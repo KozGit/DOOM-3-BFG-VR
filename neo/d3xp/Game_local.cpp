@@ -4803,7 +4803,7 @@ void idGameLocal::SetCamera( idCamera* cam )
 		if( skipCinematic && camera->spawnArgs.GetBool( "disconnect" ) )
 		{
 			camera->spawnArgs.SetBool( "disconnect", false );
-			cvarSystem->SetCVarFloat( "r_znear", 3.0f );
+			cvarSystem->SetCVarFloat( "r_znear", 1.0f );
 			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "disconnect\n" );
 			skipCinematic = false;
 			return;

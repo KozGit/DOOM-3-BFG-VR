@@ -666,8 +666,10 @@ void idPlayerView::ScreenFade()
 	}
 }
 
-idCVar	stereoRender_interOccularCentimeters( "stereoRender_interOccularCentimeters", "3.0", CVAR_ARCHIVE | CVAR_RENDERER, "Distance between eyes" );
-idCVar	stereoRender_convergence( "stereoRender_convergence", "6", CVAR_RENDERER, "0 = head mounted display, otherwise world units to convergence plane" );
+//Carl: Cymatic Bruce starts from 6.5 then adjusts it in the menu. Jose uses 5.8
+idCVar	stereoRender_interOccularCentimeters("stereoRender_interOccularCentimeters", "5.8", CVAR_ARCHIVE | CVAR_RENDERER, "Distance between eyes");
+//Carl: convergence should be 0 for HMDs, so default to that
+idCVar	stereoRender_convergence("stereoRender_convergence", "0", CVAR_RENDERER, "0 = head mounted display, otherwise world units to convergence plane");// koz was 6 for non hmd display
 
 extern	idCVar stereoRender_screenSeparation;	// screen units from center to eyes
 extern	idCVar stereoRender_swapEyes;

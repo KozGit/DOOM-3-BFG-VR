@@ -442,6 +442,28 @@ void idImage::ActuallyLoadImage( bool fromBackEnd )
 			}
 		}
 	}
+	
+	// Carl: Try to load from a targa or jpeg file (.tga, .jpg)
+	if ( binaryFileTime == FILE_NOT_FOUND_TIMESTAMP) 
+	{
+		byte * pic = NULL;
+		int w, h;
+		R_LoadImage(GetName(), &pic, &w, &h, &binaryFileTime, false);
+		if (binaryFileTime != FILE_NOT_FOUND_TIMESTAMP) 
+		{
+			opts.width = w;
+			opts.height = h;
+			opts.numLevels = 1;
+			opts.format = FMT_RGBA8;
+			opts.colorFormat = CFM_DEFAULT;
+			opts.textureType = TT_2D;
+			AllocImage();
+			SubImageUpload(0, 0, 0, 0, opts.width, opts.height, pic);
+			R_StaticFree(pic); // this might cause problems with JPEG files.
+			return;
+		}
+	}
+
 	const bimageFile_t& header = im.GetFileHeader();
 	
 	if( ( fileSystem->InProductionMode() && binaryFileTime != FILE_NOT_FOUND_TIMESTAMP ) || ( ( binaryFileTime != FILE_NOT_FOUND_TIMESTAMP )
@@ -540,6 +562,198 @@ void idImage::ActuallyLoadImage( bool fromBackEnd )
 		const bimageImage_t& img = im.GetImageHeader( i );
 		const byte* data = im.GetImageData( i );
 		SubImageUpload( img.level, 0, 0, img.destZ, img.width, img.height, data );
+	}
+}
+
+/*
+===============
+ActuallySaveImage
+===============
+*/
+void idImage::ActuallySaveImage() {
+
+	// if we don't have a rendering context yet, just return
+	if (!R_IsInitialized()) {
+		return;
+	}
+
+	if (generatorFunction) {
+		generatorFunction(this);
+		return;
+	}
+
+	if (com_productionMode.GetInteger() != 0) {
+		sourceFileTime = FILE_NOT_FOUND_TIMESTAMP;
+		if (cubeFiles != CF_2D) {
+			opts.textureType = TT_CUBIC;
+			repeat = TR_CLAMP;
+		}
+	}
+	else {
+		if (cubeFiles != CF_2D) {
+			opts.textureType = TT_CUBIC;
+			repeat = TR_CLAMP;
+			R_LoadCubeImages(GetName(), cubeFiles, NULL, NULL, &sourceFileTime);
+		}
+		else {
+			opts.textureType = TT_2D;
+			R_LoadImageProgram(GetName(), NULL, NULL, NULL, &sourceFileTime, &usage);
+		}
+	}
+
+	// Figure out opts.colorFormat and opts.format so we can make sure the binary image is up to date
+	DeriveOpts();
+
+	idStrStatic< MAX_OSPATH > generatedName = GetName();
+	GetGeneratedName(generatedName, usage, cubeFiles);
+
+	idBinaryImage im(generatedName);
+	binaryFileTime = im.LoadFromGeneratedFile(sourceFileTime);
+
+	// BFHACK, do not want to tweak on buildgame so catch these images here
+	if (binaryFileTime == FILE_NOT_FOUND_TIMESTAMP && fileSystem->UsingResourceFiles()) {
+		int c = 1;
+		while (c-- > 0) {
+			if (generatedName.Find("guis/assets/white#__0000", false) >= 0) {
+				generatedName.Replace("white#__0000", "white#__0200");
+				im.SetName(generatedName);
+				binaryFileTime = im.LoadFromGeneratedFile(sourceFileTime);
+				break;
+			}
+			if (generatedName.Find("guis/assets/white#__0100", false) >= 0) {
+				generatedName.Replace("white#__0100", "white#__0200");
+				im.SetName(generatedName);
+				binaryFileTime = im.LoadFromGeneratedFile(sourceFileTime);
+				break;
+			}
+			if (generatedName.Find("textures/black#__0100", false) >= 0) {
+				generatedName.Replace("black#__0100", "black#__0200");
+				im.SetName(generatedName);
+				binaryFileTime = im.LoadFromGeneratedFile(sourceFileTime);
+				break;
+			}
+			if (generatedName.Find("textures/decals/bulletglass1_d#__0100", false) >= 0) {
+				generatedName.Replace("bulletglass1_d#__0100", "bulletglass1_d#__0200");
+				im.SetName(generatedName);
+				binaryFileTime = im.LoadFromGeneratedFile(sourceFileTime);
+				break;
+			}
+			if (generatedName.Find("models/monsters/skeleton/skeleton01_d#__1000", false) >= 0) {
+				generatedName.Replace("skeleton01_d#__1000", "skeleton01_d#__0100");
+				im.SetName(generatedName);
+				binaryFileTime = im.LoadFromGeneratedFile(sourceFileTime);
+				break;
+			}
+		}
+	}
+
+	// Carl: Try to load from a targa or jpeg file (.tga, .jpg)
+	if (binaryFileTime == FILE_NOT_FOUND_TIMESTAMP) {
+		byte * pic = NULL;
+		int w, h;
+		R_LoadImage(GetName(), &pic, &w, &h, &binaryFileTime, false);
+		if (binaryFileTime != FILE_NOT_FOUND_TIMESTAMP) {
+			opts.width = w;
+			opts.height = h;
+			opts.numLevels = 1;
+			opts.format = FMT_RGBA8;
+			opts.colorFormat = CFM_DEFAULT;
+			opts.textureType = TT_2D;
+			AllocImage();
+			SubImageUpload(0, 0, 0, 0, opts.width, opts.height, pic);
+			R_WriteTGA(GetName(), pic, w, h, false);
+			R_StaticFree(pic); // this might cause problems with JPEG files.
+			return;
+		}
+	}
+
+	const bimageFile_t & header = im.GetFileHeader();
+
+	if ((fileSystem->InProductionMode() && binaryFileTime != FILE_NOT_FOUND_TIMESTAMP) || ((binaryFileTime != FILE_NOT_FOUND_TIMESTAMP)
+		&& (header.colorFormat == opts.colorFormat)
+		&& (header.format == opts.format)
+		&& (header.textureType == opts.textureType)
+		)) {
+		opts.width = header.width;
+		opts.height = header.height;
+		opts.numLevels = header.numLevels;
+		opts.colorFormat = (textureColor_t)header.colorFormat;
+		opts.format = (textureFormat_t)header.format;
+		opts.textureType = (textureType_t)header.textureType;
+		if (cvarSystem->GetCVarBool("fs_buildresources")) {
+			// for resource gathering write this image to the preload file for this map
+			//fileSystem->AddImagePreload( GetName(), filter, repeat, usage, cubeFiles );
+		}
+	}
+	else {
+		if (cubeFiles != CF_2D) {
+			int size;
+			byte * pics[6];
+
+			if (!R_LoadCubeImages(GetName(), cubeFiles, pics, &size, &sourceFileTime) || size == 0) {
+				idLib::Warning("Couldn't load cube image: %s", GetName());
+				return;
+			}
+
+			opts.textureType = TT_CUBIC;
+			repeat = TR_CLAMP;
+			opts.width = size;
+			opts.height = size;
+			opts.numLevels = 0;
+			DeriveOpts();
+			im.LoadCubeFromMemory(size, (const byte **)pics, opts.numLevels, opts.format, opts.gammaMips);
+			repeat = TR_CLAMP;
+
+			for (int i = 0; i < 6; i++) {
+				if (pics[i]) {
+					Mem_Free(pics[i]);
+				}
+			}
+		}
+		else {
+			int width, height;
+			byte * pic;
+
+			// load the full specification, and perform any image program calculations
+			R_LoadImageProgram(GetName(), &pic, &width, &height, &sourceFileTime, &usage);
+
+			if (pic == NULL) {
+				idLib::Warning("Couldn't load image: %s : %s", GetName(), generatedName.c_str());
+				// create a default so it doesn't get continuously reloaded
+				opts.width = 8;
+				opts.height = 8;
+				opts.numLevels = 1;
+				DeriveOpts();
+				AllocImage();
+
+				// clear the data so it's not left uninitialized
+				idTempArray<byte> clear(opts.width * opts.height * 4);
+				memset(clear.Ptr(), 0, clear.Size());
+				for (int level = 0; level < opts.numLevels; level++) {
+					SubImageUpload(level, 0, 0, 0, opts.width >> level, opts.height >> level, clear.Ptr());
+				}
+
+				return;
+			}
+
+			opts.width = width;
+			opts.height = height;
+			opts.numLevels = 0;
+			DeriveOpts();
+			im.Load2DFromMemory(opts.width, opts.height, pic, opts.numLevels, opts.format, opts.colorFormat, opts.gammaMips);
+
+			Mem_Free(pic);
+		}
+		binaryFileTime = im.WriteGeneratedFile(sourceFileTime);
+	}
+
+	AllocImage();
+
+
+	for (int i = 0; i < im.NumImages(); i++) {
+		const bimageImage_t & img = im.GetImageHeader(i);
+		const byte * data = im.GetImageData(i);
+		SubImageUpload(img.level, 0, 0, img.destZ, img.width, img.height, data);
 	}
 }
 

@@ -485,8 +485,11 @@ void idMenuScreen_Shell_SystemOptions::idMenuDataSource_SystemSettings::AdjustFi
 	{
 		case SYSTEM_FIELD_FRAMERATE:
 		{
-			static const int numValues = 2;
-			static const int values[numValues] = { 60, 120 };
+			//Carl: Oculus Rift DK1 can be hacked to use refresh rates from 60Hz to 83Hz (71Hz max undistorted). CV1 will probably support 90Hz.
+			//Carl: Doom 3 BFG also originally supported 120Hz. So list everything from 60 to 83, with 90 and 120 last.
+			static const int numValues = 26;
+			static const int values[numValues] = { 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 90, 120 };
+
 			com_engineHz.SetInteger( AdjustOption( com_engineHz.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}

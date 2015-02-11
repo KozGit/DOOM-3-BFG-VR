@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
+//#include "../sys/win32/in_motion_sensor.h"
+
 idCVar joy_mergedThreshold( "joy_mergedThreshold", "1", CVAR_BOOL | CVAR_ARCHIVE, "If the thresholds aren't merged, you drift more off center" );
 idCVar joy_newCode( "joy_newCode", "1", CVAR_BOOL | CVAR_ARCHIVE, "Use the new codepath" );
 idCVar joy_triggerThreshold( "joy_triggerThreshold", "0.05", CVAR_FLOAT | CVAR_ARCHIVE, "how far the joystick triggers have to be pressed before they register as down" );
@@ -36,8 +38,10 @@ idCVar joy_deadZone( "joy_deadZone", "0.2", CVAR_FLOAT | CVAR_ARCHIVE, "specifie
 idCVar joy_range( "joy_range", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "allow full range to be mapped to a smaller offset" );
 idCVar joy_gammaLook( "joy_gammaLook", "1", CVAR_INTEGER | CVAR_ARCHIVE, "use a log curve instead of a power curve for movement" );
 idCVar joy_powerScale( "joy_powerScale", "2", CVAR_FLOAT | CVAR_ARCHIVE, "Raise joystick values to this power" );
-idCVar joy_pitchSpeed( "joy_pitchSpeed", "100",	CVAR_ARCHIVE | CVAR_FLOAT, "pitch speed when pressing up or down on the joystick", 60, 600 );
-idCVar joy_yawSpeed( "joy_yawSpeed", "240",	CVAR_ARCHIVE | CVAR_FLOAT, "pitch speed when pressing left or right on the joystick", 60, 600 );
+
+//Carl: Allow analog stick pitch (and yaw) to be disabled
+idCVar joy_pitchSpeed("joy_pitchSpeed", "100", CVAR_ARCHIVE | CVAR_FLOAT, "pitch speed when pressing up or down on the joystick", 0, 600); // min was previously 60
+idCVar joy_yawSpeed("joy_yawSpeed", "240", CVAR_ARCHIVE | CVAR_FLOAT, "yaw speed when pressing left or right on the joystick", 0, 600);// min was previously 60
 
 // these were a bad idea!
 idCVar joy_dampenLook( "joy_dampenLook", "1", CVAR_BOOL | CVAR_ARCHIVE, "Do not allow full acceleration on look" );
@@ -1150,6 +1154,7 @@ void idUsercmdGenLocal::MakeCurrent()
 		AimAssist();
 		
 		// check to make sure the angles haven't wrapped
+		// koz fixme were commented out it tmek
 		if( viewangles[PITCH] - oldAngles[PITCH] > 90 )
 		{
 			viewangles[PITCH] = oldAngles[PITCH] + 90;
@@ -1158,6 +1163,7 @@ void idUsercmdGenLocal::MakeCurrent()
 		{
 			viewangles[PITCH] = oldAngles[PITCH] - 90;
 		}
+		// koz end commenting out for vr
 	}
 	else
 	{

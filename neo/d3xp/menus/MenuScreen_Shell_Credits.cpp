@@ -65,6 +65,13 @@ void idMenuScreen_Shell_Credits::SetupCreditList()
 	
 	
 	creditList.Clear();
+	creditList.Append( creditInfo_t( 3, "DOOM 3 BFG VR EDITION"));
+	creditList.Append( creditInfo_t());
+	creditList.Append( creditInfo_t( 1, "VR Implementation."));
+	creditList.Append( creditInfo_t( 0, "/u/Samson-"));
+	creditList.Append( creditInfo_t() );
+	creditList.Append( creditInfo_t( 2, "BASED ON"));
+	creditList.Append( creditInfo_t());
 	creditList.Append( creditInfo_t( 3,	"RBDOOM 3 BFG EDITION"	) );
 	creditList.Append( creditInfo_t() );
 	creditList.Append( creditInfo_t( 1,	"Lead Programmer"	) );

@@ -47,14 +47,15 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../sys/sys_savegame.h"
 
-
-
 #if defined( _DEBUG )
 #define BUILD_DEBUG "-debug"
 #else
 #define BUILD_DEBUG ""
 #endif
 
+//koz fixme
+bool hasOculusRift = false;
+// koz end
 struct version_s
 {
 	version_s()
@@ -262,7 +263,13 @@ void idCommonLocal::ParseCommandLine( int argc, const char* const* argv )
 	// API says no program path
 	for( i = 0; i < argc; i++ )
 	{
-		if( idStr::Icmp( argv[ i ], "+connect_lobby" ) == 0 )
+		if (idStr::Icmp(argv[i], "-vr") == 0) 
+		{
+			// koz fixme enable VR support here.
+			//hasHMD = true;
+			//hasOculusRift = true;
+		}
+		else if( idStr::Icmp( argv[ i ], "+connect_lobby" ) == 0 )
 		{
 			// Handle Steam bootable invites.
 			
@@ -423,8 +430,14 @@ void idCommonLocal::WriteConfiguration()
 	bool developer = com_developer.GetBool();
 	com_developer.SetBool( false );
 	
-	WriteConfigToFile( CONFIG_FILE );
-	
+	if ( hasOculusRift ) {
+		WriteConfigToFile("oculus_config.cfg");
+	}
+	else 
+	{
+		WriteConfigToFile(CONFIG_FILE);
+	}
+		
 	// restore the developer cvar
 	com_developer.SetBool( developer );
 #endif
@@ -1240,6 +1253,11 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		
 		// init the parallel job manager
 		parallelJobManager->Init();
+
+		//Carl: init the Virtual Reality head tracking, detect any connected HMDs, and read display parameters
+		//this needs to happen before the cfg files are loaded.
+		//IN_MotionSensor_Init(); // koz fixme
+
 		
 		// exec the startup scripts
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec default.cfg\n" );
@@ -1251,7 +1269,20 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec " CONFIG_FILE "\n" );
 		}
 #endif
+		if ( hasOculusRift ) 
+		{
+			cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "exec oculus_default.cfg\n");
+		}
 		
+		if (!SafeMode() && !g_demoMode.GetBool()) 
+		{
+			if ( hasOculusRift ) 
+			{
+				cmdSystem->BufferCommandText(CMD_EXEC_APPEND, "exec oculus_config.cfg\n");
+			}
+			
+		}
+
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec autoexec.cfg\n" );
 		
 		// run cfg execution
@@ -1294,7 +1325,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 			splashScreen = declManager->FindMaterial( "guis/assets/splash/legal_english" );
 		}
 		
-		const int legalMinTime = 4000;
+		const int legalMinTime = 1000; //Carl: Don't force them to wait more than a second
 		const bool showVideo = ( !com_skipIntroVideos.GetBool() && fileSystem->UsingResourceFiles() );
 		if( showVideo )
 		{
@@ -1421,6 +1452,11 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 #if defined(USE_DOOMCLASSIC)
 		// Initialize support for Doom classic.
 		doomClassicMaterial = declManager->FindMaterial( "_doomClassic" );
+
+		//koz fixme this was in tmeks version - check the difference in these materials.
+		//doomClassicMaterial = declManager->FindMaterial("_CarlClassic");
+		//idImage *image = globalImages->GetImage("_CarlClassic");
+
 		idImage* image = globalImages->GetImage( "_doomClassic" );
 		if( image != NULL )
 		{

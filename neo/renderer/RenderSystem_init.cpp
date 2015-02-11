@@ -31,6 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 
 #include "tr_local.h"
+#include "DXT/DXTCodec.h"
 
 // RB begin
 #if defined(_WIN32)
@@ -88,7 +89,7 @@ idCVar r_lodBias( "r_lodBias", "0.5", CVAR_RENDERER | CVAR_ARCHIVE, "UNUSED: ima
 
 idCVar r_useStateCaching( "r_useStateCaching", "1", CVAR_RENDERER | CVAR_BOOL, "avoid redundant state changes in GL_*() calls" );
 
-idCVar r_znear( "r_znear", "3", CVAR_RENDERER | CVAR_FLOAT, "near Z clip plane distance", 0.001f, 200.0f );
+idCVar r_znear( "r_znear", "1", CVAR_RENDERER | CVAR_FLOAT, "near Z clip plane distance", 0.001f, 200.0f ); // from tmek fork ,was 3
 
 idCVar r_ignoreGLErrors( "r_ignoreGLErrors", "0", CVAR_RENDERER | CVAR_BOOL, "ignore GL errors" );
 idCVar r_swapInterval( "r_swapInterval", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_INTEGER, "0 = tear, 1 = swap-tear where available, 2 = always v-sync" );
@@ -435,7 +436,10 @@ static void R_CheckPortableExtensions()
 		{
 			glConfig.uniformBufferOffsetAlignment = 256;
 		}
-	}
+	} 
+	
+	else glConfig.uniformBufferOffsetAlignment = 256; //Carl Kenner
+
 	// RB: make GPU skinning optional for weak OpenGL drivers
 	glConfig.gpuSkinningAvailable = glConfig.uniformBufferAvailable && ( glConfig.driverType == GLDRV_OPENGL3X || glConfig.driverType == GLDRV_OPENGL32_CORE_PROFILE || glConfig.driverType == GLDRV_OPENGL32_COMPATIBILITY_PROFILE );
 	
@@ -1007,6 +1011,42 @@ void R_TestImage_f( const idCmdArgs& args )
 }
 
 /*
+================
+//Carl: ExtractTGA_f
+================
+*/
+void ExtractTGA_f(const idCmdArgs &args) {
+	idStr		relativePath;
+	idStr		extension;
+	//idFileList *fileList;
+	int			imageNum;
+	idImage	*	img = NULL;
+	//idDxtDecoder dxt;
+
+	if (args.Argc() != 2) {
+		common->Printf("usage: ExtractTGA <image path or image number>\n");
+		return;
+	}
+
+	if (idStr::IsNumeric(args.Argv(1))) {
+		imageNum = atoi(args.Argv(1));
+		if (imageNum >= 0 && imageNum < globalImages->images.Num()) {
+			img = globalImages->images[imageNum];
+		}
+	}
+	else {
+		img = globalImages->ImageFromFile(args.Argv(1), TF_DEFAULT, TR_REPEAT, TD_DEFAULT);
+	}
+	if (!img) {
+		common->Warning("Image '%s' not found.\n", args.Argv(1));
+		return;
+	}
+	img->ActuallySaveImage();
+}
+
+
+
+/*
 =============
 R_TestVideo_f
 
@@ -1392,7 +1432,7 @@ void R_ScreenshotFilename( int& lastNumber, const char* base, idStr& fileName )
 		time( &aclock );
 		struct tm* t = localtime( &aclock );
 		
-		sprintf( fileName, "%s%s-%04d%02d%02d-%02d%02d%02d-%03d", base, "rbdoom-3-bfg",
+		sprintf( fileName, "%s%s-%04d%02d%02d-%02d%02d%02d-%03d", base, "doom-3-bfg-vr",
 				 1900 + t->tm_year, 1 + t->tm_mon, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec, lastNumber );
 #endif
 		// RB end
@@ -2358,6 +2398,7 @@ void R_InitCommands()
 	cmdSystem->AddCommand( "gfxInfo", GfxInfo_f, CMD_FL_RENDERER, "show graphics info" );
 	cmdSystem->AddCommand( "modulateLights", R_ModulateLights_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "modifies shader parms on all lights" );
 	cmdSystem->AddCommand( "testImage", R_TestImage_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "displays the given image centered on screen", idCmdSystem::ArgCompletion_ImageName );
+	cmdSystem->AddCommand("extractTGA", ExtractTGA_f, CMD_FL_RENDERER, "extracts texture as TGA file", idCmdSystem::ArgCompletion_ImageName); // koz from tmek/carl
 	cmdSystem->AddCommand( "testVideo", R_TestVideo_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "displays the given cinematic", idCmdSystem::ArgCompletion_VideoName );
 	cmdSystem->AddCommand( "reportSurfaceAreas", R_ReportSurfaceAreas_f, CMD_FL_RENDERER, "lists all used materials sorted by surface area" );
 	cmdSystem->AddCommand( "showInteractionMemory", R_ShowInteractionMemory_f, CMD_FL_RENDERER, "shows memory used by interactions" );

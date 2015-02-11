@@ -954,6 +954,19 @@ void idWeapon::InitWorldModel( const idDeclEntityDef* def )
 	assert( def );
 	
 	const char* model = def->dict.GetString( "model_world" );
+	
+	if ( pm_showBody.GetBool() ) 
+	{
+		//Carl: If we could get rid of the hands, we would want to use the view model instead of the world model, 
+		// when showing your body in first person. Unfortunately, I can't get rid of the hands yets. 
+		//model = def->dict.GetString( "model_view" );
+		model = def->dict.GetString("model_world");
+	}
+	else 
+	{
+		model = def->dict.GetString("model_world");
+	}
+
 	const char* attach = def->dict.GetString( "joint_attach" );
 	
 	ent->SetSkin( NULL );
@@ -978,19 +991,28 @@ void idWeapon::InitWorldModel( const idDeclEntityDef* def )
 		
 		// supress model in player views, but allow it in mirrors and remote views
 		renderEntity_t* worldModelRenderEntity = ent->GetRenderEntity();
-		if( worldModelRenderEntity )
+		if (worldModelRenderEntity) 
 		{
-			worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber + 1;
-			worldModelRenderEntity->suppressShadowInViewID = owner->entityNumber + 1;
+			if ( pm_showBody.GetBool() ) 
+			{
+				//Carl: Don't suppress drawing the weapon's world model or it's shadow in 1st person, if they want to see it (in VR) 
+				worldModelRenderEntity->suppressSurfaceInViewID = 0;
+				worldModelRenderEntity->suppressShadowInViewID = 0;
+			}
+			else 
+			{
+				worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber + 1;
+				worldModelRenderEntity->suppressShadowInViewID = owner->entityNumber + 1;
+			}
 			worldModelRenderEntity->suppressShadowInLightID = LIGHTID_VIEW_MUZZLE_FLASH + owner->entityNumber;
 		}
 	}
-	else
+	else 
 	{
-		ent->SetModel( "" );
+		ent->SetModel("");
 		ent->Hide();
 	}
-	
+
 	flashJointWorld = ent->GetAnimator()->GetJointHandle( "flash" );
 	barrelJointWorld = ent->GetAnimator()->GetJointHandle( "muzzle" );
 	ejectJointWorld = ent->GetAnimator()->GetJointHandle( "eject" );
@@ -2670,7 +2692,38 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	UpdateAnimation();
 	
 	// only show the surface in player view
-	renderEntity.allowSurfaceInViewID = owner->entityNumber + 1;
+	
+	if ( pm_showBody.GetBool() ) 
+	{
+		//Carl: Never allow drawing the weapon's view model if showing our body (we are using the body's world model)
+		renderEntity.allowSurfaceInViewID = -1;
+		//Carl: don't suppress drawing the player's body in 1st person if we want to see it (in VR)
+		owner->GetRenderEntity()->suppressSurfaceInViewID = 0;
+	}
+	else 
+	{
+		renderEntity.allowSurfaceInViewID = owner->entityNumber + 1;
+		//Carl:
+		owner->GetRenderEntity()->suppressSurfaceInViewID = owner->entityNumber + 1;
+	}
+
+	//Carl: Also update world model for pm_showBody
+	idEntity *ent = worldModel.GetEntity();
+	renderEntity_t *worldModelRenderEntity = ent->GetRenderEntity();
+	if (worldModelRenderEntity) 
+	{
+		if (pm_showBody.GetBool()) 
+		{
+			//Carl: Don't suppress drawing the weapon's world model or it's shadow in 1st person, if they want to see it (in VR) 
+			worldModelRenderEntity->suppressSurfaceInViewID = 0;
+			worldModelRenderEntity->suppressShadowInViewID = 0;
+		}
+		else 
+		{
+			worldModelRenderEntity->suppressSurfaceInViewID = owner->entityNumber + 1;
+			worldModelRenderEntity->suppressShadowInViewID = owner->entityNumber + 1;
+		}
+	}
 	
 	// crunch the depth range so it never pokes into walls this breaks the machine gun gui
 	renderEntity.weaponDepthHack = g_useWeaponDepthHack.GetBool();
@@ -2689,7 +2742,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	{
 		// deal with the third-person visible world model
 		// don't show shadows of the world model in first person
-		if( common->IsMultiplayer() || g_showPlayerShadow.GetBool() || pm_thirdPerson.GetBool() )
+		if (common->IsMultiplayer() || g_showPlayerShadow.GetBool() || pm_thirdPerson.GetBool() || pm_showBody.GetBool() ) // koz fixme only in vr
 		{
 			worldModel.GetEntity()->GetRenderEntity()->suppressShadowInViewID	= 0;
 		}

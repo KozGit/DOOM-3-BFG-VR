@@ -160,7 +160,7 @@ bool idPlayerProfile::Serialize( idSerializer& ser )
 		cvarDict.Delete( "r_vidMode" );
 		cvarDict.Delete( "r_multisamples" );
 		cvarDict.Delete( "com_engineHz" );
-		cvarSystem->SetCVarsFromDict( cvarDict );
+		//cvarSystem->SetCVarsFromDict( cvarDict ); //Carl: This makes the .cfg files useless, so comment it out.
 		common->StartupVariable( NULL );
 	}
 	

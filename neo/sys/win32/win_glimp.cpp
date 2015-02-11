@@ -863,7 +863,9 @@ void DumpAllDisplayDevices()
 				{
 					continue;
 				}
-				if( devmode.dmDisplayFrequency < 60 )
+				//Carl: Oculus Rift DK1 can be hacked to support anything from 60Hz to 83Hz, Doom 3 BFG also originally supported 120Hz, and CV will probably support 90Hz
+				// Don't list any other refresh rates
+				if ((devmode.dmDisplayFrequency < 60) || (devmode.dmDisplayFrequency > 83 && devmode.dmDisplayFrequency != 90 && devmode.dmDisplayFrequency != 120)) 
 				{
 					continue;
 				}

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-project(RBDoom3BFG)
+project(Doom3BFG_VR)
 
 option(USE_MFC_TOOLS
 		"Compile the built-in MFC based tools" OFF)
@@ -1116,7 +1116,7 @@ source_group("tools\\sound" FILES ${EDITOR_SOUND_INCLUDES})
 source_group("tools\\sound" FILES ${EDITOR_SOUND_SOURCES})
 
 
-set(RBDOOM3_INCLUDES
+set(DOOM3VR_INCLUDES
 			${AAS_INCLUDES}
 			${CM_INCLUDES}
 			${FRAMEWORK_INCLUDES}
@@ -1151,7 +1151,7 @@ set(RBDOOM3_INCLUDES
 			#${COMPILER_ROQVQ_INCLUDES} ${COMPILER_ROQVQ_SOURCES}
 			)
 			
-set(RBDOOM3_SOURCES
+set(DOOM3VR_SOURCES
 			${AAS_SOURCES}
 			${CM_SOURCES}
 			${FRAMEWORK_SOURCES}
@@ -1193,7 +1193,7 @@ add_definitions(-D__DOOM__
 				)
 				
 if(MONOLITH)
-	list(APPEND RBDOOM3_INCLUDES
+	list(APPEND DOOM3VR_INCLUDES
 		${GAMED3XP_INCLUDES}
 		${GAMED3XP_AI_INCLUDES} 
 		${GAMED3XP_ANIM_INCLUDES} 
@@ -1202,7 +1202,7 @@ if(MONOLITH)
 		${GAMED3XP_PHYSICS_INCLUDES}
 		${GAMED3XP_SCRIPT_INCLUDES})
 		
-	list(APPEND RBDOOM3_SOURCES
+	list(APPEND DOOM3VR_SOURCES
 		${GAMED3XP_SOURCES}
 		${GAMED3XP_AI_SOURCES}
 		${GAMED3XP_ANIM_SOURCES}
@@ -1258,8 +1258,8 @@ if(MSVC)
 			link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/openal-soft/lib/win32)
 		endif()
 		
-		list(APPEND RBDOOM3_INCLUDES ${OPENAL_INCLUDES})
-		list(APPEND RBDOOM3_SOURCES
+		list(APPEND DOOM3VR_INCLUDES ${OPENAL_INCLUDES})
+		list(APPEND DOOM3VR_SOURCES
 			${OPENAL_SOURCES}
 			${DOOMCLASSIC_OPENAL_SOURCES})
 		
@@ -1273,8 +1273,8 @@ if(MSVC)
 			install(FILES libs/openal-soft/lib/win32/OpenAL32.pdb DESTINATION .)
 		endif()
 	else()
-		list(APPEND RBDOOM3_INCLUDES ${XAUDIO2_INCLUDES})
-		list(APPEND RBDOOM3_SOURCES
+		list(APPEND DOOM3VR_INCLUDES ${XAUDIO2_INCLUDES})
+		list(APPEND DOOM3VR_SOURCES
 			${XAUDIO2_SOURCES}
 			${DOOMCLASSIC_XAUDIO2_SOURCES})
 	endif()
@@ -1319,7 +1319,7 @@ if(MSVC)
 		
 		add_definitions(-DUSE_MFC_TOOLS)
 		
-		list(APPEND RBDOOM3_SOURCES
+		list(APPEND DOOM3VR_SOURCES
 			${TOOLS_INCLUDES}
 			${TOOLS_COMAFX_INCLUDES} ${TOOLS_COMAFX_SOURCES}
 			${TOOLS_COMMON_INCLUDES} ${TOOLS_COMMON_SOURCES}
@@ -1337,32 +1337,32 @@ if(MSVC)
 			${EDITOR_SOUND_INCLUDES} ${EDITOR_SOUND_SOURCES})
 	endif()
 	
-	list(APPEND RBDOOM3_INCLUDES
+	list(APPEND DOOM3VR_INCLUDES
 		${SYS_INCLUDES} 
 		${WIN32_INCLUDES})
 		
-	list(APPEND RBDOOM3_SOURCES
+	list(APPEND DOOM3VR_SOURCES
 		${SYS_SOURCES}
 		${WIN32_SOURCES})
 
-	list(REMOVE_DUPLICATES RBDOOM3_SOURCES)
+	list(REMOVE_DUPLICATES DOOM3VR_SOURCES)
 	
-	set(RBDOOM3_PRECOMPILED_SOURCES ${RBDOOM3_SOURCES})
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${TIMIDITY_SOURCES} ${JPEG_SOURCES} ${PNG_SOURCES} ${ZLIB_SOURCES} ${GLEW_SOURCES})
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib/minizip/ioapi.c)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/DXT/DXTDecoder.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/DXT/DXTEncoder.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/DXT/DXTEncoder_SSE2.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/dynamicshadowvolume/DynamicShadowVolume.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/prelightshadowvolume/PreLightShadowVolume.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/staticshadowvolume/StaticShadowVolume.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/ShadowShared.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/RenderLog.cpp)
-        list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/framework/precompiled.cpp)
+	set(DOOM3VR_PRECOMPILED_SOURCES ${DOOM3VR_SOURCES})
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${TIMIDITY_SOURCES} ${JPEG_SOURCES} ${PNG_SOURCES} ${ZLIB_SOURCES} ${GLEW_SOURCES})
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib/minizip/ioapi.c)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/DXT/DXTDecoder.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/DXT/DXTEncoder.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/DXT/DXTEncoder_SSE2.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/dynamicshadowvolume/DynamicShadowVolume.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/prelightshadowvolume/PreLightShadowVolume.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/staticshadowvolume/StaticShadowVolume.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/ShadowShared.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/RenderLog.cpp)
+        list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/framework/precompiled.cpp)
 
 	
         set_source_files_properties(
-            ${RBDOOM3_PRECOMPILED_SOURCES}
+            ${DOOM3VR_PRECOMPILED_SOURCES}
             PROPERTIES
             COMPILE_FLAGS "/Yuprecompiled.h"
             OBJECT_DEPENDS "precompiled.pch"
@@ -1375,18 +1375,18 @@ if(MSVC)
         OBJECT_OUTPUTS "precompiled.pch"
         )
 	
-	list(APPEND RBDOOM3_SOURCES ${WIN32_RESOURCES})
+	list(APPEND DOOM3VR_SOURCES ${WIN32_RESOURCES})
 	
-	add_executable(RBDoom3BFG WIN32 ${RBDOOM3_INCLUDES} ${RBDOOM3_SOURCES})
+	add_executable(Doom3BFG_VR WIN32 ${DOOM3VR_INCLUDES} ${DOOM3VR_SOURCES})
 		
-	#add_custom_command(TARGET RBDoom3BFG
+	#add_custom_command(TARGET Doom3BFG_VR
     #               PRE_BUILD
 	#			   COMMAND nmake ARGS /f Makefile.vc6 CFG=release
 	#			   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libs/curl/lib
     #               COMMENT "Compiling libcURL")
 		
-	add_dependencies(RBDoom3BFG idlib)
-	target_link_libraries(RBDoom3BFG
+	add_dependencies(Doom3BFG_VR idlib)
+	target_link_libraries(Doom3BFG_VR
 		idlib
 		${DirectX_LIBRARIES}
 		#libcurl 
@@ -1408,16 +1408,16 @@ if(MSVC)
 		
 	#CMAKE_BINARY_DIR
 	if(CMAKE_CL_64)
-		install(TARGETS RBDoom3BFG
+		install(TARGETS Doom3BFG_VR
 			RUNTIME DESTINATION .)
 	else()
-		install(TARGETS RBDoom3BFG
+		install(TARGETS Doom3BFG_VR
 			RUNTIME DESTINATION .)
 	endif()
 	
 else()
 
-	list(APPEND RBDOOM3_SOURCES
+	list(APPEND DOOM3VR_SOURCES
 		${SYS_INCLUDES} ${SYS_SOURCES})
 	
 	find_package(OpenGL REQUIRED)
@@ -1448,7 +1448,7 @@ else()
 			list(REMOVE_ITEM POSIX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/sys/posix/platform_osx.cpp)
 		endif()
 
-		list(APPEND RBDOOM3_SOURCES
+		list(APPEND DOOM3VR_SOURCES
 			${POSIX_INCLUDES} ${POSIX_SOURCES}
 			${SDL_INCLUDES} ${SDL_SOURCES})
 			
@@ -1464,34 +1464,34 @@ else()
 			#	link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/openal-soft/lib/win32)
 			#endif()
 			
-			list(APPEND RBDOOM3_INCLUDES ${OPENAL_INCLUDES})
-			list(APPEND RBDOOM3_SOURCES
+			list(APPEND DOOM3VR_INCLUDES ${OPENAL_INCLUDES})
+			list(APPEND DOOM3VR_SOURCES
 				${OPENAL_SOURCES}
 				${DOOMCLASSIC_OPENAL_SOURCES})
 		else()
-			list(APPEND RBDOOM3_INCLUDES ${STUBAUDIO_INCLUDES})
-			list(APPEND RBDOOM3_SOURCES
+			list(APPEND DOOM3VR_INCLUDES ${STUBAUDIO_INCLUDES})
+			list(APPEND DOOM3VR_SOURCES
 				${STUBAUDIO_SOURCES}
 				${DOOMCLASSIC_STUBAUDIO_SOURCES})
 		endif()
 			
 	endif()
 
-	list(REMOVE_DUPLICATES RBDOOM3_SOURCES)
+	list(REMOVE_DUPLICATES DOOM3VR_SOURCES)
 	
-	set(RBDOOM3_PRECOMPILED_SOURCES ${RBDOOM3_SOURCES})
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${TIMIDITY_SOURCES} ${JPEG_SOURCES} ${PNG_SOURCES} ${ZLIB_SOURCES} ${GLEW_SOURCES})
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib/minizip/ioapi.c)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/DXT/DXTDecoder.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/DXT/DXTEncoder.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/DXT/DXTEncoder_SSE2.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/dynamicshadowvolume/DynamicShadowVolume.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/prelightshadowvolume/PreLightShadowVolume.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/staticshadowvolume/StaticShadowVolume.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/ShadowShared.cpp)
-	list(REMOVE_ITEM RBDOOM3_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/RenderLog.cpp)
+	set(DOOM3VR_PRECOMPILED_SOURCES ${DOOM3VR_SOURCES})
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${TIMIDITY_SOURCES} ${JPEG_SOURCES} ${PNG_SOURCES} ${ZLIB_SOURCES} ${GLEW_SOURCES})
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib/minizip/ioapi.c)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/DXT/DXTDecoder.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/DXT/DXTEncoder.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/DXT/DXTEncoder_SSE2.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/dynamicshadowvolume/DynamicShadowVolume.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/prelightshadowvolume/PreLightShadowVolume.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/staticshadowvolume/StaticShadowVolume.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/jobs/ShadowShared.cpp)
+	list(REMOVE_ITEM DOOM3VR_PRECOMPILED_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/renderer/RenderLog.cpp)
 
-	foreach( src_file ${RBDOOM3_PRECOMPILED_SOURCES} )
+	foreach( src_file ${DOOM3VR_PRECOMPILED_SOURCES} )
 		#message(STATUS "-include precompiled.h for ${src_file}")
 		set_source_files_properties(
 			${src_file}
@@ -1512,13 +1512,13 @@ else()
 	LIST(APPEND _compiler_FLAGS ${_directory_flags})
 	SEPARATE_ARGUMENTS(_compiler_FLAGS)
 	
-	# we need to recreate the precompiled header for RBDoom3BFG 
+	# we need to recreate the precompiled header for Doom3BFG_VR 
 	# (i.e. can't use the one created for idlib before)
 	# because some definitions (e.g. -D__IDLIB__ -D__DOOM_DLL__) differ
-	add_custom_target(precomp_header_rbdoom3bfg ALL
+	add_custom_target(precomp_header_Doom3BFG_VR ALL
 	                  COMMAND ${CMAKE_CXX_COMPILER} ${_compiler_FLAGS} -x c++-header idlib/precompiled.h -o idlib/precompiled.h.gch
 	                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	                  COMMENT "Creating idlib/precompiled.h.gch for RBDoom3BFG"
+	                  COMMENT "Creating idlib/precompiled.h.gch for Doom3BFG_VR"
 	                  )
 	
 	if(WIN32)
@@ -1536,15 +1536,15 @@ else()
 	                  )
 	
 	# make sure this is run after creating idlib
-	add_dependencies(precomp_header_rbdoom3bfg idlib)
+	add_dependencies(precomp_header_Doom3BFG_VR idlib)
 	
-	add_executable(RBDoom3BFG WIN32 ${RBDOOM3_SOURCES})
+	add_executable(Doom3BFG_VR WIN32 ${DOOM3VR_SOURCES})
 	
 	# make sure precompiled header is created before executable is compiled
-	add_dependencies(RBDoom3BFG precomp_header_rbdoom3bfg)
+	add_dependencies(Doom3BFG_VR precomp_header_Doom3BFG_VR)
 	
 	# make sure precompiled header is deleted after executable is compiled
-	add_dependencies(rm_precomp_header RBDoom3BFG)
+	add_dependencies(rm_precomp_header Doom3BFG_VR)
 	
 
 	if(NOT WIN32)
@@ -1556,7 +1556,7 @@ else()
 			set(DL_LIBRARY dl)
 		endif()
 
-		target_link_libraries(RBDoom3BFG
+		target_link_libraries(Doom3BFG_VR
 			idlib
 			${OPENGL_LIBRARIES}
 			pthread

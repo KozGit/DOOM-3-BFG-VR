@@ -157,6 +157,7 @@ public:
 		levelLoadReferenced = true;
 	}
 	void		ActuallyLoadImage( bool fromBackEnd );
+	void		ActuallySaveImage(); // carl
 	//---------------------------------------------
 	// Platform specific implementations
 	//---------------------------------------------

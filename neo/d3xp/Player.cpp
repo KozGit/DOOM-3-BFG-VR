@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../framework/Common_local.h"
 #include "PredictedValue_impl.h"
 
+//#include "../sys/win32/vr_motion_sensor.h"
+
 idCVar flashlight_batteryDrainTimeMS( "flashlight_batteryDrainTimeMS", "30000", CVAR_INTEGER, "amount of time (in MS) it takes for full battery to drain (-1 == no battery drain)" );
 idCVar flashlight_batteryChargeTimeMS( "flashlight_batteryChargeTimeMS", "3000", CVAR_INTEGER, "amount of time (in MS) it takes to fully recharge battery" );
 idCVar flashlight_minActivatePercent( "flashlight_minActivatePercent", ".25", CVAR_FLOAT, "( 0.0 - 1.0 ) minimum amount of battery (%) needed to turn on flashlight" );
@@ -2086,19 +2088,27 @@ void idPlayer::Spawn()
 	// init the damage effects
 	playerView.SetPlayerEntity( this );
 	
-	// supress model in non-player views, but allow it in mirrors and remote views
-	renderEntity.suppressSurfaceInViewID = entityNumber + 1;
-	
+	if ( pm_showBody.GetBool() ) 
+	{
+		//Carl: don't suppress drawing the player's body in 1st person if we want to see it (in VR)
+		renderEntity.suppressSurfaceInViewID = 0;
+	}
+	else 
+	{
+		// supress model in non-player views, but allow it in mirrors and remote views
+		renderEntity.suppressSurfaceInViewID = entityNumber + 1;
+	}
+		
 	// don't project shadow on self or weapon
 	renderEntity.noSelfShadow = true;
 	
 	idAFAttachment* headEnt = head.GetEntity();
-	if( headEnt )
+	if (headEnt) 
 	{
-		headEnt->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1;
+		headEnt->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1; //Carl: We still suppress the head with pm_showBody in 1st person
 		headEnt->GetRenderEntity()->noSelfShadow = true;
 	}
-	
+
 	if( common->IsMultiplayer() )
 	{
 		Init();
@@ -7025,12 +7035,26 @@ void idPlayer::UpdateViewAngles()
 		// no view changes at all, but we still want to update the deltas or else when
 		// we get out of this mode, our view will snap to a kind of random angle
 		UpdateDeltaViewAngles( viewAngles );
+		
+		// koz fixme - this was in tmeks fork, verify what we are doing here is still approptiate.
+		for (i = 0; i < 3; i++) 
+		{
+			cmdAngles[i] = SHORT2ANGLE(usercmd.angles[i]);
+			if (influenceActive == INFLUENCE_LEVEL3) {
+				viewAngles[i] += idMath::ClampFloat(-1.0f, 1.0f, idMath::AngleDelta(idMath::AngleNormalize180(SHORT2ANGLE(usercmd.angles[i]) + deltaViewAngles[i]), viewAngles[i]));
+			}
+			else {
+				viewAngles[i] = idMath::AngleNormalize180(SHORT2ANGLE(usercmd.angles[i]) + deltaViewAngles[i]);
+			}
+		}
+		// koz end
+		
 		return;
 	}
 	
 	// if dead
-	if( health <= 0 )
-	{
+	if (health <= 0 && false)  //Carl: never roll or they'll get sick! Also don't steal control. 
+		{						// koz fixme only skip in vr
 		if( pm_thirdPersonDeath.GetBool() )
 		{
 			viewAngles.roll = 0.0f;
@@ -7925,19 +7949,38 @@ void idPlayer::AdjustBodyAngles()
 	
 	// calculate the blending between down, straight, and up
 	frac = viewAngles.pitch / 90.0f;
-	if( frac > 0.0f )
+	
+	if ( pm_showBody.GetBool() ) // koz fixme check this way in vr only.
 	{
-		downBlend		= frac;
-		forwardBlend	= 1.0f - frac;
-		upBlend			= 0.0f;
+		//mmdanggg2: stop the model from bending down and getting in the way!!
+
+		if (frac > 0.0f) {
+			downBlend = 0.0f;//frac;
+			forwardBlend = 1.0f;// - frac;
+			upBlend = 0.0f;
+		}
+		else {
+			downBlend = 0.0f;
+			forwardBlend = 1.0f;// + frac;
+			upBlend = 0.0f;//-frac;
+		}
 	}
 	else
 	{
-		downBlend		= 0.0f;
-		forwardBlend	= 1.0f + frac;
-		upBlend			= -frac;
+
+		if (frac > 0.0f)
+		{
+			downBlend = frac;
+			forwardBlend = 1.0f - frac;
+			upBlend = 0.0f;
+		}
+		else
+		{
+			downBlend = 0.0f;
+			forwardBlend = 1.0f + frac;
+			upBlend = -frac;
+		}
 	}
-	
 	animator.CurrentAnim( ANIMCHANNEL_TORSO )->SetSyncedAnimWeight( 0, downBlend );
 	animator.CurrentAnim( ANIMCHANNEL_TORSO )->SetSyncedAnimWeight( 1, forwardBlend );
 	animator.CurrentAnim( ANIMCHANNEL_TORSO )->SetSyncedAnimWeight( 2, upBlend );
@@ -8141,13 +8184,25 @@ void idPlayer::Move_Interpolated( float fraction )
 	{
 		newEyeOffset = pm_deadviewheight.GetFloat();
 	}
-	else if( physicsObj.IsCrouching() )
+	else if (physicsObj.IsCrouching())
 	{
-		newEyeOffset = pm_crouchviewheight.GetFloat();
+		if ( pm_showBody.GetBool() )
+		{
+			newEyeOffset = 34; //Carl: When showing our body, our body doesn't crouch enough, so move eyes as high as possible (any higher and the top of our head wouldn't fit)
+		}
+		else
+		{
+			newEyeOffset = pm_crouchviewheight.GetFloat();
+		}
 	}
 	else if( GetBindMaster() && GetBindMaster()->IsType( idAFEntity_Vehicle::Type ) )
 	{
 		newEyeOffset = 0.0f;
+	}
+	else if ( pm_showBody.GetBool() ) 
+	{
+		newEyeOffset = pm_normalviewheight.GetFloat();
+		//Carl: Our body is too tall, so move our eyes higher so they don't clip the body
 	}
 	else
 	{
@@ -8285,11 +8340,23 @@ void idPlayer::Move()
 	}
 	else if( physicsObj.IsCrouching() )
 	{
-		newEyeOffset = pm_crouchviewheight.GetFloat();
+		if (pm_showBody.GetBool()) 
+		{
+			newEyeOffset = 34; //Carl: When showing our body, our body doesn't crouch enough, so move eyes as high as possible (any higher and the top of our head wouldn't fit)
+		}
+		else 
+		{
+			newEyeOffset = pm_crouchviewheight.GetFloat();
+		}
 	}
 	else if( GetBindMaster() && GetBindMaster()->IsType( idAFEntity_Vehicle::Type ) )
 	{
 		newEyeOffset = 0.0f;
+	}
+	else if ( pm_showBody.GetBool() ) 
+	{
+		newEyeOffset = pm_normalviewheight.GetFloat();
+		//Carl: Our body is too tall, so move our eyes higher so they don't clip the body
 	}
 	else
 	{
@@ -9066,7 +9133,14 @@ void idPlayer::Think()
 		renderEntity.suppressShadowInViewID	= entityNumber + 1;
 		if( headRenderEnt )
 		{
-			headRenderEnt->suppressShadowInViewID = entityNumber + 1;
+			if ( pm_showBody.GetBool() ) 
+			{
+				headRenderEnt->suppressShadowInViewID = 0; //Carl:Draw the head's shadow when showing the body (not working)
+			}
+			else 
+			{
+				headRenderEnt->suppressShadowInViewID = entityNumber + 1;
+			}
 		}
 	}
 	// never cast shadows from our first-person muzzle flashes
@@ -10536,7 +10610,138 @@ void idPlayer::GetViewPos( idVec3& origin, idMat3& axis ) const
 		origin += axis[0] * g_viewNodalX.GetFloat() + axis[2] * g_viewNodalZ.GetFloat();
 	}
 }
+/*
+===============
+idPlayer::GetViewPosVR
+===============
+*/
+void idPlayer::GetViewPosVR(idVec3 &origin, idMat3 &axis) const {
+	idAngles angles;
 
+	// if dead, fix the angle and don't add any kick
+	if (health <= 0) {
+		angles = viewAngles;
+		//Carl:Never roll the camera in VR unless the user does!
+		//Carl:Probably not a good idea to pitch either
+		axis = angles.ToMat3();
+		origin = GetEyePosition();
+	}
+	else {
+		//Carl: Use head and neck rotation model
+		float eyeHeightAboveRotationPoint;
+		float eyeShiftRight = 0;
+		//Carl: When we can see our body, it leans from the torso, not the neck!
+		if ( pm_showBody.GetBool() ) {
+			// with different weapons, we pivot from a different place
+			if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/fists_new.tga") {
+				eyeHeightAboveRotationPoint = 12.5f;
+				eyeShiftRight = -4;
+			}
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/chainsaw_new.tga") {
+				eyeHeightAboveRotationPoint = 13;
+				eyeShiftRight = 2;
+			}
+			else if (weapon && weapon->displayName == "#str_00100207") { // grabber
+				eyeHeightAboveRotationPoint = 10;
+				eyeShiftRight = 1;
+			}
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/soul_cube.tga") {
+				eyeHeightAboveRotationPoint = 10;
+				eyeShiftRight = -1;
+			}
+			else if (weapon && weapon->displayName == "#str_00100209") { // artifact
+				eyeHeightAboveRotationPoint = 10;
+				eyeShiftRight = -1;
+			}
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/pistol_new.tga") {
+				eyeHeightAboveRotationPoint = 15;
+				eyeShiftRight = 0;
+			}
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/shotgun_new.tga") {
+				eyeHeightAboveRotationPoint = 23;
+				eyeShiftRight = 2;
+			}
+			else if (weapon && weapon->displayName == "#str_00100191") { // double-barrelled shotgun
+				eyeHeightAboveRotationPoint = 23;
+				eyeShiftRight = 2;
+			}
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/machinegun_new.tga") {
+				eyeHeightAboveRotationPoint = 17;
+				eyeShiftRight = 0;
+			}
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/chaingun_new.tga") {
+				eyeHeightAboveRotationPoint = 12;
+				eyeShiftRight = 6;
+			}
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/grenade_new.tga") {
+				eyeHeightAboveRotationPoint = 15;
+				eyeShiftRight = 0;
+			}
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/plasmagun_new.tga") {
+				eyeHeightAboveRotationPoint = 6;
+				eyeShiftRight = 2;
+			}
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/rocketlauncher_new.tga") {
+				eyeHeightAboveRotationPoint = 20;
+				eyeShiftRight = 1;
+			}
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/bfg_new.tga") {
+				eyeHeightAboveRotationPoint = 21;
+				eyeShiftRight = 5;
+			}
+			else {
+				eyeHeightAboveRotationPoint = 14;
+				eyeShiftRight = 0;
+			}
+		}
+		else {
+			eyeHeightAboveRotationPoint = g_viewNodalZ.GetFloat();
+		}
+
+		origin = GetEyePosition() + viewBob;
+		angles = viewAngles + viewBobAngles + playerView.AngleOffset();
+
+		axis = angles.ToMat3() * physicsObj.GetGravityAxis();
+
+		// Move pivot point down so looking straight ahead is a no-op on the Z
+		const idVec3 & gravityVector = physicsObj.GetGravityNormal();
+		origin += gravityVector * g_viewNodalZ.GetFloat();
+
+		//mmdanggg2: hooray for positional tracking being a bitch with math and stuff....
+		if ( 1 /*IN_MotionSensor_CanReadPosition()*/ ){
+			if (pm_showBody.GetBool()) {
+				eyeHeightAboveRotationPoint = 16.5f;
+			}
+			else {
+				eyeHeightAboveRotationPoint = g_viewNodalZ.GetFloat();
+			}
+			eyeShiftRight = 0;
+			origin += axis[0] * g_viewNodalX.GetFloat() - axis[1] * eyeShiftRight + axis[2];
+
+			float posTrackx = 0.0f, posTracky = 0.0f, posTrackz = 0.0f, posTrackxAdj = 0.0f, posTrackyAdj = 0.0f;
+			//IN_MotionSensor_ReadPosition(posTrackx, posTrackz, posTracky); // Swapped z and y coz oculus returns retarded y=up coords
+
+			double yawRad = DEG2RAD(angles.yaw - 90); // -90deg because then it works
+			double angleCosine = cos(yawRad);
+			double angleSine = sin(yawRad);
+
+			posTracky = -posTracky;// invert the y axis beacuse then it works
+
+			posTrackxAdj = posTrackx * angleCosine - posTracky * angleSine; // rotate the vector so the users pos is aligned with the character
+			posTrackyAdj = posTrackx * angleSine + posTracky * angleCosine;
+
+			idVec3 posTrackVec(posTrackxAdj, posTrackyAdj, posTrackz);
+
+			origin += posTrackVec * 40.0f; // the number is how much the pos tracking affects the view, 40 is a complete guess
+
+			origin.z += eyeHeightAboveRotationPoint; // offset the height so it is on the neck
+		}
+		else {
+			// adjust the origin based on the camera nodal distance (eye distance from neck)
+			origin += axis[0] * g_viewNodalX.GetFloat() - axis[1] * eyeShiftRight + axis[2] * eyeHeightAboveRotationPoint;
+		}
+	}
+}
 /*
 ===============
 idPlayer::CalculateFirstPersonView
@@ -10623,7 +10828,8 @@ void idPlayer::CalculateRenderView()
 		}
 		else
 		{
-			gameLocal.GetCamera()->GetViewParms( renderView );
+			// koz fixeme this was in tmeks renderView->viewaxis = firstPersonViewAxis; 
+			gameLocal.GetCamera()->GetViewParms(renderView);
 		}
 	}
 	else
@@ -11487,7 +11693,14 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 		renderEntity.suppressShadowInViewID	= entityNumber + 1;
 		if( headRenderEnt )
 		{
-			headRenderEnt->suppressShadowInViewID = entityNumber + 1;
+			if ( pm_showBody.GetBool() ) 
+			{
+				headRenderEnt->suppressShadowInViewID = 0; //Carl:Draw the head's shadow when showing the body
+			}
+			else 
+			{
+				headRenderEnt->suppressShadowInViewID = entityNumber + 1;
+			}
 		}
 	}
 	// never cast shadows from our first-person muzzle flashes

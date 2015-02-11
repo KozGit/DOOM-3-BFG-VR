@@ -195,6 +195,8 @@ extern idCVar	pm_thirdPersonClip;
 extern idCVar	pm_thirdPerson;
 extern idCVar	pm_thirdPersonDeath;
 extern idCVar	pm_modelView;
+extern idCVar	pm_showBody;
+
 extern idCVar	pm_airMsec;
 
 extern idCVar	g_showPlayerShadow;
