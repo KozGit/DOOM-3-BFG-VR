@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #include "../Game_local.h"
 
+extern idCVar vr_hydraMenuNavHand; // Koz
+
 idMenuScreen::idMenuScreen()
 {
 	menuGUI = NULL;
@@ -101,6 +103,8 @@ void idMenuScreen::UpdateCmds()
 {
 	idSWF* const gui = menuGUI;
 	
+	common->Printf("MenuScreen UpdateCmds: gui = %s\n", gui->GetName()); // koz debug which menu we are in.
+
 	idSWFScriptObject* const shortcutKeys = gui->GetGlobal( "shortcutKeys" ).GetObject();
 	if( !verify( shortcutKeys != NULL ) )
 	{
@@ -257,8 +261,10 @@ void idMenuScreen::UpdateCmds()
 		if( btnTabNext != NULL )
 		{
 			btnTabNext->Set( "onPress", new( TAG_SWF ) WrapWidgetSWFEvent( this, WIDGET_EVENT_TAB_NEXT, 0 ) );
-			shortcutKeys->Set( "JOY6", btnTabNext );
 			
+			//shortcutKeys->Set( "JOY6", btnTabNext );
+			shortcutKeys->Set( "RB", btnTabNext );// Koz was JOY6, use alias instead to allow menu nav with hydra. 
+
 			if( btnTabNext->GetSprite() != NULL && menuData != NULL )
 			{
 				btnTabNext->GetSprite()->StopFrame( menuData->GetPlatform() + 1 );
@@ -271,8 +277,10 @@ void idMenuScreen::UpdateCmds()
 		if( btnTabPrev != NULL )
 		{
 			btnTabPrev->Set( "onPress", new( TAG_SWF ) WrapWidgetSWFEvent( this, WIDGET_EVENT_TAB_PREV, 0 ) );
-			shortcutKeys->Set( "JOY5", btnTabPrev );
 			
+			//shortcutKeys->Set( "JOY5", btnTabPrev );
+			shortcutKeys->Set( "LB", btnTabPrev ); // Koz was JOY5, use alias instead to allow menu nav with hydra.
+
 			if( btnTabPrev->GetSprite() != NULL && menuData != NULL )
 			{
 				btnTabPrev->GetSprite()->StopFrame( menuData->GetPlatform() + 1 );

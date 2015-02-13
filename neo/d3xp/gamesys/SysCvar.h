@@ -203,10 +203,25 @@ extern idCVar	g_showPlayerShadow;
 extern idCVar	g_showHud;
 extern idCVar	g_showProjectilePct;
 extern idCVar	g_showBrass;
-extern idCVar	g_gun_x;
-extern idCVar	g_gun_y;
-extern idCVar	g_gun_z;
-extern idCVar	g_gunScale;
+// koz fixme
+//extern idCVar	g_gun_x;
+//extern idCVar	g_gun_y;
+//extern idCVar	g_gun_z;
+//extern idCVar	g_gunScale;
+
+// koz begin
+extern idCVar	vr_gun_x;
+extern idCVar	vr_gun_y;
+extern idCVar	vr_gun_z;
+extern idCVar	vr_gunScale;
+
+//koz flashlight position tweaking for hydra 
+extern idCVar	vr_flash_x;
+extern idCVar	vr_flash_y;
+extern idCVar	vr_flash_z;
+extern idCVar	vr_flashScale;
+// Koz end
+
 extern idCVar	g_viewNodalX;
 extern idCVar	g_viewNodalZ;
 extern idCVar	g_fov;

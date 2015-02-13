@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #include "../Game_local.h"
 
+#include "d3xp\Weapon.h" // Koz include for in game pda
+
 static const int MAX_PDA_ITEMS = 15;
 static const int MAX_NAV_OPTIONS = 4;
 
@@ -45,6 +47,33 @@ void idMenuHandler_PDA::Update()
 		return;
 	}
 	
+	// koz fixme PDA.  In the mars city map, when the receptionist initially 
+	// gives you the PDA, the PDA menu is (somehow) initialized
+	// without actually presenting the PDA weapon. This means the model 
+	// isn't rendered and you can't see the screen, even though the menu 
+	// is running - which is a real problem. I haven't identified exactly 
+	// why this happens or if I may have broken something to cause this, so in the 
+	// meantime here is a lovely hack to make sure the PDA weapon is presented	
+	// once if the PDA menu is running.
+	
+	static bool pdaSync = false;
+	idPlayer *player = gameLocal.GetLocalPlayer();
+
+	if ( !pdaSync )
+	{
+		if ( player->weapon->IdentifyWeapon() != WEAPON_PDA )
+		{
+			if ( !gameLocal.inCinematic )
+			{
+				player->TogglePDA();
+				player->SelectWeapon( player->weapon_pda, true );
+				player->weapon->Show();
+				pdaSync = true;
+			}
+		}
+	}
+	// Koz end PDA hack 
+
 	if( activeScreen != nextScreen )
 	{
 	
@@ -96,9 +125,8 @@ void idMenuHandler_PDA::Update()
 		transition = MENU_TRANSITION_INVALID;
 		activeScreen = nextScreen;
 	}
-	
-	idPlayer* player = gameLocal.GetLocalPlayer();
-	if( player != NULL )
+			
+	if( player != NULL ) 
 	{
 		if( activeScreen == PDA_AREA_USER_DATA )
 		{
@@ -488,6 +516,10 @@ bool idMenuHandler_PDA::HandleAction( idWidgetAction& action, const idWidgetEven
 				}
 				
 			}
+
+			extern bool forceLeftStick;	// koz make left active.
+			forceLeftStick = true;		// koz
+
 			return true;
 		}
 		case WIDGET_ACTION_PDA_SELECT_NAV:

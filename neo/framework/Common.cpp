@@ -47,15 +47,14 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../sys/sys_savegame.h"
 
+#include "vr\vr.h" // koz
+
 #if defined( _DEBUG )
 #define BUILD_DEBUG "-debug"
 #else
 #define BUILD_DEBUG ""
 #endif
 
-//koz fixme
-bool hasOculusRift = false;
-// koz end
 struct version_s
 {
 	version_s()
@@ -74,7 +73,7 @@ idCVar com_allowConsole( "com_allowConsole", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR
 idCVar com_allowConsole( "com_allowConsole", "1", CVAR_BOOL | CVAR_SYSTEM | CVAR_INIT, "allow toggling console with the tilde key" );
 #endif
 
-idCVar com_developer( "developer", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "developer mode" );
+idCVar com_developer( "developer", "1", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT | CVAR_ARCHIVE, "developer mode" ); // koz fixme normally 0
 idCVar com_speeds( "com_speeds", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "show engine timings" );
 // DG: support "com_showFPS 2" for fps-only view like in classic doom3 => make it CVAR_INTEGER
 idCVar com_showFPS( "com_showFPS", "0", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT, "show frames rendered per second. 0: off 1: default bfg values, 2: only show FPS (classic view)" );
@@ -116,7 +115,8 @@ idCommonLocal	commonLocal;
 idCommon* 		common = &commonLocal;
 
 // RB: defaulted this to 1 because we don't have a sound for the intro .bik video
-idCVar com_skipIntroVideos( "com_skipIntroVideos", "1", CVAR_BOOL , "skips intro videos" );
+// Koz : set CVAR_ARCHIVE
+idCVar com_skipIntroVideos( "com_skipIntroVideos", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "skips intro videos" );
 
 // For doom classic
 struct Globals;
@@ -263,11 +263,13 @@ void idCommonLocal::ParseCommandLine( int argc, const char* const* argv )
 	// API says no program path
 	for( i = 0; i < argc; i++ )
 	{
-		if (idStr::Icmp(argv[i], "-vr") == 0) 
+		if ( idStr::Icmp( argv[i], "-vr" ) == 0 ) 
 		{
 			// koz fixme enable VR support here.
-			//hasHMD = true;
-			//hasOculusRift = true;
+			// hasHMD = true;
+			// hasOculusRift = true;
+			vr_enable.SetBool( true );
+
 		}
 		else if( idStr::Icmp( argv[ i ], "+connect_lobby" ) == 0 )
 		{
@@ -1254,10 +1256,12 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		// init the parallel job manager
 		parallelJobManager->Init();
 
+		//Koz: init the Razer Hydra
+		VR_HydraInit();
+
 		//Carl: init the Virtual Reality head tracking, detect any connected HMDs, and read display parameters
 		//this needs to happen before the cfg files are loaded.
-		//IN_MotionSensor_Init(); // koz fixme
-
+		VR_HMDInit(); // Koz new init routines.
 		
 		// exec the startup scripts
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec default.cfg\n" );
@@ -1296,7 +1300,14 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		
 		// init OpenGL, which will open a window and connect sound and input hardware
 		renderSystem->InitOpenGL();
-		
+
+		// Koz: initialize the Oculus distortion meshes. 
+		// OGL must be initialized to do this.
+		if ( hasOculusRift )
+		{
+			VR_GenerateDistortionMeshes();
+		}
+
 		// Support up to 2 digits after the decimal point
 		com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
 		com_engineHz_latched = com_engineHz.GetFloat();
@@ -1791,7 +1802,7 @@ void idCommonLocal::LeaveGame()
 idCommonLocal::ProcessEvent
 ===============
 */
-bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
+bool idCommonLocal::ProcessEvent( sysEvent_t* event ) // Koz fixme was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
 {
 	// hitting escape anywhere brings up the menu
 	if( game && game->IsInGame() )

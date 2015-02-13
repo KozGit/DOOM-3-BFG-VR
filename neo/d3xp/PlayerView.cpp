@@ -31,9 +31,16 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Game_local.h"
 
+#include "vr\vr.h" // Koz
+
+
 // _D3XP : rename all gameLocal.time to gameLocal.slow.time for merge!
 
 const int IMPULSE_DELAY = 150;
+
+// Koz begin
+idCVar vr_headKick("vr_headKick", "0", CVAR_ARCHIVE | CVAR_GAME, "Damage can 'kick' the players view. 0 = Disabled in VR.");
+// Koz end
 /*
 ==============
 idPlayerView::idPlayerView
@@ -283,26 +290,30 @@ void idPlayerView::DamageImpulse( idVec3 localKickDir, const idDict* damageDef )
 	// head angle kick
 	//
 	float kickTime = damageDef->GetFloat( "kick_time" );
-	if( kickTime )
+	
+	if ( !(vr_enable.GetBool() && !vr_headKick.GetBool()) ) // koz allow the user to disable headkicks in vr.
 	{
-		kickFinishTime = gameLocal.slow.time + g_kickTime.GetFloat() * kickTime;
-		
-		// forward / back kick will pitch view
-		kickAngles[0] = localKickDir[0];
-		
-		// side kick will yaw view
-		kickAngles[1] = localKickDir[1] * 0.5f;
-		
-		// up / down kick will pitch view
-		kickAngles[0] += localKickDir[2];
-		
-		// roll will come from  side
-		kickAngles[2] = localKickDir[1];
-		
-		float kickAmplitude = damageDef->GetFloat( "kick_amplitude" );
-		if( kickAmplitude )
+		if (kickTime)
 		{
-			kickAngles *= kickAmplitude;
+			kickFinishTime = gameLocal.slow.time + g_kickTime.GetFloat() * kickTime;
+
+			// forward / back kick will pitch view
+			kickAngles[0] = localKickDir[0];
+
+			// side kick will yaw view
+			kickAngles[1] = localKickDir[1] * 0.5f;
+
+			// up / down kick will pitch view
+			kickAngles[0] += localKickDir[2];
+
+			// roll will come from  side
+			kickAngles[2] = localKickDir[1];
+
+			float kickAmplitude = damageDef->GetFloat("kick_amplitude");
+			if (kickAmplitude)
+			{
+				kickAngles *= kickAmplitude;
+			}
 		}
 	}
 	
@@ -436,22 +447,26 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 		return;
 	}
 	
-	// place the sound origin for the player
-	gameSoundWorld->PlaceListener( view->vieworg, view->viewaxis, player->entityNumber + 1 );
-	
-	// if the objective system is up, don't do normal drawing
-	if( player->objectiveSystemOpen )
-	{
-		if( player->pdaMenu != NULL )
-		{
-			player->pdaMenu->Update();
-		}
-		return;
-	}
-	
 	// hack the shake in at the very last moment, so it can't cause any consistency problems
 	renderView_t hackedView = *view;
 	hackedView.viewaxis = hackedView.viewaxis * ShakeAxis();
+
+	// place the sound origin for the player
+	gameSoundWorld->PlaceListener( view->vieworg, view->viewaxis, player->entityNumber + 1 );
+	
+	// koz fixme this should only be for VR. the pda has already been rendered and copied to pdaImage for the pda weapon model, no need to do this here now.
+	if ( !vr_enable.GetBool() )
+	{
+		// if the objective system is up, don't do normal drawing
+		if (player->objectiveSystemOpen)
+		{
+			if (player->pdaMenu != NULL)
+			{
+				player->pdaMenu->Update();
+			}
+			return;
+		}
+	}
 	
 	if( gameLocal.portalSkyEnt.GetEntity() && gameLocal.IsPortalSkyAcive() && g_enablePortalSky.GetBool() )
 	{
@@ -471,6 +486,13 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 		return;
 	}
 	
+	// Koz begin
+	if ( g_showHud.GetBool() && !PDAforced && !PDArising ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
+	{
+		player->DrawHUD(hudManager);
+	}
+	// Koz end
+
 	// draw screen blobs
 	if( !pm_thirdPerson.GetBool() && !g_skipViewEffects.GetBool() )
 	{
@@ -498,8 +520,9 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 				}
 			}
 		}
-		player->DrawHUD( hudManager );
 		
+		// player->DrawHUD( hudManager ); koz moved before draw screen blobs so we can see the hud if we want, but still skip all other view effects.
+
 		if( player->spectating )
 		{
 			return;
@@ -666,10 +689,11 @@ void idPlayerView::ScreenFade()
 	}
 }
 
-//Carl: Cymatic Bruce starts from 6.5 then adjusts it in the menu. Jose uses 5.8
-idCVar	stereoRender_interOccularCentimeters("stereoRender_interOccularCentimeters", "5.8", CVAR_ARCHIVE | CVAR_RENDERER, "Distance between eyes");
+idCVar	stereoRender_interOccularCentimeters("stereoRender_interOccularCentimeters", "6.0", CVAR_ARCHIVE | CVAR_RENDERER, "Distance between eyes");
 //Carl: convergence should be 0 for HMDs, so default to that
 idCVar	stereoRender_convergence("stereoRender_convergence", "0", CVAR_RENDERER, "0 = head mounted display, otherwise world units to convergence plane");// koz was 6 for non hmd display
+
+// koz fixme idCVar	vr_screenSeparationOffset("vr_screenSeparationOffset", "-0.07598821", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "projection offset for screen separation in stereo view");
 
 extern	idCVar stereoRender_screenSeparation;	// screen units from center to eyes
 extern	idCVar stereoRender_swapEyes;
@@ -726,6 +750,7 @@ stereoDistances_t	CaclulateStereoDistances(
 		// head mounted display mode
 		dists.worldSeparation = CentimetersToInches( interOcularCentimeters * 0.5 );
 		dists.screenSeparation = 0.0f;
+		// dists.screenSeparation = vr_screenSeparationOffset.GetFloat(); // koz fix me this was previously active
 		return dists;
 	}
 	
@@ -736,14 +761,37 @@ stereoDistances_t	CaclulateStereoDistances(
 	return dists;
 }
 
-float	GetScreenSeparationForGuis()
+/* koz originial float	GetScreenSeparationForGuis()
 {
 	const stereoDistances_t dists = CaclulateStereoDistances(
 										stereoRender_interOccularCentimeters.GetFloat(),
 										renderSystem->GetPhysicalScreenWidthInCentimeters(),
 										stereoRender_convergence.GetFloat(),
-										80.0f /* fov */ );
+										80.0f ); // 80.0f = fov
 										
+	return dists.screenSeparation;
+}
+*/
+
+float	GetScreenSeparationForGuis() // koz fixme
+{
+
+	const idPlayer	*player = gameLocal.GetLocalPlayer();
+	float fov = player->DefaultFov();
+
+	const stereoDistances_t dists = CaclulateStereoDistances(
+		stereoRender_interOccularCentimeters.GetFloat(),
+		renderSystem->GetPhysicalScreenWidthInCentimeters(),
+		stereoRender_convergence.GetFloat(),
+		fov); // koz was 80.0f /* fov */ );
+
+	if ( renderingPDA || PDAforced || PDArising )
+		// koz fixme we don't want the guis rendered for the pda model to be offset. 
+		// I should really fix this by only drawing/copying the PDA for one eye, then using that image for both eye views instead of doing this.
+	{
+		return 0;
+	}
+
 	return dists.screenSeparation;
 }
 
@@ -761,7 +809,8 @@ void idPlayerView::EmitStereoEyeView( const int eye, idMenuHandler_HUD* hudManag
 	}
 	
 	renderView_t eyeView = *view;
-	
+	extern int currentRiftEye;
+
 	const stereoDistances_t dists = CaclulateStereoDistances(
 										stereoRender_interOccularCentimeters.GetFloat(),
 										renderSystem->GetPhysicalScreenWidthInCentimeters(),
@@ -773,6 +822,15 @@ void idPlayerView::EmitStereoEyeView( const int eye, idMenuHandler_HUD* hudManag
 	eyeView.viewEyeBuffer = stereoRender_swapEyes.GetBool() ? eye : -eye;
 	eyeView.stereoScreenSeparation = eye * dists.screenSeparation;
 	
+	if ( eye < 1 ) // Koz fixme get rid of hacky McCrappyhack globals to let everything else know what eye is being drawn.
+	{ 
+		currentRiftEye = 0;
+	}
+	else 
+	{
+		currentRiftEye = 1;
+	}
+
 	SingleView( &eyeView, hudManager );
 }
 
@@ -805,8 +863,27 @@ idPlayerView::RenderPlayerView
 void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 {
 	const renderView_t* view = player->GetRenderView();
+	
+	extern bool renderingPDA; // koz 
+
 	if( renderSystem->GetStereo3DMode() != STEREO3D_OFF )
 	{
+		// koz fixme pda, render the PDA here. it will be copied to intrinsic image _pdaImage,  
+		// which is the new texture for the PDA viewmodel screen.
+		if ( player->objectiveSystemOpen && vr_enable.GetBool() )
+		{
+			if (player->pdaMenu != NULL)
+			{
+
+				if ( !PDAforced && !PDArising )
+				{
+					renderingPDA = true;
+					player->pdaMenu->Update();
+					renderSystem->CaptureRenderToImage("_pdaImage");
+					renderingPDA = false;
+				}
+			}
+		}
 		// render both eye views each frame on the PC
 		for( int eye = 1 ; eye >= -1 ; eye -= 2 )
 		{
@@ -1966,7 +2043,8 @@ void FullscreenFXManager::Process( const renderView_t* view )
 		}
 		
 		// do the actual drawing
-		if( drawIt )
+		if ( drawIt ) // koz fixme had temp made this always false, make sure restoring didn't break anything.
+
 		{
 			atLeastOneFX = true;
 			

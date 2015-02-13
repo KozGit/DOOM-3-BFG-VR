@@ -33,7 +33,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "../framework/Common_local.h"
 #include "PredictedValue_impl.h"
 
-//#include "../sys/win32/vr_motion_sensor.h"
+// Koz begin
+#include "../../../dependencies/SixenseSDK_062612/include/sixense_utils/controller_manager/controller_manager.hpp"
+#include "vr\vr.h" 
+// Koz end
+
 
 idCVar flashlight_batteryDrainTimeMS( "flashlight_batteryDrainTimeMS", "30000", CVAR_INTEGER, "amount of time (in MS) it takes for full battery to drain (-1 == no battery drain)" );
 idCVar flashlight_batteryChargeTimeMS( "flashlight_batteryChargeTimeMS", "3000", CVAR_INTEGER, "amount of time (in MS) it takes to fully recharge battery" );
@@ -57,6 +61,35 @@ idCVar pm_clientAuthoritative_Divergence( "pm_clientAuthoritative_Divergence", "
 idCVar pm_clientInterpolation_Divergence( "pm_clientInterpolation_Divergence", "5000.0f", CVAR_FLOAT, "" );
 
 idCVar pm_clientAuthoritative_minSpeedSquared( "pm_clientAuthoritative_minSpeedSquared", "1000.0f", CVAR_FLOAT, "" );
+
+//koz cvars for hydra mods
+idCVar vr_hydraEnable("vr_hydraEnable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, " Enable Razer Hydra. 1 = enabled, 0 = disabled.");
+idCVar vr_hydraMode("vr_hydraMode", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "razer hydra mode. 0 = left hydra for positional tracking, 1 = left hydra as controller, 2 = left hydra as controller and flashlight");
+
+idCVar vr_flashPitchAngle("vr_flashPitchAngle", "90", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Pitch offset for flashlight using hydra. Default = 90");
+idCVar vr_flashlightHelmetPosX("vr_flashlightHelmetPosX", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight horizontal offset for helmet mount.");
+idCVar vr_flashlightHelmetPosY("vr_flashlightHelmetPosY", "-18", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight forward offset for helmet mount.");
+idCVar vr_flashlightHelmetPosZ("vr_flashlightHelmetPosZ", "-8", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight vertical offset for helmet mount.");
+idCVar vr_flashlightGunScale("vr_flashlightGunScale", ".4", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight scale for gun mount.");
+
+// Koz begin : these cvars were just a tool to check model rotations in game
+idCVar vr_offx("vr_offx", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, " x offset");
+idCVar vr_offy("vr_offy", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, " y offset");
+idCVar vr_offz("vr_offz", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, " z offset");
+idCVar vr_rotateAxis("vr_rotateAxis", "0", CVAR_FLOAT, "axis of rotation.");
+idCVar vr_offsetYaw("vr_offsetYaw", "0", CVAR_FLOAT, "default yaw axis.");
+idCVar vr_offsetPitch("vr_offsetPitch", "0", CVAR_FLOAT, "default pitch axis.");
+idCVar vr_offsetRoll("vr_offsetRoll", "0", CVAR_FLOAT, "default roll axis.");
+
+idCVar vr_forward_keyhole("vr_forward_keyhole", "11.25", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Forward movement keyhole in deg. If view is inside body direction +/- this value, forward movement is in view direction, not body direction");
+
+idCVar vr_PDAscale("vr_PDAscale", "3", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, " PDA scale factor");
+idCVar vr_PDAfixLocation("vr_PDAfixLocation", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Fix PDA position in space in front of player\n instead of holding in hand.");
+
+idCVar vr_mouse_gunx("vr_mouse_gunX", "3", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "");
+idCVar vr_mouse_guny("vr_mouse_gunY", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "");
+idCVar vr_mouse_gunz("vr_mouse_gunZ", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "");
+// Koz end : cvars
 
 extern idCVar g_demoMode;
 
@@ -1474,8 +1507,12 @@ idPlayer::idPlayer():
 	spawnAngles				= ang_zero;
 	viewAngles				= ang_zero;
 	cmdAngles				= ang_zero;
-	independentWeaponPitchAngle = 0.0f;
 	
+	// Koz begin : for independent weapon aiming in VR.
+	independentWeaponYaw = 0.0f; 
+	independentWeaponPitch = 0.0f;
+	// Koz end
+		
 	oldButtons				= 0;
 	buttonMask				= 0;
 	oldImpulseSequence		= 0;
@@ -1532,6 +1569,8 @@ idPlayer::idPlayer():
 	firstPersonViewOrigin	= vec3_zero;
 	firstPersonViewAxis		= mat3_identity;
 	
+	firstPersonWeaponOrigin = vec3_zero; // Koz independent weapon aiming in VR
+		
 	hipJoint				= INVALID_JOINT;
 	chestJoint				= INVALID_JOINT;
 	headJoint				= INVALID_JOINT;
@@ -1997,6 +2036,15 @@ void idPlayer::Init()
 	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
 	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
+	
+	// Koz begin
+	laserSightActive = true;	
+	headingBeamActive = true;	
+	PDAfixed = false;			// koz has the PDA been fixed in space?
+	PDAorigin = vec3_zero;		
+	PDAaxis = mat3_identity;	
+	// Koz end
+
 }
 
 /*
@@ -2103,7 +2151,7 @@ void idPlayer::Spawn()
 	renderEntity.noSelfShadow = true;
 	
 	idAFAttachment* headEnt = head.GetEntity();
-	if (headEnt) 
+	if ( headEnt ) 
 	{
 		headEnt->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1; //Carl: We still suppress the head with pm_showBody in 1st person
 		headEnt->GetRenderEntity()->noSelfShadow = true;
@@ -2280,6 +2328,8 @@ void idPlayer::Spawn()
 		weapon.GetEntity()->ForceAmmoInClip();
 	}
 	
+	ovrHmd_RecenterPose( hmd ); // Koz reset hmd orientation
+
 }
 
 /*
@@ -2942,7 +2992,8 @@ void idPlayer::Restore( idRestoreGame* savefile )
 			}
 		}
 	}
-	
+
+	ovrHmd_RecenterPose(hmd); // Koz reset hmd orientation
 }
 
 /*
@@ -6441,7 +6492,24 @@ void idPlayer::UpdateFocus()
 	}
 	
 	start = GetEyePosition();
-	end = start + firstPersonViewAxis[0] * 80.0f;
+	
+	// Koz begin
+	if ( vr_enable.GetBool() ) // koz fixme only when vr actually active.
+	{
+		//koz : in VR, if weapon equipped, use muzzle orientation to scan for accessible guis, otherwise use player center eye.
+		idMat3 weaponAxis;
+		bool fromWeap;
+
+		fromWeap = weapon->GetMuzzlePositionWithHacks(start, weaponAxis);
+		if (fromWeap) start -= weaponAxis[1] * weapon->hideOffset; // Koz - if weapon has been lowered, raise pointer to compensate
+
+		end = start + weaponAxis[0] * 50.0f;//  Koz originial value was 80.0f - allowed access to gui from too great a distance (IMO), reduced to 50.0f
+	}
+	else
+	{
+		end = start + firstPersonViewAxis[0] * 80.0f;
+	}
+	// Koz end
 	
 	// player identification -> names to the hud
 	if( common->IsMultiplayer() && IsLocallyControlled() )
@@ -6468,6 +6536,48 @@ void idPlayer::UpdateFocus()
 	
 	// no pretense at sorting here, just assume that there will only be one active
 	// gui within range along the trace
+
+	// Koz begin
+	// In VR, when the PDA model is active it needs to be hitscanned as if it were a gui.
+	if ( vr_enable.GetBool() ) 
+	{
+		if ( VR_GAME_PAUSED || (game->IsPDAOpen() && PDAclipModelSet) ) // koz scan the list for the PDA & process if hit.
+		{
+			for ( i = 0; i < listedClipModels; i++ )
+			{
+				clip = clipModelList[i];
+				ent = clip->GetEntity();
+
+				if ( ent->entityNumber == weapon->entityNumber )  // we hit the PDA
+				{
+					pt = gameRenderWorld->GuiTrace( ent->GetModelDefHandle(), start, end );
+
+					if ( pt.x != -1 )
+					{
+						// we have a hit
+						// clamp the mouse to the corner
+						ev = sys->GenerateMouseMoveEvent( -2000, -2000 );
+						if ( VR_GAME_PAUSED )
+						{
+							game->Shell_HandleGuiEvent( &ev );
+						}
+						else HandleGuiEvents( &ev );
+
+						// move to an absolute position
+						ev = sys->GenerateMouseMoveEvent( pt.x * 1080, 1080 - ( pt.y * 1080 ) );//koz fixme hardcoded res
+						if ( VR_GAME_PAUSED )
+						{
+							game->Shell_HandleGuiEvent( &ev );
+						}
+						else 	HandleGuiEvents( &ev );
+						return;
+					}
+				}
+			}
+		}
+	}
+	// Koz end
+
 	for( i = 0; i < listedClipModels; i++ )
 	{
 		clip = clipModelList[ i ];
@@ -6528,15 +6638,16 @@ void idPlayer::UpdateFocus()
 				continue;
 			}
 		}
-		
-		if( !ent->GetRenderEntity() || !ent->GetRenderEntity()->gui[ 0 ] || !ent->GetRenderEntity()->gui[ 0 ]->IsInteractive() )
+
+		if ((!ent->GetRenderEntity() || !ent->GetRenderEntity()->gui[0] || !ent->GetRenderEntity()->gui[0]->IsInteractive()) && (!game->IsPDAOpen() && !PDAclipModelSet)) // Koz don't bail if the PDA is open and clipmodel is set.
+					
 		{
 			continue;
 		}
 		
 		if( ent->spawnArgs.GetBool( "inv_item" ) )
 		{
-			// don't allow guis on pickup items focus
+			// don't allow guis on pickup items focusi
 			continue;
 		}
 		
@@ -7036,15 +7147,17 @@ void idPlayer::UpdateViewAngles()
 		// we get out of this mode, our view will snap to a kind of random angle
 		UpdateDeltaViewAngles( viewAngles );
 		
-		// koz fixme - this was in tmeks fork, verify what we are doing here is still approptiate.
-		for (i = 0; i < 3; i++) 
+		// koz fixme - this was in tmeks fork, verify what we are doing here is still appropriate.
+		for ( i = 0; i < 3; i++ ) 
 		{
-			cmdAngles[i] = SHORT2ANGLE(usercmd.angles[i]);
-			if (influenceActive == INFLUENCE_LEVEL3) {
-				viewAngles[i] += idMath::ClampFloat(-1.0f, 1.0f, idMath::AngleDelta(idMath::AngleNormalize180(SHORT2ANGLE(usercmd.angles[i]) + deltaViewAngles[i]), viewAngles[i]));
+			cmdAngles[i] = SHORT2ANGLE( usercmd.angles[i] );
+			if ( influenceActive == INFLUENCE_LEVEL3 ) 
+			{
+				viewAngles[i] += idMath::ClampFloat( -1.0f, 1.0f, idMath::AngleDelta( idMath::AngleNormalize180( SHORT2ANGLE( usercmd.angles[i] ) + deltaViewAngles[i] ), viewAngles[i] ) );
 			}
-			else {
-				viewAngles[i] = idMath::AngleNormalize180(SHORT2ANGLE(usercmd.angles[i]) + deltaViewAngles[i]);
+			else 
+			{
+				viewAngles[i] = idMath::AngleNormalize180( SHORT2ANGLE( usercmd.angles[i] ) + deltaViewAngles[i] );
 			}
 		}
 		// koz end
@@ -7053,8 +7166,8 @@ void idPlayer::UpdateViewAngles()
 	}
 	
 	// if dead
-	if (health <= 0 && false)  //Carl: never roll or they'll get sick! Also don't steal control. 
-		{						// koz fixme only skip in vr
+	if ( health <= 0 && !vr_enable.GetBool() )	// Carl: never roll or they'll get sick! Also don't steal control. 
+		{										// koz fixme only skip in vr
 		if( pm_thirdPersonDeath.GetBool() )
 		{
 			viewAngles.roll = 0.0f;
@@ -7129,10 +7242,13 @@ void idPlayer::UpdateViewAngles()
 	else
 	{
 		// don't let the player look up or down more than 90 degrees normally
-		const float restrict = 1.0f;
-		
-		viewAngles.pitch = std::min( viewAngles.pitch, pm_maxviewpitch.GetFloat() * restrict );
-		viewAngles.pitch = std::max( viewAngles.pitch, pm_minviewpitch.GetFloat() * restrict );
+		if ( !vr_enable.GetBool() )// koz fixme skip check in vr. sanity check this.
+		{
+			const float restrict = 1.0f;
+
+			viewAngles.pitch = std::min(viewAngles.pitch, pm_maxviewpitch.GetFloat() * restrict);
+			viewAngles.pitch = std::max(viewAngles.pitch, pm_minviewpitch.GetFloat() * restrict);
+		}
 	}
 	
 	UpdateDeltaViewAngles( viewAngles );
@@ -7443,7 +7559,11 @@ idPlayer::TogglePDA
 */
 void idPlayer::TogglePDA()
 {
-
+	// Koz begin : reset PDA controls
+	extern bool forceLeftStick;
+	forceLeftStick = true; 
+	// Koz end
+	
 	if( inventory.pdas.Num() == 0 )
 	{
 		ShowTip( spawnArgs.GetString( "text_infoTitle" ), spawnArgs.GetString( "text_noPDA" ), true );
@@ -7726,8 +7846,87 @@ void idPlayer::PerformImpulse( int impulse )
 			SelectWeapon( 18, false );
 			break;
 		}
+		
+		// Koz Begin
+		case IMPULSE_32: // Koz HMD/Body orienataion reset. Make fisrtperson axis match view direction.
+		{
+			OrientHMDBody();
+			break;
+		}
+
+		case IMPULSE_33: // koz toggle lasersight on/off.
+		{
+			ToggleLaserSight();
+			break;
+		}
+		// Koz end
 	}
 }
+
+// Koz Begin
+
+/*
+==============
+idPlayer::ToggleLaserSight  Koz toggle the lasersight
+==============
+*/
+void idPlayer::ToggleLaserSight()
+{
+	laserSightActive = !laserSightActive;
+}
+
+/*
+==============
+idPlayer::ToggleHeadingBeam  Koz toggle heading beam
+==============
+*/
+void idPlayer::ToggleHeadingBeam()
+{
+	headingBeamActive = !headingBeamActive;
+}
+
+/*
+==============
+idPlayer::OrientHMDBody  Koz align the body with the view for drift calibration
+==============
+*/
+void idPlayer::OrientHMDBody()
+{
+
+	static float hydraYawOffset = 0;
+
+	hydraData currentHydra = hydra_zero;
+	idAngles newBodyAngles;
+	idQuat rotQuat;
+
+	newBodyAngles = viewAngles;
+	newBodyAngles.pitch = 0;
+	newBodyAngles.roll = 0;
+	newBodyAngles.yaw += lastHMDYaw;
+	newBodyAngles.Normalize180();
+
+	hydraYawOffset += lastHMDYaw;
+	hydraYawOffset = idAngles( 0.0f, hydraYawOffset, 0.0f ).Normalize180().yaw;
+
+	ovrHmd_RecenterPose(hmd);
+	SetViewAngles( newBodyAngles );
+
+	extern idCVar vr_hydraMode;
+	if ( VR_USE_HYDRA ) // vr_hydraMode.GetInteger() !=0 ) {
+	{ 
+		rotQuat = idAngles( 0.0f, hydraYawOffset, 0.0f ).Normalize180().ToQuat();
+
+		VR_GetLeftHydra( currentHydra );
+		currentHydra.hydraRotationQuat = rotQuat;
+		VR_SetLeftHydraOffset( currentHydra );
+
+		VR_GetRightHydra( currentHydra );
+		currentHydra.hydraRotationQuat = rotQuat;
+		VR_SetRightHydraOffset( currentHydra );
+	}
+}
+
+// Koz end
 
 /*
 ==============
@@ -7954,21 +8153,21 @@ void idPlayer::AdjustBodyAngles()
 	{
 		//mmdanggg2: stop the model from bending down and getting in the way!!
 
-		if (frac > 0.0f) {
-			downBlend = 0.0f;//frac;
-			forwardBlend = 1.0f;// - frac;
+		if ( frac > 0.0f ) {
+			downBlend = 0.0f;	// frac;
+			forwardBlend = 1.0f;// -frac;
 			upBlend = 0.0f;
 		}
 		else {
 			downBlend = 0.0f;
-			forwardBlend = 1.0f;// + frac;
-			upBlend = 0.0f;//-frac;
+			forwardBlend = 1.0f;// +frac;
+			upBlend = 0.0f;		// -frac;
 		}
 	}
 	else
 	{
 
-		if (frac > 0.0f)
+		if ( frac > 0.0f )
 		{
 			downBlend = frac;
 			forwardBlend = 1.0f - frac;
@@ -8184,7 +8383,7 @@ void idPlayer::Move_Interpolated( float fraction )
 	{
 		newEyeOffset = pm_deadviewheight.GetFloat();
 	}
-	else if (physicsObj.IsCrouching())
+	else if ( physicsObj.IsCrouching() )
 	{
 		if ( pm_showBody.GetBool() )
 		{
@@ -8209,7 +8408,7 @@ void idPlayer::Move_Interpolated( float fraction )
 		newEyeOffset = pm_normalviewheight.GetFloat();
 	}
 	
-	if( EyeHeight() != newEyeOffset )
+	if( EyeHeight() != newEyeOffset ) // koz fixme - do we want a slow or instant crouch in VR?
 	{
 		if( spectating )
 		{
@@ -8318,9 +8517,53 @@ void idPlayer::Move()
 	{
 		idVec3	org;
 		idMat3	axis;
-		GetViewPos( org, axis );
-		
-		physicsObj.SetPlayerInput( usercmd, axis[0] );
+		if ( !vr_enable.GetBool() ) 
+		{
+			GetViewPos(org, axis); //koz default movement
+			physicsObj.SetPlayerInput(usercmd, axis[0]);
+		}
+		else
+		{
+			//=================================================
+			// koz add movement/view keyhole.  Sometimes wearing the rift, it *feels* like I'm looking straight ahead, but in reality 
+			// my head is rotated slightly in relation to my body.  Then when I move forward, since I feel 'centered', I expect to move where im looking, but instead move
+			// in the direction my virtual body is facing, which is jarring.  I want to define a keyhole of a few degrees +/- center of the players 'body', where if the view is in the keyhole,
+			// forward will move where the I'm looking,  not where my avatar is facing. Hopefully this will feel more natural for normal movement, but still allow me to look hard left 
+			// or right and move forward in relation to the virtual body for run and gun movement.  Or set it to 90 and always run where you look.
+			//==================================================*/
+
+			idMat3	bodyAxis; // koz direction body is facing
+			idMat3  viewAxis; // koz direction player is looking
+			idMat3	moveAxis; // koz direction player will move
+			idAngles bodyAngles;
+			idAngles viewAng;
+
+			GetViewPos( org, viewAxis );
+
+			bodyAngles = viewAngles + viewBobAngles + playerView.AngleOffset();
+			bodyAxis = bodyAngles.ToMat3();
+			viewAng = viewAxis.ToAngles();
+
+			bodyAngles.Normalize180();
+			viewAng.Normalize180();
+			
+			float viewBodyDelta = 0.0f;
+			float keyhole = vr_forward_keyhole.GetFloat();
+			idAngles ang1;
+			ang1.Zero();
+
+			ang1.yaw = bodyAngles.yaw - viewAng.yaw;
+			ang1.Normalize180();
+			viewBodyDelta = fabsf( ang1.yaw );
+
+			if ( viewBodyDelta <= keyhole ) // koz we are inside the keyhole, move the direction we are looking instead of the direction the body is facing.
+			{
+				moveAxis = viewAxis; // koz set the move axis to the view direction
+			}
+			else moveAxis = bodyAxis; // koz set the move axis to the direction the body (not head) is facing.
+
+			physicsObj.SetPlayerInput( usercmd, moveAxis[0] );
+		}
 	}
 	
 	// FIXME: physics gets disabled somehow
@@ -8340,7 +8583,7 @@ void idPlayer::Move()
 	}
 	else if( physicsObj.IsCrouching() )
 	{
-		if (pm_showBody.GetBool()) 
+		if ( pm_showBody.GetBool() ) 
 		{
 			newEyeOffset = 34; //Carl: When showing our body, our body doesn't crouch enough, so move eyes as high as possible (any higher and the top of our head wouldn't fit)
 		}
@@ -8801,7 +9044,7 @@ void idPlayer::StartFxOnBone( const char* fx, const char* bone )
 idPlayer::HandleGuiEvents
 ==============
 */
-bool idPlayer::HandleGuiEvents( const sysEvent_t* ev )
+bool idPlayer::HandleGuiEvents( sysEvent_t* ev ) // Koz fixme was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
 {
 
 	bool handled = false;
@@ -8824,8 +9067,8 @@ bool idPlayer::HandleGuiEvents( const sysEvent_t* ev )
 idPlayer::UpdateLaserSight
 ==============
 */
-idCVar	g_laserSightWidth( "g_laserSightWidth", "2.0", CVAR_FLOAT | CVAR_ARCHIVE, "laser sight beam width" );
-idCVar	g_laserSightLength( "g_laserSightLength", "250", CVAR_FLOAT | CVAR_ARCHIVE, "laser sight beam length" );
+idCVar	g_laserSightWidth("g_laserSightWidth", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "laser sight beam width");		// koz default was 2.
+idCVar	g_laserSightLength("g_laserSightLength", "1000", CVAR_FLOAT | CVAR_ARCHIVE, "laser sight beam length");	// koz default was 250, but seemed to short.  Length will be clipped if object is hit, this is max length for the hit trace. 
 
 void idPlayer::UpdateLaserSight()
 {
@@ -8838,11 +9081,14 @@ void idPlayer::UpdateLaserSight()
 		return;
 	}
 	
-	if( !IsGameStereoRendered() ||
-			!weapon.GetEntity()->ShowCrosshair() ||
-			AI_DEAD ||
-			weapon->IsHidden() ||
-			!weapon->GetMuzzlePositionWithHacks( muzzleOrigin, muzzleAxis ) )
+	if (!IsGameStereoRendered() ||
+		!laserSightActive ||		// koz allow user to toggle lasersight.
+		!weapon.GetEntity()->ShowCrosshair() ||
+		AI_DEAD ||
+		weapon->IsHidden() ||
+		weapon->hideOffset != 0 ||	// koz - turn off lasersight If gun is lowered ( in gui ).
+		game->IsPDAOpen() ||		// koz - turn off laser sight if using pda.
+		!weapon->GetMuzzlePositionWithHacks( muzzleOrigin, muzzleAxis )) // no lasersight for fists,grenades,soulcube etc
 	{
 		// hide it
 		laserSightRenderEntity.allowSurfaceInViewID = -1;
@@ -8862,10 +9108,27 @@ void idPlayer::UpdateLaserSight()
 	// only show in the player's view
 	laserSightRenderEntity.allowSurfaceInViewID = entityNumber + 1;
 	laserSightRenderEntity.axis.Identity();
-	
 	laserSightRenderEntity.origin = muzzleOrigin - muzzleAxis[0] * 2.0f;
-	idVec3&	target = *reinterpret_cast<idVec3*>( &laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_END_X] );
-	target = muzzleOrigin + muzzleAxis[0] * g_laserSightLength.GetFloat();
+
+	// Koz begin : Keep the lasersight from clipping through everything. 
+	idVec3 end, start;
+	trace_t traceResults;
+	float beamLength = g_laserSightLength.GetFloat(); // max length to run trace.
+
+	start = muzzleOrigin - muzzleAxis[0] * 2.0f;
+	end = start + muzzleAxis[0] * beamLength;
+
+	if ( gameLocal.clip.TracePoint( traceResults, start, end, MASK_SHOT_RENDERMODEL, this ) )
+	{
+		beamLength *= traceResults.fraction;
+	}
+	
+	idVec3&	target = *reinterpret_cast<idVec3*>(&laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_END_X]);
+	target = muzzleOrigin + muzzleAxis[0] * beamLength; 
+	// Koz end
+
+	// laserSightRenderEntity.origin = muzzleOrigin + muzzleAxis[0] * ( beamLength - 1 ); // koz laser dot on target instead of a full beam?
+	// koz well, that looked like crap.
 	
 	laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_WIDTH] = g_laserSightWidth.GetFloat();
 	
@@ -8911,6 +9174,7 @@ void idPlayer::Think()
 		spawnAnglesSet = true;
 		SetViewAngles( spawnAngles );
 		oldImpulseSequence = usercmd.impulseSequence;
+		ovrHmd_RecenterPose(hmd); // koz fixme check if this reset hmd orientation is needed.
 	}
 	
 	if( mountedObject )
@@ -8999,7 +9263,7 @@ void idPlayer::Think()
 		RunPhysics_RemoteClientCorrection();
 	}
 	
-	if( !g_stopTime.GetBool() )
+	if ( !g_stopTime.GetBool() && !VR_GAME_PAUSED )  // koz pause vr
 	{
 	
 		if( !noclip && !spectating && ( health > 0 ) && !IsHidden() )
@@ -9027,7 +9291,8 @@ void idPlayer::Think()
 		}
 		
 		// update GUIs, Items, and character interactions
-		UpdateFocus();
+		
+		// UpdateFocus(); // Koz moved to just before update flashlight.
 		
 		UpdateLocation();
 		
@@ -9064,6 +9329,8 @@ void idPlayer::Think()
 		UpdateWeapon();
 	}
 	
+	UpdateFocus(); // koz move here update GUIs, Items, and character interactions.
+
 	UpdateFlashlight();
 	
 	UpdateAir();
@@ -9150,7 +9417,7 @@ void idPlayer::Think()
 		headRenderEnt->suppressShadowInLightID = LIGHTID_VIEW_MUZZLE_FLASH + entityNumber;
 	}
 	
-	if( !g_stopTime.GetBool() )
+	if ( !g_stopTime.GetBool() && !VR_GAME_PAUSED )  // koz pause in VR
 	{
 		UpdateAnimation();
 		
@@ -10231,23 +10498,31 @@ Returns the base FOV
 float idPlayer::DefaultFov() const
 {
 	float fov;
-	
-	fov = g_fov.GetFloat();
-	if( common->IsMultiplayer() )
+	extern bool hasHMD;
+	extern bool hasOculusRift;
+	extern float hmdFovX;
+
+	if ( hasHMD && hasOculusRift && vr_enable.GetBool() ) // koz fixme report HMD fov in VR. 
 	{
-		if( fov < 80.0f )
+		fov = hmdFovX;
+	}
+	else
+	{
+		fov = g_fov.GetFloat();
+		if (common->IsMultiplayer())
 		{
-			return 80.0f;
-		}
-		else if( fov > 120.0f )
-		{
-			return 120.0f;
+			if (fov < 80.0f)
+			{
+				return 80.0f;
+			}
+			else if (fov > 120.0f)
+			{
+				return 120.0f;
+			}
 		}
 	}
-	
 	return fov;
 }
-
 /*
 ====================
 idPlayer::CalcFov
@@ -10255,40 +10530,50 @@ idPlayer::CalcFov
 Fixed fov at intermissions, otherwise account for fov variable and zooms.
 ====================
 */
-float idPlayer::CalcFov( bool honorZoom )
+float idPlayer::CalcFov(bool honorZoom)
 {
 	float fov;
-	
-	if( fxFov )
+	extern bool hasHMD;
+	extern bool hasOculusRift;
+	extern idCVar vr_enable;
+
+	if ( vr_enable.GetBool() && hasHMD && hasOculusRift ) // koz only use HMD fov in VR
 	{
-		return DefaultFov() + 10.0f + cos( ( gameLocal.time + 2000 ) * 0.01 ) * 10.0f;
-	}
-	
-	if( influenceFov )
-	{
-		return influenceFov;
-	}
-	
-	if( zoomFov.IsDone( gameLocal.time ) )
-	{
-		fov = ( honorZoom && usercmd.buttons & BUTTON_ZOOM ) && weapon.GetEntity() ? weapon.GetEntity()->GetZoomFov() : DefaultFov();
+		return DefaultFov();
 	}
 	else
 	{
-		fov = zoomFov.GetCurrentValue( gameLocal.time );
+		if (fxFov)
+		{
+			return DefaultFov() + 10.0f + cos((gameLocal.time + 2000) * 0.01) * 10.0f;
+		}
+
+		if (influenceFov)
+		{
+			return influenceFov;
+		}
+
+		if (zoomFov.IsDone(gameLocal.time))
+		{
+			fov = (honorZoom && usercmd.buttons & BUTTON_ZOOM) && weapon.GetEntity() ? weapon.GetEntity()->GetZoomFov() : DefaultFov();
+		}
+		else
+		{
+			fov = zoomFov.GetCurrentValue(gameLocal.time);
+		}
+
+		// bound normal viewsize
+		if (fov < 1)
+		{
+			fov = 1;
+		}
+		else if (fov > 179)
+		{
+			fov = 179;
+		}
+
+		return fov;
 	}
-	
-	// bound normal viewsize
-	if( fov < 1 )
-	{
-		fov = 1;
-	}
-	else if( fov > 179 )
-	{
-		fov = 179;
-	}
-	
-	return fov;
 }
 
 /*
@@ -10400,11 +10685,121 @@ idVec3	idPlayer::GunAcceleratingOffset()
 
 /*
 ==============
+idPlayer::ModelOriginOffsetsQuat
+Koz - just used to help view offsets to model local origin
+only used for dev - not during gameplay
+==============
+*/
+void idPlayer::ModelOriginOffsetsQuat(idVec3 &origin, idMat3 &axis) {
+
+	idAngles	angles;
+	idMat3		viewAxis2;
+	idQuat		rotQuat;
+
+	static idAngles weaponRotate = idAngles(vr_offsetPitch.GetFloat(), vr_offsetYaw.GetFloat(), vr_offsetRoll.GetFloat());
+	rotQuat = weaponRotate.ToQuat().Normalize();
+	common->Printf("Angles pitch %f yaw %f roll %f  Quat x %f y %f z %f w %f\n", weaponRotate.pitch, weaponRotate.yaw, weaponRotate.roll, rotQuat.x, rotQuat.y, rotQuat.z, rotQuat.w);
+	static int rotax = vr_rotateAxis.GetFloat();
+
+	viewAxis2 = idPlayer::viewAngles.ToMat3();
+	origin = GetEyePosition();
+
+	origin += 24 * viewAxis2[0]; // move weapon 24 inches out
+
+	rotax = vr_rotateAxis.GetFloat();
+
+	switch (rotax) {
+
+	case 0:
+		weaponRotate.yaw = vr_offsetYaw.GetFloat();
+		weaponRotate.pitch = vr_offsetPitch.GetFloat();
+		weaponRotate.roll += 3.0f;
+		break;
+
+	case 1:
+		weaponRotate.yaw = vr_offsetYaw.GetFloat();
+		weaponRotate.pitch += 3.0f;
+		weaponRotate.roll = vr_offsetRoll.GetFloat();
+		break;
+
+	case 2:
+		weaponRotate.yaw += 3.0f;
+		weaponRotate.pitch = vr_offsetPitch.GetFloat();
+		weaponRotate.roll = vr_offsetRoll.GetFloat();
+		break;
+
+	}
+
+	weaponRotate.Normalize180();
+
+	angles = weaponRotate;
+	axis = angles.ToMat3();
+	origin += idVec3(vr_offx.GetFloat(), vr_offy.GetFloat(), vr_offz.GetFloat())  * axis;
+
+}
+
+/*
+==============
+idPlayer::ModelOriginOffsets
+Koz - just used to help view offsets to model local origin
+only used for dev - not during gameplay
+==============
+*/
+void idPlayer::ModelOriginOffsets(idVec3 &origin, idMat3 &axis) {
+
+	idAngles	angles;
+	idMat3 viewAxis2;
+	static idAngles weaponRotate = idAngles(vr_offsetPitch.GetFloat(), vr_offsetYaw.GetFloat(), vr_offsetRoll.GetFloat());
+	static int rotax = vr_rotateAxis.GetFloat();
+
+	viewAxis2 = idPlayer::viewAngles.ToMat3();
+	origin = GetEyePosition();
+
+	origin += 24 * viewAxis2[0]; // move weapon 24 inches out
+
+	rotax = vr_rotateAxis.GetFloat();
+
+	switch (rotax) {
+
+	case 0:
+		weaponRotate.yaw = vr_offsetYaw.GetFloat();
+		weaponRotate.pitch = vr_offsetPitch.GetFloat();
+		weaponRotate.roll += 3.0f;
+		break;
+
+	case 1:
+		weaponRotate.yaw = vr_offsetYaw.GetFloat();
+		weaponRotate.pitch += 3.0f;
+		weaponRotate.roll = vr_offsetRoll.GetFloat();
+		break;
+
+	case 2:
+		weaponRotate.yaw += 3.0f;
+		weaponRotate.pitch = vr_offsetPitch.GetFloat();
+		weaponRotate.roll = vr_offsetRoll.GetFloat();
+		break;
+
+	default:
+		weaponRotate.yaw = vr_offsetYaw.GetFloat();
+		weaponRotate.pitch = vr_offsetPitch.GetFloat();
+		weaponRotate.roll = vr_offsetRoll.GetFloat();
+	}
+
+	weaponRotate.Normalize180();
+
+	angles = weaponRotate;
+	axis = angles.ToMat3();
+	origin += idVec3(vr_offx.GetFloat(), vr_offy.GetFloat(), vr_offz.GetFloat())  * axis;
+
+}
+
+/*
+==============
 idPlayer::CalculateViewWeaponPos
 
 Calculate the bobbing position of the view weapon
 ==============
-*/
+
 void idPlayer::CalculateViewWeaponPos( idVec3& origin, idMat3& axis )
 {
 	float		scale;
@@ -10478,6 +10873,297 @@ void idPlayer::CalculateViewWeaponPos( idVec3& origin, idMat3& axis )
 	
 	axis = scaledMat * viewAxis;
 }
+*/
+
+
+void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis ) 
+{
+	weapon_t currentWeapon = weapon->IdentifyWeapon();
+
+	idAngles	angles;
+	int			delta;
+	hydraData	rHydra = hydra_zero;
+	idVec3		viewOrigin = GetEyePosition();
+
+	//ModelOriginOffsetsQuat( origin, axis );
+	//if (1) return;
+
+	angles = idAngles( 0.0, viewAngles.yaw, 0.0f );
+	idMat3 viewAxis2 = angles.ToMat3();
+
+	// adjustPos = hand offset from center eye position. Values 0,0,0 = the gun grows out of your forehead. 
+	// Use values to move the weapon hand position to a comfortable default. This is also 
+	// the position your hand should be in when you calibrate the hydra to align
+	// your vr 'hand' with your real world one.
+
+	idVec3 adjustPos( vr_gun_x.GetFloat(), vr_gun_y.GetFloat(), vr_gun_z.GetFloat() );
+
+	// model center not at model origin, vecoff is the offset to bring the center of the weapon handle to the model origin
+	idVec3 vecoff( weaponOriginOffsets[currentWeapon].x,
+		weaponOriginOffsets[currentWeapon].y,
+		weaponOriginOffsets[currentWeapon].z);
+
+	idVec3 gravity = physicsObj.GetGravityNormal();
+
+	// drop the weapon when landing after a jump / fall
+	delta = gameLocal.time - landTime;
+	if ( delta < LAND_DEFLECT_TIME ) 
+	{
+		origin -= gravity * ( landChange*0.25f * delta / LAND_DEFLECT_TIME );
+	}
+	else if ( delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME ) 
+	{
+		origin -= gravity * ( landChange*0.25f * ( LAND_DEFLECT_TIME + LAND_RETURN_TIME - delta ) / LAND_RETURN_TIME );
+	}
+
+	// koz if using the hydra, overwrite gunposition values with hydra position and rotation offsets
+	if ( currentWeapon != WEAPON_PDA ) PDAfixed = false;
+	if ( VR_USE_HYDRA || currentWeapon == WEAPON_PDA ) 
+	{ 
+		if ( !VR_USE_HYDRA )
+		{
+			axis = viewAxis2;
+			origin = viewOrigin;
+		}
+		else
+		{
+
+			static idQuat gunRot = idAngles( 0.0f, vr_hydraPitchOffset.GetFloat(), 0.0f ).ToQuat();// offset for odd hydra handle angle.
+			static idQuat gunAxis;
+			gunRot = weaponRotOffsets[currentWeapon].ToQuat();// * gunRot; // add weapon rotations to point straight.
+
+			VR_GetRightHydraWithOffset( rHydra );
+
+			//rHydra.position *= rHydra.hydraRotationQuat.ToMat3(); // koz move the gun to the hand position
+			//rHydra.position *= viewAxis2;
+			adjustPos += rHydra.position;
+			viewOrigin += adjustPos * viewAxis2;			// koz move the gun to the hand position
+			//viewOrigin += rHydra.position;
+			gunAxis = gunRot * rHydra.hydraRotationQuat;
+			gunAxis *= viewAxis2.ToQuat();
+
+			axis = gunAxis.ToMat3();
+			//axis = mat3_identity;
+		}
+		if ( currentWeapon == WEAPON_PDA ) 
+		{
+
+			//scale the PDA so we can (maybe) read it in VR.
+			//great googly moogly. Non-uniform scaling of the PDA (horizontally) 
+			//skews it and looks terrible.  It's beyond my ken to straighten it out now,
+			//(I'm doing something more stupid than usual, I can feel it.) 
+			//so we will rotate the PDA to use it in landscape mode, and use a uniform scale value. 
+			//Texture coords have been updated during model load to rotate the view.
+
+			axis *= vr_PDAscale.GetFloat();
+
+		}
+		else 
+		{
+			PDAfixed = false; // koz move to toggle pda
+			//axis *= vr_scaleGun.GetFloat();
+		}
+		//idQuat axisQuat;
+		//axisQuat = axis.ToQuat() * hydraQuat;
+
+		//axisQuat *= viewAxis2.ToQuat();
+
+		//axis = axisQuat.ToMat3();
+		//koz gun model center (grip) not at local model origin, translate origin by offset to compensate
+		//axis = gunAxis.ToMat3();
+		origin = viewOrigin + vecoff * axis;
+
+		if ( ( vr_PDAfixLocation.GetBool() || !VR_USE_HYDRA ) && currentWeapon == WEAPON_PDA ) 
+		{
+			// plant the PDA in space in front of the players current view position
+			// store current pda position and reset when PDA dropped.
+			if ( PDAfixed ) 
+			{ // pda has already been locked in space, use stored values
+				origin = PDAorigin;
+				axis = PDAaxis;
+			}
+			else 
+			{ // fix the PDA in space, set flag and store position
+				PDAfixed = true;
+
+				PDAaxis = mat3_identity * vr_PDAscale.GetFloat();
+				origin = lastViewOrigin;// GetEyePosition();
+				origin += 4 * viewAxis2[0]; // move 4 inches in front of eyes
+				origin -= 3 * viewAxis2[2]; // move 3 inches down
+				idAngles pdaAngle = lastViewAxis.ToAngles();//viewAngles;
+				pdaAngle.roll = weaponRotOffsets[currentWeapon].roll;
+				pdaAngle.pitch = weaponRotOffsets[currentWeapon].pitch;
+				pdaAngle.yaw += weaponRotOffsets[currentWeapon].yaw;
+				pdaAngle.Normalize180();
+				PDAorigin = origin;
+				PDAaxis *= pdaAngle.ToMat3();
+				axis = PDAaxis;
+			}
+		}
+
+		if ( currentWeapon == WEAPON_PDA && PDAclipModelSet ) 
+		{
+			weapon->UpdateWeaponClipPosition( origin, axis );
+		}
+	}
+	else 
+	{ // not the pda, not using hydra
+
+		if ( !vr_enable.GetBool() ) 
+		{
+
+			axis = viewAxis2;
+			origin = viewOrigin;
+		}
+		else 
+		{
+			adjustPos = idVec3( vr_mouse_gunx.GetFloat(), vr_mouse_guny.GetFloat(), vr_mouse_gunz.GetFloat() );
+			static idQuat gunRot = idAngles( 0.0f, vr_hydraPitchOffset.GetFloat(), 0.0f ).ToQuat();// offset for odd hydra handle angle.
+			static idQuat gunAxis;
+			gunRot = weaponRotOffsets[currentWeapon].ToQuat();// * gunRot; // add weapon rotations to point straight.
+
+
+			angles[ROLL] = 0.0;
+			angles[YAW] = independentWeaponYaw;
+			angles[PITCH] = independentWeaponPitch;
+
+			common->Printf("MX = %f, MY = %f\n", independentWeaponYaw, independentWeaponPitch);
+			//rHydra.position *= rHydra.hydraRotationQuat.ToMat3(); // koz move the gun to the hand position
+			//rHydra.position *= viewAxis2;
+
+			//adjustPos += rHydra.position;
+			viewOrigin += adjustPos * viewAxis2;			// koz move the gun to the hand position
+			//viewOrigin += rHydra.position;
+			gunAxis = /*gunRot * */ angles.ToQuat();//rHydra.hydraRotationQuat;
+			gunAxis *= viewAxis2.ToQuat();
+
+			axis = gunAxis.ToMat3();
+			origin = viewOrigin + vecoff * axis;
+
+		}
+	}
+
+	//ModelOriginOffsets( origin, axis ); // test rotations
+
+}
+
+/*
+==============
+Koz idPlayer::CalculateViewFlashPos
+
+Calculate the flashlight orientation
+==============
+*/
+void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flashOffset ) 
+{
+
+	idAngles	angles;
+	int delta;
+	hydraData	hydraPos = hydra_zero;
+	idVec3 viewOrigin = GetEyePosition();
+
+	angles = idAngles( 0.0, viewAngles.yaw, 0.0f );
+
+	idMat3 viewAxis2 = angles.ToMat3();
+
+	// koz these cvars are for tweaking the flash position in when aiming with hydra.
+	idVec3 adjustPos( vr_flash_x.GetFloat(), vr_flash_y.GetFloat(), vr_flash_z.GetFloat() ); //koz offset to move model to left hand
+	static idVec3 flashpos( 6.0f, -6.0f, -12.0f );//  koz offset from actual center of the flashlight model to the models local origin. values computed using the exacting method of 'well, that looks about right.'
+
+	idAngles baseAdjustAng = idAngles( 90.0f, 0.0f, 0.0f ); // rotate the flash to point straight ahead
+	idVec3 gravity = physicsObj.GetGravityNormal();
+	int hydraMode = vr_hydraMode.GetInteger();
+
+	// drop the flashlight when landing after a jump / fall
+	delta = gameLocal.time - landTime;
+	if (delta < LAND_DEFLECT_TIME) {
+		viewOrigin -= gravity * (landChange*0.25f * delta / LAND_DEFLECT_TIME);
+	}
+	else if (delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME) {
+		viewOrigin -= gravity * (landChange*0.25f * (LAND_DEFLECT_TIME + LAND_RETURN_TIME - delta) / LAND_RETURN_TIME);
+	}
+
+	// koz if using hydra, overwrite flashlight position values with hydra position and rotation offsets
+	if ( VR_USE_HYDRA ) { // hydraMode !=0 ) {
+
+		// if the PDA is open, fall through to default so flashlight moves to helmet.
+		// this avoids any clipping issues between the PDA and flashlight model.
+		if ( game->IsPDAOpen() ) hydraMode = 3; 
+
+		switch ( hydraMode ) 
+		{
+
+		case 0:
+		case 1: // flashlight mounted on weapon
+
+			if ( weapon->GetMuzzlePositionWithHacks( origin, axis ) ) 
+			{
+				// move the weapon to the gun
+				origin += flashOffset.x * axis[1] + flashOffset.y * axis[0] + flashOffset.z * axis[2];
+				axis = baseAdjustAng.ToMat3() * axis;
+				axis *= vr_flashlightGunScale.GetFloat();
+
+			}
+			else 
+			{	// weapon has no muzzle, bring flashlight to helmet ( to do: move to hand for select models );
+				// koz rt, fwd, up   
+				origin += vr_flashlightHelmetPosX.GetFloat() * axis[1] + vr_flashlightHelmetPosY.GetFloat() * axis[0] + vr_flashlightHelmetPosZ.GetFloat() * axis[2];
+				axis = baseAdjustAng.ToMat3() * axis;
+			}
+			break;
+
+		case 2: 
+		{	// flashlight in left hand 
+
+			// correct the flaslight model rotation so it points forward.
+			static idQuat flashRot = idAngles( 0.0f, 90.0f, 45.0f ).ToQuat();
+			static idQuat flashAxis;
+
+			VR_GetLeftHydraWithOffset( hydraPos );
+			adjustPos += hydraPos.position;
+
+			// koz move flashlight to the hand position
+			viewOrigin += adjustPos * viewAxis2;
+
+			flashAxis = flashRot * hydraPos.hydraRotationQuat;
+			flashAxis *= viewAxis2.ToQuat();
+			axis = flashAxis.ToMat3();
+
+			//model center not at local model origin, translate origin by offset to compensate
+			origin = viewOrigin + flashpos * axis;
+			break;
+		}
+
+		default: // move flashlight to helmet
+
+			origin += vr_flashlightHelmetPosX.GetFloat() * axis[1] + vr_flashlightHelmetPosY.GetFloat() * axis[0] + vr_flashlightHelmetPosZ.GetFloat() * axis[2];
+			axis = baseAdjustAng.ToMat3() * axis;
+			break;
+		}
+	}
+	else 
+	{	// should change this, we still probably want the flash mounted on the weapon in vr, even if not using hydras
+		static float fraccos, fraccos2 = 0.0f;
+		fraccos = cos( ( gameLocal.framenum & 255 ) / 127.0f * idMath::PI );
+
+		static unsigned int divisor = 32;
+		unsigned int val = ( gameLocal.framenum + gameLocal.framenum / divisor ) & 255;
+		fraccos2 = cos( val / 127.0f * idMath::PI );
+
+		static idVec3 baseAdjustPos = idVec3( -8.0f, -20.0f, -10.0f );		// rt, fwd, up
+		static float pscale = 0.5f;
+		static float yscale = 0.125f;
+		idVec3 adjustPos = baseAdjustPos;// + ( idVec3( fraccos, 0.0f, fraccos2 ) * scale );
+		origin += adjustPos.x * axis[1] + adjustPos.y * axis[0] + adjustPos.z * axis[2];
+		//viewWeaponOrigin += owner->viewBob;
+
+		static idAngles baseAdjustAng = idAngles( 88.0f, 10.0f, 0.0f );		//
+		idAngles adjustAng = baseAdjustAng + idAngles( fraccos * pscale, fraccos2 * yscale, 0.0f );
+		//adjustAng += owner->GetViewBobAngles();
+		axis = adjustAng.ToMat3() * axis;
+	}
+}
+
 
 /*
 ===============
@@ -10585,27 +11271,36 @@ idPlayer::GetViewPos
 void idPlayer::GetViewPos( idVec3& origin, idMat3& axis ) const
 {
 	idAngles angles;
-	
+
 	// if dead, fix the angle and don't add any kick
-	if( health <= 0 )
+	if ( health <= 0 )
 	{
-		angles.yaw = viewAngles.yaw;
-		angles.roll = 40;
-		angles.pitch = -15;
+		if ( vr_enable.GetBool() ) // koz use the viewAngles to keep track of HMD viewpoint 
+		{
+			angles = viewAngles;  // koz fixme need to really check the results of this whole routine, esp adjusting origin based on the nodals
+		}
+		else
+		{
+			angles.yaw = viewAngles.yaw;
+			angles.roll = 40;
+			angles.pitch = -15;
+		}
+
 		axis = angles.ToMat3();
 		origin = GetEyePosition();
+
 	}
 	else
 	{
 		origin = GetEyePosition() + viewBob;
 		angles = viewAngles + viewBobAngles + playerView.AngleOffset();
-		
+
 		axis = angles.ToMat3() * physicsObj.GetGravityAxis();
-		
+
 		// Move pivot point down so looking straight ahead is a no-op on the Z
 		const idVec3& gravityVector = physicsObj.GetGravityNormal();
 		origin += gravityVector * g_viewNodalZ.GetFloat();
-		
+
 		// adjust the origin based on the camera nodal distance (eye distance from neck)
 		origin += axis[0] * g_viewNodalX.GetFloat() + axis[2] * g_viewNodalZ.GetFloat();
 	}
@@ -10619,82 +11314,101 @@ void idPlayer::GetViewPosVR(idVec3 &origin, idMat3 &axis) const {
 	idAngles angles;
 
 	// if dead, fix the angle and don't add any kick
-	if (health <= 0) {
+	if ( health <= 0 ) 
+	{
 		angles = viewAngles;
 		//Carl:Never roll the camera in VR unless the user does!
 		//Carl:Probably not a good idea to pitch either
 		axis = angles.ToMat3();
 		origin = GetEyePosition();
 	}
-	else {
+	else 
+	{
 		//Carl: Use head and neck rotation model
 		float eyeHeightAboveRotationPoint;
 		float eyeShiftRight = 0;
 		//Carl: When we can see our body, it leans from the torso, not the neck!
-		if ( pm_showBody.GetBool() ) {
+		if ( pm_showBody.GetBool() ) 
+		{
 			// with different weapons, we pivot from a different place
-			if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/fists_new.tga") {
+			if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/fists_new.tga") 
+			{
 				eyeHeightAboveRotationPoint = 12.5f;
 				eyeShiftRight = -4;
 			}
-			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/chainsaw_new.tga") {
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/chainsaw_new.tga") 
+			{
 				eyeHeightAboveRotationPoint = 13;
 				eyeShiftRight = 2;
 			}
-			else if (weapon && weapon->displayName == "#str_00100207") { // grabber
+			else if (weapon && weapon->displayName == "#str_00100207") 
+			{ // grabber
 				eyeHeightAboveRotationPoint = 10;
 				eyeShiftRight = 1;
 			}
-			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/soul_cube.tga") {
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/soul_cube.tga") 
+			{
 				eyeHeightAboveRotationPoint = 10;
 				eyeShiftRight = -1;
 			}
-			else if (weapon && weapon->displayName == "#str_00100209") { // artifact
+			else if (weapon && weapon->displayName == "#str_00100209") 
+			{ // artifact
 				eyeHeightAboveRotationPoint = 10;
 				eyeShiftRight = -1;
 			}
-			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/pistol_new.tga") {
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/pistol_new.tga") 
+			{
 				eyeHeightAboveRotationPoint = 15;
 				eyeShiftRight = 0;
 			}
-			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/shotgun_new.tga") {
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/shotgun_new.tga") 
+			{
 				eyeHeightAboveRotationPoint = 23;
 				eyeShiftRight = 2;
 			}
-			else if (weapon && weapon->displayName == "#str_00100191") { // double-barrelled shotgun
+			else if (weapon && weapon->displayName == "#str_00100191") 
+			{ // double-barrelled shotgun
 				eyeHeightAboveRotationPoint = 23;
 				eyeShiftRight = 2;
 			}
-			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/machinegun_new.tga") {
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/machinegun_new.tga") 
+			{
 				eyeHeightAboveRotationPoint = 17;
 				eyeShiftRight = 0;
 			}
-			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/chaingun_new.tga") {
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/chaingun_new.tga") 
+			{
 				eyeHeightAboveRotationPoint = 12;
 				eyeShiftRight = 6;
 			}
-			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/grenade_new.tga") {
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/grenade_new.tga") 
+			{
 				eyeHeightAboveRotationPoint = 15;
 				eyeShiftRight = 0;
 			}
-			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/plasmagun_new.tga") {
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/plasmagun_new.tga") 
+			{
 				eyeHeightAboveRotationPoint = 6;
 				eyeShiftRight = 2;
 			}
-			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/rocketlauncher_new.tga") {
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/rocketlauncher_new.tga") 
+			{
 				eyeHeightAboveRotationPoint = 20;
 				eyeShiftRight = 1;
 			}
-			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/bfg_new.tga") {
+			else if (weapon && weapon->pdaIcon == "guis/assets/hud/icons/bfg_new.tga") 
+			{
 				eyeHeightAboveRotationPoint = 21;
 				eyeShiftRight = 5;
 			}
-			else {
+			else 
+			{
 				eyeHeightAboveRotationPoint = 14;
 				eyeShiftRight = 0;
 			}
 		}
-		else {
+		else 
+		{
 			eyeHeightAboveRotationPoint = g_viewNodalZ.GetFloat();
 		}
 
@@ -10768,6 +11482,7 @@ void idPlayer::CalculateFirstPersonView()
 	else
 	{
 		// offset for local bobbing and kicks
+		firstPersonWeaponOrigin = GetEyePosition(); // koz 
 		GetViewPos( firstPersonViewOrigin, firstPersonViewAxis );
 #if 0
 		// shakefrom sound stuff only happens in first person
@@ -10797,6 +11512,15 @@ create the renderView for the current tic
 */
 void idPlayer::CalculateRenderView()
 {
+	idAngles imuAngles;  // koz add headtracking
+	extern bool hmdPositionTracked;
+	static idVec3 lastValidHmdTranslation = vec3_zero;
+	idVec3 hmdTranslation = vec3_zero;
+
+	// koz headtracker does not actually update the head model position or axis, we simply add offsets to body rotation at render time
+	VR_GetHMDOrientation( imuAngles[ROLL], imuAngles[PITCH], imuAngles[YAW], hmdTranslation );
+
+	
 	int i;
 	float range;
 	
@@ -10828,13 +11552,13 @@ void idPlayer::CalculateRenderView()
 		}
 		else
 		{
-			// koz fixeme this was in tmeks renderView->viewaxis = firstPersonViewAxis; 
-			gameLocal.GetCamera()->GetViewParms(renderView);
+			// koz fixme this was in tmeks renderView->viewaxis = firstPersonViewAxis; shouldnt be needed, verify.
+			gameLocal.GetCamera()->GetViewParms( renderView );
 		}
 	}
 	else
 	{
-		if( g_stopTime.GetBool() )
+		if( g_stopTime.GetBool() || VR_GAME_PAUSED ) // Koz 
 		{
 			renderView->vieworg = firstPersonViewOrigin;
 			renderView->viewaxis = firstPersonViewAxis;
@@ -10876,6 +11600,89 @@ void idPlayer::CalculateRenderView()
 	if( g_showviewpos.GetBool() )
 	{
 		gameLocal.Printf( "%s : %s\n", renderView->vieworg.ToString(), renderView->viewaxis.ToAngles().ToString() );
+	}
+
+	// Koz begin : Add headtracking
+	idVec3 origin = renderView->vieworg;
+	idAngles angles = renderView->viewaxis.ToAngles(); //viewAngles + viewBobAngles + playerView.AngleOffset();
+	idMat3 axis = renderView->viewaxis;
+
+	angles.yaw += imuAngles.yaw;    // add the current hmd orientation
+	angles.pitch += imuAngles.pitch;
+	angles.roll += imuAngles.roll;
+	angles = angles.Normalize180();
+
+	lastHMDYaw = imuAngles.yaw;
+
+	//common->Printf("Current yaw %f pitch %f roll %f\n",imuAngles.yaw,imuAngles.pitch,imuAngles.roll);
+	//common->Printf("Positional tracking: %s translation x %f  y %f z %f\n",
+	//				hmdPositionTracked ? "active" : "incative",hmdTranslation.x,hmdTranslation.x,hmdTranslation.z);
+
+	if ( hmdPositionTracked )
+	{
+		lastValidHmdTranslation = hmdTranslation;
+		origin += axis[0] * hmdTranslation.x + axis[1] * hmdTranslation.y + axis[2] * hmdTranslation.z; // add hmd translation
+	}
+	else
+	{
+		//origin += axis[0] * lastValidHmdTranslation.x + axis[1] * lastValidHmdTranslation.y + axis[2] * lastValidHmdTranslation.z; // add last valid hmd translation
+	}
+
+	/*	if ( vr_hydraMode.GetInteger() == 1 ) {
+	VR_MotionSensor_Get_Left_Hydra_With_Offset(hydraPositional);
+	origin += axis[0]* hydraPositional.position.x + axis[1]*hydraPositional.position.y + axis[2]*hydraPositional.position.z;		//koz update view with hydra positional info if enabled
+	} else {
+	origin += axis[0] * hmdTranslation.x + axis[1] * hmdTranslation.y + axis[2] * hmdTranslation.z; // add hmd translation
+	} */
+
+	renderView->vieworg = origin;
+	renderView->viewaxis = angles.ToMat3();//axis;
+
+	int neg = 1;
+	extern int currentRiftEye;
+	extern idCVar  stereoRender_interOccularCentimeters;
+	float worldSeparation = ( stereoRender_interOccularCentimeters.GetFloat() * 0.5 ) / 2.54;
+
+	neg = ( currentRiftEye == 0 ) ? -1 : 1;
+
+	lastViewOrigin = origin += neg * worldSeparation * renderView->viewaxis[1];
+	lastViewAxis = renderView->viewaxis;
+
+	// koz fixme pause - handle the PDA model if game is paused
+	// really really need to move this somewhere else.
+
+	if ( PDAforcetoggle || PDArising )
+	{
+		if ( !PDAforced )
+		{
+			if ( !PDArising )
+			{
+				SelectWeapon( weapon_pda, true );
+				PDAforcetoggle = false;
+				PDArising = true;
+			}
+			else
+			{
+				if ( weapon->IdentifyWeapon() == WEAPON_PDA && weapon->status == WP_READY )
+				{
+					if ( weapon->status == WP_READY )
+					{
+						PDAforced = true;
+						PDArising = false;
+					}
+				}
+			}
+		}
+		else 
+		{ // pda has been already been forced active, put it away.
+			if ( PDAforcetoggle )
+			{
+				TogglePDA();
+				PDAforcetoggle = false;
+				PDAforced = false;
+				PDArising = false;
+			}
+		}
 	}
 }
 
@@ -11615,7 +12422,7 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 		}
 	}
 	
-	if( !g_stopTime.GetBool() )
+	if( !g_stopTime.GetBool() && !VR_GAME_PAUSED ) // Koz 
 	{
 		if( !noclip && !spectating && ( health > 0 ) && !IsHidden() )
 		{

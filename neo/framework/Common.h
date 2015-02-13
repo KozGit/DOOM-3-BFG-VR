@@ -42,6 +42,11 @@ extern float com_engineHz_latched;
 extern int64 com_engineHz_numerator;
 extern int64 com_engineHz_denominator;
 
+//Koz begin
+extern bool hasHMD;
+extern bool hasOculusRift; 
+// Koz end
+
 // Returns the msec the frame starts on
 ID_INLINE int FRAME_TO_MSEC( int64 frame )
 {
@@ -295,8 +300,8 @@ public:
 	virtual void				NetReceiveUsercmds( int peer, idBitMsg& msg ) = 0;
 	
 	// Processes the given event.
-	virtual	bool				ProcessEvent( const sysEvent_t* event ) = 0;
-	
+	virtual	bool				ProcessEvent( sysEvent_t* event ) = 0; // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+
 	virtual bool				LoadGame( const char* saveName ) = 0;
 	virtual bool				SaveGame( const char* saveName ) = 0;
 	

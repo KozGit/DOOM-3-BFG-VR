@@ -202,6 +202,8 @@ public:
 	}
 	
 	static void			GetGeneratedName( idStr& _name, const textureUsage_t& _usage, const cubeFiles_t& _cube );
+
+	GLuint		GetTexNum() const { return texnum; } // koz fixme return texnum for FBO binding
 	
 private:
 	friend class idImageManager;
@@ -360,6 +362,11 @@ public:
 	idImage* 			loadingIconImage;				// loading icon must exist always
 	idImage* 			hellLoadingIconImage;				// loading icon must exist always
 	
+	// Koz begin
+	idImage*			pdaImage;						// koz rendered PDA gui will be copied here 
+	idImage*			hudImage;						// koz hud/menus will be copied here	
+	// Koz end
+
 	//--------------------------------------------------------
 	
 	idImage* 			AllocImage( const char* name );

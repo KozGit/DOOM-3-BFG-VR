@@ -41,6 +41,12 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 // RB end
 
+// Koz begin
+#include "VR\vr.h"
+#include "renderer\AutoRender.h"
+// Koz end
+
+
 /*
 
 New for tech4x:
@@ -80,6 +86,12 @@ idCVar timescale( "timescale", "1", CVAR_SYSTEM | CVAR_FLOAT, "Number of game fr
 
 extern idCVar in_useJoystick;
 extern idCVar in_joystickRumble;
+
+// Koz
+idCVar vr_freeze("vr_freeze", "1", CVAR_SYSTEM | CVAR_BOOL, ""); // koz
+bool playerHasDied = false;
+// Koz end
+
 
 /*
 ===============
@@ -283,13 +295,36 @@ void idCommonLocal::Draw()
 	// RB end
 	else if( game && game->Shell_IsActive() )
 	{
+		// Koz begin : 
+		// VR pause menu 
+		// when paused capture the shell render to the PDA screen texture,
+		// then draw the game frame
+
+		extern bool PDAforced;
+		extern bool PDArising;
+
+		if ( PDAforced || PDArising ) // koz fixme do we only want to use the PDA model in VR?
+		{
+			game->Shell_Render(); //koz render the menu
+			renderSystem->CaptureRenderToImage( "_pdaImage", true ); // copy the rendered menu then clear buffer
+		}
+		// Koz end
+
 		bool gameDraw = game->Draw( game->GetLocalClientNum() );
-		if( !gameDraw )
+		if ( !gameDraw )
 		{
 			renderSystem->SetColor( colorBlack );
-			renderSystem->DrawStretchPic( 0, 0, renderSystem->GetVirtualWidth(), renderSystem->GetVirtualHeight(), 0, 0, 1, 1, whiteMaterial );
+			renderSystem->DrawStretchPic( 0, 0, renderSystem->GetVirtualWidth(), renderSystem->GetVirtualHeight(), 0, 0, 1, 1, whiteMaterial);
 		}
-		game->Shell_Render();
+
+		// Koz begin
+		if ( !PDAforced && !PDArising ) game->Shell_Render(); //koz render any menus outside of game ( main menu etc )
+
+		if ( vr_freeze.GetBool() )
+		{
+			//renderWorld->RenderHmdTrackedFrame();
+		}
+		//Koz end
 	}
 	else if( readDemo )
 	{
@@ -369,6 +404,8 @@ void idCommonLocal::UpdateScreen( bool captureToImage, bool releaseMouse )
 	// build all the draw commands without running a new game tic
 	Draw();
 	
+	VR_HMDTrackStatic(); // koz fixme only in vr only during loading/saving dont think we need this now anyway.
+
 	if( captureToImage )
 	{
 		renderSystem->CaptureRenderToImage( "_currentRender", false );
@@ -412,16 +449,19 @@ void idCommonLocal::ProcessGameReturn( const gameReturn_t& ret )
 		
 		if( !idStr::Icmp( args.Argv( 0 ), "map" ) )
 		{
+			playerHasDied = true; // koz fixme
 			MoveToNewMap( args.Argv( 1 ), false );
 		}
 		else if( !idStr::Icmp( args.Argv( 0 ), "devmap" ) )
 		{
+			playerHasDied = true; // koz fixme
 			MoveToNewMap( args.Argv( 1 ), true );
 		}
 		else if( !idStr::Icmp( args.Argv( 0 ), "died" ) )
 		{
 			if( !IsMultiplayer() )
 			{
+				playerHasDied = true; // koz fixme
 				game->Shell_Show( true );
 			}
 		}
@@ -476,7 +516,15 @@ void idCommonLocal::Frame()
 		WriteConfiguration();
 		
 		eventLoop->RunEventLoop();
-		
+
+		// Koz fixme begin only in vr in menus
+		// koz add head tracking to the main menus.
+		if (!game->IsInGame())
+		{ // || session->GetState() != idSession::INGAME ) { // koz add head tracking to the main menus. idSession::LOADING
+			VR_HMDTrackStatic();
+		}
+		// Koz end
+
 		// Activate the shell if it's been requested
 		if( showShellRequested && game )
 		{
@@ -607,7 +655,81 @@ void idCommonLocal::Frame()
 			gameTimeResidual += clampedDeltaMilliseconds * timescale.GetFloat();
 			
 			// don't run any frames when paused
-			if( pauseGame )
+
+			// Koz begin
+			// koz fixme pause - In VR, we still want head movement while the game is paused.
+			// so we still need to run game frames. The pause menu will be rendered
+			// to the PDA screen, so force a pda toggle if needed. Actual gametime 
+			// will be stopped just as if the g_stoptime cvar was set.
+
+			bool ingame = false;
+			static bool PDAopenedByPause = false;
+			extern bool VR_GAME_PAUSED;
+			extern bool PDAforcetoggle;
+			extern bool PDAforced;
+			extern bool PDArising;
+			if ( game )
+			{
+				ingame = game->IsInGame();
+			}
+
+			//common->Printf("Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->ishellactive = %d\n",ingame,VR_GAME_PAUSED,pauseGame,game->Shell_IsActive());
+			//common->Printf("Pause diag: PDAforcetoggle = %d, PDAforced = %d, PDA rising =%d\n",PDAforcetoggle,PDAforced,PDArising);
+			if ( VR_GAME_PAUSED ) // game is paused, check to exit
+			{
+				if ( ingame )
+				{
+					if ( !pauseGame )
+					{
+						if ( !PDAopenedByPause )
+						{
+							VR_GAME_PAUSED = false;
+							PDArising = false;
+							PDAforced = false;
+						}
+						else if  (PDAforced && !PDArising )
+						{
+							PDAforcetoggle = true;
+							PDAopenedByPause = false;
+							VR_GAME_PAUSED = false;
+						}
+					}
+				}
+				else
+				{
+					VR_GAME_PAUSED = false;
+					PDAopenedByPause = false;
+					PDArising = false;
+					PDAforced = false;
+				}
+			}
+			else // game is not paused, see if we need to pause it
+			{
+				if ( pauseGame && ingame && !playerHasDied ) // we need to pause 
+				{
+					if ( game->IsPDAOpen() && !PDAopenedByPause ) // the PDA was already opened, dont toggle it
+					{
+						VR_GAME_PAUSED = true;
+						PDAopenedByPause = false;
+						PDAforced = false;
+						PDArising = false;
+					}
+					else if ( !PDAforced && !PDArising ) // force a PDA toggle;
+					{
+						PDAforcetoggle = true;
+						PDAopenedByPause = true;
+					}
+					else if ( PDAforced ) // pda is up, pause the game.
+					{
+						VR_GAME_PAUSED = true;
+						PDAopenedByPause = true;
+						PDArising = false;
+					}
+				}
+			}
+			// Koz end			
+
+			if ( pauseGame && !ingame ) // koz added !ingame
 			{
 				gameFrame++;
 				gameTimeResidual = 0;

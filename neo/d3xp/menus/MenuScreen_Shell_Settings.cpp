@@ -36,6 +36,7 @@ enum settingMenuCmds_t
 	SETTING_CMD_CONTROLS,
 	SETTING_CMD_GAMEPLAY,
 	SETTING_CMD_SYSTEM,
+	SETTING_CMD_VR, // Koz add VR menus.
 	SETTING_CMD_3D,
 };
 
@@ -68,11 +69,17 @@ void idMenuScreen_Shell_Settings::Initialize( idMenuHandler* data )
 	option.Append( "#str_04160" );	// system
 	menuOptions.Append( option );
 	option.Clear();
+
+	//koz add vr options
+	option.Append( "VR Options" );	// Koz fixme VR options use dictionary strings instead of hard coding.
+	menuOptions.Append(option);
+	option.Clear();
 	
 	if( renderSystem->IsStereoScopicRenderingSupported() )
 	{
 		option.Append( "#str_swf_stereoscopics" );	// Stereoscopic Rendering
 		menuOptions.Append( option );
+		option.Clear();
 	}
 	
 	options->SetListData( menuOptions );
@@ -85,7 +92,7 @@ void idMenuScreen_Shell_Settings::Initialize( idMenuHandler* data )
 	helpWidget->SetSpritePath( GetSpritePath(), "info", "helpTooltip" );
 	AddChild( helpWidget );
 	
-	const char* tips[] = { "#str_02166", "#str_02168", "#str_02170", "#str_swf_customize_3d" };
+	const char* tips[] = { "#str_02166", "#str_02168", "#str_02170", "Customize VR settings.", "#str_swf_customize_3d" }; // Koz fixme add vr menus use dictionary.
 	
 	while( options->GetChildren().Num() < NUM_SETTING_OPTIONS )
 	{
@@ -250,6 +257,11 @@ bool idMenuScreen_Shell_Settings::HandleAction( idWidgetAction& action, const id
 				case SETTING_CMD_SYSTEM:
 				{
 					menuData->SetNextScreen( SHELL_AREA_SYSTEM_OPTIONS, MENU_TRANSITION_SIMPLE );
+					break;
+				}
+				case SETTING_CMD_VR: // Koz add vr menus
+				{
+					menuData->SetNextScreen( SHELL_AREA_VR_SETTINGS, MENU_TRANSITION_SIMPLE );
 					break;
 				}
 				case SETTING_CMD_3D:

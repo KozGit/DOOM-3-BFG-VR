@@ -360,10 +360,23 @@ void idConsoleLocal::Init()
 	int		i;
 	
 	keyCatching = false;
-	
-	LOCALSAFE_LEFT		= 32;
+
+	extern bool hasHMD; // koz
+	extern bool hasOculusRift;
+
+	// koz fixme only in vr move the console in for the Rift
+	if ( hasHMD && hasOculusRift )
+	{
+		LOCALSAFE_LEFT = 120;
+		LOCALSAFE_TOP = 150;
+	}
+	else
+	{
+		LOCALSAFE_LEFT = 32;
+		LOCALSAFE_TOP = 24;
+	}
+			
 	LOCALSAFE_RIGHT		= SCREEN_WIDTH - LOCALSAFE_LEFT;
-	LOCALSAFE_TOP		= 24;
 	LOCALSAFE_BOTTOM	= SCREEN_HEIGHT - LOCALSAFE_TOP;
 	LOCALSAFE_WIDTH		= LOCALSAFE_RIGHT - LOCALSAFE_LEFT;
 	LOCALSAFE_HEIGHT	= LOCALSAFE_BOTTOM - LOCALSAFE_TOP;

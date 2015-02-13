@@ -419,10 +419,11 @@ void idMenuScreen_Shell_Gamepad::idMenuDataSource_GamepadSettings::LoadData()
 	fields[ GAMEPAD_FIELD_INVERT ].SetBool( in_invertLook.GetBool() );
 	fields[ GAMEPAD_FIELD_LEFTY ].SetBool( profile ? profile->GetLeftyFlip() : false );
 	fields[ GAMEPAD_FIELD_VIBRATE ].SetBool( in_joystickRumble.GetBool() );
+	
 	//fields[ GAMEPAD_FIELD_HOR_SENS ].SetFloat( 100.0f * ( ( joy_yawSpeed.GetFloat() - 100.0f ) / 300.0f ) );
 	//fields[ GAMEPAD_FIELD_VERT_SENS ].SetFloat( 100.0f * ( ( joy_pitchSpeed.GetFloat() - 60.0f ) / 200.0f ) );
-	fields[GAMEPAD_FIELD_HOR_SENS].SetFloat(100.0f * ((joy_yawSpeed.GetFloat() - 0.0f) / 400.0f)); // koz from tmeks fork.
-	fields[GAMEPAD_FIELD_VERT_SENS].SetFloat(100.0f * ((joy_pitchSpeed.GetFloat() - 0.0f) / 260.0f));
+	fields[GAMEPAD_FIELD_HOR_SENS].SetFloat(100.0f * ((joy_yawSpeed.GetFloat() - 0.0f) / 400.0f));		// Koz from tmeks fork.
+	fields[GAMEPAD_FIELD_VERT_SENS].SetFloat(100.0f * ((joy_pitchSpeed.GetFloat() - 0.0f) / 260.0f));	// Koz from tmeks fork
 
 	fields[ GAMEPAD_FIELD_ACCELERATION ].SetBool( joy_gammaLook.GetBool() );
 	fields[ GAMEPAD_FIELD_THRESHOLD ].SetBool( joy_mergedThreshold.GetBool() );
@@ -440,10 +441,11 @@ void idMenuScreen_Shell_Gamepad::idMenuDataSource_GamepadSettings::CommitData()
 
 	in_invertLook.SetBool( fields[ GAMEPAD_FIELD_INVERT ].ToBool() );
 	in_joystickRumble.SetBool( fields[ GAMEPAD_FIELD_VIBRATE ].ToBool() );
+	
 	//joy_yawSpeed.SetFloat( ( ( fields[ GAMEPAD_FIELD_HOR_SENS ].ToFloat() / 100.0f ) * 300.0f ) + 100.0f );
 	//joy_pitchSpeed.SetFloat( ( ( fields[ GAMEPAD_FIELD_VERT_SENS ].ToFloat() / 100.0f ) * 200.0f ) + 60.0f );
-	joy_yawSpeed.SetFloat(((fields[GAMEPAD_FIELD_HOR_SENS].ToFloat() / 100.0f) * 400.0f) + 0.0f); // koz from tmeks fork
-	joy_pitchSpeed.SetFloat(((fields[GAMEPAD_FIELD_VERT_SENS].ToFloat() / 100.0f) * 260.0f) + 0.0f);
+	joy_yawSpeed.SetFloat(((fields[GAMEPAD_FIELD_HOR_SENS].ToFloat() / 100.0f) * 400.0f) + 0.0f);	// Koz from tmeks fork
+	joy_pitchSpeed.SetFloat(((fields[GAMEPAD_FIELD_VERT_SENS].ToFloat() / 100.0f) * 260.0f) + 0.0f);// Koz from tmeks fork
 
 	joy_gammaLook.SetBool( fields[ GAMEPAD_FIELD_ACCELERATION ].ToBool() );
 	joy_mergedThreshold.SetBool( fields[ GAMEPAD_FIELD_THRESHOLD ].ToBool() );

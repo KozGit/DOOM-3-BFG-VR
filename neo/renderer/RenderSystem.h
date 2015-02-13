@@ -228,11 +228,13 @@ public:
 	virtual bool			IsOpenGLRunning() const = 0;
 	
 	virtual bool			IsFullScreen() const = 0;
-	virtual int				GetWidth() const = 0;
-	virtual int				GetHeight() const = 0;
-	virtual int				GetVirtualWidth() const = 0;
-	virtual int				GetVirtualHeight() const = 0;
-	
+	virtual int				GetWidth() = 0;
+	virtual int				GetHeight() = 0;
+	virtual int				GetVirtualWidth() = 0;
+	virtual int				GetVirtualHeight() = 0;
+	virtual int				GetNativeWidth() = 0; // koz
+	virtual int				GetNativeHeight() = 0; // koz
+
 	// return w/h of a single pixel. This will be 1.0 for normal cases.
 	// A side-by-side stereo 3D frame will have a pixel aspect of 0.5.
 	// A top-and-bottom stereo 3D frame will have a pixel aspect of 2.0

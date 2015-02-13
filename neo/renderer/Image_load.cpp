@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#include "vr\vr.h" // koz
+
 /*
 ================
 BitsForFormat
@@ -863,40 +865,97 @@ int MakePowerOfTwo( int num )
 CopyFramebuffer
 ====================
 */
-void idImage::CopyFramebuffer( int x, int y, int imageWidth, int imageHeight )
+void idImage::CopyFramebuffer(int x, int y, int imageWidth, int imageHeight)
 {
-	glBindTexture( ( opts.textureType == TT_CUBIC ) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, texnum );
-	
-	glReadBuffer( GL_BACK );
-	
+	// Koz begin
+	if ( VR_USE_FBO )
+	{
+		if ( VR_AAmode == VR_AA_MSAA )
+		{
+			GL_CheckErrors();
+            VR_ResolveMSAA();
+			GL_CheckErrors();
+		}
+		else
+		{
+			GL_CheckErrors();
+			VR_BindFBO( GL_READ_FRAMEBUFFER, VR_FBO );
+			GL_CheckErrors();
+		}
+	}
+	else
+	{
+		glReadBuffer( GL_BACK );
+	}
+	// Koz end
+
+	glBindTexture( (opts.textureType == TT_CUBIC) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, texnum );
+
 	opts.width = imageWidth;
 	opts.height = imageHeight;
 	glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, x, y, imageWidth, imageHeight, 0 );
-	
+
 	// these shouldn't be necessary if the image was initialized properly
 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	
+
 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-	
+
 	backEnd.pc.c_copyFrameBuffer++;
+
+	// Koz begin
+	if ( VR_USE_FBO )
+	{
+		GL_CheckErrors();
+		VR_BindFBO( GL_FRAMEBUFFER, VR_FBO ); // ensure primary FBO set 
+		GL_CheckErrors();
+	}
+	// Koz end
 }
+
 
 /*
 ====================
 CopyDepthbuffer
 ====================
 */
-void idImage::CopyDepthbuffer( int x, int y, int imageWidth, int imageHeight )
+void idImage::CopyDepthbuffer(int x, int y, int imageWidth, int imageHeight)
 {
-	glBindTexture( ( opts.textureType == TT_CUBIC ) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, texnum );
-	
+	// Koz begin
+	if ( VR_USE_FBO )
+	{
+		if ( VR_AAmode == VR_AA_MSAA )
+		{
+			VR_ResolveMSAA();
+		}
+		else
+		{
+			GL_CheckErrors();
+			VR_BindFBO( GL_READ_FRAMEBUFFER, VR_FBO );
+			GL_CheckErrors();
+		}
+	}
+	else
+	{
+		glReadBuffer( GL_BACK );
+	}
+	// Koz end
+
+	glBindTexture( (opts.textureType == TT_CUBIC) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, texnum );
+
 	opts.width = imageWidth;
 	opts.height = imageHeight;
 	glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, x, y, imageWidth, imageHeight, 0 );
-	
+
 	backEnd.pc.c_copyFrameBuffer++;
+
+	if ( VR_USE_FBO ) // Koz ensure primary FBO set 
+	{
+		GL_CheckErrors();
+		VR_BindFBO( GL_FRAMEBUFFER, VR_FBO );
+		GL_CheckErrors();
+	}
 }
 
 /*

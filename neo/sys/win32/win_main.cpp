@@ -49,6 +49,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "win_local.h"
 #include "../../renderer/tr_local.h"
 
+// Koz begin
+#include "..\dependencies\SixenseSDK_062612\include\sixense.h"
+// Koz end
+
 idCVar Win32Vars_t::sys_arch( "sys_arch", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar Win32Vars_t::sys_cpustring( "sys_cpustring", "detect", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar Win32Vars_t::in_mouse( "in_mouse", "1", CVAR_SYSTEM | CVAR_BOOL, "enable mouse input" );
@@ -328,6 +332,7 @@ void Sys_Quit() {
 	timeEndPeriod( 1 );
 	Sys_ShutdownInput();
 	Sys_DestroyConsole();
+	sixenseExit(); // Koz fixme move this! also shutdown the HMD!
 	ExitProcess( 0 );
 }
 

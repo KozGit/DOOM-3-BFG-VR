@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../tr_local.h"
 
+#include "vr\vr.h" // Koz
+
 /*
 ====================
 GL_SelectTexture
@@ -254,6 +256,19 @@ GL_Clear
 */
 void GL_Clear( bool color, bool depth, bool stencil, byte stencilValue, float r, float g, float b, float a )
 {
+	// Koz fixme clean up fbo switching code to make this hack unnecessary. test if still needed
+	if ( VR_USE_FBO )
+	{
+		GL_CheckErrors();
+		VR_BindFBO( GL_FRAMEBUFFER, VR_FBO );
+		GL_CheckErrors();
+	}
+	else 
+    {
+		glDrawBuffer( GL_BACK );
+	}
+	// Koz end
+
 	int clearFlags = 0;
 	if( color )
 	{
@@ -315,13 +330,29 @@ void GL_SetDefaultState()
 	glEnable( GL_DEPTH_TEST );
 	glEnable( GL_BLEND );
 	glEnable( GL_SCISSOR_TEST );
-	glDrawBuffer( GL_BACK );
-	glReadBuffer( GL_BACK );
+//	glDrawBuffer( GL_BACK ); koz not when using
+//	glReadBuffer( GL_BACK ); koz 
 	
 	if( r_useScissor.GetBool() )
 	{
 		glScissor( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
 	}
+
+	// Koz begin
+	if ( VR_USE_FBO )
+	{
+		GL_CheckErrors();
+		VR_BindFBO( GL_FRAMEBUFFER, VR_FBO );
+		GL_CheckErrors();
+	}
+	else
+	{
+		glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // koz if not using FBOs, ensure the default framebuffer is active.
+		glDrawBuffer( GL_BACK );
+
+	}
+	// Koz end
+
 }
 
 /*

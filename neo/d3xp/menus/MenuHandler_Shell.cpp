@@ -311,7 +311,7 @@ void idMenuHandler_Shell::SetCanContinue( bool valid )
 idMenuHandler_Shell::HandleGuiEvent
 ========================
 */
-bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
+bool idMenuHandler_Shell::HandleGuiEvent( sysEvent_t* sev ) // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
 {
 
 	if( IsPacifierVisible() )
@@ -330,11 +330,14 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 		if( sev->evType == SE_KEY && sev->evValue2 == 1 )
 		{
 		
-			if( sev->evValue >= K_JOY_STICK1_UP && sev->evValue <= K_JOY_STICK2_RIGHT )
+			// Koz remove this check to enable joystick rebinding.
+			/*	
+			if ( sev->evValue >= K_JOY_STICK1_UP && sev->evValue <= K_JOY_STICK2_RIGHT )
 			{
 				return true;
 			}
-			
+			*/
+						
 			if( sev->evValue == K_ESCAPE )
 			{
 				waitForBinding = false;
@@ -484,6 +487,15 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		
 		BIND_SHELL_SCREEN( SHELL_AREA_GAMEPAD, idMenuScreen_Shell_Gamepad, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_CREDITS, idMenuScreen_Shell_Credits, this );
+
+		// Koz begin VR menus
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_SETTINGS, idMenuScreen_Shell_VR_Settings, this);
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_RENDERING_OPTIONS, idMenuScreen_Shell_VR_Rendering_Options, this);
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_HMD_OPTIONS, idMenuScreen_Shell_VR_HMD_Options, this);
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_CONTROL_OPTIONS, idMenuScreen_Shell_VR_Control_Options, this);
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_GAMEPLAY_OPTIONS, idMenuScreen_Shell_VR_Gameplay_Options, this);
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this);
+		// koz end
 		
 	}
 	else
@@ -511,6 +523,16 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		BIND_SHELL_SCREEN( SHELL_AREA_MODE_SELECT, idMenuScreen_Shell_ModeSelect, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_BROWSER, idMenuScreen_Shell_GameBrowser, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_CREDITS, idMenuScreen_Shell_Credits, this );
+
+		// Koz begin VR menus
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_SETTINGS, idMenuScreen_Shell_VR_Settings, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_RENDERING_OPTIONS, idMenuScreen_Shell_VR_Rendering_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_HMD_OPTIONS, idMenuScreen_Shell_VR_HMD_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_CONTROL_OPTIONS, idMenuScreen_Shell_VR_Control_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_GAMEPLAY_OPTIONS, idMenuScreen_Shell_VR_Gameplay_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this );
+		// koz end 
+
 		
 		doom3Intro = declManager->FindMaterial( "gui/intro/introloop" );
 		roeIntro = declManager->FindMaterial( "gui/intro/marsflyby" );

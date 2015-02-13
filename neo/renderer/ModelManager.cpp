@@ -572,6 +572,8 @@ void idRenderModelManagerLocal::ReloadModels( bool forceAll )
 		{
 			// check timestamp
 			ID_TIME_T current;
+
+			common->Printf("Checking model %s \n", model->Name()); // koz fixme delete this only for debuging new assets
 			
 			fileSystem->ReadFile( model->Name(), NULL, &current );
 			if( current <= model->Timestamp() )

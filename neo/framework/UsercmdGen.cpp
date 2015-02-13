@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-//#include "../sys/win32/in_motion_sensor.h"
+#include "vr\vr.h"
 
 idCVar joy_mergedThreshold( "joy_mergedThreshold", "1", CVAR_BOOL | CVAR_ARCHIVE, "If the thresholds aren't merged, you drift more off center" );
 idCVar joy_newCode( "joy_newCode", "1", CVAR_BOOL | CVAR_ARCHIVE, "Use the new codepath" );
@@ -167,6 +167,11 @@ userCmdString_t	userCmdStrings[] =
 	{ "_impulse30",		UB_IMPULSE30 },
 	{ "_impulse31",		UB_IMPULSE31 },
 	
+	// Koz begin
+	{ "_impulse32",		UB_IMPULSE32 }, // new impulse for HMD/Body orientation reset
+	{ "_impulse33",		UB_IMPULSE33 }, // new impulse for lasersight toggle
+	// Koz end
+	
 	{ NULL,				UB_NONE },
 };
 
@@ -263,6 +268,9 @@ private:
 	void			KeyMove();
 	void			CircleToSquare( float& axis_x, float& axis_y ) const;
 	void			HandleJoystickAxis( int keyNum, float unclampedValue, float threshold, bool positive );
+
+	void			MapAxis(idVec2 &mappedMove, idVec2 &mappedLook, int axisNum); // Koz remap joystic axis.
+
 	void			JoystickMove();
 	void			JoystickMove2();
 	void			MouseMove();
@@ -481,6 +489,12 @@ void idUsercmdGenLocal::MouseMove()
 	static int	historyCounter;
 	int			i;
 	
+	// Koz begin
+	float yawdelta;
+	float pitchdelta;
+	float yawmove;
+	// Koz end
+
 	history[historyCounter & 7][0] = mouseDx;
 	history[historyCounter & 7][1] = mouseDy;
 	
@@ -523,9 +537,39 @@ void idUsercmdGenLocal::MouseMove()
 	mouseDx = 0;
 	mouseDy = 0;
 	
-	viewangles[YAW] -= m_yaw.GetFloat() * mx * in_mouseSpeed.GetFloat();
-	viewangles[PITCH] += m_pitch.GetFloat() * in_mouseSpeed.GetFloat() * ( in_mouseInvertLook.GetBool() ? -my : my );
+	// koz begin add mouse control here
+	if ( !vr_enable.GetBool() )
+	{
+		viewangles[YAW] -= m_yaw.GetFloat() * mx * in_mouseSpeed.GetFloat();
+		viewangles[PITCH] += m_pitch.GetFloat() * in_mouseSpeed.GetFloat() * ( in_mouseInvertLook.GetBool() ? -my : my );
+	}
+	else
+	{
+		yawdelta = m_yaw.GetFloat() * mx * in_mouseSpeed.GetFloat();
+		pitchdelta = m_pitch.GetFloat() * in_mouseSpeed.GetFloat() * ( in_mouseInvertLook.GetBool() ? -my : my );
+		independentWeaponPitch += pitchdelta;
+
+		if ( independentWeaponPitch > 90.0 )	independentWeaponPitch = 90;
+		if ( independentWeaponPitch < -90 ) independentWeaponPitch = -90;
+
+		independentWeaponYaw -= yawdelta;
+		if ( independentWeaponYaw > 30 )
+		{
+			yawmove = independentWeaponYaw - 30;
+			independentWeaponYaw = 30;
+			viewangles[YAW] += yawmove;
+		}
+
+		if (independentWeaponYaw < -30 )
+		{
+			yawmove = independentWeaponYaw + 30;
+			independentWeaponYaw = -30;
+			viewangles[YAW] += yawmove;
+		}
+
+	}
 }
+
 
 /*
 ========================
@@ -993,6 +1037,87 @@ void DrawJoypadTexture( const int size, byte image[] )
 	DrawJoypadTexture( size, image, lastLookJoypad, threshold, range, shape, mergedThreshold );
 }
 
+/*
+=================
+Koz - mapAxis
+
+Want to be able to map any joystic axis/direction to any movement/look command.
+Process each joystic axis, and update mapped look and move vectors so
+the normal joystick handling can process movement scaling, etc.
+=================
+*/
+
+void idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int axisNum )
+{
+
+	const int axisName[int(MAX_JOYSTICK_AXIS)][2] = {	K_JOY_STICK1_LEFT,			K_JOY_STICK1_RIGHT,
+														K_JOY_STICK1_UP,			K_JOY_STICK1_DOWN,
+														K_JOY_STICK2_LEFT,			K_JOY_STICK2_RIGHT,
+														K_JOY_STICK2_UP,			K_JOY_STICK2_DOWN,
+														K_JOY_TRIGGER1,				K_JOY_TRIGGER1,
+														K_JOY_TRIGGER2,				K_JOY_TRIGGER2,
+														K_HYDRA_LEFT_STICK_LEFT,	K_HYDRA_LEFT_STICK_RIGHT,
+														K_HYDRA_LEFT_STICK_UP,		K_HYDRA_LEFT_STICK_DOWN,
+														K_HYDRA_RIGHT_STICK_LEFT,	K_HYDRA_RIGHT_STICK_RIGHT,
+														K_HYDRA_RIGHT_STICK_UP,		K_HYDRA_RIGHT_STICK_DOWN,
+														K_L_HYDRATRIG,				K_L_HYDRATRIG,
+														K_R_HYDRATRIG,				K_R_HYDRATRIG 
+													};
+
+	float jaxisValue = 0.0f;
+	int joyCmd = 0;
+	int joyDir = 0;
+
+	jaxisValue = joystickAxis[axisNum];
+
+	if ( jaxisValue < 0 )
+	{
+		joyDir = axisName[axisNum][0];
+		jaxisValue *= -1;
+	}
+	else
+	{
+		joyDir = axisName[axisNum][1];
+	}
+
+	joyCmd = idKeyInput::GetUsercmdAction( joyDir );
+
+	switch ( joyCmd )
+	{
+
+	case UB_LOOKLEFT:
+		mappedLook.x -= jaxisValue;
+		break;
+
+	case UB_LOOKRIGHT:
+		mappedLook.x += jaxisValue;
+		break;
+
+	case UB_LOOKUP:
+		mappedLook.y -= jaxisValue;
+		break;
+
+	case UB_LOOKDOWN:
+		mappedLook.y += jaxisValue;
+		break;
+
+	case UB_MOVEFORWARD:
+		mappedMove.y -= jaxisValue;;
+		break;
+
+	case UB_MOVEBACK:
+		mappedMove.y += jaxisValue;;
+		break;
+
+	case UB_MOVELEFT:
+		mappedMove.x -= jaxisValue;;
+		break;
+
+	case UB_MOVERIGHT:
+		mappedMove.x += jaxisValue;;
+		break;
+	}
+}
 
 /*
 =================
@@ -1001,7 +1126,11 @@ idUsercmdGenLocal::JoystickMove2
 */
 void idUsercmdGenLocal::JoystickMove2()
 {
-	const bool invertLook =			in_invertLook.GetBool();
+	// Koz - joystick handling changed to allow all axes to be mapped to any movement/look control independently,
+	// including the hydras.  No need for stick swapping or inversion - just remap.
+
+	// koz const bool invertLook =			in_invertLook.GetBool(); dont need anymore remap instead.
+
 	const float threshold =			joy_deadZone.GetFloat();
 	const float range =				joy_range.GetFloat();
 	const transferFunction_t shape = ( transferFunction_t )joy_gammaLook.GetInteger();
@@ -1009,31 +1138,25 @@ void idUsercmdGenLocal::JoystickMove2()
 	const float pitchSpeed =		joy_pitchSpeed.GetFloat();
 	const float yawSpeed =			joy_yawSpeed.GetFloat();
 	
+	extern idCVar vr_hydraMode; // koz
+
 	idGame* game = common->Game();
 	const float aimAssist = game != NULL ? game->GetAimAssistSensitivity() : 1.0f;
 	
-	idVec2 leftRaw( joystickAxis[ AXIS_LEFT_X ], joystickAxis[ AXIS_LEFT_Y ] );
-	idVec2 rightRaw( joystickAxis[ AXIS_RIGHT_X ], joystickAxis[ AXIS_RIGHT_Y ] );
-	
-	// optional stick swap
-	if( idKeyInput::GetUsercmdAction( K_JOY_STICK1_LEFT ) == UB_LOOKLEFT )
-	{
-		const idVec2	temp = leftRaw;
-		leftRaw = rightRaw;
-		rightRaw = temp;
-	}
-	
-	// optional invert look by inverting the right Y axis
-	if( invertLook )
-	{
-		rightRaw.y = -rightRaw.y;
-	}
+	idVec2 mappedMove = vec2_zero;
+	idVec2 mappedLook = vec2_zero;
+
+	MapAxis( mappedMove, mappedLook, AXIS_LEFT_X ); //koz remamp axis
+	MapAxis( mappedMove, mappedLook, AXIS_LEFT_Y );
+	MapAxis( mappedMove, mappedLook, AXIS_RIGHT_X );
+	MapAxis( mappedMove, mappedLook, AXIS_RIGHT_Y );
+
 	
 	// save for visualization
-	lastLookJoypad = rightRaw;
+	lastLookJoypad = mappedLook; 
 	
-	idVec2 leftMapped = JoypadFunction( leftRaw, 1.0f, threshold, range, shape, mergedThreshold );
-	idVec2 rightMapped = JoypadFunction( rightRaw, aimAssist, threshold, range, shape, mergedThreshold );
+	idVec2 leftMapped = JoypadFunction( mappedMove, 1.0f, threshold, range, shape, mergedThreshold );
+	idVec2 rightMapped = JoypadFunction( mappedLook, aimAssist, threshold, range, shape, mergedThreshold );
 	
 	// because idPhysics_Player::CmdScale scales mvoement values down so that 1,1 = sqrt(2), sqrt(2),
 	// we need to expand our circular values out to a square
@@ -1049,8 +1172,36 @@ void idUsercmdGenLocal::JoystickMove2()
 	const float triggerThreshold = joy_triggerThreshold.GetFloat();
 	HandleJoystickAxis( K_JOY_TRIGGER1, joystickAxis[ AXIS_LEFT_TRIG ], triggerThreshold, true );
 	HandleJoystickAxis( K_JOY_TRIGGER2, joystickAxis[ AXIS_RIGHT_TRIG ], triggerThreshold, true );
-}
 
+
+	// Koz hydra -------------------do this again with the hydras
+
+	if ( VR_USE_HYDRA ) // vr_hydraMode.GetInteger() != 0 ) {
+	{
+		mappedMove = vec2_zero;
+		mappedLook = vec2_zero;
+
+		MapAxis( mappedMove, mappedLook, AXIS_LEFT_HYDRA_X );
+		MapAxis( mappedMove, mappedLook, AXIS_LEFT_HYDRA_Y );
+		MapAxis( mappedMove, mappedLook, AXIS_RIGHT_HYDRA_X );
+		MapAxis( mappedMove, mappedLook, AXIS_RIGHT_HYDRA_Y );
+
+		leftMapped = JoypadFunction( mappedMove, 1.0f, threshold, range, shape, mergedThreshold );
+		rightMapped = JoypadFunction( mappedLook, aimAssist, threshold, range, shape, mergedThreshold );
+
+		CircleToSquare( leftMapped.x, leftMapped.y );
+
+		cmd.forwardmove = idMath::ClampChar( cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y );
+		cmd.rightmove = idMath::ClampChar( cmd.rightmove + KEY_MOVESPEED * leftMapped.x );
+
+		viewangles[PITCH] += MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed; 
+		viewangles[YAW] += MS2SEC( pollTime - lastPollTime ) * -rightMapped.x * yawSpeed;
+
+		HandleJoystickAxis( K_L_HYDRATRIG, joystickAxis[AXIS_LEFT_HYDRA_TRIG], triggerThreshold, true );
+		HandleJoystickAxis( K_R_HYDRATRIG, joystickAxis[AXIS_RIGHT_HYDRA_TRIG], triggerThreshold, true );
+
+	}
+}
 /*
 ==============
 idUsercmdGenLocal::CmdButtons
@@ -1144,6 +1295,9 @@ void idUsercmdGenLocal::MakeCurrent()
 		// keyboard angle adjustment
 		AdjustAngles();
 		
+		// Koz headtracking moved to renderSingleView.
+		// koz fixme if we want player to always face where looking.
+		
 		// set button bits
 		CmdButtons();
 		
@@ -1154,7 +1308,8 @@ void idUsercmdGenLocal::MakeCurrent()
 		AimAssist();
 		
 		// check to make sure the angles haven't wrapped
-		// koz fixme were commented out it tmek
+		// koz fixme were commented out it tmek, shoudlnt be an issue now with new tracking, need to sanity check.
+		
 		if( viewangles[PITCH] - oldAngles[PITCH] > 90 )
 		{
 			viewangles[PITCH] = oldAngles[PITCH] + 90;
@@ -1173,7 +1328,7 @@ void idUsercmdGenLocal::MakeCurrent()
 	
 	for( int i = 0; i < 3; i++ )
 	{
-		cmd.angles[i] = ANGLE2SHORT( viewangles[i] );
+		cmd.angles[i] = ANGLE2SHORT( viewangles[i] ); // koz this sets the players body.
 	}
 	
 	cmd.mx = continuousMouseX;
@@ -1322,7 +1477,7 @@ void idUsercmdGenLocal::Key( int keyNum, bool down )
 		buttonState[ action ]++;
 		if( !Inhibited() )
 		{
-			if( action >= UB_IMPULSE0 && action <= UB_IMPULSE31 )
+			if( action >= UB_IMPULSE0 && action <= UB_IMPULSE33 )
 			{
 				cmd.impulse = action - UB_IMPULSE0;
 				cmd.impulseSequence++;

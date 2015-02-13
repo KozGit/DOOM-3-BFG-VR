@@ -32,6 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 
 const static int NUM_SETTING_OPTIONS = 7;
 
+// koz display windows monitor name in the resolution selection menu, helpful to ID which is the rift if using extended mode
+idCVar vr_listMonitorName("vr_listMonitorName", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "List monitor name with resolution.");
+
 enum settingMenuCmds_t
 {
 	SETTING_CMD_CONTROLS,
@@ -188,8 +191,20 @@ void idMenuScreen_Shell_Resolution::ShowScreen( const mainMenuTransition_t trans
 			{
 				str.Append( va( "%s %i: ", idLocalization::GetString( "#str_swf_monitor" ), displayNum + 1 ) );
 			}
+
+			/*	koz list monitor names to more easily identify a Rift in the monitor list,
+			as display numbers don't match windows numbering.  Retrieving the actual monitor
+			model number is cumbersome, and the potential is there to fail in some windows instances,
+			so it can be disabled via cvar vr_listMonitorName if problematic.
+			*/
+
+			if ( vr_listMonitorName.GetBool() )
+			{
+				str.Append( va( "(%s) ", modeList[i].displayName.c_str() ) );// koz add the montior name to the list
+			}
+
 			str.Append( va( "%4i x %4i", modeList[i].width, modeList[i].height ) );
-			if( modeList[i].displayHz != 60 )
+			if( ( modeList[i].displayHz != 60 ) || 1 ) // Koz fixme, always show refresh rate, maybe on in vr?
 			{
 				str.Append( va( " @ %dhz", modeList[i].displayHz ) );
 			}

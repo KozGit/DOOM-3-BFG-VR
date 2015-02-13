@@ -39,6 +39,11 @@ bool idSWF::isMouseInClientArea = false;
 
 extern idCVar in_useJoystick;
 
+// Koz begin
+idCVar vr_hydraMenuNavHand( "vr_hydraMenuNavHand", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Hydra for Menu/PDA navigation.\n 0 = Right, 1 = Left.\n Requires restart." );
+// koz end
+
+
 /*
 ===================
 idSWF::idSWF
@@ -58,6 +63,8 @@ idSWF::idSWF( const char* filename_, idSoundWorld* soundWorld_ )
 	guiCursor_arrow = declManager->FindMaterial( "ui/assets/guicursor_arrow" );
 	guiCursor_hand = declManager->FindMaterial( "ui/assets/guicursor_hand" );
 	white = declManager->FindMaterial( "_white" );
+	hudImageMat = declManager->FindMaterial( "_hudImage" ); // koz fixme check dont think we need this anymore
+
 	
 	tooltipButtonImage.Append( keyButtonImages_t( "<JOY1>", "guis/assets/hud/controller/xb360/a", "guis/assets/hud/controller/ps3/cross", 37, 37, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<JOY2>", "guis/assets/hud/controller/xb360/b", "guis/assets/hud/controller/ps3/circle", 37, 37, 0 ) );
@@ -753,6 +760,44 @@ idSWFScriptVar idSWF::idSWFScriptFunction_shortcutKeys_clear::Call( idSWFScriptO
 	object->Set( "JOY_STICK2_DOWN", "STICK2_DOWN" );
 	object->Set( "JOY_STICK2_LEFT", "STICK2_LEFT" );
 	object->Set( "JOY_STICK2_RIGHT", "STICK2_RIGHT" );
+
+	// Koz begin
+
+	/*============================
+	KOZ hydra - add shortcuts
+	Map sticks on both hydras to "STICK1" & "STICK2",
+	button 1 & trigger on both hydras to "ENTER", and
+	button 2 & bumper on both hydras to "BACKSPACE"
+	so SWF menus can be navigated with either hand.
+	In PDA menus, menu navigation has been altered in SWF_Events.cpp
+	to allow single stick navigation of PDA menus.
+	============================*/
+
+	object->Set( "HYDRA_LEFT_STICK_UP", "STICK1_UP" );
+	object->Set( "HYDRA_LEFT_STICK_DOWN", "STICK1_DOWN" );
+	object->Set( "HYDRA_LEFT_STICK_LEFT", "STICK1_LEFT" );
+	object->Set( "HYDRA_LEFT_STICK_RIGHT", "STICK1_RIGHT" );
+
+	object->Set( "HYDRA_RIGHT_STICK_UP", "STICK2_UP" );
+	object->Set( "HYDRA_RIGHT_STICK_DOWN", "STICK2_DOWN" );
+	object->Set( "HYDRA_RIGHT_STICK_LEFT", "STICK2_LEFT" );
+	object->Set( "HYDRA_RIGHT_STICK_RIGHT", "STICK2_RIGHT" );
+
+	object->Set( "JOY17", "ENTER" );		// Left hydra button 1
+	object->Set( "JOY18", "BACKSPACE" );	// Left hydra button 2
+	object->Set( "JOY19", "LB" );			// Left hydra  button 3 = left bumper PDA nav
+	object->Set( "JOY20", "RB" );			// Left hydra  button 4 = right bumper PDA nav
+	object->Set( "JOY22", "LB" );			// Left hydra bumper
+	object->Set( "L_HYDRATRIG", "ENTER" );	// Left hydra trigger
+
+	object->Set( "JOY24", "ENTER" );		// Right hydra button 1
+	object->Set( "JOY25", "BACKSPACE" );	// Right hydra button 2
+	object->Set( "JOY26", "LB" );			// Right hydra  button 3 = left bumper PDA nav
+	object->Set( "JOY27", "RB" );			// Right hydra  button 4 = right bumper PDA nav
+	object->Set( "JOY29", "RB" );			// Right hydra bumper
+	object->Set( "L_HYDRATRIG", "ENTER" );	// Left hydra trigger
+	// Koz end hydras
+	
 	object->Set( "KP_ENTER", "ENTER" );
 	object->Set( "MWHEELDOWN", "MWHEEL_DOWN" );
 	object->Set( "MWHEELUP", "MWHEEL_UP" );

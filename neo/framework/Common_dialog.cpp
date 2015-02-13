@@ -1555,7 +1555,7 @@ idStr idCommonDialog::GetDialogMsg( gameDialogMessages_t msg, idStr& message, id
 idCommonDialog::HandleDialogEvent
 ================================================
 */
-bool idCommonDialog::HandleDialogEvent( const sysEvent_t* sev )
+bool idCommonDialog::HandleDialogEvent( sysEvent_t* sev ) // koz fixme check if still needed:  was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
 {
 
 	if( dialog != NULL && dialog->IsLoaded() && dialog->IsActive() )

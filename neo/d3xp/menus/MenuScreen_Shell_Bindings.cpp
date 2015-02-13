@@ -35,48 +35,53 @@ typedef struct
 	const char* bind;
 } bindInfo_t;
 
-static bindInfo_t keyboardBinds[] =
+static bindInfo_t keyboardBinds[] = 
 {
-	{ "#str_02090",			""								},	// HEADING
-	{ "#str_02100",	"_forward"								},	// FORWARD
-	{ "#str_02101",	"_back"									},	// BACKPEDAL
-	{ "#str_02102",	"_moveLeft"								},	// MOVE LEFT
-	{ "#str_02103",	"_moveRight"							},	// MOVE RIGHT
-	{ "#str_02104",	"_moveUp"								},	// JUMP
-	{ "#str_02105",	"_moveDown"								},	// CROUCH
-	{ "#str_02106",	"_left"									},	// TURN LEFT
-	{ "#str_02107",	"_right"								},	// TURN RIGHT
-	{ "#str_02109",	"_speed"								},	// SPRINT
-	
-	{ "#str_02095",			""								},	// HEADING
-	{ "#str_02112",	"_attack"								},	// ATTACK
-	{ "#str_02114",	"_impulse14"							},	// PREV. WEAPON
-	{ "#str_02113",	"_impulse15"							},	// NEXT WEAPON
-	{ "#str_02115",	"_impulse13"							},	// RELOAD
-	{ "#str_swf_action_use",	"_use"						},	// USE
-	{ "#str_02116",	"_lookUp"								},	// LOOK UP
-	{ "#str_02117",	"_lookDown"								},	// LOOK DOWN
-	{ "#str_02121",	"_impulse19"							},	// PDA / SCOREBOARD
-	
-	{ "#str_02093",			""								},	// HEADING
-	{ "#str_00100177",	"_impulse0"							},	// FISTS / GRABBER
-	{ "#str_00100178",	"_impulse2"							},	// PISTOL
-	{ "#str_00100179",	"_impulse3"							},	// SHOTGUN / DOUBLE
-	{ "#str_00100180",	"_impulse5"							},	// MACHINEGUN
-	{ "#str_00100181",	"_impulse6"							},	// CHAINGUN
-	{ "#str_00100182",	"_impulse7"							},	// GRENADES
-	{ "#str_00100183",	"_impulse8"							},	// PLASMA GUN
-	{ "#str_00100184",	"_impulse9"							},	// ROCKETS
-	{ "#str_00100185",	"_impulse10"						},	// BFG
-	{ "#str_swf_soulcube_artifact",	"_impulse12"			},	// SOULCUBE / ARTIFACT
-	{ "#str_00100187",	"_impulse16"						},	// FLASHLIGHT
-	
-	{ "#str_04065",			""								},	// HEADING
-	{ "#str_04067",	"savegame quick"						},	// QUICK SAVE
-	{ "#str_04068",	"loadgame quick"						},	// QUICK LOAD
-	{ "#str_04069",	"screenshot"							},	// SCREENSHOT
-	{ "#str_02068",	"clientMessageMode"						},	// SCREENSHOT
-	{ "#str_02122",	"clientMessageMode 1"					},	// SCREENSHOT
+	{ "                                ", "" }, // koz divider
+	{ "#str_02090", "" },				// HEADING
+	{ "#str_02100", "_forward" },		// FORWARD
+	{ "#str_02101", "_back" },			// BACKPEDAL
+	{ "#str_02102", "_moveLeft" },		// MOVE LEFT
+	{ "#str_02103", "_moveRight" },		// MOVE RIGHT
+	{ "#str_02104", "_moveUp" },		// JUMP
+	{ "#str_02105", "_moveDown" },		// CROUCH
+	{ "#str_02106", "_left" },			// TURN LEFT
+	{ "#str_02107", "_right" },			// TURN RIGHT
+	{ "#str_02109", "_speed" },			// SPRINT
+	{ "Reset HMD orientation", "_impulse32" },  // KOZ RESET HMD/BODY ORIENTATION 
+	{ "                                ", "" }, // koz divider
+	{ "#str_02095", "" },				// HEADING
+	{ "#str_02112", "_attack" },		// ATTACK
+	{ "#str_02114", "_impulse14" },		// PREV. WEAPON
+	{ "#str_02113", "_impulse15" },		// NEXT WEAPON
+	{ "#str_02115", "_impulse13" },		// RELOAD
+	{ "#str_swf_action_use", "_use" },	// USE
+	{ "#str_02116", "_lookUp" },		// LOOK UP
+	{ "#str_02117", "_lookDown" },		// LOOK DOWN
+	{ "#str_02121", "_impulse19" },		// PDA / SCOREBOARD
+	{ "Toggle Lasersight", "_impulse33" },	// KOZ TOGGLE LASERSIGHT
+	{ "                                ", "" }, // koz divider
+	{ "#str_02093", "" },				// HEADING
+	{ "#str_00100177", "_impulse0" },	// FISTS / GRABBER
+	{ "#str_00100178", "_impulse2" },	// PISTOL
+	{ "#str_00100179", "_impulse3" },	// SHOTGUN / DOUBLE
+	{ "#str_00100180", "_impulse5" },	// MACHINEGUN
+	{ "#str_00100181", "_impulse6" },	// CHAINGUN
+	{ "#str_00100182", "_impulse7" },	// GRENADES
+	{ "#str_00100183", "_impulse8" },	// PLASMA GUN
+	{ "#str_00100184", "_impulse9" },	// ROCKETS
+	{ "#str_00100185", "_impulse10" },	// BFG
+	{ "#str_swf_soulcube_artifact", "_impulse12" },	// SOULCUBE / ARTIFACT	
+	{ "#str_00100187", "_impulse16" },	// FLASHLIGHT
+
+	{ "                                ", "" }, // koz divider
+	{ "#str_04065", "" },				// HEADING
+	{ "#str_04067", "savegame quick" },	// QUICK SAVE
+	{ "#str_04068", "loadgame quick" },	// QUICK LOAD
+	{ "#str_04069", "screenshot" },		// SCREENSHOT
+	{ "#str_02068", "clientMessageMode" },	// SCREENSHOT
+	{ "#str_02122", "clientMessageMode 1" },	// SCREENSHOT
+	{ "                                ", "" }, // koz divider
 	//{ "#str_04071",	"clientDropWeapon"						}	// DROP WEAPON
 };
 
@@ -296,10 +301,14 @@ void idMenuScreen_Shell_Bindings::UpdateBindingDisplay()
 				};
 				for( int i = 0; i < joyBinds.Num(); i++ )
 				{
-					if( joyBinds[i].Icmpn( "JOY_STICK", 9 ) == 0 )
+					// Koz  - removing the following check to allow joystick rebinding.
+					/*
+					if ( joyBinds[i].Icmpn( "JOY_STICK", 9 ) == 0 )
 					{
 						continue; // Can't rebind the sticks, so don't even show them
 					}
+					*/
+
 					bool hasImage = false;
 					for( const char** b = buttonsWithImages; *b != 0; b++ )
 					{

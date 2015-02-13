@@ -33,6 +33,12 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "win_local.h"
 
+// Koz begin
+#include "vr\vr.h"
+#include "../../../dependencies/SixenseSDK_062612/include/sixense_utils/controller_manager/controller_manager.hpp"
+// Koz end
+
+
 #define DINPUT_BUFFERSIZE           256
 
 /*
@@ -947,7 +953,39 @@ void idJoystickWin32::PostInputEvent( int inputDeviceNum, int event, int value, 
 	{
 		PushButton( inputDeviceNum, K_JOY_TRIGGER2, ( value > range ) );
 	}
-	if( event >= J_AXIS_MIN && event <= J_AXIS_MAX )
+	
+	// Koz begin add hydras
+	else if ( event == J_AXIS_LEFT_HYDRA_X )
+	{
+		PushButton( inputDeviceNum, K_HYDRA_LEFT_STICK_LEFT, ( value < -range ) );
+		PushButton( inputDeviceNum, K_HYDRA_LEFT_STICK_RIGHT, ( value > range ) );
+	}
+	else if ( event == J_AXIS_LEFT_HYDRA_Y )
+	{
+		PushButton( inputDeviceNum, K_HYDRA_LEFT_STICK_UP, ( value < -range ) );
+		PushButton( inputDeviceNum, K_HYDRA_LEFT_STICK_DOWN, ( value > range ) );
+	}
+	else if ( event == J_AXIS_RIGHT_HYDRA_X )
+	{
+		PushButton( inputDeviceNum, K_HYDRA_RIGHT_STICK_LEFT, ( value < -range ) );
+		PushButton( inputDeviceNum, K_HYDRA_RIGHT_STICK_RIGHT, ( value > range ) );
+	}
+	else if ( event == J_AXIS_RIGHT_HYDRA_Y )
+	{
+		PushButton( inputDeviceNum, K_HYDRA_RIGHT_STICK_UP, ( value < -range ) );
+		PushButton( inputDeviceNum, K_HYDRA_RIGHT_STICK_DOWN, ( value > range ) );
+	}
+	else if ( event == J_AXIS_LEFT_HYDRA_TRIG )
+	{
+		PushButton( inputDeviceNum, K_L_HYDRATRIG, ( value > range ) );
+	}
+	else if ( event == J_AXIS_RIGHT_HYDRA_TRIG )
+	{
+		PushButton( inputDeviceNum, K_R_HYDRATRIG, ( value > range ) );
+	}
+	// Koz end
+	
+	if ( event >= J_AXIS_MIN && event <= J_AXIS_MAX )
 	{
 		int axis = event - J_AXIS_MIN;
 		int percent = ( value * 16 ) / range;
@@ -1071,6 +1109,89 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 		PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_Y, -xis.Gamepad.sThumbRY );
 	}
 	
+	// Koz begin add hydras
+	if ( VR_USE_HYDRA )
+	{
+
+		// koz check the hydras -  my god it's full of ugly. Lots of remapping. Dont ask :(
+		hydraData hydraCurrent;
+		static hydraData hydraRightOld;
+		static hydraData hydraLeftOld;
+
+		int hydraLeftRemap[10] = {
+			J_ACTION21, 0,				// Start, Unused
+			0, J_ACTION19,				// Unused, Button 3
+			J_ACTION20, J_ACTION17,		// Button 4, Button 1
+			J_ACTION18, J_ACTION22,		// Button 2, Bumper
+			J_ACTION23, 0,				// Button Joystick, Unused
+		};
+
+		int hydraRightRemap[10] = {
+			J_ACTION28, 0,				// Start, Unused
+			0, J_ACTION26,				// Unused, Button 3
+			J_ACTION27, J_ACTION24,		// Button 4, Button 1
+			J_ACTION25, J_ACTION29,		// Button 2, Bumper
+			J_ACTION30, 0,				// Button Joystick, Unused
+		};
+
+		VR_GetLeftHydra( hydraCurrent ); // begin processing left hydra
+
+		if ( hydraCurrent.trigger != hydraLeftOld.trigger )
+		{
+			PostInputEvent( inputDeviceNum, J_AXIS_LEFT_HYDRA_TRIG, hydraCurrent.trigger * 32767.0f );
+		}
+
+		if ( hydraCurrent.joystick_x != hydraLeftOld.joystick_x )
+		{
+			PostInputEvent( inputDeviceNum, J_AXIS_LEFT_HYDRA_X, hydraCurrent.joystick_x * 32767.0f );
+		}
+
+		if ( hydraCurrent.joystick_y != hydraLeftOld.joystick_y )
+		{
+			PostInputEvent( inputDeviceNum, J_AXIS_LEFT_HYDRA_Y, -hydraCurrent.joystick_y * 32767.0f );
+		}
+
+		for ( int i = 0; i < 9; i++ ) // check the left hydras buttons
+		{
+			int mask = ( 1 << i );
+			if ( ( hydraCurrent.buttons & mask ) != ( hydraLeftOld.buttons & mask ) )
+			{
+				PostInputEvent( inputDeviceNum, hydraLeftRemap[i], ( hydraCurrent.buttons & mask ) > 0 );
+			}
+		}
+
+		hydraLeftOld = hydraCurrent;
+
+		VR_GetRightHydra( hydraCurrent );	// begin processing right hydra	
+
+		if ( hydraCurrent.trigger != hydraRightOld.trigger )
+		{
+			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_HYDRA_TRIG, hydraCurrent.trigger * 32767.0f );
+		}
+
+		if ( hydraCurrent.joystick_x != hydraRightOld.joystick_x )
+		{
+			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_HYDRA_X, hydraCurrent.joystick_x * 32767.0f );
+		}
+
+		if ( hydraCurrent.joystick_y != hydraRightOld.joystick_y )
+		{
+			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_HYDRA_Y, -hydraCurrent.joystick_y * 32767.0f );
+		}
+
+		for ( int i = 0; i < 9; i++ ) // check the right hydras buttons
+		{
+			int mask = ( 1 << i );
+			if ( ( hydraCurrent.buttons & mask ) != ( hydraRightOld.buttons & mask ) )
+			{
+				PostInputEvent( inputDeviceNum, hydraRightRemap[i], ( hydraCurrent.buttons & mask ) > 0 );
+			}
+		}
+
+		hydraRightOld = hydraCurrent;
+		// Koz end
+	}
+
 	return numEvents;
 }
 

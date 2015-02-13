@@ -60,6 +60,14 @@ enum shellAreas_t
 	SHELL_AREA_MODE_SELECT,
 	SHELL_AREA_BROWSER,
 	SHELL_AREA_CREDITS,
+	// Koz begin VR menus
+	SHELL_AREA_VR_SETTINGS,
+	SHELL_AREA_VR_RENDERING_OPTIONS,
+	SHELL_AREA_VR_HMD_OPTIONS,
+	SHELL_AREA_VR_PROFILE_OPTIONS,
+	SHELL_AREA_VR_GAMEPLAY_OPTIONS,
+	SHELL_AREA_VR_CONTROL_OPTIONS,
+	// Koz end
 	SHELL_NUM_AREAS
 };
 
@@ -131,7 +139,7 @@ enum menuSounds_t
 	NUM_GUI_SOUNDS,
 };
 
-static const int MAX_SCREEN_AREAS = 32;
+static const int MAX_SCREEN_AREAS = 40; // Koz changed from 32 to support additional VR options.
 static const int DEFAULT_REPEAT_TIME = 150;
 static const int WAIT_START_TIME_LONG = 30000;
 static const int WAIT_START_TIME_SHORT = 5000;
@@ -248,7 +256,7 @@ public:
 	virtual void			Update();
 	virtual void			UpdateChildren();
 	virtual void			UpdateMenuDisplay( int menu );
-	virtual bool			HandleGuiEvent( const sysEvent_t* sev );
+	virtual bool			HandleGuiEvent( sysEvent_t* sev ); // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
 	virtual bool			IsActive();
 	virtual void			ActivateMenu( bool show );
 	virtual void			TriggerMenu();
@@ -368,8 +376,8 @@ public:
 	virtual void			Cleanup();
 	virtual bool			HandleAction( idWidgetAction& action, const idWidgetEvent& event, idMenuWidget* widget, bool forceHandled = false );
 	virtual idMenuScreen* 	GetMenuScreen( int index );
-	virtual bool			HandleGuiEvent( const sysEvent_t* sev );
-	
+	virtual bool			HandleGuiEvent( sysEvent_t* sev ); // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+
 	void					UpdateSavedGames();
 	void					ShowSmallFrame( bool show );
 	void					ShowMPFrame( bool show );

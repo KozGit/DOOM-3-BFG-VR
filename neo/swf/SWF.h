@@ -123,7 +123,9 @@ public:
 	}
 	
 	void Render( idRenderSystem* gui, int time = 0, bool isSplitscreen = false );
-	bool HandleEvent( const sysEvent_t* event );
+
+	bool HandleEvent( sysEvent_t* event ); // koz was const 
+
 	bool InhibitControl();
 	void ForceInhibitControl( bool val )
 	{
@@ -381,6 +383,8 @@ private:
 	const idMaterial* guiCursor_arrow;
 	const idMaterial* guiCursor_hand;
 	const idMaterial* white;
+	const idMaterial* hudImageMat; // koz fixme check - dont need this anymore.
+
 	
 private:
 	friend class idSWFSprite;

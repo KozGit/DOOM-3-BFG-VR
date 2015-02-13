@@ -405,7 +405,7 @@ public:
 	void					RunSingleUserCmd( usercmd_t& cmd, idPlayer& player );
 	void					RunEntityThink( idEntity& ent, idUserCmdMgr& userCmdMgr );
 	virtual bool			Draw( int clientNum );
-	virtual bool			HandlePlayerGuiEvent( const sysEvent_t* ev );
+	virtual bool			HandlePlayerGuiEvent( sysEvent_t* ev ); // koz fixme was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
 	virtual void			ServerWriteSnapshot( idSnapShot& ss );
 	virtual void			ProcessReliableMessage( int clientNum, int type, const idBitMsg& msg );
 	virtual void			ClientReadSnapshot( const idSnapShot& ss );
@@ -592,7 +592,7 @@ public:
 	virtual void					Shell_ClosePause();
 	virtual void					Shell_CreateMenu( bool inGame );
 	virtual bool					Shell_IsActive() const;
-	virtual bool					Shell_HandleGuiEvent( const sysEvent_t* sev );
+	virtual bool					Shell_HandleGuiEvent( sysEvent_t* sev ); // koz fixme was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
 	virtual void					Shell_Render();
 	virtual void					Shell_ResetMenu();
 	virtual void					Shell_SyncWithSession() ;

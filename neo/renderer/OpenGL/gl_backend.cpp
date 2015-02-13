@@ -32,18 +32,20 @@ If you have questions concerning this license or the applicable additional terms
 #include "../tr_local.h"
 #include "../../framework/Common_local.h"
 
-idCVar r_drawFlickerBox( "r_drawFlickerBox", "0", CVAR_RENDERER | CVAR_BOOL, "visual test for dropping frames" );
-idCVar stereoRender_warp( "stereoRender_warp", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "use the optical warping renderprog instead of stereoDeGhost" );
-idCVar stereoRender_warpStrength( "stereoRender_warpStrength", "1.45", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "amount of pre-distortion" );
+#include "vr\vr.h" // koz
 
-idCVar stereoRender_warpCenterX( "stereoRender_warpCenterX", "0.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "center for left eye, right eye will be 1.0 - this" );
-idCVar stereoRender_warpCenterY( "stereoRender_warpCenterY", "0.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "center for both eyes" );
-idCVar stereoRender_warpParmZ( "stereoRender_warpParmZ", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "development parm" );
-idCVar stereoRender_warpParmW( "stereoRender_warpParmW", "0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "development parm" );
-idCVar stereoRender_warpTargetFraction( "stereoRender_warpTargetFraction", "1.0", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "fraction of half-width the through-lens view covers" );
+idCVar r_drawFlickerBox( "r_drawFlickerBox", "0", CVAR_RENDERER | CVAR_BOOL, "visual test for dropping frames" );
 
 idCVar r_showSwapBuffers( "r_showSwapBuffers", "0", CVAR_BOOL, "Show timings from GL_BlockingSwapBuffers" );
 idCVar r_syncEveryFrame( "r_syncEveryFrame", "1", CVAR_BOOL, "Don't let the GPU buffer execution past swapbuffers" );
+
+// Koz begin
+idCVar vr_warp("vr_warp", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Use Oculus distortion");
+idCVar vr_chromaCorrection("vr_chromaCorrection", "1", CVAR_INTEGER | CVAR_RENDERER | CVAR_ARCHIVE, "Enable Rift chromatic distortion correction. 0 = disabled, 1 = enabled.");
+idCVar vr_timewarp("vr_timewarp", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Enable Rift timewarp. 0 = disabled, 1 = enabled.");
+idCVar vr_overdrive("vr_overdrive", ".1", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, " Rift overdrive value.");
+idCVar vr_overdriveEnable("vr_overdriveEnable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Enable rift Overdrive.");
+// Koz end
 
 static int		swapIndex;		// 0 or 1 into renderSync
 static GLsync	renderSync[2];
@@ -208,6 +210,9 @@ const void GL_BlockingSwapBuffers()
 		common->Printf( "blockToBlock: %i\n", delta );
 	}
 	prevBlockTime = exitBlockTime;
+
+	if ( hasOculusRift ) VR_FrameEnd(); // Koz fixme all of the hmd timing is broken.
+
 }
 
 /*
@@ -227,6 +232,30 @@ static void R_MakeStereoRenderImage( idImage* image )
 
 /*
 ====================
+Koz
+GL_SetupShaderDistortion
+Set uniforms for oculus distortion shader
+====================
+*/
+void GL_SetupShaderDistortion(int eye)
+{
+
+	extern hmdEye_t hmdEye[2];
+    	
+	float overdriveScaleRegularRise = vr_overdrive.GetFloat();
+	static float overdriveScaleRegularFall = 0.05f;	// falling issues are hardly visible
+	float overdriveScales[4] = { overdriveScaleRegularRise, overdriveScaleRegularFall, 0.0f, 0.0f };
+	float UVScale[4] = { hmdEye[eye].UVScaleoffset[0].x, hmdEye[eye].UVScaleoffset[0].y, 0.0f, 0.0f };
+	float UVOffset[4] = { hmdEye[eye].UVScaleoffset[1].x, hmdEye[eye].UVScaleoffset[1].y, 0.0f, 0.0f };
+
+	renderProgManager.SetRenderParm( RENDERPARM_OVERDRIVE_SCALES, overdriveScales);
+	renderProgManager.SetRenderParm( RENDERPARM_EYE_TO_SOURCE_UV_OFFSET, UVOffset);
+	renderProgManager.SetRenderParm( RENDERPARM_EYE_TO_SOURCE_UV_SCALE, UVScale);
+	renderProgManager.CommitUniforms();
+	
+}
+/*
+====================
 RB_StereoRenderExecuteBackEndCommands
 
 Renders the draw list twice, with slight modifications for left eye / right eye
@@ -234,7 +263,17 @@ Renders the draw list twice, with slight modifications for left eye / right eye
 */
 void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds )
 {
-	uint64 backEndStartTime = Sys_Microseconds();
+	
+    // Koz begin - need to keep a copy of the current and the last render for overdrive
+    // swap the current and previous buffers.
+    static int currentEyeTexture = 0; // koz which eye buffer to render to.
+    static int previousEyeTexture = 0;
+
+    previousEyeTexture = currentEyeTexture;
+    currentEyeTexture = 1 - currentEyeTexture;
+	//Koz end
+	
+    uint64 backEndStartTime = Sys_Microseconds();
 	
 	// If we are in a monoscopic context, this draws to the only buffer, and is
 	// the same as GL_BACK.  In a quad-buffer stereo context, this is necessary
@@ -243,25 +282,40 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	// To allow stereo deghost processing, the views have to be copied to separate
 	// textures anyway, so there isn't any benefit to rendering to BACK_RIGHT for
 	// that eye.
-	glDrawBuffer( GL_BACK_LEFT );
 	
-	// create the stereoRenderImage if we haven't already
-	static idImage* stereoRenderImages[2];
-	for( int i = 0; i < 2; i++ )
+	//Koz begin
+	if  (VR_USE_FBO )
 	{
-		if( stereoRenderImages[i] == NULL )
+		GL_CheckErrors();
+		VR_BindFBO( GL_FRAMEBUFFER, VR_FBO );
+		GL_CheckErrors();
+	}
+	else {
+		glDrawBuffer( GL_BACK_LEFT );
+	}
+	// Koz end
+
+	// create the stereoRenderImage if we haven't already
+
+	// koz begin
+	
+	static idImage * stereoRenderImages[2][2];
+	for ( int i = 0; i < 2; i++ )
+	{
+		for ( int j = 0; j < 2; j++ )
 		{
-			stereoRenderImages[i] = globalImages->ImageFromFunction( va( "_stereoRender%i", i ), R_MakeStereoRenderImage );
-		}
-		
-		// resize the stereo render image if the main window has changed size
-		if( stereoRenderImages[i]->GetUploadWidth() != renderSystem->GetWidth() ||
-				stereoRenderImages[i]->GetUploadHeight() != renderSystem->GetHeight() )
-		{
-			stereoRenderImages[i]->Resize( renderSystem->GetWidth(), renderSystem->GetHeight() );
+			if ( stereoRenderImages[i][j] == NULL )
+			{
+				stereoRenderImages[i][j] = globalImages->ImageFromFunction( va("_stereoRender%i%j", i, j ), R_MakeStereoRenderImage );
+			}
+			if ( stereoRenderImages[i][j]->GetUploadWidth() != renderSystem->GetWidth() ||
+				stereoRenderImages[i][j]->GetUploadHeight() != renderSystem->GetHeight() )
+			{
+				stereoRenderImages[i][j]->Resize( renderSystem->GetWidth(), renderSystem->GetHeight() );
+			}
 		}
 	}
-	
+    	
 	// In stereoRender mode, the front end has generated two RC_DRAW_VIEW commands
 	// with slightly different origins for each eye.
 	
@@ -281,6 +335,9 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		GL_SetDefaultState();
 		renderProgManager.Unbind();
 		renderProgManager.ZeroUniforms();
+
+		glClearColor(0, 0, 0, 0); // koz fixme this should not be needed check.
+		glClear(GL_COLOR_BUFFER_BIT);
 		
 		for( const emptyCommand_t* cmds = allCmds; cmds != NULL; cmds = ( const emptyCommand_t* )cmds->next )
 		{
@@ -330,7 +387,13 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		}
 		
 		// copy to the target
-		stereoRenderImages[ targetEye ]->CopyFramebuffer( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
+		
+        //Koz begin
+		stereoRenderImages[targetEye][currentEyeTexture]->CopyFramebuffer( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
+		hmdCurrentRender[targetEye] = stereoRenderImages[targetEye][currentEyeTexture];
+		hmdPreviousRender[targetEye] = stereoRenderImages[targetEye][previousEyeTexture];
+		//Koz end 
+
 	}
 	
 	// perform the final compositing / warping / deghosting to the actual framebuffer(s)
@@ -344,9 +407,20 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	// make sure we draw to both eyes.  This is likely to be sub-optimal
 	// performance on most cards and drivers, but it is better than getting
 	// a confusing, half-ghosted view.
-	if( renderSystem->GetStereo3DMode() != STEREO3D_QUAD_BUFFER )
+	
+    if ( renderSystem->GetStereo3DMode() != STEREO3D_QUAD_BUFFER )
 	{
-		glDrawBuffer( GL_BACK );
+		// Koz fixme this should no longer be necessary, check.
+		if ( VR_USE_FBO )
+		{
+			GL_CheckErrors();
+			//glReadBuffer( GL_BACK );
+			//glDrawBuffer( GL_COLOR_ATTACHMENT0 );
+		}
+		else {
+			glDrawBuffer( GL_BACK );
+		}
+		//Koz end
 	}
 	
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
@@ -372,32 +446,32 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		case STEREO3D_QUAD_BUFFER:
 			glDrawBuffer( GL_BACK_RIGHT );
 			GL_SelectTexture( 0 );
-			stereoRenderImages[1]->Bind();
+			stereoRenderImages[1][currentEyeTexture]->Bind();
 			GL_SelectTexture( 1 );
-			stereoRenderImages[0]->Bind();
+			stereoRenderImages[0][currentEyeTexture]->Bind();
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			
 			glDrawBuffer( GL_BACK_LEFT );
 			GL_SelectTexture( 1 );
-			stereoRenderImages[1]->Bind();
+			stereoRenderImages[1][currentEyeTexture]->Bind();
 			GL_SelectTexture( 0 );
-			stereoRenderImages[0]->Bind();
+			stereoRenderImages[0][currentEyeTexture]->Bind();
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			
 			break;
 		case STEREO3D_HDMI_720:
 			// HDMI 720P 3D
 			GL_SelectTexture( 0 );
-			stereoRenderImages[1]->Bind();
+			stereoRenderImages[1][currentEyeTexture]->Bind();
 			GL_SelectTexture( 1 );
-			stereoRenderImages[0]->Bind();
+			stereoRenderImages[0][currentEyeTexture]->Bind();
 			GL_ViewportAndScissor( 0, 0, 1280, 720 );
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			
 			GL_SelectTexture( 0 );
-			stereoRenderImages[0]->Bind();
+			stereoRenderImages[0][currentEyeTexture]->Bind();
 			GL_SelectTexture( 1 );
-			stereoRenderImages[1]->Bind();
+			stereoRenderImages[1][currentEyeTexture]->Bind();
 			GL_ViewportAndScissor( 0, 750, 1280, 720 );
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			
@@ -406,90 +480,58 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			glClear( GL_COLOR_BUFFER_BIT );
 			break;
 		default:
+		
+        	//----------------------------------------------------------------------------------
+			//----------------------------------------------------------------------------------
+
 		case STEREO3D_SIDE_BY_SIDE:
-			if( stereoRender_warp.GetBool() )
+			
+            // This is the rift.
+
+			//Koz begin
+			extern bool hasHMD;
+			extern bool hasOculusRift;
+
+			if ( hasHMD && hasOculusRift && vr_enable.GetBool() ) // koz fix me :only in VR.
 			{
-				// this is the Rift warp
-				// renderSystem->GetWidth() / GetHeight() have returned equal values (640 for initial Rift)
-				// and we are going to warp them onto a symetric square region of each half of the screen
-				
-				renderProgManager.BindShader_StereoWarp();
-				
-				// clear the entire screen to black
-				// we could be smart and only clear the areas we aren't going to draw on, but
-				// clears are fast...
-				glScissor( 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
-				glClearColor( 0, 0, 0, 0 );
-				glClear( GL_COLOR_BUFFER_BIT );
-				
-				// the size of the box that will get the warped pixels
-				// With the 7" displays, this will be less than half the screen width
-				const int pixelDimensions = ( glConfig.nativeScreenWidth >> 1 ) * stereoRender_warpTargetFraction.GetFloat();
-				
-				// Always scissor to the half-screen boundary, but the viewports
-				// might cross that boundary if the lenses can be adjusted closer
-				// together.
-				glViewport( ( glConfig.nativeScreenWidth >> 1 ) - pixelDimensions,
-							( glConfig.nativeScreenHeight >> 1 ) - ( pixelDimensions >> 1 ),
-							pixelDimensions, pixelDimensions );
-				glScissor( 0, 0, glConfig.nativeScreenWidth >> 1, glConfig.nativeScreenHeight );
-				
-				idVec4	color( stereoRender_warpCenterX.GetFloat(), stereoRender_warpCenterY.GetFloat(), stereoRender_warpParmZ.GetFloat(), stereoRender_warpParmW.GetFloat() );
-				// don't use GL_Color(), because we don't want to clamp
-				renderProgManager.SetRenderParm( RENDERPARM_COLOR, color.ToFloatPtr() );
-				
-				GL_SelectTexture( 0 );
-				stereoRenderImages[0]->Bind();
-				glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
-				glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
-				RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
-				
-				idVec4	color2( stereoRender_warpCenterX.GetFloat(), stereoRender_warpCenterY.GetFloat(), stereoRender_warpParmZ.GetFloat(), stereoRender_warpParmW.GetFloat() );
-				// don't use GL_Color(), because we don't want to clamp
-				renderProgManager.SetRenderParm( RENDERPARM_COLOR, color2.ToFloatPtr() );
-				
-				glViewport( ( glConfig.nativeScreenWidth >> 1 ),
-							( glConfig.nativeScreenHeight >> 1 ) - ( pixelDimensions >> 1 ),
-							pixelDimensions, pixelDimensions );
-				glScissor( glConfig.nativeScreenWidth >> 1, 0, glConfig.nativeScreenWidth >> 1, glConfig.nativeScreenHeight );
-				
-				GL_SelectTexture( 0 );
-				stereoRenderImages[1]->Bind();
-				glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
-				glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
-				RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
-				break;
+				GL_CheckErrors();
+				VR_HMDRender( stereoRenderImages[0][currentEyeTexture], stereoRenderImages[1][currentEyeTexture],
+					stereoRenderImages[0][previousEyeTexture], stereoRenderImages[1][previousEyeTexture] );
+				GL_CheckErrors();
+                break;
 			}
+			//Koz end
+
 		// a non-warped side-by-side-uncompressed (dual input cable) is rendered
 		// just like STEREO3D_SIDE_BY_SIDE_COMPRESSED, so fall through.
 		case STEREO3D_SIDE_BY_SIDE_COMPRESSED:
 			GL_SelectTexture( 0 );
-			stereoRenderImages[0]->Bind();
+			stereoRenderImages[0][currentEyeTexture]->Bind();
 			GL_SelectTexture( 1 );
-			stereoRenderImages[1]->Bind();
+			stereoRenderImages[1][currentEyeTexture]->Bind();
 			GL_ViewportAndScissor( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			
 			GL_SelectTexture( 0 );
-			stereoRenderImages[1]->Bind();
+			stereoRenderImages[1][currentEyeTexture]->Bind();
 			GL_SelectTexture( 1 );
-			stereoRenderImages[0]->Bind();
+			stereoRenderImages[0][currentEyeTexture]->Bind();
 			GL_ViewportAndScissor( renderSystem->GetWidth(), 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			break;
 			
 		case STEREO3D_TOP_AND_BOTTOM_COMPRESSED:
 			GL_SelectTexture( 1 );
-			stereoRenderImages[0]->Bind();
+			stereoRenderImages[0][currentEyeTexture]->Bind();
 			GL_SelectTexture( 0 );
-			stereoRenderImages[1]->Bind();
+			stereoRenderImages[1][currentEyeTexture]->Bind();
 			GL_ViewportAndScissor( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			
 			GL_SelectTexture( 1 );
-			stereoRenderImages[1]->Bind();
+			stereoRenderImages[1][currentEyeTexture]->Bind();
 			GL_SelectTexture( 0 );
-			stereoRenderImages[0]->Bind();
+			stereoRenderImages[0][currentEyeTexture]->Bind();
 			GL_ViewportAndScissor( 0, renderSystem->GetHeight(), renderSystem->GetWidth(), renderSystem->GetHeight() );
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			break;
@@ -497,12 +539,12 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		case STEREO3D_INTERLACED:
 			// every other scanline
 			GL_SelectTexture( 0 );
-			stereoRenderImages[0]->Bind();
+			stereoRenderImages[0][currentEyeTexture]->Bind();
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 			
 			GL_SelectTexture( 1 );
-			stereoRenderImages[1]->Bind();
+			stereoRenderImages[1][currentEyeTexture]->Bind();
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 			
@@ -521,6 +563,8 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			break;
 	}
 	
+	// koz fixme old3Dmode = renderSystem->GetStereo3DMode();
+
 	// debug tool
 	RB_DrawFlickerBox();
 	
@@ -574,8 +618,22 @@ void RB_ExecuteBackEndCommands( const emptyCommand_t* cmds )
 	// If we have a stereo pixel format, this will draw to both
 	// the back left and back right buffers, which will have a
 	// performance penalty.
-	glDrawBuffer( GL_BACK );
-	
+
+	// koz - this was just handlede in GL_SetdefaultState. 
+	// glDrawBuffer( GL_BACK ); 
+
+	/*
+	Koz fixme, this should no longer be needed, test and delete.
+	if (VR_USE_FBO)
+	{
+	qglDrawBuffer(GL_COLOR_ATTACHMENT0);
+	}
+	else
+	{
+	qglDrawBuffer(GL_BACK);
+	} */
+
+
 	for( ; cmds != NULL; cmds = ( const emptyCommand_t* )cmds->next )
 	{
 		switch( cmds->commandId )

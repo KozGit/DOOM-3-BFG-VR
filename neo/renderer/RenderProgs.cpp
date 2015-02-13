@@ -144,6 +144,15 @@ void idRenderProgManager::Init()
 		// RB begin
 		{ BUILTIN_DEBUG_SHADOWMAP, "debug_shadowmap.vfp", "", 0, false },
 		// RB end
+
+		// Koz begin
+		{ BUILTIN_OCULUS_WARP, "oculusWarp.vfp", 0, false },
+		{ BUILTIN_OCULUS_WARP_CHRAB, "oculusWarpChrAb.vfp", 0, false },
+		//{ BUILTIN_OCULUS_WARP_TIMEWARP, "oculusWarpTimewarp.vfp", 0, false },
+		//{ BUILTIN_OCULUS_WARP_TIMEWARP_CHRAB, "oculusWarpTimewarpChrAb.vfp", 0, false },
+		//{ BUILTIN_VRFXAA, "oculusVrFxaa.vfp", 0, false },
+		// Koz end
+
 	};
 	int numBuiltins = sizeof( builtins ) / sizeof( builtins[0] );
 	vertexShaders.SetNum( numBuiltins );

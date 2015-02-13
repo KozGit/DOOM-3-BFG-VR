@@ -29,12 +29,23 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #include "../renderer/tr_local.h"
 
+#include "vr\vr.h" // koz
+bool renderingPDA = false; // koz
+
+
 idCVar swf_timescale( "swf_timescale", "1", CVAR_FLOAT, "timescale for swf files" );
 idCVar swf_stopat( "swf_stopat", "0", CVAR_FLOAT, "stop at a specific frame" );
 
 idCVar swf_titleSafe( "swf_titleSafe", "0.005", CVAR_FLOAT, "space between UI elements and screen edge", 0.0f, 0.075f );
 
 idCVar swf_forceAlpha( "swf_forceAlpha", "0", CVAR_FLOAT, "force an alpha value on all elements, useful to show invisible animating elements", 0.0f, 1.0f );
+
+// Koz begin
+idCVar vr_guiScale( "vr_guiScale", "0.4", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "scale reduction factor for full screen menu/pda scale in VR", 0.0001f, 0.9f ); //koz allow scaling of full screen guis/pda
+idCVar vr_hudScaleX( "vr_hudScaleX", "0.3", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "X scale reduction factor for hud element positions in VR", 0.0001f, 0.9f ); //scale hud positions so they will be visible in VR if wanted
+idCVar vr_hudScaleY( "vr_hudScaleY", "0.3", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "Y scale reduction factor for hud element positions in VR", 0.0001f, 0.9f ); //scale hud positions so they will be visible in VR if wanted
+// bool renderingPDA = false;
+// Koz end
 
 extern idCVar swf_textStrokeSize;
 extern idCVar swf_textStrokeSizeGlyphSpacer;

@@ -111,6 +111,14 @@ uniform float4 rpShadowMatrices[6*4]	:	register(c59);
 #endif
 // RB end
 
+// Koz begin
+uniform float4 rpEyeToSourceUVOffset	:	register(c60);
+uniform float4 rpEyeToSourceUVScale		:	register(c61);
+uniform float4 rpInverseResolution		:	register(c62);
+uniform float4 rpOverdriveScales		:	register(c63);
+uniform float4 rpVignetteFade			:	register(c64);
+// Koz end
+
 static float dot2( float2 a, float2 b ) { return dot( a, b ); }
 static float dot3( float3 a, float3 b ) { return dot( a, b ); }
 static float dot3( float3 a, float4 b ) { return dot( a, b.xyz ); }

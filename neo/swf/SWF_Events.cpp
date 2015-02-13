@@ -28,6 +28,11 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 #include "precompiled.h"
 
+// Koz begin
+idCVar vr_joystickMenuMapping( "vr_joystickMenuMapping", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, " Use alternate joy mapping\n in menus/PDA.\n 0 = D3 Standard\n 1 = VR Mode.\n(Both joys can nav menus,\n joy r/l to change\nselect area in PDA." );
+// Koz end
+
+
 /*
 ===================
 idSWF::HitTest
@@ -244,23 +249,44 @@ idSWFScriptObject* idSWF::HitTest( idSWFSpriteInstance* spriteInstance, const sw
 idSWF::HandleEvent
 ===================
 */
-bool idSWF::HandleEvent( const sysEvent_t* event )
+bool idSWF::HandleEvent( sysEvent_t* event ) // koz was const
 {
-	if( !IsLoaded() || !IsActive() || ( !inhibitControl && useInhibtControl ) )
+	if ( !IsLoaded() || !IsActive() || ( !inhibitControl && useInhibtControl ) )
 	{
 		return false;
 	}
-	if( event->evType == SE_KEY )
+	if ( event->evType == SE_KEY )
 	{
-		if( event->evValue == K_MOUSE1 )
+
+		/*	koz PDA - if the user is in VR, and the PDA menu is up,
+		he can use head tracking to controll the mouse in the
+		PDA menus.  We need to check for hydra buttons/triggers as
+		well as mouse clicks so the user can actually select
+		something with the hydras.
+		Update - I'm an idiot, and the user might not have a hydra,
+		and still want to select something with a controller,
+		so add some controller buttons too.
+		*/
+
+		if ( event->evValue == K_MOUSE1
+			|| event->evValue == K_L_HYDRATRIG 	// koz hydra left trigger
+			|| event->evValue == K_R_HYDRATRIG 	// koz hydra right trigger
+			//||	event->evValue == K_JOY17 		// koz hydra left button 1
+			//||	event->evValue == K_JOY24 		// koz hydra right button 1
+			|| event->evValue == K_JOY_TRIGGER1
+			|| event->evValue == K_JOY_TRIGGER2
+			//||	event->evValue == K_JOY2 
+			//||	event->evValue == K_JOY1
+			)
 		{
+
 			mouseEnabled = true;
 			idSWFScriptVar var;
-			if( event->evValue2 )
+			if ( event->evValue2 )
 			{
-			
+
 				idSWFScriptVar waitInput = globals->Get( "waitInput" );
-				if( waitInput.IsFunction() )
+				if ( waitInput.IsFunction() )
 				{
 					useMouse = false;
 					idSWFParmList waitParms;
@@ -272,15 +298,15 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				{
 					useMouse = true;
 				}
-				
+
 				idSWFScriptObject* hitObject = HitTest( mainspriteInstance, swfRenderState_t(), mouseX, mouseY, NULL );
-				if( hitObject != NULL )
+				if ( hitObject != NULL )
 				{
 					mouseObject = hitObject;
 					mouseObject->AddRef();
-					
+
 					var = hitObject->Get( "onPress" );
-					if( var.IsFunction() )
+					if ( var.IsFunction() )
 					{
 						idSWFParmList parms;
 						parms.Append( event->inputDevice );
@@ -288,9 +314,9 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 						parms.Clear();
 						return true;
 					}
-					
+
 					idSWFScriptVar var = hitObject->Get( "onDrag" );
-					if( var.IsFunction() )
+					if ( var.IsFunction() )
 					{
 						idSWFParmList parms;
 						parms.Append( mouseX );
@@ -301,18 +327,18 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 						return true;
 					}
 				}
-				
+
 				idSWFParmList parms;
 				parms.Append( hitObject );
 				Invoke( "setHitObject", parms );
-				
+
 			}
 			else
 			{
-				if( mouseObject )
+				if ( mouseObject )
 				{
 					var = mouseObject->Get( "onRelease" );
-					if( var.IsFunction() )
+					if ( var.IsFunction() )
 					{
 						idSWFParmList parms;
 						parms.Append( mouseObject ); // FIXME: Remove this
@@ -321,58 +347,150 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 					mouseObject->Release();
 					mouseObject = NULL;
 				}
-				if( hoverObject )
+				if ( hoverObject )
 				{
 					hoverObject->Release();
 					hoverObject = NULL;
 				}
-				
-				if( var.IsFunction() )
+
+				if ( var.IsFunction() )
 				{
 					return true;
 				}
 			}
-			
-			return false;
+
+			//return false; // koz fixme hydra this was just a return, but let hydra key events fall through
+
 		}
-		const char* keyName = idKeyInput::KeyNumToString( ( keyNum_t )event->evValue );
+
+		// koz begin
+		/* ==================================
+		koz some serious BS here.  By default, the PDA menu uses both joysticks for
+		navigation - left stick for user info and right stick to select an item from a submenu.
+		I don't think this works well with the hydras, or when using a gun style controller
+		like the top shot elite. I'm implementing a hack here so the user can A: use either
+		joystick for menu navigation and B: 'switch' which list in the PDA is being navigated
+		by moving the stick left or right.  This will be handled here, by intercepting the
+		joystick events, keeping track if the user has moved left or right, and modifying
+		the joystick event on the fly to reflect the left stick for primary menus and right stick
+		for sub menus in the PDA.
+		For any non-pda menus, all joystick values will be mapped to the left stick, as this is the
+		default for menu navigation.
+		====================================*/
+
+		const keyNum_t joyAxisSwap[8][2] = { K_JOY_STICK2_UP, K_JOY_STICK1_UP,
+			K_JOY_STICK2_DOWN, K_JOY_STICK1_DOWN,
+			K_JOY_STICK2_LEFT, K_JOY_STICK1_LEFT,
+			K_JOY_STICK2_RIGHT, K_JOY_STICK1_RIGHT,
+			K_HYDRA_RIGHT_STICK_UP, K_HYDRA_LEFT_STICK_UP,
+			K_HYDRA_RIGHT_STICK_DOWN, K_HYDRA_LEFT_STICK_DOWN,
+			K_HYDRA_RIGHT_STICK_LEFT, K_HYDRA_LEFT_STICK_LEFT,
+			K_HYDRA_RIGHT_STICK_RIGHT, K_HYDRA_LEFT_STICK_RIGHT,
+
+		}; // will map right stick and right hydra stick to left sticks for nav 
+
+
+		const int rightStick = 0;
+		const int leftStick = 1;
+		static int sourceAxis = 0;
+		static int destAxis = 0;
+		static idStr lastMenu = "none";
+		extern bool forceLeftStick;//  in the left PDA menu?
+		bool inPDAmenu = false;
+
+		keyNum_t keyValue = (keyNum_t)event->evValue;
+
+		if ( vr_joystickMenuMapping.GetBool() ) {
+			idStr thisMenu = GetName();
+
+			if ( thisMenu.Icmp( lastMenu.c_str() ) != 0 ) {
+				forceLeftStick = true;
+				lastMenu = thisMenu;
+			}
+
+			if ( thisMenu.Icmp( "swf/pda.swf" ) == 0 ) {
+				inPDAmenu = true;
+			}
+
+			if ( !inPDAmenu ) { // not in the PDA menu, force all stick axis movement to the left stick for menu control
+
+				forceLeftStick = true;
+
+			}
+			else { // we are in the PDA menu. handle toggling sticks and changing mappings as needed
+
+				if ( !forceLeftStick ) {
+					if ( keyValue == K_HYDRA_RIGHT_STICK_LEFT ||
+						keyValue == K_HYDRA_LEFT_STICK_LEFT ||
+						keyValue == K_JOY_STICK1_LEFT ||
+						keyValue == K_JOY_STICK2_LEFT ) {
+
+						forceLeftStick = true;
+					}
+				}
+				else {
+					if ( keyValue == K_HYDRA_RIGHT_STICK_RIGHT ||
+						keyValue == K_HYDRA_LEFT_STICK_RIGHT ||
+						keyValue == K_JOY_STICK1_RIGHT ||
+						keyValue == K_JOY_STICK2_RIGHT ) {
+
+						forceLeftStick = false;
+					}
+				}
+			}
+
+			if ( forceLeftStick ) { // in the pda map right stick movement to the left sticks if forced
+				sourceAxis = rightStick;
+				destAxis = leftStick;
+			}
+			else {
+				sourceAxis = leftStick; // map left sticks to right if in submenus
+				destAxis = rightStick;
+			}
+
+			for ( int j = 0; j<8; j++ ) { // swap the axis if needed
+				if ( joyAxisSwap[j][sourceAxis] == keyValue ) keyValue = joyAxisSwap[j][destAxis];
+			}
+		} // koz end joy remapping if requested
+
+		const char* keyName = idKeyInput::KeyNumToString( (keyNum_t)event->evValue );
 		idSWFScriptVar var = shortcutKeys->Get( keyName );
 		// anything more than 32 levels of indirection we can be pretty sure is an infinite loop
-		for( int runaway = 0; runaway < 32; runaway++ )
+		for ( int runaway = 0; runaway < 32; runaway++ )
 		{
 			idSWFParmList eventParms;
 			eventParms.Clear();
 			eventParms.Append( event->inputDevice );
-			if( var.IsString() )
+			if ( var.IsString() )
 			{
 				// alias to another key
 				var = shortcutKeys->Get( var.ToString() );
 				continue;
 			}
-			else if( var.IsObject() )
+			else if ( var.IsObject() )
 			{
 				// if this object is a sprite, send fake mouse events to it
 				idSWFScriptObject* object = var.GetObject();
 				// make sure we don't send an onRelease event unless we have already sent that object an onPress
 				bool wasPressed = object->Get( "_pressed" ).ToBool();
 				object->Set( "_pressed", event->evValue2 );
-				if( event->evValue2 )
+				if ( event->evValue2 )
 				{
 					var = object->Get( "onPress" );
 				}
-				else if( wasPressed )
+				else if ( wasPressed )
 				{
 					var = object->Get( "onRelease" );
 				}
-				if( var.IsFunction() )
+				if ( var.IsFunction() )
 				{
 					var.GetFunction()->Call( object, eventParms );
 					return true;
 				}
 			}
-			else if( var.IsFunction() )
+			else if ( var.IsFunction() )
 			{
-				if( event->evValue2 )
+				if ( event->evValue2 )
 				{
 					// anonymous functions only respond to key down events
 					var.GetFunction()->Call( NULL, eventParms );
@@ -380,25 +498,32 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				}
 				return false;
 			}
-			
+
 			idSWFScriptVar useFunction = globals->Get( "useFunction" );
-			if( useFunction.IsFunction() && event->evValue2 )
+			if ( useFunction.IsFunction() && event->evValue2 )
 			{
-				const char* action = idKeyInput::GetBinding( event->evValue );
-				if( idStr::Cmp( "_use", action ) == 0 )
+				// koz begin
+				//const char* action = idKeyInput::GetBinding( event->evValue );
+				const char * action = idKeyInput::GetBinding( keyValue );
+				// koz end
+				if ( idStr::Cmp( "_use", action ) == 0 )
 				{
 					useFunction.GetFunction()->Call( NULL, idSWFParmList() );
 				}
 			}
-			
+
 			idSWFScriptVar waitInput = globals->Get( "waitInput" );
-			if( waitInput.IsFunction() )
+			if ( waitInput.IsFunction() )
 			{
 				useMouse = false;
-				if( event->evValue2 )
+				if ( event->evValue2 )
 				{
 					idSWFParmList waitParms;
-					waitParms.Append( event->evValue );
+					// koz begin
+					// waitParms.Append( event->evValue );
+					waitParms.Append( keyValue );
+					// koz end
+
 					waitInput.GetFunction()->Call( NULL, waitParms );
 				}
 			}
@@ -406,30 +531,31 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 			{
 				useMouse = true;
 			}
-			
+
 			idSWFScriptVar focusWindow = globals->Get( "focusWindow" );
-			if( focusWindow.IsObject() )
+			if ( focusWindow.IsObject() )
 			{
 				idSWFScriptVar onKey = focusWindow.GetObject()->Get( "onKey" );
-				if( onKey.IsFunction() )
+				if ( onKey.IsFunction() )
 				{
-				
+
 					// make sure we don't send an onRelease event unless we have already sent that object an onPress
 					idSWFScriptObject* object = focusWindow.GetObject();
 					bool wasPressed = object->Get( "_kpressed" ).ToBool();
 					object->Set( "_kpressed", event->evValue2 );
-					if( event->evValue2 || wasPressed )
+					if ( event->evValue2 || wasPressed )
 					{
 						idSWFParmList parms;
-						parms.Append( event->evValue );
+						parms.Append( keyValue ); // koz parms.Append(event->evValue);
 						parms.Append( event->evValue2 );
 						onKey.GetFunction()->Call( focusWindow.GetObject(), parms ).ToBool();
 						return true;
 					}
-					else if( event->evValue == K_LSHIFT || event->evValue == K_RSHIFT )
+					//else if( event->evValue == K_LSHIFT || event->evValue == K_RSHIFT )
+					else if ( keyValue == K_LSHIFT || keyValue == K_RSHIFT ) // koz
 					{
 						idSWFParmList parms;
-						parms.Append( event->evValue );
+						parms.Append( keyValue ); // koz parms.Append(event->evValue);
 						parms.Append( event->evValue2 );
 						onKey.GetFunction()->Call( focusWindow.GetObject(), parms ).ToBool();
 					}
@@ -439,55 +565,55 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 		}
 		idLib::Warning( "Circular reference in %s shortcutKeys.%s", filename.c_str(), keyName );
 	}
-	else if( event->evType == SE_CHAR )
+	else if ( event->evType == SE_CHAR )
 	{
 		idSWFScriptVar focusWindow = globals->Get( "focusWindow" );
-		if( focusWindow.IsObject() )
+		if ( focusWindow.IsObject() )
 		{
 			idSWFScriptVar onChar = focusWindow.GetObject()->Get( "onChar" );
-			if( onChar.IsFunction() )
+			if ( onChar.IsFunction() )
 			{
 				idSWFParmList parms;
 				parms.Append( event->evValue );
-				parms.Append( idKeyInput::KeyNumToString( ( keyNum_t )event->evValue ) );
+				parms.Append( idKeyInput::KeyNumToString( (keyNum_t)event->evValue ) );
 				onChar.GetFunction()->Call( focusWindow.GetObject(), parms ).ToBool();
 				return true;
 			}
 		}
 	}
-	else if( event->evType == SE_MOUSE_ABSOLUTE || event->evType == SE_MOUSE )
+	else if ( event->evType == SE_MOUSE_ABSOLUTE || event->evType == SE_MOUSE )
 	{
 		mouseEnabled = true;
 		isMouseInClientArea = true;
-		
+
 		// Mouse position in screen space needs to be converted to SWF space
-		if( event->evType == SE_MOUSE_ABSOLUTE )
+		if ( event->evType == SE_MOUSE_ABSOLUTE )
 		{
 			const float pixelAspect = renderSystem->GetPixelAspect();
 			const float sysWidth = renderSystem->GetWidth() * ( pixelAspect > 1.0f ? pixelAspect : 1.0f );
 			const float sysHeight = renderSystem->GetHeight() / ( pixelAspect < 1.0f ? pixelAspect : 1.0f );
-			float scale = swfScale * sysHeight / ( float )frameHeight;
+			float scale = swfScale * sysHeight / (float)frameHeight;
 			float invScale = 1.0f / scale;
 			float tx = 0.5f * ( sysWidth - ( frameWidth * scale ) );
 			float ty = 0.5f * ( sysHeight - ( frameHeight * scale ) );
-			
+
 			mouseX = idMath::Ftoi( ( static_cast<float>( event->evValue ) - tx ) * invScale );
 			mouseY = idMath::Ftoi( ( static_cast<float>( event->evValue2 ) - ty ) * invScale );
 		}
 		else
 		{
-		
+
 			mouseX += event->evValue;
 			mouseY += event->evValue2;
-			
+
 			mouseX = Max( Min( mouseX, idMath::Ftoi( frameWidth + renderBorder ) ), idMath::Ftoi( 0.0f - renderBorder ) );
 			mouseY = Max( Min( mouseY, idMath::Ftoi( frameHeight ) ), 0 );
 		}
-		
+
 		bool retVal = false;
-		
+
 		idSWFScriptObject* hitObject = HitTest( mainspriteInstance, swfRenderState_t(), mouseX, mouseY, NULL );
-		if( hitObject != NULL )
+		if ( hitObject != NULL )
 		{
 			hasHitObject = true;
 		}
@@ -495,14 +621,14 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 		{
 			hasHitObject = false;
 		}
-		
-		if( hitObject != hoverObject )
+
+		if ( hitObject != hoverObject )
 		{
 			// First check to see if we should call onRollOut on our previous hoverObject
-			if( hoverObject != NULL )
+			if ( hoverObject != NULL )
 			{
 				idSWFScriptVar var = hoverObject->Get( "onRollOut" );
-				if( var.IsFunction() )
+				if ( var.IsFunction() )
 				{
 					var.GetFunction()->Call( hoverObject, idSWFParmList() );
 					retVal = true;
@@ -511,22 +637,22 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				hoverObject = NULL;
 			}
 			// Then call onRollOver on our hitObject
-			if( hitObject != NULL )
+			if ( hitObject != NULL )
 			{
 				hoverObject = hitObject;
 				hoverObject->AddRef();
 				idSWFScriptVar var = hitObject->Get( "onRollOver" );
-				if( var.IsFunction() )
+				if ( var.IsFunction() )
 				{
 					var.GetFunction()->Call( hitObject, idSWFParmList() );
 					retVal = true;
 				}
 			}
 		}
-		if( mouseObject != NULL )
+		if ( mouseObject != NULL )
 		{
 			idSWFScriptVar var = mouseObject->Get( "onDrag" );
-			if( var.IsFunction() )
+			if ( var.IsFunction() )
 			{
 				idSWFParmList parms;
 				parms.Append( mouseX );
@@ -538,11 +664,11 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 		}
 		return retVal;
 	}
-	else if( event->evType == SE_MOUSE_LEAVE )
+	else if ( event->evType == SE_MOUSE_LEAVE )
 	{
 		isMouseInClientArea = false;
 	}
-	else if( event->evType == SE_JOYSTICK )
+	else if ( event->evType == SE_JOYSTICK )
 	{
 		idSWFParmList parms;
 		parms.Append( event->evValue );

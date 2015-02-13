@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#include "vr\vr.h" // koz
+
 idRenderSystemLocal	tr;
 idRenderSystem* renderSystem = &tr;
 
@@ -329,7 +331,8 @@ idRenderSystemLocal::idRenderSystemLocal
 idRenderSystemLocal::idRenderSystemLocal() :
 	unitSquareTriangles( NULL ),
 	zeroOneCubeTriangles( NULL ),
-	testImageTriangles( NULL )
+	testImageTriangles( NULL ),
+	hudTriangles( NULL ) //koz hud mesh
 {
 	Clear();
 }
@@ -721,6 +724,8 @@ void idRenderSystemLocal::SwapCommandBuffers_FinishRendering(
 {
 	SCOPED_PROFILE_EVENT( "SwapCommandBuffers" );
 	
+	//VR_MotionSensor_FrameEnd(); // koz fixme oculus timing
+
 	if( gpuMicroSec != NULL )
 	{
 		*gpuMicroSec = 0;		// until shown otherwise
@@ -811,7 +816,8 @@ const emptyCommand_t* idRenderSystemLocal::SwapCommandBuffers_FinishCommandBuffe
 	backEnd.unitSquareSurface = tr.unitSquareSurface_;
 	backEnd.zeroOneCubeSurface = tr.zeroOneCubeSurface_;
 	backEnd.testImageSurface = tr.testImageSurface_;
-	
+	backEnd.hudSurface = tr.hudSurface_; // koz hud mesh
+
 	// use the other buffers next frame, because another CPU
 	// may still be rendering into the current buffers
 	R_ToggleSmpFrame();
@@ -842,6 +848,8 @@ const emptyCommand_t* idRenderSystemLocal::SwapCommandBuffers_FinishCommandBuffe
 	R_InitDrawSurfFromTri( tr.unitSquareSurface_, *tr.unitSquareTriangles );
 	R_InitDrawSurfFromTri( tr.zeroOneCubeSurface_, *tr.zeroOneCubeTriangles );
 	R_InitDrawSurfFromTri( tr.testImageSurface_, *tr.testImageTriangles );
+	R_InitDrawSurfFromTri( tr.hudSurface_, *tr.hudTriangles ); //koz hud mesh
+
 	
 	// Reset render crop to be the full screen
 	renderCrops[0].x1 = 0;

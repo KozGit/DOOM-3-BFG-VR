@@ -186,7 +186,7 @@ idCommonLocal::MenuEvent
 Executes any commands returned by the gui
 ==============
 */
-bool idCommonLocal::MenuEvent( const sysEvent_t* event )
+bool idCommonLocal::MenuEvent( sysEvent_t* event ) // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
 {
 
 	if( session->GetSignInManager().ProcessInputEvent( event ) )

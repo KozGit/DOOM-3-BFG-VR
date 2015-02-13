@@ -34,6 +34,13 @@ If you have questions concerning this license or the applicable additional terms
 
 idCVar binaryLoadAnim( "binaryLoadAnim", "1", 0, "enable binary load/write of idMD5Anim" );
 
+// Koz begin
+idCVar vr_disableWeaponAnimation( "vr_disableWeaponAnimation", "1", 0, "Disable weapon animations in VR. (1 = disabled)"); 
+extern idCVar vr_hydraMode;
+// Koz end
+
+
+
 static const byte B_ANIM_MD5_VERSION = 101;
 static const unsigned int B_ANIM_MD5_MAGIC = ( 'B' << 24 ) | ( 'M' << 16 ) | ( 'D' << 8 ) | B_ANIM_MD5_VERSION;
 
@@ -121,6 +128,26 @@ idMD5Anim::Length
 */
 int idMD5Anim::Length() const
 {
+	extern idCVar vr_enable;
+
+	if ( vr_disableWeaponAnimation.GetBool() && vr_enable.GetBool() )
+	{	// koz - disable weapon idle animations in VR, so aim is only affected by hydra.
+		// Originally set the length to 1 at animation load time, but this way the user can toggle
+		// animations without having to reload them all.  
+
+		if ( ( strstr( name, "artifact" ) ||
+			strstr( name, "bfg" ) ||
+			strstr( name, "chaingun" ) ||
+			strstr( name, "grenade" ) ||
+			strstr( name, "machinegun" ) ||
+			strstr( name, "pistol" ) ||
+			strstr( name, "plasma" ) ||
+			strstr( name, "shotgun" ) ) && strstr( name, "idle" ) )
+		{
+			return 1;	// set anmination length to 1
+		}
+	}
+	
 	return animLength;
 }
 

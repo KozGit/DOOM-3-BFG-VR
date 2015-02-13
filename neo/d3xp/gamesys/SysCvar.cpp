@@ -150,7 +150,6 @@ idCVar g_dvTime(					"g_dvTime",					"1",			CVAR_GAME | CVAR_FLOAT, "" );
 idCVar g_dvAmplitude(				"g_dvAmplitude",			"0.001",		CVAR_GAME | CVAR_FLOAT, "" );
 idCVar g_dvFrequency(				"g_dvFrequency",			"0.5",			CVAR_GAME | CVAR_FLOAT, "" );
 
-//Carl: Jose sets this to 0 to disable head kicks in VR
 idCVar g_kickTime(					"g_kickTime",				"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "");
 idCVar g_kickAmplitude(				"g_kickAmplitude",			"0.0001",		CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "");
 
@@ -274,7 +273,7 @@ idCVar pm_thirdPersonClip(			"pm_thirdPersonClip",		"1",			CVAR_GAME | CVAR_NETW
 idCVar pm_thirdPerson(				"pm_thirdPerson",			"0",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL, "enables third person view" );
 idCVar pm_thirdPersonDeath(			"pm_thirdPersonDeath",		"0",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_BOOL, "enables third person view when player dies" );
 idCVar pm_modelView(				"pm_modelView",				"0",			CVAR_GAME | CVAR_NETWORKSYNC | CVAR_INTEGER, "draws camera from POV of player model (1 = always, 2 = when dead)", 0, 2, idCmdSystem::ArgCompletion_Integer<0,2> );
-idCVar pm_showBody(					"pm_showBody",				"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_NETWORKSYNC | CVAR_BOOL, "shows your body in 1st person (see your legs when you look down)"); //Carl
+idCVar pm_showBody(					"pm_showBody",				"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_NETWORKSYNC | CVAR_BOOL, "shows your body in 1st person (see your legs when you look down.)"); //Carl
 
 idCVar pm_airMsec(					"pm_air",					"30000",		CVAR_GAME | CVAR_NETWORKSYNC | CVAR_INTEGER, "how long in milliseconds the player can go without air before he starts taking damage" );
 
@@ -282,10 +281,12 @@ idCVar g_showPlayerShadow(			"g_showPlayerShadow",		"0",			CVAR_GAME | CVAR_ARCH
 idCVar g_showHud(					"g_showHud",				"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "" );
 idCVar g_showProjectilePct(			"g_showProjectilePct",		"0",			CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "enables display of player hit percentage" );
 idCVar g_showBrass(					"g_showBrass",				"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_BOOL, "enables ejected shells from weapon" );
-idCVar g_gun_x(						"g_gunX",					"3",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar g_gun_y(						"g_gunY",					"0",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar g_gun_z(						"g_gunZ",					"0",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar g_gunScale(					"g_gunScale",				"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+// koz fixme
+//idCVar g_gun_x(						"g_gunX",					"3",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+//idCVar g_gun_y(						"g_gunY",					"0",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+//idCVar g_gun_z(						"g_gunZ",					"0",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+//idCVar g_gunScale(					"g_gunScale",				"1",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+// koz end
 idCVar g_viewNodalX(				"g_viewNodalX",				"3",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 idCVar g_viewNodalZ(				"g_viewNodalZ",				"6",			CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 // RB: fixed missing CVAR_ARCHIVE

@@ -32,6 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "Common_local.h"
 #include "../sys/sys_lobby_backend.h"
 
+#include "renderer\AutoRender.h" // koz background saving/loading to enable smooth headtracking on static load/save screens
+#include "sys\win32\win_local.h" //koz
+#include "vr\vr.h"				 // koz
 
 #define LAUNCH_TITLE_DOOM_EXECUTABLE		"doom1.exe"
 #define LAUNCH_TITLE_DOOM2_EXECUTABLE		"doom2.exe"
@@ -422,7 +425,7 @@ void idCommonLocal::ExecuteMapChange()
 	// ensure that r_znear is reset to the default value
 	// this fixes issues with the projection matrix getting messed up when switching maps or loading a saved game
 	// while an in-game cinematic is playing.
-	cvarSystem->SetCVarFloat( "r_znear", 1.0f ); // koz was 3.0f??
+	cvarSystem->SetCVarFloat( "r_znear", 1.0f ); // koz was 3.0f
 	
 	// reset all cheat cvars for a multiplayer game
 	if( IsMultiplayer() )
@@ -493,7 +496,7 @@ void idCommonLocal::ExecuteMapChange()
 	LoadLoadingGui( currentMapName, hellMap );
 	
 	// Stop rendering the wipe
-	ClearWipe();
+	ClearWipe(); // Koz skip this to leave the screen black during loads.
 	
 	
 	if( fileSystem->UsingResourceFiles() )
@@ -622,12 +625,48 @@ void idCommonLocal::ExecuteMapChange()
 				emptyCommandManager.PutUserCmdForPlayer( playerIndex, usercmd_t() );
 			}
 			game->RunFrame( emptyCommandManager, emptyGameReturn );
+
+			// Koz fixme only in vr
+			// Koz: make sure to maintain smooth heatracking of loading screen when running frames.
+			VR_HMDTrackStatic();
+			SwapBuffers(win32.hDC);
+			glFinish();
 		}
 		
 		// kick off an auto-save of the game (so we can always continue in this map if we die before hitting an autosave)
 		common->Printf( "----- Saving Game -----\n" );
-		SaveGame( "autosave" );
+
+		// Koz: start the save in a background thread.
+		// keep this tread busy headtracking the dialog until complete.		
+		// koz fixme only in vr
+		
+		//	SaveGame("autosave"); // these two lines were the original save code.
+		//}
+
+		//Dialog().ShowSaveIndicator( true );
+		//UpdateLevelLoadPacifier();
+		//	for ( int i = 0; i < 100; i++ ) {
+		//		BusyWait();
+		//	}
+
+		vrIsBackgroundSaving = true;
+		rAutoRender.StartBackgroundAutoSwaps( (autoRenderIconType_t) 0 ); // koz fixme start thread, need to rename rAutoRender
+		//SaveGame( "autosave" );
+		while ( vrIsBackgroundSaving == true )
+		{
+			VR_HMDTrackStatic();
+			SwapBuffers(win32.hDC);
+			glFinish();
+		}
+
 	}
+
+	StartWipe( "wipeMaterial", true );
+	CompleteWipe();
+	glClearColor( 0, 0, 0, 1 );
+	glClear( GL_COLOR_BUFFER_BIT);
+	// Koz : end background save.
+
 	
 	common->Printf( "----- Generating Interactions -----\n" );
 	
@@ -868,6 +907,8 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	soundSystem->SetPlayingSoundWorld( menuSoundWorld );
 	soundSystem->Render();
 	
+/* Koz fixme : implement this. shows saving dialog during save. currently disabled for smooth headtracking.
+
 	Dialog().ShowSaveIndicator( true );
 	if( insideExecuteMapChange )
 	{
@@ -883,7 +924,7 @@ bool idCommonLocal::SaveGame( const char* saveName )
 		}
 		renderSystem->BeginAutomaticBackgroundSwaps( AUTORENDER_DIALOGICON );
 	}
-	
+*/	
 	// Make sure the file is writable and the contents are cleared out (Set to write from the start of file)
 	saveFile.MakeWritable();
 	saveFile.Clear( false );

@@ -606,6 +606,13 @@ void idImageManager::CreateIntrinsicImages()
 	currentRenderImage = ImageFromFunction( "_currentRender", R_RGBA8Image );
 	currentDepthImage = ImageFromFunction( "_currentDepth", R_DepthImage );
 	
+    // Koz begin
+    // pdaImage - the rendered PDA screen will be copied to this image to use as a texture on the pda model
+	// hudImage - the rendered hud/menus will be rendered to this image to use as a texture for the hud model
+	pdaImage = ImageFromFunction("_pdaImage", R_RGBA8Image);
+	hudImage = ImageFromFunction("_hudImage", R_RGBA8Image);
+	// Koz end
+
 	// save a copy of this for material comparison, because currentRenderImage may get
 	// reassigned during stereo rendering
 	originalCurrentRenderImage = currentRenderImage;

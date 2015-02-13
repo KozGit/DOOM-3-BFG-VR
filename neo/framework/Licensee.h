@@ -38,6 +38,8 @@ If you have questions concerning this license or the applicable additional terms
 #define GAME_NAME						"DOOM 3: BFG Edition"		// appears on window titles and errors
 
 // RB: changed home folder so we don't break the savegame of the original game
+// Koz : changed again to keep VR variant separate
+
 #define SAVE_PATH						"\\id Software\\DOOM 3 BFG VR"
 
 #define ENGINE_VERSION					"DOOM 3 BFG VR 0.1.0.3 (based on RBDOOM 3 BFG 1.0.3)"	// printed in console

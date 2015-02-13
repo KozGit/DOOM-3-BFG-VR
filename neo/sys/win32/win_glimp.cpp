@@ -886,7 +886,7 @@ void DumpAllDisplayDevices()
 class idSort_VidMode : public idSort_Quick< vidMode_t, idSort_VidMode >
 {
 public:
-	int Compare( const vidMode_t& a, const vidMode_t& b ) const
+	int Compare( const vidMode_t& b, const vidMode_t& a ) const // koz, switched a & b to sort w/ highest res first.
 	{
 		int wd = a.width - b.width;
 		int hd = a.height - b.height;
@@ -895,6 +895,166 @@ public:
 	}
 };
 // RB end
+
+// Koz begin
+/*=========================
+Koz - code to try to retrieve the monitor model name from EDID data in the windows registry.
+I think that if microsoft worked really, really hard, they could obfuscate this a little more,
+and come up with a less robust method to retrieve this info. Maybe.
+It's conceivable that this code wont work as intended in all windows variations, so displaying the monitor
+model name can be disabled with the cvar 'vr_listMonitorName' if this behaves poorly.
+=========================*/
+
+#include "tchar.h"
+#include <string>
+#include <SetupApi.h>
+#include <cfgmgr32.h>
+#pragma comment( lib, "setupapi.lib" )
+
+#define NAME_SIZE 128
+const GUID GUID_CLASS_MONITOR = { 0x4d36e96e, 0xe325, 0x11ce, 0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18 };
+
+// Assumes hDevRegKey is valid
+bool GetMonitorNameFromEDID( const HKEY hDevRegKey, idStr& monitorName )
+{
+	BYTE nameID[5];
+	nameID[0] = 0x00;
+	nameID[1] = 0x00;
+	nameID[2] = 0x00;
+	nameID[3] = 0xFC;
+	nameID[4] = 0x00;     //"\0x00\0x00\0x00\0xFC\0x00" is the model name identifier in the EDID data);
+
+	DWORD dwType, AcutalValueNameLength = NAME_SIZE;
+	TCHAR valueName[NAME_SIZE];
+
+	BYTE EDIDdata[1024];
+	DWORD edidsize = sizeof( EDIDdata );
+
+	for ( LONG i = 0, retValue = ERROR_SUCCESS; retValue != ERROR_NO_MORE_ITEMS; ++i )
+	{
+		retValue = RegEnumValue( hDevRegKey, i, &valueName[0],
+			&AcutalValueNameLength, NULL, &dwType,
+			EDIDdata, // buffer
+			&edidsize ); // buffer size
+
+		if ( retValue != ERROR_SUCCESS || 0 != _tcscmp( valueName, _T( "EDID" ) ) )
+			continue;
+
+		int r, position = 0;
+		int found = 0;
+
+		for ( r = 0; r < 1019 && !found; r++ )
+		{
+
+			if ( EDIDdata[r] == nameID[0] &&
+				EDIDdata[r + 1] == nameID[1] &&
+				EDIDdata[r + 2] == nameID[2] &&
+				EDIDdata[r + 3] == nameID[3] &&
+				EDIDdata[r + 4] == nameID[4] )
+			{
+
+				position = r + 5;
+				found = true;
+				break;
+			}
+		}
+
+		if ( !found )
+		{
+			return false;
+		}
+
+		char mname[1023] = {};
+		int moff = 0;
+
+		EDIDdata[1023] = 0;// make sure there is a zero temination
+
+		if ( position < 1004 )
+		{
+			EDIDdata[position + 19] = 0; // limit name to 20 chars max.
+		}
+
+		for ( position; position<1023; position++ )
+		{
+			mname[moff] = EDIDdata[position];
+
+			if ( EDIDdata[position] == 0x00 )
+			{
+				break;
+			}
+			moff++;
+		}
+
+		mname[moff] = 0x00;
+
+		sprintf( monitorName, "%s", (char *)mname );
+		monitorName.StripTrailingWhitespace();
+
+		return true;
+
+	}
+
+	return false; // EDID not found
+}
+
+bool GetNameForDevID( const idStr& TargetDevID, idStr& monitorName )
+{
+	HDEVINFO devInfo = SetupDiGetClassDevsEx(
+		&GUID_CLASS_MONITOR, //class GUID
+		NULL, //enumerator
+		NULL, //HWND
+		DIGCF_PRESENT, // Flags //DIGCF_ALLCLASSES|
+		NULL, // device info, create a new one.
+		NULL, // machine name, local machine
+		NULL );// reserved
+
+	if ( NULL == devInfo )
+		return false;
+
+	bool bRes = false;
+
+	for ( ULONG i = 0; ERROR_NO_MORE_ITEMS != GetLastError(); ++i )
+	{
+		SP_DEVINFO_DATA devInfoData;
+		memset( &devInfoData, 0, sizeof( devInfoData ) );
+		devInfoData.cbSize = sizeof( devInfoData );
+
+		if ( SetupDiEnumDeviceInfo( devInfo, i, &devInfoData ) )
+		{
+			TCHAR Instance[MAX_DEVICE_ID_LEN];
+			SetupDiGetDeviceInstanceId( devInfo, &devInfoData, Instance, MAX_PATH, NULL );
+
+			idStr sInstance;
+			sprintf( sInstance, "%s", Instance );
+
+			if ( -1 == sInstance.Find( TargetDevID.c_str(), false ) )
+			{
+				continue;
+			}
+
+			//common->Printf("\nMonitor instance %s *FOUND*\n",sInstance.c_str());
+
+			HKEY hDevRegKey = SetupDiOpenDevRegKey( devInfo, &devInfoData,
+				DICS_FLAG_GLOBAL, 0, DIREG_DEV, KEY_READ );
+
+			if ( !hDevRegKey || ( hDevRegKey == INVALID_HANDLE_VALUE ) )
+				continue;
+
+			bRes = GetMonitorNameFromEDID( hDevRegKey, monitorName );
+
+			RegCloseKey( hDevRegKey );
+			if ( bRes )
+			{
+				SetupDiDestroyDeviceInfoList( devInfo );
+				return bRes;
+			}
+		}
+	}
+	SetupDiDestroyDeviceInfoList( devInfo );
+	return bRes;
+}
+
+// Koz end 
 
 /*
 ====================
@@ -907,6 +1067,12 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t>& 
 	
 	bool	verbose = false;
 	
+	// Koz begin
+	idStr DeviceID = "";
+	idStr monitorName = "";
+	bool nameFound = false;
+	// Koz end
+
 	for( int displayNum = requestedDisplayNum; ; displayNum++ )
 	{
 		DISPLAY_DEVICE	device;
@@ -955,6 +1121,20 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t>& 
 			common->Printf( "      DeviceKey   : %s\n", monitor.DeviceKey );
 		}
 		
+		// Koz begin
+		// koz fixme allow cvar to skip this
+		sprintf( DeviceID, "%s", monitor.DeviceID );
+		DeviceID = DeviceID.Mid( 8, DeviceID.Find( "\\", false, 9 ) - 8 );
+		if ( verbose ) common->Printf( "\nSearching for monitor %s\n", DeviceID.c_str() );
+
+		if ( GetNameForDevID( DeviceID.c_str(), monitorName ) )
+		{
+			nameFound = true;
+			if ( verbose ) common->Printf( "Monitor found %s\n", monitorName.c_str() );
+		}
+
+		// Koz end
+
 		for( int modeNum = 0 ; ; modeNum++ )
 		{
 			if( !EnumDisplaySettings( device.DeviceName, modeNum, &devmode ) )
@@ -991,12 +1171,21 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t>& 
 			mode.width = devmode.dmPelsWidth;
 			mode.height = devmode.dmPelsHeight;
 			mode.displayHz = devmode.dmDisplayFrequency;
+
+			// Koz begin
+			if ( nameFound )
+			{
+				mode.displayName = monitorName.c_str(); // koz monitor model name
+			}
+			// Koz end
+
+
 			modeList.AddUnique( mode );
 		}
 		
 		if( modeList.Num() > 0 )
 		{
-			// sort with lowest resolution first
+			// Koz changed to sort with highest resolution first.
 			modeList.SortWithTemplate( idSort_VidMode() );
 			
 			return true;

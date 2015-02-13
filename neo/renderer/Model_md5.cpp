@@ -45,6 +45,9 @@ static const unsigned int MD5B_MAGIC = ( '5' << 24 ) | ( 'D' << 16 ) | ( 'M' << 
 
 idCVar r_useGPUSkinning( "r_useGPUSkinning", "1", CVAR_INTEGER, "animate normals and tangents instead of deriving" );
 
+//Koz
+idCVar vr_viewModelArms( "vr_viewModelArms", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, " Display arms on view models in VR" );
+
 /***********************************************************************
 
 	idMD5Mesh
@@ -772,11 +775,18 @@ bool idRenderModelMD5::LoadBinaryModel( idFile* file, const ID_TIME_T sourceTime
 	meshes.SetNum( tempNum );
 	for( int i = 0; i < meshes.Num(); i++ )
 	{
-	
+		bool isPDAmesh = false; // koz
+                
 		idStr materialName;
 		file->ReadString( materialName );
-		if( materialName.IsEmpty() )
-		{
+		// Koz if we dont want floating forearms, remove the references to the arm and hand textures
+		// for the weapon & item viewmodels. ( have to perform the weapon and item name check 
+		// so the cinematic models still have arms.)
+		if ( materialName.IsEmpty() ||
+			( !vr_viewModelArms.GetBool() && // koz fixme only do this in vr
+			( strstr( file->GetName(), "weapons") || strstr( file->GetName(), "items" ) ) &&
+			( materialName == "models/characters/player/arm2" || materialName == "models/weapons/hands/hand" ) ) )
+		{ // Koz Look Ma - no hands! 
 			meshes[i].shader = NULL;
 		}
 		else
@@ -784,6 +794,23 @@ bool idRenderModelMD5::LoadBinaryModel( idFile* file, const ID_TIME_T sourceTime
 			meshes[i].shader = declManager->FindMaterial( materialName );
 		}
 		
+		//Koz begin
+
+		extern bool hasOculusRift;
+		
+        if ( hasOculusRift ) // koz fixme only in vr
+		{
+			if ( materialName == "textures/common/pda_gui" )
+			{
+				// koz pda  - change material to _pdaImage instead of deault genericmap.gui
+				// this allows rendering the PDA & swf menus to the model ingame.
+				// koz fixme just create a new model for VR and dont hack on load.
+				meshes[i].shader = declManager->FindMaterial( "_pdaImage" );
+				isPDAmesh = true;
+			}
+		}
+		// Koz end
+
 		file->ReadBig( meshes[i].numVerts );
 		file->ReadBig( meshes[i].numTris );
 		
@@ -821,7 +848,131 @@ bool idRenderModelMD5::LoadBinaryModel( idFile* file, const ID_TIME_T sourceTime
 			file->ReadBigArray( deform.indexes, deform.numIndexes );
 			file->ReadBigArray( deform.silIndexes, deform.numIndexes );
 		}
-		
+		/* KOZ begin PDA
+		We want to render the PDA screen onto the model in VR, instead of a full screen GUI.
+		To do this, we'll copy the rendered full screen gui from the framebuffer to a texture. This
+		results in the imaged being inverted. To correct this, invert the texture coordinates
+		for the gui while it's loading. Koz fixme - create new model instead of hacking in code
+		Update: we are also rotating the texture coords now to use the PDA in landscape mode.
+		Update2: also need to apply a surface to the PDA screen so we can hitscan and
+		send mouse commands based on head movement. this is not working right yet.
+        Did I mention I want to create a new model?
+		*/
+
+		if ( isPDAmesh /*materialName=="_pdaImage"*/ ) // material will only have this name if we changed it to support the rift
+		{
+
+			srfTriangles_t	tri2;
+			memset( &tri2, 0, sizeof( srfTriangles_t ) );
+			tri2.verts = deform.verts;
+
+			for ( int j = 0; j < deform.numOutputVerts; j++ )
+			{
+				common->Printf( "Munging PDA Vertex %d x = %f, y = %f, z =%f\n", j, tri2.verts[j].xyz.x, tri2.verts[j].xyz.y, tri2.verts[j].xyz.z );
+			}
+
+
+			tri2.verts++->SetTexCoord( 0, 1 ); // set the new inverted/rotated texture coords.
+			tri2.verts++->SetTexCoord( 0, 0 );
+			tri2.verts++->SetTexCoord( 1, 1 );
+			tri2.verts->SetTexCoord( 1, 0 );
+
+            // Koz fixme : everything below this line is crap. Fix it all.
+            // the whole PDA model hitscan implementation is wrong, need to figure out
+		    // a better way and do it right, or don't do it at all.
+            // Do we really need to control the cursor with our view? that's all this is for.
+            // mouse and joystick will work fine without dealing with surfaces and clipmodels etc.
+
+			modelSurface_t  pdasurface;
+			srfTriangles_t * pdageometry;
+
+			pdasurface.id = 999999999;
+			pdasurface.shader = declManager->FindMaterial( "_pdaImage" );
+
+			pdageometry = R_AllocStaticTriSurf();
+			assert( pdageometry != NULL );
+
+			idVec3 bounds0( -3.466643f, -2.718928f, 1.426082f );// hope these are right, got them from the pda worldmodel lwo. may need to manually calc.
+			idVec3 bounds1( 3.465192f, 5.145287f, 1.426083f );
+
+			pdageometry->bounds[0] = bounds0;
+			pdageometry->bounds[1] = bounds1;
+			pdageometry->generateNormals = false;
+			pdageometry->tangentsCalculated = false;
+			pdageometry->perfectHull = false;
+			pdageometry->referencedIndexes = false;
+			pdageometry->numVerts = deform.numOutputVerts;
+			pdageometry->numIndexes = deform.numIndexes;
+			pdageometry->staticModelWithJoints = NULL;
+
+			srfTriangles_t surftri2;
+			memset(&surftri2, 0, sizeof(srfTriangles_t));
+
+			tri2.verts = deform.verts;
+			tri2.indexes = deform.indexes;
+			tri2.silIndexes = deform.silIndexes;
+
+			R_AllocStaticTriSurfVerts(&surftri2, pdageometry->numVerts);
+			assert(surftri2.verts != NULL);
+			int indexSize = pdageometry->numVerts * sizeof(tri2.verts[0]);
+			memcpy(surftri2.verts, tri2.verts, indexSize);
+			pdageometry->verts = surftri2.verts;
+
+			pdageometry->verts[0].xyz = idVec3(-5.0f, -20.0f, 20.0f);
+			pdageometry->verts[1].xyz = idVec3(-5.0f, 20.0f, 20.0f);
+			pdageometry->verts[2].xyz = idVec3(-5.0f, -20.0f, -20.0f);
+			pdageometry->verts[3].xyz = idVec3(-5.0f, 20.0f, -20.0f);
+
+			R_AllocStaticTriSurfIndexes(&surftri2, pdageometry->numIndexes);
+			assert(surftri2.indexes != NULL);
+			indexSize = pdageometry->numIndexes * sizeof(tri2.indexes[0]);
+			memcpy(surftri2.indexes, tri2.indexes, indexSize);
+			pdageometry->indexes = surftri2.indexes;
+
+			R_AllocStaticTriSurfSilIndexes(&surftri2, pdageometry->numIndexes);
+			//assert(surftri2.SilIndexes != NULL );
+			assert(surftri2.silIndexes != NULL);
+			indexSize = pdageometry->numIndexes * sizeof(tri2.silIndexes[0]);
+			memcpy(surftri2.silIndexes, tri2.silIndexes, indexSize);
+			pdageometry->silIndexes = surftri2.silIndexes;
+
+			common->Printf("Alloc surftri.numIndexes = %d\n", pdageometry->numIndexes);
+
+
+			pdageometry->preLightShadowVertexes = NULL;
+			pdageometry->silIndexes = NULL;
+			pdageometry->mirroredVerts = NULL;
+			pdageometry->dupVerts = NULL;
+			pdageometry->silEdges = NULL;
+			pdageometry->dominantTris = NULL;
+			pdageometry->numShadowIndexesNoCaps = 0;
+			pdageometry->numShadowIndexesNoFrontCaps = 0;
+			pdageometry->shadowCapPlaneBits = 0;
+			pdageometry->ambientSurface = NULL;
+			pdageometry->nextDeferredFree = NULL;
+			pdageometry->indexCache = 0;
+			pdageometry->ambientCache = 0;
+			pdageometry->shadowCache = 0;
+
+			pdasurface.geometry = pdageometry;
+
+			AddSurface(pdasurface);
+
+			/*
+			//old inversion code
+			int x1 = 0;
+			idVec2 tempvert1 = vec2_zero;
+			for (x1 = 0; x1 < deform.numOutputVerts; x1++ ) {
+			tempvert1 = tri2.verts->GetTexCoord();
+			tempvert1.y = 1 - tempvert1.y; // invert the Y texture coordinate
+			tri2.verts->SetTexCoord(tempvert1);
+			common->Printf("Converting PDA tex ver %d x %f y%f\n",x1,tempvert1.x,tempvert1.y);
+			tri2.verts++;
+			}
+			*/
+		}
+		// Koz end PDA
+
 		if( deform.numMirroredVerts > 0 )
 		{
 			R_AllocStaticTriSurfMirroredVerts( &tri, deform.numMirroredVerts );
@@ -1073,11 +1224,29 @@ void idRenderModelMD5::LoadModel()
 		invertedDefaultPose[i].Invert();
 	}
 	SIMD_INIT_LAST_JOINT( invertedDefaultPose.Ptr(), joints.Num() );
-	
+
+	idStr materialName; // Koz
+    	
 	for( int i = 0; i < meshes.Num(); i++ )
 	{
 		parser.ExpectTokenString( "mesh" );
 		meshes[i].ParseMesh( parser, defaultPose.Num(), poseMat );
+
+		// koz begin
+		// koz fixme only do this in vr
+		// koz remove hands from weapon & pda viewmodels if desired.
+		extern idCVar vr_enable;
+        if ( !vr_viewModelArms.GetBool() && vr_enable.GetBool() )
+		{
+			materialName = meshes[i].shader->GetName();
+			if ( materialName.IsEmpty() ||
+				( ( strstr( this->Name(), "weapons" ) || strstr( this->Name(), "items" ) ) &&
+				( materialName == "models/characters/player/arm2" || materialName == "models/weapons/hands/hand" ) ) )
+			{
+				meshes[i].shader = NULL; // Koz Look Ma - no hands! 
+			}
+		}
+		// koz end
 	}
 	
 	// calculate the bounds of the model

@@ -2028,6 +2028,8 @@ idActor::SetDeltaViewAngles
 */
 void idActor::SetDeltaViewAngles( const idAngles& delta )
 {
+	// koz check :this should be OK now in VR - make sure unintentional view changes have all been addressed.
+	// was zero'd in previous versions to prevent 
 	deltaViewAngles = delta;
 }
 

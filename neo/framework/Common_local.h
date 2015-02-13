@@ -190,8 +190,8 @@ public:
 	virtual void				NetReceiveUsercmds( int peer, idBitMsg& msg );
 	void						NetReadUsercmds( int clientNum, idBitMsg& msg );
 	
-	virtual bool				ProcessEvent( const sysEvent_t* event );
-	
+	virtual bool				ProcessEvent( sysEvent_t* event ); // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+
 	virtual bool				LoadGame( const char* saveName );
 	virtual bool				SaveGame( const char* saveName );
 	
@@ -552,8 +552,8 @@ private:
 	void	CheckStartupStorageRequirements();
 	
 	void	ExitMenu();
-	bool	MenuEvent( const sysEvent_t* event );
-	
+	bool	MenuEvent( sysEvent_t* event ); // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+
 	void	StartMenu( bool playIntro = false );
 	void	GuiFrameEvents();
 	

@@ -34,6 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_local.h"
 #include "Framebuffer.h"
 
+#include "vr\vr.h" // koz
+
 idCVar r_drawEyeColor( "r_drawEyeColor", "0", CVAR_RENDERER | CVAR_BOOL, "Draw a colored box, red = left eye, blue = right eye, grey = non-stereo" );
 idCVar r_motionBlur( "r_motionBlur", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "1 - 5, log2 of the number of motion blur samples" );
 idCVar r_forceZPassStencilShadows( "r_forceZPassStencilShadows", "0", CVAR_RENDERER | CVAR_BOOL, "force Z-pass rendering for performance testing" );
@@ -45,6 +47,9 @@ idCVar r_useLightStencilSelect( "r_useLightStencilSelect", "0", CVAR_RENDERER | 
 extern idCVar stereoRender_swapEyes;
 
 backEndState_t	backEnd;
+
+ovrPosef qPose; // koz fixme = hmdTrackingState.HeadPose.ThePose;
+int qframeIndex = 0; // koz
 
 /*
 ================
@@ -283,6 +288,186 @@ void RB_DrawElementsWithCounters( const drawSurf_t* surf )
 	backEnd.pc.c_drawElements++;
 	backEnd.pc.c_drawIndexes += surf->numIndexes;
 	// RB end
+}
+/*
+================
+Koz draw triangle strips.
+RB_DrawStripWithCounters
+================
+*/
+void RB_DrawStripWithCounters( const drawSurf_t *surf ) {
+	// get vertex buffer
+	const vertCacheHandle_t vbHandle = surf->ambientCache;
+	idVertexBuffer * vertexBuffer;
+	if ( vertexCache.CacheIsStatic( vbHandle ) ) {
+		vertexBuffer = &vertexCache.staticData.vertexBuffer;
+	}
+	else {
+		const uint64 frameNum = (int)( vbHandle >> VERTCACHE_FRAME_SHIFT ) & VERTCACHE_FRAME_MASK;
+		if ( frameNum != ( ( vertexCache.currentFrame - 1 ) & VERTCACHE_FRAME_MASK ) ) {
+			idLib::Warning( "RB_DrawElementsWithCounters, vertexBuffer == NULL" );
+			return;
+		}
+		vertexBuffer = &vertexCache.frameData[vertexCache.drawListNum].vertexBuffer;
+	}
+	const int vertOffset = (int)( vbHandle >> VERTCACHE_OFFSET_SHIFT ) & VERTCACHE_OFFSET_MASK;
+
+	// get index buffer
+	const vertCacheHandle_t ibHandle = surf->indexCache;
+	idIndexBuffer * indexBuffer;
+	if ( vertexCache.CacheIsStatic( ibHandle ) ) {
+		indexBuffer = &vertexCache.staticData.indexBuffer;
+	}
+	else {
+		const uint64 frameNum = (int)( ibHandle >> VERTCACHE_FRAME_SHIFT ) & VERTCACHE_FRAME_MASK;
+		if ( frameNum != ( ( vertexCache.currentFrame - 1 ) & VERTCACHE_FRAME_MASK ) ) {
+			idLib::Warning( "RB_DrawElementsWithCounters, indexBuffer == NULL" );
+			return;
+		}
+		indexBuffer = &vertexCache.frameData[vertexCache.drawListNum].indexBuffer;
+	}
+	const int indexOffset = (int)( ibHandle >> VERTCACHE_OFFSET_SHIFT ) & VERTCACHE_OFFSET_MASK;
+
+	RENDERLOG_PRINTF( "Binding Buffers: %p:%i %p:%i\n", vertexBuffer, vertOffset, indexBuffer, indexOffset );
+
+	if ( surf->jointCache ) {
+		if ( !verify( renderProgManager.ShaderUsesJoints() ) ) {
+			return;
+		}
+	}
+	else {
+		if ( !verify( !renderProgManager.ShaderUsesJoints() || renderProgManager.ShaderHasOptionalSkinning() ) ) {
+			return;
+		}
+	}
+
+
+	if ( surf->jointCache ) {
+		idJointBuffer jointBuffer;
+		if ( !vertexCache.GetJointBuffer( surf->jointCache, &jointBuffer ) ) {
+			idLib::Warning( "RB_DrawElementsWithCounters, jointBuffer == NULL" );
+			return;
+		}
+		assert( ( jointBuffer.GetOffset() & ( glConfig.uniformBufferOffsetAlignment - 1 ) ) == 0 );
+
+		const GLuint ubo = reinterpret_cast< GLuint >( jointBuffer.GetAPIObject() );
+		glBindBufferRange( GL_UNIFORM_BUFFER, 0, ubo, jointBuffer.GetOffset(), jointBuffer.GetNumJoints() * sizeof( idJointMat ) );
+	}
+
+	renderProgManager.CommitUniforms();
+
+	if ( backEnd.glState.currentIndexBuffer != (GLuint)indexBuffer->GetAPIObject() || !r_useStateCaching.GetBool() ) {
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER_ARB, (GLuint)indexBuffer->GetAPIObject() );
+		backEnd.glState.currentIndexBuffer = (GLuint)indexBuffer->GetAPIObject();
+	}
+
+	if ( ( backEnd.glState.vertexLayout != LAYOUT_DRAW_VERT ) || ( backEnd.glState.currentVertexBuffer != (GLuint)vertexBuffer->GetAPIObject() ) || !r_useStateCaching.GetBool() ) {
+		glBindBuffer( GL_ARRAY_BUFFER_ARB, (GLuint)vertexBuffer->GetAPIObject() );
+		backEnd.glState.currentVertexBuffer = (GLuint)vertexBuffer->GetAPIObject();
+
+		glEnableVertexAttribArray( PC_ATTRIB_INDEX_VERTEX );
+		glEnableVertexAttribArray( PC_ATTRIB_INDEX_NORMAL );
+		glEnableVertexAttribArray( PC_ATTRIB_INDEX_COLOR );
+		glEnableVertexAttribArray( PC_ATTRIB_INDEX_COLOR2 );
+		glEnableVertexAttribArray( PC_ATTRIB_INDEX_ST );
+		glEnableVertexAttribArray( PC_ATTRIB_INDEX_TANGENT );
+
+		glVertexAttribPointer( PC_ATTRIB_INDEX_VERTEX, 3, GL_FLOAT, GL_FALSE, sizeof( idDrawVert ), (void *)( DRAWVERT_XYZ_OFFSET ) );
+		glVertexAttribPointer( PC_ATTRIB_INDEX_NORMAL, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof( idDrawVert ), (void *)( DRAWVERT_NORMAL_OFFSET ) );
+		glVertexAttribPointer( PC_ATTRIB_INDEX_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof( idDrawVert ), (void *)( DRAWVERT_COLOR_OFFSET ) );
+		glVertexAttribPointer( PC_ATTRIB_INDEX_COLOR2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof( idDrawVert ), (void *)( DRAWVERT_COLOR2_OFFSET ) );
+		glVertexAttribPointer( PC_ATTRIB_INDEX_ST, 2, GL_HALF_FLOAT, GL_TRUE, sizeof( idDrawVert ), (void *)( DRAWVERT_ST_OFFSET ) );
+		glVertexAttribPointer( PC_ATTRIB_INDEX_TANGENT, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof( idDrawVert ), (void *)( DRAWVERT_TANGENT_OFFSET ) );
+
+		backEnd.glState.vertexLayout = LAYOUT_DRAW_VERT;
+	}
+
+	glDrawElementsBaseVertex( GL_TRIANGLES,
+		surf->numIndexes,
+		GL_INDEX_TYPE,
+		(triIndex_t *)indexOffset,
+		vertOffset / sizeof( idDrawVert ) );
+
+}
+
+/*
+================
+// Koz Oculus distortion mesh
+RB_DrawDistortionMesh
+================
+*/
+void RB_DrawDistortionMesh( int eye, bool timewarp, int ocuframe, ovrPosef thePose ) 
+{
+	void GL_SetupShaderDistortion( int eye );
+	extern ovrTrackingState hmdTrackingState;
+	extern hmdEye_t hmdEye[2];
+	extern ovrFrameTiming hmdFrameTime;
+
+	extern ovrHmd hmd;
+
+	static vertexLayoutType_t layout;
+	static GLuint EyeRotationStart;
+	static GLuint EyeRotationEnd;
+
+	static int progr = 0;
+	if ( eye )
+	{
+		layout = LAYOUT_DRAW_DISTORTION_VERT_1;
+	}
+	else
+	{
+		layout = LAYOUT_DRAW_DISTORTION_VERT_0;
+	}
+
+	if ( backEnd.glState.vertexLayout != layout ) // vertex layout is not correct for this eye
+	{
+		// bind vertex and index buffers for this eye mesh.
+		glBindBuffer( GL_ARRAY_BUFFER, hmdEye[eye].vbo.vertBuffHandle );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, hmdEye[eye].vbo.indexBuffHandle );
+
+		// set vertex attrib pointers
+		glVertexAttribPointer( PC_ATTRIB_INDEX_DIST_POS, 2, GL_FLOAT, GL_FALSE, sizeof( distortionVert_t ), (const GLvoid *)offsetof( distortionVert_t, pos ) );
+		glVertexAttribPointer( PC_ATTRIB_INDEX_DIST_TEXR, 2, GL_FLOAT, GL_TRUE, sizeof( distortionVert_t ), (const GLvoid *)offsetof( distortionVert_t, texR ) );
+		glVertexAttribPointer( PC_ATTRIB_INDEX_DIST_TEXG, 2, GL_FLOAT, GL_TRUE, sizeof( distortionVert_t ), (const GLvoid *)offsetof( distortionVert_t, texG ) );
+		glVertexAttribPointer( PC_ATTRIB_INDEX_DIST_TEXB, 2, GL_FLOAT, GL_TRUE, sizeof( distortionVert_t ), (const GLvoid *)offsetof( distortionVert_t, texB ) );
+		glVertexAttribPointer( PC_ATTRIB_INDEX_DIST_DCOLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof( distortionVert_t ), (const GLvoid *)offsetof( distortionVert_t, color ) );
+
+		//Enable distortion vertex attribs
+		glEnableVertexAttribArray( PC_ATTRIB_INDEX_DIST_POS );
+		glEnableVertexAttribArray( PC_ATTRIB_INDEX_DIST_TEXR );
+		glEnableVertexAttribArray( PC_ATTRIB_INDEX_DIST_TEXG );
+		glEnableVertexAttribArray( PC_ATTRIB_INDEX_DIST_TEXB );
+		glEnableVertexAttribArray( PC_ATTRIB_INDEX_DIST_DCOLOR );
+
+		backEnd.glState.vertexLayout = layout;
+		backEnd.glState.currentIndexBuffer = hmdEye[eye].vbo.indexBuffHandle;
+		backEnd.glState.currentVertexBuffer = hmdEye[eye].vbo.vertBuffHandle;
+
+	}
+
+	if ( timewarp && 0 ) 	{
+
+		renderProgManager.BindShader_OculusWarpTimewarp();
+		// koz fixme ovr_WaitTillTime(hmdFrameTime.TimewarpPointSeconds);
+
+		progr = renderProgManager.GetGLSLCurrentProgram();
+		EyeRotationStart = glGetUniformLocation( progr, "EyeRotationStart" );
+		EyeRotationEnd = glGetUniformLocation( progr, "EyeRotationEnd" );
+
+		ovrMatrix4f timeWarpMatrices[2];
+		ovrHmd_GetEyeTimewarpMatrices( hmd, (ovrEyeType)eye, thePose, timeWarpMatrices );
+
+		glUniformMatrix4fv( EyeRotationStart, 1, GL_TRUE, (GLfloat *)timeWarpMatrices[0].M );
+		glUniformMatrix4fv( EyeRotationEnd, 1, GL_TRUE, (GLfloat *)timeWarpMatrices[1].M );
+
+	}
+
+	//renderProgManager.BindShader_OculusWarp();
+	GL_SetupShaderDistortion( eye );
+
+	//draw the distortion mesh for this eye
+	glDrawElements( GL_TRIANGLES, hmdEye[eye].vbo.numIndexes, GL_UNSIGNED_SHORT, (void*)0 );
+
 }
 
 /*
@@ -4242,6 +4427,20 @@ void RB_PostProcess( const void* data )
 	int screenWidth = renderSystem->GetWidth();
 	int screenHeight = renderSystem->GetHeight();
 	
+	// koz fixme verify still necessary.
+	// Koz begin
+	if ( VR_USE_FBO )
+	{
+		GL_CheckErrors();
+		VR_BindFBO( GL_FRAMEBUFFER, VR_FBO );
+		GL_CheckErrors();
+	}
+	else
+	{
+		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+		glDrawBuffer( GL_BACK );
+	}
+	// Koz end
 	// set the window clipping
 	GL_Viewport( 0, 0, screenWidth, screenHeight );
 	GL_Scissor( 0, 0, screenWidth, screenHeight );

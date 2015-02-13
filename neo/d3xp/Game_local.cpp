@@ -2559,7 +2559,8 @@ void idGameLocal::RunFrame( idUserCmdMgr& cmdMgr, gameReturn_t& ret )
 	
 	player = GetLocalPlayer();
 	
-	if( !common->IsMultiplayer() && g_stopTime.GetBool() )
+	extern bool VR_GAME_PAUSED; // koz fixme vr pause
+	if (!common->IsMultiplayer() && g_stopTime.GetBool() || VR_GAME_PAUSED) // koz vr pause
 	{
 		// clear any debug lines from a previous frame
 		gameRenderWorld->DebugClearLines( time + 1 );
@@ -3042,29 +3043,35 @@ idGameLocal::CalcFov
 Calculates the horizontal and vertical field of view based on a horizontal field of view and custom aspect ratio
 ====================
 */
-void idGameLocal::CalcFov( float base_fov, float& fov_x, float& fov_y ) const
+void idGameLocal::CalcFov(float base_fov, float& fov_x, float& fov_y) const
 {
+	// koz begin
+	extern bool hasHMD; 
+	extern idCVar vr_enable; 
+	extern float hmdFovX; 
+	extern float hmdFovY; 
+	// koz end
 	const int width = renderSystem->GetWidth();
 	const int height = renderSystem->GetHeight();
-	if( width == height )
+		
+	if ( vr_enable.GetBool() && hasHMD ) // koz fixme  : this is the Rift, so don't mess with our aspect ratio corrections
 	{
-		// this is the Rift, so don't mess with our aspect ratio corrections
-		fov_x = base_fov;
-		fov_y = base_fov;
+		fov_x = hmdFovX;
+		fov_y = hmdFovY;
 		return;
 	}
-	
+
 	// Calculate the fov_y based on an ideal aspect ratio
 	const float ideal_ratio_x = 16.0f;
 	const float ideal_ratio_y = 9.0f;
-	const float tanHalfX = idMath::Tan( DEG2RAD( base_fov * 0.5f ) );
-	fov_y = 2.0f * RAD2DEG( idMath::ATan( ideal_ratio_y * tanHalfX, ideal_ratio_x ) );
-	
+	const float tanHalfX = idMath::Tan(DEG2RAD(base_fov * 0.5f));
+	fov_y = 2.0f * RAD2DEG(idMath::ATan(ideal_ratio_y * tanHalfX, ideal_ratio_x));
+
 	// Then calculate fov_x based on the true aspect ratio
 	const float ratio_x = width * renderSystem->GetPixelAspect();
 	const float ratio_y = height;
-	const float tanHalfY = idMath::Tan( DEG2RAD( fov_y * 0.5f ) );
-	fov_x = 2.0f * RAD2DEG( idMath::ATan( ratio_x * tanHalfY, ratio_y ) );
+	const float tanHalfY = idMath::Tan(DEG2RAD(fov_y * 0.5f));
+	fov_x = 2.0f * RAD2DEG(idMath::ATan(ratio_x * tanHalfY, ratio_y));
 }
 
 /*
@@ -3108,7 +3115,7 @@ bool idGameLocal::Draw( int clientNum )
 idGameLocal::HandleGuiCommands
 ================
 */
-bool idGameLocal::HandlePlayerGuiEvent( const sysEvent_t* ev )
+bool idGameLocal::HandlePlayerGuiEvent( sysEvent_t* ev ) // koz fixme was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
 {
 
 	idPlayer* player = GetLocalPlayer();
@@ -5772,7 +5779,7 @@ bool idGameLocal::Shell_IsActive() const
 idGameLocal::Shell_HandleGuiEvent
 ========================
 */
-bool idGameLocal::Shell_HandleGuiEvent( const sysEvent_t* sev )
+bool idGameLocal::Shell_HandleGuiEvent( sysEvent_t* sev ) // koz fixme was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
 {
 	if( shellHandler != NULL )
 	{

@@ -57,7 +57,7 @@ const float THIRD_PERSON_FOCUS_DISTANCE	= 512.0f;
 const int	LAND_DEFLECT_TIME = 150;
 const int	LAND_RETURN_TIME = 300;
 const int	FOCUS_TIME = 300;
-const int	FOCUS_GUI_TIME = 500;
+const int	FOCUS_GUI_TIME = 200; // koz fixme, only change in VR. was 500, reduced to 200 to drop weapon out of guis faster.
 const int	NUM_QUICK_SLOTS = 4;
 
 const int MAX_WEAPONS = 32;
@@ -287,7 +287,18 @@ public:
 	
 	renderEntity_t			laserSightRenderEntity;	// replace crosshair for 3DTV
 	qhandle_t				laserSightHandle;
-	
+	// Koz begin
+	bool					laserSightActive; // koz allow lasersight toggle
+
+	renderEntity_t			headingBeamEntity; // koz add a heading indicator pointing the direction the players body is facing.
+	qhandle_t				headingBeamHandle;
+	bool					headingBeamActive;
+
+	bool					PDAfixed; // koz has the PDA been fixed in space?
+	idVec3					PDAorigin; // koz 
+	idMat3					PDAaxis; // koz
+	// Koz end
+		
 	bool					noclip;
 	bool					godmode;
 	
@@ -295,8 +306,12 @@ public:
 	idAngles				spawnAngles;
 	idAngles				viewAngles;			// player view angles
 	idAngles				cmdAngles;			// player cmd angles
-	float					independentWeaponPitchAngle;	// viewAngles[PITCH} when head tracking is active
-	
+
+	// Koz begin
+	float					independentWeaponPitch; // deltas to provide aim independent of body/view orientation
+	float					independentWeaponYaw;
+	// Koz end
+
 	// For interpolating angles between snapshots
 	idQuat					previousViewQuat;
 	idQuat					nextViewQuat;
@@ -421,6 +436,8 @@ public:
 	// if a third person view is used
 	idVec3					firstPersonViewOrigin;
 	idMat3					firstPersonViewAxis;
+
+	idVec3					firstPersonWeaponOrigin; // koz independent weapons
 	
 	idDragEntity			dragEntity;
 	
@@ -447,6 +464,12 @@ public:
 	void					Think();
 	
 	void					UpdateLaserSight();
+	
+	// Koz begin
+	void					ToggleLaserSight(); // koz
+	void					UpdateHeadingBeam(); // koz heading indicator
+	void					ToggleHeadingBeam(); // koz
+	// Koz end
 	
 	// save games
 	void					Save( idSaveGame* savefile ) const;					// archives object for save game file
@@ -526,9 +549,16 @@ public:
 	float					DefaultFov() const;
 	float					CalcFov( bool honorZoom );
 	void					CalculateViewWeaponPos( idVec3& origin, idMat3& axis );
+
+	// Koz begin
+	void					CalculateViewFlashPos(idVec3 &origin, idMat3 &axis, idVec3 flashOffset); // koz aim the flashlight with the hydra
+	void					ModelOriginOffsets(idVec3 &origin, idMat3 &axis); // koz dev test weapon model origin offsets
+	void					ModelOriginOffsetsQuat(idVec3 &origin, idMat3 &axis); // koz dev test weapon model origin offsets
+	// Koz end
+
 	idVec3					GetEyePosition() const;
 	void					GetViewPos( idVec3& origin, idMat3& axis ) const;
-	void					GetViewPosVR(idVec3& origin, idMat3& axis) const; // koz
+	void					GetViewPosVR(idVec3& origin, idMat3& axis) const; // koz fixme
 
 	void					OffsetThirdPersonView( float angle, float range, float height, bool clip );
 	
@@ -620,7 +650,7 @@ public:
 		return focusGUIent != NULL;
 	}
 	
-	bool					HandleGuiEvents( const sysEvent_t* ev );
+	bool					HandleGuiEvents( sysEvent_t* ev ); // koz fixme was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
 	void					PerformImpulse( int impulse );
 	void					Spectate( bool spectate, bool force = false );
 	void					TogglePDA();
@@ -941,6 +971,9 @@ private:
 	void					BobCycle( const idVec3& pushVelocity );
 	void					UpdateViewAngles();
 	void					EvaluateControls();
+
+	void					OrientHMDBody(); // koz reset hmd/body orientations
+
 	void					AdjustSpeed();
 	void					AdjustBodyAngles();
 	void					InitAASLocation();

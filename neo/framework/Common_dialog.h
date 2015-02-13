@@ -300,8 +300,8 @@ public:
 	
 	void	ClearAllDialogHack();
 	idStr	GetDialogMsg( gameDialogMessages_t msg, idStr& message, idStr& title );
-	bool	HandleDialogEvent( const sysEvent_t* sev );
-	
+	bool	HandleDialogEvent( sysEvent_t* sev ); // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+
 protected:
 	void	RemoveWaitDialogs();
 	void	ShowDialog( const idDialogInfo& info );

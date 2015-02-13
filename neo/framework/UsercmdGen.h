@@ -77,6 +77,11 @@ const int IMPULSE_29			= 29;			// quick 1
 const int IMPULSE_30			= 30;			// quick 2
 const int IMPULSE_31			= 31;			// quick 3
 
+//koz 
+const int IMPULSE_32 = 32;			// KOZ HMD/Body orientation reset
+const int IMPULSE_33 = 33;			// KOZ toggle lasersight on/off
+//koz end
+
 class usercmd_t
 {
 public:
@@ -184,6 +189,12 @@ typedef enum
 	UB_IMPULSE29,
 	UB_IMPULSE30,
 	UB_IMPULSE31,
+
+	// Koz begin
+	UB_IMPULSE32, // Koz impulse for HMD/Body orientation reset
+	UB_IMPULSE33, // Koz impulse for lasersight toggle
+	// Koz end
+
 	
 	UB_MAX_BUTTONS
 } usercmdButton_t;

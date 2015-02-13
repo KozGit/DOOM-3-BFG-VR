@@ -31,6 +31,15 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+#include "vr\vr.h" // koz
+
+// Koz fixme - for pda guitracing, need to eliminate these and do it the right way.
+idCVar vv_height( "vv_height", "30", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "" );
+idCVar vv_width( "vv_width", "30", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "" );
+idCVar vv_depth( "vv_depth", "-5", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "" );
+idCVar vv_hoffset( "vv_hoffset", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "" );
+idCVar vv_woffset( "vv_woffset", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "" );
+
 /*
 ===================
 R_ListRenderLightDefs_f
@@ -1234,6 +1243,28 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, const idVec3 st
 	pt.x = pt.y = -1;
 	pt.guiId = 0;
 	
+	// koz begin
+	// koz fixeme this is for hacked PDA guitracing, get rid of this crap and figure out how to do it right
+	idVec3 v0, v1, v2, v3;
+
+	float whalf, hhalf, vdepth, hoffset, woffset;
+
+	whalf = vv_width.GetFloat() / 2;
+	hhalf = vv_height.GetFloat() / 2;
+
+	vdepth = vv_depth.GetFloat();
+	hoffset = vv_hoffset.GetFloat();
+	woffset = vv_woffset.GetFloat();
+
+	v0 = idVec3( vdepth, -whalf + woffset, hhalf + hoffset );
+	v1 = idVec3( vdepth, whalf + woffset, hhalf + hoffset );
+	v2 = idVec3( vdepth, -whalf + woffset, -hhalf + hoffset );
+	v3 = idVec3( vdepth, whalf + woffset, -hhalf + hoffset );
+
+	bool isPDA = false;
+	extern bool PDAclipModelSet;
+	// koz end
+
 	if( ( entityHandle < 0 ) || ( entityHandle >= entityDefs.Num() ) )
 	{
 		common->Printf( "idRenderWorld::GuiTrace: invalid handle %i\n", entityHandle );
@@ -1248,11 +1279,25 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, const idVec3 st
 	}
 	
 	idRenderModel* model = def->parms.hModel;
-	if( model == NULL || model->IsDynamicModel() != DM_STATIC || def->parms.callback != NULL )
+	if( model == NULL ) // koz || model->IsDynamicModel() != DM_STATIC || def->parms.callback != NULL )
 	{
 		return pt;
 	}
 	
+	// Koz begin
+	// koz fixme allow the PDA model to be traced. 
+
+	if ( game->IsPDAOpen() && PDAclipModelSet )
+	{
+		isPDA = ( idStr::Icmp( "models/md5/items/pda_view/idle.md5mesh", model->Name() ) == 0 );
+	}
+
+	if ( ( model->IsDynamicModel() != DM_STATIC || def->parms.callback != NULL ) && !isPDA )
+	{
+		return pt;
+	}
+	// Koz end
+
 	// transform the points into local space
 	idVec3 localStart, localEnd;
 	R_GlobalPointToLocal( def->modelMatrix, start, localStart );
@@ -1279,6 +1324,18 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, const idVec3 st
 			continue;
 		}
 		
+		// Koz begin
+		// Koz fixme
+		if ( isPDA )
+		{
+			// overwrite surface coords for testing
+			tri->verts[0].xyz = v0;
+			tri->verts[1].xyz = v1;
+			tri->verts[2].xyz = v2;
+			tri->verts[3].xyz = v3;
+		}
+		// Koz end
+
 		localTrace_t local = R_LocalTrace( localStart, localEnd, 0.0f, tri );
 		if( local.fraction < 1.0f )
 		{

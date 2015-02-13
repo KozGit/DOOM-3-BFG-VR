@@ -32,6 +32,13 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+// koz begin
+#include "vr\vr.h"
+idCVar vr_oculusFov("vr_oculusFov", "1", CVAR_BOOL, " use the oculus fov values");
+idCVar vr_flip("vr_flip", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "");
+// koz end
+
+
 /*
 ==========================================================================================
 
@@ -413,7 +420,7 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 	// frames are going to be blended together
 	// for motion blurred anti-aliasing
 	float jitterx, jittery;
-	if( r_jitter.GetBool() )
+	if ( r_jitter.GetBool() )
 	{
 		static idRandom random;
 		jitterx = random.RandomFloat();
@@ -424,45 +431,59 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 		jitterx = 0.0f;
 		jittery = 0.0f;
 	}
-	
+
 	//
 	// set up projection matrix
 	//
+
+	float ymax, ymin, xmax, xmin, width, height = 0; // koz
+
 	const float zNear = ( viewDef->renderView.cramZNear ) ? ( r_znear.GetFloat() * 0.25f ) : r_znear.GetFloat();
-	
-	float ymax = zNear * tan( viewDef->renderView.fov_y * idMath::PI / 360.0f );
-	float ymin = -ymax;
-	
-	float xmax = zNear * tan( viewDef->renderView.fov_x * idMath::PI / 360.0f );
-	float xmin = -xmax;
-	
-	const float width = xmax - xmin;
-	const float height = ymax - ymin;
-	
+
+	if ( hasHMD && hasOculusRift ) // koz use oculus provided FOV values for HMD
+	{
+		ymax = zNear * hmdEye[currentRiftEye].eyeFov.UpTan;
+		ymin = -zNear * hmdEye[currentRiftEye].eyeFov.DownTan;
+
+		xmax = zNear * hmdEye[currentRiftEye].eyeFov.RightTan;
+		xmin = -zNear * hmdEye[currentRiftEye].eyeFov.LeftTan;
+	}
+	else
+	{
+		ymax = zNear * tan( viewDef->renderView.fov_y * idMath::PI / 360.0f );
+		ymin = -ymax;
+
+		xmax = zNear * tan( viewDef->renderView.fov_x * idMath::PI / 360.0f );
+		xmin = -xmax;
+	}
+
+	width = xmax - xmin;
+	height = ymax - ymin;
+
 	const int viewWidth = viewDef->viewport.x2 - viewDef->viewport.x1 + 1;
 	const int viewHeight = viewDef->viewport.y2 - viewDef->viewport.y1 + 1;
-	
+
 	jitterx = jitterx * width / viewWidth;
 	jitterx += r_centerX.GetFloat();
 	jitterx += viewDef->renderView.stereoScreenSeparation;
 	xmin += jitterx * width;
 	xmax += jitterx * width;
-	
+
 	jittery = jittery * height / viewHeight;
 	jittery += r_centerY.GetFloat();
 	ymin += jittery * height;
 	ymax += jittery * height;
-	
+
 	viewDef->projectionMatrix[0 * 4 + 0] = 2.0f * zNear / width;
 	viewDef->projectionMatrix[1 * 4 + 0] = 0.0f;
-	viewDef->projectionMatrix[2 * 4 + 0] = ( xmax + xmin ) / width;	// normally 0
+	viewDef->projectionMatrix[2 * 4 + 0] = (xmax + xmin) / width;	// normally 0
 	viewDef->projectionMatrix[3 * 4 + 0] = 0.0f;
-	
+
 	viewDef->projectionMatrix[0 * 4 + 1] = 0.0f;
 	viewDef->projectionMatrix[1 * 4 + 1] = 2.0f * zNear / height;
-	viewDef->projectionMatrix[2 * 4 + 1] = ( ymax + ymin ) / height;	// normally 0
+	viewDef->projectionMatrix[2 * 4 + 1] = (ymax + ymin) / height;	// normally 0
 	viewDef->projectionMatrix[3 * 4 + 1] = 0.0f;
-	
+
 	// this is the far-plane-at-infinity formulation, and
 	// crunches the Z range slightly so w=0 vertexes do not
 	// rasterize right at the wraparound point
@@ -470,13 +491,13 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 	viewDef->projectionMatrix[1 * 4 + 2] = 0.0f;
 	viewDef->projectionMatrix[2 * 4 + 2] = -0.999f; // adjust value to prevent imprecision issues
 	viewDef->projectionMatrix[3 * 4 + 2] = -2.0f * zNear;
-	
+
 	viewDef->projectionMatrix[0 * 4 + 3] = 0.0f;
 	viewDef->projectionMatrix[1 * 4 + 3] = 0.0f;
 	viewDef->projectionMatrix[2 * 4 + 3] = -1.0f;
 	viewDef->projectionMatrix[3 * 4 + 3] = 0.0f;
-	
-	if( viewDef->renderView.flipProjection )
+
+	if ( viewDef->renderView.flipProjection )
 	{
 		viewDef->projectionMatrix[1 * 4 + 1] = -viewDef->projectionMatrix[1 * 4 + 1];
 		viewDef->projectionMatrix[1 * 4 + 3] = -viewDef->projectionMatrix[1 * 4 + 3];
@@ -487,14 +508,28 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 // RB: standard OpenGL projection matrix
 void R_SetupProjectionMatrix2( const viewDef_t* viewDef, const float zNear, const float zFar, float projectionMatrix[16] )
 {
-	float ymax = zNear * tan( viewDef->renderView.fov_y * idMath::PI / 360.0f );
-	float ymin = -ymax;
+	// Koz changing to allow the use of Oculus FOV values instead of the game FOV.
+	float ymax, ymin, xmax, xmin, width, height = 0; 
 	
-	float xmax = zNear * tan( viewDef->renderView.fov_x * idMath::PI / 360.0f );
-	float xmin = -xmax;
-	
-	const float width = xmax - xmin;
-	const float height = ymax - ymin;
+	if ( hasHMD && hasOculusRift ) // koz use oculus provided FOV values for HMD
+	{
+		ymax = zNear * hmdEye[currentRiftEye].eyeFov.UpTan;
+		ymin = -zNear * hmdEye[currentRiftEye].eyeFov.DownTan;
+
+		xmax = zNear * hmdEye[currentRiftEye].eyeFov.RightTan;
+		xmin = -zNear * hmdEye[currentRiftEye].eyeFov.LeftTan;
+	}
+	else
+	{
+		ymax = zNear * tan(viewDef->renderView.fov_y * idMath::PI / 360.0f);
+		ymin = -ymax;
+
+		xmax = zNear * tan(viewDef->renderView.fov_x * idMath::PI / 360.0f);
+		xmin = -xmax;
+	}
+		
+	width = xmax - xmin;
+	height = ymax - ymin;
 	
 	const int viewWidth = viewDef->viewport.x2 - viewDef->viewport.x1 + 1;
 	const int viewHeight = viewDef->viewport.y2 - viewDef->viewport.y1 + 1;

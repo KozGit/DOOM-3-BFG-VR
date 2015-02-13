@@ -105,7 +105,9 @@ void Framebuffer::Bind()
 		RB_LogComment( "--- Framebuffer::Bind( name = '%s' ) ---\n", fboName.c_str() );
 	}
 #endif
-	
+
+	common->Printf("--- Framebuffer::Bind( name = '%s' ) ---\n", fboName.c_str()); // koz fixme delete this only for debugging
+
 	if( backEnd.glState.currentFramebuffer != this )
 	{
 		glBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );

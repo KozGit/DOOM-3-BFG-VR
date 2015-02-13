@@ -51,6 +51,88 @@ typedef enum
 	WP_LOWERING
 } weaponStatus_t;
 
+typedef enum { // koz weapon enumerations
+	NO_WEAPON = 0,
+	WEAPON_FISTS,
+	WEAPON_CHAINSAW,
+	WEAPON_PISTOL,
+	WEAPON_SHOTGUN,
+	WEAPON_MACHINEGUN,
+	WEAPON_CHAINGUN,
+	WEAPON_HANDGRENADE,
+	WEAPON_PLASMAGUN,
+	WEAPON_ROCKETLAUNCHER,
+	WEAPON_BFG,
+	WEAPON_SOULCUBE,
+	WEAPON_SHOTGUN_DOUBLE,
+	WEAPON_SHOTGUN_DOUBLE_MP,
+	WEAPON_GRABBER,
+	WEAPON_ARTIFACT,
+	WEAPON_PDA,
+	WEAPON_NUM_WEAPONS
+} weapon_t;
+
+// koz flashOffsets - values are used to move flashlight model to 'mount' to the active weapon.  Hacky McCrappyHack was here.
+const idVec3 flashOffsets[ int( WEAPON_NUM_WEAPONS ) ] = {	idVec3( 0.0f, 0.0f, 0.0f ),			// NO_WEAPON
+															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_FISTS
+															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_CHAINSAW
+															idVec3( -4.0f, -9.0f, -1.6f ),		// WEAPON_PISTOL
+															idVec3( -4.0f, -12.0f, -0.6f ),		// WEAPON_SHOTGUN
+															idVec3( -2.0f, -12.0f, -0.8f ),		// WEAPON_MACHINEGUN
+															idVec3( 0.2f, -14.75f, -5.5f ),		// WEAPON_CHAINGUN
+															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_HANDGRENADE
+															idVec3( -5.0f, -10.0f, -0.75f ),	// WEAPON_PLASMAGUN
+															idVec3( 0.1f, -15.0f, -0.75f ),		// WEAPON_ROCKETLAUNCHER
+															idVec3( -1.75f, -10.0f, -7.1f ),	// WEAPON_BFG
+															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_SOULCUBE
+															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_SHOTGUN_DOUBLE
+															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_SHOTGUN_DOUBLE_MP
+															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_GRABBER
+															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_ARTIFACT
+															idVec3( 0.0f, 0.0f, 0.0f )			// WEAPON_PDA
+};
+
+// koz weaponOriginOffsets - offsets to move local origin of weapon viewmodels to be centered around grip/hand location
+const idVec3 weaponOriginOffsets[ int( WEAPON_NUM_WEAPONS ) ] = {	idVec3( 0.0f, 0.0f, 0.0f ),			// NO_WEAPON
+																	idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_FISTS
+																	idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_CHAINSAW
+																	idVec3( -7.0f, 4.0f, 7.0f ),		// WEAPON_PISTOL
+																	idVec3( -1.0f, 4.0f, 7.0f ),		// WEAPON_SHOTGUN
+																	idVec3( -7.0f, 4.0f, 10.0f ),		// WEAPON_MACHINEGUN
+																	idVec3( -7.0f, 4.0f, 7.0f ),		// WEAPON_CHAINGUN
+																	idVec3( -13.0f, 0.0f, 9.0f ),		// WEAPON_HANDGRENADE
+																	idVec3( -5.0f, 4.0f, 12.0f ),		// WEAPON_PLASMAGUN
+																	idVec3( -9.0f, 4.0f, 14.0f ),		// WEAPON_ROCKETLAUNCHER
+																	idVec3( -9.0f, 4.0f, 14.0f ),		// WEAPON_BFG
+																	idVec3( -12.0f, 0.0f, 5.0f ),		// WEAPON_SOULCUBE
+																	idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_SHOTGUN_DOUBLE
+																	idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_SHOTGUN_DOUBLE_MP
+																	idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_GRABBER
+																	idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_ARTIFACT
+																	idVec3( -3.0f, 0.0f, 4.5f )			// WEAPON_PDA
+};
+
+//koz weaponRotOffsets - weapon rotation around each axis to bring weapon viewmodel to straight/level
+//																			 pitch	yaw	  roll
+const idAngles weaponRotOffsets[ int( WEAPON_NUM_WEAPONS ) ] = {	idAngles( 0.0f, 0.0f, 0.0f ),		// NO_WEAPON
+																	idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_FISTS
+																	idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_CHAINSAW
+																	idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_PISTOL
+																	idAngles( -6.0f, 0.0f, -5.0f ),		// WEAPON_SHOTGUN
+																	idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_MACHINEGUN
+																	idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_CHAINGUN
+																	idAngles( -7.0f, 0.0f, 46.0f ),		// WEAPON_HANDGRENADE
+																	idAngles( 1.0f, 0.0f, -7.0f ),		// WEAPON_PLASMAGUN
+																	idAngles( 0.0f, 0.0f, -2.0f ),		// WEAPON_ROCKETLAUNCHER
+																	idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_BFG
+																	idAngles( 30.0f, 0.0f, -2.0f ),		// WEAPON_SOULCUBE
+																	idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_SHOTGUN_DOUBLE
+																	idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_SHOTGUN_DOUBLE_MP
+																	idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_GRABBER
+																	idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_ARTIFACT
+																	idAngles( 15.0f, -5.0f, -90.0f )	// WEAPON_PDA
+};
+
 typedef int ammo_t;
 static const int AMMO_NUMTYPES = 16;
 
@@ -110,6 +192,11 @@ public:
 	bool					IsLinked();
 	bool					IsWorldModelReady();
 	
+	// Koz begin
+	weapon_t				IdentifyWeapon(); // koz provide enumeration of weapon name
+	weapon_t				currentWeaponEnum; 
+	// Koz end
+	
 	// GUIs
 	const char* 			Icon() const;
 	void					UpdateGUI();
@@ -162,6 +249,7 @@ public:
 	
 	// Visual presentation
 	void					PresentWeapon( bool showViewModel );
+	void					PresentWeaponOriginal( bool showViewModel ); // koz fixme delete this
 	int						GetZoomFov();
 	void					GetWeaponAngleOffsets( int* average, float* scale, float* max );
 	void					GetWeaponTimeOffsets( float* time, float* scale );
@@ -390,6 +478,8 @@ private:
 	void					MuzzleRise( idVec3& origin, idMat3& axis );
 	void					UpdateNozzleFx();
 	void					UpdateFlashPosition();
+	void					UpdateWeaponClipPosition( idVec3 &origin, idMat3 &axis ); // Koz
+
 	
 	// script events
 	void					Event_Clear();

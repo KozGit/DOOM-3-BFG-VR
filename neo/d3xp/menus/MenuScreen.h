@@ -1851,4 +1851,472 @@ inline void InvitePartyOrFriends()
 	}
 }
 
+//=====================================================================================================================
+//=====================================================================================================================
+//=====================================================================================================================
+
+// KOZ VR options
+
+//=====================================================================================================================
+//=====================================================================================================================
+//=====================================================================================================================
+
+/*
+//================================================
+//idMenuScreen_Shell_VR_Settings
+//================================================
+//*/
+class idMenuScreen_Shell_VR_Settings : public idMenuScreen
+{
+public:
+	idMenuScreen_Shell_VR_Settings() :
+		options(NULL),
+		btnBack(NULL)
+	{
+	}
+	virtual void				Initialize(idMenuHandler * data);
+	virtual void				Update();
+	virtual void				ShowScreen(const mainMenuTransition_t transitionType);
+	virtual void				HideScreen(const mainMenuTransition_t transitionType);
+	virtual bool				HandleAction(idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled = false);
+
+private:
+	idMenuWidget_DynamicList *	options;
+	idMenuWidget_Button	*		btnBack;
+};
+
+
+//*
+//================================================	
+//idMenuScreen_Shell_VR_Rendering_Options
+//================================================
+//*/
+class idMenuScreen_Shell_VR_Rendering_Options : public idMenuScreen
+{
+public:
+
+	/*
+	================================================
+	idMenuDataSource_Shell_VR_Rendering_Options
+	================================================
+	*/
+	class idMenuDataSource_Shell_VR_Rendering_Options : public idMenuDataSource
+	{
+	public:
+		enum vrRenderingOptions_t
+		{
+			VR_OPTIONS_FIELD_ENABLE_VR,
+			VR_OPTIONS_FIELD_ENABLE_FBO,
+			VR_OPTIONS_FIELD_FBO_SIZE,
+			VR_OPTIONS_FIELD_ANTIALIASINGTYPE,
+			VR_OPTIONS_FIELD_MSAALEVEL,
+			MAX_VR_OPTION_FIELDS
+		};
+
+		idMenuDataSource_Shell_VR_Rendering_Options();
+
+		// loads data
+		virtual void				LoadData();
+
+		// submits data
+		virtual void				CommitData();
+
+		// says whether something changed with the data
+		virtual bool				IsDataChanged() const;
+
+		// retrieves a particular field for reading
+		virtual idSWFScriptVar		GetField(const int fieldIndex) const;
+
+		// updates a particular field value
+		virtual void				AdjustField(const int fieldIndex, const int adjustAmount);
+
+		bool						IsRestartRequired() const;
+
+	private:
+		int		originalEnableVR;
+		int		originalEnableFBO;
+		float	originalFBOsize;
+		int		originalAntialiasingType;
+		int		originalMSAAlevel;
+	};
+
+	idMenuScreen_Shell_VR_Rendering_Options() :
+		options(NULL),
+		btnBack(NULL)
+	{
+	}
+	virtual void				Initialize(idMenuHandler * data);
+	virtual void				Update();
+	virtual void				ShowScreen(const mainMenuTransition_t transitionType);
+	virtual void				HideScreen(const mainMenuTransition_t transitionType);
+	virtual bool				HandleAction(idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled = false);
+
+private:
+	idMenuWidget_DynamicList *	options;
+	idMenuDataSource_Shell_VR_Rendering_Options	systemData;
+	idMenuWidget_Button	*		btnBack;
+
+};
+
+//*
+//================================================	
+//idMenuScreen_Shell_VR_HMD_Options
+//================================================
+//*/
+class idMenuScreen_Shell_VR_HMD_Options : public idMenuScreen
+{
+public:
+
+	/*
+	================================================
+	idMenuDataSource_VR_HMD_Options
+	================================================
+	*/
+	class idMenuDataSource_VR_HMD_Options : public idMenuDataSource
+	{
+	public:
+		enum vrHMDOptions_t
+		{
+			HMD_OPTIONS_FIELD_LOWPERSISTENCE,
+			HMD_OPTIONS_FIELD_OVERDRIVE,
+			HMD_OPTIONS_FIELD_CHROMACORRECTION,
+			HMD_OPTIONS_FIELD_TIMEWARP,
+			HMD_OPTIONS_FIELD_VIGNETTE,
+			HMD_OPTIONS_FIELD_PIXEL_DENSITY,
+			MAX_HMD_OPTION_FIELDS
+		};
+
+		idMenuDataSource_VR_HMD_Options();
+
+		// loads data
+		virtual void				LoadData();
+
+		// submits data
+		virtual void				CommitData();
+
+		// says whether something changed with the data
+		virtual bool				IsDataChanged() const;
+
+		// retrieves a particular field for reading
+		virtual idSWFScriptVar		GetField(const int fieldIndex) const;
+
+		// updates a particular field value
+		virtual void				AdjustField(const int fieldIndex, const int adjustAmount);
+
+		bool						IsRestartRequired() const;
+
+	private:
+		int		originalLowPersistence;
+		float	originalOverdrive;
+		int		originalChromaCorrection;
+		int		originalTimewarp;
+		int		originalVignette;
+		float	originalPixelDensity;
+	};
+
+	idMenuScreen_Shell_VR_HMD_Options() :
+		options(NULL),
+		btnBack(NULL)
+	{
+	}
+	virtual void				Initialize(idMenuHandler * data);
+	virtual void				Update();
+	virtual void				ShowScreen(const mainMenuTransition_t transitionType);
+	virtual void				HideScreen(const mainMenuTransition_t transitionType);
+	virtual bool				HandleAction(idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled = false);
+
+private:
+	idMenuWidget_DynamicList *	options;
+	idMenuDataSource_VR_HMD_Options	systemData;
+	idMenuWidget_Button	*		btnBack;
+
+};
+
+//*
+//================================================	
+//idMenuScreen_Shell_Hydra_Options
+//================================================
+//*/
+class idMenuScreen_Shell_VR_Hydra_Options : public idMenuScreen
+{
+public:
+
+	/*
+	================================================
+	idMenuDataSource_VR_Hydra_Options
+	================================================
+	*/
+	class idMenuDataSource_VR_Hydra_Options : public idMenuDataSource
+	{
+	public:
+		enum vrHydraOptions_t
+		{
+			HYDRA_OPTIONS_FIELD_ENABLE,
+			HYDRA_OPTIONS_FIELD_MODE,
+			HYDRA_OPTIONS_FIELD_PITCH_OFFSET,
+			HYDRA_OPTIONS_FIELD_MENU_NAV_HAND,
+			MAX_HYDRA_OPTION_FIELDS
+		};
+
+		idMenuDataSource_VR_Hydra_Options();
+
+		// loads data
+		virtual void				LoadData();
+
+		// submits data
+		virtual void				CommitData();
+
+		// says whether something changed with the data
+		virtual bool				IsDataChanged() const;
+
+		// retrieves a particular field for reading
+		virtual idSWFScriptVar		GetField(const int fieldIndex) const;
+
+		// updates a particular field value
+		virtual void				AdjustField(const int fieldIndex, const int adjustAmount);
+
+		bool						IsRestartRequired() const;
+
+	private:
+		int		originalEnabled;
+		int		originalMenuNavHand;
+		float	originalPitchOffset;
+		int		originalMode;
+	};
+
+	idMenuScreen_Shell_VR_Hydra_Options() :
+		options(NULL),
+		btnBack(NULL)
+	{
+	}
+	virtual void				Initialize(idMenuHandler * data);
+	virtual void				Update();
+	virtual void				ShowScreen(const mainMenuTransition_t transitionType);
+	virtual void				HideScreen(const mainMenuTransition_t transitionType);
+	virtual bool				HandleAction(idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled = false);
+
+private:
+	idMenuWidget_DynamicList *	options;
+	idMenuDataSource_VR_Hydra_Options	systemData;
+	idMenuWidget_Button	*		btnBack;
+
+};
+
+
+
+//*
+//================================================	
+//idMenuScreen_Shell_VR_Control_Options
+//================================================
+//*/
+class idMenuScreen_Shell_VR_Control_Options : public idMenuScreen
+{
+public:
+
+	/*
+	================================================
+	idMenuDataSource_VR_Control_Options
+	================================================
+	*/
+	class idMenuDataSource_Shell_VR_Control_Options : public idMenuDataSource
+	{
+	public:
+		enum vrControlOptions_t
+		{
+			VR_CONTROLS_FIELD_ENABLE,
+			MAX_CONTROL_OPTION_FIELDS
+		};
+
+		idMenuDataSource_Shell_VR_Control_Options();
+
+		// loads data
+		virtual void				LoadData();
+
+		// submits data
+		virtual void				CommitData();
+
+		// says whether something changed with the data
+		virtual bool				IsDataChanged() const;
+
+		// retrieves a particular field for reading
+		virtual idSWFScriptVar		GetField(const int fieldIndex) const;
+
+		// updates a particular field value
+		virtual void				AdjustField(const int fieldIndex, const int adjustAmount);
+
+		bool						IsRestartRequired() const;
+
+	private:
+		int		originalEnabled;
+		int		originalMenuNavHand;
+		float	originalPitchOffset;
+		int		originalMode;
+	};
+
+	idMenuScreen_Shell_VR_Control_Options() :
+		options(NULL),
+		btnBack(NULL)
+	{
+	}
+	virtual void				Initialize(idMenuHandler * data);
+	virtual void				Update();
+	virtual void				ShowScreen(const mainMenuTransition_t transitionType);
+	virtual void				HideScreen(const mainMenuTransition_t transitionType);
+	virtual bool				HandleAction(idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled = false);
+
+private:
+	idMenuWidget_DynamicList *		options;
+	idMenuDataSource_Shell_VR_Control_Options	systemData;
+	idMenuWidget_Button	*			btnBack;
+
+};
+
+//*
+//================================================	
+//idMenuScreen_Shell_VR_Gameplay_Options
+//================================================
+//*/
+class idMenuScreen_Shell_VR_Gameplay_Options : public idMenuScreen
+{
+public:
+
+	/*
+	================================================
+	idMenuDataSource_Shell_VR_Gameplay_Options
+	================================================
+	*/
+	class idMenuDataSource_Shell_VR_Gameplay_Options : public idMenuDataSource
+	{
+	public:
+		enum vrGameplayOptions_t
+		{
+			VR_GAMEPLAY_OPTIONS_PDASCALE,
+			VR_GAMEPLAY_OPTIONS_PDALOCATION,
+			VR_GAMEPLAY_OPTIONS_VIEW_ARMS,
+			VR_GAMEPLAY_OPTIONS_WEAPON_ANIMATIONS,
+			MAX_CONTROL_OPTION_FIELDS
+		};
+
+		idMenuDataSource_Shell_VR_Gameplay_Options();
+
+		// loads data
+		virtual void				LoadData();
+
+		// submits data
+		virtual void				CommitData();
+
+		// says whether something changed with the data
+		virtual bool				IsDataChanged() const;
+
+		// retrieves a particular field for reading
+		virtual idSWFScriptVar		GetField(const int fieldIndex) const;
+
+		// updates a particular field value
+		virtual void				AdjustField(const int fieldIndex, const int adjustAmount);
+
+		bool						IsRestartRequired() const;
+
+	private:
+		int		originalPDAscale;
+		int		originalPDAlocation;
+		int		originalViewArms;
+		int		originalWeaponAnimations;
+	};
+
+	idMenuScreen_Shell_VR_Gameplay_Options() :
+		options(NULL),
+		btnBack(NULL)
+	{
+	}
+	virtual void				Initialize(idMenuHandler * data);
+	virtual void				Update();
+	virtual void				ShowScreen(const mainMenuTransition_t transitionType);
+	virtual void				HideScreen(const mainMenuTransition_t transitionType);
+	virtual bool				HandleAction(idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled = false);
+
+private:
+	idMenuWidget_DynamicList *		options;
+	idMenuDataSource_Shell_VR_Gameplay_Options	systemData;
+	idMenuWidget_Button	*			btnBack;
+
+};
+
+//*
+//================================================	
+//idMenuScreen_Shell_VR_Profile_Options
+//================================================
+//*/
+class idMenuScreen_Shell_VR_Profile_Options : public idMenuScreen
+{
+public:
+
+	/*
+	================================================
+	idMenuDataSource_Shell_VR_Profile_Options
+	================================================
+	*/
+	class idMenuDataSource_Shell_VR_Profile_Options : public idMenuDataSource
+	{
+	public:
+		enum vrProfileOptions_t
+		{
+			VR_PROFILE_USE_OCULUS_PROFILE,
+			VR_OCULUS_IPD,
+			VR_OCULUS_HEIGHT,
+			VR_PROFILE_IPD,
+			VR_PROFILE_HEIGHT,
+			VR_PROFILE_SCALE,
+			MAX_VR_PROFILE_OPTION_FIELDS
+		};
+
+		idMenuDataSource_Shell_VR_Profile_Options();
+
+		// loads data
+		virtual void				LoadData();
+
+		// submits data
+		virtual void				CommitData();
+
+		// says whether something changed with the data
+		virtual bool				IsDataChanged() const;
+
+		// retrieves a particular field for reading
+		virtual idSWFScriptVar		GetField(const int fieldIndex) const;
+
+		// updates a particular field value
+		virtual void				AdjustField(const int fieldIndex, const int adjustAmount);
+
+		bool						IsRestartRequired() const;
+
+	private:
+
+		float originalUseOculusProfile;
+		float originalIPD;
+		float originalScale;
+		float originalHeight;
+
+	};
+
+	idMenuScreen_Shell_VR_Profile_Options() :
+		options(NULL),
+		btnBack(NULL)
+	{
+	}
+	virtual void				Initialize(idMenuHandler * data);
+	virtual void				Update();
+	virtual void				ShowScreen(const mainMenuTransition_t transitionType);
+	virtual void				HideScreen(const mainMenuTransition_t transitionType);
+	virtual bool				HandleAction(idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled = false);
+
+private:
+	idMenuWidget_DynamicList *		options;
+	idMenuDataSource_Shell_VR_Profile_Options	systemData;
+	idMenuWidget_Button	*			btnBack;
+
+};
+
+// KOZ END VR options
+//=====================================================================================================================
+
+
 #endif

@@ -41,6 +41,13 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 // RB end
 
+// Koz begin
+#undef strncmp // koz fixme do this better to prevent conflict with oculus SDK.
+#include "vr\vr.h"
+#include "..\dependencies\LibOVR\Include\OVR.h"
+#include "AutoRender.h" // koz fixme dont think i need this here anymore - check.
+// Koz end
+
 // DeviceContext bypasses RenderSystem to work directly with this
 idGuiModel* tr_guiModel;
 
@@ -437,7 +444,6 @@ static void R_CheckPortableExtensions()
 			glConfig.uniformBufferOffsetAlignment = 256;
 		}
 	} 
-	
 	else glConfig.uniformBufferOffsetAlignment = 256; //Carl Kenner
 
 	// RB: make GPU skinning optional for weak OpenGL drivers
@@ -1015,7 +1021,8 @@ void R_TestImage_f( const idCmdArgs& args )
 //Carl: ExtractTGA_f
 ================
 */
-void ExtractTGA_f(const idCmdArgs &args) {
+void ExtractTGA_f( const idCmdArgs &args ) 
+{
 	idStr		relativePath;
 	idStr		extension;
 	//idFileList *fileList;
@@ -1023,28 +1030,31 @@ void ExtractTGA_f(const idCmdArgs &args) {
 	idImage	*	img = NULL;
 	//idDxtDecoder dxt;
 
-	if (args.Argc() != 2) {
-		common->Printf("usage: ExtractTGA <image path or image number>\n");
+	if ( args.Argc() != 2 ) 
+	{
+		common->Printf( "usage: ExtractTGA <image path or image number>\n" );
 		return;
 	}
 
-	if (idStr::IsNumeric(args.Argv(1))) {
-		imageNum = atoi(args.Argv(1));
-		if (imageNum >= 0 && imageNum < globalImages->images.Num()) {
+	if ( idStr::IsNumeric( args.Argv(1) ) ) 
+	{
+		imageNum = atoi( args.Argv(1) );
+		if ( imageNum >= 0 && imageNum < globalImages->images.Num() ) 
+		{
 			img = globalImages->images[imageNum];
 		}
 	}
-	else {
-		img = globalImages->ImageFromFile(args.Argv(1), TF_DEFAULT, TR_REPEAT, TD_DEFAULT);
+	else 
+	{
+		img = globalImages->ImageFromFile( args.Argv(1), TF_DEFAULT, TR_REPEAT, TD_DEFAULT );
 	}
-	if (!img) {
-		common->Warning("Image '%s' not found.\n", args.Argv(1));
+	if ( !img ) 
+	{
+		common->Warning( "Image '%s' not found.\n", args.Argv(1) );
 		return;
 	}
 	img->ActuallySaveImage();
 }
-
-
 
 /*
 =============
@@ -2398,7 +2408,7 @@ void R_InitCommands()
 	cmdSystem->AddCommand( "gfxInfo", GfxInfo_f, CMD_FL_RENDERER, "show graphics info" );
 	cmdSystem->AddCommand( "modulateLights", R_ModulateLights_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "modifies shader parms on all lights" );
 	cmdSystem->AddCommand( "testImage", R_TestImage_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "displays the given image centered on screen", idCmdSystem::ArgCompletion_ImageName );
-	cmdSystem->AddCommand("extractTGA", ExtractTGA_f, CMD_FL_RENDERER, "extracts texture as TGA file", idCmdSystem::ArgCompletion_ImageName); // koz from tmek/carl
+	cmdSystem->AddCommand( "extractTGA", ExtractTGA_f, CMD_FL_RENDERER, "extracts texture as TGA file", idCmdSystem::ArgCompletion_ImageName ); // koz from tmek/carl
 	cmdSystem->AddCommand( "testVideo", R_TestVideo_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "displays the given cinematic", idCmdSystem::ArgCompletion_VideoName );
 	cmdSystem->AddCommand( "reportSurfaceAreas", R_ReportSurfaceAreas_f, CMD_FL_RENDERER, "lists all used materials sorted by surface area" );
 	cmdSystem->AddCommand( "showInteractionMemory", R_ShowInteractionMemory_f, CMD_FL_RENDERER, "shows memory used by interactions" );
@@ -2457,6 +2467,13 @@ void idRenderSystemLocal::Clear()
 		Mem_Free( testImageTriangles );
 		testImageTriangles = NULL;
 	}
+	
+	// Koz begin
+	if ( hudTriangles != NULL ) { // koz create the hud mesh
+		Mem_Free( hudTriangles );
+		hudTriangles = NULL;
+	}
+	// Koz end
 	
 	frontEndJobList = NULL;
 }
@@ -2660,6 +2677,117 @@ srfTriangles_t* R_MakeTestImageTriangles()
 
 /*
 ===============
+R_MakeHUDTriangles
+Koz - build the hud mesh
+===============
+*/
+
+// koz fixme this is all broken.
+
+srfTriangles_t* R_MakeHUDTriangles() {
+
+	int i, j;
+	float numsegments = 16;
+	float horizFOV = 65;
+	float depth = 1;
+	float horizInterval = 2.0 / numsegments;
+	float vertBounds = 1080.0f / 960; // hud.height / (float) hud.width;
+	float vertInterval = horizInterval * vertBounds;
+
+	int numIndexes = numsegments * numsegments * 2 * 3;
+	int numVerts = ( numsegments + 1 ) * ( numsegments + 1 );
+
+	srfTriangles_t * tri = (srfTriangles_t *)Mem_ClearedAlloc( sizeof( *tri ), TAG_RENDER_TOOLS );
+
+	tri->numIndexes = numIndexes;
+	tri->numVerts = numVerts;
+
+	int indexSize = tri->numIndexes * sizeof( tri->indexes[0] );
+	int allocatedIndexBytes = ALIGN( indexSize, 16 );
+	tri->indexes = (triIndex_t *)Mem_Alloc( allocatedIndexBytes, TAG_RENDER_TOOLS );
+
+	int vertexSize = tri->numVerts * sizeof( tri->verts[0] );
+	int allocatedVertexBytes = ALIGN( vertexSize, 16 );
+	tri->verts = (idDrawVert *)Mem_ClearedAlloc( allocatedVertexBytes, TAG_RENDER_TOOLS );
+
+	idDrawVert * verts = tri->verts;
+	triIndex_t * tempIndexes = tri->indexes;
+
+	uint32_t hudNumVerts = 0;
+
+
+	// calculate coordinates for hud
+	float xoff = tanf( horizFOV * ( idMath::PI / 180.0f ) * 0.5 ) * ( depth );
+	float zoff = depth * cosf( horizFOV * ( idMath::PI / 180.0f ) * 0.5 );
+	idVec3 offsetScale = idVec3( xoff, xoff, zoff );
+
+	for ( j = 0; j <= numsegments; j++ )
+	{
+		float ypos;
+		ypos = j * vertInterval - vertBounds;
+
+		for ( i = 0; i <= numsegments; i++ )
+		{
+			float xpos;
+			GLushort vertNum1;
+
+			vertNum1 = hudNumVerts++;
+
+			xpos = i * horizInterval - 1;
+
+			idVec3 temp;
+
+			float x2 = xpos * xpos;
+			float y2 = ypos * ypos;
+			float z2 = -1 * -1;
+
+			verts[vertNum1].xyz.x = xpos * sqrt( 1 - y2 / 2.0 - z2 / 2.0 + ( y2 * z2 ) / 3.0 ) * offsetScale.x;
+			verts[vertNum1].xyz.y = ypos * sqrt( 1 - z2 / 2.0 - x2 / 2.0 + ( x2 * z2 ) / 3.0 ) * offsetScale.y;
+			verts[vertNum1].xyz.z = -1 * sqrt( 1 - x2 / 2.0 - y2 / 2.0 + ( y2 * x2 ) / 3.0 ) * offsetScale.z;
+
+			idVec2 st;
+
+			st.x = i / numsegments;
+			st.y = j / numsegments;
+
+			verts[vertNum1].SetTexCoord( st );
+			verts[vertNum1].SetColor( 0xffffffff );
+
+		}
+	}
+
+	int sx, sy;
+	int sindex = 0;
+	int vertgrid = numsegments + 1;
+
+	for ( sy = 0; sy < numsegments; sy++ ) {
+		for ( sx = 0; sx < numsegments; sx++ ) {
+
+			tempIndexes[sindex++] = ( ( sy + 1 ) * vertgrid ) + sx;
+			tempIndexes[sindex++] = ( sy * vertgrid ) + sx;
+			tempIndexes[sindex++] = ( ( sy + 1 ) * vertgrid ) + sx + 1;
+
+			tempIndexes[sindex++] = ( ( sy + 1 ) * vertgrid ) + sx + 1;
+			tempIndexes[sindex++] = ( sy * vertgrid ) + sx;
+			tempIndexes[sindex++] = ( sy * vertgrid ) + sx + 1;
+		}
+	}
+
+	idVec2 st;
+
+	for ( i = 0; i < tri->numVerts; i++ ) {
+		st = tri->verts[i].GetTexCoord();
+		//common->Printf("Hud Vert %d xyz %f %f %f Texcoord S %f  T %f\n", i, tri->verts[i].xyz.x,tri->verts[i].xyz.y,tri->verts[i].xyz.z,st.x,st.y);
+	}
+	for ( i = 0; i < tri->numIndexes; i++ ) {
+		//common->Printf("Hud Index %d - %d\n", i, tri->indexes[i]);
+	}
+
+	return tri;
+}
+
+/*
+===============
 idRenderSystemLocal::Init
 ===============
 */
@@ -2724,6 +2852,11 @@ void idRenderSystemLocal::Init()
 		testImageTriangles = R_MakeTestImageTriangles();
 	}
 	
+	// Koz make the hud mesh
+	if ( hudTriangles == NULL )  {
+		hudTriangles = R_MakeHUDTriangles();
+	}
+
 	frontEndJobList = parallelJobManager->AllocJobList( JOBLIST_RENDERER_FRONTEND, JOBLIST_PRIORITY_MEDIUM, 2048, 0, NULL );
 	
 	// make sure the command buffers are ready to accept the first screen update
@@ -2960,10 +3093,16 @@ bool idRenderSystemLocal::IsFullScreen() const
 idRenderSystemLocal::GetWidth
 ========================
 */
-int idRenderSystemLocal::GetWidth() const
+int idRenderSystemLocal::GetWidth()
 {
-	if( glConfig.stereo3Dmode == STEREO3D_SIDE_BY_SIDE || glConfig.stereo3Dmode == STEREO3D_SIDE_BY_SIDE_COMPRESSED )
+	if ( glConfig.stereo3Dmode == STEREO3D_SIDE_BY_SIDE || glConfig.stereo3Dmode == STEREO3D_SIDE_BY_SIDE_COMPRESSED )
 	{
+		// Koz begin
+		if ( VR_USE_FBO )
+		{
+			return VR_FBO.width;
+		}
+		// Koz end
 		return glConfig.nativeScreenWidth >> 1;
 	}
 	return glConfig.nativeScreenWidth;
@@ -2974,19 +3113,21 @@ int idRenderSystemLocal::GetWidth() const
 idRenderSystemLocal::GetHeight
 ========================
 */
-int idRenderSystemLocal::GetHeight() const
+int idRenderSystemLocal::GetHeight()
 {
-	if( glConfig.stereo3Dmode == STEREO3D_HDMI_720 )
+	// Koz begin
+	if ( VR_USE_FBO )
+	{
+		return VR_FBO.height;
+	}
+	// Koz end
+
+	if ( glConfig.stereo3Dmode == STEREO3D_HDMI_720 )
 	{
 		return 720;
 	}
-	extern idCVar stereoRender_warp;
-	if( glConfig.stereo3Dmode == STEREO3D_SIDE_BY_SIDE && stereoRender_warp.GetBool() )
-	{
-		// for the Rift, render a square aspect view that will be symetric for the optics
-		return glConfig.nativeScreenWidth >> 1;
-	}
-	if( glConfig.stereo3Dmode == STEREO3D_INTERLACED || glConfig.stereo3Dmode == STEREO3D_TOP_AND_BOTTOM_COMPRESSED )
+
+	if ( glConfig.stereo3Dmode == STEREO3D_INTERLACED || glConfig.stereo3Dmode == STEREO3D_TOP_AND_BOTTOM_COMPRESSED )
 	{
 		return glConfig.nativeScreenHeight >> 1;
 	}
@@ -2998,7 +3139,7 @@ int idRenderSystemLocal::GetHeight() const
 idRenderSystemLocal::GetVirtualWidth
 ========================
 */
-int idRenderSystemLocal::GetVirtualWidth() const
+int idRenderSystemLocal::GetVirtualWidth() 
 {
 	if( r_useVirtualScreenResolution.GetBool() )
 	{
@@ -3012,12 +3153,34 @@ int idRenderSystemLocal::GetVirtualWidth() const
 idRenderSystemLocal::GetVirtualHeight
 ========================
 */
-int idRenderSystemLocal::GetVirtualHeight() const
+int idRenderSystemLocal::GetVirtualHeight() 
 {
 	if( r_useVirtualScreenResolution.GetBool() )
 	{
 		return SCREEN_HEIGHT;
 	}
+	return glConfig.nativeScreenHeight;
+}
+
+/*
+========================
+Koz
+idRenderSystemLocal::GetNativeWidth
+========================
+*/
+int idRenderSystemLocal::GetNativeWidth()
+{
+	return glConfig.nativeScreenWidth;
+}
+
+/*
+========================
+Koz
+idRenderSystemLocal::GetNativeHeight
+========================
+*/
+int idRenderSystemLocal::GetNativeHeight()
+{
 	return glConfig.nativeScreenHeight;
 }
 

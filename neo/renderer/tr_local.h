@@ -39,6 +39,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "Font.h"
 #include "Framebuffer.h"
 
+#undef strncmp // koz 
+#include "..\dependencies\LibOVR\Include\OVR.h" // koz
+
+
 // everything that is needed by the backend needs
 // to be double buffered to allow it to run in
 // parallel on a dual cpu machine
@@ -673,7 +677,10 @@ enum vertexLayoutType_t
 	LAYOUT_UNKNOWN = 0,
 	LAYOUT_DRAW_VERT,
 	LAYOUT_DRAW_SHADOW_VERT,
-	LAYOUT_DRAW_SHADOW_VERT_SKINNED
+	LAYOUT_DRAW_SHADOW_VERT_SKINNED,
+	LAYOUT_DRAW_DISTORTION_VERT_0,// koz oculus distortion vertex
+	LAYOUT_DRAW_DISTORTION_VERT_1 // koz oculus distortion vertex
+
 };
 
 struct glstate_t
@@ -697,6 +704,15 @@ struct glstate_t
 	float				polyOfsBias;
 	
 	uint64				glStateBits;
+
+	// Koz begin
+	// koz fixme use RBs framebuffer code
+	GLuint				currentFBO; // koz keep track of the current FBO info
+	int					currentFBOWidth;
+	int					currentFBOHeight;
+	bool				currentFBOValid;
+	// koz end
+
 };
 
 struct backEndCounters_t
@@ -742,6 +758,8 @@ struct backEndState_t
 	drawSurf_t			unitSquareSurface;
 	drawSurf_t			zeroOneCubeSurface;
 	drawSurf_t			testImageSurface;
+	drawSurf_t			hudSurface; //koz hud mesh
+
 };
 
 class idParallelJobList;
@@ -773,10 +791,12 @@ public:
 	virtual bool			IsStereoScopicRenderingSupported() const;
 	virtual stereo3DMode_t	GetStereoScopicRenderingMode() const;
 	virtual void			EnableStereoScopicRendering( const stereo3DMode_t mode ) const;
-	virtual int				GetWidth() const;
-	virtual int				GetHeight() const;
-	virtual int				GetVirtualWidth() const;
-	virtual int				GetVirtualHeight() const;
+	virtual int				GetWidth();
+	virtual int				GetHeight();
+	virtual int				GetVirtualWidth();
+	virtual int				GetVirtualHeight();
+	virtual int				GetNativeWidth();
+	virtual int				GetNativeHeight();
 	virtual float			GetPixelAspect() const;
 	virtual float			GetPhysicalScreenWidthInCentimeters() const;
 	virtual idRenderWorld* 	AllocRenderWorld();
@@ -890,6 +910,8 @@ public:
 	srfTriangles_t* 		unitSquareTriangles;
 	srfTriangles_t* 		zeroOneCubeTriangles;
 	srfTriangles_t* 		testImageTriangles;
+	srfTriangles_t*			hudTriangles; //koz hud mesh
+
 	
 	// these are allocated at buffer swap time, but
 	// the back end should only use the ones in the backEnd stucture,
@@ -897,6 +919,8 @@ public:
 	drawSurf_t				unitSquareSurface_;
 	drawSurf_t				zeroOneCubeSurface_;
 	drawSurf_t				testImageSurface_;
+	drawSurf_t				hudSurface_; // koz hud mesh
+
 	
 	idParallelJobList* 		frontEndJobList;
 	
@@ -1101,6 +1125,7 @@ struct vidMode_t
 	int width;
 	int height;
 	int displayHz;
+	idStr displayName; // koz
 	
 	// RB begin
 	vidMode_t()
@@ -1108,6 +1133,8 @@ struct vidMode_t
 		width = 640;
 		height = 480;
 		displayHz = 60;
+		displayName = ""; // koz
+
 	}
 	
 	vidMode_t( int width, int height, int displayHz ) :
@@ -1436,6 +1463,10 @@ TR_BACKEND_DRAW
 
 void RB_SetMVP( const idRenderMatrix& mvp );
 void RB_DrawElementsWithCounters( const drawSurf_t* surf );
+
+void RB_DrawStripWithCounters( const drawSurf_t *surf ); // koz fixme dont use strips for hmd mesh strips
+void RB_DrawDistortionMesh( int eye, bool timewarp, int ocuframe, ovrPosef thePose ); //koz mesh
+
 void RB_DrawViewInternal( const viewDef_t* viewDef, const int stereoEye );
 void RB_DrawView( const void* data, const int stereoEye );
 void RB_CopyRender( const void* data );
