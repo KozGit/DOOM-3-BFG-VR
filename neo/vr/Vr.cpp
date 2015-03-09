@@ -279,7 +279,7 @@ iVr::HMDInitializeDistortion
 void iVr::HMDInitializeDistortion()  
 {
 	
-	if ( ( !hmd && !hasOculusRift ) || !vr_enable.GetBool() ) 
+	if ( ( !vr->hmd && !vr->hasOculusRift ) || !vr_enable.GetBool() ) 
 	{
 		game->isVR = false;
 		return;
@@ -288,9 +288,10 @@ void iVr::HMDInitializeDistortion()
 	game->isVR = true;
 	common->Printf( "VR Mode ENABLED.\n" );
 	
-	eyeOrder[0] = hmd->EyeRenderOrder[ovrEye_Left]; //ovrEye_Left;
-	eyeOrder[1] = hmd->EyeRenderOrder[ovrEye_Right];
+	eyeOrder[0] = vr->hmd->EyeRenderOrder[ovrEye_Left]; //ovrEye_Left;
+	eyeOrder[1] = vr->hmd->EyeRenderOrder[ovrEye_Right];
 
+	common->Printf( "Eyeorder[0] = %d, Eyeorder[1] = %d\n", eyeOrder[0], eyeOrder[1] );
 	// koz : create distortion meshes for oculus - copy verts and indexes from oculus supplied mesh
 	
 	useFBO = vr_FBOEnabled.GetInteger() && glConfig.framebufferObjectAvailable;
@@ -298,6 +299,7 @@ void iVr::HMDInitializeDistortion()
 	if ( vr_FBOEnabled.GetInteger() && !glConfig.framebufferObjectAvailable )
 	{
 		common->Printf( "Framebuffer requested but framebufferObject not available.\n Reverting to default GL framebuffer.\n" );
+		useFBO = false;
 	}
 	bool fboCreated = false;
 
@@ -313,8 +315,8 @@ void iVr::HMDInitializeDistortion()
 		ovrDistortionVertex *ov = NULL;
 		unsigned int vtex = 0;
 		
-		hmdEye[eye].eyeFov = hmd->DefaultEyeFov[ eye ];
-		hmdEye[eye].eyeRenderDesc = ovrHmd_GetRenderDesc( hmd, ( ovrEyeType ) eye, hmdEye[ eye ].eyeFov );
+		hmdEye[eye].eyeFov = vr->hmd->DefaultEyeFov[ eye ];
+		hmdEye[eye].eyeRenderDesc = ovrHmd_GetRenderDesc( vr->hmd, ( ovrEyeType ) eye, hmdEye[ eye ].eyeFov );
 		
 		//oculus defaults znear 1 and positive zfar, id uses 1 znear, and the infinite z variation (-.999f) zfar
 		//during cinematics znear is crammed to .25, so create a second matrix for cinematics
@@ -350,10 +352,10 @@ void iVr::HMDInitializeDistortion()
 		
 		ovrSizei rendertarget;
 		ovrRecti viewport = { 0, 0, 0 ,0 };
-		//rendertarget = ovrHmd_GetFovTextureSize( hmd, (ovrEyeType) eye, hmdEye[eye].eyeFov, vr_pixelDensity.GetFloat() );
-		rendertarget = ovrHmd_GetFovTextureSize( hmd, (ovrEyeType) 0, hmdEye[0].eyeFov, vr_pixelDensity.GetFloat() ); // make sure both eyes render to the same size target
+		
+		rendertarget = ovrHmd_GetFovTextureSize( vr->hmd, (ovrEyeType)eyeOrder[0], vr->hmdEye[eyeOrder[0]].eyeFov, vr_pixelDensity.GetFloat() ); // make sure both eyes render to the same size target
 				
-		if ( useFBO != 0  ) 
+		if ( useFBO && !fboCreated  ) 
 		{
 			common->Printf("Using FBOs.\n");
 			common->Printf("Requested pixel density = %f \n",vr_pixelDensity.GetFloat() );
@@ -494,19 +496,6 @@ void iVr::HMDInitializeDistortion()
 						useFBO = false;
 						fboCreated = false;
 					}
-					
-					/*
-					VR_GenFBO( rendertarget.w, rendertarget.h, VR_FBO, true, false );
-					VR_GenFBO( (rendertarget.w * 2) , rendertarget.h, VR_FullscreenFBO, false, false );
-					VR_FBO.aaMode = VR_AA_NONE;
-					
-					if ( !VR_FBO.valid  || !VR_FullscreenFBO.valid ) {
-						VR_DeleteFBO( VR_FBO );
-						VR_DeleteFBO( VR_FullscreenFBO );
-						useFBO = false; // FBO creation failed, fallback to default rendering.
-						common->Warning( "Unable to create FBO. Rendering to default framebuffer.\n" );
-					} else common->Printf( "Succesfully created %d x %d FBO. Antialiasing DISABLED.\n", rendertarget.w, rendertarget.h ); 
-					*/
 				}
 			}
 		}

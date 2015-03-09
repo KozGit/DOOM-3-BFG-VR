@@ -130,7 +130,6 @@ Framebuffer::Framebuffer( const char* name, int w, int h, bool msaa )
 	// Koz end
 	
 	glGenFramebuffers( 1, &frameBuffer );
-	common->Printf( "_glGenFrameBuffers( 1, &frameBuffer )\n" );
 	framebuffers.Append( this );
 }
 

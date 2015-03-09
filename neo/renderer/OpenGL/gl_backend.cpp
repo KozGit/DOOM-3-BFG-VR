@@ -322,8 +322,10 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	for( int stereoEye = 1; stereoEye >= -1; stereoEye -= 2 )
 	{
 		// set up the target texture we will draw to
-		const int targetEye = ( stereoEye == 1 ) ? 1 : 0;
+		int targetEye = ( stereoEye == 1 ) ? 1 : 0;
 		
+		targetEye = vr->eyeOrder[targetEye]; // koz
+
 		// Set the back end into a known default state to fix any stale render state issues
 		GL_CheckErrors(); // koz
 		GL_SetDefaultState();

@@ -11009,7 +11009,8 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis )
 			angles[YAW] = vr->independentWeaponYaw;
 			angles[PITCH] = vr->independentWeaponPitch;
 
-			common->Printf( "MX = %f, MY = %f\n", vr->independentWeaponYaw, vr->independentWeaponPitch );
+			//common->Printf( "MX = %f, MY = %f\n", vr->independentWeaponYaw, vr->independentWeaponPitch );
+			
 			//rHydra.position *= rHydra.hydraRotationQuat.ToMat3(); // koz move the gun to the hand position
 			//rHydra.position *= viewAxis2;
 

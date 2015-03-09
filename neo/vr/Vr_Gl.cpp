@@ -309,14 +309,25 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 	VR_QuatToRotation( imuRotationGL, rot );
 	VR_TranslationMatrix( 0, 0, vr_transz.GetFloat() , trans );
 		
-	if ( vr->useFBO )
+	if ( vr->useFBO ) // we dont want to render this into an MSAA FBO.
 	{
-		//IF( VR_USE)
+		if ( globalFramebuffers.primaryFBO->IsMSAA() )
+		{
+			globalFramebuffers.resolveFBO->Bind();
+			GL_ViewportAndScissor( 0, 0, globalFramebuffers.resolveFBO->GetWidth(), globalFramebuffers.resolveFBO->GetHeight() );
+		}
+		else
+		{
+			globalFramebuffers.primaryFBO->Bind();
+			GL_ViewportAndScissor( 0, 0, globalFramebuffers.primaryFBO->GetWidth(), globalFramebuffers.primaryFBO->GetHeight() );
+		}
 	}
-	//VR_BindFBO(GL_FRAMEBUFFER, VR_ResolveAAFBO );
-	//GL_ViewportAndScissor(0, 0, VR_ResolveAAFBO.width, VR_ResolveAAFBO.height );
-	globalFramebuffers.resolveFBO->Bind();
-	GL_ViewportAndScissor( 0, 0, globalFramebuffers.resolveFBO->GetWidth(), globalFramebuffers.resolveFBO->GetHeight() );
+	else
+	{
+		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+		glDrawBuffer( GL_BACK );
+		GL_ViewportAndScissor( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
+	}
 	
 	glClearColor( 0, 0, 0, 0 );
 	
