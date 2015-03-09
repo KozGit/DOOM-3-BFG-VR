@@ -1,2 +1,0 @@
-premake4 embed
-pause
