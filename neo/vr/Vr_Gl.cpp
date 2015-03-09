@@ -1,10 +1,10 @@
+
+#include "precompiled.h"
 #pragma hdrstop
 
-#include "../../idlib/precompiled.h"
 #include "d3xp\Game_local.h"
 #include "vr.h"
 #include "renderer\tr_local.h"
-
 #include "sys\win32\win_local.h"
 
 	

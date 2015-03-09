@@ -27,7 +27,9 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 #include "precompiled.h"
-#include "..\..\\dependencies\LibOVR\Src\OVR_CAPI.h"
+#pragma hdrstop
+
+#include "..\LibOVR\Src\OVR_CAPI.h"
 #include "vr_hmd.h"
 #include "vr_sixense.h"
 #include "..\renderer\Framebuffer.h"

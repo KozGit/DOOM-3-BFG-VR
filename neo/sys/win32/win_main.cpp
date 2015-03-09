@@ -50,7 +50,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../renderer/tr_local.h"
 
 // Koz begin
-#include "..\dependencies\SixenseSDK_062612\include\sixense.h"
+#include "libs\SixenseSDK_062612\include\sixense.h"
 // Koz end
 
 

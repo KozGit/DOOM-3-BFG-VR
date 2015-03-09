@@ -9,8 +9,8 @@
 #include "vr.h"
 #include "d3xp\Game_local.h"
 #include "d3xp\physics\Clip.h"
-#include "..\dependencies\SixenseSDK_062612\include\sixense_utils\controller_manager\controller_manager.hpp"
-#include "..\dependencies\LibOVR\Include\OVR.h"
+#include "libs\SixenseSDK_062612\include\sixense_utils\controller_manager\controller_manager.hpp"
+#include "libs\LibOVR\Include\OVR.h"
 #include "..\renderer\Framebuffer.h"
 
 //koz fixme #include "Kernel/OVR_Math.h"
@@ -198,7 +198,7 @@ void iVr::HydraInit(void)
 			if ( x == SIXENSE_SUCCESS ) 
 			{
 				x = sixenseIsBaseConnected( 0 );
-				if ( x == 1 );
+				if ( x == 1 )
 				{
 					x = sixenseGetNumActiveControllers();
 					if ( x > 0 )

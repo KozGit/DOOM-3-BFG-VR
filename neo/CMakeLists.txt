@@ -601,9 +601,11 @@ file(GLOB SYS_SOURCES sys/*.cpp)
 file(GLOB UI_INCLUDES ui/*.h)
 file(GLOB UI_SOURCES ui/*.cpp)
 
+file(GLOB VR_INCLUDES vr/*.h)
+file(GLOB VR_SOURCES vr/*.cpp)
+
 file(GLOB SWF_INCLUDES swf/*.h)
 file(GLOB SWF_SOURCES swf/*.cpp)
-
 
 set(GAMED3XP_INCLUDES
 	d3xp/Achievements.h
@@ -930,9 +932,6 @@ file(GLOB COMMON_SOURCES sys/common/*.cpp)
 file(GLOB SDL_INCLUDES sys/sdl/*.h)
 file(GLOB SDL_SOURCES sys/sdl/*.cpp)
 
-file(GLOB VR_INCLUDES vr/*.h)
-file(GLOB VR_SOURCES vr/*.cpp)
-
 source_group("aas" FILES ${AAS_INCLUDES})
 source_group("aas" FILES ${AAS_SOURCES})
 
@@ -1006,6 +1005,9 @@ source_group("libs\\oggvorbis" FILES ${OGGVORBIS_SOURCES})
 
 source_group("ui" FILES ${UI_INCLUDES})
 source_group("ui" FILES ${UI_SOURCES})
+
+source_group("vr" FILES ${VR_INCLUDES})
+source_group("vr" FILES ${VR_SOURCES})
 
 source_group("swf" FILES ${SWF_INCLUDES})
 source_group("swf" FILES ${SWF_SOURCES})
@@ -1117,9 +1119,6 @@ source_group("tools\\script" FILES ${EDITOR_SCRIPT_SOURCES})
 source_group("tools\\sound" FILES ${EDITOR_SOUND_INCLUDES})
 source_group("tools\\sound" FILES ${EDITOR_SOUND_SOURCES})
 
-source_group("vr" FILES ${VR_INCLUDES})
-source_group("vr" FILES ${VR_SOURCES})
-
 
 set(DOOM3_INCLUDES
 			${AAS_INCLUDES}
@@ -1144,6 +1143,7 @@ set(DOOM3_INCLUDES
 			${SOUND_INCLUDES}
 			#${OGGVORBIS_INCLUDES}
 			${UI_INCLUDES}
+			${VR_INCLUDES}
 			${SWF_INCLUDES}
 			${COMMON_INCLUDES}
 			${DOOMCLASSIC_INCLUDES}
@@ -1179,6 +1179,7 @@ set(DOOM3_SOURCES
 			${SOUND_SOURCES}
 			#${OGGVORBIS_INCLUDES} ${OGGVORBIS_SOURCES}
 			${UI_SOURCES}
+			${VR_SOURCES}
 			${SWF_SOURCES}
 			${COMMON_SOURCES}
 			${DOOMCLASSIC_SOURCES}
@@ -1257,8 +1258,9 @@ if(MSVC)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/include/sixense_utils)
 	
 	if(CMAKE_CL_64)
-		link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/x64/VS2013)
-		link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/lib/x64/release)dll)
+		link_directories(
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/x64/VS2013
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/lib/x64/release_dll)
 		
 		set(LibOVR_LIBRARIES
 			libovr64.lib
@@ -1272,8 +1274,9 @@ if(MSVC)
 			
 			
 	else()
-		link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Win32/VS2013)
-		link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/lib/win32/release)dll)
+		link_directories(
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Win32/VS2013
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/lib/win32/release_dll)
 		
 			set(LibOVR_LIBRARIES
 			libovr.lib

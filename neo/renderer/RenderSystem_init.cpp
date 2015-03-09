@@ -42,10 +42,9 @@ If you have questions concerning this license or the applicable additional terms
 // RB end
 
 // Koz begin
-#undef strncmp // koz fixme do this better to prevent conflict with oculus SDK.
+#undef strncmp // koz fixme to prevent conflict with oculus SDK.
 #include "vr\vr.h"
-#include "..\dependencies\LibOVR\Include\OVR.h"
-//#include "AutoRender.h" // koz fixme dont think i need this here anymore - check.
+#include "libs\LibOVR\Include\OVR.h"
 // Koz end
 
 // DeviceContext bypasses RenderSystem to work directly with this

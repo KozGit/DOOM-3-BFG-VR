@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // Koz begin
 #include "vr\vr.h"
-#include "../../../dependencies/SixenseSDK_062612/include/sixense_utils/controller_manager/controller_manager.hpp"
+#include "libs\SixenseSDK_062612\include\sixense_utils\controller_manager\controller_manager.hpp"
 // Koz end
 
 #define DINPUT_BUFFERSIZE           256
