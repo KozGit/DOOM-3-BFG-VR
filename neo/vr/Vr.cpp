@@ -170,6 +170,13 @@ iVr::iVr()
 	independentWeaponYaw = 0;
 	independentWeaponPitch = 0;
 	
+	hmdWidth = 0;
+	hmdHeight = 0;
+	hmdWinPosX = 0;
+	hmdWinPosY =0;
+	hmdDisplayID = 0;
+	hmdDeviceName = "";
+		
 	primaryFBOWidth = 0;
 	primaryFBOHeight = 0;
 
@@ -259,6 +266,16 @@ void iVr::HMDInit( void )
 			
 			ovrHmd_RecenterPose( hmd ); // lets start looking forward.
 			
+			hmdWidth = hmd->Resolution.w;
+			hmdHeight = hmd->Resolution.h;
+			hmdWinPosX = hmd->WindowsPos.x;
+			hmdWinPosY = hmd->WindowsPos.y;
+			hmdDeviceName = hmd->DisplayDeviceName;
+			hmdDisplayID = hmd->DisplayId;
+
+			common->Printf( "Hmd width %d, height %d\n", hmdWidth, hmdHeight );
+			common->Printf( "Hmd DisplayDeviceName = %s, DisplayID = %d\n", hmdDeviceName.c_str(), hmdDisplayID );
+			common->Printf( "Hmd WindowPosX = %d , WindowPosY = %d\n\n", hmdWinPosX, hmdWinPosY );
 		}
     	
 	} 

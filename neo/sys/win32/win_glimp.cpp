@@ -714,14 +714,14 @@ static bool GetDisplayCoordinates( const int deviceNum, int& x, int& y, int& wid
 	{
 		return false;
 	}
-	
+	common->Printf( "Get Display Coordinates:\n" );// koz
 	common->Printf( "display device: %i\n", deviceNum );
 	common->Printf( "  DeviceName  : %s\n", device.DeviceName );
 	common->Printf( "  DeviceString: %s\n", device.DeviceString );
 	common->Printf( "  StateFlags  : 0x%x\n", device.StateFlags );
 	common->Printf( "  DeviceID    : %s\n", device.DeviceID );
 	common->Printf( "  DeviceKey   : %s\n", device.DeviceKey );
-	common->Printf( "      DeviceName  : %s\n", monitor.DeviceName );
+	common->Printf( "(Mon) DeviceName  : %s\n", monitor.DeviceName );
 	common->Printf( "      DeviceString: %s\n", monitor.DeviceString );
 	common->Printf( "      StateFlags  : 0x%x\n", monitor.StateFlags );
 	common->Printf( "      DeviceID    : %s\n", monitor.DeviceID );
@@ -799,7 +799,7 @@ void DumpAllDisplayDevices()
 		{
 			break;
 		}
-		
+		common->Printf( "Dump all display devices:\n" ); // Koz
 		common->Printf( "display device: %i\n", deviceNum );
 		common->Printf( "  DeviceName  : %s\n", device.DeviceName );
 		common->Printf( "  DeviceString: %s\n", device.DeviceString );
@@ -820,7 +820,7 @@ void DumpAllDisplayDevices()
 				break;
 			}
 			
-			common->Printf( "      DeviceName  : %s\n", monitor.DeviceName );
+			common->Printf( "(Mon) DeviceName  : %s\n", monitor.DeviceName );
 			common->Printf( "      DeviceString: %s\n", monitor.DeviceString );
 			common->Printf( "      StateFlags  : 0x%x\n", monitor.StateFlags );
 			common->Printf( "      DeviceID    : %s\n", monitor.DeviceID );
@@ -1101,13 +1101,14 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t>& 
 		
 		if( verbose )
 		{
+			common->Printf( " GetModeListForDisplay:\n" ); // Koz
 			common->Printf( "display device: %i\n", displayNum );
 			common->Printf( "  DeviceName  : %s\n", device.DeviceName );
 			common->Printf( "  DeviceString: %s\n", device.DeviceString );
 			common->Printf( "  StateFlags  : 0x%x\n", device.StateFlags );
 			common->Printf( "  DeviceID    : %s\n", device.DeviceID );
 			common->Printf( "  DeviceKey   : %s\n", device.DeviceKey );
-			common->Printf( "      DeviceName  : %s\n", monitor.DeviceName );
+			common->Printf( "(Mon) DeviceName  : %s\n", monitor.DeviceName );
 			common->Printf( "      DeviceString: %s\n", monitor.DeviceString );
 			common->Printf( "      StateFlags  : 0x%x\n", monitor.StateFlags );
 			common->Printf( "      DeviceID    : %s\n", monitor.DeviceID );
