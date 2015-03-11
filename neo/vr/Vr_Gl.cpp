@@ -443,7 +443,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent, idImage *left
 	ovrPosef thePose;
 	GL_CheckErrors();
 	HMDGetFrameData( ocuframe, thePose );
-	FrameStart( ocuframe );
+	//FrameStart( ocuframe );
 		
 	timewarp = ( 0 && hmdInFrame && vr_timewarp.GetInteger() ); // koz fixme
 	

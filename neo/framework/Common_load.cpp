@@ -519,15 +519,25 @@ void idCommonLocal::ExecuteMapChange()
 	{
 		// In multiplayer, make sure the player is either 60Hz or 120Hz
 		// to avoid potential issues.
-		const float mpEngineHz = ( com_engineHz.GetFloat() < 90.0f ) ? 60.0f : 120.0f;
+		const float mpEngineHz = ( com_engineHz.GetFloat() < 90.0f ) ? 60.0f : 120.0f; // koz fixme for multiplayer
 		com_engineHz_denominator = 100LL * mpEngineHz;
 		com_engineHz_latched = mpEngineHz;
 	}
 	else
 	{
 		// allow com_engineHz to be changed between map loads
-		com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
-		com_engineHz_latched = com_engineHz.GetFloat();
+		
+		if ( vr->hasHMD ) // koz
+		{
+			com_engineHz_denominator = 100LL * (vr->hmdHz + 1);
+			com_engineHz_latched = (vr->hmdHz + 1);
+		}
+		else
+		{
+			com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
+			com_engineHz_latched = com_engineHz.GetFloat();
+		}
+				
 	}
 	
 	// note any warning prints that happen during the load process

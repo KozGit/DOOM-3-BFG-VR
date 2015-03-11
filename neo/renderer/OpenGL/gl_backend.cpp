@@ -205,7 +205,7 @@ const void GL_BlockingSwapBuffers()
 	}
 	prevBlockTime = exitBlockTime;
 
-	if ( vr->hasOculusRift && game->isVR ) vr->FrameEnd(); // Koz fixme all of the hmd timing is broken.
+	//if ( vr->hasOculusRift && game->isVR ) vr->FrameEnd(); // Koz fixme all of the hmd timing is broken.
 }
 
 /*
@@ -477,6 +477,8 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			
 			if ( game->isVR ) 
 			{
+				
+				vr->FrameWait();
 				GL_CheckErrors();
 				vr->HMDRender( stereoRenderImages[0][currentEyeTexture], stereoRenderImages[1][currentEyeTexture],
 					stereoRenderImages[0][previousEyeTexture], stereoRenderImages[1][previousEyeTexture] );

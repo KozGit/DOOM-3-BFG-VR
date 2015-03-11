@@ -1302,9 +1302,17 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		renderSystem->InitOpenGL();
 		
 		// Support up to 2 digits after the decimal point
-		com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
-		com_engineHz_latched = com_engineHz.GetFloat();
 		
+		if ( vr->hasHMD ) // koz
+		{
+			com_engineHz_denominator = 100LL * (vr->hmdHz + 1);
+			com_engineHz_latched = (vr->hmdHz + 1);
+		}
+		else
+		{
+			com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
+			com_engineHz_latched = com_engineHz.GetFloat();
+		}
 		// start the sound system, but don't do any hardware operations yet
 		soundSystem->Init();
 		
@@ -1996,9 +2004,18 @@ void idCommonLocal::PerformGameSwitch()
 	else if( idealCurrentGame == DOOM3_BFG )
 	{
 		DoomLib::Interface.Shutdown();
-		com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
-		com_engineHz_latched = com_engineHz.GetFloat();
 		
+		
+		if ( vr->hasHMD ) // koz
+		{
+			com_engineHz_denominator = 100LL * (vr->hmdHz + 1);
+			com_engineHz_latched = ( vr->hmdHz + 1 );
+		}
+		else
+		{
+			com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
+			com_engineHz_latched = com_engineHz.GetFloat();
+		}
 		// Don't MoveToPressStart if we have an invite, we need to go
 		// directly to the lobby.
 		if( session->GetState() <= idSession::IDLE )

@@ -75,6 +75,7 @@ public:
 		
 	void				FrameStart( int index );
 	void				FrameEnd();
+	void				FrameWait();
 	
 	void				MSAAResolve( void );
 	void				FXAAResolve( idImage * leftCurrent, idImage * rightCurrent );
@@ -98,6 +99,7 @@ public:
 	
 	int					hmdWidth;
 	int					hmdHeight;
+	int					hmdHz;
 	int					hmdWinPosX;
 	int					hmdWinPosY;
 	int					hmdDisplayID;
@@ -262,6 +264,9 @@ extern idCVar	vr_enable;
 extern idCVar	vr_FBOscale;
 extern idCVar	vr_hydraEnable;
 extern idCVar	vr_joystickMenuMapping;
+
+extern idCVar	vr_trackingPredictionAuto;
+extern idCVar	vr_trackingPredictionUserDefined;
 
 extern iVr* vr;
 

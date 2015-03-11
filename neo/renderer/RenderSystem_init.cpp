@@ -630,9 +630,8 @@ void R_SetNewMode( const bool fullInit )
 		
 		extern idCVar vr_hmdFullscreen;
 		extern idCVar vr_hmdAutoDetect;
-
-
-		if ( vr->hasHMD && vr->hasOculusRift && vr_hmdAutoDetect.GetBool() && vr_enable.GetBool() )
+		
+		if ( vr->hasHMD && vr->hasOculusRift && vr_hmdAutoDetect.GetBool() && vr_enable.GetBool() && i == 1 )
 		{
 			int hmdDisplayNum = -1;
 
@@ -642,7 +641,7 @@ void R_SetNewMode( const bool fullInit )
 				parms.y = 0;
 				parms.width = vr->hmdWidth;
 				parms.height = vr->hmdHeight;
-				parms.displayHz = 60; // koz fixme
+				parms.displayHz = vr->hmdHz; // koz fixme
 				parms.fullScreen = ++hmdDisplayNum;
 			}
 			else
@@ -654,7 +653,7 @@ void R_SetNewMode( const bool fullInit )
 				parms.width = vr->hmdWidth;
 				parms.height = vr->hmdHeight;
 				parms.fullScreen = -1;
-				parms.displayHz = 60; // koz fixme
+				parms.displayHz = 0; // ignored
 			}
 		}
 		else

@@ -722,7 +722,7 @@ void idRenderSystemLocal::SwapCommandBuffers_FinishRendering(
 {
 	SCOPED_PROFILE_EVENT( "SwapCommandBuffers" );
 	
-	//VR_MotionSensor_FrameEnd(); // koz fixme oculus timing
+	
 
 	if( gpuMicroSec != NULL )
 	{
@@ -785,6 +785,9 @@ void idRenderSystemLocal::SwapCommandBuffers_FinishRendering(
 	
 	// check for errors
 	GL_CheckErrors();
+	
+	vr->FrameEnd();
+
 }
 
 /*

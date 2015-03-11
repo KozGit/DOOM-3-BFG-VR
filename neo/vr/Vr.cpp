@@ -37,7 +37,7 @@ idCVar vr_hydraPitchOffset( "vr_hydraPitchOffset", "40", CVAR_GAME | CVAR_ARCHIV
 idCVar vr_trackingPredictionAuto( "vr_useAutoTrackingPrediction", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Use SDK tracking prediction.\n 1 = Auto, 0 = User defined." );
 idCVar vr_trackingPredictionUserDefined( "vr_trackingPredictionUserDefined", "50", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined tracking prediction in ms." );
 idCVar vr_useOculusProjectionMatrix( "vr_useOculusProjectionMatrix", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "0(Default) Let engine calc projection Matrices. 1 = Oculus defined(testing only)." );
-idCVar vr_pixelDensity( "vr_pixelDensity", "1.33", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "" );
+idCVar vr_pixelDensity( "vr_pixelDensity", "1.25", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "" );
 idCVar vr_lowPersistence( "vr_lowPersistence", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable low persistence. 0 = off 1 = on" );
 idCVar vr_vignette( "vr_vignette", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable warp vignette. 0 = off 1 = on" );
 idCVar vr_FBOEnabled( "vr_FBOEnabled", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Use FBO rendering path." );
@@ -98,7 +98,7 @@ idCVar vr_joystickMenuMapping( "vr_joystickMenuMapping", "1", CVAR_BOOL | CVAR_A
 
 idCVar vr_hmdFullscreen( " vr_hmdFullscreen", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "HMD autodetect screen format. 0 = window, 1 = fullscreen\n" );
 idCVar vr_hmdAutoDetect( " vr_hmdAutoSelect", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Attempt to autoselect HMD as display.\n" );
-
+idCVar vr_hmdHz(" vr_hmdHz", "0", CVAR_INTEGER | CVAR_RENDERER | CVAR_ARCHIVE, " HMD refresh rate. 0 = Auto, othewise freq in Hz." );
 
 // Koz end
 //===================================================================
@@ -182,9 +182,8 @@ iVr::iVr()
 		
 	primaryFBOWidth = 0;
 	primaryFBOHeight = 0;
-
-	//fboWidth = 0;
-	//fboHeight = 0;
+	hmdHz = 60; // koz fixme what doesnt support 60 hz?
+	
 }
 
 
@@ -248,7 +247,7 @@ void iVr::HMDInit( void )
 		{ 
 			hasOculusRift = true;
 			hasHMD = true;
-			common->Printf( "\nOculus Rift HMD Initialized\n" );
+			common->Printf( "\n\nOculus Rift HMD Initialized\n" );
 			hmdInFrame = false;
 			ovrHmd_ResetFrameTiming(hmd,0);
 		
@@ -257,8 +256,8 @@ void iVr::HMDInit( void )
 		
 			unsigned int caps = 0;
 	
-			//if ( hmd->HmdCaps & ovrHmdCap_DynamicPrediction )
-			//caps |= ovrHmdCap_DynamicPrediction;
+			if ( hmd->HmdCaps & ovrHmdCap_DynamicPrediction )
+			caps |= ovrHmdCap_DynamicPrediction;
 
 			if ( hmd->HmdCaps & ovrHmdCap_LowPersistence && vr_lowPersistence.GetInteger() )
 			caps |= ovrHmdCap_LowPersistence;
@@ -276,6 +275,21 @@ void iVr::HMDInit( void )
 			hmdDeviceName = hmd->DisplayDeviceName;
 			hmdDisplayID = hmd->DisplayId;
 
+			int hz = vr_hmdHz.GetInteger();
+			if ( strstr( hmd->ProductName, "DK2" ) )
+			{
+				vr->hmdHz = hz == 0 ? 75 : hz; // DK2 default hz is 75
+			}
+			else 
+			{
+				vr->hmdHz = hz == 0 ? 60 : hz;// DK1 default is 60
+			}
+			
+			com_engineHz.SetInteger( vr->hmdHz + 1 );
+
+			vr_lowPersistence.SetModified();
+
+			common->Printf( "Hmd: %s .\n", hmd->ProductName );
 			common->Printf( "Hmd width %d, height %d\n", hmdWidth, hmdHeight );
 			common->Printf( "Hmd DisplayDeviceName = %s, DisplayID = %d\n", hmdDeviceName.c_str(), hmdDisplayID );
 			common->Printf( "Hmd WindowPosX = %d , WindowPosY = %d\n\n", hmdWinPosX, hmdWinPosY );
@@ -686,28 +700,31 @@ void iVr::HMDGetOrientation(float &roll, float &pitch, float &yaw, idVec3 &hmdPo
 	static ovrPosef lastTrackedPose = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } ;
 	static bool currentlyTracked;
 		
-	ovrFrameTiming frameTiming;
-	int frameIndex = tr.frameCount & 0xff;
+	//ovrFrameTiming frameTiming;
+	//int frameIndex = tr.frameCount & 0xff;
 	
 	if ( hasOculusRift && hmd ) 
 	{
         
 		if ( vr_trackingPredictionAuto.GetBool() ) 
 		{
-			time = ( hmdFrameTime.EyeScanoutSeconds[ovrEye_Left] + hmdFrameTime.EyeScanoutSeconds[ovrEye_Right] ) / 2.0;
-			frameTiming = ovrHmd_GetFrameTiming(hmd,frameIndex);		
+			//time = ( hmdFrameTime.EyeScanoutSeconds[ovrEye_Left] + hmdFrameTime.EyeScanoutSeconds[ovrEye_Right] ) / 2.0;
+			time = hmdFrameTime.ScanoutMidpointSeconds;
+			//frameTiming = ovrHmd_GetFrameTiming(hmd,frameIndex);		
 		} 
 		else 
 		{
 			time = ovr_GetTimeInSeconds() + ( vr_trackingPredictionUserDefined.GetFloat() / 1000 );
-			frameTiming = ovrHmd_GetFrameTiming(hmd,frameIndex);	
+			//frameTiming = ovrHmd_GetFrameTiming(hmd,frameIndex);	
 
 		}
 
-		//hmdTrackingState = ovrHmd_GetTrackingState( hmd, time );
-		hmdTrackingState = ovrHmd_GetTrackingState(hmd, frameTiming.ScanoutMidpointSeconds) ;
+		//frameTiming = hmdFrameTime;
 
-		HMDSetFrameData(frameIndex,hmdTrackingState.HeadPose.ThePose);
+		hmdTrackingState = ovrHmd_GetTrackingState( hmd, time );
+		//hmdTrackingState = ovrHmd_GetTrackingState(hmd, frameTiming.ScanoutMidpointSeconds) ;
+
+		//HMDSetFrameData(frameIndex,hmdTrackingState.HeadPose.ThePose);
 		
 		if (hmdTrackingState.StatusFlags & ( ovrStatus_OrientationTracked ) )
 		{
@@ -789,7 +806,11 @@ void iVr::FrameStart(int index)
 	
 	} 
 
-	if (!hmdInFrame)
+	
+	hmdFrameTime = ovrHmd_BeginFrameTiming( vr->hmd, 0 );
+		
+
+/*	if (!hmdInFrame)
 	{
 		hmdFrameTime = ovrHmd_BeginFrameTiming(hmd,index);
 	}
@@ -799,8 +820,10 @@ void iVr::FrameStart(int index)
 		ovrHmd_ResetFrameTiming(hmd,index);
 		hmdFrameTime = ovrHmd_BeginFrameTiming(hmd,index);
 	}
-	hmdInFrame = true;
+	hmdInFrame = true; */
 }
+
+
 
 /*
 ==============
@@ -809,8 +832,21 @@ iVr::FrameEnd
 */
 void iVr::FrameEnd() 
 {
-	ovrHmd_EndFrameTiming( hmd );
-	hmdInFrame = false;
+	ovrHmd_EndFrameTiming( vr->hmd );
+	//hmdInFrame = false;
+
+}
+
+/*
+==============
+iVr::FrameWait
+==============
+*/
+void iVr::FrameWait()
+{
+	return;
+	ovr_WaitTillTime( hmdFrameTime.TimewarpPointSeconds );
+
 }
 
 /*
