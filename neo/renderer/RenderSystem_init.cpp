@@ -628,59 +628,92 @@ void R_SetNewMode( const bool fullInit )
 		
 		glimpParms_t	parms;
 		
-		if( r_fullscreen.GetInteger() <= 0 )
+		extern idCVar vr_hmdFullscreen;
+		extern idCVar vr_hmdAutoDetect;
+
+
+		if ( vr->hasHMD && vr->hasOculusRift && vr_hmdAutoDetect.GetBool() && vr_enable.GetBool() )
 		{
-			// use explicit position / size for window
-			parms.x = r_windowX.GetInteger();
-			parms.y = r_windowY.GetInteger();
-			parms.width = r_windowWidth.GetInteger();
-			parms.height = r_windowHeight.GetInteger();
-			// may still be -1 to force a borderless window
-			parms.fullScreen = r_fullscreen.GetInteger();
-			parms.displayHz = 0;		// ignored
+			int hmdDisplayNum = -1;
+
+			if ( vr_hmdFullscreen.GetBool() && R_GetDisplayNumForDeviceName( vr->hmdDeviceName, hmdDisplayNum ) )
+			{	// set the hmd as fullscreen.
+				parms.x = 0;
+				parms.y = 0;
+				parms.width = vr->hmdWidth;
+				parms.height = vr->hmdHeight;
+				parms.displayHz = 60; // koz fixme
+				parms.fullScreen = ++hmdDisplayNum;
+			}
+			else
+			{	// requested a windowed format or failed to get display num,
+				// create a fullscreen borderless window.
+
+				parms.x = vr->hmdWinPosX;
+				parms.y = vr->hmdWinPosY;
+				parms.width = vr->hmdWidth;
+				parms.height = vr->hmdHeight;
+				parms.fullScreen = -1;
+				parms.displayHz = 60; // koz fixme
+			}
 		}
 		else
-		{
-			// get the mode list for this monitor
-			idList<vidMode_t> modeList;
-			if( !R_GetModeListForDisplay( r_fullscreen.GetInteger() - 1, modeList ) )
+		{ // normal 
+
+			if ( r_fullscreen.GetInteger() <= 0 )
 			{
-				idLib::Printf( "r_fullscreen reset from %i to 1 because mode list failed.", r_fullscreen.GetInteger() );
-				r_fullscreen.SetInteger( 1 );
-				R_GetModeListForDisplay( r_fullscreen.GetInteger() - 1, modeList );
-			}
-			if( modeList.Num() < 1 )
-			{
-				idLib::Printf( "Going to safe mode because mode list failed." );
-				goto safeMode;
-			}
-			
-			parms.x = 0;		// ignored
-			parms.y = 0;		// ignored
-			parms.fullScreen = r_fullscreen.GetInteger();
-			
-			// set the parameters we are trying
-			if( r_vidMode.GetInteger() < 0 )
-			{
-				// try forcing a specific mode, even if it isn't on the list
-				parms.width = r_customWidth.GetInteger();
-				parms.height = r_customHeight.GetInteger();
-				parms.displayHz = r_displayRefresh.GetInteger();
+				// use explicit position / size for window
+				parms.x = r_windowX.GetInteger();
+				parms.y = r_windowY.GetInteger();
+				parms.width = r_windowWidth.GetInteger();
+				parms.height = r_windowHeight.GetInteger();
+				// may still be -1 to force a borderless window
+				parms.fullScreen = r_fullscreen.GetInteger();
+				parms.displayHz = 0;		// ignored
 			}
 			else
 			{
-				if( r_vidMode.GetInteger() >= modeList.Num() )
+				// get the mode list for this monitor
+				idList<vidMode_t> modeList;
+				if ( !R_GetModeListForDisplay( r_fullscreen.GetInteger() - 1, modeList ) )
 				{
-					idLib::Printf( "r_vidMode reset from %i to 0.\n", r_vidMode.GetInteger() );
-					r_vidMode.SetInteger( 0 );
+					idLib::Printf( "r_fullscreen reset from %i to 1 because mode list failed.", r_fullscreen.GetInteger() );
+					r_fullscreen.SetInteger( 1 );
+					R_GetModeListForDisplay( r_fullscreen.GetInteger() - 1, modeList );
 				}
-				
-				parms.width = modeList[ r_vidMode.GetInteger() ].width;
-				parms.height = modeList[ r_vidMode.GetInteger() ].height;
-				parms.displayHz = modeList[ r_vidMode.GetInteger() ].displayHz;
+				if ( modeList.Num() < 1 )
+				{
+					idLib::Printf( "Going to safe mode because mode list failed." );
+					goto safeMode;
+				}
+
+				parms.x = 0;		// ignored
+				parms.y = 0;		// ignored
+				parms.fullScreen = r_fullscreen.GetInteger();
+
+				// set the parameters we are trying
+				if ( r_vidMode.GetInteger() < 0 )
+				{
+					// try forcing a specific mode, even if it isn't on the list
+					parms.width = r_customWidth.GetInteger();
+					parms.height = r_customHeight.GetInteger();
+					parms.displayHz = r_displayRefresh.GetInteger();
+				}
+				else
+				{
+					if ( r_vidMode.GetInteger() >= modeList.Num() )
+					{
+						idLib::Printf( "r_vidMode reset from %i to 0.\n", r_vidMode.GetInteger() );
+						r_vidMode.SetInteger( 0 );
+					}
+
+					parms.width = modeList[r_vidMode.GetInteger()].width;
+					parms.height = modeList[r_vidMode.GetInteger()].height;
+					parms.displayHz = modeList[r_vidMode.GetInteger()].displayHz;
+				}
 			}
 		}
-		
+
 		parms.multiSamples = r_multiSamples.GetInteger();
 		if( i == 0 )
 		{

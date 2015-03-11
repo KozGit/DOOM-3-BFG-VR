@@ -1134,6 +1134,14 @@ struct vidMode_t
 // 1 to this to get an r_fullScreen value.
 bool R_GetModeListForDisplay( const int displayNum, idList<vidMode_t>& modeList );
 
+
+// returns the 0 based displayNum for a given device name.
+// used to identify which display a HMD is on.
+// the oculus SDK currently provides the display name for the attached device.
+
+bool R_GetDisplayNumForDeviceName( idStr requestedDeviceName, int &foundDisplayNum );
+
+
 struct glimpParms_t
 {
 	int			x;				// ignored in fullscreen

@@ -96,6 +96,9 @@ idCVar vr_headKick( "vr_headKick", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "D
 idCVar vr_showBody( "vr_showBody", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Show player body in VR." );
 idCVar vr_joystickMenuMapping( "vr_joystickMenuMapping", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, " Use alternate joy mapping\n in menus/PDA.\n 0 = D3 Standard\n 1 = VR Mode.\n(Both joys can nav menus,\n joy r/l to change\nselect area in PDA." );
 
+idCVar vr_hmdFullscreen( " vr_hmdFullscreen", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "HMD autodetect screen format. 0 = window, 1 = fullscreen\n" );
+idCVar vr_hmdAutoDetect( " vr_hmdAutoSelect", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Attempt to autoselect HMD as display.\n" );
+
 
 // Koz end
 //===================================================================
@@ -276,6 +279,7 @@ void iVr::HMDInit( void )
 			common->Printf( "Hmd width %d, height %d\n", hmdWidth, hmdHeight );
 			common->Printf( "Hmd DisplayDeviceName = %s, DisplayID = %d\n", hmdDeviceName.c_str(), hmdDisplayID );
 			common->Printf( "Hmd WindowPosX = %d , WindowPosY = %d\n\n", hmdWinPosX, hmdWinPosY );
+				
 		}
     	
 	} 
