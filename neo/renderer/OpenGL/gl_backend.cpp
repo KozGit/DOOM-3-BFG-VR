@@ -480,8 +480,11 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 				
 				vr->FrameWait();
 				GL_CheckErrors();
-				vr->HMDRender( stereoRenderImages[0][currentEyeTexture], stereoRenderImages[1][currentEyeTexture],
-					stereoRenderImages[0][previousEyeTexture], stereoRenderImages[1][previousEyeTexture] );
+				//vr->HMDRender( stereoRenderImages[0][currentEyeTexture], stereoRenderImages[1][currentEyeTexture],
+				//	stereoRenderImages[0][previousEyeTexture], stereoRenderImages[1][previousEyeTexture] );
+
+				vr->HMDRender( stereoRenderImages[vr->eyeOrder[0]][currentEyeTexture], stereoRenderImages[vr->eyeOrder[1]][currentEyeTexture],
+					stereoRenderImages[vr->eyeOrder[0]][previousEyeTexture], stereoRenderImages[vr->eyeOrder[1]][previousEyeTexture] );
 				GL_CheckErrors();
 				break;
 			}
