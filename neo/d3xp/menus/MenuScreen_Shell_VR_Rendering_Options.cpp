@@ -274,7 +274,7 @@ bool idMenuScreen_Shell_VR_Rendering_Options::HandleAction( idWidgetAction & act
 					options->Update();
 				}
 			}
-
+			
 			return true;
 		}
 		case WIDGET_ACTION_START_REPEATER: {
@@ -335,7 +335,7 @@ bool idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 	if ( originalAntialiasingType != vr_FBOAAmode.GetInteger() ) {
 		return true;
 	}
-	if ( originalMSAAlevel != r_multiSamples.GetInteger() && vr_FBOAAmode.GetInteger() == 2 ) {
+	if ( originalMSAAlevel != r_multiSamples.GetInteger() && vr_FBOAAmode.GetInteger() == VR_AA_MSAA ) {
 		return true;
 	}
 	if ( originalEnableFBO != vr_FBOEnabled.GetInteger() ) {
@@ -385,7 +385,7 @@ void idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 										 
 		case VR_OPTIONS_FIELD_MSAALEVEL: {
 			static const int numValues = 5;
-			static const int values[numValues] = { 0, 2, 4, 8, 16 };
+			static const int values[numValues] = { 0, 2, 4, 8 };
 			r_multiSamples.SetInteger( AdjustOption( r_multiSamples.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
@@ -435,18 +435,16 @@ idSWFScriptVar idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_V
 			return result;
 		}
 		case VR_OPTIONS_FIELD_ANTIALIASINGTYPE:
-			if ( vr_FBOAAmode.GetInteger() == 1 ) {
+			if ( vr_FBOAAmode.GetInteger() == VR_AA_FXAA ) {
 				return "FXAA";
-			} else if ( vr_FBOAAmode.GetInteger() == 2 ) {
+			} else if ( vr_FBOAAmode.GetInteger() == VR_AA_MSAA ) {
 				return "MSAA";
 			} else {
 				return "#str_swf_disabled";
 			}
 		
 		case VR_OPTIONS_FIELD_MSAALEVEL:
-			if ( r_multiSamples.GetInteger() == 0 ) {
-				return "#str_swf_disabled";
-			}
+			
 			return va( "%dx", r_multiSamples.GetInteger() );
 		
 		

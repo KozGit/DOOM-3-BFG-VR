@@ -308,7 +308,7 @@ void idMenuScreen_Shell_Bindings::UpdateBindingDisplay()
 						continue; // Can't rebind the sticks, so don't even show them
 					}
 					*/
-
+					// Koz end
 					bool hasImage = false;
 					for( const char** b = buttonsWithImages; *b != 0; b++ )
 					{

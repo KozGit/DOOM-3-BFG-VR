@@ -859,11 +859,13 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 
 		// render both eye views each frame on the PC
 		// koz timing
+		/* koz fixme
 		if ( game->isVR && vr->hasOculusRift )
 		{
 			vr->FrameStart(0);
 		}
-		
+		*/
+
 		for( int eye = 1 ; eye >= -1 ; eye -= 2 )
 		{
 			EmitStereoEyeView( eye, hudManager );

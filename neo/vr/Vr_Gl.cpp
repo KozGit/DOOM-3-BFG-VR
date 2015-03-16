@@ -480,11 +480,14 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent, idImage *left
 		
 	// final eye textures now in finalEyeImage[0,1]				
 
-	/*if ( vr->useFBO ) // if using FBOs, bind them, otherwise bind the default frame buffer.
+	if ( vr->useFBO ) // if using FBOs, bind them, otherwise bind the default frame buffer.
 	{ 
 
-		VR_BindFBO( GL_FRAMEBUFFER, VR_FullscreenFBO );
-		GL_ViewportAndScissor( 0, 0, VR_FullscreenFBO.width, VR_FullscreenFBO.height );
+		
+		globalFramebuffers.fullscreenFBO->Bind();
+		//VR_BindFBO( GL_FRAMEBUFFER, VR_FullscreenFBO );
+		//GL_ViewportAndScissor( 0, 0, VR_FullscreenFBO.width, VR_FullscreenFBO.height 
+		GL_ViewportAndScissor( 0, 0, globalFramebuffers.fullscreenFBO->GetWidth(), globalFramebuffers.fullscreenFBO->GetHeight() );
 		GL_CheckErrors();
 
 	}
@@ -493,12 +496,13 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent, idImage *left
 		glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // bind the default framebuffer if necessary
 		glDrawBuffer( GL_BACK );
 		GL_ViewportAndScissor( 0, 0, renderSystem->GetNativeWidth(), renderSystem->GetNativeHeight() );
-	} */
+		backEnd.glState.currentFramebuffer = NULL;
+	} 
 	
-	glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // bind the default framebuffer if necessary
+	/*glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // bind the default framebuffer if necessary
 	glDrawBuffer( GL_BACK );
 	GL_ViewportAndScissor( 0, 0, renderSystem->GetNativeWidth(), renderSystem->GetNativeHeight() );
-	backEnd.glState.currentFramebuffer = NULL;
+	backEnd.glState.currentFramebuffer = NULL;*/
 
 	// this is the Rift warp
 	// Updated shaders support oculus distortion meshes, timewarp,
@@ -558,7 +562,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent, idImage *left
 	
  	RB_DrawDistortionMesh( 1 , timewarp, ocuframe, thePose ); // draw right eye
 		
-/*	if ( vr->useFBO ) 
+	if ( vr->useFBO ) 
 	{	// distortion corrected textures have been rendered to fullscreen FBO  
 		// now draw a fullscreen quad to the default buffer		
 
@@ -571,13 +575,14 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent, idImage *left
 		renderProgManager.BindShader_PostProcess(); // pass thru shader
 
 		GL_SelectTexture( 0 );
-		VR_FullscreenFBO.FBOImage->Bind();
+		//VR_FullscreenFBO.FBOImage->Bind();
+		fullscreenFBOimage->Bind();
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
 
 		RB_DrawElementsWithCounters( &backEnd.unitSquareSurface ); // draw it
 
-	} */
+	} 
 
 	renderProgManager.Unbind();
 	

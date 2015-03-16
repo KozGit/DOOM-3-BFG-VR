@@ -786,7 +786,7 @@ void idRenderSystemLocal::SwapCommandBuffers_FinishRendering(
 	// check for errors
 	GL_CheckErrors();
 	
-	vr->FrameEnd();
+	// koz fixme vr->FrameEnd();
 
 }
 

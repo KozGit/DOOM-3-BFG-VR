@@ -478,7 +478,11 @@ void idCommonLocal::Frame()
 		
 		// This is the only place this is incremented
 		idLib::frameNumber++;
-		
+		if ( game->isVR )
+		{ 
+			vr->FrameStart( idLib::frameNumber );
+		}
+
 		// allow changing SIMD usage on the fly
 		if( com_forceGenericSIMD.IsModified() )
 		{
@@ -653,58 +657,61 @@ void idCommonLocal::Frame()
 			{
 				ingame = game->IsInGame();
 			}
-
-			//common->Printf("Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->ishellactive = %d\n",ingame,VR_GAME_PAUSED,pauseGame,game->Shell_IsActive());
-			//common->Printf("Pause diag: PDAforcetoggle = %d, PDAforced = %d, PDA rising =%d\n",PDAforcetoggle,PDAforced,PDArising);
-			if ( vr->VR_GAME_PAUSED ) // game is paused, check to exit
+			
+			if ( game->isVR )
 			{
-				if ( ingame )
+				//common->Printf("Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->ishellactive = %d\n",ingame,VR_GAME_PAUSED,pauseGame,game->Shell_IsActive());
+				//common->Printf("Pause diag: PDAforcetoggle = %d, PDAforced = %d, PDA rising =%d\n",PDAforcetoggle,PDAforced,PDArising);
+				if ( vr->VR_GAME_PAUSED ) // game is paused, check to exit
 				{
-					if ( !pauseGame )
+					if ( ingame )
 					{
-						if ( !PDAopenedByPause )
+						if ( !pauseGame )
 						{
-							vr->VR_GAME_PAUSED = false;
-							vr->PDArising = false;
-							vr->PDAforced = false;
+							if ( !PDAopenedByPause )
+							{
+								vr->VR_GAME_PAUSED = false;
+								vr->PDArising = false;
+								vr->PDAforced = false;
+							}
+							else if ( vr->PDAforced && !vr->PDArising )
+							{
+								vr->PDAforcetoggle = true;
+								PDAopenedByPause = false;
+								vr->VR_GAME_PAUSED = false;
+							}
 						}
-						else if ( vr->PDAforced && !vr->PDArising )
+					}
+					else
+					{
+						vr->VR_GAME_PAUSED = false;
+						PDAopenedByPause = false;
+						vr->PDArising = false;
+						vr->PDAforced = false;
+					}
+				}
+				else // game is not paused, see if we need to pause it
+				{
+					if ( pauseGame && ingame ) // we need to pause 
+					{
+						if ( game->IsPDAOpen() && !PDAopenedByPause ) // the PDA was already opened, dont toggle it
+						{
+							vr->VR_GAME_PAUSED = true;
+							PDAopenedByPause = false;
+							vr->PDAforced = false;
+							vr->PDArising = false;
+						}
+						else if ( !vr->PDAforced && !vr->PDArising ) // force a PDA toggle;
 						{
 							vr->PDAforcetoggle = true;
-							PDAopenedByPause = false;
-							vr->VR_GAME_PAUSED = false;
+							PDAopenedByPause = true;
 						}
-					}
-				}
-				else
-				{
-					vr->VR_GAME_PAUSED = false;
-					PDAopenedByPause = false;
-					vr->PDArising = false;
-					vr->PDAforced = false;
-				}
-			}
-			else // game is not paused, see if we need to pause it
-			{
-				if ( pauseGame && ingame ) // we need to pause 
-				{
-					if ( game->IsPDAOpen() && !PDAopenedByPause ) // the PDA was already opened, dont toggle it
-					{
-						vr->VR_GAME_PAUSED = true;
-						PDAopenedByPause = false;
-						vr->PDAforced = false;
-						vr->PDArising = false;
-					}
-					else if ( !vr->PDAforced && !vr->PDArising ) // force a PDA toggle;
-					{
-						vr->PDAforcetoggle = true;
-						PDAopenedByPause = true;
-					}
-					else if ( vr->PDAforced ) // pda is up, pause the game.
-					{
-						vr->VR_GAME_PAUSED = true;
-						PDAopenedByPause = true;
-						vr->PDArising = false;
+						else if ( vr->PDAforced ) // pda is up, pause the game.
+						{
+							vr->VR_GAME_PAUSED = true;
+							PDAopenedByPause = true;
+							vr->PDArising = false;
+						}
 					}
 				}
 			}
@@ -821,7 +828,7 @@ void idCommonLocal::Frame()
 		//--------------------------------------------
 		
 		// get the previous usercmd for bypassed head tracking transform
-		const usercmd_t	previousCmd = usercmdGen->GetCurrentUsercmd();
+		// koz no longer need this : const usercmd_t	previousCmd = usercmdGen->GetCurrentUsercmd();
 		
 		// build a new usercmd
 		int deviceNum = session->GetSignInManager().GetMasterInputDevice();
@@ -959,7 +966,17 @@ void idCommonLocal::Frame()
 		mainFrameTiming = frameTiming;
 		
 		session->GetSaveGameManager().Pump();
+		
+		// Koz begin
+		if ( game->isVR )
+		{
+			vr->FrameEnd();
+		}
+		// Koz end
 	}
+		
+
+
 	catch( idException& )
 	{
 		// an ERP_DROP was thrown

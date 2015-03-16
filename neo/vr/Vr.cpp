@@ -282,7 +282,7 @@ void iVr::HMDInit( void )
 				vr->hmdHz = hz == 0 ? 60 : hz;// DK1 default is 60
 			}
 			
-			com_engineHz.SetInteger( vr->hmdHz + 1 );
+			com_engineHz.SetInteger( vr->hmdHz );
 
 			vr_lowPersistence.SetModified();
 
@@ -517,6 +517,21 @@ void iVr::HMDInitializeDistortion()
 					
 					int status = globalFramebuffers.primaryFBO->Check();
 					globalFramebuffers.primaryFBO->Error( status );
+
+					fboWidth = rendertarget.w * 2;
+					fullscreenFBOimage = globalImages->ImageFromFunction( "_fullscreenFBOimage", R_MakeFBOImage );
+
+					common->Printf( "Creating fullscreen framebuffer\n" );
+					globalFramebuffers.fullscreenFBO = new Framebuffer( "_fullscreenFBO", rendertarget.w * 2, rendertarget.h, false ); // koz
+
+					common->Printf( "Adding color attachment to framebuffer\n" );
+					fullscreenFBOimage->Bind();
+					globalFramebuffers.fullscreenFBO->Bind();
+					globalFramebuffers.fullscreenFBO->AttachImage2D( GL_TEXTURE_2D, fullscreenFBOimage, 0 );
+
+
+					status = globalFramebuffers.fullscreenFBO->Check();
+					globalFramebuffers.fullscreenFBO->Error( status );
 
 					if ( status = GL_FRAMEBUFFER_COMPLETE ) 
 					{
@@ -804,7 +819,7 @@ void iVr::FrameStart(int index)
 	} 
 
 	
-	hmdFrameTime = ovrHmd_BeginFrameTiming( vr->hmd, 0 );
+	hmdFrameTime = ovrHmd_BeginFrameTiming( vr->hmd, index );
 		
 
 /*	if (!hmdInFrame)

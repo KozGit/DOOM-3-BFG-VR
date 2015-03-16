@@ -1305,8 +1305,8 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		
 		if ( vr->hasHMD ) // koz
 		{
-			com_engineHz_denominator = 100LL * (vr->hmdHz + 1);
-			com_engineHz_latched = (vr->hmdHz + 1);
+			com_engineHz_denominator = 100LL * ( vr->hmdHz );
+			com_engineHz_latched = ( vr->hmdHz );
 		}
 		else
 		{
@@ -2008,8 +2008,8 @@ void idCommonLocal::PerformGameSwitch()
 		
 		if ( vr->hasHMD ) // koz
 		{
-			com_engineHz_denominator = 100LL * (vr->hmdHz + 1);
-			com_engineHz_latched = ( vr->hmdHz + 1 );
+			com_engineHz_denominator = 100LL * ( vr->hmdHz );
+			com_engineHz_latched = ( vr->hmdHz );
 		}
 		else
 		{

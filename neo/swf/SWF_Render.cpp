@@ -140,7 +140,7 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 		sysWidth = 640;
 		sysHeight = 480;
 	}
-
+	
 	float scale = swfScale * sysHeight / ( float )frameHeight;
 
 	// koz begin
@@ -148,9 +148,13 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 	// or scale fullscreen images to a more appropriate size for VR.
 	if ( game->isVR )
 	{
-		if ( vr->renderingPDA || vr->VR_GAME_PAUSED )
+		if ( vr->renderingPDA ) 
 		{
 			scale *= 1.25;
+		}
+		else if ( vr->VR_GAME_PAUSED )
+		{
+			scale *= .8;
 		}
 		else
 		{
@@ -198,7 +202,7 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 		//idSWFScriptObject * hitObject = HitTest( mainspriteInstance, swfRenderState_t(), mouseX, mouseY, NULL );
 		
 		// koz begin
-		// koz scale the mouse pointer in VR on gui screens.
+		// scale the mouse pointer in VR on gui screens.
 		float mScale = game->isVR ? vr_guiScale.GetFloat() : 1.0f;
 		// koz end
 
