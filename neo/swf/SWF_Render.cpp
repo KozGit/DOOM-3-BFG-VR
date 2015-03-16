@@ -132,19 +132,25 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 	}
 	
 	const float pixelAspect = renderSystem->GetPixelAspect();
-	const float sysWidth = renderSystem->GetWidth() * ( pixelAspect > 1.0f ? pixelAspect : 1.0f );
-	const float sysHeight = renderSystem->GetHeight() / ( pixelAspect < 1.0f ? pixelAspect : 1.0f );
+	float sysWidth = renderSystem->GetWidth() * ( pixelAspect > 1.0f ? pixelAspect : 1.0f );
+	float sysHeight = renderSystem->GetHeight() / ( pixelAspect < 1.0f ? pixelAspect : 1.0f );
+	
+	if ( vr->renderingPDA ) // koz we dont need to render a fullscreen sized PDA, it will be scaled down to fit the model in VR.  This 
+	{
+		sysWidth = 640;
+		sysHeight = 480;
+	}
+
 	float scale = swfScale * sysHeight / ( float )frameHeight;
 
 	// koz begin
-	// Scale the full screen guis in VR
-	// If rendering to PDS, scale to fit the PDA,
+	// If rendering to PDA, scale to fit model,.
 	// or scale fullscreen images to a more appropriate size for VR.
 	if ( game->isVR )
 	{
 		if ( vr->renderingPDA || vr->VR_GAME_PAUSED )
 		{
-			scale *= 0.70f;
+			scale *= 1.25;
 		}
 		else
 		{

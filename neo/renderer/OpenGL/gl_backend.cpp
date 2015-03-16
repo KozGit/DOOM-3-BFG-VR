@@ -276,18 +276,14 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	//Koz begin
 	if ( vr->useFBO )
 	{
-		GL_CheckErrors();
-		//VR_BindFBO( GL_FRAMEBUFFER, VR_FBO );
 		globalFramebuffers.primaryFBO->Bind();
-		GL_CheckErrors();
 	}
 	else {
 		glDrawBuffer( GL_BACK_LEFT );
 	}
 	// Koz end
 
-	GL_CheckErrors(); // koz	
-	
+		
 	// create the stereoRenderImage if we haven't already
 	
 	// Koz begin
@@ -324,15 +320,12 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		// set up the target texture we will draw to
 		int targetEye = ( stereoEye == 1 ) ? 1 : 0;
 		
-		targetEye = vr->eyeOrder[targetEye]; // koz
+		//targetEye = vr->eyeOrder[targetEye]; // koz
 
 		// Set the back end into a known default state to fix any stale render state issues
-		GL_CheckErrors(); // koz
 		GL_SetDefaultState();
-		GL_CheckErrors(); // koz
 		renderProgManager.Unbind();
 		renderProgManager.ZeroUniforms();
-		GL_CheckErrors(); // koz
 		for( const emptyCommand_t* cmds = allCmds; cmds != NULL; cmds = ( const emptyCommand_t* )cmds->next )
 		{
 			switch( cmds->commandId )
@@ -382,11 +375,9 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		
 		// copy to the target
 		//Koz begin
-		GL_CheckErrors(); // koz
 		stereoRenderImages[targetEye][currentEyeTexture]->CopyFramebuffer( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
 		vr->hmdCurrentRender[targetEye] = stereoRenderImages[targetEye][currentEyeTexture];
 		vr->hmdPreviousRender[targetEye] = stereoRenderImages[targetEye][previousEyeTexture];
-		GL_CheckErrors(); // koz
 		//Koz end 
 
 	}
@@ -394,10 +385,8 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	// perform the final compositing / warping / deghosting to the actual framebuffer(s)
 	assert( foundEye[0] && foundEye[1] );
 	
-	GL_CheckErrors(); // koz
 	GL_SetDefaultState();
-	GL_CheckErrors(); // koz
-	
+		
 	RB_SetMVP( renderMatrix_identity );
 	
 	// If we are in quad-buffer pixel format but testing another 3D mode,
@@ -408,8 +397,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	{
 		if ( !vr->useFBO ) glDrawBuffer( GL_BACK ); // Koz 
 	}
-	GL_CheckErrors(); // koz
-
+	
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
 	GL_Cull( CT_TWO_SIDED );
 	
@@ -427,9 +415,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	
 	renderProgManager.BindShader_Texture();
 	GL_Color( 1, 1, 1, 1 );
-	
-	GL_CheckErrors(); // koz
-
+		
 	switch( renderSystem->GetStereo3DMode() )
 	{
 		case STEREO3D_QUAD_BUFFER:
@@ -478,13 +464,13 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			if ( game->isVR ) 
 			{
 				
-				vr->FrameWait();
-				GL_CheckErrors();
-				//vr->HMDRender( stereoRenderImages[0][currentEyeTexture], stereoRenderImages[1][currentEyeTexture],
-				//	stereoRenderImages[0][previousEyeTexture], stereoRenderImages[1][previousEyeTexture] );
+				//vr->FrameWait();
+				
+				vr->HMDRender( stereoRenderImages[0][currentEyeTexture], stereoRenderImages[1][currentEyeTexture],
+					stereoRenderImages[0][previousEyeTexture], stereoRenderImages[1][previousEyeTexture] );
 
-				vr->HMDRender( stereoRenderImages[vr->eyeOrder[0]][currentEyeTexture], stereoRenderImages[vr->eyeOrder[1]][currentEyeTexture],
-					stereoRenderImages[vr->eyeOrder[0]][previousEyeTexture], stereoRenderImages[vr->eyeOrder[1]][previousEyeTexture] );
+				//vr->HMDRender( stereoRenderImages[vr->eyeOrder[0]][currentEyeTexture], stereoRenderImages[vr->eyeOrder[1]][currentEyeTexture],
+				//	stereoRenderImages[vr->eyeOrder[0]][previousEyeTexture], stereoRenderImages[vr->eyeOrder[1]][previousEyeTexture] );
 				GL_CheckErrors();
 				break;
 			}

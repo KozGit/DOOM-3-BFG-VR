@@ -250,10 +250,7 @@ void iVr::HMDInit( void )
 			common->Printf( "\n\nOculus Rift HMD Initialized\n" );
 			hmdInFrame = false;
 			ovrHmd_ResetFrameTiming(hmd,0);
-		
-		
-			currentRiftEye = 0;
-		
+					
 			unsigned int caps = 0;
 	
 			if ( hmd->HmdCaps & ovrHmdCap_DynamicPrediction )

@@ -122,7 +122,6 @@ public:
 	float				hmdPixelScale;
 	float				hmdAspect;
 	hmdEye_t			hmdEye[2];
-	int					currentRiftEye;
 	int					eyeOrder[2];
 	
 	float				oculusIPD;
@@ -288,7 +287,6 @@ extern bool		PDAclipModelSet;
 
 extern ovrHmd	hmd;
 extern hmdEye_t hmdEye[2];
-extern int		currentRiftEye;
 extern float	hmdFovX;
 extern float	hmdFovY;
 

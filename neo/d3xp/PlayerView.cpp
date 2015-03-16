@@ -799,18 +799,13 @@ void idPlayerView::EmitStereoEyeView( const int eye, idMenuHandler_HUD* hudManag
 	eyeView.stereoScreenSeparation = eye * dists.screenSeparation;
 
 	// Koz begin
-	
-    if ( eye < 1 ) // Koz fixme get rid of hacky McCrappyhack globals to let everything else know what eye is being drawn.
+	if ( game->isVR )
 	{
-		vr->currentRiftEye = 0;//vr->eyeOrder[0];
+		vr->lastViewOrigin = eyeView.vieworg;
+		vr->lastViewAxis = eyeView.viewaxis;
 	}
-	else
-	{
-		vr->currentRiftEye = 1;//vr->eyeOrder[1];
-	}
-	//common->Printf( "Eye %d, riftEye %d\n", eye, vr->currentRiftEye );
 	// Koz end
-    	
+	
 	SingleView( &eyeView, hudManager );
 }
 
@@ -852,7 +847,7 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 			if ( player->pdaMenu != NULL )
 			{
 
-				if ( !vr->PDAforced && !vr->PDArising )
+				if ( !vr->PDAforced && !vr->PDArising && view->viewEyeBuffer == 0 ) // pda is not stereo, only render it for the left eye and use it twice.
 				{
 					vr->renderingPDA = true;
 					player->pdaMenu->Update();

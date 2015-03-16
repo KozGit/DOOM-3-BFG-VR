@@ -428,18 +428,22 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 	//
 	// set up projection matrix
 	//
-
-	float ymax, ymin, xmax, xmin, width, height = 0; // koz
+	
+	// Koz begin : changing to allow the use of Oculus FOV values instead of the game FOV.
+	float ymax, ymin, xmax, xmin, width, height = 0; 
 
 	const float zNear = ( viewDef->renderView.cramZNear ) ? ( r_znear.GetFloat() * 0.25f ) : r_znear.GetFloat();
 
-	if ( game->isVR ) // koz use oculus provided FOV values for HMD
+	if ( game->isVR ) 
 	{
-		ymax = zNear * vr->hmdEye[vr->currentRiftEye].eyeFov.UpTan;
-		ymin = -zNear * vr->hmdEye[vr->currentRiftEye].eyeFov.DownTan;
+		
+		int pEye = viewDef->renderView.viewEyeBuffer == -1 ? 0 : 1;
+		
+		ymax = zNear * vr->hmdEye[pEye].eyeFov.UpTan;
+		ymin = -zNear * vr->hmdEye[pEye].eyeFov.DownTan;
 
-		xmax = zNear * vr->hmdEye[vr->currentRiftEye].eyeFov.RightTan;
-		xmin = -zNear * vr->hmdEye[vr->currentRiftEye].eyeFov.LeftTan;
+		xmax = zNear * vr->hmdEye[pEye].eyeFov.RightTan;
+		xmin = -zNear * vr->hmdEye[pEye].eyeFov.LeftTan;
 	}
 	else
 	{
@@ -449,6 +453,8 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 		xmax = zNear * tan( viewDef->renderView.fov_x * idMath::PI / 360.0f );
 		xmin = -xmax;
 	}
+
+	// Koz end
 
 	width = xmax - xmin;
 	height = ymax - ymin;
@@ -501,16 +507,18 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 // RB: standard OpenGL projection matrix
 void R_SetupProjectionMatrix2( const viewDef_t* viewDef, const float zNear, const float zFar, float projectionMatrix[16] )
 {
-	// Koz changing to allow the use of Oculus FOV values instead of the game FOV.
+	// Koz begin : changing to allow the use of Oculus FOV values instead of the game FOV.
 	float ymax, ymin, xmax, xmin, width, height = 0;
 
-	if ( game->isVR ) // koz use oculus provided FOV values for HMD
+	if ( game->isVR ) 
 	{
-		ymax = zNear * vr->hmdEye[vr->currentRiftEye].eyeFov.UpTan;
-		ymin = -zNear * vr->hmdEye[vr->currentRiftEye].eyeFov.DownTan;
+		int pEye = viewDef->renderView.viewEyeBuffer == -1 ? 0 : 1;
 
-		xmax = zNear * vr->hmdEye[vr->currentRiftEye].eyeFov.RightTan;
-		xmin = -zNear * vr->hmdEye[vr->currentRiftEye].eyeFov.LeftTan;
+		ymax = zNear * vr->hmdEye[pEye].eyeFov.UpTan;
+		ymin = -zNear * vr->hmdEye[pEye].eyeFov.DownTan;
+
+		xmax = zNear * vr->hmdEye[pEye].eyeFov.RightTan;
+		xmin = -zNear * vr->hmdEye[pEye].eyeFov.LeftTan;
 	}
 	else
 	{
@@ -520,6 +528,7 @@ void R_SetupProjectionMatrix2( const viewDef_t* viewDef, const float zNear, cons
 		xmax = zNear * tan( viewDef->renderView.fov_x * idMath::PI / 360.0f );
 		xmin = -xmax;
 	}
+	// Koz end
 
 	width = xmax - xmin;
 	height = ymax - ymin;

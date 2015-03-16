@@ -7816,7 +7816,7 @@ void idPlayer::PerformImpulse( int impulse )
 			break;
 		}
 
-		/*
+		
 		// Koz Begin
 		case IMPULSE_32: // Koz HMD/Body orienataion reset. Make fisrtperson axis match view direction.
 		{
@@ -7830,7 +7830,7 @@ void idPlayer::PerformImpulse( int impulse )
 			break;
 		}
 		// Koz end
-		*/
+		
 	}
 }
 
@@ -7858,7 +7858,7 @@ void idPlayer::ToggleHeadingBeam()
 
 /*
 ==============
-idPlayer::OrientHMDBody  Koz align the body with the view for drift calibration
+idPlayer::OrientHMDBody  Koz align the body with the view  ( move the body to point the same direction as the HMD view - does not change the view. ) 
 ==============
 */
 void idPlayer::OrientHMDBody()
@@ -11600,7 +11600,7 @@ void idPlayer::CalculateRenderView()
 	//common->Printf("Positional tracking: %s translation x %f  y %f z %f\n",
 	//				hmdPositionTracked ? "active" : "incative",hmdTranslation.x,hmdTranslation.x,hmdTranslation.z);
 
-	if (vr->hmdPositionTracked )
+	if ( vr->hmdPositionTracked )
 	{
 		lastValidHmdTranslation = hmdTranslation;
 		origin += axis[0] * hmdTranslation.x + axis[1] * hmdTranslation.y + axis[2] * hmdTranslation.z; // add hmd translation
@@ -11620,15 +11620,15 @@ void idPlayer::CalculateRenderView()
 	renderView->vieworg = origin;
 	renderView->viewaxis = angles.ToMat3();//axis;
 
-	int neg = 1;
+	/*int neg = 1;
 	extern idCVar  stereoRender_interOccularCentimeters;
 	float worldSeparation = (stereoRender_interOccularCentimeters.GetFloat() * 0.5) / 2.54;
 
-	neg = ( vr->currentRiftEye == 0 ) ? -1 : 1;
+	neg = renderView->viewEyeBuffer;
 
 	vr->lastViewOrigin = origin += neg * worldSeparation * renderView->viewaxis[1];
 	vr->lastViewAxis = renderView->viewaxis;
-
+	*/
 	// koz fixme pause - handle the PDA model if game is paused
 	// really really need to move this somewhere else.
 

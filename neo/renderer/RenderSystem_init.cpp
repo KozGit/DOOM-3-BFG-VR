@@ -3132,6 +3132,7 @@ idRenderSystemLocal::GetWidth
 int idRenderSystemLocal::GetWidth() const
 {
 	// Koz begin
+		
 	if ( vr->useFBO ) {
 		return globalFramebuffers.primaryFBO->GetWidth();
 	}
@@ -3153,6 +3154,7 @@ idRenderSystemLocal::GetHeight
 int idRenderSystemLocal::GetHeight() const
 {
 	// Koz begin
+	
 	if ( vr->useFBO ) {
 		return globalFramebuffers.primaryFBO->GetHeight();
 	}

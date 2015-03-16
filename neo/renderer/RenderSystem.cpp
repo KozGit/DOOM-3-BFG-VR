@@ -1049,27 +1049,13 @@ void idRenderSystemLocal::CaptureRenderToImage( const char* imageName, bool clea
 	}
 	
 	idScreenRect& rc = renderCrops[currentRenderCrop];
-
-	// Koz begin
-	// Koz fixme - brutal hack for incorrect PDA model aspect - really really need to fix the model.
-	int y1, rch; 
-	if ( game->isVR && ( vr->renderingPDA || (vr->PDAforced && vr->VR_GAME_PAUSED) ) )
-	{
-		y1 = rc.y1 + ( rc.GetHeight() * .18);
-		rch = rc.GetHeight() * .64;
-	}
-	else
-	{
-		y1 = rc.y1;
-		rch = rc.GetHeight();
-	}
-	// Koz end
+		
 	copyRenderCommand_t* cmd = ( copyRenderCommand_t* )R_GetCommandBuffer( sizeof( *cmd ) );
 	cmd->commandId = RC_COPY_RENDER;
 	cmd->x = rc.x1;
-	cmd->y = y1;//  rc.y1;
+	cmd->y = rc.y1;
 	cmd->imageWidth = rc.GetWidth();
-	cmd->imageHeight = rch;// rc.GetHeight();
+	cmd->imageHeight = rc.GetHeight();
 	cmd->image = image;
 	cmd->clearColorAfterCopy = clearColorAfterCopy;
 	
