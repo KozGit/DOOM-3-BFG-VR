@@ -1002,6 +1002,15 @@ idCommonLocal::LoadGame
 */
 bool idCommonLocal::LoadGame( const char* saveName )
 {
+	// Koz begin
+	// koz fixme do this right.
+	// Make sure the pda is in a valid state on game load.
+	vr->PDAforced = false;
+	vr->PDArising = false;
+	vr->PDAforcetoggle = false;
+	vr->VR_GAME_PAUSED = false; 
+	// Koz end
+	
 	if( IsMultiplayer() )
 	{
 		common->Printf( "Can't load during net play.\n" );
