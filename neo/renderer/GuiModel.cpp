@@ -35,6 +35,8 @@ const float idGuiModel::STEREO_DEPTH_NEAR = 0.0f;
 const float idGuiModel::STEREO_DEPTH_MID  = 0.5f;
 const float idGuiModel::STEREO_DEPTH_FAR  = 1.0f;
 
+idCVar vr_guiSeparation( "vr_guiSeparation", ".07", CVAR_FLOAT | CVAR_ARCHIVE, " Screen separation value for fullscreen guis." );
+
 /*
 ================
 idGuiModel::idGuiModel
@@ -248,7 +250,12 @@ void idGuiModel::EmitFullScreen()
 	bool stereoEnabled = ( renderSystem->GetStereo3DMode() != STEREO3D_OFF );
 	if( stereoEnabled )
 	{
-		const float screenSeparation = GetScreenSeparationForGuis();
+		float screenSeparation = GetScreenSeparationForGuis();
+
+		if ( game->isVR )
+		{
+			screenSeparation = vr_guiSeparation.GetFloat();
+		}
 		
 		// this will be negated on the alternate eyes, both rendered each frame
 		viewDef->renderView.stereoScreenSeparation = screenSeparation;

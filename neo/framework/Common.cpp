@@ -892,6 +892,7 @@ void idCommonLocal::RenderSplash()
 	
 	const emptyCommand_t* cmd = renderSystem->SwapCommandBuffers( &time_frontend, &time_backend, &time_shadows, &time_gpu );
 	renderSystem->RenderCommandBuffers( cmd );
+	
 }
 
 /*

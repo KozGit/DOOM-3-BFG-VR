@@ -307,7 +307,7 @@ void idCommonLocal::Draw()
 		}
 		
 		// Koz begin
-		if ( !vr->PDAforced && !vr->PDArising ) game->Shell_Render(); //koz render any menus outside of game ( main menu etc )
+		if ( !game->isVR || (!vr->PDAforced && !vr->PDArising) ) game->Shell_Render(); //koz render any menus outside of game ( main menu etc )
 		//Koz end
 
 	}
@@ -389,11 +389,6 @@ void idCommonLocal::UpdateScreen( bool captureToImage, bool releaseMouse )
 	// build all the draw commands without running a new game tic
 	Draw();
 	
-	if ( game->isVR && vr->vrIsBackgroundSaving )
-	{
-		vr->HMDTrackStatic(); // koz fixme only in vr only during loading/saving dont think we need this now anyway.
-	}
-
 	if( captureToImage )
 	{
 		renderSystem->CaptureRenderToImage( "_currentRender", false );
@@ -401,6 +396,7 @@ void idCommonLocal::UpdateScreen( bool captureToImage, bool releaseMouse )
 	
 	// this should exit right after vsync, with the GPU idle and ready to draw
 	const emptyCommand_t* cmd = renderSystem->SwapCommandBuffers( &time_frontend, &time_backend, &time_shadows, &time_gpu );
+		
 	
 	// get the GPU busy with new commands
 	renderSystem->RenderCommandBuffers( cmd );
@@ -505,15 +501,7 @@ void idCommonLocal::Frame()
 		WriteConfiguration();
 		
 		eventLoop->RunEventLoop();
-		// Koz begin 
-		// Add head tracking to the main menus.
-		if ( !game->IsInGame() && game->isVR )
-			// || session->GetState() != idSession::INGAME )
-		{ 
-			vr->HMDTrackStatic();
-		}
-		// Koz end
-
+		
 		// Activate the shell if it's been requested
 		if( showShellRequested && game )
 		{

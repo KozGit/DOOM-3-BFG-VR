@@ -104,7 +104,7 @@ public:
 	int					hmdWinPosY;
 	int					hmdDisplayID;
 	idStr				hmdDeviceName;
-		
+			
 	int					useFBO;
 	int					primaryFBOWidth;
 	int					primaryFBOHeight;

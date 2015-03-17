@@ -179,7 +179,7 @@ iVr::iVr()
 	hmdWinPosY =0;
 	hmdDisplayID = 0;
 	hmdDeviceName = "";
-		
+			
 	primaryFBOWidth = 0;
 	primaryFBOHeight = 0;
 	hmdHz = 60; // koz fixme what doesnt support 60 hz?

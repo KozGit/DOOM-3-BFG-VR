@@ -640,9 +640,12 @@ void idCommonLocal::ExecuteMapChange()
 			game->RunFrame( emptyCommandManager, emptyGameReturn );
 			// Koz fixme only in vr
 			// Koz: make sure to maintain smooth heatracking of loading screen when running frames.
-			//VR_HMDTrackStatic();
-			//SwapBuffers(win32.hDC);
-			//glFinish();
+			if ( game->isVR )
+			{
+				vr->HMDTrackStatic();
+				SwapBuffers( win32.hDC );
+				glFinish();
+			}
 		}
 		
 		// kick off an auto-save of the game (so we can always continue in this map if we die before hitting an autosave)
@@ -655,25 +658,23 @@ void idCommonLocal::ExecuteMapChange()
 		else
 		{	
 			// Koz: start the save in a background thread.
-			// keep this tread busy headtracking the dialog until complete.		
-				
-
-			//Dialog().ShowSaveIndicator( true );
-			//UpdateLevelLoadPacifier();
-			//	for ( int i = 0; i < 100; i++ ) {
-			//		BusyWait();
-			//	}
-
-			//vr->vrIsBackgroundSaving = true;
-			//rAutoRender.StartBackgroundAutoSwaps( (autoRenderIconType_t) 0 ); // koz fixme start thread, need to rename rAutoRender
-			vrBackgroundSave.StartBackgroundSave( BACKGROUND_SAVE, "autosave" );
-			//SaveGame( "autosave" );
+			// keep this thread busy headtracking the dialog until complete.		
 			
+			Dialog().ShowSaveIndicator( true );
+			UpdateLevelLoadPacifier();
+			for ( int i = 0; i < 100; i++ ) 
+			{
+					//BusyWait();
+			}
+						
+			vrBackgroundSave.StartBackgroundSave( BACKGROUND_SAVE, "autosave" );
+						
 			while ( vr->vrIsBackgroundSaving == true )
 			{
 				vr->HMDTrackStatic();
 				SwapBuffers(win32.hDC);
 				glFinish();
+				BusyWait();
 			}
 			
 			StartWipe( "wipeMaterial", true );
@@ -799,7 +800,7 @@ void idCommonLocal::UpdateLevelLoadPacifier()
 	else
 	{
 		// On the PC just update at a constant rate for the Steam overlay
-		if( time - lastPacifierGuiTime >= 50 )
+		if( time - lastPacifierGuiTime >= 50 ) // koz fixme
 		{
 			lastPacifierGuiTime = time;
 			UpdateScreen( false );
@@ -1321,8 +1322,7 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 	if ( game->isVR )
 	{
 		vrBackgroundSave.StartBackgroundSave( BACKGROUND_SAVE, savename );
-		//SaveGame( "autosave" );
-
+		
 		while ( vr->vrIsBackgroundSaving == true )
 		{
 			vr->HMDTrackStatic();
