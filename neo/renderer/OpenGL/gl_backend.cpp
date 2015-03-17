@@ -469,10 +469,8 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 				vr->HMDRender( stereoRenderImages[0][currentEyeTexture], stereoRenderImages[1][currentEyeTexture],
 					stereoRenderImages[0][previousEyeTexture], stereoRenderImages[1][previousEyeTexture] );
 
-				if ( !game->IsInGame() ) vr->HMDTrackStatic();
-
-				//vr->HMDRender( stereoRenderImages[vr->eyeOrder[0]][currentEyeTexture], stereoRenderImages[vr->eyeOrder[1]][currentEyeTexture],
-				//	stereoRenderImages[vr->eyeOrder[0]][previousEyeTexture], stereoRenderImages[vr->eyeOrder[1]][previousEyeTexture] );
+				if ( vr->playerDead || ( game->Shell_IsActive() && !vr->PDAforced && !vr->PDArising ) ) vr->HMDTrackStatic();
+								
 				GL_CheckErrors();
 				break;
 			}

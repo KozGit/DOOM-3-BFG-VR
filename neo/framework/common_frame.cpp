@@ -292,7 +292,7 @@ void idCommonLocal::Draw()
 		// when paused capture the shell render to the PDA screen texture,
 		// then draw the game frame
 		
-		if ( vr->PDAforced || vr->PDArising ) // koz fixme do we only want to use the PDA model in VR?
+		if ( (vr->PDAforced || vr->PDArising) && !vr->playerDead) // koz fixme do we only want to use the PDA model in VR?
 		{
 			game->Shell_Render(); //koz render the menu
 			renderSystem->CaptureRenderToImage( "_pdaImage", true ); // copy the rendered menu then clear buffer
@@ -307,7 +307,10 @@ void idCommonLocal::Draw()
 		}
 		
 		// Koz begin
-		if ( !game->isVR || (!vr->PDAforced && !vr->PDArising) ) game->Shell_Render(); //koz render any menus outside of game ( main menu etc )
+		if ( !game->isVR || vr->playerDead || (!vr->PDAforced && !vr->PDArising) )
+		{
+			game->Shell_Render(); //koz render any menus outside of game ( main menu etc )
+		}
 		//Koz end
 
 	}

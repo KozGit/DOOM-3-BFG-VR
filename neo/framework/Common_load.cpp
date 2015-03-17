@@ -672,9 +672,10 @@ void idCommonLocal::ExecuteMapChange()
 			while ( vr->vrIsBackgroundSaving == true )
 			{
 				vr->HMDTrackStatic();
-				SwapBuffers(win32.hDC);
-				glFinish();
-				BusyWait();
+				UpdateScreen( false, false );
+				//SwapBuffers(win32.hDC);
+				//glFinish();
+				
 			}
 			
 			StartWipe( "wipeMaterial", true );
@@ -1009,6 +1010,7 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	vr->PDArising = false;
 	vr->PDAforcetoggle = false;
 	vr->VR_GAME_PAUSED = false; 
+	vr->playerDead = false;
 	// Koz end
 	
 	if( IsMultiplayer() )

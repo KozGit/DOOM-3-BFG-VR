@@ -172,6 +172,8 @@ iVr::iVr()
 
 	independentWeaponYaw = 0;
 	independentWeaponPitch = 0;
+
+	playerDead = false;
 	
 	hmdWidth = 0;
 	hmdHeight = 0;

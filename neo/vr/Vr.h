@@ -147,6 +147,8 @@ public:
 	float				independentWeaponYaw;
 	float				independentWeaponPitch;
 
+	float				playerDead;
+
 	
 	//---------------------------
 private:
