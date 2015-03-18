@@ -352,7 +352,16 @@ void idSWF::RenderSprite( idRenderSystem* gui, idSWFSpriteInstance* spriteInstan
 				
 				float widthAdj = swf_titleSafe.GetFloat() * frameWidth;
 				float heightAdj = swf_titleSafe.GetFloat() * frameHeight;
-				
+
+				// Koz begin
+				// Scale the HUD into view in VR
+				if ( game->isVR )
+				{
+					widthAdj = (swf_titleSafe.GetFloat() + vr_hudScaleX.GetFloat()) * frameWidth;
+					heightAdj = (swf_titleSafe.GetFloat() + vr_hudScaleY.GetFloat()) * frameHeight;
+				}
+				// Koz end
+
 				const float pixelAspect = renderSystem->GetPixelAspect();
 				const float sysWidth = renderSystem->GetWidth() * ( pixelAspect > 1.0f ? pixelAspect : 1.0f );
 				const float sysHeight = renderSystem->GetHeight() / ( pixelAspect < 1.0f ? pixelAspect : 1.0f );

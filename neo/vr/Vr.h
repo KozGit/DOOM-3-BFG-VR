@@ -259,6 +259,7 @@ extern idCVar	vr_overdriveEnable;
 extern idCVar	vr_guiScale; 
 extern idCVar	vr_hudScaleX; 
 extern idCVar	vr_hudScaleY; 
+extern idCVar	vr_showHud;
 extern idCVar	vr_listMonitorName;
 
 extern idCVar	vr_enable;

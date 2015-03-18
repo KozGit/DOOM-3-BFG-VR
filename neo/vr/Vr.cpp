@@ -87,6 +87,7 @@ idCVar vr_overdriveEnable( "vr_overdriveEnable", "1", CVAR_INTEGER | CVAR_ARCHIV
 idCVar vr_guiScale( "vr_guiScale", "0.4", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "scale reduction factor for full screen menu/pda scale in VR", 0.0001f, 0.9f ); //koz allow scaling of full screen guis/pda
 idCVar vr_hudScaleX( "vr_hudScaleX", "0.3", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "X scale reduction factor for hud element positions in VR", 0.0001f, 0.9f ); //scale hud positions so they will be visible in VR if wanted
 idCVar vr_hudScaleY( "vr_hudScaleY", "0.3", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "Y scale reduction factor for hud element positions in VR", 0.0001f, 0.9f ); //scale hud positions so they will be visible in VR if wanted
+idCVar vr_showHud( "vr_showHud", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Show the HUD in VR. 1 = Enable, 0 = Disable." );
 
 // koz display windows monitor name in the resolution selection menu, helpful to ID which is the rift if using extended mode
 idCVar vr_listMonitorName( "vr_listMonitorName", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "List monitor name with resolution." );

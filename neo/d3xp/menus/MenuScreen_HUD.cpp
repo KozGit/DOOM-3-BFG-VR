@@ -33,6 +33,8 @@ extern idCVar pm_stamina;
 extern idCVar in_useJoystick;
 extern idCVar flashlight_batteryDrainTimeMS;
 
+idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "41", CVAR_FLOAT, "Tweak talk cursor y pos in VR. % val", 0 , 99 );
+
 /*
 ========================
 idMenuScreen_HUD::Initialize
@@ -226,10 +228,12 @@ void idMenuScreen_HUD::UpdateHealthArmor( idPlayer* player )
 	if( common->IsMultiplayer() )
 	{
 		playerInfo->GetSprite()->SetYPos( 20.0f );
+
 	}
 	else
 	{
 		playerInfo->GetSprite()->SetYPos( 0.0f );
+		
 	}
 	
 	idSWFTextInstance* txtVal = playerInfo->GetNestedText( "health", "txtVal" );
@@ -951,6 +955,16 @@ void idMenuScreen_HUD::UpdateCursorState()
 			cursorState = CURSOR_IN_COMBAT;
 			
 		}
+		
+		// Koz begin
+		if ( talkCursor && game->isVR )
+		{ // move the talk cursor so it's normally above the target. 
+						
+			talkCursor->SetYPos( -renderSystem->GetHeight() * ( vr_tweakTalkCursor.GetFloat() / 100.0f ) );
+			
+		}
+		// Koz end
+
 	}
 }
 

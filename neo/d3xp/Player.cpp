@@ -3589,6 +3589,12 @@ idPlayer::DrawHUD
 void idPlayer::DrawHUD( idMenuHandler_HUD* _hudManager )
 {
 	SCOPED_PROFILE_EVENT( "idPlayer::DrawHUD" );
+	// Koz begin
+	if ( game->isVR && !vr_showHud.GetBool() )
+	{
+		return;
+	}
+	// Koz end
 	
 	if( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || !g_showHud.GetBool() )
 	{
