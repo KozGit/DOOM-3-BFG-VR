@@ -269,6 +269,8 @@ extern idCVar	vr_joystickMenuMapping;
 extern idCVar	vr_trackingPredictionAuto;
 extern idCVar	vr_trackingPredictionUserDefined;
 
+extern idCVar	vr_minLoadScreenTime;
+
 extern iVr* vr;
 
 /*

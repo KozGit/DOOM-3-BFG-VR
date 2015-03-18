@@ -499,7 +499,7 @@ void idCommonLocal::ExecuteMapChange()
 	LoadLoadingGui( currentMapName, hellMap );
 	
 	// Stop rendering the wipe
-	ClearWipe(); // Koz skip this to leave the screen black during loads.
+	if ( !game->isVR) ClearWipe(); // Koz skip this to leave the screen black during loads.
 	
 	
 	if( fileSystem->UsingResourceFiles() )
@@ -624,7 +624,9 @@ void idCommonLocal::ExecuteMapChange()
 	uiManager->EndLevelLoad( currentMapName );
 	fileSystem->EndLevelLoad();
 	
-	if( !mapSpawnData.savegameFile && !IsMultiplayer() )
+	if ( game->isVR ) ClearWipe(); // Koz
+	
+		if( !mapSpawnData.savegameFile && !IsMultiplayer() )
 	{
 		common->Printf( "----- Running initial game frames -----\n" );
 		
@@ -660,16 +662,13 @@ void idCommonLocal::ExecuteMapChange()
 			// Koz: start the save in a background thread.
 			// keep this thread busy headtracking the dialog until complete.		
 			
-			Dialog().ShowSaveIndicator( true );
-			UpdateLevelLoadPacifier();
-			for ( int i = 0; i < 100; i++ ) 
-			{
-					//BusyWait();
-			}
-						
+			//Dialog().ShowSaveIndicator( true );
+			//UpdateLevelLoadPacifier();
+			
+			int startLoadScreen = Sys_Milliseconds();
 			vrBackgroundSave.StartBackgroundSave( BACKGROUND_SAVE, "autosave" );
 						
-			while ( vr->vrIsBackgroundSaving == true )
+			while ( vr->vrIsBackgroundSaving == true || ( Sys_Milliseconds() - startLoadScreen < vr_minLoadScreenTime.GetFloat() ) )
 			{
 				vr->HMDTrackStatic();
 				UpdateScreen( false, false );
