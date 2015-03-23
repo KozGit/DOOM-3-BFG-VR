@@ -44,8 +44,15 @@ typedef enum
 	VR_AA_MSAA,
 	VR_AA_FXAA,
 	NUM_VR_AA
-}  vr_aa_t;
+} vr_aa_t;
 
+typedef enum
+{
+	VR_HUD_NONE,
+	VR_HUD_FULL,
+	VR_HUD_LOOK_DOWN,
+	VR_HUD_FLOATING
+} vr_hud_t;
 
 class iVr
 {
@@ -80,7 +87,9 @@ public:
 	void				MSAAResolve( void );
 	void				FXAAResolve( idImage * leftCurrent, idImage * rightCurrent );
 	void				FXAASetUniforms( Framebuffer FBO );
-	
+
+	float				GetHudAlpha( void );
+		
 	bool				VR_GAME_PAUSED;
 	
 	bool				PDAforcetoggle;
@@ -95,6 +104,8 @@ public:
 	idVec3				lastViewOrigin;
 	idMat3				lastViewAxis;
 	float				lastHMDYaw;
+	float				lastHMDPitch;
+
 	float				angles[3];
 	
 	int					hmdWidth;
@@ -259,7 +270,8 @@ extern idCVar	vr_overdriveEnable;
 extern idCVar	vr_guiScale; 
 extern idCVar	vr_hudScaleX; 
 extern idCVar	vr_hudScaleY; 
-extern idCVar	vr_showHud;
+extern idCVar	vr_hudType;
+extern idCVar	vr_hudAngle;
 extern idCVar	vr_listMonitorName;
 
 extern idCVar	vr_enable;

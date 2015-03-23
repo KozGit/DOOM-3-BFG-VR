@@ -34,6 +34,7 @@ extern idCVar in_useJoystick;
 extern idCVar flashlight_batteryDrainTimeMS;
 
 idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "41", CVAR_FLOAT, "Tweak talk cursor y pos in VR. % val", 0 , 99 );
+idCVar vr_tweak( "vr_tweak", "41", CVAR_FLOAT, "Tweak pos in VR. % val", 0, 99 );
 
 /*
 ========================
@@ -233,9 +234,16 @@ void idMenuScreen_HUD::UpdateHealthArmor( idPlayer* player )
 	else
 	{
 		playerInfo->GetSprite()->SetYPos( 0.0f );
-		
 	}
 	
+	// Koz begin
+	// Hud fade
+	if ( game->isVR )
+	{
+		playerInfo->GetSprite()->SetAlpha( vr->GetHudAlpha() );
+	}
+	// Koz end
+
 	idSWFTextInstance* txtVal = playerInfo->GetNestedText( "health", "txtVal" );
 	if( txtVal != NULL )
 	{
@@ -321,6 +329,12 @@ void idMenuScreen_HUD::UpdateStamina( idPlayer* player )
 		return;
 	}
 	
+	if ( game->isVR )
+	{
+		stamina->GetSprite()->SetAlpha( vr->GetHudAlpha() );
+	}
+	
+	// Koz end
 	idSWFSpriteInstance* stamSprite = stamina->GetSprite();
 	if( stamSprite != NULL )
 	{
@@ -359,6 +373,20 @@ void idMenuScreen_HUD::UpdateWeaponInfo( idPlayer* player )
 		return;
 	}
 	
+	// Koz begin
+	// Hud fade
+	if ( game->isVR )
+	{
+		ammoInfo->SetAlpha( vr->GetHudAlpha() );
+		
+		// updateWeaponStates not called every frame, so update the alpha here.
+		if ( weaponPills )
+		{
+			weaponPills->GetSprite()->SetAlpha( vr->GetHudAlpha() );
+		}
+	}
+	
+	// Koz end
 	idEntityPtr<idWeapon> weapon = player->weapon;
 	
 	assert( weapon.GetEntity() );
@@ -1046,7 +1074,8 @@ void idMenuScreen_HUD::UpdateWeaponStates( idPlayer* player, bool weaponChanged 
 	{
 		return;
 	}
-	
+		
+
 	idStr displayName;
 	if( common->IsMultiplayer() )
 	{
@@ -1318,6 +1347,19 @@ void idMenuScreen_HUD::UpdateLocation( idPlayer* player )
 		locationName->SetText( idLocalization::GetString( "#str_02911" ) );
 	}
 	locationName->SetStrokeInfo( true, 0.6f, 2.0f );
+
+	// Koz begin
+	// Hud fade
+	if ( game->isVR )
+	{
+		// Set the damage color
+		swfColorRGBA_t color;
+		
+		color = locationName->color;
+		color.a = int ( vr->GetHudAlpha() * 255.0f );
+		locationName->color = color;
+	}
+	// Koz end
 	
 }
 
@@ -1463,6 +1505,14 @@ idMenuScreen_HUD::UpdatedSecurity
 */
 void idMenuScreen_HUD::UpdatedSecurity()
 {
+	
+	// Koz begin
+	// Hud fade
+	if ( game->isVR )
+	{
+		security->SetAlpha( vr->GetHudAlpha() );
+	}
+	// Koz end
 	if( security != NULL && securityText != NULL )
 	{
 		security->SetVisible( true );
@@ -1627,6 +1677,14 @@ void  idMenuScreen_HUD::UpdateCommunication( bool show, idPlayer* player )
 		return;
 	}
 	
+	// Koz begin
+	// Hud fade
+	if ( game->isVR )
+	{
+		communication->SetAlpha( vr->GetHudAlpha() );
+	}
+	// Koz end
+
 	bool oxygenChanged = false;
 	if( inVaccuum != oxygenComm )
 	{
@@ -1718,6 +1776,8 @@ void  idMenuScreen_HUD::UpdateOxygen( bool show, int val )
 	
 	if( show )
 	{
+		
+						
 		if( !oxygen->IsVisible() )
 		{
 			inVaccuum = true;
@@ -1768,6 +1828,14 @@ void  idMenuScreen_HUD::UpdateOxygen( bool show, int val )
 		inVaccuum = false;
 		oxygen->StopFrame( 1 );
 	}
+
+	// Koz begin
+	// Hud fade
+	if ( game->isVR )
+	{
+		oxygen->SetAlpha( vr->GetHudAlpha() );
+	}
+	// Koz end
 }
 
 /*
@@ -2248,6 +2316,14 @@ void idMenuScreen_HUD::UpdateFlashlight( idPlayer* player )
 		return;
 	}
 	
+	// Koz begin
+	// Hud fade
+	if ( game->isVR )
+	{
+		flashlight->SetAlpha( vr->GetHudAlpha() );
+	}
+	// Koz end
+
 	if( player->flashlightBattery != flashlight_batteryDrainTimeMS.GetInteger() )
 	{
 		flashlight->StopFrame( 2 );

@@ -364,7 +364,7 @@ void idConsoleLocal::Init()
 	// Koz begin - in vr move the console in. 
 	if ( game->isVR )
 	{
-		LOCALSAFE_LEFT = 120;
+		LOCALSAFE_LEFT = 180;
 		LOCALSAFE_TOP = 150;
 	}
 	else

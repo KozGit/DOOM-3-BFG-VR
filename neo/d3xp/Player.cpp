@@ -3590,7 +3590,7 @@ void idPlayer::DrawHUD( idMenuHandler_HUD* _hudManager )
 {
 	SCOPED_PROFILE_EVENT( "idPlayer::DrawHUD" );
 	// Koz begin
-	if ( game->isVR && !vr_showHud.GetBool() )
+	if ( game->isVR && vr_hudType.GetInteger() == VR_HUD_NONE )
 	{
 		return;
 	}
@@ -11601,6 +11601,7 @@ void idPlayer::CalculateRenderView()
 	angles = angles.Normalize180();
 
 	vr->lastHMDYaw = imuAngles.yaw;
+	vr->lastHMDPitch = imuAngles.pitch;
 
 	//common->Printf("Current yaw %f pitch %f roll %f\n",imuAngles.yaw,imuAngles.pitch,imuAngles.roll);
 	//common->Printf("Positional tracking: %s translation x %f  y %f z %f\n",

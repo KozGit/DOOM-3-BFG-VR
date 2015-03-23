@@ -653,7 +653,7 @@ void idCommonLocal::ExecuteMapChange()
 		// kick off an auto-save of the game (so we can always continue in this map if we die before hitting an autosave)
 		common->Printf( "----- Saving Game -----\n" );
 		
-		if ( !game->isVR )
+		if ( !game->isVR || 1 )
 		{
 			SaveGame( "autosave" );
 		}
@@ -1329,7 +1329,7 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 	const char* savename = ( args.Argc() > 1 ) ? args.Argv( 1 ) : "quick";
 	
 	// Koz begin background save in VR
-	if ( game->isVR )
+	if ( game->isVR && 0 )
 	{
 		vrBackgroundSave.StartBackgroundSave( BACKGROUND_SAVE, savename );
 		

@@ -87,7 +87,8 @@ idCVar vr_overdriveEnable( "vr_overdriveEnable", "1", CVAR_INTEGER | CVAR_ARCHIV
 idCVar vr_guiScale( "vr_guiScale", "0.4", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "scale reduction factor for full screen menu/pda scale in VR", 0.0001f, 0.9f ); //koz allow scaling of full screen guis/pda
 idCVar vr_hudScaleX( "vr_hudScaleX", "0.3", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "X scale reduction factor for hud element positions in VR", 0.0001f, 0.9f ); //scale hud positions so they will be visible in VR if wanted
 idCVar vr_hudScaleY( "vr_hudScaleY", "0.3", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "Y scale reduction factor for hud element positions in VR", 0.0001f, 0.9f ); //scale hud positions so they will be visible in VR if wanted
-idCVar vr_showHud( "vr_showHud", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Show the HUD in VR. 1 = Enable, 0 = Disable." );
+idCVar vr_hudType( "vr_hudType", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "VR Hud Type. 0 = Disable.\n1 = Full\n2=Look Down\n3=Floating", 0, 3 ); // 
+idCVar vr_hudAngle( "vr_hudAngle", "75", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, " HMD pitch to show stats in look down mode." );
 
 // koz display windows monitor name in the resolution selection menu, helpful to ID which is the rift if using extended mode
 idCVar vr_listMonitorName( "vr_listMonitorName", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "List monitor name with resolution." );
@@ -158,7 +159,8 @@ iVr::iVr()
 	lastViewOrigin = vec3_zero;
 	lastViewAxis = mat3_identity;
 	lastHMDYaw = 0.0f;
-
+	lastHMDPitch = 0.0f;
+	
 	hydraLeftOffset = hydra_zero;		// koz base offset for left hydra 
 	hydraRightOffset = hydra_zero;		// koz base offset for right hydra 
 
@@ -1038,4 +1040,39 @@ void iVr::HydraGetRightWithOffset( hydraData &rightOffsetHydra ) { // will retur
 		
 	rightCurrent.hydraRotationQuat = ca.ToQuat(); 
 	rightOffsetHydra = rightCurrent;
+}
+
+/*
+==============
+iVr::GetHudAlpha
+Hide weapon/health/armor stats unless player looking down.
+==============
+*/
+float iVr::GetHudAlpha()
+{
+	static int lastFrame = idLib::frameNumber;
+	static float currentAlpha = 0.0f;
+	static float delta = 255 / vr->hmdHz / .5 / 100 ;
+	
+	if ( vr_hudType.GetInteger() != VR_HUD_LOOK_DOWN ) return 1;
+
+	if ( lastFrame == idLib::frameNumber ) return currentAlpha;
+	
+	lastFrame = idLib::frameNumber;
+	
+	if ( lastHMDPitch >= vr_hudAngle.GetFloat() ) // fade stats in
+	{
+		currentAlpha += delta;
+		if ( currentAlpha > 1.0f ) currentAlpha = 1.0f;
+		return currentAlpha;
+	}
+
+	if ( lastHMDPitch <= vr_hudAngle.GetFloat() ) // fade stats out
+	{
+		currentAlpha -= delta;
+		if ( currentAlpha < 0.0f ) currentAlpha = 0.0f;
+		return currentAlpha;
+	}
+
+	return 0.0f; // never reach this.
 }
