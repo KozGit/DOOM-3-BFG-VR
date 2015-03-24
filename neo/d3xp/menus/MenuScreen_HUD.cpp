@@ -33,7 +33,6 @@ extern idCVar pm_stamina;
 extern idCVar in_useJoystick;
 extern idCVar flashlight_batteryDrainTimeMS;
 
-idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "41", CVAR_FLOAT, "Tweak talk cursor y pos in VR. % val", 0 , 99 );
 idCVar vr_tweak( "vr_tweak", "41", CVAR_FLOAT, "Tweak pos in VR. % val", 0, 99 );
 
 /*

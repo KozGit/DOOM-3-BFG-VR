@@ -54,6 +54,24 @@ typedef enum
 	VR_HUD_FLOATING
 } vr_hud_t;
 
+typedef enum
+{
+	RENDERING_NORMAL,
+	RENDERING_PDA,
+	RENDERING_HUD
+} vr_swf_render_t;
+
+typedef enum
+{
+	FLASH_BODY,
+	FLASH_HEAD,
+	FLASH_GUN,
+	FLASH_HAND
+} vr_flashlight_mode_t;
+
+
+
+
 class iVr
 {
 public:
@@ -95,7 +113,7 @@ public:
 	bool				PDAforcetoggle;
 	bool				PDAforced;
 	bool				PDArising;
-	bool				renderingPDA;
+	int					swfRenderMode;
 	bool				PDAclipModelSet;
 	bool				forceLeftStick;
 	
@@ -225,7 +243,6 @@ extern idCVar	vr_useOculusProfile;
 extern idCVar	vr_manualIPD;
 extern idCVar	vr_manualHeight;
 extern idCVar   vr_timewarp;
-extern idCVar	vr_warp;
 extern idCVar	vr_chromaCorrection;
 
 extern idCVar	vr_showBody;
@@ -237,6 +254,12 @@ extern idCVar	vr_hydraEnable;
 extern idCVar	vr_hydraMode;
 
 extern idCVar	vr_flashPitchAngle;
+extern idCVar	vr_flashlightMode;
+
+extern idCVar	vr_flashlightBodyPosX;
+extern idCVar	vr_flashlightBodyPosY;
+extern idCVar	vr_flashlightBodyPosZ;
+
 extern idCVar	vr_flashlightHelmetPosX;
 extern idCVar	vr_flashlightHelmetPosY;
 extern idCVar	vr_flashlightHelmetPosZ;
@@ -261,17 +284,22 @@ extern idCVar	vr_mouse_gunx;
 extern idCVar	vr_mouse_guny;
 extern idCVar	vr_mouse_gunz;
 
-extern idCVar	vr_warp;
 extern idCVar	vr_chromaCorrection;
 extern idCVar	vr_timewarp;
 extern idCVar	vr_overdrive;
 extern idCVar	vr_overdriveEnable;
 
 extern idCVar	vr_guiScale; 
-extern idCVar	vr_hudScaleX; 
-extern idCVar	vr_hudScaleY; 
+extern idCVar	vr_guiSeparation;
+
+extern idCVar	vr_hudScale;
+extern idCVar	vr_hudPosX; 
+extern idCVar	vr_hudPosY; 
 extern idCVar	vr_hudType;
 extern idCVar	vr_hudAngle;
+
+extern idCVar	vr_tweakTalkCursor; 
+
 extern idCVar	vr_listMonitorName;
 
 extern idCVar	vr_enable;
@@ -284,6 +312,9 @@ extern idCVar	vr_trackingPredictionUserDefined;
 
 extern idCVar	vr_minLoadScreenTime;
 
+extern idCVar	vr_tweakx;
+extern idCVar	vr_tweaky;
+
 extern iVr* vr;
 
 /*
@@ -291,7 +322,7 @@ extern bool		VR_GAME_PAUSED;
 extern bool		PDAforcetoggle;
 extern bool		PDAforced;
 extern bool		PDArising;
-extern bool		renderingPDA;
+extern int		swfRenderMode;
 extern idVec3	lastViewOrigin;
 extern idMat3	lastViewAxis;
 extern float	lastHMDYaw;

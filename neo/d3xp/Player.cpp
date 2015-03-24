@@ -11046,6 +11046,60 @@ Calculate the flashlight orientation
 void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flashOffset )
 {
 
+	int flashMode = vr_flashlightMode.GetInteger();
+
+	if ( game->IsPDAOpen() && flashMode == FLASH_HAND ) flashMode == FLASH_HEAD; // move the flashlight to the head if the PDA is open to prevent weird clipping if using motion controls.
+	if ( !game->isVR ) flashMode = FLASH_BODY;
+
+	switch ( flashMode )
+	{
+	case FLASH_GUN:
+	case FLASH_HEAD:
+	case FLASH_HAND:
+	case FLASH_BODY:
+	default: // this is the original body mount code.
+	{
+		origin = weapon->playerViewOrigin;
+		axis = weapon->playerViewAxis;
+		float fraccos = cos( (gameLocal.framenum & 255) / 127.0f * idMath::PI );
+		static unsigned int divisor = 32;
+		unsigned int val = (gameLocal.framenum + gameLocal.framenum / divisor) & 255;
+		float fraccos2 = cos( val / 127.0f * idMath::PI );
+		static idVec3 baseAdjustPos = idVec3( -8.0f, -20.0f, -10.0f ); // rt, fwd, up
+		if ( game->isVR )
+		{
+			baseAdjustPos.x += vr_flashlightBodyPosX.GetFloat();
+			baseAdjustPos.y += vr_flashlightBodyPosY.GetFloat();
+			baseAdjustPos.z += vr_flashlightBodyPosZ.GetFloat();
+		}
+		static float pscale = 0.5f;
+		static float yscale = 0.125f;
+		idVec3 adjustPos = baseAdjustPos;// + ( idVec3( fraccos, 0.0f, fraccos2 ) * scale );
+		origin += adjustPos.x * axis[1] + adjustPos.y * axis[0] + adjustPos.z * axis[2];
+		// viewWeaponOrigin += owner->viewBob;
+		static idAngles baseAdjustAng = idAngles( 88.0f, 10.0f, 0.0f ); //
+		idAngles adjustAng = baseAdjustAng + idAngles( fraccos * pscale, fraccos2 * yscale, 0.0f );
+		// adjustAng += owner->GetViewBobAngles();
+		axis = adjustAng.ToMat3() * axis;
+	}
+
+	}
+
+}
+	
+/*
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	idAngles	angles;
 	int delta;
 	hydraData	hydraPos = hydra_zero;
@@ -11153,7 +11207,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 	}
 }
 
-
+*/
 /*
 ===============
 idPlayer::OffsetThirdPersonView

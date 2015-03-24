@@ -653,7 +653,7 @@ void idCommonLocal::ExecuteMapChange()
 		// kick off an auto-save of the game (so we can always continue in this map if we die before hitting an autosave)
 		common->Printf( "----- Saving Game -----\n" );
 		
-		if ( !game->isVR || 1 )
+		if ( !game->isVR )
 		{
 			SaveGame( "autosave" );
 		}
@@ -671,9 +671,9 @@ void idCommonLocal::ExecuteMapChange()
 			while ( vr->vrIsBackgroundSaving == true || ( Sys_Milliseconds() - startLoadScreen < vr_minLoadScreenTime.GetFloat() ) )
 			{
 				vr->HMDTrackStatic();
-				UpdateScreen( false, false );
-				//SwapBuffers(win32.hDC);
-				//glFinish();
+				//UpdateScreen( false, false );
+				SwapBuffers(win32.hDC);
+				glFinish();
 				
 			}
 			
@@ -1329,7 +1329,7 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 	const char* savename = ( args.Argc() > 1 ) ? args.Argv( 1 ) : "quick";
 	
 	// Koz begin background save in VR
-	if ( game->isVR && 0 )
+	if ( game->isVR )
 	{
 		vrBackgroundSave.StartBackgroundSave( BACKGROUND_SAVE, savename );
 		

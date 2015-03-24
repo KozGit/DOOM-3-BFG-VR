@@ -307,9 +307,10 @@ void idCommonLocal::Draw()
 		}
 		
 		// Koz begin
-		if ( !game->isVR || vr->playerDead || (!vr->PDAforced && !vr->PDArising) )
+		if ( !game->isVR || vr->playerDead || ( !vr->PDAforced && !vr->PDArising ) )
 		{
 			game->Shell_Render(); //koz render any menus outside of game ( main menu etc )
+			//if ( game->isVR ) vr->HMDTrackStatic(); // add headtracking to menus
 		}
 		//Koz end
 
@@ -642,14 +643,17 @@ void idCommonLocal::Frame()
 			// will be stopped just as if the g_stoptime cvar was set.
 
 			bool ingame = false;
+			bool isVR = false;
 			static bool PDAopenedByPause = false;
 			
+			// warning: this may be the worst code written since the dawn of humanity.
 			if ( game )
 			{
 				ingame = game->IsInGame();
+				isVR = game->isVR;
 			}
 			
-			if ( game->isVR )
+			if ( isVR )
 			{
 				//common->Printf("Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->ishellactive = %d\n",ingame,VR_GAME_PAUSED,pauseGame,game->Shell_IsActive());
 				//common->Printf("Pause diag: PDAforcetoggle = %d, PDAforced = %d, PDA rising =%d\n",PDAforcetoggle,PDAforced,PDArising);

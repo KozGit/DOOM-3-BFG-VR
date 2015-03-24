@@ -13,8 +13,6 @@
 #include "libs\LibOVR\Include\OVR.h"
 #include "..\renderer\Framebuffer.h"
 
-//koz fixme #include "Kernel/OVR_Math.h"
-
 using namespace OVR;
 
 #define RADIANS_TO_DEGREES(rad) ((float) rad * (float) (180.0 / idMath::PI))
@@ -42,7 +40,7 @@ idCVar vr_lowPersistence( "vr_lowPersistence", "1", CVAR_INTEGER | CVAR_ARCHIVE 
 idCVar vr_vignette( "vr_vignette", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable warp vignette. 0 = off 1 = on" );
 idCVar vr_FBOEnabled( "vr_FBOEnabled", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Use FBO rendering path." );
 idCVar vr_FBOAAmode( "vr_FBOAAmode", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Antialiasing mode. 0 = Disabled 1 = MSAA 2= FXAA\n" );
-idCVar vr_enable( "vr_enable", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable VR mode. 0 = Disabled 1 = Enabled." );
+idCVar vr_enable( "vr_enable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable VR mode. 0 = Disabled 1 = Enabled." );
 idCVar vr_FBOscale( "vr_FBOscale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "FBO scaling factor." );
 idCVar vr_scale( "vr_scale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "VR World scale adjustment." );
 idCVar vr_useOculusProfile( "vr_useOculusProfile", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Use Oculus Profile values. 0 = use user defined profile, 1 = use Oculus profile." );
@@ -55,6 +53,12 @@ idCVar vr_hydraEnable( "vr_hydraEnable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR
 idCVar vr_hydraMode( "vr_hydraMode", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "razer hydra mode. 0 = left hydra for positional tracking, 1 = left hydra as controller, 2 = left hydra as controller and flashlight" );
 
 idCVar vr_flashPitchAngle( "vr_flashPitchAngle", "90", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Pitch offset for flashlight using hydra. Default = 90" );
+idCVar vr_flashlightMode( "vr_flashlightMode", "2", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Flashlight mount.\n0 = Body\n1 = Head\n2 = Gun\n3= Hand ( if motion controls available.)" );
+
+idCVar vr_flashlightBodyPosX( "vr_flashlightBodyPosX", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight horizontal offset for helmet mount." );
+idCVar vr_flashlightBodyPosY( "vr_flashlightBodyPosY", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight forward offset for helmet mount." );
+idCVar vr_flashlightBodyPosZ( "vr_flashlightBodyPosZ", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight vertical offset for helmet mount." );
+
 idCVar vr_flashlightHelmetPosX( "vr_flashlightHelmetPosX", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight horizontal offset for helmet mount." );
 idCVar vr_flashlightHelmetPosY( "vr_flashlightHelmetPosY", "-18", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight forward offset for helmet mount." );
 idCVar vr_flashlightHelmetPosZ( "vr_flashlightHelmetPosZ", "-8", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight vertical offset for helmet mount." );
@@ -78,17 +82,21 @@ idCVar vr_mouse_gunx( "vr_mouse_gunX", "3", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOA
 idCVar vr_mouse_guny( "vr_mouse_gunY", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 idCVar vr_mouse_gunz( "vr_mouse_gunZ", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 
-idCVar vr_warp( "vr_warp", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_BOOL, "Use Oculus distortion" );
 idCVar vr_chromaCorrection( "vr_chromaCorrection", "1", CVAR_INTEGER | CVAR_RENDERER | CVAR_ARCHIVE, "Enable Rift chromatic distortion correction. 0 = disabled, 1 = enabled." );
 idCVar vr_timewarp( "vr_timewarp", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Enable Rift timewarp. 0 = disabled, 1 = enabled." );
-idCVar vr_overdrive( "vr_overdrive", ".1", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, " Rift overdrive value." );
+idCVar vr_overdrive( "vr_overdrive", ".1", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "Rift overdrive value." );
 idCVar vr_overdriveEnable( "vr_overdriveEnable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Enable rift Overdrive." );
 
-idCVar vr_guiScale( "vr_guiScale", "0.4", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "scale reduction factor for full screen menu/pda scale in VR", 0.0001f, 0.9f ); //koz allow scaling of full screen guis/pda
-idCVar vr_hudScaleX( "vr_hudScaleX", "0.3", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "X scale reduction factor for hud element positions in VR", 0.0001f, 0.9f ); //scale hud positions so they will be visible in VR if wanted
-idCVar vr_hudScaleY( "vr_hudScaleY", "0.3", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "Y scale reduction factor for hud element positions in VR", 0.0001f, 0.9f ); //scale hud positions so they will be visible in VR if wanted
-idCVar vr_hudType( "vr_hudType", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "VR Hud Type. 0 = Disable.\n1 = Full\n2=Look Down\n3=Floating", 0, 3 ); // 
-idCVar vr_hudAngle( "vr_hudAngle", "75", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, " HMD pitch to show stats in look down mode." );
+idCVar vr_guiScale( "vr_guiScale", "1", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "scale reduction factor for full screen menu/pda scale in VR", 0.0001f, 1.0f ); //koz allow scaling of full screen guis/pda
+idCVar vr_guiSeparation( "vr_guiSeparation", ".01", CVAR_FLOAT | CVAR_ARCHIVE, " Screen separation value for fullscreen guis." );
+
+idCVar vr_hudScale( "vr_hudScale", "0.6", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "Hud scale", 0.1f, 2.0f ); //scale hud 
+idCVar vr_hudPosX( "vr_hudPosX", "0.25", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "X scale reduction factor for hud element positions in VR", 0.01f, 1.0f ); //scale hud positions so they will be visible in VR if wanted
+idCVar vr_hudPosY( "vr_hudPosY", "0.4", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "Y scale reduction factor for hud element positions in VR", 0.01f, 1.0f ); //scale hud positions so they will be visible in VR if wanted
+idCVar vr_hudType( "vr_hudType", "2", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "VR Hud Type. 0 = Disable.\n1 = Full\n2=Look Down\n3=Floating", 0, 3 ); // 
+idCVar vr_hudAngle( "vr_hudAngle", "48", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "HMD pitch to reveal HUD in look down mode." );
+
+idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "41", CVAR_FLOAT, "Tweak talk cursor y pos in VR. % val", 0, 99 );
 
 // koz display windows monitor name in the resolution selection menu, helpful to ID which is the rift if using extended mode
 idCVar vr_listMonitorName( "vr_listMonitorName", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "List monitor name with resolution." );
@@ -99,9 +107,12 @@ idCVar vr_headKick( "vr_headKick", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "D
 idCVar vr_showBody( "vr_showBody", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Show player body in VR." );
 idCVar vr_joystickMenuMapping( "vr_joystickMenuMapping", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, " Use alternate joy mapping\n in menus/PDA.\n 0 = D3 Standard\n 1 = VR Mode.\n(Both joys can nav menus,\n joy r/l to change\nselect area in PDA." );
 
-idCVar vr_hmdFullscreen( " vr_hmdFullscreen", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "HMD autodetect screen format. 0 = window, 1 = fullscreen\n" );
-idCVar vr_hmdAutoDetect( " vr_hmdAutoSelect", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Attempt to autoselect HMD as display.\n" );
-idCVar vr_hmdHz(" vr_hmdHz", "0", CVAR_INTEGER | CVAR_RENDERER | CVAR_ARCHIVE, " HMD refresh rate. 0 = Auto, othewise freq in Hz." );
+idCVar vr_hmdFullscreen( "vr_hmdFullscreen", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "HMD autodetect screen format. 0 = window, 1 = fullscreen\n" );
+idCVar vr_hmdAutoDetect( "vr_hmdAutoSelect", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Attempt to autoselect HMD as display.\n" );
+idCVar vr_hmdHz("vr_hmdHz", "0", CVAR_INTEGER | CVAR_RENDERER | CVAR_ARCHIVE, " HMD refresh rate. 0 = Auto, othewise freq in Hz." );
+
+idCVar vr_tweakx( "vr_tweakx", "1.0", CVAR_FLOAT, "xtweaking value.", 0.0f, 2.0f ); // deleteme for dev only
+idCVar vr_tweaky( "vr_tweaky", "1.0", CVAR_FLOAT, "xtweaking value.", 0.0f, 2.0f ); // deleteme for dev only
 
 // Koz end
 //===================================================================

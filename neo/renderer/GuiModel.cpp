@@ -35,8 +35,6 @@ const float idGuiModel::STEREO_DEPTH_NEAR = 0.0f;
 const float idGuiModel::STEREO_DEPTH_MID  = 0.5f;
 const float idGuiModel::STEREO_DEPTH_FAR  = 1.0f;
 
-idCVar vr_guiSeparation( "vr_guiSeparation", ".07", CVAR_FLOAT | CVAR_ARCHIVE, " Screen separation value for fullscreen guis." );
-
 /*
 ================
 idGuiModel::idGuiModel
@@ -254,6 +252,7 @@ void idGuiModel::EmitFullScreen()
 
 		if ( game->isVR )
 		{
+			extern idCVar vr_guiSeparation;
 			screenSeparation = vr_guiSeparation.GetFloat();
 		}
 		

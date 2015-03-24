@@ -38,9 +38,6 @@ idCVar swf_titleSafe( "swf_titleSafe", "0.005", CVAR_FLOAT, "space between UI el
 
 idCVar swf_forceAlpha( "swf_forceAlpha", "0", CVAR_FLOAT, "force an alpha value on all elements, useful to show invisible animating elements", 0.0f, 1.0f );
 
-idCVar vr_tweakx( "vr_tweakx", "1.0", CVAR_FLOAT, "xtweaking value.", 0.0f, 2.0f );
-idCVar vr_tweaky( "vr_tweaky", "1.0", CVAR_FLOAT, "xtweaking value.", 0.0f, 2.0f );
-
 extern idCVar swf_textStrokeSize;
 extern idCVar swf_textStrokeSizeGlyphSpacer;
 extern idCVar in_useJoystick;
@@ -135,30 +132,40 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 	float sysWidth = renderSystem->GetWidth() * ( pixelAspect > 1.0f ? pixelAspect : 1.0f );
 	float sysHeight = renderSystem->GetHeight() / ( pixelAspect < 1.0f ? pixelAspect : 1.0f );
 	
-	if ( vr->renderingPDA ) // koz we dont need to render a fullscreen sized PDA, it will be scaled down to fit the model in VR.  This 
+	// Koz begin
+	if ( vr->swfRenderMode == RENDERING_PDA ) // We dont need to render a full resolution PDA, it will be scaled down to fit the model in VR.  
 	{
 		sysWidth = 640;
 		sysHeight = 480;
 	}
-	
+	// Koz end
+
 	float scale = swfScale * sysHeight / ( float )frameHeight;
 
 	// koz begin
-	// If rendering to PDA, scale to fit model,.
-	// or scale fullscreen images to a more appropriate size for VR.
+	// In VR, scale SWF elements to a more appropriate size.
 	if ( game->isVR )
 	{
-		if ( vr->renderingPDA ) 
+		if ( vr->VR_GAME_PAUSED )
 		{
-			scale *= 1.25;
-		}
-		else if ( vr->VR_GAME_PAUSED )
-		{
-			scale *= .8;
+			scale *= 0.8f;
 		}
 		else
 		{
-			scale *= vr_guiScale.GetFloat();
+			switch ( vr->swfRenderMode )
+			{
+				case RENDERING_PDA:
+					scale *= 1.25;
+					break;
+
+				case RENDERING_HUD:
+					scale *= vr_hudScale.GetFloat();
+					break;
+				
+				case RENDERING_NORMAL:
+				default:
+					scale = vr_guiScale.GetFloat();
+			}
 		}
 	}
 	// koz end
@@ -354,11 +361,11 @@ void idSWF::RenderSprite( idRenderSystem* gui, idSWFSpriteInstance* spriteInstan
 				float heightAdj = swf_titleSafe.GetFloat() * frameHeight;
 
 				// Koz begin
-				// Scale the HUD into view in VR
+				// Move the HUD into view in VR
 				if ( game->isVR )
 				{
-					widthAdj = (swf_titleSafe.GetFloat() + vr_hudScaleX.GetFloat()) * frameWidth;
-					heightAdj = (swf_titleSafe.GetFloat() + vr_hudScaleY.GetFloat()) * frameHeight;
+					widthAdj = ( swf_titleSafe.GetFloat() + vr_hudPosX.GetFloat() ) * frameWidth;
+					heightAdj = ( swf_titleSafe.GetFloat() + vr_hudPosY.GetFloat() ) * frameHeight;
 				}
 				// Koz end
 

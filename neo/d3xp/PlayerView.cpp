@@ -491,7 +491,9 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 	// Koz begin
 	if ( g_showHud.GetBool() && !vr->PDAforced && !vr->PDArising ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
 	{
+		vr->swfRenderMode = RENDERING_HUD;
 		player->DrawHUD( hudManager );
+		vr->swfRenderMode = RENDERING_NORMAL;
 	}
 	// Koz end
 
@@ -849,10 +851,10 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 
 				if ( !vr->PDAforced && !vr->PDArising && view->viewEyeBuffer == 0 ) // pda is not stereo, only render it for the left eye and use it twice.
 				{
-					vr->renderingPDA = true;
+					vr->swfRenderMode = RENDERING_PDA;
 					player->pdaMenu->Update();
 					renderSystem->CaptureRenderToImage( "_pdaImage" );
-					vr->renderingPDA = false;
+					vr->swfRenderMode = RENDERING_NORMAL;
 				}
 			}
 		}

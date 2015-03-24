@@ -1360,10 +1360,10 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		{
 			idLib::Printf( "Skipping Intro Videos!\n" );
 			// display the legal splash screen
-			// No clue why we have to render this twice to show up...
+			// Carl - No clue why we have to render this twice to show up...
 			RenderSplash();
 			RenderSplash();
-			RenderSplash(); // Koz kick it off faster in VR.
+			RenderSplash(); // Koz kick it off faster in VR. But really, no idea why 3rd time is the charm.
 		}
 		
 		
