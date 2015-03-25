@@ -90,13 +90,28 @@ idCVar vr_overdriveEnable( "vr_overdriveEnable", "1", CVAR_INTEGER | CVAR_ARCHIV
 idCVar vr_guiScale( "vr_guiScale", "1", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "scale reduction factor for full screen menu/pda scale in VR", 0.0001f, 1.0f ); //koz allow scaling of full screen guis/pda
 idCVar vr_guiSeparation( "vr_guiSeparation", ".01", CVAR_FLOAT | CVAR_ARCHIVE, " Screen separation value for fullscreen guis." );
 
-idCVar vr_hudScale( "vr_hudScale", "0.6", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "Hud scale", 0.1f, 2.0f ); //scale hud 
-idCVar vr_hudPosX( "vr_hudPosX", "0.25", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "X scale reduction factor for hud element positions in VR", 0.01f, 1.0f ); //scale hud positions so they will be visible in VR if wanted
-idCVar vr_hudPosY( "vr_hudPosY", "0.4", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "Y scale reduction factor for hud element positions in VR", 0.01f, 1.0f ); //scale hud positions so they will be visible in VR if wanted
-idCVar vr_hudType( "vr_hudType", "2", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "VR Hud Type. 0 = Disable.\n1 = Full\n2=Look Down\n3=Floating", 0, 3 ); // 
-idCVar vr_hudAngle( "vr_hudAngle", "48", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "HMD pitch to reveal HUD in look down mode." );
+idCVar vr_hudScale( "vr_hudScale", "0.6", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Hud scale", 0.1f, 2.0f ); //scale hud 
+idCVar vr_hudPosX( "vr_hudPosX", "0.25", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "X scale reduction factor for hud element positions in VR", 0.01f, 1.0f ); //scale hud positions so they will be visible in VR if wanted
+idCVar vr_hudPosY( "vr_hudPosY", "0.4", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Y scale reduction factor for hud element positions in VR", 0.01f, 1.0f ); //scale hud positions so they will be visible in VR if wanted
+idCVar vr_hudType( "vr_hudType", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "VR Hud Type. 0 = Disable.\n1 = Full\n2=Look Down\n3=Floating", 0, 3 ); // 
+idCVar vr_hudAngle( "vr_hudAngle", "48", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "HMD pitch to reveal HUD in look down mode." );
+idCVar vr_hudTransparency( "vr_hudTransparency", "1", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, " Hud transparency. 0.0 = Invisible thru 1.0 = full", 0.0, 1.0 );
 
-idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "41", CVAR_FLOAT, "Tweak talk cursor y pos in VR. % val", 0, 99 );
+idCVar vr_hudHealth(	"vr_hudHealth",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show Armor/Health in Hud." );
+idCVar vr_hudAmmo(		"vr_hudAmmo",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show Ammo in Hud." );
+idCVar vr_hudPickUps(	"vr_hudPickUps",	"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show item pick ups in Hud." );
+idCVar vr_hudTips(		"vr_hudTips",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show tips Hud." );
+idCVar vr_hudLocation(	"vr_hudLocation",	"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show player location in Hud." );
+idCVar vr_hudObjective(	"vr_hudObjective",	"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show objectives in Hud." );
+idCVar vr_hudStamina(	"vr_hudStamina",	"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show stamina in Hud." );
+idCVar vr_hudPills(		"vr_hudPills",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show weapon pills in Hud." );
+idCVar vr_hudComs(		"vr_hudComs",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show communications in Hud." );
+idCVar vr_hudWeap(		"vr_hudWeap",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show weapon pickup/change icons in Hud." );
+idCVar vr_hudNewItems(	"vr_hudNewItems",	"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show new items acquired in Hud." );
+idCVar vr_hudFlashlight("vr_hudFlashlight", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show flashlight in Hud." );
+
+
+idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "41", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Tweak talk cursor y pos in VR. % val", 0, 99 );
 
 // koz display windows monitor name in the resolution selection menu, helpful to ID which is the rift if using extended mode
 idCVar vr_listMonitorName( "vr_listMonitorName", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "List monitor name with resolution." );
@@ -1063,9 +1078,11 @@ float iVr::GetHudAlpha()
 {
 	static int lastFrame = idLib::frameNumber;
 	static float currentAlpha = 0.0f;
-	static float delta = 255 / vr->hmdHz / .5 / 100 ;
+	static float delta = 0.0f ;
 	
-	if ( vr_hudType.GetInteger() != VR_HUD_LOOK_DOWN ) return 1;
+	delta = vr_hudTransparency.GetFloat() / (250 / (1000 / vr->hmdHz));
+	
+	if ( vr_hudType.GetInteger() != VR_HUD_LOOK_DOWN ) return vr_hudTransparency.GetFloat();
 
 	if ( lastFrame == idLib::frameNumber ) return currentAlpha;
 	
@@ -1074,7 +1091,7 @@ float iVr::GetHudAlpha()
 	if ( lastHMDPitch >= vr_hudAngle.GetFloat() ) // fade stats in
 	{
 		currentAlpha += delta;
-		if ( currentAlpha > 1.0f ) currentAlpha = 1.0f;
+		if ( currentAlpha > vr_hudTransparency.GetFloat() ) currentAlpha = vr_hudTransparency.GetFloat();
 		return currentAlpha;
 	}
 

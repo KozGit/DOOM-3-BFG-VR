@@ -297,6 +297,20 @@ extern idCVar	vr_hudPosX;
 extern idCVar	vr_hudPosY; 
 extern idCVar	vr_hudType;
 extern idCVar	vr_hudAngle;
+extern idCVar	vr_hudTransparency;
+
+extern idCVar	vr_hudHealth;
+extern idCVar	vr_hudAmmo;
+extern idCVar	vr_hudPickUps;
+extern idCVar	vr_hudTips;
+extern idCVar	vr_hudLocation;
+extern idCVar	vr_hudObjective;
+extern idCVar	vr_hudStamina;
+extern idCVar	vr_hudPills;
+extern idCVar	vr_hudComs;
+extern idCVar	vr_hudWeap;
+extern idCVar	vr_hudNewItems;
+extern idCVar	vr_hudFlashlight;
 
 extern idCVar	vr_tweakTalkCursor; 
 
