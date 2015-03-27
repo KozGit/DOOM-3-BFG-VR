@@ -1255,10 +1255,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		
 		// init the parallel job manager
 		parallelJobManager->Init();
-
-		// Koz: init the Razer Hydra
-		vr->HydraInit();
-
+		
 		// Carl: init the Virtual Reality head tracking, detect any connected HMDs, and read display parameters
 		// this needs to happen before the cfg files are loaded.
 		
@@ -1327,6 +1324,9 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		{
 			vr->HMDInitializeDistortion();
 		}
+		
+		// init the Razer Hydra
+		vr->HydraInit();
 		// Koz end
 
 		whiteMaterial = declManager->FindMaterial( "_white" );

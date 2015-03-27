@@ -2718,87 +2718,7 @@ bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 	return true;
 
 }
-/* Koz this is the original GetMuzzlePositionWithHacks code for reference
-// I couldn't find a simple enum to identify the weapons that need
-// workaround hacks...
-const idStr& weaponIconName = pdaIcon;
 
-origin = playerViewOrigin;
-axis = playerViewAxis;
-
-if( weaponIconName == "guis/assets/hud/icons/grenade_new.tga" )
-{
-return false;
-}
-
-if( weaponIconName == "guis/assets/hud/icons/chainsaw_new.tga" )
-{
-return false;
-}
-
-if( weaponIconName == "guis/assets/hud/icons/soul_cube.tga" )
-{
-return false;
-}
-
-if( barrelJointView != INVALID_JOINT )
-{
-GetGlobalJointTransform( true, barrelJointView, origin, axis );
-}
-else if( guiLightJointView != INVALID_JOINT )
-{
-GetGlobalJointTransform( true, guiLightJointView, origin, axis );
-}
-else
-{
-return false;
-}
-
-// get better axis joints for weapons where the barrelJointView isn't
-// animated properly
-idVec3	discardedOrigin;
-if( weaponIconName == "guis/assets/hud/icons/pistol_new.tga" )
-{
-// muzzle doesn't animate during firing, Bod does
-const jointHandle_t bodJoint = animator.GetJointHandle( "Bod" );
-GetGlobalJointTransform( true, bodJoint, discardedOrigin, axis );
-}
-if( weaponIconName == "guis/assets/hud/icons/rocketlauncher_new.tga" )
-{
-// joint doesn't point straight, so rotate it
-std::swap( axis[0], axis[2] );
-}
-if( weaponIconName == "guis/assets/hud/icons/shotgun_new.tga" )
-{
-// joint doesn't point straight, so rotate it
-const jointHandle_t bodJoint = animator.GetJointHandle( "trigger" );
-GetGlobalJointTransform( true, bodJoint, discardedOrigin, axis );
-std::swap( axis[0], axis[2] );
-axis[0] = -axis[0];
-}
-
-// we probably should fix the above hacks above that are based on texture names above at some
-// point
-if( weaponDef != NULL )
-{
-if( ( idStr::Icmp( "weapon_shotgun_double", weaponDef->GetName() ) == 0 ) || ( idStr::Icmp( "weapon_shotgun_double_mp", weaponDef->GetName() ) == 0 ) )
-{
-// joint doesn't point straight, so rotate it
-std::swap( axis[0], axis[2] );
-}
-else if( idStr::Icmp( "weapon_grabber", weaponDef->GetName() ) == 0 )
-{
-idVec3 forward = axis[0];
-forward.Normalize();
-const float scaleOffset = 4.0f;
-forward *= scaleOffset;
-origin += forward;
-}
-}
-
-return true;
-}
-*/ // koz end orig code
 
 /*
 ===============
@@ -3161,32 +3081,6 @@ void idWeapon::PresentWeapon( bool showViewModel )
 		viewWeaponAxis = playerViewAxis;
 		owner->CalculateViewFlashPos( viewWeaponOrigin, viewWeaponAxis, flashOffsets[int( currentWeapon )] );
 
-
-		/*if (vr_hydraMode.GetInteger() ==3) {// koz add flashlight hydra here
-		owner->CalculateViewFlashPos(viewWeaponOrigin, viewWeaponAxis); // aim flash with left hydra
-		} else {
-		owner->CalculateViewWeaponPos( viewWeaponOrigin, viewWeaponAxis ); //koz aim with gun/right hydra
-
-		fraccos = cos( ( gameLocal.framenum & 255 ) / 127.0f * idMath::PI );
-
-		static unsigned int divisor = 32;
-		unsigned int val = ( gameLocal.framenum + gameLocal.framenum / divisor ) & 255;
-		fraccos2 = cos( val / 127.0f * idMath::PI );
-
-		//static idVec3 baseAdjustPos = idVec3( -8.0f, -20.0f, -10.0f ); // rt, fwd, up   koz change these
-		static idVec3 baseAdjustPos = idVec3( -15.0f, -20.0f, -15.0f ); // will really need to change per weapon need to get on it
-		static float pscale = 0.5f;
-		static float yscale = 0.125f;
-		idVec3 adjustPos = baseAdjustPos; // + ( idVec3( fraccos, 0.0f, fraccos2 ) * scale );
-		viewWeaponOrigin += adjustPos.x * viewWeaponAxis[1] + adjustPos.y * viewWeaponAxis[0] + adjustPos.z * viewWeaponAxis[2];
-		//viewWeaponOrigin += owner->viewBob;
-
-		//static idAngles baseAdjustAng = idAngles( 88.0f, 10.0f, 0.0f );		// koz this was orig
-		idAngles baseAdjustAng = idAngles( 90.0f, 0.0f, 0.0f );
-		idAngles adjustAng = baseAdjustAng ;//+ idAngles( fraccos * pscale, fraccos2 * yscale, 0.0f ); koz
-		//adjustAng += owner->GetViewBobAngles();
-		viewWeaponAxis = adjustAng.ToMat3() * viewWeaponAxis;
-		} */
 	}
 	else
 	{

@@ -242,7 +242,6 @@ void idMenuScreen_HUD::UpdateHealthArmor( idPlayer* player )
 		float alpha;
 		alpha = vr_hudHealth.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
 		playerInfo->GetSprite()->SetAlpha( alpha );
-		playerInfo->GetSprite()->stereoDepth = STEREO_DEPTH_TYPE_NEAR;
 	}
 
 	// Koz end
@@ -642,7 +641,16 @@ void idMenuScreen_HUD::UpdatePickupInfo( int index, const idStr& name )
 	{
 		txtItem->SetText( name );
 		txtItem->SetStrokeInfo( true, 0.6f, 2.0f );
+		
+		if ( game->isVR )
+		{
+			// Set the fade
+			float alpha;
+			alpha = vr_hudPickUps.GetBool() == true ? vr_hudTransparency.GetFloat() : 0.0f;
+			txtItem->color.a = int( (alpha * 255.0f) *.75 ); // *.75 - txt always seems brighter so dilute a bit.
+		}
 	}
+	
 	
 }
 
@@ -1372,13 +1380,10 @@ void idMenuScreen_HUD::UpdateLocation( idPlayer* player )
 	// Hud fade
 	if ( game->isVR )
 	{
-		// Set the damage color
-		swfColorRGBA_t color;
+		// Set the fade
 		float alpha;
 		alpha = vr_hudLocation.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
-		color = locationName->color;
-		color.a = int ( alpha * 255.0f );
-		locationName->color = color;
+		locationName->color.a = int( alpha * 255.0f );
 	}
 	// Koz end
 	

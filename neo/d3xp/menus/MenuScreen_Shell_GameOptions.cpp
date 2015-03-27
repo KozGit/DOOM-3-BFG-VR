@@ -333,7 +333,7 @@ void idMenuScreen_Shell_GameOptions::idMenuDataSource_GameSettings::CommitData()
 
 	g_fov.SetFloat( fields[ GAME_FIELD_FOV ].ToFloat() );
 	
-	vr_gun_x.SetFloat(Lerp(MIN_FOV_GUN, MAX_FOV_GUN, (fields[GAME_FIELD_FOV].ToFloat() - MIN_FOV) / (MAX_FOV - MIN_FOV)));
+	vr_gunHand_x.SetFloat(Lerp(MIN_FOV_GUN, MAX_FOV_GUN, (fields[GAME_FIELD_FOV].ToFloat() - MIN_FOV) / (MAX_FOV - MIN_FOV)));
 	// koz fixme was g_gunx, need to sort out all the cvars.
 
 	g_checkpoints.SetBool( fields[ GAME_FIELD_CHECKPOINTS ].ToBool() );

@@ -123,6 +123,7 @@ public:
 	idMat3				lastViewAxis;
 	float				lastHMDYaw;
 	float				lastHMDPitch;
+	float				lastHMDRoll;
 
 	float				angles[3];
 	
@@ -225,14 +226,14 @@ void VR_HMDTrackStatic();
 #endif
 
 //koz g_flash cvars allow tweaking of flash position when aiming with hydra
-extern idCVar	vr_flash_x;
-extern idCVar	vr_flash_y;
-extern idCVar	vr_flash_z;
+extern idCVar	vr_flashHand_x;
+extern idCVar	vr_flashHand_y;
+extern idCVar	vr_flashHand_z;
 extern idCVar	vr_flashScale;
 //koz g_gun cvars allow tweaking of gun position when aiming with hydra
-extern idCVar	vr_gun_x;
-extern idCVar	vr_gun_y;
-extern idCVar	vr_gun_z;
+extern idCVar	vr_gunHand_x;
+extern idCVar	vr_gunHand_y;
+extern idCVar	vr_gunHand_z;
 extern idCVar	vr_scaleGun;
 
 extern idCVar	vr_hydraPitchOffset;
@@ -251,6 +252,7 @@ extern idCVar	vr_disableWeaponAnimation;
 extern idCVar	vr_headKick;
 
 extern idCVar	vr_hydraEnable;
+extern idCVar	vr_hydraForceDetect;
 extern idCVar	vr_hydraMode;
 
 extern idCVar	vr_flashPitchAngle;
@@ -283,6 +285,7 @@ extern idCVar	vr_PDAfixLocation;
 extern idCVar	vr_mouse_gunx;
 extern idCVar	vr_mouse_guny;
 extern idCVar	vr_mouse_gunz;
+extern idCVar	vr_mouse_gun_forearm;
 
 extern idCVar	vr_chromaCorrection;
 extern idCVar	vr_timewarp;
@@ -311,6 +314,7 @@ extern idCVar	vr_hudComs;
 extern idCVar	vr_hudWeap;
 extern idCVar	vr_hudNewItems;
 extern idCVar	vr_hudFlashlight;
+extern idCVar	vr_hudLowHealth;
 
 extern idCVar	vr_tweakTalkCursor; 
 

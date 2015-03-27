@@ -18,14 +18,14 @@ using namespace OVR;
 #define RADIANS_TO_DEGREES(rad) ((float) rad * (float) (180.0 / idMath::PI))
 
 //koz g_flash cvars allow tweaking of flash position when aiming with hydra
-idCVar vr_flash_x( "vr_flashX", "12", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_flash_y( "vr_flashY", "-4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_flash_z( "vr_flashZ", "-8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_flashHand_x( "vr_flashX", "12", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_flashHand_y( "vr_flashY", "-4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_flashHand_z( "vr_flashZ", "-8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 idCVar vr_flashScale( "vr_flashScale", ".8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 //koz g_gun cvars allow tweaking of gun position when aiming with hydra
-idCVar vr_gun_x( "vr_gunX", "12", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_gun_y( "vr_gunY", "4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_gun_z( "vr_gunZ", "-8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_gunHand_x( "vr_gunX", "12", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_gunHand_y( "vr_gunY", "4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_gunHand_z( "vr_gunZ", "-8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 idCVar vr_scaleGun( "vr_scaleGun", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 
 idCVar vr_hydraPitchOffset( "vr_hydraPitchOffset", "40", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "Pitch offset for awkward hydra grip angle" );
@@ -50,18 +50,19 @@ idCVar vr_minLoadScreenTime( "vr_minLoadScreenTime", "6000", CVAR_FLOAT | CVAR_A
 
 //koz cvars for hydra mods
 idCVar vr_hydraEnable( "vr_hydraEnable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, " Enable Razer Hydra. 1 = enabled, 0 = disabled." );
+idCVar vr_hydraForceDetect( "vr_hydraForceDetect", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Force hydra detection. 0 = normal detection, 1 = force detection." );;
 idCVar vr_hydraMode( "vr_hydraMode", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "razer hydra mode. 0 = left hydra for positional tracking, 1 = left hydra as controller, 2 = left hydra as controller and flashlight" );
 
 idCVar vr_flashPitchAngle( "vr_flashPitchAngle", "90", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Pitch offset for flashlight using hydra. Default = 90" );
 idCVar vr_flashlightMode( "vr_flashlightMode", "2", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Flashlight mount.\n0 = Body\n1 = Head\n2 = Gun\n3= Hand ( if motion controls available.)" );
 
-idCVar vr_flashlightBodyPosX( "vr_flashlightBodyPosX", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight horizontal offset for helmet mount." );
-idCVar vr_flashlightBodyPosY( "vr_flashlightBodyPosY", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight forward offset for helmet mount." );
-idCVar vr_flashlightBodyPosZ( "vr_flashlightBodyPosZ", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight vertical offset for helmet mount." );
+idCVar vr_flashlightBodyPosX( "vr_flashlightBodyPosX", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight vertical offset for helmet mount." );
+idCVar vr_flashlightBodyPosY( "vr_flashlightBodyPosY", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight horizontal offset for helmet mount." );
+idCVar vr_flashlightBodyPosZ( "vr_flashlightBodyPosZ", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight forward offset for helmet mount." );
 
-idCVar vr_flashlightHelmetPosX( "vr_flashlightHelmetPosX", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight horizontal offset for helmet mount." );
-idCVar vr_flashlightHelmetPosY( "vr_flashlightHelmetPosY", "-18", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight forward offset for helmet mount." );
-idCVar vr_flashlightHelmetPosZ( "vr_flashlightHelmetPosZ", "-8", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight vertical offset for helmet mount." );
+idCVar vr_flashlightHelmetPosX( "vr_flashlightHelmetPosX", "6", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight vertical offset for helmet mount." );
+idCVar vr_flashlightHelmetPosY( "vr_flashlightHelmetPosY", "-6", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight horizontal offset for helmet mount." );
+idCVar vr_flashlightHelmetPosZ( "vr_flashlightHelmetPosZ", "-20", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight forward offset for helmet mount." );
 idCVar vr_flashlightGunScale( "vr_flashlightGunScale", ".4", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight scale for gun mount." );
 
 // Koz begin : these cvars were just a tool to check model rotations in game
@@ -81,6 +82,7 @@ idCVar vr_PDAfixLocation( "vr_PDAfixLocation", "1", CVAR_BOOL | CVAR_ARCHIVE | C
 idCVar vr_mouse_gunx( "vr_mouse_gunX", "3", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 idCVar vr_mouse_guny( "vr_mouse_gunY", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 idCVar vr_mouse_gunz( "vr_mouse_gunZ", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_mouse_gun_forearm("vr_mouse_gun_forearm", "16", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "");;
 
 idCVar vr_chromaCorrection( "vr_chromaCorrection", "1", CVAR_INTEGER | CVAR_RENDERER | CVAR_ARCHIVE, "Enable Rift chromatic distortion correction. 0 = disabled, 1 = enabled." );
 idCVar vr_timewarp( "vr_timewarp", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Enable Rift timewarp. 0 = disabled, 1 = enabled." );
@@ -109,7 +111,7 @@ idCVar vr_hudComs(		"vr_hudComs",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "S
 idCVar vr_hudWeap(		"vr_hudWeap",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show weapon pickup/change icons in Hud." );
 idCVar vr_hudNewItems(	"vr_hudNewItems",	"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show new items acquired in Hud." );
 idCVar vr_hudFlashlight("vr_hudFlashlight", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show flashlight in Hud." );
-
+idCVar vr_hudLowHealth( "vr_hudLowHealth",	"0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Show health in hud if hidden when below this." );
 
 idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "41", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Tweak talk cursor y pos in VR. % val", 0, 99 );
 
@@ -186,6 +188,7 @@ iVr::iVr()
 	lastViewAxis = mat3_identity;
 	lastHMDYaw = 0.0f;
 	lastHMDPitch = 0.0f;
+	lastHMDRoll = 0.0f;
 	
 	hydraLeftOffset = hydra_zero;		// koz base offset for left hydra 
 	hydraRightOffset = hydra_zero;		// koz base offset for right hydra 
@@ -229,24 +232,55 @@ iVr::HydraInit
 
 void iVr::HydraInit(void) 
 {
+	
+	int x = 0;
 	VR_USE_HYDRA = FALSE;
+	
 	if ( vr_hydraEnable.GetInteger() != 0 ) 
 	{
-		int x = sixenseInit();
+		x = sixenseInit();
+		
+		
+		common->Printf( "\nvr_hydraEnable = %d\n", vr_hydraEnable.GetInteger() );
+		common->Printf( "Initializing Hydra.\n" );
+		
+		// Koz for some reason, the rest of the init fails
+		// if we don't give sixenseInit time to settle.
+		// Not sure if its my code, my machine, or my Hydras ( poor abused things ) - previously this was not necessary.
+		Sys_Sleep( 1000 ); 
+
+		if ( vr_hydraForceDetect.GetBool() )
+		{
+			sixenseSetActiveBase( 0 );
+			sixenseUtils::getTheControllerManager()->setGameType( sixenseUtils::ControllerManager::ONE_PLAYER_TWO_CONTROLLER );
+			common->Printf( "Hydra detection forced.\n" );
+			x = sixenseGetNumActiveControllers();
+			common->Printf( "iVr::HydraInit : sixenseGetNumActiveControllers() reporting % controllers.\nHydra ENABLED\n\n ", x );
+			VR_USE_HYDRA = TRUE;
+			return;
+		}
+		
 		if ( x == SIXENSE_SUCCESS ) 
 		{ 
+			common->Printf( "sixenseInit() = SIXENSE_SUCCESS\n" );
 			x = sixenseSetActiveBase( 0 );
 			if ( x == SIXENSE_SUCCESS ) 
 			{
+				common->Printf( "sixenseSetActiveBase( 0 ) = SIXENSE_SUCCESS\n" );
 				x = sixenseIsBaseConnected( 0 );
 				if ( x == 1 )
 				{
+					common->Printf( "sixenseIsBaseConnected( 0 ) = 1\n" );
 					x = sixenseGetNumActiveControllers();
-					if ( x > 0 )
+					if (  x > 0  )
 					{
-						common->Printf( "VR_HydraInit: Hydra base 0 available, %d controllers active.\n", x );
+						common->Printf( "iVr::HydraInit : Hydra base 0 available, %d controllers active.\n", x );
 						sixenseUtils::getTheControllerManager()->setGameType( sixenseUtils::ControllerManager::ONE_PLAYER_TWO_CONTROLLER );
 						VR_USE_HYDRA = TRUE;
+					}
+					else 
+					{
+						common->Printf( "\nError: iVr::HydraInit : sixenseGetNumActiveControllers() reported %d controllers.\nHydra DISABLED\n\n ", x );
 					}
 				}
 			}
@@ -850,7 +884,12 @@ void iVr::FrameStart(int index)
 	
 	} 
 
-	
+	if ( vr_hydraEnable.IsModified() )
+	{
+		vr->HydraInit();
+		vr_hydraEnable.ClearModified();
+	}
+
 	hmdFrameTime = ovrHmd_BeginFrameTiming( vr->hmd, index );
 		
 
@@ -960,8 +999,8 @@ void iVr::HydraGetData( int hydraIndex, hydraData &hydraData )
 	sixenseGetAllNewestData(&acd);
 
 	static idQuat tempQuat = idQuat_zero;
-
-	if ( sixenseIsControllerEnabled(hydraIndex)) 
+		
+	if ( sixenseIsControllerEnabled(hydraIndex) ) 
 	{
 		
 			sixtempq.x =  acd.controllers[hydraIndex].rot_quat[2];	// koz get hydra quat and convert to id coord space
@@ -1071,14 +1110,16 @@ void iVr::HydraGetRightWithOffset( hydraData &rightOffsetHydra ) { // will retur
 /*
 ==============
 iVr::GetHudAlpha
-Hide weapon/health/armor stats unless player looking down.
+If in "look down" mode, hide weapon/health/armor stats until pitch threshold met.
+If in "look down" and vr_lowHealth enabled, show health/ammo when health below threshold.
+otherwise return default alpha.
 ==============
 */
 float iVr::GetHudAlpha()
 {
 	static int lastFrame = idLib::frameNumber;
 	static float currentAlpha = 0.0f;
-	static float delta = 0.0f ;
+	static float delta = 0.0f;
 	
 	delta = vr_hudTransparency.GetFloat() / (250 / (1000 / vr->hmdHz));
 	
@@ -1087,20 +1128,25 @@ float iVr::GetHudAlpha()
 	if ( lastFrame == idLib::frameNumber ) return currentAlpha;
 	
 	lastFrame = idLib::frameNumber;
+
+	bool force = false;
+
+	idPlayer* player = gameLocal.GetLocalPlayer();
+	if ( player )
+	{
+		if ( vr_hudLowHealth.GetInteger() >= player->health && player->health >=0 ) force = true;
+	}
 	
-	if ( lastHMDPitch >= vr_hudAngle.GetFloat() ) // fade stats in
+	if ( lastHMDPitch >= vr_hudAngle.GetFloat() || force ) // fade stats in
 	{
 		currentAlpha += delta;
 		if ( currentAlpha > vr_hudTransparency.GetFloat() ) currentAlpha = vr_hudTransparency.GetFloat();
-		return currentAlpha;
 	}
-
-	if ( lastHMDPitch <= vr_hudAngle.GetFloat() ) // fade stats out
+	else 
 	{
 		currentAlpha -= delta;
 		if ( currentAlpha < 0.0f ) currentAlpha = 0.0f;
-		return currentAlpha;
 	}
 
-	return 0.0f; // never reach this.
+	return currentAlpha; 
 }
