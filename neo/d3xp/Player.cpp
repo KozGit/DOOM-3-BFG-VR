@@ -10924,13 +10924,12 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis )
 		{
 
 			//gunRot = idAngles( 0.0f, vr_hydraPitchOffset.GetFloat(), 0.0f ).ToQuat();// offset for odd hydra handle angle.
-			gunRot = weaponRotOffsets[currentWeapon].ToQuat();// * gunRot; // add weapon rotations to point straight.
+			gunRot = weaponRotOffsets[currentWeapon].ToQuat();// add weapon rotations to point straight.
 
 			vr->HydraGetRightWithOffset( rHydra );
 			
 			adjustPos += rHydra.position;
 			eyeOrigin += adjustPos * bodyAxis;			// koz move the gun to the hand position
-			//viewOrigin += rHydra.position;
 			gunAxis = gunRot * rHydra.hydraRotationQuat;
 			gunAxis *= bodyAxis.ToQuat();
 
@@ -10939,21 +10938,14 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis )
 		}
 		if ( currentWeapon == WEAPON_PDA )
 		{
-
 			//scale the PDA so we can (maybe) read it in VR.
-			//great googly moogly. Non-uniform scaling of the PDA (horizontally) 
-			//skews it and looks terrible. Instead, rotate the PDA to landscape mode, and use a uniform scale value. 
+			//PDA has been rotated to landscape mode. use a uniform scale value. 
 			//Texture coords have been updated during model load to rotate the view.
 
 			axis *= vr_PDAscale.GetFloat();
 
 		}
-		else
-		{
-			PDAfixed = false; // koz move to toggle pda
-			//axis *= vr_scaleGun.GetFloat();
-		}
-		
+				
 		origin = eyeOrigin + vecoff * axis;
 
 		if ( (vr_PDAfixLocation.GetBool() || !vr->VR_USE_HYDRA) && currentWeapon == WEAPON_PDA )
@@ -10973,10 +10965,7 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis )
 				origin = vr->lastViewOrigin;// GetEyePosition();
 				origin += 4 * bodyAxis[0]; // move 4 inches in front of eyes
 				origin -= 3 * bodyAxis[2]; // move 3 inches down
-				idAngles pdaAngle = vr->lastViewAxis.ToAngles();//viewAngles;
-				pdaAngle.roll = weaponRotOffsets[currentWeapon].roll;
-				pdaAngle.pitch = weaponRotOffsets[currentWeapon].pitch;
-				pdaAngle.yaw += weaponRotOffsets[currentWeapon].yaw;
+				idAngles pdaAngle = vr->lastViewAxis.ToAngles() + weaponRotOffsets[currentWeapon];
 				pdaAngle.Normalize180();
 				PDAorigin = origin;
 				PDAaxis *= pdaAngle.ToMat3();
@@ -11068,6 +11057,8 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis )
 			
 			idVec3 forearm = idVec3( vr_mouse_gun_forearm.GetFloat(), 0.0f, 0.0f );
 			origin = eyeOrigin + ( vecoff + forearm ) * axis;
+
+			origin -= vecoff * bodyAxis;
 
 			idVec3 gravity = physicsObj.GetGravityNormal();
 
