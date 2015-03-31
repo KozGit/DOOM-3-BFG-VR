@@ -10894,11 +10894,26 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis )
 	idVec3 adjustPos( vr_gunHand_x.GetFloat(), vr_gunHand_y.GetFloat(), vr_gunHand_z.GetFloat() );
 
 	// model center not at model origin, vecoff is the offset to bring the center of the weapon handle to the model origin
-	idVec3 vecoff( weaponOriginOffsets[currentWeapon].x,
-		weaponOriginOffsets[currentWeapon].y,
-		weaponOriginOffsets[currentWeapon].z );
+	idVec3 vecoff(	weaponOriginOffsets[currentWeapon].x,
+					weaponOriginOffsets[currentWeapon].y,
+					weaponOriginOffsets[currentWeapon].z );
 
 	idVec3 gravity = physicsObj.GetGravityNormal();
+
+
+	if ( game->isVR && vr_testWeaponModel.GetBool() )
+	{
+		origin = GetEyePosition();
+		origin += 30 * bodyAxis[0]; // move 30 inches in front of eyes
+		origin -= 6 * bodyAxis[2]; // move 6 inches down
+				
+		angles[ROLL] = 0.0;
+		angles[YAW] = vr->independentWeaponYaw;
+		angles[PITCH] = vr->independentWeaponPitch;
+		axis = angles.ToMat3();
+		origin += vecoff * axis;			// koz move the gun to the hand position
+		return;
+	}
 
 	// drop the weapon when landing after a jump / fall
 	delta = gameLocal.time - landTime;

@@ -333,6 +333,8 @@ extern idCVar	vr_minLoadScreenTime;
 extern idCVar	vr_tweakx;
 extern idCVar	vr_tweaky;
 
+extern idCVar	vr_testWeaponModel;
+
 extern iVr* vr;
 
 /*

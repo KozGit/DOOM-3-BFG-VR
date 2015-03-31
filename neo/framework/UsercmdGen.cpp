@@ -548,26 +548,38 @@ void idUsercmdGenLocal::MouseMove()
 	{
 		yawdelta = m_yaw.GetFloat() * mx * in_mouseSpeed.GetFloat();
 		pitchdelta = m_pitch.GetFloat() * in_mouseSpeed.GetFloat() * (in_mouseInvertLook.GetBool() ? -my : my);
+		
 		vr->independentWeaponPitch += pitchdelta;
-
-		if ( vr->independentWeaponPitch > 90.0 )	vr->independentWeaponPitch = 90;
-		if ( vr->independentWeaponPitch < -90 ) vr->independentWeaponPitch = -90;
-
 		vr->independentWeaponYaw -= yawdelta;
-		if ( vr->independentWeaponYaw > 30 )
-		{
-			yawmove = vr->independentWeaponYaw - 30;
-			vr->independentWeaponYaw = 30;
-			viewangles[YAW] += yawmove;
-		}
 
-		if ( vr->independentWeaponYaw < -30 )
+		if ( vr_testWeaponModel.GetBool() )
 		{
-			yawmove = vr->independentWeaponYaw + 30;
-			vr->independentWeaponYaw = -30;
-			viewangles[YAW] += yawmove;
-		}
+			if ( vr->independentWeaponPitch > 180.0 )	vr->independentWeaponPitch -= 360.0;
+			if ( vr->independentWeaponPitch < -180.0 ) vr->independentWeaponPitch += 360.0;
+			if ( vr->independentWeaponYaw > 180.0 )	vr->independentWeaponYaw -= 360.0;
+			if ( vr->independentWeaponYaw < -180.0 ) vr->independentWeaponYaw += 360.0;
 
+		}
+		else
+		{
+			if ( vr->independentWeaponPitch > 90.0 )	vr->independentWeaponPitch = 90;
+			if ( vr->independentWeaponPitch < -90 ) vr->independentWeaponPitch = -90;
+
+
+			if ( vr->independentWeaponYaw > 30 )
+			{
+				yawmove = vr->independentWeaponYaw - 30;
+				vr->independentWeaponYaw = 30;
+				viewangles[YAW] += yawmove;
+			}
+
+			if ( vr->independentWeaponYaw < -30 )
+			{
+				yawmove = vr->independentWeaponYaw + 30;
+				vr->independentWeaponYaw = -30;
+				viewangles[YAW] += yawmove;
+			}
+		}
 	}
 }
 

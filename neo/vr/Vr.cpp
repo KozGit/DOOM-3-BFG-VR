@@ -131,6 +131,8 @@ idCVar vr_hmdHz("vr_hmdHz", "0", CVAR_INTEGER | CVAR_RENDERER | CVAR_ARCHIVE, " 
 idCVar vr_tweakx( "vr_tweakx", "1.0", CVAR_FLOAT, "xtweaking value.", 0.0f, 2.0f ); // deleteme for dev only
 idCVar vr_tweaky( "vr_tweaky", "1.0", CVAR_FLOAT, "xtweaking value.", 0.0f, 2.0f ); // deleteme for dev only
 
+idCVar vr_testWeaponModel( "vr_testWeaponModel", "0", CVAR_BOOL, "Free rotation of viewweapon models." ); // deleteme for dev only
+
 // Koz end
 //===================================================================
 

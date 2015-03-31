@@ -701,7 +701,18 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 	
 	if( g_showcamerainfo.GetBool() )
 	{
-		gameLocal.Printf( "^5Frame: ^7%d/%d\n\n\n", realFrame + 1, camera.Num() - cameraCuts.Num() );
+		idStr		filename;
+		const char*	key;
+
+		key = spawnArgs.GetString( "anim" );
+		filename = spawnArgs.GetString( va( "anim %s", key ) );
+		
+		gameLocal.Printf( "^5Frame: ^7%d/%d\n", realFrame + 1, camera.Num() - cameraCuts.Num() );
+		
+		if ( key && filename.Length() )
+		{ 
+			gameLocal.Printf( "Name %s\nKey %s\nFilename %s\n\n\n", name.c_str(), key, filename.c_str() );
+		}
 	}
 }
 
