@@ -107,6 +107,8 @@ public:
 	void				FXAASetUniforms( Framebuffer FBO );
 
 	float				GetHudAlpha( void );
+
+	void				CalcAimMove( float &yawDelta, float &pitchDelta );
 		
 	bool				VR_GAME_PAUSED;
 	
@@ -334,6 +336,12 @@ extern idCVar	vr_tweakx;
 extern idCVar	vr_tweaky;
 
 extern idCVar	vr_testWeaponModel;
+
+extern idCVar	vr_aimMode;
+extern idCVar	vr_deadzonePitch;
+extern idCVar	vr_deadzoneYaw;
+extern idCVar	vr_comfortDelta;
+
 
 extern iVr* vr;
 

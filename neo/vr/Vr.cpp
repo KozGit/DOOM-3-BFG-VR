@@ -133,6 +133,11 @@ idCVar vr_tweaky( "vr_tweaky", "1.0", CVAR_FLOAT, "xtweaking value.", 0.0f, 2.0f
 
 idCVar vr_testWeaponModel( "vr_testWeaponModel", "0", CVAR_BOOL, "Free rotation of viewweapon models." ); // deleteme for dev only
 
+idCVar	vr_aimMode( "vr_aimMode", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Aim Mode in VR", 0, 99 );
+idCVar	vr_deadzonePitch( "vr_deadzonePitch", "90", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Vertical Aim Deadzone", 0, 180 );
+idCVar	vr_deadzoneYaw( "vr_deadzoneYaw", "30", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Horizontal Aim Deadzone", 0, 180 );
+idCVar	vr_comfortDelta( "vr_comfortDelta", "10", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Comfort Mode turning angle ", 0, 180 );
+
 // Koz end
 //===================================================================
 
@@ -1151,4 +1156,57 @@ float iVr::GetHudAlpha()
 	}
 
 	return currentAlpha; 
+}
+
+/*
+==============
+iVr::CalcAimMove
+Pass the controller yaw & pitch changes.
+Indepent weapon view angles will be updated,
+and the correct yaw & pitch movement values will
+be returned based on the current user aim mode. 
+==============
+*/
+
+void iVr::CalcAimMove( float &yawDelta, float &pitchDelta )
+{
+	
+	float pitchDeadzone = vr_deadzonePitch.GetFloat();
+	float yawDeadzone = vr_deadzoneYaw.GetFloat();
+
+
+	vr->independentWeaponPitch += pitchDelta;
+	vr->independentWeaponYaw += yawDelta;
+
+	if ( vr_testWeaponModel.GetBool() )
+	{
+		if ( vr->independentWeaponPitch > 180.0 )	vr->independentWeaponPitch -= 360.0;
+		if ( vr->independentWeaponPitch < -180.0 ) vr->independentWeaponPitch += 360.0;
+		if ( vr->independentWeaponYaw > 180.0 )	vr->independentWeaponYaw -= 360.0;
+		if ( vr->independentWeaponYaw < -180.0 ) vr->independentWeaponYaw += 360.0;
+
+	}
+	else
+	{
+		if ( vr->independentWeaponPitch >= pitchDeadzone )	vr->independentWeaponPitch = pitchDeadzone;
+		if ( vr->independentWeaponPitch < -pitchDeadzone ) vr->independentWeaponPitch = -pitchDeadzone;
+		pitchDelta = 0;
+
+
+		if ( vr->independentWeaponYaw >= yawDeadzone )
+		{
+			yawDelta = vr->independentWeaponYaw - yawDeadzone;
+			vr->independentWeaponYaw = yawDeadzone;
+			return;
+		}
+
+		if ( vr->independentWeaponYaw < -yawDeadzone )
+		{
+			yawDelta = vr->independentWeaponYaw + yawDeadzone;
+			vr->independentWeaponYaw = -yawDeadzone;
+			return;
+		}
+		
+		yawDelta = 0.0f;
+	}
 }

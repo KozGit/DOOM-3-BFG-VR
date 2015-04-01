@@ -10788,9 +10788,17 @@ idPlayer::CalculateViewWeaponPos
 
 Calculate the bobbing position of the view weapon
 ==============
+*/
 
 void idPlayer::CalculateViewWeaponPos( idVec3& origin, idMat3& axis )
 {
+	
+	if ( game->isVR )
+	{
+		CalculateViewWeaponPosVR( origin, axis );
+		return;
+	}
+	
 	float		scale;
 	float		fracsin;
 	idAngles	angles;
@@ -10853,120 +10861,75 @@ void idPlayer::CalculateViewWeaponPos( idVec3& origin, idMat3& axis )
 	angles.roll		+= fracsin;
 	angles.yaw		+= fracsin;
 	angles.pitch	+= fracsin;
-	
-	// decoupled weapon aiming in head mounted displays
-	angles.pitch += independentWeaponPitchAngle;
-	
+		
 	const idMat3	anglesMat = angles.ToMat3();
 	const idMat3	scaledMat = anglesMat * g_gunScale.GetFloat();
 	
 	axis = scaledMat * viewAxis;
 }
-*/
 
-void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis )
+
+void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 {
+	
 	weapon_t currentWeapon = weapon->IdentifyWeapon();
 
-	idAngles	bodyAngles;
 	idAngles	angles;
 	int			delta;
-	idQuat		gunRot; 
+	idQuat		gunRot;
 	idQuat		gunAxis;
 	hydraData	rHydra = hydra_zero;
 	idVec3		eyeOrigin = GetEyePosition();
+	
+	// model center not at model origin, vecoff is the offset to bring the center of the weapon handle to the model origin
+	idVec3		vecoff(	weaponOriginOffsets[currentWeapon].x,
+						weaponOriginOffsets[currentWeapon].y,
+						weaponOriginOffsets[currentWeapon].z );
 
-	// CalculateRenderView must have been called first
-	idVec3 viewOrigin1 = firstPersonViewOrigin;
-	idMat3 viewAxis1 = firstPersonViewAxis;
+	// direction the player body is facing.
+	idMat3		bodyAxis = idAngles( 0.0, viewAngles.yaw, 0.0f ).ToMat3();
+	
+	idVec3		gravity = physicsObj.GetGravityNormal();
 
-	//ModelOriginOffsetsQuat( origin, axis );
-	//if (1) return;
-
-	bodyAngles = idAngles( 0.0, viewAngles.yaw, 0.0f );
-	idMat3 bodyAxis = bodyAngles.ToMat3();
-
-	// adjustPos = hand offset from center eye position. Values 0,0,0 = the gun grows out of your forehead. 
+	// adjustPos = Motion control hand offset from center eye position. Values 0,0,0 = the gun grows out of your forehead. 
 	// Use values to move the weapon hand position to a comfortable default. This is also 
-	// the position your hand should be in when you calibrate the hydra to align
+	// the position your hand should be in when you calibrate motion controls to align
 	// your vr 'hand' with your real world one.
 
-	idVec3 adjustPos( vr_gunHand_x.GetFloat(), vr_gunHand_y.GetFloat(), vr_gunHand_z.GetFloat() );
-
-	// model center not at model origin, vecoff is the offset to bring the center of the weapon handle to the model origin
-	idVec3 vecoff(	weaponOriginOffsets[currentWeapon].x,
-					weaponOriginOffsets[currentWeapon].y,
-					weaponOriginOffsets[currentWeapon].z );
-
-	idVec3 gravity = physicsObj.GetGravityNormal();
-
-
-	if ( game->isVR && vr_testWeaponModel.GetBool() )
+	// koz fixme - this won't be needed for solutions like the vive, where the headset position 
+	// and the controller positions are already in the same coordinate space.  Rework this so the motion control routines will work regardless of controller type.
+	idVec3		adjustPos( vr_gunHand_x.GetFloat(), vr_gunHand_y.GetFloat(), vr_gunHand_z.GetFloat() );
+		
+	if ( vr_testWeaponModel.GetBool() )
 	{
 		origin = GetEyePosition();
 		origin += 30 * bodyAxis[0]; // move 30 inches in front of eyes
-		origin -= 6 * bodyAxis[2]; // move 6 inches down
-				
-		angles[ROLL] = 0.0;
-		angles[YAW] = vr->independentWeaponYaw;
-		angles[PITCH] = vr->independentWeaponPitch;
-		axis = angles.ToMat3();
-		origin += vecoff * axis;			// koz move the gun to the hand position
+		origin -= 6 * bodyAxis[2];	// move 6 inches down
+		axis = idAngles( 0.0f, vr->independentWeaponYaw, vr->independentWeaponPitch ).ToMat3();
+
+		origin += vecoff * axis;	// move the gun model origin to center of handle.
 		return;
 	}
+	
 
-	// drop the weapon when landing after a jump / fall
-	delta = gameLocal.time - landTime;
-	if ( delta < LAND_DEFLECT_TIME )
+	if ( currentWeapon != WEAPON_PDA )
 	{
-		origin -= gravity * (landChange*0.25f * delta / LAND_DEFLECT_TIME);
+		PDAfixed = false; // release the PDA if weapon has been switched.
 	}
-	else if ( delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME )
-	{
-		origin -= gravity * (landChange*0.25f * (LAND_DEFLECT_TIME + LAND_RETURN_TIME - delta) / LAND_RETURN_TIME);
-	}
+	
+	if ( !vr->VR_USE_HYDRA || ( vr_PDAfixLocation.GetBool() && currentWeapon == WEAPON_PDA ) ) // non-motion control & fixed pda positioning.
+	{ 
+		axis = bodyAxis;
+		origin = eyeOrigin + vecoff * axis;
 
-	// koz if using the hydra, overwrite gunposition values with hydra position and rotation offsets
-	if ( currentWeapon != WEAPON_PDA ) PDAfixed = false;
-	if ( vr->VR_USE_HYDRA || currentWeapon == WEAPON_PDA )
-	{
-		if ( !vr->VR_USE_HYDRA )
-		{
-			axis = bodyAxis;
-			origin = eyeOrigin;
-		}
-		else
-		{
-
-			//gunRot = idAngles( 0.0f, vr_hydraPitchOffset.GetFloat(), 0.0f ).ToQuat();// offset for odd hydra handle angle.
-			gunRot = weaponRotOffsets[currentWeapon].ToQuat();// add weapon rotations to point straight.
-
-			vr->HydraGetRightWithOffset( rHydra );
-			
-			adjustPos += rHydra.position;
-			eyeOrigin += adjustPos * bodyAxis;			// koz move the gun to the hand position
-			gunAxis = gunRot * rHydra.hydraRotationQuat;
-			gunAxis *= bodyAxis.ToQuat();
-
-			axis = gunAxis.ToMat3();
-			
-		}
 		if ( currentWeapon == WEAPON_PDA )
-		{
+		{ 
 			//scale the PDA so we can (maybe) read it in VR.
 			//PDA has been rotated to landscape mode. use a uniform scale value. 
 			//Texture coords have been updated during model load to rotate the view.
 
 			axis *= vr_PDAscale.GetFloat();
-
-		}
-				
-		origin = eyeOrigin + vecoff * axis;
-
-		if ( (vr_PDAfixLocation.GetBool() || !vr->VR_USE_HYDRA) && currentWeapon == WEAPON_PDA )
-		{
-			// plant the PDA in space in front of the players current view position
-			// store current pda position and reset when PDA dropped.
+			
 			if ( PDAfixed )
 			{ // pda has already been locked in space, use stored values
 				origin = PDAorigin;
@@ -10974,8 +10937,8 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis )
 			}
 			else
 			{ // fix the PDA in space, set flag and store position
+				
 				PDAfixed = true;
-
 				PDAaxis = mat3_identity * vr_PDAscale.GetFloat();
 				origin = vr->lastViewOrigin;// GetEyePosition();
 				origin += 4 * bodyAxis[0]; // move 4 inches in front of eyes
@@ -10986,82 +10949,20 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis )
 				PDAaxis *= pdaAngle.ToMat3();
 				axis = PDAaxis;
 			}
-		}
-
-		if ( currentWeapon == WEAPON_PDA && vr->PDAclipModelSet )
-		{
-			weapon->UpdateWeaponClipPosition( origin, axis );
-		}
-	}
-	else
-	{ // not the pda, not using hydra
-
-		if ( !game->isVR )
-		{
-			// this is the original code.
-			float	scale;
-			float	fracsin;
-			idAngles angles;
-			int	delta;
 			
-			// these cvars are just for hand tweaking before moving a value to the weapon def
-			idVec3 gunpos( g_gun_x.GetFloat(), g_gun_y.GetFloat(), g_gun_z.GetFloat() );
-
-			// as the player changes direction, the gun will take a small lag
-			idVec3 gunOfs = GunAcceleratingOffset();
-			origin = viewOrigin1 + (gunpos + gunOfs) * viewAxis1;
-
-			// on odd legs, invert some angles
-			if ( bobCycle & 128 ) {
-				scale = -xyspeed;
+			if ( vr->PDAclipModelSet )
+			{
+				weapon->UpdateWeaponClipPosition( origin, axis );
 			}
-			else {
-				scale = xyspeed;
-			}
-			// gun angles from bobbing
-			angles.roll = scale * bobfracsin * 0.005f;
-			angles.yaw = scale * bobfracsin * 0.01f;
-			angles.pitch = xyspeed * bobfracsin * 0.005f;
-
-			// gun angles from turning
-			if ( common->IsMultiplayer() ) {
-				idAngles offset = GunTurningOffset();
-				offset *= g_mpWeaponAngleScale.GetFloat();
-				angles += offset;
-			}
-			else {
-				angles += GunTurningOffset();
-			}
-
-			idVec3 gravity = physicsObj.GetGravityNormal();
-
-			// drop the weapon when landing after a jump / fall
-			delta = gameLocal.time - landTime;
-			if ( delta < LAND_DEFLECT_TIME ) {
-				origin -= gravity * (landChange*0.25f * delta / LAND_DEFLECT_TIME);
-			}
-			else if ( delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME ) {
-				origin -= gravity * (landChange*0.25f * (LAND_DEFLECT_TIME + LAND_RETURN_TIME - delta) / LAND_RETURN_TIME);
-			}
-
-			// speed sensitive idle drift
-			scale = xyspeed + 40.0f;
-			fracsin = scale * sin( MS2SEC( gameLocal.time ) ) * 0.01f;
-			angles.roll += fracsin;
-			angles.yaw += fracsin;
-			angles.pitch += fracsin;
-						
-			const idMat3 anglesMat = angles.ToMat3();
-			const idMat3 scaledMat = anglesMat * g_gunScale.GetFloat();
-			axis = scaledMat * viewAxis1;
 		}
 		else
 		{
-			gunRot = weaponRotOffsets[currentWeapon].ToQuat();// * gunRot; // add weapon rotations to point straight.
+			// non motion control weapon positioning for everything other than the PDA.
+			gunRot = weaponRotOffsets[currentWeapon].ToQuat(); // add weapon rotations to point straight.
 			idVec3 gunpos = idVec3( vr_mouse_gunx.GetFloat(), vr_mouse_guny.GetFloat(), vr_mouse_gunz.GetFloat() );
-						
+
 			eyeOrigin += gunpos * bodyAxis;			// koz move the gun to the hand position
-			
+
 			angles[ROLL] = 0.0;
 			angles[YAW] = vr->independentWeaponYaw;
 			angles[PITCH] = vr->independentWeaponPitch;
@@ -11069,26 +10970,61 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis )
 			gunAxis = gunRot * angles.ToQuat();
 			gunAxis *= bodyAxis.ToQuat();
 			axis = gunAxis.ToMat3();
-			
+
 			idVec3 forearm = idVec3( vr_mouse_gun_forearm.GetFloat(), 0.0f, 0.0f );
-			origin = eyeOrigin + ( vecoff + forearm ) * axis;
+			origin = eyeOrigin + (vecoff + forearm) * axis;
 
 			origin -= vecoff * bodyAxis;
-
-			idVec3 gravity = physicsObj.GetGravityNormal();
-
-			// drop the weapon when landing after a jump / fall
-			delta = gameLocal.time - landTime;
-			if ( delta < LAND_DEFLECT_TIME ) {
-				origin -= gravity * (landChange*0.25f * delta / LAND_DEFLECT_TIME);
-			}
-			else if ( delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME ) {
-				origin -= gravity * (landChange*0.25f * (LAND_DEFLECT_TIME + LAND_RETURN_TIME - delta) / LAND_RETURN_TIME);
-			}
+						
 		}
+		
+		// drop the weapon when landing after a jump / fall
+		delta = gameLocal.time - landTime;
+		if ( delta < LAND_DEFLECT_TIME ) {
+			origin -= gravity * (landChange*0.25f * delta / LAND_DEFLECT_TIME);
+		}
+		else if ( delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME ) {
+			origin -= gravity * (landChange*0.25f * (LAND_DEFLECT_TIME + LAND_RETURN_TIME - delta) / LAND_RETURN_TIME);
+		}
+		
+		return;
 	}
 
-	//ModelOriginOffsets( origin, axis ); // test rotations
+	// motion control weapon positioning.
+	//-----------------------------------
+
+	//ModelOriginOffsetsQuat( origin, axis );
+	//if (1) return;
+	
+	//gunRot = idAngles( 0.0f, vr_hydraPitchOffset.GetFloat(), 0.0f ).ToQuat();// offset for odd hydra handle angle.
+		
+	gunRot = idAngles(	weaponRotOffsets[currentWeapon].pitch + vr_hydraPitchOffset.GetFloat(),
+						weaponRotOffsets[currentWeapon].yaw,
+						weaponRotOffsets[currentWeapon].roll ).Normalize180().ToQuat();// add weapon rotations to point straight.
+
+	vr->HydraGetRightWithOffset( rHydra );
+			
+	adjustPos += rHydra.position;
+	eyeOrigin += adjustPos * bodyAxis;			// koz move the gun to the hand position
+	gunAxis = gunRot * rHydra.hydraRotationQuat;
+	gunAxis *= bodyAxis.ToQuat();
+
+	axis = gunAxis.ToMat3();
+	
+	if ( currentWeapon == WEAPON_PDA )
+	{
+		//scale the PDA so we can (maybe) read it in VR.
+		//PDA has been rotated to landscape mode. use a uniform scale value. 
+		//Texture coords have been updated during model load to rotate the view.
+
+		axis *= vr_PDAscale.GetFloat();
+		if ( vr->PDAclipModelSet )
+		{
+			weapon->UpdateWeaponClipPosition( origin, axis );
+		}
+	}
+				
+	origin = eyeOrigin + vecoff * axis;
 
 }
 
@@ -11539,10 +11475,7 @@ void idPlayer::CalculateRenderView()
 	idAngles imuAngles;  // koz add headtracking
 	static idVec3 lastValidHmdTranslation = vec3_zero;
 	idVec3 hmdTranslation = vec3_zero;
-
-	// koz headtracker does not actually update the head model position or axis, we simply add offsets to body rotation at render time
-	vr->HMDGetOrientation( imuAngles[ROLL], imuAngles[PITCH], imuAngles[YAW], hmdTranslation );
-
+		
 	int i;
 	float range;
 
@@ -11624,90 +11557,99 @@ void idPlayer::CalculateRenderView()
 		gameLocal.Printf( "%s : %s\n", renderView->vieworg.ToString(), renderView->viewaxis.ToAngles().ToString() );
 	}
 
-	// Koz begin : Add headtracking
-	idVec3 origin = renderView->vieworg;
-	idAngles angles = renderView->viewaxis.ToAngles(); //viewAngles + viewBobAngles + playerView.AngleOffset();
-	idMat3 axis = renderView->viewaxis;
-
-	angles.yaw += imuAngles.yaw;    // add the current hmd orientation
-	angles.pitch += imuAngles.pitch;
-	angles.roll += imuAngles.roll;
-	angles = angles.Normalize180();
-
-	vr->lastHMDYaw = imuAngles.yaw;
-	vr->lastHMDPitch = imuAngles.pitch;
-	vr->lastHMDRoll = imuAngles.roll;
-
-	//common->Printf("Current yaw %f pitch %f roll %f\n",imuAngles.yaw,imuAngles.pitch,imuAngles.roll);
-	//common->Printf("Positional tracking: %s translation x %f  y %f z %f\n",
-	//				hmdPositionTracked ? "active" : "incative",hmdTranslation.x,hmdTranslation.x,hmdTranslation.z);
-
-	if ( vr->hmdPositionTracked )
+	if ( game->isVR )
 	{
-		lastValidHmdTranslation = hmdTranslation;
-		origin += axis[0] * hmdTranslation.x + axis[1] * hmdTranslation.y + axis[2] * hmdTranslation.z; // add hmd translation
-	}
-	else
-	{
-		//origin += axis[0] * lastValidHmdTranslation.x + axis[1] * lastValidHmdTranslation.y + axis[2] * lastValidHmdTranslation.z; // add last valid hmd translation
-	}
+		// koz headtracker does not actually update the head model position or axis, we simply add offsets to body rotation at render time
+		// koz fixme fix this.
+		vr->HMDGetOrientation( imuAngles[ROLL], imuAngles[PITCH], imuAngles[YAW], hmdTranslation );
+		
+		// Koz begin : Add headtracking
+		idVec3 origin = renderView->vieworg;
+		idAngles angles = renderView->viewaxis.ToAngles(); //viewAngles + viewBobAngles + playerView.AngleOffset();
+		idMat3 axis = renderView->viewaxis;
 
-	/*	if ( vr_hydraMode.GetInteger() == 1 ) {
-	VR_MotionSensor_Get_Left_Hydra_With_Offset(hydraPositional);
-	origin += axis[0]* hydraPositional.position.x + axis[1]*hydraPositional.position.y + axis[2]*hydraPositional.position.z;		//koz update view with hydra positional info if enabled
-	} else {
-	origin += axis[0] * hmdTranslation.x + axis[1] * hmdTranslation.y + axis[2] * hmdTranslation.z; // add hmd translation
-	} */
+		angles.yaw += imuAngles.yaw;    // add the current hmd orientation
+		angles.pitch += imuAngles.pitch;
+		angles.roll += imuAngles.roll;
+		angles = angles.Normalize180();
 
-	renderView->vieworg = origin;
-	renderView->viewaxis = angles.ToMat3();//axis;
+		vr->lastHMDYaw = imuAngles.yaw;
+		vr->lastHMDPitch = imuAngles.pitch;
+		vr->lastHMDRoll = imuAngles.roll;
 
-	/*int neg = 1;
-	extern idCVar  stereoRender_interOccularCentimeters;
-	float worldSeparation = (stereoRender_interOccularCentimeters.GetFloat() * 0.5) / 2.54;
+		//common->Printf("Current yaw %f pitch %f roll %f\n",imuAngles.yaw,imuAngles.pitch,imuAngles.roll);
+		//common->Printf("Positional tracking: %s translation x %f  y %f z %f\n",
+		//				hmdPositionTracked ? "active" : "incative",hmdTranslation.x,hmdTranslation.x,hmdTranslation.z);
 
-	neg = renderView->viewEyeBuffer;
-
-	vr->lastViewOrigin = origin += neg * worldSeparation * renderView->viewaxis[1];
-	vr->lastViewAxis = renderView->viewaxis;
-	*/
-	// koz fixme pause - handle the PDA model if game is paused
-	// really really need to move this somewhere else.
-
-	if ( vr->PDAforcetoggle || vr->PDArising )
-	{
-		if ( !vr->PDAforced )
+		if ( vr->hmdPositionTracked )
 		{
-			if ( !vr->PDArising )
+			lastValidHmdTranslation = hmdTranslation;
+			origin += axis[0] * hmdTranslation.x + axis[1] * hmdTranslation.y + axis[2] * hmdTranslation.z; // add hmd translation
+		}
+		else
+		{
+			//origin += axis[0] * lastValidHmdTranslation.x + axis[1] * lastValidHmdTranslation.y + axis[2] * lastValidHmdTranslation.z; // add last valid hmd translation
+		}
+
+		/*	if ( vr_hydraMode.GetInteger() == 1 ) {
+		VR_MotionSensor_Get_Left_Hydra_With_Offset(hydraPositional);
+		origin += axis[0]* hydraPositional.position.x + axis[1]*hydraPositional.position.y + axis[2]*hydraPositional.position.z;		//koz update view with hydra positional info if enabled
+		} else {
+		origin += axis[0] * hmdTranslation.x + axis[1] * hmdTranslation.y + axis[2] * hmdTranslation.z; // add hmd translation
+		} */
+
+		renderView->vieworg = origin;
+		renderView->viewaxis = angles.ToMat3();//axis;
+
+		/*int neg = 1;
+		extern idCVar  stereoRender_interOccularCentimeters;
+		float worldSeparation = (stereoRender_interOccularCentimeters.GetFloat() * 0.5) / 2.54;
+
+		neg = renderView->viewEyeBuffer;
+
+		vr->lastViewOrigin = origin += neg * worldSeparation * renderView->viewaxis[1];
+		vr->lastViewAxis = renderView->viewaxis;
+		*/
+		// koz fixme pause - handle the PDA model if game is paused
+		// really really need to move this somewhere else.
+
+		if ( vr->PDAforcetoggle || vr->PDArising )
+		{
+			if ( !vr->PDAforced )
 			{
-				SelectWeapon( weapon_pda, true );
-				vr->PDAforcetoggle = false;
-				vr->PDArising = true;
-			}
-			else
-			{
-				if ( weapon->IdentifyWeapon() == WEAPON_PDA && weapon->status == WP_READY )
+				if ( !vr->PDArising )
 				{
-					if ( weapon->status == WP_READY )
+					SelectWeapon( weapon_pda, true );
+					vr->PDAforcetoggle = false;
+					vr->PDArising = true;
+				}
+				else
+				{
+					if ( weapon->IdentifyWeapon() == WEAPON_PDA && weapon->status == WP_READY )
 					{
-						vr->PDAforced = true;
-						vr->PDArising = false;
+						if ( weapon->status == WP_READY )
+						{
+							vr->PDAforced = true;
+							vr->PDArising = false;
+						}
 					}
 				}
 			}
-		}
-		else
-		{ // pda has been already been forced active, put it away.
-			if ( vr->PDAforcetoggle )
-			{
-				TogglePDA();
-				vr->PDAforcetoggle = false;
-				vr->PDAforced = false;
-				vr->PDArising = false;
+			else
+			{ // pda has been already been forced active, put it away.
+				if ( vr->PDAforcetoggle )
+				{
+					TogglePDA();
+					vr->PDAforcetoggle = false;
+					vr->PDAforced = false;
+					vr->PDArising = false;
+				}
 			}
+
 		}
 	}
 }
+
 /*
 =============
 idPlayer::AddAIKill

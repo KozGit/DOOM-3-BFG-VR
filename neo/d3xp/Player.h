@@ -549,6 +549,7 @@ public:
 	float					DefaultFov() const;
 	float					CalcFov( bool honorZoom );
 	void					CalculateViewWeaponPos( idVec3& origin, idMat3& axis );
+	void					CalculateViewWeaponPosVR( idVec3& origin, idMat3& axis );
 
 	// Koz begin
 	void					CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flashOffset ); // koz aim the flashlight with the hydra

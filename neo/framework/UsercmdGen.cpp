@@ -493,7 +493,7 @@ void idUsercmdGenLocal::MouseMove()
 	// Koz begin
 	float yawdelta;
 	float pitchdelta;
-	float yawmove;
+//	float yawmove;
 	// Koz end
 
 	history[historyCounter & 7][0] = mouseDx;
@@ -538,49 +538,19 @@ void idUsercmdGenLocal::MouseMove()
 	mouseDx = 0;
 	mouseDy = 0;
 
+	yawdelta = -m_yaw.GetFloat() * mx * in_mouseSpeed.GetFloat();
+	pitchdelta = m_pitch.GetFloat() * in_mouseSpeed.GetFloat() * (in_mouseInvertLook.GetBool() ? -my : my);
+
 	// koz begin add mouse control here
-	if ( !vr_enable.GetBool() )
+	if ( vr_enable.GetBool() )
 	{
-		viewangles[YAW] -= m_yaw.GetFloat() * mx * in_mouseSpeed.GetFloat();
-		viewangles[PITCH] += m_pitch.GetFloat() * in_mouseSpeed.GetFloat() * (in_mouseInvertLook.GetBool() ? -my : my);
+		// update the independent weapon angles and return any view changes based on current aim mode
+		vr->CalcAimMove( yawdelta, pitchdelta );
 	}
-	else
-	{
-		yawdelta = m_yaw.GetFloat() * mx * in_mouseSpeed.GetFloat();
-		pitchdelta = m_pitch.GetFloat() * in_mouseSpeed.GetFloat() * (in_mouseInvertLook.GetBool() ? -my : my);
-		
-		vr->independentWeaponPitch += pitchdelta;
-		vr->independentWeaponYaw -= yawdelta;
 
-		if ( vr_testWeaponModel.GetBool() )
-		{
-			if ( vr->independentWeaponPitch > 180.0 )	vr->independentWeaponPitch -= 360.0;
-			if ( vr->independentWeaponPitch < -180.0 ) vr->independentWeaponPitch += 360.0;
-			if ( vr->independentWeaponYaw > 180.0 )	vr->independentWeaponYaw -= 360.0;
-			if ( vr->independentWeaponYaw < -180.0 ) vr->independentWeaponYaw += 360.0;
-
-		}
-		else
-		{
-			if ( vr->independentWeaponPitch > 90.0 )	vr->independentWeaponPitch = 90;
-			if ( vr->independentWeaponPitch < -90 ) vr->independentWeaponPitch = -90;
-
-
-			if ( vr->independentWeaponYaw > 30 )
-			{
-				yawmove = vr->independentWeaponYaw - 30;
-				vr->independentWeaponYaw = 30;
-				viewangles[YAW] += yawmove;
-			}
-
-			if ( vr->independentWeaponYaw < -30 )
-			{
-				yawmove = vr->independentWeaponYaw + 30;
-				vr->independentWeaponYaw = -30;
-				viewangles[YAW] += yawmove;
-			}
-		}
-	}
+	viewangles[YAW] += yawdelta;
+	viewangles[PITCH] += pitchdelta;
+	
 }
 
 /*
@@ -1176,8 +1146,17 @@ void idUsercmdGenLocal::JoystickMove2()
 	cmd.forwardmove = idMath::ClampChar( cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y );
 	cmd.rightmove = idMath::ClampChar( cmd.rightmove + KEY_MOVESPEED * leftMapped.x );
 
-	viewangles[PITCH] += MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed;
-	viewangles[YAW] += MS2SEC( pollTime - lastPollTime ) * -rightMapped.x * yawSpeed;
+	float pitchDelta, yawDelta = 0.0f;
+	pitchDelta = MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed;;
+	yawDelta = MS2SEC( pollTime - lastPollTime ) * -rightMapped.x * yawSpeed;
+
+	if ( game->isVR )
+	{
+		vr->CalcAimMove( yawDelta, pitchDelta );
+	}
+
+	viewangles[PITCH] += pitchDelta;
+	viewangles[YAW] += yawDelta;
 
 	const float triggerThreshold = joy_triggerThreshold.GetFloat();
 	HandleJoystickAxis( K_JOY_TRIGGER1, joystickAxis[AXIS_LEFT_TRIG], triggerThreshold, true );
@@ -1204,9 +1183,17 @@ void idUsercmdGenLocal::JoystickMove2()
 		cmd.forwardmove = idMath::ClampChar( cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y );
 		cmd.rightmove = idMath::ClampChar( cmd.rightmove + KEY_MOVESPEED * leftMapped.x );
 
-		viewangles[PITCH] += MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed;
-		viewangles[YAW] += MS2SEC( pollTime - lastPollTime ) * -rightMapped.x * yawSpeed;
+		pitchDelta = MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed;;
+		yawDelta = MS2SEC( pollTime - lastPollTime ) * -rightMapped.x * yawSpeed;
 
+		if ( game->isVR )
+		{
+			vr->CalcAimMove( yawDelta, pitchDelta );
+		}
+
+		viewangles[PITCH] += pitchDelta;
+		viewangles[YAW] += yawDelta;
+		
 		HandleJoystickAxis( K_L_HYDRATRIG, joystickAxis[AXIS_LEFT_HYDRA_TRIG], triggerThreshold, true );
 		HandleJoystickAxis( K_R_HYDRATRIG, joystickAxis[AXIS_RIGHT_HYDRA_TRIG], triggerThreshold, true );
 
