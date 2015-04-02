@@ -601,7 +601,7 @@ public:
 	void					SetQuickSlot( int index, int val );
 	int						GetQuickSlot( int index );
 	
-	void					GivePDA( const idDeclPDA* pda, const char* securityItem );
+	void					GivePDA( const idDeclPDA* pda, const char* securityItem, bool toggle = true );
 	void					GiveVideo( const idDeclVideo* video, const char* itemName );
 	void					GiveEmail( const idDeclEmail* email );
 	void					GiveSecurity( const char* security );

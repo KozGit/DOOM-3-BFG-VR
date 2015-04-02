@@ -4885,7 +4885,7 @@ void idPlayer::GiveEmail( const idDeclEmail* email )
 idPlayer::GivePDA
 ===============
 */
-void idPlayer::GivePDA( const idDeclPDA* pda, const char* securityItem )
+void idPlayer::GivePDA( const idDeclPDA* pda, const char* securityItem, bool toggle )
 {
 	if( common->IsMultiplayer() && spectating )
 	{
@@ -4943,10 +4943,11 @@ void idPlayer::GivePDA( const idDeclPDA* pda, const char* securityItem )
 	
 	// This is kind of a hack, but it works nicely
 	// We don't want to display the 'you got a new pda' message during a map load
-	if( gameLocal.GetFrameNum() > 10 )
+	if ( gameLocal.GetFrameNum() > 10 ) 
 	{
+				
 		const char* sec = pda->GetSecurity();
-		if( hud )
+		if ( hud && inventory.pdas.Num() != 1 ) // koz dont show the pda loading indicator for the initial PDA.
 		{
 			hud->DownloadPDA( pda, ( sec != NULL && sec[0] != 0 ) ? true : false );
 		}
@@ -4955,7 +4956,17 @@ void idPlayer::GivePDA( const idDeclPDA* pda, const char* securityItem )
 			GetPDA()->RemoveAddedEmailsAndVideos();
 			if( !objectiveSystemOpen )
 			{
-				TogglePDA();
+				if ( toggle ) // koz: toggle pda renders a fullscreen PDA in normal play, for VR we need to select the pda 'weapon'.
+				{
+					if ( !game->isVR )
+					{
+						TogglePDA();
+					}
+					else
+					{
+						SelectWeapon( weapon_pda, true );
+					}
+				}
 			}
 			//ShowTip( spawnArgs.GetString( "text_infoTitle" ), spawnArgs.GetString( "text_firstPDA" ), true );
 		}
@@ -5396,8 +5407,17 @@ void idPlayer::SelectWeapon( int num, bool force )
 		}
 		else if( ( weapon_pda >= 0 ) && ( num == weapon_pda ) && ( inventory.pdas.Num() == 0 ) )
 		{
-			ShowTip( spawnArgs.GetString( "text_infoTitle" ), spawnArgs.GetString( "text_noPDA" ), true );
-			return;
+			
+			if ( game->isVR )
+			{
+				GivePDA( NULL, NULL, false ); // hack to allow the player to change system settings in the mars city level before the PDA is given by the receptionist.
+				idealWeapon = num;
+			}
+			else
+			{
+				ShowTip( spawnArgs.GetString( "text_infoTitle" ), spawnArgs.GetString( "text_noPDA" ), true );
+				return;
+			}
 		}
 		else
 		{
@@ -7538,11 +7558,19 @@ void idPlayer::TogglePDA()
 	// Koz begin : reset PDA controls
 	vr->forceLeftStick = true;
 	// Koz end
-
-	if( inventory.pdas.Num() == 0 )
+		
+	if ( inventory.pdas.Num() == 0 )
 	{
-		ShowTip( spawnArgs.GetString( "text_infoTitle" ), spawnArgs.GetString( "text_noPDA" ), true );
-		return;
+		if ( game->isVR )
+		{
+			// koz : hack to allow the player to change system settings in the mars city level before the PDA is given by the receptionist.
+			GivePDA( NULL, NULL, false ); 
+		}
+		else
+		{
+			ShowTip( spawnArgs.GetString( "text_infoTitle" ), spawnArgs.GetString( "text_noPDA" ), true );
+			return;
+		}
 	}
 	
 	if( pdaMenu != NULL )
@@ -11600,16 +11628,7 @@ void idPlayer::CalculateRenderView()
 
 		renderView->vieworg = origin;
 		renderView->viewaxis = angles.ToMat3();//axis;
-
-		/*int neg = 1;
-		extern idCVar  stereoRender_interOccularCentimeters;
-		float worldSeparation = (stereoRender_interOccularCentimeters.GetFloat() * 0.5) / 2.54;
-
-		neg = renderView->viewEyeBuffer;
-
-		vr->lastViewOrigin = origin += neg * worldSeparation * renderView->viewaxis[1];
-		vr->lastViewAxis = renderView->viewaxis;
-		*/
+				
 		// koz fixme pause - handle the PDA model if game is paused
 		// really really need to move this somewhere else.
 
@@ -11627,11 +11646,9 @@ void idPlayer::CalculateRenderView()
 				{
 					if ( weapon->IdentifyWeapon() == WEAPON_PDA && weapon->status == WP_READY )
 					{
-						if ( weapon->status == WP_READY )
-						{
-							vr->PDAforced = true;
-							vr->PDArising = false;
-						}
+						vr->PDAforced = true;
+						vr->PDArising = false;
+						
 					}
 				}
 			}
