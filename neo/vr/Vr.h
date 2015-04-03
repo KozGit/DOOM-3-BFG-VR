@@ -342,6 +342,8 @@ extern idCVar	vr_deadzonePitch;
 extern idCVar	vr_deadzoneYaw;
 extern idCVar	vr_comfortDelta;
 
+extern idCVar	vr_interactiveCinematic;
+
 
 extern iVr* vr;
 

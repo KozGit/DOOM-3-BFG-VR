@@ -11537,6 +11537,12 @@ void idPlayer::CalculateRenderView()
 		{
 			// koz fixme this was in tmeks renderView->viewaxis = firstPersonViewAxis; shouldnt be needed, verify.
 			gameLocal.GetCamera()->GetViewParms( renderView );
+	
+			/*	if ( game->isVR && vr_interactiveCinematic.GetBool() ) // koz cinematic
+			{
+				renderView->vieworg = firstPersonViewOrigin;
+				renderView->viewaxis = firstPersonViewAxis;
+			}*/
 		}
 	}
 	else

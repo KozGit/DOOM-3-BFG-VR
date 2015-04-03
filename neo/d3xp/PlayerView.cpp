@@ -844,12 +844,12 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 	{
 		// koz fixme pda, render the PDA here. it will be copied to intrinsic image _pdaImage,  
 		// which is the new texture for the PDA viewmodel screen.
-		if ( player->objectiveSystemOpen && vr_enable.GetBool() )
+		if ( player->objectiveSystemOpen && game->isVR )
 		{
 			if ( player->pdaMenu != NULL )
 			{
 
-				if ( !vr->PDAforced && !vr->PDArising && view->viewEyeBuffer == 0 ) // pda is not stereo, only render it for the left eye and use it twice.
+				if ( !vr->PDAforced && !vr->PDArising ) // dont render the PDA gui if the PDA model been forced up to display the pause menus.
 				{
 					vr->swfRenderMode = RENDERING_PDA;
 					player->pdaMenu->Update();
@@ -860,14 +860,7 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 		}
 
 		// render both eye views each frame on the PC
-		// koz timing
-		/* koz fixme
-		if ( game->isVR && vr->hasOculusRift )
-		{
-			vr->FrameStart(0);
-		}
-		*/
-
+		
 		for( int eye = 1 ; eye >= -1 ; eye -= 2 )
 		{
 			EmitStereoEyeView( eye, hudManager );

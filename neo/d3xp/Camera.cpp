@@ -659,7 +659,7 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		// Clamp the camera origin to camera cut locations. 
 		// This eliminates camera panning and smooth movements in cutscenes,
 		// while allowing the player to look around from
-		// the camera origin. Not perfect but far less vomitous.
+		// the camera origin. Not perfect but less vomitous.
 		// Maybe I should redefine the camera animation files to 
 		// provide more coherent camera transitions in cutscenes?
 

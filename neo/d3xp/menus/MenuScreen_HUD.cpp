@@ -237,13 +237,12 @@ void idMenuScreen_HUD::UpdateHealthArmor( idPlayer* player )
 	
 	// Koz begin
 	// Hud fade
-	if ( game->isVR )
+	if ( game->isVR && playerInfo->GetSprite() != NULL )
 	{
 		float alpha;
 		alpha = vr_hudHealth.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
 		playerInfo->GetSprite()->SetAlpha( alpha );
 	}
-
 	// Koz end
 
 	idSWFTextInstance* txtVal = playerInfo->GetNestedText( "health", "txtVal" );
@@ -331,14 +330,14 @@ void idMenuScreen_HUD::UpdateStamina( idPlayer* player )
 		return;
 	}
 	
-	if ( game->isVR )
+	if ( game->isVR && stamina->GetSprite() != NULL )
 	{
 		float alpha;
 		alpha = vr_hudStamina.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
 		stamina->GetSprite()->SetAlpha( alpha );
 	}
-	
 	// Koz end
+	
 	idSWFSpriteInstance* stamSprite = stamina->GetSprite();
 	if( stamSprite != NULL )
 	{
@@ -379,7 +378,7 @@ void idMenuScreen_HUD::UpdateWeaponInfo( idPlayer* player )
 	
 	// Koz begin
 	// Hud fade
-	if ( game->isVR )
+	if ( game->isVR && ammoInfo != NULL )
 	{
 		float alpha;
 		alpha = vr_hudAmmo.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
@@ -387,13 +386,13 @@ void idMenuScreen_HUD::UpdateWeaponInfo( idPlayer* player )
 						
 				
 		// updateWeaponStates not called every frame, so update the alpha here.
-		if ( weaponPills )
+		if ( weaponPills && weaponPills->GetSprite() != NULL )
 		{
 			alpha = vr_hudPills.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
 			weaponPills->GetSprite()->SetAlpha( alpha );
 		}
 
-		if ( weaponImg )
+		if ( weaponImg != NULL )
 		{
 			alpha = vr_hudWeap.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
 			weaponImg->SetAlpha( alpha );
@@ -1378,7 +1377,7 @@ void idMenuScreen_HUD::UpdateLocation( idPlayer* player )
 
 	// Koz begin
 	// Hud fade
-	if ( game->isVR )
+	if ( game->isVR && locationName != NULL )
 	{
 		// Set the fade
 		float alpha;
@@ -1413,6 +1412,8 @@ void idMenuScreen_HUD::ShowTip( const char* title, const char* tip )
 		return;
 	}
 	
+	if ( game->isVR ) tipSprite->SetAlpha( vr_hudTransparency.GetFloat() );
+
 	tipSprite->SetVisible( true );
 	tipSprite->PlayFrame( "rollOn" );
 	
@@ -1538,11 +1539,12 @@ void idMenuScreen_HUD::UpdatedSecurity()
 	
 	// Koz begin
 	// Hud fade
-	if ( game->isVR )
+	if ( game->isVR && security != NULL )
 	{
 		security->SetAlpha( vr->GetHudAlpha() );
 	}
 	// Koz end
+	
 	if( security != NULL && securityText != NULL )
 	{
 		security->SetVisible( true );
@@ -1709,7 +1711,7 @@ void  idMenuScreen_HUD::UpdateCommunication( bool show, idPlayer* player )
 	
 	// Koz begin
 	// Hud fade
-	if ( game->isVR )
+	if ( game->isVR && communication != NULL )
 	{
 		float alpha;
 		alpha = vr_hudComs.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
@@ -1863,7 +1865,7 @@ void  idMenuScreen_HUD::UpdateOxygen( bool show, int val )
 
 	// Koz begin
 	// Hud fade
-	if ( game->isVR )
+	if ( game->isVR && oxygen )
 	{
 		oxygen->SetAlpha( vr->GetHudAlpha() );
 	}
@@ -2364,7 +2366,7 @@ void idMenuScreen_HUD::UpdateFlashlight( idPlayer* player )
 	
 	// Koz begin
 	// Hud fade
-	if ( game->isVR )
+	if ( game->isVR && flashlight )
 	{
 		float alpha;
 		alpha = vr_hudFlashlight.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
