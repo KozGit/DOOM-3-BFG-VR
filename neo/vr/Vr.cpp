@@ -1129,17 +1129,27 @@ float iVr::GetHudAlpha()
 	static float currentAlpha = 0.0f;
 	static float delta = 0.0f;
 	
+	idPlayer* player = gameLocal.GetLocalPlayer();
+
 	delta = vr_hudTransparency.GetFloat() / (250 / (1000 / vr->hmdHz));
 	
-	if ( vr_hudType.GetInteger() != VR_HUD_LOOK_DOWN ) return vr_hudTransparency.GetFloat();
+	if ( vr_hudType.GetInteger() != VR_HUD_LOOK_DOWN )
+	{
+		if ( player )
+		{
+			return player->hudActive ? vr_hudTransparency.GetFloat() : 0;
+		}
+		
+		return vr_hudTransparency.GetFloat();
+	}
+
 
 	if ( lastFrame == idLib::frameNumber ) return currentAlpha;
 	
 	lastFrame = idLib::frameNumber;
 
 	bool force = false;
-
-	idPlayer* player = gameLocal.GetLocalPlayer();
+		
 	if ( player )
 	{
 		if ( vr_hudLowHealth.GetInteger() >= player->health && player->health >=0 ) force = true;

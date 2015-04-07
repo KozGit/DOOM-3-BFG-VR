@@ -2004,9 +2004,16 @@ void idPlayer::Init()
 	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
 
+	// heading indicator for VR - point the direction the body is facing.
+	memset( &headingBeamEntity, 0, sizeof( laserSightRenderEntity ) );
+	headingBeamEntity.hModel = renderModelManager->FindModel( "_BEAM" );
+	headingBeamEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
+
 	// Koz begin
 	laserSightActive = true;
 	headingBeamActive = true;
+	hudActive = true;
+
 	PDAfixed = false;			// koz has the PDA been fixed in space?
 	PDAorigin = vec3_zero;
 	PDAaxis = mat3_identity;
@@ -7852,17 +7859,47 @@ void idPlayer::PerformImpulse( int impulse )
 
 		
 		// Koz Begin
-		case IMPULSE_32: // Koz HMD/Body orienataion reset. Make fisrtperson axis match view direction.
+		case IMPULSE_32: // HMD/Body orienataion reset. Make fisrtperson axis match view direction.
 		{
 			OrientHMDBody();
 			break;
 		}
 
-		case IMPULSE_33: // koz toggle lasersight on/off.
+		case IMPULSE_33: // toggle lasersight on/off.
 		{
 			ToggleLaserSight();
 			break;
 		}
+
+		case IMPULSE_34: // comfort turn right
+		{
+			idAngles ang = viewAngles;
+			ang[YAW] += vr_comfortDelta.GetFloat();
+			ang.Normalize180();
+			SetViewAngles( ang );
+			break;
+		}
+		
+		case IMPULSE_35: // comfort turn left
+		{
+			idAngles ang = viewAngles;
+			ang[YAW] -= vr_comfortDelta.GetFloat();
+			ang.Normalize180();
+			SetViewAngles( ang );
+			break;
+		}
+		
+		case IMPULSE_36: //  Toggle Hud
+		{
+			ToggleHud();
+			break;
+		}
+
+		case IMPULSE_37: //  toggle heading beam
+		{ 
+			ToggleHeadingBeam();
+		}
+
 		// Koz end
 		
 	}
@@ -7889,6 +7926,17 @@ void idPlayer::ToggleHeadingBeam()
 {
 	headingBeamActive = !headingBeamActive;
 }
+
+/*
+==============
+idPlayer::ToggleHud  Koz toggle hud
+==============
+*/
+void idPlayer::ToggleHud()
+{
+	hudActive = !hudActive;
+}
+
 
 /*
 ==============

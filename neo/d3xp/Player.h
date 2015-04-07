@@ -295,6 +295,8 @@ public:
 	qhandle_t				headingBeamHandle;
 	bool					headingBeamActive;
 
+	bool					hudActive;
+
 	bool					PDAfixed; // koz has the PDA been fixed in space?
 	idVec3					PDAorigin; // koz 
 	idMat3					PDAaxis; // koz
@@ -466,9 +468,10 @@ public:
 	void					UpdateLaserSight();
 
 	// Koz begin
-	void					ToggleLaserSight(); // koz
-	void					UpdateHeadingBeam(); // koz heading indicator
-	void					ToggleHeadingBeam(); // koz
+	void					ToggleLaserSight(); 
+	void					UpdateHeadingBeam(); 
+	void					ToggleHeadingBeam(); 
+	void					ToggleHud();
 	// Koz end
 		
 	// save games

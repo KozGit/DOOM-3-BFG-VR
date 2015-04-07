@@ -171,7 +171,12 @@ userCmdString_t	userCmdStrings[] =
 	// Koz begin
 	{ "_impulse32", UB_IMPULSE32 }, // new impulse for HMD/Body orientation reset
 	{ "_impulse33", UB_IMPULSE33 }, // new impulse for lasersight toggle
-	// Koz end
+	{ "_impulse34", UB_IMPULSE34 }, // new impulse for comfort turn right
+	{ "_impulse35", UB_IMPULSE35 }, // new impulse for comfort turn left
+	{ "_impulse36", UB_IMPULSE36 }, // new impulse for hud toggle;
+	{ "_impulse37", UB_IMPULSE37 }, // new impulse for headingbeam toggle;
+	
+
 		
 	{ NULL,				UB_NONE },
 };
@@ -270,7 +275,7 @@ private:
 	void			CircleToSquare( float& axis_x, float& axis_y ) const;
 	void			HandleJoystickAxis( int keyNum, float unclampedValue, float threshold, bool positive );
 
-	void			MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int axisNum ); // Koz remap joystic axis.
+	float			MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int axisNum ); // Koz remap joystic axis.
 
 	void			JoystickMove();
 	void			JoystickMove2();
@@ -448,12 +453,65 @@ void idUsercmdGenLocal::AdjustAngles()
 	{
 		speed *= in_angleSpeedKey.GetFloat();
 	}
+		
 	
-	viewangles[YAW] -= speed * in_yawSpeed.GetFloat() * ButtonState( UB_LOOKRIGHT );
-	viewangles[YAW] += speed * in_yawSpeed.GetFloat() * ButtonState( UB_LOOKLEFT );
-	
-	viewangles[PITCH] -= speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKUP );
-	viewangles[PITCH] += speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKDOWN );
+	if ( !game->isVR )
+	{
+		viewangles[YAW] -= speed * in_yawSpeed.GetFloat() * ButtonState( UB_LOOKRIGHT );
+		viewangles[YAW] += speed * in_yawSpeed.GetFloat() * ButtonState( UB_LOOKLEFT );
+
+		viewangles[PITCH] -= speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKUP );
+		viewangles[PITCH] += speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKDOWN );
+	}
+	else // koz add independent weapon aiming and comfort mode turning for VR
+	{
+		float yawdelta = 0.0f;
+		float pitchdelta = 0.0f;
+
+		static int lastLeft = 0;
+		static int lastRight = 0;
+		int button;
+
+		if ( ButtonState( UB_LOOKRIGHT ) )
+		{
+			yawdelta = -speed * in_yawSpeed.GetFloat();
+		}
+		
+		if ( ButtonState( UB_LOOKLEFT ) )
+		{
+			yawdelta = speed * in_yawSpeed.GetFloat();
+		}
+		
+		if ( ButtonState( UB_LOOKUP ) )
+		{
+			pitchdelta = -speed * in_pitchSpeed.GetFloat();
+		}
+
+		if ( ButtonState( UB_LOOKDOWN ) )
+		{
+			pitchdelta = speed * in_pitchSpeed.GetFloat();
+		}
+
+		vr->CalcAimMove( yawdelta, pitchdelta ); // update the independent weapon angles and return any movement changes.
+		viewangles[YAW] += yawdelta;
+		viewangles[PITCH] += pitchdelta;
+		
+	/*	button = ButtonState( UB_IMPULSE34 );
+
+		if ( button && ( lastRight != button ) )// comfort right
+		{
+			viewangles[YAW] += vr_comfortDelta.GetFloat();
+		}
+		lastRight = button;
+
+		button = ButtonState( UB_IMPULSE35 );
+		if ( button && ( lastLeft != button ) )// comfort left
+		{
+			viewangles[YAW] -= vr_comfortDelta.GetFloat();
+		}
+		lastLeft = button;
+		*/
+	}
 }
 
 /*
@@ -1029,27 +1087,30 @@ the normal joystick handling can process movement scaling, etc.
 =================
 */
 
-void idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int axisNum )
+float idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int axisNum )
 {
 
-	const int axisName[int( MAX_JOYSTICK_AXIS )][2] = { K_JOY_STICK1_LEFT, K_JOY_STICK1_RIGHT,
-		K_JOY_STICK1_UP, K_JOY_STICK1_DOWN,
-		K_JOY_STICK2_LEFT, K_JOY_STICK2_RIGHT,
-		K_JOY_STICK2_UP, K_JOY_STICK2_DOWN,
-		K_JOY_TRIGGER1, K_JOY_TRIGGER1,
-		K_JOY_TRIGGER2, K_JOY_TRIGGER2,
-		K_HYDRA_LEFT_STICK_LEFT, K_HYDRA_LEFT_STICK_RIGHT,
-		K_HYDRA_LEFT_STICK_UP, K_HYDRA_LEFT_STICK_DOWN,
-		K_HYDRA_RIGHT_STICK_LEFT, K_HYDRA_RIGHT_STICK_RIGHT,
-		K_HYDRA_RIGHT_STICK_UP, K_HYDRA_RIGHT_STICK_DOWN,
-		K_L_HYDRATRIG, K_L_HYDRATRIG,
-		K_R_HYDRATRIG, K_R_HYDRATRIG
+	const int axisName[int( MAX_JOYSTICK_AXIS )][2] = { K_JOY_STICK1_LEFT,			K_JOY_STICK1_RIGHT,
+														K_JOY_STICK1_UP,			K_JOY_STICK1_DOWN,
+														K_JOY_STICK2_LEFT,			K_JOY_STICK2_RIGHT,
+														K_JOY_STICK2_UP,			K_JOY_STICK2_DOWN,
+														K_JOY_TRIGGER1,				K_JOY_TRIGGER1,
+														K_JOY_TRIGGER2,				K_JOY_TRIGGER2,
+														K_HYDRA_LEFT_STICK_LEFT,	K_HYDRA_LEFT_STICK_RIGHT,
+														K_HYDRA_LEFT_STICK_UP,		K_HYDRA_LEFT_STICK_DOWN,
+														K_HYDRA_RIGHT_STICK_LEFT,	K_HYDRA_RIGHT_STICK_RIGHT,
+														K_HYDRA_RIGHT_STICK_UP,		K_HYDRA_RIGHT_STICK_DOWN,
+														K_L_HYDRATRIG,				K_L_HYDRATRIG,
+														K_R_HYDRATRIG,			K_R_HYDRATRIG
 	};
 
 	float jaxisValue = 0.0f;
 	int joyCmd = 0;
 	int joyDir = 0;
 
+	static int lastLeft =0 ;
+	static int lastRight = 0;
+	
 	jaxisValue = joystickAxis[axisNum];
 
 	if ( jaxisValue < 0 )
@@ -1067,38 +1128,54 @@ void idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int axi
 	switch ( joyCmd )
 	{
 
-	case UB_LOOKLEFT:
-		mappedLook.x -= jaxisValue;
-		break;
+		case UB_LOOKLEFT:
+			mappedLook.x -= jaxisValue;
+			break;
 
-	case UB_LOOKRIGHT:
-		mappedLook.x += jaxisValue;
-		break;
+		case UB_LOOKRIGHT:
+			mappedLook.x += jaxisValue;
+			break;
 
-	case UB_LOOKUP:
-		mappedLook.y -= jaxisValue;
-		break;
+		case UB_LOOKUP:
+			mappedLook.y -= jaxisValue;
+			break;
 
-	case UB_LOOKDOWN:
-		mappedLook.y += jaxisValue;
-		break;
+		case UB_LOOKDOWN:
+			mappedLook.y += jaxisValue;
+			break;
 
-	case UB_MOVEFORWARD:
-		mappedMove.y -= jaxisValue;;
-		break;
+		case UB_MOVEFORWARD:
+			mappedMove.y -= jaxisValue;
+			break;
 
-	case UB_MOVEBACK:
-		mappedMove.y += jaxisValue;;
-		break;
+		case UB_MOVEBACK:
+			mappedMove.y += jaxisValue;
+			break;
 
-	case UB_MOVELEFT:
-		mappedMove.x -= jaxisValue;;
-		break;
+		case UB_MOVELEFT:
+			mappedMove.x -= jaxisValue;
+			break;
 
-	case UB_MOVERIGHT:
-		mappedMove.x += jaxisValue;;
-		break;
+		case UB_MOVERIGHT:
+			mappedMove.x += jaxisValue;
+			break;
+
+		case UB_IMPULSE34: // comfort turn right
+			jaxisValue = jaxisValue > 0.0 ? jaxisValue : -jaxisValue;
+			if ( jaxisValue > .25 ) {
+				return -vr_comfortDelta.GetFloat();
+			}
+			break;
+	
+		case UB_IMPULSE35: // comfort turn left
+			jaxisValue = jaxisValue > 0.0 ? jaxisValue : -jaxisValue;
+			if ( jaxisValue > .25 ) {
+				return vr_comfortDelta.GetFloat();
+			}
+			break;
 	}
+	
+	return 0.0;
 }
 
 /*
@@ -1126,12 +1203,22 @@ void idUsercmdGenLocal::JoystickMove2()
 	idVec2 mappedMove = vec2_zero;
 	idVec2 mappedLook = vec2_zero;
 
-	MapAxis( mappedMove, mappedLook, AXIS_LEFT_X ); //koz remamp axis
-	MapAxis( mappedMove, mappedLook, AXIS_LEFT_Y );
-	MapAxis( mappedMove, mappedLook, AXIS_RIGHT_X );
-	MapAxis( mappedMove, mappedLook, AXIS_RIGHT_Y );
+	float comfortTurn = 0.0 ;
+	static bool lastComfort = false;
 
+	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_X ); //koz remamp axis
+	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_Y );
+	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_X );
+	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_Y );
 
+	if ( comfortTurn != 0.0 && !lastComfort )
+	{
+		viewangles[YAW] += comfortTurn;
+		lastComfort = true;
+		
+	}
+	if ( comfortTurn == 0.0 ) lastComfort = false;
+	
 	// save for visualization
 	lastLookJoypad = mappedLook;
 
@@ -1167,13 +1254,25 @@ void idUsercmdGenLocal::JoystickMove2()
 
 	if ( vr->VR_USE_HYDRA ) // vr_hydraMode.GetInteger() != 0 ) {
 	{
+		comfortTurn = 0.0 ;
+		static bool lastComfortHydra = false;
+
 		mappedMove = vec2_zero;
 		mappedLook = vec2_zero;
 
-		MapAxis( mappedMove, mappedLook, AXIS_LEFT_HYDRA_X );
-		MapAxis( mappedMove, mappedLook, AXIS_LEFT_HYDRA_Y );
-		MapAxis( mappedMove, mappedLook, AXIS_RIGHT_HYDRA_X );
-		MapAxis( mappedMove, mappedLook, AXIS_RIGHT_HYDRA_Y );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_HYDRA_X );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_HYDRA_Y );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_HYDRA_X );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_HYDRA_Y );
+
+		if ( comfortTurn != 0.0 && !lastComfortHydra )
+		{
+			viewangles[YAW] += comfortTurn;
+			lastComfortHydra = true;
+
+		}
+		if ( comfortTurn == 0.0 ) lastComfortHydra = false;
+
 
 		leftMapped = JoypadFunction( mappedMove, 1.0f, threshold, range, shape, mergedThreshold );
 		rightMapped = JoypadFunction( mappedLook, aimAssist, threshold, range, shape, mergedThreshold );
