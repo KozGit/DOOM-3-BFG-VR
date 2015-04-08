@@ -408,7 +408,7 @@ bool idMultiplayerGame::IsScoreboardActive()
 idMultiplayerGame::HandleGuiEvent
 ================
 */
-bool idMultiplayerGame::HandleGuiEvent( sysEvent_t* sev ) // Koz was previously const. Hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+bool idMultiplayerGame::HandleGuiEvent( const sysEvent_t* sev )
 {
 
 	if( scoreboardManager != NULL && scoreboardManager->IsActive() )

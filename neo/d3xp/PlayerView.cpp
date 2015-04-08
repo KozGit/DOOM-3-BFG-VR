@@ -285,10 +285,10 @@ void idPlayerView::DamageImpulse( idVec3 localKickDir, const idDict* damageDef )
 	// head angle kick
 	//
 	float kickTime = damageDef->GetFloat( "kick_time" );
-	float gkicktime = g_kickTime.GetFloat();
 	
-	if ( game->isVR && !vr_headKick.GetBool() ) gkicktime = 0.0f; // koz
-
+	float gkicktime = g_kickTime.GetFloat();
+		if ( game->isVR && !vr_headKick.GetBool() ) gkicktime = 0.0f; // koz
+	
 
 	if( kickTime )
 	{
@@ -355,6 +355,8 @@ Called when a weapon fires, generates head twitches, etc
 */
 void idPlayerView::WeaponFireFeedback( const idDict* weaponDef )
 {
+	if ( game->isVR && !vr_headKick.GetBool() ) return; // koz skip head kick from weapon recoil in vr
+
 	int recoilTime = weaponDef->GetInt( "recoilTime" );
 	// don't shorten a damage kick in progress
 	if( recoilTime && kickFinishTime < gameLocal.slow.time )

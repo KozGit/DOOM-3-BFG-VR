@@ -300,7 +300,7 @@ public:
 	
 	void	ClearAllDialogHack();
 	idStr	GetDialogMsg( gameDialogMessages_t msg, idStr& message, idStr& title );
-	bool	HandleDialogEvent( sysEvent_t* sev ); // Koz was const - changed to allow keyremapping on the fly in PDA menus to support hydras.
+	bool	HandleDialogEvent( const sysEvent_t* sev );
 	
 protected:
 	void	RemoveWaitDialogs();

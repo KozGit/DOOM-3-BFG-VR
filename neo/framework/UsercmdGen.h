@@ -195,12 +195,12 @@ typedef enum
 	UB_IMPULSE31,
 		
 	// Koz begin
-	UB_IMPULSE32, // Koz impulse for HMD/Body orientation reset
-	UB_IMPULSE33, // Koz impulse for lasersight toggle
-	UB_IMPULSE34, // Koz impulse for comfort turn right
-	UB_IMPULSE35, // Koz impulse for comfort turn left
-	UB_IMPULSE36, // Koz impulse for hud toggle
-	UB_IMPULSE37, // Koz impulse for headingbeam toggle
+	UB_IMPULSE32, // HMD/Body orientation reset
+	UB_IMPULSE33, // lasersight toggle
+	UB_IMPULSE34, // comfort turn right
+	UB_IMPULSE35, // comfort turn left
+	UB_IMPULSE36, // hud toggle
+	UB_IMPULSE37, // headingbeam toggle
 	// Koz end
 	
 	UB_MAX_BUTTONS

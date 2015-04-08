@@ -244,7 +244,7 @@ idSWFScriptObject* idSWF::HitTest( idSWFSpriteInstance* spriteInstance, const sw
 idSWF::HandleEvent
 ===================
 */
-bool idSWF::HandleEvent( sysEvent_t* event ) // koz was const
+bool idSWF::HandleEvent( const sysEvent_t* event )
 {
 	if ( !IsLoaded() || !IsActive() || (!inhibitControl && useInhibtControl) )
 	{
@@ -360,7 +360,7 @@ bool idSWF::HandleEvent( sysEvent_t* event ) // koz was const
 
 		// koz begin
 		/* ==================================
-		koz some serious BS here.  By default, the PDA menu uses both joysticks for
+		koz some serious ugly here.  By default, the PDA menu uses both joysticks for
 		navigation - left stick for user info and right stick to select an item from a submenu.
 		I don't think this works well with the hydras, or when using a gun style controller
 		like the top shot elite. I'm implementing a hack here so the user can A: use either
@@ -394,40 +394,46 @@ bool idSWF::HandleEvent( sysEvent_t* event ) // koz was const
 
 		keyNum_t keyValue = (keyNum_t)event->evValue;
 
-		if ( vr_joystickMenuMapping.GetBool() ) {
+		if ( vr_joystickMenuMapping.GetBool() ) 
+		{
 			idStr thisMenu = GetName();
 
-			if ( thisMenu.Icmp( lastMenu.c_str() ) != 0 ) {
+			if ( thisMenu.Icmp( lastMenu.c_str() ) != 0 ) 
+			{
+				//start new menus or screen with either stick.
 				vr->forceLeftStick = true;
 				lastMenu = thisMenu;
 			}
 
-			if ( thisMenu.Icmp( "swf/pda.swf" ) == 0 ) {
+			if ( thisMenu.Icmp( "swf/pda.swf" ) == 0 ) 
+			{
 				inPDAmenu = true;
 			}
 
-			if ( !inPDAmenu ) { // not in the PDA menu, force all stick axis movement to the left stick for menu control
-
+			if ( !inPDAmenu ) // not in the PDA menu, force all stick axis movement to the left stick for menu control
+			{ 
 				vr->forceLeftStick = true;
-
 			}
-			else { // we are in the PDA menu. handle toggling sticks and changing mappings as needed
+			else 
+			{ // we are in the PDA menu. handle toggling sticks and changing mappings as needed
 
-				if ( !vr->forceLeftStick ) {
+				if ( !vr->forceLeftStick ) 
+				{
 					if ( keyValue == K_HYDRA_RIGHT_STICK_LEFT ||
 						keyValue == K_HYDRA_LEFT_STICK_LEFT ||
 						keyValue == K_JOY_STICK1_LEFT ||
-						keyValue == K_JOY_STICK2_LEFT ) {
-
+						keyValue == K_JOY_STICK2_LEFT ) 
+					{
 						vr->forceLeftStick = true;
 					}
 				}
-				else {
+				else 
+				{
 					if ( keyValue == K_HYDRA_RIGHT_STICK_RIGHT ||
 						keyValue == K_HYDRA_LEFT_STICK_RIGHT ||
 						keyValue == K_JOY_STICK1_RIGHT ||
-						keyValue == K_JOY_STICK2_RIGHT ) {
-
+						keyValue == K_JOY_STICK2_RIGHT ) 
+					{
 						vr->forceLeftStick = false;
 					}
 				}
@@ -442,12 +448,18 @@ bool idSWF::HandleEvent( sysEvent_t* event ) // koz was const
 				destAxis = rightStick;
 			}
 
-			for ( int j = 0; j<8; j++ ) { // swap the axis if needed
+			for ( int j = 0; j<8; j++ ) 
+			{ // swap the axis if needed
 				if ( joyAxisSwap[j][sourceAxis] == keyValue ) keyValue = joyAxisSwap[j][destAxis];
 			}
-		} // koz end joy remapping if requested
+				
+		} // koz end joy remapping if enabled
 
-		const char* keyName = idKeyInput::KeyNumToString( (keyNum_t)event->evValue );
+		// Koz begin
+		// const char* keyName = idKeyInput::KeyNumToString( (keyNum_t)event->evValue );
+		const char* keyName = idKeyInput::KeyNumToString( keyValue );
+		// Koz end
+
 		idSWFScriptVar var = shortcutKeys->Get( keyName );
 		// anything more than 32 levels of indirection we can be pretty sure is an infinite loop
 		for ( int runaway = 0; runaway < 32; runaway++ )

@@ -256,7 +256,7 @@ public:
 	virtual void			Update();
 	virtual void			UpdateChildren();
 	virtual void			UpdateMenuDisplay( int menu );
-	virtual bool			HandleGuiEvent( sysEvent_t* sev ); // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+	virtual bool			HandleGuiEvent( const sysEvent_t* sev );
 	virtual bool			IsActive();
 	virtual void			ActivateMenu( bool show );
 	virtual void			TriggerMenu();
@@ -376,7 +376,7 @@ public:
 	virtual void			Cleanup();
 	virtual bool			HandleAction( idWidgetAction& action, const idWidgetEvent& event, idMenuWidget* widget, bool forceHandled = false );
 	virtual idMenuScreen* 	GetMenuScreen( int index );
-	virtual bool			HandleGuiEvent( sysEvent_t* sev ); // Koz was previously const. Hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+	virtual bool			HandleGuiEvent( const sysEvent_t* sev );
 
 	void					UpdateSavedGames();
 	void					ShowSmallFrame( bool show );

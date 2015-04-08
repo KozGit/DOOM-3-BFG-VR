@@ -295,7 +295,7 @@ public:
 	virtual void				NetReceiveUsercmds( int peer, idBitMsg& msg ) = 0;
 	
 	// Processes the given event.
-	virtual	bool				ProcessEvent( sysEvent_t* event ) = 0; // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+	virtual	bool				ProcessEvent( const sysEvent_t* event ) = 0;
 	
 	virtual bool				LoadGame( const char* saveName ) = 0;
 	virtual bool				SaveGame( const char* saveName ) = 0;

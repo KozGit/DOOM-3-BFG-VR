@@ -194,7 +194,7 @@ public:
 	bool			IsPureReady() const;
 	void			ProcessChatMessage( int clientNum, bool team, const char* name, const char* text, const char* sound );
 	void			ProcessVoiceChat( int clientNum, bool team, int index );
-	bool			HandleGuiEvent( sysEvent_t* sev ); // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+	bool			HandleGuiEvent( const sysEvent_t* sev );
 	bool			IsScoreboardActive();
 	void			SetScoreboardActive( bool active );
 	void			CleanupScoreboard();

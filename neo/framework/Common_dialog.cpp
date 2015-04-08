@@ -1555,7 +1555,7 @@ idStr idCommonDialog::GetDialogMsg( gameDialogMessages_t msg, idStr& message, id
 idCommonDialog::HandleDialogEvent
 ================================================
 */
-bool idCommonDialog::HandleDialogEvent( sysEvent_t* sev ) // Koz was const.
+bool idCommonDialog::HandleDialogEvent( const sysEvent_t* sev )
 {
 
 	if( dialog != NULL && dialog->IsLoaded() && dialog->IsActive() )

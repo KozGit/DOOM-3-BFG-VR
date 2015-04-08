@@ -3108,7 +3108,7 @@ bool idGameLocal::Draw( int clientNum )
 idGameLocal::HandleGuiCommands
 ================
 */
-bool idGameLocal::HandlePlayerGuiEvent( sysEvent_t* ev ) // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+bool idGameLocal::HandlePlayerGuiEvent( const sysEvent_t* ev )
 {
 
 	idPlayer* player = GetLocalPlayer();
@@ -5772,7 +5772,7 @@ bool idGameLocal::Shell_IsActive() const
 idGameLocal::Shell_HandleGuiEvent
 ========================
 */
-bool idGameLocal::Shell_HandleGuiEvent( sysEvent_t* sev ) // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+bool idGameLocal::Shell_HandleGuiEvent( const sysEvent_t* sev )
 {
 	if( shellHandler != NULL )
 	{

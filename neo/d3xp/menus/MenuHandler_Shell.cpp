@@ -311,7 +311,7 @@ void idMenuHandler_Shell::SetCanContinue( bool valid )
 idMenuHandler_Shell::HandleGuiEvent
 ========================
 */
-bool idMenuHandler_Shell::HandleGuiEvent( sysEvent_t* sev ) // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 {
 
 	if( IsPacifierVisible() )

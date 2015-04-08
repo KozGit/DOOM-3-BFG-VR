@@ -7874,7 +7874,7 @@ void idPlayer::PerformImpulse( int impulse )
 		case IMPULSE_34: // comfort turn right
 		{
 			idAngles ang = viewAngles;
-			ang[YAW] += vr_comfortDelta.GetFloat();
+			ang[YAW] -= vr_comfortDelta.GetFloat();
 			ang.Normalize180();
 			SetViewAngles( ang );
 			break;
@@ -7883,7 +7883,7 @@ void idPlayer::PerformImpulse( int impulse )
 		case IMPULSE_35: // comfort turn left
 		{
 			idAngles ang = viewAngles;
-			ang[YAW] -= vr_comfortDelta.GetFloat();
+			ang[YAW] += vr_comfortDelta.GetFloat();
 			ang.Normalize180();
 			SetViewAngles( ang );
 			break;
@@ -9107,7 +9107,7 @@ void idPlayer::StartFxOnBone( const char* fx, const char* bone )
 idPlayer::HandleGuiEvents
 ==============
 */
-bool idPlayer::HandleGuiEvents( sysEvent_t* ev ) // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+bool idPlayer::HandleGuiEvents( const sysEvent_t* ev )
 {
 
 	bool handled = false;

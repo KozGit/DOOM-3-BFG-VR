@@ -1810,7 +1810,7 @@ void idCommonLocal::LeaveGame()
 idCommonLocal::ProcessEvent
 ===============
 */
-bool idCommonLocal::ProcessEvent( sysEvent_t* event ) // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
 {
 	// hitting escape anywhere brings up the menu
 	if( game && game->IsInGame() )

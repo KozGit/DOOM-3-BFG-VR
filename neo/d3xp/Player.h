@@ -655,7 +655,7 @@ public:
 		return focusGUIent != NULL;
 	}
 	
-	bool					HandleGuiEvents( sysEvent_t* ev ); // koz was previously const. hack to allow modifying keypress events in SWF to allow hydra/mouse control of PDA menus in game.
+	bool					HandleGuiEvents( const sysEvent_t* ev );
 	void					PerformImpulse( int impulse );
 	void					Spectate( bool spectate, bool force = false );
 	void					TogglePDA();

@@ -247,8 +247,7 @@ void iVr::HydraInit(void)
 	if ( vr_hydraEnable.GetInteger() != 0 ) 
 	{
 		x = sixenseInit();
-		
-		
+				
 		common->Printf( "\nvr_hydraEnable = %d\n", vr_hydraEnable.GetInteger() );
 		common->Printf( "Initializing Hydra.\n" );
 		
@@ -1182,6 +1181,13 @@ be returned based on the current user aim mode.
 void iVr::CalcAimMove( float &yawDelta, float &pitchDelta )
 {
 	
+	if ( vr->VR_USE_HYDRA ) // no independent aim or joystick pitch when using motion controllers.
+	{
+		pitchDelta = 0.0f;
+		return;
+	}
+	
+	
 	float pitchDeadzone = vr_deadzonePitch.GetFloat();
 	float yawDeadzone = vr_deadzoneYaw.GetFloat();
 
@@ -1195,29 +1201,27 @@ void iVr::CalcAimMove( float &yawDelta, float &pitchDelta )
 		if ( vr->independentWeaponPitch < -180.0 ) vr->independentWeaponPitch += 360.0;
 		if ( vr->independentWeaponYaw > 180.0 )	vr->independentWeaponYaw -= 360.0;
 		if ( vr->independentWeaponYaw < -180.0 ) vr->independentWeaponYaw += 360.0;
-
+		return;
 	}
-	else
+	
+	if ( vr->independentWeaponPitch >= pitchDeadzone ) vr->independentWeaponPitch = pitchDeadzone;
+	if ( vr->independentWeaponPitch < -pitchDeadzone ) vr->independentWeaponPitch = -pitchDeadzone;
+	pitchDelta = 0;
+	
+	if ( vr->independentWeaponYaw >= yawDeadzone )
 	{
-		if ( vr->independentWeaponPitch >= pitchDeadzone )	vr->independentWeaponPitch = pitchDeadzone;
-		if ( vr->independentWeaponPitch < -pitchDeadzone ) vr->independentWeaponPitch = -pitchDeadzone;
-		pitchDelta = 0;
-
-
-		if ( vr->independentWeaponYaw >= yawDeadzone )
-		{
-			yawDelta = vr->independentWeaponYaw - yawDeadzone;
-			vr->independentWeaponYaw = yawDeadzone;
-			return;
-		}
-
-		if ( vr->independentWeaponYaw < -yawDeadzone )
-		{
-			yawDelta = vr->independentWeaponYaw + yawDeadzone;
-			vr->independentWeaponYaw = -yawDeadzone;
-			return;
-		}
-		
-		yawDelta = 0.0f;
+		yawDelta = vr->independentWeaponYaw - yawDeadzone;
+		vr->independentWeaponYaw = yawDeadzone;
+		return;
 	}
+
+	if ( vr->independentWeaponYaw < -yawDeadzone )
+	{
+		yawDelta = vr->independentWeaponYaw + yawDeadzone;
+		vr->independentWeaponYaw = -yawDeadzone;
+		return;
+	}
+		
+	yawDelta = 0.0f;
+	
 }

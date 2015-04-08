@@ -123,7 +123,7 @@ public:
 	}
 	
 	void Render( idRenderSystem* gui, int time = 0, bool isSplitscreen = false );
-	bool HandleEvent( sysEvent_t* event ); // Koz was const
+	bool HandleEvent( const sysEvent_t* event ); 
 	bool InhibitControl();
 	void ForceInhibitControl( bool val )
 	{

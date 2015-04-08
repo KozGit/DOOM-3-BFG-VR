@@ -49,9 +49,9 @@ static bindInfo_t keyboardBinds[] =
 	{ "#str_02107", "_right" },					// TURN RIGHT
 	{ "#str_02109", "_speed" },					// SPRINT
 	{ "Reset HMD orientation", "_impulse32" },  // KOZ RESET HMD/BODY ORIENTATION 
-	{ "Comfort Turn Left", "_impulse34" },		// KOZ RESET HMD/BODY ORIENTATION
-	{ "Comfort Turn Right", "_impulse35" },		// KOZ RESET HMD/BODY ORIENTATION
-	{ "Toggle Heading Beam", "_impulse37" },	// KOZ RESET HMD/BODY ORIENTATION
+	{ "Comfort Turn Left", "_impulse35" },		// KOZ COMFORT TURN LEFT
+	{ "Comfort Turn Right", "_impulse34" },		// KOZ COMFORT TURN RIGHT
+	{ "Toggle Heading Beam", "_impulse37" },	// KOZ TOGGLE HEADING BEAM
 	{ "                                ", "" }, // koz divider
 	{ "#str_02095", "" },						// HEADING
 	{ "#str_02112", "_attack" },				// ATTACK
@@ -63,7 +63,7 @@ static bindInfo_t keyboardBinds[] =
 	{ "#str_02117", "_lookDown" },				// LOOK DOWN
 	{ "#str_02121", "_impulse19" },				// PDA / SCOREBOARD
 	{ "Toggle Lasersight", "_impulse33" },		// KOZ TOGGLE LASERSIGHT
-	{ "Toggle HUD", "_impulse36" },				// KOZ TOGGLE LASERSIGHT
+	{ "Toggle HUD", "_impulse36" },				// KOZ TOGGLE HUD
 
 	{ "                                ", "" }, // koz divider
 	{ "#str_02093", "" },						// HEADING
