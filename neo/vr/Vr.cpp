@@ -34,7 +34,6 @@ idCVar vr_hydraPitchOffset( "vr_hydraPitchOffset", "40", CVAR_GAME | CVAR_ARCHIV
 
 idCVar vr_trackingPredictionAuto( "vr_useAutoTrackingPrediction", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Use SDK tracking prediction.\n 1 = Auto, 0 = User defined." );
 idCVar vr_trackingPredictionUserDefined( "vr_trackingPredictionUserDefined", "50", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined tracking prediction in ms." );
-idCVar vr_useOculusProjectionMatrix( "vr_useOculusProjectionMatrix", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "0(Default) Let engine calc projection Matrices. 1 = Oculus defined(testing only)." );
 idCVar vr_pixelDensity( "vr_pixelDensity", "1.25", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "" );
 idCVar vr_lowPersistence( "vr_lowPersistence", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable low persistence. 0 = off 1 = on" );
 idCVar vr_vignette( "vr_vignette", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable warp vignette. 0 = off 1 = on" );
@@ -44,6 +43,7 @@ idCVar vr_enable( "vr_enable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "En
 idCVar vr_FBOscale( "vr_FBOscale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "FBO scaling factor." );
 idCVar vr_scale( "vr_scale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "VR World scale adjustment." );
 idCVar vr_useOculusProfile( "vr_useOculusProfile", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Use Oculus Profile values. 0 = use user defined profile, 1 = use Oculus profile." );
+idCVar vr_oculusHmdDirectMode( "vr_oculusHmdDirectMode", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Enable Oculus Direct mode. 0 = Extended Mode 1 = Direct Mode." );
 idCVar vr_manualIPD( "vr_manualIPD", "64", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined IPD value in MM" );
 idCVar vr_manualHeight( "vr_manualHeight", "70", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined player height in inches" );
 idCVar vr_minLoadScreenTime( "vr_minLoadScreenTime", "6000", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Min time to display load screens in ms.", 0.0f, 10000.0f );
@@ -375,6 +375,40 @@ void iVr::HMDInit( void )
 	}
 }
 
+/*
+=======================
+iVr::CreateOculusTexture
+Generate an ovrTexture with our opengl texture
+=======================
+*/
+ovrTexture iVr::GenOvrTexture( int eye )
+{
+	ovrTexture tex;
+
+	OVR::Sizei newRTSize( G_ovrRenderWidth, G_ovrRenderHeight );
+
+	ovrGLTextureData* texData = (ovrGLTextureData*)&tex;
+
+	texData->Header.API = ovrRenderAPI_OpenGL;
+	texData->Header.TextureSize = newRTSize;
+	texData->Header.RenderViewport = Recti( newRTSize );
+	texData->TexId = EyeTexture[eye];
+
+	return tex;
+}
+
+
+
+/*
+==============
+iVr::HMDInitDirectRendering
+==============
+*/
+bool iVr::HMDInitDirectRendering( HWND hwnd, HDC dc )
+{
+	vr->hWnd = hwnd;
+	vr->dc = dc;
+}
 /*
 ==============
 iVr::HMDInitializeDistortion

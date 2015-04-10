@@ -584,26 +584,45 @@ static void GLW_CreateWindowClasses()
 	{
 		return;
 	}
-	
-	memset( &wc, 0, sizeof( wc ) );
-	
-	wc.style         = 0;
-	wc.lpfnWndProc   = ( WNDPROC ) MainWndProc;
-	wc.cbClsExtra    = 0;
-	wc.cbWndExtra    = 0;
-	wc.hInstance     = win32.hInstance;
-	wc.hIcon         = LoadIcon( win32.hInstance, MAKEINTRESOURCE( IDI_ICON1 ) );
-	wc.hCursor       = NULL;
-	wc.hbrBackground = ( struct HBRUSH__* )COLOR_GRAYTEXT;
-	wc.lpszMenuName  = 0;
-	wc.lpszClassName = WIN32_WINDOW_CLASS_NAME;
-	
-	if( !RegisterClass( &wc ) )
+	if ( vr_enable.GetBool() && vr_oculusHmdDirectMode.GetBool() )
 	{
-		common->FatalError( "GLW_CreateWindow: could not register window class" );
+		memset( &wc, 0, sizeof( wc ) );
+		wc.style = CS_OWNDC;
+		wc.lpfnWndProc = (WNDPROC)MainWndProc;
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = 0;
+		wc.hCursor = LoadCursor( NULL, IDC_ARROW );
+		wc.hbrBackground = (struct HBRUSH__ *)COLOR_GRAYTEXT;
+		wc.lpszMenuName = 0;
+		wc.lpszClassName = "DOOM3_BFG_VR";
+
+		if ( !RegisterClass( &wc ) )
+		{
+			common->FatalError( "GLW_CreateWindow: could not register window class" );
+		}
+		common->Printf( "...registered window class\n" );
 	}
-	common->Printf( "...registered window class\n" );
-	
+	else
+	{
+		memset( &wc, 0, sizeof( wc ) );
+
+		wc.style = 0;
+		wc.lpfnWndProc = (WNDPROC)MainWndProc;
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = 0;
+		wc.hInstance = win32.hInstance;
+		wc.hIcon = LoadIcon( win32.hInstance, MAKEINTRESOURCE( IDI_ICON1 ) );
+		wc.hCursor = NULL;
+		wc.hbrBackground = (struct HBRUSH__*)COLOR_GRAYTEXT;
+		wc.lpszMenuName = 0;
+		wc.lpszClassName = WIN32_WINDOW_CLASS_NAME;
+
+		if ( !RegisterClass( &wc ) )
+		{
+			common->FatalError( "GLW_CreateWindow: could not register window class" );
+		}
+		common->Printf( "...registered window class\n" );
+	}
 	// now register the fake window class that is only used
 	// to get wgl extensions
 	wc.style         = 0;
@@ -1499,6 +1518,69 @@ void GLimp_PreInit()
 	// DG: not needed on this platform, so just do nothing
 }
 
+// OCULUS BEGIN
+static bool GLW_CreateOculusDirectWindow( glimpParms_t parms )
+{
+	int				x, y, w, h;
+	int				exstyle;
+
+	//
+	// compute width and height
+	//
+
+	RECT	r;
+
+	exstyle = 0;
+	AdjustWindowRect( &r, WS_OVERLAPPEDWINDOW, FALSE );
+
+	w = vr->hmdWidth; //Hmd->Resolution.w;
+	h = vr->hmdHeight; // oculus->Hmd->Resolution.h;
+	
+
+	x = vr->hmdWinPosX;// oculus->Hmd->WindowsPos.x;
+	y = vr->hmdWinPosY;// oculus->Hmd->WindowsPos.y;
+	
+	win32.hWnd = CreateWindowEx(
+		exstyle,
+		"DOOM3_BFG_VR",
+		"DOOM3 BFG VR",
+		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
+		x, y, w, h,
+		NULL,
+		NULL,
+		win32.hInstance,
+		NULL );
+
+	if ( !win32.hWnd ) {
+		common->Printf( "^3GLW_CreateWindow() - Couldn't create window^0\n" );
+		return false;
+	}
+
+	::SetTimer( win32.hWnd, 0, 100, NULL );
+
+	ShowWindow( win32.hWnd, SW_SHOW );
+	UpdateWindow( win32.hWnd );
+	common->Printf( "...created window @ %d,%d (%dx%d)\n", x, y, w, h );
+
+	ovrHmd_AttachToWindow( vr->hmd, win32.hWnd, NULL, NULL );
+
+	if ( !GLW_InitDriver( parms ) ) {
+		ShowWindow( win32.hWnd, SW_HIDE );
+		DestroyWindow( win32.hWnd );
+		win32.hWnd = NULL;
+		return false;
+	}
+
+	SetForegroundWindow( win32.hWnd );
+	SetFocus( win32.hWnd );
+	
+	vr->InitDirectRendering( win32.hWnd, win32.hDC );
+	ovrHmd_DismissHSWDisplay( oculus->Hmd );
+	
+	glConfig.isFullscreen = parms.fullScreen;
+
+	return true;
+}
 /*
 ===================
 GLimp_Init
@@ -1517,57 +1599,73 @@ parameters and try again.
 bool GLimp_Init( glimpParms_t parms )
 {
 	HDC		hDC;
-	
+
 	cmdSystem->AddCommand( "testSwapBuffers", GLimp_TestSwapBuffers, CMD_FL_SYSTEM, "Times swapbuffer options" );
-	
+
 	common->Printf( "Initializing OpenGL subsystem with multisamples:%i stereo:%i fullscreen:%i\n",
-					parms.multiSamples, parms.stereo, parms.fullScreen );
-					
+		parms.multiSamples, parms.stereo, parms.fullScreen );
+
 	// check our desktop attributes
 	hDC = GetDC( GetDesktopWindow() );
 	win32.desktopBitsPixel = GetDeviceCaps( hDC, BITSPIXEL );
 	win32.desktopWidth = GetDeviceCaps( hDC, HORZRES );
 	win32.desktopHeight = GetDeviceCaps( hDC, VERTRES );
 	ReleaseDC( GetDesktopWindow(), hDC );
-	
+
 	// we can't run in a window unless it is 32 bpp
-	if( win32.desktopBitsPixel < 32 && parms.fullScreen <= 0 )
+	if ( win32.desktopBitsPixel < 32 && parms.fullScreen <= 0 )
 	{
 		common->Printf( "^3Windowed mode requires 32 bit desktop depth^0\n" );
 		return false;
 	}
-	
+
 	// save the hardware gamma so it can be
 	// restored on exit
 	GLimp_SaveGamma();
-	
+
 	// create our window classes if we haven't already
 	GLW_CreateWindowClasses();
-	
+
 	// this will load the dll and set all our gl* function pointers,
 	// but doesn't create a window
-	
+
 	// getting the wgl extensions involves creating a fake window to get a context,
 	// which is pretty disgusting, and seems to mess with the AGP VAR allocation
 	GLW_GetWGLExtensionsWithFakeWindow();
-	
-	
-	
+
+
+
 	// Optionally ChangeDisplaySettings to get a different fullscreen resolution.
-	if( !GLW_ChangeDislaySettingsIfNeeded( parms ) )
+	if ( !GLW_ChangeDislaySettingsIfNeeded( parms ) )
 	{
 		GLimp_Shutdown();
 		return false;
 	}
-	
-	// try to create a window with the correct pixel format
-	// and init the renderer context
-	if( !GLW_CreateWindow( parms ) )
+
+	if ( vr_enable.GetBool() && vr_oculusHmdDirectMode.GetBool() )
 	{
-		GLimp_Shutdown();
-		return false;
+
+		if ( !GLW_CreateOculusDirectWindow( parms ) )
+		{
+			GLimp_Shutdown();
+			return false;
+		}
+
+		// wglSwapinterval, etc
+		GLW_CheckWGLExtensions( win32.hDC );
+
 	}
-	
+	else
+	{
+		// try to create a window with the correct pixel format
+		// and init the renderer context
+		if ( !GLW_CreateWindow( parms ) )
+		{
+			GLimp_Shutdown();
+			return false;
+		}
+	}
+
 	glConfig.isFullscreen = parms.fullScreen;
 	glConfig.isStereoPixelFormat = parms.stereo;
 	glConfig.nativeScreenWidth = parms.width;

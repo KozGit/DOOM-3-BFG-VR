@@ -80,6 +80,7 @@ public:
 	
 	void				HMDInit( void );
 	void				HMDInitializeDistortion( void );
+	void				HMDInitDirectRendering( HWND, HDC );
 	void				HMDGetOrientation( float &roll, float &pitch, float &yaw, idVec3 &hmdPosition );
 	void				HMDRender( idImage *leftCurrent, idImage *rightCurrent, idImage *leftLast, idImage *rightLast );
 	void				HMDTrackStatic();
@@ -168,6 +169,9 @@ public:
 	idImage*			primaryFBOimage;
 	idImage*			resolveFBOimage;
 	idImage*			fullscreenFBOimage;
+
+	HWND				hWnd;
+	HDC					dc;
 	
 	ovrTrackingState	hmdTrackingState;
 	ovrFrameTiming		hmdFrameTime;
@@ -247,6 +251,7 @@ extern idCVar	vr_manualIPD;
 extern idCVar	vr_manualHeight;
 extern idCVar   vr_timewarp;
 extern idCVar	vr_chromaCorrection;
+extern idCVar vr_oculusHmdDirectMode;
 
 extern idCVar	vr_showBody;
 extern idCVar	vr_viewModelArms;
