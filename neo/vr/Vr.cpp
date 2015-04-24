@@ -43,7 +43,7 @@ idCVar vr_enable( "vr_enable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "En
 idCVar vr_FBOscale( "vr_FBOscale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "FBO scaling factor." );
 idCVar vr_scale( "vr_scale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "VR World scale adjustment." );
 idCVar vr_useOculusProfile( "vr_useOculusProfile", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Use Oculus Profile values. 0 = use user defined profile, 1 = use Oculus profile." );
-idCVar vr_oculusHmdDirectMode( "vr_oculusHmdDirectMode", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Enable Oculus Direct mode. 0 = Extended Mode 1 = Direct Mode." );
+idCVar vr_oculusHmdDirectMode( "vr_oculusHmdDirectMode", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Enable Oculus Direct mode. 0 = Extended Mode 1 = Direct Mode." );
 idCVar vr_manualIPD( "vr_manualIPD", "64", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined IPD value in MM" );
 idCVar vr_manualHeight( "vr_manualHeight", "70", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined player height in inches" );
 idCVar vr_minLoadScreenTime( "vr_minLoadScreenTime", "6000", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Min time to display load screens in ms.", 0.0f, 10000.0f );
@@ -139,6 +139,12 @@ idCVar	vr_deadzoneYaw( "vr_deadzoneYaw", "30", CVAR_FLOAT | CVAR_GAME | CVAR_ARC
 idCVar	vr_comfortDelta( "vr_comfortDelta", "10", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Comfort Mode turning angle ", 0, 180 );
 
 idCVar	vr_interactiveCinematic( "vr_interactiveCinematic", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Interactive cinematics in VR ( no camera )" );
+
+idCVar	vr_headingBeamWidth( "vr_headingBeamWidth", "12.0", CVAR_FLOAT | CVAR_ARCHIVE, "heading beam width" ); // Koz default was 2, IMO too big in VR.
+idCVar	vr_headingBeamLength( "vr_headingBeamLength", "96", CVAR_FLOAT | CVAR_ARCHIVE, "heading beam length" ); // koz default was 250, but was to short in VR.  Length will be clipped if object is hit, this is max length for the hit trace. 
+
+
+
 // Koz end
 //===================================================================
 
@@ -200,9 +206,7 @@ iVr::iVr()
 	
 	hydraLeftOffset = hydra_zero;		// koz base offset for left hydra 
 	hydraRightOffset = hydra_zero;		// koz base offset for right hydra 
-
-	//idQuat idQuat_zero = idQuat( 0.0f, 0.0f, 0.0f, 0.0f );
-
+	
 	hydraLeftIndex = 0;						// koz fixme should pull these from hydra sdk but it bails for some reason using sample code - fix later.
 	hydraRightIndex = 1;
 
@@ -216,12 +220,13 @@ iVr::iVr()
 
 	playerDead = false;
 	
-	hmdWidth = 0;
-	hmdHeight = 0;
+	hmdWidth = hmdWindowWidth = 0;
+	hmdHeight = hmdWindowHeight = 0;
 	hmdWinPosX = 0;
 	hmdWinPosY =0;
 	hmdDisplayID = 0;
 	hmdDeviceName = "";
+	oculusDirect = false;
 			
 	primaryFBOWidth = 0;
 	primaryFBOHeight = 0;
@@ -331,8 +336,24 @@ void iVr::HMDInit( void )
 
 			if ( hmd->HmdCaps & ovrHmdCap_LowPersistence && vr_lowPersistence.GetInteger() )
 			caps |= ovrHmdCap_LowPersistence;
-
-			caps |= ovrHmdCap_NoVSync;  
+						
+			if ( hmd->HmdCaps & ovrHmdCap_ExtendDesktop )  
+			{
+				// extended mode
+				hmdWindowWidth = hmd->Resolution.w;
+				hmdWindowHeight = hmd->Resolution.h;
+				oculusDirect = false;
+			}
+			else
+			{
+				//direct mode
+				hmdWindowWidth = 1100;
+				hmdWindowHeight = 618;
+				oculusDirect = true;
+			}
+			
+			
+			//caps |= ovrHmdCap_NoVSync;  
 		
 			ovrHmd_SetEnabledCaps( hmd, caps );
 			
@@ -380,7 +401,7 @@ void iVr::HMDInit( void )
 iVr::CreateOculusTexture
 Generate an ovrTexture with our opengl texture
 =======================
-*/
+
 ovrTexture iVr::GenOvrTexture( int eye )
 {
 	ovrTexture tex;
@@ -396,7 +417,7 @@ ovrTexture iVr::GenOvrTexture( int eye )
 
 	return tex;
 }
-
+*/
 
 
 /*
@@ -404,7 +425,7 @@ ovrTexture iVr::GenOvrTexture( int eye )
 iVr::HMDInitDirectRendering
 ==============
 */
-bool iVr::HMDInitDirectRendering( HWND hwnd, HDC dc )
+void iVr::HMDInitDirectRendering( HWND hwnd, HDC dc )
 {
 	vr->hWnd = hwnd;
 	vr->dc = dc;
@@ -418,7 +439,7 @@ iVr::HMDInitializeDistortion
 void iVr::HMDInitializeDistortion()  
 {
 	
-	if ( ( !vr->hmd && !vr->hasOculusRift ) || !vr_enable.GetBool() ) 
+	if (  !vr->hmd || !vr->hasOculusRift || !vr_enable.GetBool() ) 
 	{
 		game->isVR = false;
 		return;
@@ -431,6 +452,7 @@ void iVr::HMDInitializeDistortion()
 	eyeOrder[1] = vr->hmd->EyeRenderOrder[ovrEye_Right];
 
 	common->Printf( "Eyeorder[0] = %d, Eyeorder[1] = %d\n", eyeOrder[0], eyeOrder[1] );
+	
 	// koz : create distortion meshes for oculus - copy verts and indexes from oculus supplied mesh
 	
 	useFBO = vr_FBOEnabled.GetInteger() && glConfig.framebufferObjectAvailable;
@@ -678,7 +700,7 @@ void iVr::HMDInitializeDistortion()
 		ovrHmd_CreateDistortionMesh( hmd, 
 									 hmdEye[eye].eyeRenderDesc.Eye, 
 									 hmdEye[eye].eyeRenderDesc.Fov, 
-									 ovrDistortionCap_Chromatic /* | ovrDistortionCap_SRGB | ovrDistortionCap_TimeWarp | ovrDistortionCap_Vignette */ ,
+									 0 /*ovrDistortionCap_Chromatic | ovrDistortionCap_SRGB | ovrDistortionCap_TimeWarp | ovrDistortionCap_Vignette */ ,
 									 &meshData );
 
 		hmdEye[eye].vbo.numVerts = meshData.VertexCount;
@@ -1229,7 +1251,7 @@ void iVr::CalcAimMove( float &yawDelta, float &pitchDelta )
 	vr->independentWeaponPitch += pitchDelta;
 	vr->independentWeaponYaw += yawDelta;
 
-	if ( vr_testWeaponModel.GetBool() )
+	if ( vr_testWeaponModel.GetBool() ) // only used for rotating the viewmodels for testing.
 	{
 		if ( vr->independentWeaponPitch > 180.0 )	vr->independentWeaponPitch -= 360.0;
 		if ( vr->independentWeaponPitch < -180.0 ) vr->independentWeaponPitch += 360.0;

@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-#include "..\LibOVR\Src\OVR_CAPI.h"
+#include "..\LibOVR\Include\OVR_CAPI.h"
 #include "vr_hmd.h"
 #include "vr_sixense.h"
 #include "..\renderer\Framebuffer.h"
@@ -68,8 +68,6 @@ typedef enum
 	FLASH_GUN,
 	FLASH_HAND
 } vr_flashlight_mode_t;
-
-
 
 
 class iVr
@@ -133,11 +131,13 @@ public:
 	int					hmdWidth;
 	int					hmdHeight;
 	int					hmdHz;
+	int					hmdWindowWidth;
+	int					hmdWindowHeight;
 	int					hmdWinPosX;
 	int					hmdWinPosY;
 	int					hmdDisplayID;
 	idStr				hmdDeviceName;
-			
+	bool				oculusDirect;
 	int					useFBO;
 	int					primaryFBOWidth;
 	int					primaryFBOHeight;
@@ -202,33 +202,6 @@ private:
 	ovrPosef			frameDataPose[255];
 };
 
-
-/*
-void VR_HydraInit( void );
-void VR_HMDInit( void );
-void VR_GenerateDistortionMeshes( void );
-void VR_GetHMDOrientation( float &roll, float &pitch, float &yaw, idVec3 &hmdPosition );
-void VR_SetLeftHydraOffset( hydraData hydraOffset );
-void VR_SetRightHydraOffset( hydraData hydraOffset );
-void VR_GetLeftHydraOffset( hydraData &hydraOffset );
-void VR_GetRightHydraOffset( hydraData &hydraOffset );
-void VR_GetLeftHydra( hydraData &leftHydra );
-void VR_GetRightHydra( hydraData &rightHydra );
-void VR_GetLeftHydraWithOffset( hydraData &leftOffsetHydra );
-void VR_GetRightHydraWithOffset( hydraData &rightOffsetHydra );
-void VR_FrameStart( int index );
-void VR_FrameEnd();
-void VR_GetFrameHMDData( int &frameIndex, ovrPosef &thePose );
-void VR_SetFrameHMDData( int frameIndex, ovrPosef thePose );
-void VR_ResolveMSAA( void );
-void VR_ResolveFXAA( void );
-void VR_SetFXAAUniforms( Framebuffer FBO );
-void VR_HUDRender( idImage *image0, idImage *image1 );
-void VR_HMDRender( idImage *leftCurrent, idImage *rightCurrent, idImage *leftLast, idImage *rightLast );
-void VR_HMDTrackStatic();
-*/
-
-
 #endif
 
 //koz g_flash cvars allow tweaking of flash position when aiming with hydra
@@ -251,7 +224,7 @@ extern idCVar	vr_manualIPD;
 extern idCVar	vr_manualHeight;
 extern idCVar   vr_timewarp;
 extern idCVar	vr_chromaCorrection;
-extern idCVar vr_oculusHmdDirectMode;
+extern idCVar	vr_oculusHmdDirectMode;
 
 extern idCVar	vr_showBody;
 extern idCVar	vr_viewModelArms;
@@ -348,6 +321,9 @@ extern idCVar	vr_deadzoneYaw;
 extern idCVar	vr_comfortDelta;
 
 extern idCVar	vr_interactiveCinematic;
+
+extern idCVar	vr_headingBeamLength;
+extern idCVar	vr_headingBeamWidth;
 
 
 extern iVr* vr;

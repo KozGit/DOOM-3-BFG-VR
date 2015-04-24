@@ -1574,8 +1574,8 @@ static bool GLW_CreateOculusDirectWindow( glimpParms_t parms )
 	SetForegroundWindow( win32.hWnd );
 	SetFocus( win32.hWnd );
 	
-	vr->InitDirectRendering( win32.hWnd, win32.hDC );
-	ovrHmd_DismissHSWDisplay( oculus->Hmd );
+	//vr->InitDirectRendering( win32.hWnd, win32.hDC );
+	//ovrHmd_DismissHSWDisplay( oculus->Hmd );
 	
 	glConfig.isFullscreen = parms.fullScreen;
 

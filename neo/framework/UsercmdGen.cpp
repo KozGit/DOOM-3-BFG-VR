@@ -463,15 +463,11 @@ void idUsercmdGenLocal::AdjustAngles()
 		viewangles[PITCH] -= speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKUP );
 		viewangles[PITCH] += speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKDOWN );
 	}
-	else // koz add independent weapon aiming and comfort mode turning for VR
+	else // koz add independent weapon aiming 
 	{
 		float yawdelta = 0.0f;
 		float pitchdelta = 0.0f;
-
-		static int lastLeft = 0;
-		static int lastRight = 0;
-		int button;
-
+				
 		if ( ButtonState( UB_LOOKRIGHT ) )
 		{
 			yawdelta = -speed * in_yawSpeed.GetFloat();
@@ -496,21 +492,6 @@ void idUsercmdGenLocal::AdjustAngles()
 		viewangles[YAW] += yawdelta;
 		viewangles[PITCH] += pitchdelta;
 		
-	/*	button = ButtonState( UB_IMPULSE34 );
-
-		if ( button && ( lastRight != button ) )// comfort right
-		{
-			viewangles[YAW] += vr_comfortDelta.GetFloat();
-		}
-		lastRight = button;
-
-		button = ButtonState( UB_IMPULSE35 );
-		if ( button && ( lastLeft != button ) )// comfort left
-		{
-			viewangles[YAW] -= vr_comfortDelta.GetFloat();
-		}
-		lastLeft = button;
-		*/
 	}
 }
 

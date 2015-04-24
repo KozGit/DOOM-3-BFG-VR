@@ -1491,6 +1491,9 @@ idPlayer::idPlayer():
 	laserSightHandle	= -1;
 	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
 	
+	headingBeamHandle = -1;
+	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
+
 	weapon					= NULL;
 	primaryObjective		= NULL;
 	
@@ -2005,9 +2008,10 @@ void idPlayer::Init()
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
 
 	// heading indicator for VR - point the direction the body is facing.
-	memset( &headingBeamEntity, 0, sizeof( laserSightRenderEntity ) );
+	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
 	headingBeamEntity.hModel = renderModelManager->FindModel( "_BEAM" );
-	headingBeamEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
+	//headingBeamEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
+	headingBeamEntity.customShader = declManager->FindMaterial( "textures/sfx/fridgeglass1" );
 
 	// Koz begin
 	laserSightActive = true;
@@ -2932,11 +2936,18 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	aimAssist.Init( this );
 	
 	laserSightHandle = -1;
+	headingBeamHandle = -1; // koz
 	
 	// re-init the laser model
 	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
 	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
+	
+	// koz re-init the heading beam model
+	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
+	headingBeamEntity.hModel = renderModelManager->FindModel( "_BEAM" );
+	//headingBeamEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
+	headingBeamEntity.customShader = declManager->FindMaterial( "textures/sfx/fridgeglass1" );
 	
 	for( int i = 0; i < MAX_PLAYER_PDA; i++ )
 	{
@@ -9211,6 +9222,59 @@ void idPlayer::UpdateLaserSight()
 
 /*
 ==============
+Koz
+idPlayer::UpdateHeadingBeam
+==============
+*/
+void idPlayer::UpdateHeadingBeam()
+{
+	
+	if ( !headingBeamActive )
+	{
+
+		// hide it
+		headingBeamEntity.allowSurfaceInViewID = -1;
+		if ( headingBeamHandle == -1 )
+		{
+			headingBeamHandle = gameRenderWorld->AddEntityDef( &headingBeamEntity );
+		}
+		else
+		{
+			gameRenderWorld->UpdateEntityDef( headingBeamHandle, &headingBeamEntity );
+		}
+		return;
+	}
+		
+	idVec3 beamOrigin = GetEyePosition();
+	beamOrigin.z -= pm_normalviewheight.GetFloat();
+
+	idMat3 beamAxis = idAngles( 0.0f, viewAngles.yaw, 0.0f ).ToMat3();
+	
+	// program the beam model
+	// only show in the player's view
+	headingBeamEntity.allowSurfaceInViewID = entityNumber + 1;
+	headingBeamEntity.axis.Identity();
+	headingBeamEntity.origin = beamOrigin;
+		
+	float beamLength = vr_headingBeamLength.GetFloat();
+	
+	idVec3&	target = *reinterpret_cast<idVec3*>(&headingBeamEntity.shaderParms[SHADERPARM_BEAM_END_X]);
+	target = headingBeamEntity.origin + beamAxis[0] * beamLength;
+	
+
+	headingBeamEntity.shaderParms[SHADERPARM_BEAM_WIDTH] = vr_headingBeamWidth.GetFloat();
+
+	if ( headingBeamHandle == -1 )
+	{
+		headingBeamHandle = gameRenderWorld->AddEntityDef( &headingBeamEntity );
+	}
+	else
+	{
+		gameRenderWorld->UpdateEntityDef( headingBeamHandle, &headingBeamEntity );
+	}
+}
+/*
+==============
 idPlayer::Think
 
 Called every tic for each player
@@ -9536,6 +9600,8 @@ void idPlayer::Think()
 	
 	// stereo rendering laser sight that replaces the crosshair
 	UpdateLaserSight();
+
+	if ( game->isVR ) UpdateHeadingBeam(); // koz
 	
 	// Show the respawn hud message if necessary.
 	if( common->IsMultiplayer() && ( minRespawnTime != maxRespawnTime ) )
@@ -12595,7 +12661,9 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 	
 	// stereo rendering laser sight that replaces the crosshair
 	UpdateLaserSight();
-	
+
+	if ( game->isVR ) UpdateHeadingBeam(); // koz
+		
 	if( gameLocal.isNewFrame && IsLocallyControlled() )
 	{
 		playerView.CalculateShake();
