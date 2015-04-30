@@ -852,14 +852,15 @@ bool idRenderModelMD5::LoadBinaryModel( idFile* file, const ID_TIME_T sourceTime
 		We want to render the PDA screen onto the model in VR, instead of a full screen GUI.
 		To do this, we'll copy the rendered full screen gui from the framebuffer to a texture. This
 		results in the imaged being inverted. To correct this, invert the texture coordinates
-		for the gui while it's loading. Koz fixme - create new model instead of hacking in code
+		for the gui while it's loading.
+		Koz fixme - create new model instead of hacking in code
 		Update: we are also rotating the texture coords now to use the PDA in landscape mode.
 		Update2: also need to apply a surface to the PDA screen so we can hitscan and
 		send mouse commands based on head movement. this is not working right yet.
 		Did I mention I want to create a new model?
 		*/
 
-		if ( isPDAmesh /*materialName=="_pdaImage"*/ ) // material will only have this name if we changed it to support the rift
+		if ( isPDAmesh ) 
 		{
 
 			srfTriangles_t	tri2;
@@ -1226,6 +1227,7 @@ void idRenderModelMD5::LoadModel()
 	SIMD_INIT_LAST_JOINT( invertedDefaultPose.Ptr(), joints.Num() );
 	
 	idStr materialName; // Koz
+	bool isPDAmesh = false;
 
 	for( int i = 0; i < meshes.Num(); i++ )
 	{
@@ -1234,17 +1236,31 @@ void idRenderModelMD5::LoadModel()
 
 		// Koz begin
 		// Remove hands from weapon & pda viewmodels if desired.
-		
-		if ( !vr_viewModelArms.GetBool() && game->isVR )
+		if ( game->isVR )
 		{
 			materialName = meshes[i].shader->GetName();
-			if ( materialName.IsEmpty() ||
-				( ( strstr( this->Name(), "weapons" ) || strstr( this->Name(), "items" ) ) &&
-				( materialName == "models/characters/player/arm2" || materialName == "models/weapons/hands/hand") ) )
+
+			if ( !vr_viewModelArms.GetBool() )
 			{
-				meshes[i].shader = NULL; // Koz : Look ma - no hands! 
+				materialName = meshes[i].shader->GetName();
+				if ( materialName.IsEmpty() ||
+					((strstr( this->Name(), "weapons" ) || strstr( this->Name(), "items" )) &&
+					(materialName == "models/characters/player/arm2" || materialName == "models/weapons/hands/hand")) )
+				{
+					meshes[i].shader = NULL; // Koz : Look ma - no hands! 
+				}
+			}
+
+			if ( materialName == "textures/common/pda_gui" )
+			{
+				// Koz pda  - change material to _pdaImage instead of deault 
+				// this allows rendering the PDA & swf menus to the model ingame.
+				// koz fixme just create a new model for VR and dont hack on load.
+				meshes[i].shader = declManager->FindMaterial( "_pdaImage" );
+				isPDAmesh = true;
 			}
 		}
+		
 		// koz end
 	}
 	
