@@ -131,13 +131,7 @@ public:
 	int					hmdWidth;
 	int					hmdHeight;
 	int					hmdHz;
-	int					hmdWindowWidth;
-	int					hmdWindowHeight;
-	int					hmdWinPosX;
-	int					hmdWinPosY;
-	int					hmdDisplayID;
-	idStr				hmdDeviceName;
-	bool				oculusDirect;
+	
 	int					useFBO;
 	int					primaryFBOWidth;
 	int					primaryFBOHeight;

@@ -41,6 +41,9 @@ If you have questions concerning this license or the applicable additional terms
 #define MAX_PICKUP_VELOCITY				1500 * 1500
 #define MAX_PICKUP_SIZE					96
 
+idCVar	vr_grabberBeamWidth( "vr_grabberBeamWidth", "4", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Beam width for grabber in VR. Default 4." );
+
+
 /*
 ===============================================================================
 
@@ -194,7 +197,18 @@ void idGrabber::Initialize()
 			args.Set( "target", beamTarget->name.c_str() );
 			args.SetVector( "origin", vec3_origin );
 			args.SetBool( "start_off", true );
-			args.Set( "width", "6" );
+			
+			// koz begin
+			if ( game->isVR )
+			{ 
+				args.Set( "width", vr_grabberBeamWidth.GetString() );
+			}
+			else
+			{
+				args.Set( "width", "6" );
+			}
+			// koz end
+
 			args.Set( "skin", "textures/smf/flareSizeable" );
 			args.Set( "_color", "0.0235 0.843 0.969 0.2" );
 			beam = ( idBeam* )gameLocal.SpawnEntityType( idBeam::Type, &args );
@@ -232,42 +246,42 @@ void idGrabber::StartDrag( idEntity* grabEnt, int id )
 {
 	int clipModelId = id;
 	idPlayer* thePlayer = owner.GetEntity();
-	
+
 	holdingAF = false;
 	dragFailTime = gameLocal.slow.time;
 	startDragTime = gameLocal.slow.time;
-	
+
 	oldImpulseSequence = thePlayer->usercmd.impulseSequence;
-	
+
 	// set grabbed state for networking
 	grabEnt->SetGrabbedState( true );
-	
+
 	// This is the new object to drag around
 	dragEnt = grabEnt;
-	
+
 	// Show the beams!
 	UpdateBeams();
-	if( beam )
+	if ( beam )
 	{
 		beam->Show();
 	}
-	if( beamTarget )
+	if ( beamTarget )
 	{
 		beamTarget->Show();
 	}
-	
+
 	// Move the object to the fast group (helltime)
 	grabEnt->timeGroup = TIME_GROUP2;
-	
+
 	// Handle specific class types
-	if( grabEnt->IsType( idProjectile::Type ) )
+	if ( grabEnt->IsType( idProjectile::Type ) )
 	{
-		idProjectile* p = ( idProjectile* )grabEnt;
-		
+		idProjectile* p = (idProjectile*)grabEnt;
+
 		p->CatchProjectile( thePlayer, "_catch" );
-		
+
 		// Make the projectile non-solid to other projectiles/enemies (special hack for helltime hunter)
-		if( !idStr::Cmp( grabEnt->GetEntityDefName(), "projectile_helltime_killer" ) )
+		if ( !idStr::Cmp( grabEnt->GetEntityDefName(), "projectile_helltime_killer" ) )
 		{
 			savedContents = CONTENTS_PROJECTILE;
 			savedClipmask = MASK_SHOT_RENDERMODEL | CONTENTS_PROJECTILE;
@@ -279,53 +293,57 @@ void idGrabber::StartDrag( idEntity* grabEnt, int id )
 		}
 		grabEnt->GetPhysics()->SetContents( 0 );
 		grabEnt->GetPhysics()->SetClipMask( CONTENTS_SOLID | CONTENTS_BODY );
-		
+
 	}
-	else if( grabEnt->IsType( idExplodingBarrel::Type ) )
+	else if ( grabEnt->IsType( idExplodingBarrel::Type ) )
 	{
-		idExplodingBarrel* ebarrel = static_cast<idExplodingBarrel*>( grabEnt );
-		
+		idExplodingBarrel* ebarrel = static_cast<idExplodingBarrel*>(grabEnt);
+
 		ebarrel->StartBurning();
-		
+
 	}
-	else if( grabEnt->IsType( idAFEntity_Gibbable::Type ) )
+	else if ( grabEnt->IsType( idAFEntity_Gibbable::Type ) )
 	{
 		holdingAF = true;
 		clipModelId = 0;
-		
-		if( grabbableAI( grabEnt->spawnArgs.GetString( "classname" ) ) )
+
+		if ( grabbableAI( grabEnt->spawnArgs.GetString( "classname" ) ) )
 		{
-			idAI* aiEnt = static_cast<idAI*>( grabEnt );
-			
+			idAI* aiEnt = static_cast<idAI*>(grabEnt);
+
 			aiEnt->StartRagdoll();
 		}
 	}
-	else if( grabEnt->IsType( idMoveableItem::Type ) )
+	else if ( grabEnt->IsType( idMoveableItem::Type ) )
 	{
 		// RB: 64 bit fixes, changed NULL to 0
 		grabEnt->PostEventMS( &EV_Touch, 250, thePlayer, 0 );
 		// RB end
 	}
-	
+
 	// Get the current physics object to manipulate
 	idPhysics* phys = grabEnt->GetPhysics();
-	
+
 	// Turn off gravity on object
 	saveGravity = phys->GetGravity();
 	phys->SetGravity( vec3_origin );
-	
+
 	// hold it directly in front of player
-	localPlayerPoint = ( thePlayer->firstPersonViewAxis[0] * HOLD_DISTANCE ) * thePlayer->firstPersonViewAxis.Transpose();
-	
+	localPlayerPoint = (thePlayer->firstPersonViewAxis[0] * HOLD_DISTANCE) * thePlayer->firstPersonViewAxis.Transpose();
+
 	// Set the ending time for the hold
 	endTime = gameLocal.time + g_grabberHoldSeconds.GetFloat() * 1000;
-	
+
 	// Start up the Force_Drag to bring it in
 	drag.Init( g_grabberDamping.GetFloat() );
 	drag.SetPhysics( phys, clipModelId, thePlayer->firstPersonViewOrigin + localPlayerPoint * thePlayer->firstPersonViewAxis );
-	
+
 	// start the screen warp
-	warpId = thePlayer->playerView.AddWarp( phys->GetOrigin(), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 160, 2000 );
+
+	if ( !game->isVR ) // koz don't warp in VR - it's a pukefest.
+	{
+		warpId = thePlayer->playerView.AddWarp( phys->GetOrigin(), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 160, 2000 );
+	}
 }
 
 /*
@@ -472,6 +490,30 @@ int idGrabber::Update( idPlayer* player, bool hide )
 	trace_t trace;
 	idEntity* newEnt;
 	
+	// koz begin 
+	idVec3  dragOrigin = vec3_zero;
+	idMat3	dragAxis = mat3_identity;
+	
+	
+	if ( game->IsInGame() ) // koz fix me
+	{
+		dragOrigin = player->firstPersonViewOrigin;
+		dragAxis = player->firstPersonViewAxis;
+
+		if ( game->isVR )
+		{
+			if ( player->weapon != NULL )
+			{
+				if ( !player->weapon->GetMuzzlePositionWithHacks( dragOrigin, dragAxis ) )
+				{
+					dragOrigin = player->firstPersonViewOrigin;
+					dragAxis = player->firstPersonViewAxis;
+				}
+			}
+		}
+	}
+	// koz end
+
 	// pause before allowing refire
 	if( lastFiredTime + FIRING_DELAY > gameLocal.time )
 	{
@@ -526,12 +568,19 @@ int idGrabber::Update( idPlayer* player, bool hide )
 	if( !dragEnt.GetEntity() )
 	{
 		idBounds bounds;
-		idVec3 end = player->firstPersonViewOrigin + player->firstPersonViewAxis[0] * dragTraceDist;
+		idVec3 end;
+		
+
+		// koz begin
+		end = dragOrigin + dragAxis[0] * dragTraceDist;
 		
 		bounds.Zero();
 		bounds.ExpandSelf( TRACE_BOUNDS_SIZE );
 		
-		gameLocal.clip.TraceBounds( trace, player->firstPersonViewOrigin, end, bounds, MASK_SHOT_RENDERMODEL | CONTENTS_PROJECTILE | CONTENTS_MOVEABLECLIP, player );
+		// gameLocal.clip.TraceBounds( trace, player->firstPersonViewOrigin, end, bounds, MASK_SHOT_RENDERMODEL | CONTENTS_PROJECTILE | CONTENTS_MOVEABLECLIP, player );
+		gameLocal.clip.TraceBounds( trace, dragOrigin, end, bounds, MASK_SHOT_RENDERMODEL | CONTENTS_PROJECTILE | CONTENTS_MOVEABLECLIP, player );
+		// koz end
+				
 		// If the trace hit something
 		if( trace.fraction < 1.0f )
 		{
@@ -649,8 +698,12 @@ int idGrabber::Update( idPlayer* player, bool hide )
 		}
 		
 		// Set and evaluate drag force
-		goalPos = player->firstPersonViewOrigin + localPlayerPoint * player->firstPersonViewAxis;
 		
+		// koz begin 
+		//goalPos = player->firstPersonViewOrigin + localPlayerPoint * player->firstPersonViewAxis;
+		goalPos = dragOrigin + localPlayerPoint * dragAxis;
+		// koz end
+	
 		drag.SetGoalPosition( goalPos );
 		drag.Evaluate( gameLocal.time );
 		
@@ -661,14 +714,18 @@ int idGrabber::Update( idPlayer* player, bool hide )
 			idVec3 toPlayerVelocity, objectCenter;
 			float toPlayerSpeed;
 			
-			toPlayerVelocity = -player->firstPersonViewAxis[0];
+			//toPlayerVelocity = -player->firstPersonViewAxis[0];
+			toPlayerVelocity = -dragAxis[0]; // koz
+			
 			toPlayerSpeed = entPhys->GetLinearVelocity() * toPlayerVelocity;
 			
 			if( toPlayerSpeed > 64.f )
 			{
 				objectCenter = entPhys->GetAbsBounds().GetCenter();
 				
-				theWall.SetNormal( player->firstPersonViewAxis[0] );
+				//theWall.SetNormal( player->firstPersonViewAxis[0] );
+				theWall.SetNormal( dragAxis[0] ); // koz
+
 				theWall.FitThroughPoint( goalPos );
 				
 				if( theWall.Side( objectCenter, 0.1f ) == PLANESIDE_BACK )
@@ -700,7 +757,9 @@ int idGrabber::Update( idPlayer* player, bool hide )
 		// Orient projectiles away from the player
 		if( dragEnt.GetEntity()->IsType( idProjectile::Type ) )
 		{
-			idAngles ang = player->firstPersonViewAxis[0].ToAngles();
+			//idAngles ang = player->firstPersonViewAxis[0].ToAngles();
+			idAngles ang = dragAxis[0].ToAngles(); // koz
+			
 			ang.pitch += 90.f;
 			entPhys->SetAxis( ang.ToMat3() );
 		}
@@ -756,10 +815,16 @@ void idGrabber::UpdateBeams()
 			beamTarget->SetOrigin( dragEnt.GetEntity()->GetPhysics()->GetAbsBounds().GetCenter() );
 		}
 		
-		muzzle_joint = thePlayer->weapon.GetEntity()->GetAnimator()->GetJointHandle( "particle_upper" );
+		muzzle_joint = thePlayer->weapon.GetEntity()->GetAnimator()->GetJointHandle( /* "particle_upper" */ "beam" ); // koz
 		if( muzzle_joint != INVALID_JOINT )
 		{
 			thePlayer->weapon.GetEntity()->GetJointWorldTransform( muzzle_joint, gameLocal.time, muzzle_origin, muzzle_axis );
+			
+			// koz begin
+			// move the beam forward 3 inches to prevent it from distorting the (now complete) grabber viewmodel.
+			muzzle_origin += muzzle_axis[0] * 3.0; 
+			// koz end
+		
 		}
 		else
 		{

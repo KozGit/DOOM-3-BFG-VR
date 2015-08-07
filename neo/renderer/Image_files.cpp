@@ -950,7 +950,7 @@ void R_LoadImage( const char* cname, byte** pic, int* width, int* height, ID_TIM
 					
 					if( pic && *pic != NULL )
 					{
-						//common->Warning("image %s failed to load, using %s instead", origName.c_str(), name.c_str());
+						//common->Warning("image %s failed to load, using %s instead", origName.c_str(), name.c_str()); 
 						break;
 					}
 				}

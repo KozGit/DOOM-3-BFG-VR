@@ -220,17 +220,15 @@ iVr::iVr()
 
 	playerDead = false;
 	
-	hmdWidth = hmdWindowWidth = 0;
-	hmdHeight = hmdWindowHeight = 0;
-	hmdWinPosX = 0;
-	hmdWinPosY =0;
-	hmdDisplayID = 0;
-	hmdDeviceName = "";
-	oculusDirect = false;
-			
+	hmdWidth =  0;
+	hmdHeight = 0;
+					
 	primaryFBOWidth = 0;
 	primaryFBOHeight = 0;
 	hmdHz = 60; // koz fixme what doesnt support 60 hz?
+	
+	hmd = nullptr;
+
 	
 }
 
@@ -311,89 +309,66 @@ void iVr::HMDInit( void )
 {
 	
 	// Oculus HMD Initialization
-		
-	ovr_Initialize();
-	hmd = ovrHmd_Create( 0 );
-    
-	if ( hmd ) 
-	{
-		// configure the tracking
-								
-		if ( ovrHmd_ConfigureTracking( hmd,	ovrTrackingCap_Orientation 
-											| ovrTrackingCap_MagYawCorrection
-											| ovrTrackingCap_Position, ovrTrackingCap_Orientation ) ) 
-		{ 
-			hasOculusRift = true;
-			hasHMD = true;
-			common->Printf( "\n\nOculus Rift HMD Initialized\n" );
-			hmdInFrame = false;
-			ovrHmd_ResetFrameTiming(hmd,0);
-					
-			unsigned int caps = 0;
 	
-			if ( hmd->HmdCaps & ovrHmdCap_DynamicPrediction )
-			caps |= ovrHmdCap_DynamicPrediction;
-
-			if ( hmd->HmdCaps & ovrHmdCap_LowPersistence && vr_lowPersistence.GetInteger() )
-			caps |= ovrHmdCap_LowPersistence;
-						
-			if ( hmd->HmdCaps & ovrHmdCap_ExtendDesktop )  
-			{
-				// extended mode
-				hmdWindowWidth = hmd->Resolution.w;
-				hmdWindowHeight = hmd->Resolution.h;
-				oculusDirect = false;
-			}
-			else
-			{
-				//direct mode
-				hmdWindowWidth = 1100;
-				hmdWindowHeight = 618;
-				oculusDirect = true;
-			}
-			
-			
-			//caps |= ovrHmdCap_NoVSync;  
+	if ( ovr_Initialize( nullptr ) == ovrSuccess )
+	{
+		ovrResult result  = ovrHmd_Create( 0, &hmd );
+		if ( result == ovrSuccess )
 		
-			ovrHmd_SetEnabledCaps( hmd, caps );
-			
-			ovrHmd_RecenterPose( hmd ); // lets start looking forward.
-			
-			hmdWidth = hmd->Resolution.w;
-			hmdHeight = hmd->Resolution.h;
-			hmdWinPosX = hmd->WindowsPos.x;
-			hmdWinPosY = hmd->WindowsPos.y;
-			hmdDeviceName = hmd->DisplayDeviceName;
-			hmdDisplayID = hmd->DisplayId;
+		{
+			// configure the tracking
 
-			int hz = vr_hmdHz.GetInteger();
-			if ( strstr( hmd->ProductName, "DK2" ) )
+			if ( ovrHmd_ConfigureTracking( hmd, ovrTrackingCap_Orientation
+												| ovrTrackingCap_MagYawCorrection
+												| ovrTrackingCap_Position, ovrTrackingCap_Orientation ) )
 			{
-				vr->hmdHz = hz == 0 ? 75 : hz; // DK2 default hz is 75
-			}
-			else 
-			{
-				vr->hmdHz = hz == 0 ? 60 : hz;// DK1 default is 60
-			}
-			
-			com_engineHz.SetInteger( vr->hmdHz );
+				hasOculusRift = true;
+				hasHMD = true;
+				common->Printf( "\n\nOculus Rift HMD Initialized\n" );
+				hmdInFrame = false;
+				ovrHmd_ResetFrameTiming( hmd, 0 );
 
-			vr_lowPersistence.SetModified();
+				unsigned int caps = 0;
 
-			common->Printf( "Hmd: %s .\n", hmd->ProductName );
-			common->Printf( "Hmd width %d, height %d\n", hmdWidth, hmdHeight );
-			common->Printf( "Hmd DisplayDeviceName = %s, DisplayID = %d\n", hmdDeviceName.c_str(), hmdDisplayID );
-			common->Printf( "Hmd WindowPosX = %d , WindowPosY = %d\n\n", hmdWinPosX, hmdWinPosY );
+				if ( hmd->HmdCaps & ovrHmdCap_DynamicPrediction )
+					caps |= ovrHmdCap_DynamicPrediction;
+
+				if ( hmd->HmdCaps & ovrHmdCap_LowPersistence && vr_lowPersistence.GetInteger() )
+					caps |= ovrHmdCap_LowPersistence;
+
+				vr_lowPersistence.SetModified();
 				
+				ovrHmd_SetEnabledCaps( hmd, caps );
+				ovrHmd_RecenterPose( hmd ); // lets start looking forward.
+								
+				hmdWidth = hmd->Resolution.w;
+				hmdHeight = hmd->Resolution.h;
+				
+				int hz = vr_hmdHz.GetInteger();
+				if ( strstr( hmd->ProductName, "DK2" ) )
+				{
+					vr->hmdHz = hz == 0 ? 75 : hz; // DK2 default hz is 75
+				}
+				else
+				{
+					vr->hmdHz = hz == 0 ? 60 : hz;// DK1 default is 60
+				}
+
+				com_engineHz.SetInteger( vr->hmdHz );
+				
+				common->Printf( "Hmd: %s .\n", hmd->ProductName );
+				common->Printf( "Hmd width %d, height %d\n", hmdWidth, hmdHeight );
+				return;
+			}
+
 		}
-    	
-	} 
-	else  
-	{            
-			common->Printf( "\nOculus Rift not detected.\n" );
-			hasHMD = false;
-			hasOculusRift = false;
 	}
+	
+	common->Printf( "\nOculus Rift not detected.\n" );
+	hasHMD = false;
+	hasOculusRift = false;
+	game->isVR = false;
+
 }
 
 /*
@@ -469,13 +444,7 @@ void iVr::HMDInitializeDistortion()
 	for ( int eye1 = 0 ; eye1 < 2 ; eye1++ ) 
 	{
 		eye = eyeOrder[eye1];
-		
-		ovrDistortionMesh meshData = {};
-		distortionVert_t *mesh = NULL;
-		distortionVert_t *v = NULL;
-		ovrDistortionVertex *ov = NULL;
-		unsigned int vtex = 0;
-		
+				
 		hmdEye[eye].eyeFov = vr->hmd->DefaultEyeFov[ eye ];
 		hmdEye[eye].eyeRenderDesc = ovrHmd_GetRenderDesc( vr->hmd, ( ovrEyeType ) eye, hmdEye[ eye ].eyeFov );
 		
@@ -687,7 +656,11 @@ void iVr::HMDInitializeDistortion()
 		
 		viewport.Size.w = rendertarget.w;
 		viewport.Size.h = rendertarget.h;
-				
+		
+		/* -------------------
+
+		Koz:  removed when oculus removed extended mode & client side rendering
+		
 		ovrHmd_GetRenderScaleAndOffset( hmdEye[eye].eyeFov, rendertarget, viewport, (ovrVector2f*) hmdEye[eye].UVScaleoffset );
 		
 		common->Printf( "Eye %d UVscale x %f y %f  offset x %f , y %f\n", eye,
@@ -696,11 +669,20 @@ void iVr::HMDInitializeDistortion()
 			hmdEye[eye].UVScaleoffset[1].x,	
 			hmdEye[eye].UVScaleoffset[1].y ); 
 						
+		
+		
 		// create the distortion mesh for this eye
+
+		ovrDistortionMesh meshData = {};
+		distortionVert_t *mesh = NULL;
+		distortionVert_t *v = NULL;
+		ovrDistortionVertex *ov = NULL;
+		unsigned int vtex = 0;
+
 		ovrHmd_CreateDistortionMesh( hmd, 
 									 hmdEye[eye].eyeRenderDesc.Eye, 
 									 hmdEye[eye].eyeRenderDesc.Fov, 
-									 0 /*ovrDistortionCap_Chromatic | ovrDistortionCap_SRGB | ovrDistortionCap_TimeWarp | ovrDistortionCap_Vignette */ ,
+									 0, // ovrDistortionCap_Chromatic | ovrDistortionCap_SRGB | ovrDistortionCap_TimeWarp | ovrDistortionCap_Vignette  ,
 									 &meshData );
 
 		hmdEye[eye].vbo.numVerts = meshData.VertexCount;
@@ -764,6 +746,7 @@ void iVr::HMDInitializeDistortion()
 		
 		free( mesh );
 		ovrHmd_DestroyDistortionMesh( &meshData ); 
+		*/	
 	}
 	
 	// calculate fov for engine
@@ -777,8 +760,7 @@ void iVr::HMDInitializeDistortion()
 	hmdPixelScale = 1;//ovrScale * vid.width / (float) hmd->Resolution.w;	
 
 	common->Warning( "Init Hmd FOV x,y = %f , %f. Aspect = %f, PixelScale = %f\n",hmdFovX,hmdFovY,hmdAspect,hmdPixelScale );
-	
-	//globalFramebuffers.primaryFBO->Bind();
+		
 	GL_CheckErrors();
 	} 
 
@@ -849,9 +831,9 @@ void iVr::HMDGetOrientation(float &roll, float &pitch, float &yaw, idVec3 &hmdPo
         
 		if ( vr_trackingPredictionAuto.GetBool() ) 
 		{
-			//time = ( hmdFrameTime.EyeScanoutSeconds[ovrEye_Left] + hmdFrameTime.EyeScanoutSeconds[ovrEye_Right] ) / 2.0;
-			time = hmdFrameTime.ScanoutMidpointSeconds;
-			//frameTiming = ovrHmd_GetFrameTiming(hmd,frameIndex);		
+			
+			time = hmdFrameTime.DisplayMidpointSeconds;// ScanoutMidpointSeconds;
+			
 		} 
 		else 
 		{
@@ -930,7 +912,8 @@ iVr::FrameStart
 */
 void iVr::FrameStart(int index) 
 {
-		
+	// koz fixme move these checks 
+
 	if ( vr_lowPersistence.IsModified() ) 
 	{
 		unsigned int caps = 0;
@@ -939,9 +922,7 @@ void iVr::FrameStart(int index)
 
 		if ( hmd->HmdCaps & ovrHmdCap_LowPersistence && vr_lowPersistence.GetInteger() )
 			caps |= ovrHmdCap_LowPersistence;
-
-		caps |= ovrHmdCap_NoVSync;  
-		
+				
 		ovrHmd_SetEnabledCaps( hmd, caps );
 		vr_lowPersistence.ClearModified();
 	
@@ -953,20 +934,9 @@ void iVr::FrameStart(int index)
 		vr_hydraEnable.ClearModified();
 	}
 
-	hmdFrameTime = ovrHmd_BeginFrameTiming( vr->hmd, index );
-		
+	//hmdFrameTime = ovrHmd_BeginFrameTiming( vr->hmd, index );
+	
 
-/*	if (!hmdInFrame)
-	{
-		hmdFrameTime = ovrHmd_BeginFrameTiming(hmd,index);
-	}
-	else
-	{
-		ovrHmd_EndFrameTiming(hmd);
-		ovrHmd_ResetFrameTiming(hmd,index);
-		hmdFrameTime = ovrHmd_BeginFrameTiming(hmd,index);
-	}
-	hmdInFrame = true; */
 }
 
 
@@ -978,7 +948,9 @@ iVr::FrameEnd
 */
 void iVr::FrameEnd() 
 {
-	ovrHmd_EndFrameTiming( vr->hmd );
+	// koz fixme
+
+	//ovrHmd_EndFrameTiming( vr->hmd );
 	//hmdInFrame = false;
 
 }
@@ -991,7 +963,7 @@ iVr::FrameWait
 void iVr::FrameWait()
 {
 	return;
-	ovr_WaitTillTime( hmdFrameTime.TimewarpPointSeconds );
+	// ovr_WaitTillTime( hmdFrameTime. TimewarpPointSeconds );
 
 }
 

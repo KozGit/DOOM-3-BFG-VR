@@ -911,9 +911,7 @@ public:
 // Koz begin
 /*=========================
 Koz - code to try to retrieve the monitor model name from EDID data in the windows registry.
-I think that if microsoft worked really, really hard, they could obfuscate this a little more,
-and come up with a less robust method to retrieve this info. Maybe.
-It's conceivable that this code wont work as intended in all windows variations, so displaying the monitor
+It's conceivable ( probable? likely? ) that this code wont work as intended in all windows variations, so displaying the monitor
 model name can be disabled with the cvar 'vr_listMonitorName' if this behaves poorly.
 =========================*/
 
@@ -1213,8 +1211,10 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t>& 
 /*
 ====================
 R_GetDisplayNumForDeviceName
-Koz get the display num for a device name
-For autoselecting HMD
+Koz get the display number for a device name
+Useful for autoselecting HMD as primary display.
+Update: no longer useful with removal of extended modes in the newer oculus SDK,
+left here to see if may be useful later.
 
 ====================
 */
@@ -1519,68 +1519,7 @@ void GLimp_PreInit()
 }
 
 // OCULUS BEGIN
-static bool GLW_CreateOculusDirectWindow( glimpParms_t parms )
-{
-	int				x, y, w, h;
-	int				exstyle;
 
-	//
-	// compute width and height
-	//
-
-	RECT	r;
-
-	exstyle = 0;
-	AdjustWindowRect( &r, WS_OVERLAPPEDWINDOW, FALSE );
-
-	w = vr->hmdWidth; //Hmd->Resolution.w;
-	h = vr->hmdHeight; // oculus->Hmd->Resolution.h;
-	
-
-	x = vr->hmdWinPosX;// oculus->Hmd->WindowsPos.x;
-	y = vr->hmdWinPosY;// oculus->Hmd->WindowsPos.y;
-	
-	win32.hWnd = CreateWindowEx(
-		exstyle,
-		"DOOM3_BFG_VR",
-		"DOOM3 BFG VR",
-		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
-		x, y, w, h,
-		NULL,
-		NULL,
-		win32.hInstance,
-		NULL );
-
-	if ( !win32.hWnd ) {
-		common->Printf( "^3GLW_CreateWindow() - Couldn't create window^0\n" );
-		return false;
-	}
-
-	::SetTimer( win32.hWnd, 0, 100, NULL );
-
-	ShowWindow( win32.hWnd, SW_SHOW );
-	UpdateWindow( win32.hWnd );
-	common->Printf( "...created window @ %d,%d (%dx%d)\n", x, y, w, h );
-
-	ovrHmd_AttachToWindow( vr->hmd, win32.hWnd, NULL, NULL );
-
-	if ( !GLW_InitDriver( parms ) ) {
-		ShowWindow( win32.hWnd, SW_HIDE );
-		DestroyWindow( win32.hWnd );
-		win32.hWnd = NULL;
-		return false;
-	}
-
-	SetForegroundWindow( win32.hWnd );
-	SetFocus( win32.hWnd );
-	
-	//vr->InitDirectRendering( win32.hWnd, win32.hDC );
-	//ovrHmd_DismissHSWDisplay( oculus->Hmd );
-	
-	glConfig.isFullscreen = parms.fullScreen;
-
-	return true;
-}
 /*
 ===================
 GLimp_Init
@@ -1642,28 +1581,12 @@ bool GLimp_Init( glimpParms_t parms )
 		return false;
 	}
 
-	if ( vr_enable.GetBool() && vr_oculusHmdDirectMode.GetBool() )
+	// try to create a window with the correct pixel format
+	// and init the renderer context
+	if ( !GLW_CreateWindow( parms ) )
 	{
-
-		if ( !GLW_CreateOculusDirectWindow( parms ) )
-		{
-			GLimp_Shutdown();
-			return false;
-		}
-
-		// wglSwapinterval, etc
-		GLW_CheckWGLExtensions( win32.hDC );
-
-	}
-	else
-	{
-		// try to create a window with the correct pixel format
-		// and init the renderer context
-		if ( !GLW_CreateWindow( parms ) )
-		{
-			GLimp_Shutdown();
-			return false;
-		}
+		GLimp_Shutdown();
+		return false;
 	}
 
 	glConfig.isFullscreen = parms.fullScreen;

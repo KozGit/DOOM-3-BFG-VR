@@ -801,7 +801,7 @@ bool idRenderModelMD5::LoadBinaryModel( idFile* file, const ID_TIME_T sourceTime
 		{
 			if ( materialName == "textures/common/pda_gui" )
 			{
-				// Koz pda  - change material to _pdaImage instead of deault 
+				// Koz pda  - change material to _pdaImage instead of default 
 				// this allows rendering the PDA & swf menus to the model ingame.
 				// koz fixme just create a new model for VR and dont hack on load.
 				meshes[i].shader = declManager->FindMaterial( "_pdaImage" );

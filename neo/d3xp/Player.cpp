@@ -9163,7 +9163,9 @@ void idPlayer::UpdateLaserSight()
 		weapon->IsHidden() ||
 		weapon->hideOffset != 0 ||	// koz - turn off lasersight If gun is lowered ( in gui ).
 		game->IsPDAOpen() ||		// koz - turn off laser sight if using pda.
+		weapon.GetEntity()->GetGrabberState() >= 2 || // koz turn off laser sight if grabber is dragging and entity
 		!weapon->GetMuzzlePositionWithHacks( muzzleOrigin, muzzleAxis ) ) // no lasersight for fists,grenades,soulcube etc
+		
 	{
 
 		// hide it

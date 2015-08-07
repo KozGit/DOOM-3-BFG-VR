@@ -202,6 +202,7 @@ public:
 	// GUIs
 	const char* 			Icon() const;
 	void					UpdateGUI();
+	void					UpdateVRGUI();
 	const char* 			PdaIcon() const;
 	const char* 			DisplayName() const;
 	const char* 			Description() const;
@@ -384,6 +385,11 @@ private:
 	renderLight_t			guiLight;
 	int						guiLightHandle;
 	
+	// koz begin
+	// VR Stat Gui - this is the 'watch' the player wears in VR to display stats.
+	class idUserInterface*	vrStatGui;
+	// koz end
+
 	// muzzle flash
 	renderLight_t			muzzleFlash;		// positioned on view weapon bone
 	int						muzzleFlashHandle;

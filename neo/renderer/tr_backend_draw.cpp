@@ -456,7 +456,7 @@ void RB_DrawDistortionMesh( int eye, bool timewarp, int ocuframe, ovrPosef thePo
 		EyeRotationEnd = glGetUniformLocation( progr, "EyeRotationEnd" );
 
 		ovrMatrix4f timeWarpMatrices[2];
-		ovrHmd_GetEyeTimewarpMatrices( vr->hmd, (ovrEyeType)eye, thePose, timeWarpMatrices );
+		//ovrHmd_GetEyeTimewarpMatrices( vr->hmd, (ovrEyeType)eye, thePose, timeWarpMatrices );
 
 		glUniformMatrix4fv( EyeRotationStart, 1, GL_TRUE, (GLfloat *)timeWarpMatrices[0].M );
 		glUniformMatrix4fv( EyeRotationEnd, 1, GL_TRUE, (GLfloat *)timeWarpMatrices[1].M );

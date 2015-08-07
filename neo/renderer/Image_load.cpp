@@ -442,28 +442,7 @@ void idImage::ActuallyLoadImage( bool fromBackEnd )
 			}
 		}
 	}
-	
-	// Carl begin: Try to load from a targa or jpeg file (.tga, .jpg)
-	if ( binaryFileTime == FILE_NOT_FOUND_TIMESTAMP )
-	{
-		byte * pic = NULL;
-		int w, h;
-		R_LoadImage( GetName(), &pic, &w, &h, &binaryFileTime, false );
-		if ( binaryFileTime != FILE_NOT_FOUND_TIMESTAMP )
-		{
-			opts.width = w;
-			opts.height = h;
-			opts.numLevels = 1;
-			opts.format = FMT_RGBA8;
-			opts.colorFormat = CFM_DEFAULT;
-			opts.textureType = TT_2D;
-			AllocImage();
-			SubImageUpload( 0, 0, 0, 0, opts.width, opts.height, pic );
-			R_StaticFree( pic ); // this might cause problems with JPEG files.
-			return;
-		}
-	}
-	// Carl end
+
 	const bimageFile_t& header = im.GetFileHeader();
 	
 	if( ( fileSystem->InProductionMode() && binaryFileTime != FILE_NOT_FOUND_TIMESTAMP ) || ( ( binaryFileTime != FILE_NOT_FOUND_TIMESTAMP )

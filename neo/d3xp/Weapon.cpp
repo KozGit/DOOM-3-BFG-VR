@@ -1356,8 +1356,15 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 	if( guiName[0] )
 	{
 		renderEntity.gui[ 0 ] = uiManager->FindGui( guiName, true, false, true );
+		common->Printf( "Weapon guiname = %s\n", guiName );// koz delete me
 	}
 	
+
+	// Koz begin - gui for stats device on player wrist in VR. 
+	vrStatGui = uiManager->FindGui( "guis/weapons/vrstatgui.gui", true, false, true );
+	// Koz end
+
+
 	zoomFov = weaponDef->dict.GetInt( "zoomFov", "70" );
 	berserk = weaponDef->dict.GetInt( "berserk", "2" );
 	
@@ -1540,6 +1547,77 @@ const char* idWeapon::Description() const
 {
 	return idLocalization::GetString( itemDesc );
 }
+/*
+================
+idWeapon::UpdateVRGUI
+================
+*/
+void idWeapon::UpdateVRGUI()
+{
+
+	
+	if ( vrStatGui == NULL )
+	{
+		return;
+	}
+
+	if ( status == WP_HOLSTERED )
+	{
+		return;
+	}
+
+	if ( isPlayerFlashlight ) return;
+
+	if ( owner->weaponGone )
+	{
+		// dropping weapons was implemented wierd, so we have to not update the gui when it happens or we'll get a negative ammo count
+		return;
+	}
+
+	if ( !owner->IsLocallyControlled() )
+	{
+		// if updating the hud for a followed client
+		if ( gameLocal.GetLocalClientNum() >= 0 && gameLocal.entities[gameLocal.GetLocalClientNum()] && gameLocal.entities[gameLocal.GetLocalClientNum()]->IsType( idPlayer::Type ) )
+		{
+			idPlayer* p = static_cast< idPlayer* >(gameLocal.entities[gameLocal.GetLocalClientNum()]);
+			if ( !p->spectating || p->spectator != owner->entityNumber )
+			{
+				return;
+			}
+		}
+		else
+		{
+			return;
+		}
+	}
+
+	int inclip = AmmoInClip();
+	int ammoamount = AmmoAvailable();
+		
+	if ( ammoamount < 0 )
+	{
+		// show infinite ammo
+		vrStatGui->SetStateString( "player_ammo", "" );
+	}
+	else
+	{
+		// show remaining ammo
+		vrStatGui->SetStateString( "player_totalammo", va( "%i", ammoamount ) );
+		vrStatGui->SetStateString( "player_ammo", ClipSize() ? va( "%i", inclip ) : "--" );
+		vrStatGui->SetStateString( "player_clips", ClipSize() ? va( "%i", ammoamount / ClipSize() ) : "--" );
+
+		vrStatGui->SetStateString( "player_allammo", va( "%i/%i", inclip, ammoamount ) );
+	}
+	vrStatGui->SetStateBool( "player_ammo_empty", (ammoamount == 0) );
+	vrStatGui->SetStateBool( "player_clip_empty", (inclip == 0) );
+	vrStatGui->SetStateBool( "player_clip_low", (inclip <= lowAmmo) );
+
+	//Let the GUI know the total amount of ammo regardless of the ammo required value
+	vrStatGui->SetStateString( "player_ammo_count", va( "%i", AmmoCount() ) );
+
+	//Grabber Gui Info
+	vrStatGui->SetStateString( "grabber_state", va( "%i", grabberState ) );
+}
 
 /*
 ================
@@ -1548,6 +1626,9 @@ idWeapon::UpdateGUI
 */
 void idWeapon::UpdateGUI()
 {
+	
+	if ( game->isVR ) UpdateVRGUI();
+		
 	if( !renderEntity.gui[ 0 ] )
 	{
 		return;
@@ -2692,6 +2773,8 @@ bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 			//GetGlobalJointTransform(true, bodJoint, discardedOrigin, axis);
 			std::swap( axis[0], axis[2] ); // koz fixme just swap like the rocketlauncher this should work now test and cleanup
 			//axis[0] = -axis[0];
+			//common->Printf( "GMPWH returning value for WEAPON_SHOTGUN_DOUBLE \n" );
+			
 			break;
 		}
 
@@ -2704,6 +2787,7 @@ bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 			forward *= scaleOffset;
 			origin += forward;
 			break;
+			
 		}
 
 		case WEAPON_PLASMAGUN:
@@ -2728,8 +2812,16 @@ koz return weapon enumeration
 */
 weapon_t idWeapon::IdentifyWeapon()
 {
-	static weapon_t currentWeapon;
+	static int lastFrame = 0;
+	static weapon_t currentWeapon = NO_WEAPON;
 	static weapon_t lastWeapon = NO_WEAPON; // lastweapon holds the last actual weapon value, so the weapon enum will never return a value of 'weapon_flaslight'. nothing to do with the players previous weapon
+
+	if ( lastFrame == idLib::frameNumber ) // only check once per game frame.
+	{
+		return currentWeapon;
+	}
+
+	lastFrame = idLib::frameNumber;
 
 	if ( weaponDef != NULL )
 	{
@@ -2747,6 +2839,7 @@ weapon_t idWeapon::IdentifyWeapon()
 		else if ( idStr::Icmp( "weapon_bfg", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_BFG;
 		else if ( idStr::Icmp( "weapon_soulcube", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SOULCUBE;
 		else if ( idStr::Icmp( "weapon_shotgun_double_mp", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SHOTGUN_DOUBLE_MP;
+		else if ( idStr::Icmp( "weapon_grabber", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_GRABBER;
 		else if ( idStr::Icmp( "weapon_shotgun_double", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SHOTGUN_DOUBLE;
 		else if ( idStr::Icmp( "weapon_artifact", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_ARTIFACT;
 		else if ( idStr::Icmp( "weapon_pda", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_PDA;
@@ -2758,7 +2851,9 @@ weapon_t idWeapon::IdentifyWeapon()
 	{
 		currentWeapon = NO_WEAPON;
 	}
+		
 	return currentWeapon;
+	
 }
 /*
 ================
@@ -4129,8 +4224,8 @@ idWeapon::Event_PlayAnim
 void idWeapon::Event_PlayAnim( int channel, const char* animname )
 {
 	int anim;
-	
 	anim = animator.GetAnim( animname );
+	
 	if( !anim )
 	{
 		gameLocal.Warning( "missing '%s' animation on '%s' (%s)", animname, name.c_str(), GetEntityDefName() );
@@ -4166,7 +4261,6 @@ idWeapon::Event_PlayCycle
 void idWeapon::Event_PlayCycle( int channel, const char* animname )
 {
 	int anim;
-	
 	anim = animator.GetAnim( animname );
 	if( !anim )
 	{
@@ -4176,6 +4270,7 @@ void idWeapon::Event_PlayCycle( int channel, const char* animname )
 	}
 	else
 	{
+				
 		if( !( owner && owner->GetInfluenceLevel() ) )
 		{
 			Show();
@@ -4429,6 +4524,7 @@ void idWeapon::GetProjectileLaunchOriginAndAxis( idVec3& origin, idMat3& axis )
 	assert( owner != NULL );
 	if ( game->isVR )
 	{
+		common->Printf( "GPLOAA getting muzzle position w/ hacks\n" ); // koz delete me
 		GetMuzzlePositionWithHacks( origin, axis );
 		return;
 	}
@@ -4757,18 +4853,26 @@ void idWeapon::Event_LaunchProjectilesEllipse( int num_projectiles, float spread
 		worldModel.GetEntity()->SetShaderParm( SHADERPARM_TIMEOFFSET, renderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] );
 	}
 	
-	// calculate the muzzle position
-	if( barrelJointView != INVALID_JOINT && projectileDict.GetBool( "launchFromBarrel" ) )
-	{
-		// there is an explicit joint for the muzzle
-		GetGlobalJointTransform( true, barrelJointView, muzzleOrigin, muzzleAxis );
-	}
-	else
-	{
-		// go straight out of the view
-		muzzleOrigin = playerViewOrigin;
-		muzzleAxis = playerViewAxis;
-	}
+	// koz begin - calculate the muzzle position
+	GetProjectileLaunchOriginAndAxis( muzzleOrigin, muzzleAxis );
+
+	/*	koz original code - changed to maintain consistency with Event_LaunchProjectiles
+		// calculate the muzzle position
+		if( barrelJointView != INVALID_JOINT && projectileDict.GetBool( "launchFromBarrel" ) )
+		{
+			// there is an explicit joint for the muzzle
+			GetGlobalJointTransform( true, barrelJointView, muzzleOrigin, muzzleAxis );
+		}
+		else
+		{
+			// go straight out of the view
+			muzzleOrigin = playerViewOrigin;
+			muzzleAxis = playerViewAxis;
+		}
+	
+	*/
+
+	// koz end
 	
 	// add some to the kick time, incrementally moving repeat firing weapons back
 	if( kick_endtime < gameLocal.time )
@@ -4796,7 +4900,12 @@ void idWeapon::Event_LaunchProjectilesEllipse( int num_projectiles, float spread
 			spin = ( float )DEG2RAD( 360.0f ) * gameLocal.random.RandomFloat();
 			anga = idMath::Sin( spreadRadA * gameLocal.random.RandomFloat() );
 			angb = idMath::Sin( spreadRadB * gameLocal.random.RandomFloat() );
-			dir = playerViewAxis[ 0 ] + playerViewAxis[ 2 ] * ( angb * idMath::Sin( spin ) ) - playerViewAxis[ 1 ] * ( anga * idMath::Cos( spin ) );
+			
+			// koz begin 
+			//dir = playerViewAxis[ 0 ] + playerViewAxis[ 2 ] * ( angb * idMath::Sin( spin ) ) - playerViewAxis[ 1 ] * ( anga * idMath::Cos( spin ) );
+			dir = muzzleAxis[0] + muzzleAxis[2] * (angb * idMath::Sin( spin )) - muzzleAxis[1] * (anga * idMath::Cos( spin ));
+			// koz end
+			
 			dir.Normalize();
 			
 			gameLocal.SpawnEntityDef( projectileDict, &ent );
@@ -4815,10 +4924,16 @@ void idWeapon::Event_LaunchProjectilesEllipse( int num_projectiles, float spread
 			// make sure the projectile starts inside the bounding box of the owner
 			if( i == 0 )
 			{
-				muzzle_pos = muzzleOrigin + playerViewAxis[ 0 ] * 2.0f;
+				//muzzle_pos = muzzleOrigin + playerViewAxis[ 0 ] * 2.0f;
+				muzzle_pos = muzzleOrigin + muzzleAxis[0] * 2.0f;
+				
+				
 				if( ( ownerBounds - projBounds ).RayIntersection( muzzle_pos, playerViewAxis[0], distance ) )
 				{
-					start = muzzle_pos + distance * playerViewAxis[0];
+					// koz begin
+					//start = muzzle_pos + distance * playerViewAxis[0];
+					start = muzzle_pos + distance * muzzleAxis[0];
+					// koz end
 				}
 				else
 				{
