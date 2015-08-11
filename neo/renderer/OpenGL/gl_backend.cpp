@@ -254,15 +254,6 @@ Renders the draw list twice, with slight modifications for left eye / right eye
 */
 void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds )
 {
-	// Koz begin - need to keep a copy of the current and the last render for overdrive
-	static int currentEyeTexture = 0; 
-	static int previousEyeTexture = 0;
-
-	previousEyeTexture = currentEyeTexture;
-	currentEyeTexture = 1 - currentEyeTexture;
-	//Koz end
-	
-	
 	uint64 backEndStartTime = Sys_Microseconds();
 	
 	// If we are in a monoscopic context, this draws to the only buffer, and is
@@ -285,23 +276,18 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 
 		
 	// create the stereoRenderImage if we haven't already
-	
-	// Koz begin
-	// create 2 additional stereoRenderImages to hold the previous render for each eye.
-	static idImage * stereoRenderImages[2][2];
+	static idImage * stereoRenderImages[2];
 	for ( int i = 0; i < 2; i++ )
 	{
-		for ( int j = 0; j < 2; j++ )
+		
+		if ( stereoRenderImages[i] == NULL )
 		{
-			if ( stereoRenderImages[i][j] == NULL )
-			{
-				stereoRenderImages[i][j] = globalImages->ImageFromFunction( va( "_stereoRender%i%j", i, j ), R_MakeStereoRenderImage );
-			}
-			if ( stereoRenderImages[i][j]->GetUploadWidth() != renderSystem->GetWidth() ||
-				stereoRenderImages[i][j]->GetUploadHeight() != renderSystem->GetHeight() )
-			{
-				stereoRenderImages[i][j]->Resize( renderSystem->GetWidth(), renderSystem->GetHeight() );
-			}
+			stereoRenderImages[i] = globalImages->ImageFromFunction( va( "_stereoRender%i", i ), R_MakeStereoRenderImage );
+		}
+		if ( stereoRenderImages[i]->GetUploadWidth() != renderSystem->GetWidth() ||
+			stereoRenderImages[i]->GetUploadHeight() != renderSystem->GetHeight() )
+		{
+			stereoRenderImages[i]->Resize( renderSystem->GetWidth(), renderSystem->GetHeight() );
 		}
 	}
 	
@@ -320,8 +306,6 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		// set up the target texture we will draw to
 		int targetEye = ( stereoEye == 1 ) ? 1 : 0;
 		
-		//targetEye = vr->eyeOrder[targetEye]; // koz
-
 		// Set the back end into a known default state to fix any stale render state issues
 		GL_SetDefaultState();
 		renderProgManager.Unbind();
@@ -374,12 +358,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		}
 		
 		// copy to the target
-		//Koz begin
-		stereoRenderImages[targetEye][currentEyeTexture]->CopyFramebuffer( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
-		vr->hmdCurrentRender[targetEye] = stereoRenderImages[targetEye][currentEyeTexture];
-		vr->hmdPreviousRender[targetEye] = stereoRenderImages[targetEye][previousEyeTexture];
-		//Koz end 
-
+		stereoRenderImages[targetEye]->CopyFramebuffer( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
 	}
 	
 	// perform the final compositing / warping / deghosting to the actual framebuffer(s)
@@ -421,32 +400,32 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		case STEREO3D_QUAD_BUFFER:
 			glDrawBuffer( GL_BACK_RIGHT );
 			GL_SelectTexture( 0 );
-			stereoRenderImages[1][currentEyeTexture]->Bind();
+			stereoRenderImages[1]->Bind();
 			GL_SelectTexture( 1 );
-			stereoRenderImages[0][currentEyeTexture]->Bind();
+			stereoRenderImages[0]->Bind();
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			
 			glDrawBuffer( GL_BACK_LEFT );
 			GL_SelectTexture( 1 );
-			stereoRenderImages[1][currentEyeTexture]->Bind();
+			stereoRenderImages[1]->Bind();
 			GL_SelectTexture( 0 );
-			stereoRenderImages[0][currentEyeTexture]->Bind();
+			stereoRenderImages[0]->Bind();
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			
 			break;
 		case STEREO3D_HDMI_720:
 			// HDMI 720P 3D
 			GL_SelectTexture( 0 );
-			stereoRenderImages[1][currentEyeTexture]->Bind();
+			stereoRenderImages[1]->Bind();
 			GL_SelectTexture( 1 );
-			stereoRenderImages[0][currentEyeTexture]->Bind();
+			stereoRenderImages[0]->Bind();
 			GL_ViewportAndScissor( 0, 0, 1280, 720 );
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			
 			GL_SelectTexture( 0 );
-			stereoRenderImages[0][currentEyeTexture]->Bind();
+			stereoRenderImages[0]->Bind();
 			GL_SelectTexture( 1 );
-			stereoRenderImages[1][currentEyeTexture]->Bind();
+			stereoRenderImages[1]->Bind();
 			GL_ViewportAndScissor( 0, 750, 1280, 720 );
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			
@@ -463,14 +442,10 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			
 			if ( game->isVR ) 
 			{
-				
-				//vr->FrameWait();
-				
-				vr->HMDRender( stereoRenderImages[0][currentEyeTexture], stereoRenderImages[1][currentEyeTexture],
-					stereoRenderImages[0][previousEyeTexture], stereoRenderImages[1][previousEyeTexture] );
+							
+				vr->HMDRender( stereoRenderImages[0], stereoRenderImages[1] );
 
 				if ( vr->playerDead || ( game->Shell_IsActive() && !vr->PDAforced && !vr->PDArising ) ) vr->HMDTrackStatic();
-								
 				GL_CheckErrors();
 				break;
 			}
@@ -483,32 +458,32 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		// just like STEREO3D_SIDE_BY_SIDE_COMPRESSED, so fall through.
 		case STEREO3D_SIDE_BY_SIDE_COMPRESSED:
 			GL_SelectTexture( 0 );
-			stereoRenderImages[0][currentEyeTexture]->Bind();
+			stereoRenderImages[0]->Bind();
 			GL_SelectTexture( 1 );
-			stereoRenderImages[1][currentEyeTexture]->Bind();
+			stereoRenderImages[1]->Bind();
 			GL_ViewportAndScissor( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			
 			GL_SelectTexture( 0 );
-			stereoRenderImages[1][currentEyeTexture]->Bind();
+			stereoRenderImages[1]->Bind();
 			GL_SelectTexture( 1 );
-			stereoRenderImages[0][currentEyeTexture]->Bind();
+			stereoRenderImages[0]->Bind();
 			GL_ViewportAndScissor( renderSystem->GetWidth(), 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			break;
 			
 		case STEREO3D_TOP_AND_BOTTOM_COMPRESSED:
 			GL_SelectTexture( 1 );
-			stereoRenderImages[0][currentEyeTexture]->Bind();
+			stereoRenderImages[0]->Bind();
 			GL_SelectTexture( 0 );
-			stereoRenderImages[1][currentEyeTexture]->Bind();
+			stereoRenderImages[1]->Bind();
 			GL_ViewportAndScissor( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			
 			GL_SelectTexture( 1 );
-			stereoRenderImages[1][currentEyeTexture]->Bind();
+			stereoRenderImages[1]->Bind();
 			GL_SelectTexture( 0 );
-			stereoRenderImages[0][currentEyeTexture]->Bind();
+			stereoRenderImages[0]->Bind();
 			GL_ViewportAndScissor( 0, renderSystem->GetHeight(), renderSystem->GetWidth(), renderSystem->GetHeight() );
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 			break;
@@ -516,12 +491,12 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		case STEREO3D_INTERLACED:
 			// every other scanline
 			GL_SelectTexture( 0 );
-			stereoRenderImages[0][currentEyeTexture]->Bind();
+			stereoRenderImages[0]->Bind();
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 			
 			GL_SelectTexture( 1 );
-			stereoRenderImages[1][currentEyeTexture]->Bind();
+			stereoRenderImages[1]->Bind();
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 			
