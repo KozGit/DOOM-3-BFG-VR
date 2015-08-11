@@ -371,40 +371,8 @@ void iVr::HMDInit( void )
 
 }
 
-/*
-=======================
-iVr::CreateOculusTexture
-Generate an ovrTexture with our opengl texture
-=======================
-
-ovrTexture iVr::GenOvrTexture( int eye )
-{
-	ovrTexture tex;
-
-	OVR::Sizei newRTSize( G_ovrRenderWidth, G_ovrRenderHeight );
-
-	ovrGLTextureData* texData = (ovrGLTextureData*)&tex;
-
-	texData->Header.API = ovrRenderAPI_OpenGL;
-	texData->Header.TextureSize = newRTSize;
-	texData->Header.RenderViewport = Recti( newRTSize );
-	texData->TexId = EyeTexture[eye];
-
-	return tex;
-}
-*/
 
 
-/*
-==============
-iVr::HMDInitDirectRendering
-==============
-*/
-void iVr::HMDInitDirectRendering( HWND hwnd, HDC dc )
-{
-	vr->hWnd = hwnd;
-	vr->dc = dc;
-}
 /*
 ==============
 iVr::HMDInitializeDistortion
@@ -468,14 +436,10 @@ void iVr::HMDInitializeDistortion()
 		hmdEye[eye].projection.x.offset = ( hmdEye[eye].eyeFov.LeftTan - hmdEye[eye].eyeFov.RightTan ) * hmdEye[eye].projection.x.scale * 0.5f;
 		hmdEye[eye].projection.y.scale = 2.0f / ( hmdEye[eye].eyeFov.UpTan + hmdEye[eye].eyeFov.DownTan );
 		hmdEye[eye].projection.y.offset = ( hmdEye[eye].eyeFov.UpTan - hmdEye[eye].eyeFov.DownTan ) * hmdEye[eye].projection.y.scale * 0.5f;
-	
-		/*hmdEye[eye].viewOffset = (idVec3)( -hmdEye[eye].eyeRenderDesc.ViewAdjust.x ,	
-												hmdEye[eye].eyeRenderDesc.ViewAdjust.y ,
-												hmdEye[eye].eyeRenderDesc.ViewAdjust.z); */
-
-		hmdEye[eye].viewOffset = (idVec3)(-hmdEye[eye].eyeRenderDesc.HmdToEyeViewOffset.x,
-			hmdEye[eye].eyeRenderDesc.HmdToEyeViewOffset.y,
-			hmdEye[eye].eyeRenderDesc.HmdToEyeViewOffset.z);
+			
+		hmdEye[eye].viewOffset = (idVec3)( -hmdEye[eye].eyeRenderDesc.HmdToEyeViewOffset.x,
+											hmdEye[eye].eyeRenderDesc.HmdToEyeViewOffset.y,
+											hmdEye[eye].eyeRenderDesc.HmdToEyeViewOffset.z);
 				
 		common->Printf("EYE %d px.scale %f, px.offset %f, py.scale %f, py.offset %f\n",eye,hmdEye[eye].projection.x.scale,hmdEye[eye].projection.x.offset,hmdEye[eye].projection.y.scale,hmdEye[eye].projection.y.offset);
 		common->Printf("EYE %d viewoffset viewadjust x %f y %f z %f\n",eye,hmdEye[eye].viewOffset.x,hmdEye[eye].viewOffset.y,hmdEye[eye].viewOffset.z);
@@ -483,12 +447,12 @@ void iVr::HMDInitializeDistortion()
 		ovrSizei rendertarget;
 		ovrRecti viewport = { 0, 0, 0 ,0 };
 		
-		rendertarget = ovrHmd_GetFovTextureSize( vr->hmd, (ovrEyeType)eyeOrder[0], vr->hmdEye[eyeOrder[0]].eyeFov, vr_pixelDensity.GetFloat() ); // make sure both eyes render to the same size target
+		rendertarget = ovrHmd_GetFovTextureSize( vr->hmd, ( ovrEyeType ) eyeOrder[0], vr->hmdEye[ eyeOrder[0] ].eyeFov, vr_pixelDensity.GetFloat() ); // make sure both eyes render to the same size target
 				
 		if ( useFBO && !fboCreated  ) 
 		{
 			common->Printf("Using FBOs.\n");
-			common->Printf("Requested pixel density = %f \n",vr_pixelDensity.GetFloat() );
+			common->Printf("Requested pixel density = %f \n", vr_pixelDensity.GetFloat() );
 			common->Printf("Eye %d Rendertaget Width x Height = %d x %d\n",eye,rendertarget.w, rendertarget.h);
 			hmdEye[eye].renderTarget.h = rendertarget.h; // koz was height?
 			hmdEye[eye].renderTarget.w = rendertarget.w;

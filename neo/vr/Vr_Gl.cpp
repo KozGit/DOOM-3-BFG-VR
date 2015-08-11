@@ -426,142 +426,76 @@ Draw the pre rendered eye textures to the back buffer.
 Apply FXAA if enabled.
 Apply HMD distortion correction.
 
-eye textures: idImage leftCurrent, rightCurrent, leftLast, rightLast   - current and last refer to frame
+eye textures: idImage leftCurrent, rightCurrent
 ====================
 */
 
-void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent, idImage *leftLast, idImage *rightLast ) 
+void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent ) 
 {
 
 	extern bool hmdInFrame;
 	extern ovrFrameTiming hmdFrameTime;
-	bool timewarp;
+	
 	static int FBOW ;
 	static int FBOH ;
 	static int ocuframe = 0;
-	static idImage * finalEyeImage[2];
+	
 	ovrPosef thePose;
 	GL_CheckErrors();
 	HMDGetFrameData( ocuframe, thePose );
-	//FrameStart( ocuframe );
 		
-	timewarp = ( 0 && hmdInFrame && vr_timewarp.GetInteger() ); // koz fixme
-	
-	if ( vr->useFBO ) // if using FBOs, bind them, otherwise bind the default frame buffer. 
-	{
-		if ( VR_AAmode == VR_AA_FXAA ) // perform post process FXAA antialiasing on stereoRenderImages
-		{
-			// VR_ResolveFXAA(leftCurrent, rightCurrent);
-		}
-	}
-/*		VR_BindFBO( GL_FRAMEBUFFER, VR_FullscreenFBO );
-		GL_ViewportAndScissor( 0, 0, VR_FullscreenFBO.width, VR_FullscreenFBO.height );
-	}
-	else
-	{
-		glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // bind the default framebuffer if necessary
-		glDrawBuffer( GL_BACK );
-		GL_ViewportAndScissor( 0, 0, renderSystem->GetNativeWidth(), renderSystem->GetNativeHeight() );
-	}*/
+	// still need to handle fxaa
 		
 	// AA is done,  FBO is bound, render headtracked quads
 	
-	if ( 0 && !game->IsInGame() ) 
-	{
-		HUDRender( leftCurrent, rightCurrent );
-		// headtracked textures now in hmdEyeImage[0,1]		
-		finalEyeImage[0] = hmdEyeImage[0];
-		finalEyeImage[1] = hmdEyeImage[1];
-	}
-	else {
-		finalEyeImage[0] = leftCurrent;
-		finalEyeImage[1] = rightCurrent;
-	}
+	
 		
 	// final eye textures now in finalEyeImage[0,1]				
 
 	if ( vr->useFBO ) // if using FBOs, bind them, otherwise bind the default frame buffer.
 	{ 
-
 		
+		FBOW = globalFramebuffers.fullscreenFBO->GetWidth();
+		FBOH = globalFramebuffers.fullscreenFBO->GetHeight();
 		globalFramebuffers.fullscreenFBO->Bind();
-		//VR_BindFBO( GL_FRAMEBUFFER, VR_FullscreenFBO );
-		//GL_ViewportAndScissor( 0, 0, VR_FullscreenFBO.width, VR_FullscreenFBO.height 
-		GL_ViewportAndScissor( 0, 0, globalFramebuffers.fullscreenFBO->GetWidth(), globalFramebuffers.fullscreenFBO->GetHeight() );
 		GL_CheckErrors();
 
 	}
 	else	{
 
+		FBOW = renderSystem->GetNativeWidth();
+		FBOH = renderSystem->GetNativeHeight();
 		glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // bind the default framebuffer if necessary
 		glDrawBuffer( GL_BACK );
-		GL_ViewportAndScissor( 0, 0, renderSystem->GetNativeWidth(), renderSystem->GetNativeHeight() );
 		backEnd.glState.currentFramebuffer = NULL;
 	} 
 	
-	/*glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // bind the default framebuffer if necessary
-	glDrawBuffer( GL_BACK );
-	GL_ViewportAndScissor( 0, 0, renderSystem->GetNativeWidth(), renderSystem->GetNativeHeight() );
-	backEnd.glState.currentFramebuffer = NULL;*/
-
-	// this is the Rift warp
-	// Updated shaders support oculus distortion meshes, timewarp,
-	// and chromatic abberation correction.
-
-	if ( 0 && timewarp && vr_chromaCorrection.GetInteger() ) 
-	{
-		common->Printf("Timewarp chroma\n");
-		renderProgManager.BindShader_OculusWarpTimewarpChrAb();
-		// koz fixme ovr_WaitTillTime( hmdFrameTime.TimewarpPointSeconds);
-
-	}
-	else if ( vr_chromaCorrection.GetInteger() != 0  ) 
-	{
-		//common->Printf("Chroma\n");
-		renderProgManager.BindShader_OculusWarpChrAb();
-	}
-	else if ( timewarp ) 
-	{
-		common->Printf("Timewarp\n");
-		//renderProgManager.BindShader_OculusWarpTimewarp();
-		//ovr_WaitTillTime( hmdFrameTime.TimewarpPointSeconds);
-	}
-	else 
-	{
-		renderProgManager.BindShader_OculusWarp();
-	}
 	
+	renderProgManager.BindShader_PostProcess(); // pass thru shader
+		
 	glClearColor( 0, 0, 0, 0 );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );	
 	GL_CheckErrors();
-	// draw the left eye texture.				
-	GL_SelectTexture( 0 );
-	finalEyeImage[0]->Bind();
-	//leftCurrent->Bind();
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
-
-	GL_SelectTexture( 1 ); // bind the last rendered eye texture for overdrive
-	leftLast->Bind();
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER  );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
-	
-	RB_DrawDistortionMesh( 0 , timewarp, ocuframe, thePose ); // draw left eye
-	GL_CheckErrors();
-	// draw the right eye texture
-	GL_SelectTexture( 0 );
-	finalEyeImage[1]->Bind();
-	//rightCurrent->Bind();
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
-	GL_CheckErrors();
-	GL_SelectTexture( 1 ); // bind the last rendered eye texture for overdrive calc
-	rightLast->Bind();
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
-	
- 	RB_DrawDistortionMesh( 1 , timewarp, ocuframe, thePose ); // draw right eye
 		
+	// draw the left eye texture.				
+	GL_ViewportAndScissor( 0, 0, FBOW / 2, FBOH );
+	GL_SelectTexture( 0 );
+	leftCurrent->Bind();
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
+	RB_DrawElementsWithCounters( &backEnd.unitSquareSurface ); // draw it
+
+	
+	// draw the right eye texture
+	GL_ViewportAndScissor( FBOW / 2, 0, FBOW, FBOH );
+	GL_SelectTexture( 0 );
+	rightCurrent->Bind();
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
+	RB_DrawElementsWithCounters( &backEnd.unitSquareSurface ); // draw it
+	 	
+	// The individual eye images have been merged into a single FBO.  Copy it to the oculus texture and hand off to the HMD.
+	// koz here
 	if ( vr->useFBO ) 
 	{	// distortion corrected textures have been rendered to fullscreen FBO  
 		// now draw a fullscreen quad to the default buffer		

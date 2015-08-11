@@ -78,9 +78,8 @@ public:
 	
 	void				HMDInit( void );
 	void				HMDInitializeDistortion( void );
-	void				HMDInitDirectRendering( HWND, HDC );
 	void				HMDGetOrientation( float &roll, float &pitch, float &yaw, idVec3 &hmdPosition );
-	void				HMDRender( idImage *leftCurrent, idImage *rightCurrent, idImage *leftLast, idImage *rightLast );
+	void				HMDRender( idImage *leftCurrent, idImage *rightCurrent );
 	void				HMDTrackStatic();
 	void				HMDGetFrameData( int &frameIndex, ovrPosef &thePose );
 	void				HMDSetFrameData( int frameIndex, ovrPosef thePose );
@@ -164,9 +163,6 @@ public:
 	idImage*			resolveFBOimage;
 	idImage*			fullscreenFBOimage;
 
-	HWND				hWnd;
-	HDC					dc;
-	
 	ovrTrackingState	hmdTrackingState;
 	ovrFrameTiming		hmdFrameTime;
 	bool				hmdPositionTracked;
