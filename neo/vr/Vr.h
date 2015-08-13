@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "..\LibOVR\Include\OVR_CAPI.h"
+#include "..\LibOVR\Include\OVR_CAPI_GL.h"
 #include "vr_hmd.h"
 #include "vr_sixense.h"
 #include "..\renderer\Framebuffer.h"
@@ -81,9 +82,6 @@ public:
 	void				HMDGetOrientation( float &roll, float &pitch, float &yaw, idVec3 &hmdPosition );
 	void				HMDRender( idImage *leftCurrent, idImage *rightCurrent );
 	void				HMDTrackStatic();
-	void				HMDGetFrameData( int &frameIndex, ovrPosef &thePose );
-	void				HMDSetFrameData( int frameIndex, ovrPosef thePose );
-	
 	void				HUDRender( idImage *image0, idImage *image1 );
 
 	void				HydraInit( void );
@@ -157,12 +155,19 @@ public:
 
 	idImage*			hmdEyeImage[2];
 	idImage*			hmdCurrentRender[2];
-	idImage*			hmdPreviousRender[2];
-
+	
 	idImage*			primaryFBOimage;
 	idImage*			resolveFBOimage;
 	idImage*			fullscreenFBOimage;
 
+	ovrSwapTextureSet * oculusTextureSet[2];
+	GLuint				oculusFboId;
+	GLuint				ocululsDepthTexID;
+	ovrGLTexture*		oculusMirrorTexture;
+	GLuint				oculusMirrorFboId;
+
+	ovrLayerEyeFov		oculusLayer;
+		
 	ovrTrackingState	hmdTrackingState;
 	ovrFrameTiming		hmdFrameTime;
 	bool				hmdPositionTracked;
@@ -344,7 +349,6 @@ extern float	oculusHeight;
 
 extern idImage * hmdEyeImage[2];
 extern idImage * hmdCurrentRender[2];
-extern idImage * hmdPreviousRender[2];
 
 extern bool vrIsBackgroundSaving;
 

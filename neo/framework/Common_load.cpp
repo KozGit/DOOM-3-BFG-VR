@@ -645,8 +645,8 @@ void idCommonLocal::ExecuteMapChange()
 			if ( game->isVR )
 			{
 				vr->HMDTrackStatic();
-				SwapBuffers( win32.hDC );
-				glFinish();
+				//SwapBuffers( win32.hDC );
+				//glFinish();
 			}
 		}
 		
@@ -672,8 +672,8 @@ void idCommonLocal::ExecuteMapChange()
 			{
 				vr->HMDTrackStatic();
 				//UpdateScreen( false, false );
-				SwapBuffers(win32.hDC);
-				glFinish();
+				//SwapBuffers(win32.hDC);
+				//glFinish();
 				
 			}
 			
@@ -1336,8 +1336,8 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 		while ( vr->vrIsBackgroundSaving == true )
 		{
 			vr->HMDTrackStatic();
-			SwapBuffers( win32.hDC );
-			glFinish();
+			//SwapBuffers( win32.hDC );
+			//glFinish();
 		}
 		common->Printf( "Background Saved: %s\n", savename );
 		return;

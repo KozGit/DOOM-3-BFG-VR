@@ -133,7 +133,7 @@ const void GL_BlockingSwapBuffers()
 	
 	if( !glConfig.syncAvailable )
 	{
-		glFinish();
+		// koz reset glFinish();
 	}
 	
 	const int beforeSwap = Sys_Milliseconds();
@@ -150,7 +150,7 @@ const void GL_BlockingSwapBuffers()
 		common->Printf( "%i msec to swapBuffers\n", beforeFence - beforeSwap );
 	}
 	
-	if( glConfig.syncAvailable )
+	if( glConfig.syncAvailable  ) 
 	{
 		swapIndex ^= 1;
 		
@@ -205,7 +205,7 @@ const void GL_BlockingSwapBuffers()
 	}
 	prevBlockTime = exitBlockTime;
 
-	//if ( vr->hasOculusRift && game->isVR ) vr->FrameEnd(); // Koz fixme all of the hmd timing is broken.
+	
 }
 
 /*
@@ -359,6 +359,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		
 		// copy to the target
 		stereoRenderImages[targetEye]->CopyFramebuffer( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
+		vr->hmdCurrentRender[targetEye] = stereoRenderImages[targetEye];
 	}
 	
 	// perform the final compositing / warping / deghosting to the actual framebuffer(s)
@@ -443,9 +444,17 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			if ( game->isVR ) 
 			{
 							
-				vr->HMDRender( stereoRenderImages[0], stereoRenderImages[1] );
+				
 
-				if ( vr->playerDead || ( game->Shell_IsActive() && !vr->PDAforced && !vr->PDArising ) ) vr->HMDTrackStatic();
+				if ( vr->playerDead || (game->Shell_IsActive() && !vr->PDAforced && !vr->PDArising) )
+				{
+					vr->HMDTrackStatic();
+				}
+				else
+				{
+					vr->HMDRender( stereoRenderImages[0], stereoRenderImages[1] );
+				}
+
 				GL_CheckErrors();
 				break;
 			}
@@ -519,7 +528,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	RB_DrawFlickerBox();
 	
 	// make sure the drawing is actually started
-	glFlush();
+	// koz reset glFlush();
 	
 	// we may choose to sync to the swapbuffers before the next frame
 	
@@ -609,7 +618,7 @@ void RB_ExecuteBackEndCommands( const emptyCommand_t* cmds )
 	// Fix for the steam overlay not showing up while in game without Shell/Debug/Console/Menu also rendering
 	glColorMask( 1, 1, 1, 1 );
 	
-	glFlush();
+	// kox reset glFlush();
 	
 	// stop rendering on this thread
 	uint64 backEndFinishTime = Sys_Microseconds();

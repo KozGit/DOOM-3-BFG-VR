@@ -1767,11 +1767,17 @@ void GLimp_SwapBuffers()
 		
 		if( WGLEW_EXT_swap_control )
 		{
-			wglSwapIntervalEXT( interval );
+			if ( game->isVR ) {
+				wglSwapIntervalEXT( 0 );
+			}
+			else
+			{
+				wglSwapIntervalEXT( interval );
+			}
 		}
 	}
 	
-	SwapBuffers( win32.hDC );
+	// koz reset SwapBuffers( win32.hDC ); 
 }
 // RB end
 

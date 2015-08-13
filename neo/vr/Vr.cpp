@@ -8,9 +8,11 @@
 
 #include "vr.h"
 #include "d3xp\Game_local.h"
+#include "sys\win32\win_local.h"
 #include "d3xp\physics\Clip.h"
 #include "libs\SixenseSDK_062612\include\sixense_utils\controller_manager\controller_manager.hpp"
 #include "libs\LibOVR\Include\OVR.h"
+#include "libs\LibOVR\Include\OVR_CAPI_GL.h"
 #include "..\renderer\Framebuffer.h"
 
 using namespace OVR;
@@ -225,11 +227,21 @@ iVr::iVr()
 					
 	primaryFBOWidth = 0;
 	primaryFBOHeight = 0;
-	hmdHz = 60; // koz fixme what doesnt support 60 hz?
+	hmdHz = 75; // koz fixme what doesnt support 60 hz?
 	
 	hmd = nullptr;
+	oculusTextureSet[0] = 0;
+	oculusTextureSet[1] = 0;
+	oculusFboId = 0;
+	ocululsDepthTexID = 0;
+	oculusMirrorFboId = 0;
+	oculusMirrorTexture = 0;
 
-	
+	hmdEyeImage[0] = 0;
+	hmdEyeImage[1] = 0;
+	hmdCurrentRender[0] = 0;
+	hmdCurrentRender[1] = 0;
+			
 }
 
 
@@ -312,16 +324,19 @@ void iVr::HMDInit( void )
 	
 	if ( ovr_Initialize( nullptr ) == ovrSuccess )
 	{
+		common->Printf( "ovr_Initialize was successful.\n" );
 		ovrResult result  = ovrHmd_Create( 0, &hmd );
 		if ( result == ovrSuccess )
 		
 		{
 			// configure the tracking
-
+			common->Printf( "ovrHmd_Create was successful.\n" );
 			if ( ovrHmd_ConfigureTracking( hmd, ovrTrackingCap_Orientation
 												| ovrTrackingCap_MagYawCorrection
-												| ovrTrackingCap_Position, ovrTrackingCap_Orientation ) )
+												| ovrTrackingCap_Position, ovrTrackingCap_Orientation ) == ovrSuccess )
 			{
+				
+				common->Printf( "ovrHmd_ConfigureTracking was successful.\n" );
 				hasOculusRift = true;
 				hasHMD = true;
 				common->Printf( "\n\nOculus Rift HMD Initialized\n" );
@@ -351,13 +366,13 @@ void iVr::HMDInit( void )
 				}
 				else
 				{
-					vr->hmdHz = hz == 0 ? 60 : hz;// DK1 default is 60
+					vr->hmdHz = hz == 0 ? 80 : hz;// DK1 default is 60
 				}
 
 				com_engineHz.SetInteger( vr->hmdHz );
 				
 				common->Printf( "Hmd: %s .\n", hmd->ProductName );
-				common->Printf( "Hmd width %d, height %d\n", hmdWidth, hmdHeight );
+				common->Printf( "Hmd HZ %d, width %d, height %d\n", vr->hmdHz, hmdWidth, hmdHeight );
 				return;
 			}
 
@@ -379,10 +394,10 @@ iVr::HMDInitializeDistortion
 ==============
 */
 
-void iVr::HMDInitializeDistortion()  
+void iVr::HMDInitializeDistortion()
 {
-	
-	if (  !vr->hmd || !vr->hasOculusRift || !vr_enable.GetBool() ) 
+
+	if ( !vr->hmd || !vr->hasOculusRift || !vr_enable.GetBool() )
 	{
 		game->isVR = false;
 		return;
@@ -390,14 +405,14 @@ void iVr::HMDInitializeDistortion()
 
 	game->isVR = true;
 	common->Printf( "VR Mode ENABLED.\n" );
-	
+
 	eyeOrder[0] = vr->hmd->EyeRenderOrder[ovrEye_Left]; //ovrEye_Left;
 	eyeOrder[1] = vr->hmd->EyeRenderOrder[ovrEye_Right];
 
 	common->Printf( "Eyeorder[0] = %d, Eyeorder[1] = %d\n", eyeOrder[0], eyeOrder[1] );
-	
+
 	// koz : create distortion meshes for oculus - copy verts and indexes from oculus supplied mesh
-	
+
 	useFBO = vr_FBOEnabled.GetInteger() && glConfig.framebufferObjectAvailable;
 
 	if ( vr_FBOEnabled.GetInteger() && !glConfig.framebufferObjectAvailable )
@@ -407,93 +422,93 @@ void iVr::HMDInitializeDistortion()
 	}
 	bool fboCreated = false;
 
-		
+
 	int eye = 0;
-	for ( int eye1 = 0 ; eye1 < 2 ; eye1++ ) 
+	for ( int eye = 0; eye < 2; eye++ )
 	{
-		eye = eyeOrder[eye1];
-				
-		hmdEye[eye].eyeFov = vr->hmd->DefaultEyeFov[ eye ];
-		hmdEye[eye].eyeRenderDesc = ovrHmd_GetRenderDesc( vr->hmd, ( ovrEyeType ) eye, hmdEye[ eye ].eyeFov );
-		
+
+
+		hmdEye[eye].eyeFov = vr->hmd->DefaultEyeFov[eye];
+		hmdEye[eye].eyeRenderDesc = ovrHmd_GetRenderDesc( vr->hmd, (ovrEyeType)eye, hmdEye[eye].eyeFov );
+
 		//oculus defaults znear 1 and positive zfar, id uses 1 znear, and the infinite z variation (-.999f) zfar
 		//during cinematics znear is crammed to .25, so create a second matrix for cinematics
-		Matrix4f pEye = ovrMatrix4f_Projection( hmdEye[ eye ].eyeRenderDesc.Fov, 1.0f, -0.9999999999f, true ); // nzear was 0.01f zfar was 10000
-		Matrix4f pEyeCramZnear = ovrMatrix4f_Projection( hmdEye[ eye ].eyeRenderDesc.Fov, 0.25f, -0.999f, true ); // nzear was 0.01f zfar was 10000
-		int x,y;
-					
-		for ( x=0 ; x<4 ; x++ ) 
+		Matrix4f pEye = ovrMatrix4f_Projection( hmdEye[eye].eyeRenderDesc.Fov, 1.0f, -0.9999999999f, true ); // nzear was 0.01f zfar was 10000
+		Matrix4f pEyeCramZnear = ovrMatrix4f_Projection( hmdEye[eye].eyeRenderDesc.Fov, 0.25f, -0.999f, true ); // nzear was 0.01f zfar was 10000
+		int x, y;
+
+		for ( x = 0; x < 4; x++ )
 		{
-			for ( y = 0 ; y<4 ; y++ ) 
+			for ( y = 0; y < 4; y++ )
 			{
-				hmdEye[eye].projectionRift[ y*4 + x ] = pEye.M[x][y];						// convert oculus matrices to something this engine likes 
+				hmdEye[eye].projectionRift[y * 4 + x] = pEye.M[x][y];						// convert oculus matrices to something this engine likes 
 				//hmdEye[eye].projectionRiftCramZnear[ y*4 + x ] = pEyeCramZnear.M[x][y];	// convert oculus matrices to something this engine likes
-				
+
 			}
 		}
-				
-		hmdEye[eye].projection.x.scale = 2.0f / ( hmdEye[eye].eyeFov.LeftTan + hmdEye[eye].eyeFov.RightTan );
-		hmdEye[eye].projection.x.offset = ( hmdEye[eye].eyeFov.LeftTan - hmdEye[eye].eyeFov.RightTan ) * hmdEye[eye].projection.x.scale * 0.5f;
-		hmdEye[eye].projection.y.scale = 2.0f / ( hmdEye[eye].eyeFov.UpTan + hmdEye[eye].eyeFov.DownTan );
-		hmdEye[eye].projection.y.offset = ( hmdEye[eye].eyeFov.UpTan - hmdEye[eye].eyeFov.DownTan ) * hmdEye[eye].projection.y.scale * 0.5f;
-			
-		hmdEye[eye].viewOffset = (idVec3)( -hmdEye[eye].eyeRenderDesc.HmdToEyeViewOffset.x,
-											hmdEye[eye].eyeRenderDesc.HmdToEyeViewOffset.y,
-											hmdEye[eye].eyeRenderDesc.HmdToEyeViewOffset.z);
-				
-		common->Printf("EYE %d px.scale %f, px.offset %f, py.scale %f, py.offset %f\n",eye,hmdEye[eye].projection.x.scale,hmdEye[eye].projection.x.offset,hmdEye[eye].projection.y.scale,hmdEye[eye].projection.y.offset);
-		common->Printf("EYE %d viewoffset viewadjust x %f y %f z %f\n",eye,hmdEye[eye].viewOffset.x,hmdEye[eye].viewOffset.y,hmdEye[eye].viewOffset.z);
-		
+
+		hmdEye[eye].projection.x.scale = 2.0f / (hmdEye[eye].eyeFov.LeftTan + hmdEye[eye].eyeFov.RightTan);
+		hmdEye[eye].projection.x.offset = (hmdEye[eye].eyeFov.LeftTan - hmdEye[eye].eyeFov.RightTan) * hmdEye[eye].projection.x.scale * 0.5f;
+		hmdEye[eye].projection.y.scale = 2.0f / (hmdEye[eye].eyeFov.UpTan + hmdEye[eye].eyeFov.DownTan);
+		hmdEye[eye].projection.y.offset = (hmdEye[eye].eyeFov.UpTan - hmdEye[eye].eyeFov.DownTan) * hmdEye[eye].projection.y.scale * 0.5f;
+
+		hmdEye[eye].viewOffset = (idVec3)(-hmdEye[eye].eyeRenderDesc.HmdToEyeViewOffset.x,
+			hmdEye[eye].eyeRenderDesc.HmdToEyeViewOffset.y,
+			hmdEye[eye].eyeRenderDesc.HmdToEyeViewOffset.z);
+
+		common->Printf( "EYE %d px.scale %f, px.offset %f, py.scale %f, py.offset %f\n", eye, hmdEye[eye].projection.x.scale, hmdEye[eye].projection.x.offset, hmdEye[eye].projection.y.scale, hmdEye[eye].projection.y.offset );
+		common->Printf( "EYE %d viewoffset viewadjust x %f y %f z %f\n", eye, hmdEye[eye].viewOffset.x, hmdEye[eye].viewOffset.y, hmdEye[eye].viewOffset.z );
+
 		ovrSizei rendertarget;
-		ovrRecti viewport = { 0, 0, 0 ,0 };
-		
-		rendertarget = ovrHmd_GetFovTextureSize( vr->hmd, ( ovrEyeType ) eyeOrder[0], vr->hmdEye[ eyeOrder[0] ].eyeFov, vr_pixelDensity.GetFloat() ); // make sure both eyes render to the same size target
-				
-		if ( useFBO && !fboCreated  ) 
+		ovrRecti viewport = { 0, 0, 0, 0 };
+
+		rendertarget = ovrHmd_GetFovTextureSize( vr->hmd, (ovrEyeType)eye, vr->hmdEye[eye].eyeFov, vr_pixelDensity.GetFloat() ); // make sure both eyes render to the same size target
+		hmdEye[eye].renderTarget.h = rendertarget.h; // koz was height?
+		hmdEye[eye].renderTarget.w = rendertarget.w;
+		common->Printf( "Eye %d Rendertaget Width x Height = %d x %d\n", eye, rendertarget.w, rendertarget.h );
+
+		if ( useFBO && !fboCreated )
 		{
-			common->Printf("Using FBOs.\n");
-			common->Printf("Requested pixel density = %f \n", vr_pixelDensity.GetFloat() );
-			common->Printf("Eye %d Rendertaget Width x Height = %d x %d\n",eye,rendertarget.w, rendertarget.h);
-			hmdEye[eye].renderTarget.h = rendertarget.h; // koz was height?
-			hmdEye[eye].renderTarget.w = rendertarget.w;
+			common->Printf( "Generating FBOs.\n" );
+			common->Printf( "Requested pixel density = %f \n", vr_pixelDensity.GetFloat() );
 			primaryFBOWidth = rendertarget.w;
 			primaryFBOHeight = rendertarget.h;
 			fboWidth = rendertarget.w;
 			fboHeight = rendertarget.h;
 
-									
-			if ( !fboCreated ) 
+
+			if ( !fboCreated )
 			{ // create the FBOs if needed.
-								
+
 				VR_AAmode = vr_FBOAAmode.GetInteger();
 
 				if ( VR_AAmode == VR_AA_MSAA && r_multiSamples.GetInteger() == 0 ) VR_AAmode = VR_AA_NONE;
-								
-				if ( VR_AAmode == VR_AA_FXAA ) 
+
+				if ( VR_AAmode == VR_AA_FXAA )
 				{// enable FXAA
-				
+
 					VR_AAmode = VR_AA_NONE;
-					
+
 					/*
 					VR_GenFBO( rendertarget.w, rendertarget.h, VR_FBO, true, false  );
 					VR_GenFBO( rendertarget.w , rendertarget.h , VR_ResolveAAFBO, false, false );
 					VR_GenFBO( (rendertarget.w * 2) , rendertarget.h, VR_FullscreenFBO, false, false );
 					if ( !VR_ResolveAAFBO.valid || !VR_FBO.valid || !VR_FullscreenFBO.valid ) {
-						VR_DeleteFBO( VR_FBO );
-						VR_DeleteFBO( VR_ResolveAAFBO );
-						VR_DeleteFBO( VR_FullscreenFBO );
-						common->Warning("Unable to create FBOs for FXAA antialiasing. Attempting to create FBOs with FXAA disabled.\n", rendertarget.w, rendertarget.h ); 
+					VR_DeleteFBO( VR_FBO );
+					VR_DeleteFBO( VR_ResolveAAFBO );
+					VR_DeleteFBO( VR_FullscreenFBO );
+					common->Warning("Unable to create FBOs for FXAA antialiasing. Attempting to create FBOs with FXAA disabled.\n", rendertarget.w, rendertarget.h );
 					} else {
-						common->Printf("Successfully created two %d x %d FBOs for FXAA \n", rendertarget.w, rendertarget.h ); 
-						VR_FBO.MSAAsamples = 0;
-						VR_FBO.aaMode = VR_AA_FXAA;
+					common->Printf("Successfully created two %d x %d FBOs for FXAA \n", rendertarget.w, rendertarget.h );
+					VR_FBO.MSAAsamples = 0;
+					VR_FBO.aaMode = VR_AA_FXAA;
 					}
 					*/
-				} 
+				}
 
-				if ( VR_AAmode == VR_AA_MSAA ) 
+				if ( VR_AAmode == VR_AA_MSAA )
 				{// enable MSAA
-					common->Printf( "Creating MSAA framebuffer\n" );
+					common->Printf( "Creating %d x %d MSAA framebuffer\n", rendertarget.w, rendertarget.h );
 					globalFramebuffers.primaryFBO = new Framebuffer( "_primaryFBO", rendertarget.w, rendertarget.h, true ); // koz
 					common->Printf( "Adding Depth/Stencil attachments to MSAA framebuffer\n" );
 					globalFramebuffers.primaryFBO->AddDepthStencilBuffer( GL_DEPTH24_STENCIL8 );
@@ -502,45 +517,45 @@ void iVr::HMDInitializeDistortion()
 
 					int status = globalFramebuffers.primaryFBO->Check();
 					globalFramebuffers.primaryFBO->Error( status );
-					
+
 					resolveFBOimage = globalImages->ImageFromFunction( "_resolveFBOimage", R_MakeFBOImage );
-					
+
 					common->Printf( "Creating resolve framebuffer\n" );
 					globalFramebuffers.resolveFBO = new Framebuffer( "_resolveFBO", rendertarget.w, rendertarget.h, false ); // koz
-					
+
 					common->Printf( "Adding Depth/Stencil attachments to MSAA framebuffer\n" );
 					globalFramebuffers.resolveFBO->AddDepthStencilBuffer( GL_DEPTH24_STENCIL8 );
-					
+
 					common->Printf( "Adding color attachment to framebuffer\n" );
 					globalFramebuffers.resolveFBO->AttachImage2D( GL_TEXTURE_2D, resolveFBOimage, 0 );
 					resolveFBOimage->Bind();
-					
+
 					status = globalFramebuffers.resolveFBO->Check();
 					globalFramebuffers.resolveFBO->Error( status );
-										
-					
-					fboWidth = rendertarget.w * 2 ;
+
+
+					fboWidth = rendertarget.w * 2;
 					fullscreenFBOimage = globalImages->ImageFromFunction( "_fullscreenFBOimage", R_MakeFBOImage );
 
 					common->Printf( "Creating fullscreen framebuffer\n" );
-					globalFramebuffers.fullscreenFBO = new Framebuffer( "_fullscreenFBO", rendertarget.w * 2 , rendertarget.h, false ); // koz
-					
+					globalFramebuffers.fullscreenFBO = new Framebuffer( "_fullscreenFBO", rendertarget.w * 2, rendertarget.h, false ); // koz
+
 					common->Printf( "Adding color attachment to framebuffer\n" );
 					fullscreenFBOimage->Bind();
 					globalFramebuffers.fullscreenFBO->Bind();
 					globalFramebuffers.fullscreenFBO->AttachImage2D( GL_TEXTURE_2D, fullscreenFBOimage, 0 );
-					
+
 
 					status = globalFramebuffers.fullscreenFBO->Check();
 					globalFramebuffers.fullscreenFBO->Error( status );
-					
+
 					fboWidth = rendertarget.w;
 
-					if ( status = GL_FRAMEBUFFER_COMPLETE ) 
+					if ( status = GL_FRAMEBUFFER_COMPLETE )
 					{
 						useFBO = 1;
 						fboCreated = true;
-					} 
+					}
 					else
 					{
 						useFBO = 0;
@@ -552,31 +567,31 @@ void iVr::HMDInitializeDistortion()
 					VR_GenFBO( rendertarget.w , rendertarget.h , VR_ResolveAAFBO, true, false );
 					VR_GenFBO( (rendertarget.w * 2) , rendertarget.h, VR_FullscreenFBO, false, false );
 					if ( !VR_ResolveAAFBO.valid || !VR_FBO.valid || !VR_FullscreenFBO.valid ) {
-						VR_DeleteFBO( VR_FBO );
-						VR_DeleteFBO( VR_ResolveAAFBO );
-						VR_DeleteFBO( VR_FullscreenFBO );
-						common->Warning("Unable to create FBOs for MSAA antialiasing. Attempting to create FBOs with MSAA disabled.\n", rendertarget.w, rendertarget.h ); 
+					VR_DeleteFBO( VR_FBO );
+					VR_DeleteFBO( VR_ResolveAAFBO );
+					VR_DeleteFBO( VR_FullscreenFBO );
+					common->Warning("Unable to create FBOs for MSAA antialiasing. Attempting to create FBOs with MSAA disabled.\n", rendertarget.w, rendertarget.h );
 					} else {
-						common->Printf("Successfully created %d x %d FBO for MSAA \n", rendertarget.w, rendertarget.h ); 
-						VR_FBO.aaMode = VR_AA_MSAA;
-					} 
+					common->Printf("Successfully created %d x %d FBO for MSAA \n", rendertarget.w, rendertarget.h );
+					VR_FBO.aaMode = VR_AA_MSAA;
+					}
 					*/
 				}
 
-				if ( !fboCreated /*!VR_FBO.valid*/ ) 
+				if ( !fboCreated /*!VR_FBO.valid*/ )
 				{ // either AA disabled or AA buffer creation failed. Try creating unaliased FBOs.
 
 					primaryFBOimage = globalImages->ImageFromFunction( "_primaryFBOimage", R_MakeFBOImage );
 					common->Printf( "Creating framebuffer\n" );
 					globalFramebuffers.primaryFBO = new Framebuffer( "_primaryFBO", rendertarget.w, rendertarget.h, false ); // koz
-					
+
 					common->Printf( "Adding Depth/Stencil attachments to framebuffer\n" );
 					globalFramebuffers.primaryFBO->AddDepthStencilBuffer( GL_DEPTH24_STENCIL8 );
 
 					common->Printf( "Adding color attachment to framebuffer\n" );
 					globalFramebuffers.primaryFBO->AttachImage2D( GL_TEXTURE_2D, primaryFBOimage, 0 );
 					primaryFBOimage->Bind();
-					
+
 					int status = globalFramebuffers.primaryFBO->Check();
 					globalFramebuffers.primaryFBO->Error( status );
 
@@ -595,7 +610,7 @@ void iVr::HMDInitializeDistortion()
 					status = globalFramebuffers.fullscreenFBO->Check();
 					globalFramebuffers.fullscreenFBO->Error( status );
 
-					if ( status = GL_FRAMEBUFFER_COMPLETE ) 
+					if ( status = GL_FRAMEBUFFER_COMPLETE )
 					{
 						useFBO = 1;
 						fboCreated = true;
@@ -610,31 +625,31 @@ void iVr::HMDInitializeDistortion()
 		}
 
 		if ( !useFBO ) { // not using FBO's, will render to default framebuffer (screen) 
-			
-			rendertarget.w = renderSystem->GetNativeWidth() / 2 ;
+
+			rendertarget.w = renderSystem->GetNativeWidth() / 2;
 			rendertarget.h = renderSystem->GetNativeHeight();
 			hmdEye[eye].renderTarget = rendertarget;
-			
-			
-		} 
-		
+
+
+		}
+
 		viewport.Size.w = rendertarget.w;
 		viewport.Size.h = rendertarget.h;
-		
+
 		/* -------------------
 
 		Koz:  removed when oculus removed extended mode & client side rendering
-		
+
 		ovrHmd_GetRenderScaleAndOffset( hmdEye[eye].eyeFov, rendertarget, viewport, (ovrVector2f*) hmdEye[eye].UVScaleoffset );
-		
+
 		common->Printf( "Eye %d UVscale x %f y %f  offset x %f , y %f\n", eye,
-			hmdEye[eye].UVScaleoffset[0].x,
-			hmdEye[eye].UVScaleoffset[0].y,	
-			hmdEye[eye].UVScaleoffset[1].x,	
-			hmdEye[eye].UVScaleoffset[1].y ); 
-						
-		
-		
+		hmdEye[eye].UVScaleoffset[0].x,
+		hmdEye[eye].UVScaleoffset[0].y,
+		hmdEye[eye].UVScaleoffset[1].x,
+		hmdEye[eye].UVScaleoffset[1].y );
+
+
+
 		// create the distortion mesh for this eye
 
 		ovrDistortionMesh meshData = {};
@@ -643,126 +658,147 @@ void iVr::HMDInitializeDistortion()
 		ovrDistortionVertex *ov = NULL;
 		unsigned int vtex = 0;
 
-		ovrHmd_CreateDistortionMesh( hmd, 
-									 hmdEye[eye].eyeRenderDesc.Eye, 
-									 hmdEye[eye].eyeRenderDesc.Fov, 
-									 0, // ovrDistortionCap_Chromatic | ovrDistortionCap_SRGB | ovrDistortionCap_TimeWarp | ovrDistortionCap_Vignette  ,
-									 &meshData );
+		ovrHmd_CreateDistortionMesh( hmd,
+		hmdEye[eye].eyeRenderDesc.Eye,
+		hmdEye[eye].eyeRenderDesc.Fov,
+		0, // ovrDistortionCap_Chromatic | ovrDistortionCap_SRGB | ovrDistortionCap_TimeWarp | ovrDistortionCap_Vignette  ,
+		&meshData );
 
 		hmdEye[eye].vbo.numVerts = meshData.VertexCount;
 		hmdEye[eye].vbo.numIndexes = meshData.IndexCount;
 		common->Printf(" %d Vertexes  %d Indexes.\n", meshData.VertexCount, meshData.IndexCount);
-		
+
 		mesh = (distortionVert_t *) malloc( sizeof(distortionVert_t) * meshData.VertexCount );
 		v = mesh;
-		ov = meshData.pVertexData; 
-		
-		for ( vtex = 0; vtex < meshData.VertexCount; vtex++ )	
+		ov = meshData.pVertexData;
+
+		for ( vtex = 0; vtex < meshData.VertexCount; vtex++ )
 		{
-				
-			v->pos.x = ov->ScreenPosNDC.x;
-			v->pos.y = ov->ScreenPosNDC.y;
-			v->texR = ( *(idVec2*)&ov->TanEyeAnglesR ); 
-			v->texG = ( *(idVec2*)&ov->TanEyeAnglesG );
-			v->texB = ( *(idVec2*)&ov->TanEyeAnglesB ); 
-			v->color[0] = v->color[1] = v->color[2] = (GLubyte)( ov->VignetteFactor * 255.99f );
-			v->color[3] = (GLubyte)( ov->TimeWarpFactor * 255.99f );
-			v++; ov++;
-		}
-				
-		if ( !hmdEye[eye].vbo.vertBuffHandle ) 
-		{
-			glGenBuffers( 1, &hmdEye[eye].vbo.vertBuffHandle );
-			GL_CheckErrors();
-		}
-		
-		if ( !hmdEye[eye].vbo.indexBuffHandle ) 
-		{	
-			glGenBuffers( 1 , &hmdEye[eye].vbo.indexBuffHandle );
-			GL_CheckErrors();
+
+		v->pos.x = ov->ScreenPosNDC.x;
+		v->pos.y = ov->ScreenPosNDC.y;
+		v->texR = ( *(idVec2*)&ov->TanEyeAnglesR );
+		v->texG = ( *(idVec2*)&ov->TanEyeAnglesG );
+		v->texB = ( *(idVec2*)&ov->TanEyeAnglesB );
+		v->color[0] = v->color[1] = v->color[2] = (GLubyte)( ov->VignetteFactor * 255.99f );
+		v->color[3] = (GLubyte)( ov->TimeWarpFactor * 255.99f );
+		v++; ov++;
 		}
 
-		if ( hmdEye[eye].vbo.vertBuffHandle && hmdEye[eye].vbo.indexBuffHandle ) 
+		if ( !hmdEye[eye].vbo.vertBuffHandle )
 		{
-			//build the mesh vbo
-			GLint oldVertArray , oldIndexArray = 0;
-			
-			glBindVertexArray( glConfig.global_vao );
-						
-			glGetIntegerv( GL_ARRAY_BUFFER_BINDING , (GLint *) &oldVertArray ); 
-			glGetIntegerv( GL_ELEMENT_ARRAY_BUFFER_BINDING, (GLint *) &oldIndexArray );
-									
-			glBindBuffer( GL_ARRAY_BUFFER, hmdEye[eye].vbo.vertBuffHandle );
-			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, hmdEye[eye].vbo.indexBuffHandle );
-					
-			glBufferData( GL_ARRAY_BUFFER, sizeof(distortionVert_t) * meshData.VertexCount, mesh,GL_STATIC_DRAW );
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short) * meshData.IndexCount, meshData.pIndexData, GL_STATIC_DRAW); GL_CheckErrors();
-		
-			glBindBuffer( GL_ARRAY_BUFFER, oldVertArray );
-			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, oldIndexArray );		
-			GL_CheckErrors();
-		
-		} else 
-		{		
-			common->Warning("ERROR: Unable to allocate vertex buffer data");
-			game->isVR = false;
+		glGenBuffers( 1, &hmdEye[eye].vbo.vertBuffHandle );
+		GL_CheckErrors();
 		}
-		
+
+		if ( !hmdEye[eye].vbo.indexBuffHandle )
+		{
+		glGenBuffers( 1 , &hmdEye[eye].vbo.indexBuffHandle );
+		GL_CheckErrors();
+		}
+
+		if ( hmdEye[eye].vbo.vertBuffHandle && hmdEye[eye].vbo.indexBuffHandle )
+		{
+		//build the mesh vbo
+		GLint oldVertArray , oldIndexArray = 0;
+
+		glBindVertexArray( glConfig.global_vao );
+
+		glGetIntegerv( GL_ARRAY_BUFFER_BINDING , (GLint *) &oldVertArray );
+		glGetIntegerv( GL_ELEMENT_ARRAY_BUFFER_BINDING, (GLint *) &oldIndexArray );
+
+		glBindBuffer( GL_ARRAY_BUFFER, hmdEye[eye].vbo.vertBuffHandle );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, hmdEye[eye].vbo.indexBuffHandle );
+
+		glBufferData( GL_ARRAY_BUFFER, sizeof(distortionVert_t) * meshData.VertexCount, mesh,GL_STATIC_DRAW );
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short) * meshData.IndexCount, meshData.pIndexData, GL_STATIC_DRAW); GL_CheckErrors();
+
+		glBindBuffer( GL_ARRAY_BUFFER, oldVertArray );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, oldIndexArray );
+		GL_CheckErrors();
+
+		} else
+		{
+		common->Warning("ERROR: Unable to allocate vertex buffer data");
+		game->isVR = false;
+		}
+
 		free( mesh );
-		ovrHmd_DestroyDistortionMesh( &meshData ); 
-		*/	
+		ovrHmd_DestroyDistortionMesh( &meshData );
+		*/
 	}
-	
+
 	// calculate fov for engine
-	float combinedTanHalfFovHorizontal = std::max ( std::max ( hmdEye[0].eyeFov.LeftTan, hmdEye[0].eyeFov.RightTan ), std::max ( hmdEye[1].eyeFov.LeftTan, hmdEye[1].eyeFov.RightTan ) );
-	float combinedTanHalfFovVertical = std::max ( std::max ( hmdEye[0].eyeFov.UpTan, hmdEye[0].eyeFov.DownTan ), std::max ( hmdEye[1].eyeFov.UpTan, hmdEye[1].eyeFov.DownTan ) );
-	float horizontalFullFovInRadians = 2.0f * atanf ( combinedTanHalfFovHorizontal ); 
-	
+	float combinedTanHalfFovHorizontal = std::max( std::max( hmdEye[0].eyeFov.LeftTan, hmdEye[0].eyeFov.RightTan ), std::max( hmdEye[1].eyeFov.LeftTan, hmdEye[1].eyeFov.RightTan ) );
+	float combinedTanHalfFovVertical = std::max( std::max( hmdEye[0].eyeFov.UpTan, hmdEye[0].eyeFov.DownTan ), std::max( hmdEye[1].eyeFov.UpTan, hmdEye[1].eyeFov.DownTan ) );
+	float horizontalFullFovInRadians = 2.0f * atanf( combinedTanHalfFovHorizontal );
+
 	hmdFovX = RAD2DEG( horizontalFullFovInRadians );
-	hmdFovY = RAD2DEG( 2.0 * atanf(combinedTanHalfFovVertical ) );
+	hmdFovY = RAD2DEG( 2.0 * atanf( combinedTanHalfFovVertical ) );
 	hmdAspect = combinedTanHalfFovHorizontal / combinedTanHalfFovVertical;
 	hmdPixelScale = 1;//ovrScale * vid.width / (float) hmd->Resolution.w;	
 
-	common->Warning( "Init Hmd FOV x,y = %f , %f. Aspect = %f, PixelScale = %f\n",hmdFovX,hmdFovY,hmdAspect,hmdPixelScale );
-		
-	GL_CheckErrors();
-	} 
+	common->Warning( "Init Hmd FOV x,y = %f , %f. Aspect = %f, PixelScale = %f\n", hmdFovX, hmdFovY, hmdAspect, hmdPixelScale );
 
-/*
-==============
-iVr::HMDSetFrameData
-==============
-*/
+	common->Printf( "Creating oculus texture set width = %d height = %d.\n", hmdEye[0].renderTarget.w * 2, hmdEye[0].renderTarget.h );
+	// create the swap texture sets 
+	if ( (ovrHmd_CreateSwapTextureSetGL( hmd, GL_RGBA, hmdEye[0].renderTarget.w, hmdEye[0].renderTarget.h,
+		&oculusTextureSet[0] ) != ovrSuccess) || ovrHmd_CreateSwapTextureSetGL( hmd, GL_RGBA, hmdEye[0].renderTarget.w, hmdEye[0].renderTarget.h,
+		&oculusTextureSet[1] ) != ovrSuccess ) {
+		common->Warning( "iVr::HMDInitializeDistortion unable to create OVR swap texture set.\n VR mode is DISABLED.\n" );
+		game->isVR = false;
 
-void iVr::HMDSetFrameData(int frameIndex, ovrPosef thePose) 
-{
-	
-	if ( frameDataCount == 255 ) return;
-
-	frameDataIndex[frameDataCount] = frameIndex;
-	frameDataPose[frameDataCount] = thePose;
-
-	frameDataCount++;
-	
-}
-
-void iVr::HMDGetFrameData(int &frameIndex, ovrPosef &thePose) 
-{
-	
-	if ( frameDataCount ) 
-	{
-		frameIndex = frameDataIndex[frameDataCount];
-		thePose = frameDataPose[frameDataCount];
-		frameDataCount--;
-	} else 
-	{
-		frameIndex = 0;
-		ovrTrackingState currentTrackingState = ovrHmd_GetTrackingState(hmd, 0) ;
-		thePose = currentTrackingState.HeadPose.ThePose;
 	}
 
-	return;
-}
+	for ( int j = 0; j < 2; j++ )
+	{
+	
+		for ( int i = 0; i < oculusTextureSet[j]->TextureCount; ++i )
+		{
+			ovrGLTexture* tex = (ovrGLTexture*)&oculusTextureSet[j]->Textures[i];
+			glBindTexture( GL_TEXTURE_2D, tex->OGL.TexId );
+
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		}
+	}
+	glGenFramebuffers( 1, &oculusFboId );
+
+	glGenTextures( 1, &ocululsDepthTexID );
+		
+	glBindTexture( GL_TEXTURE_2D, ocululsDepthTexID );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+
+	glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, hmdEye[0].renderTarget.w, hmdEye[0].renderTarget.h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL );
+
+
+	ovrHmd_CreateMirrorTextureGL( hmd, GL_RGBA, 860, 540, (ovrTexture**) &oculusMirrorTexture );
+	glGenFramebuffers( 1, &oculusMirrorFboId );
+	glBindFramebuffer( GL_READ_FRAMEBUFFER, oculusMirrorFboId );
+	glFramebufferTexture2D( GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, oculusMirrorTexture->OGL.TexId, 0 );
+	glFramebufferRenderbuffer( GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0 );
+	glBindFramebuffer( GL_READ_FRAMEBUFFER, 0 );
+
+	oculusLayer.Header.Type = ovrLayerType_EyeFov;
+	oculusLayer.Header.Flags = ovrLayerFlag_TextureOriginAtBottomLeft;
+	oculusLayer.ColorTexture[0] = oculusTextureSet[0];
+	oculusLayer.ColorTexture[1] = oculusTextureSet[1];
+	oculusLayer.Fov[0] = hmdEye[0].eyeRenderDesc.Fov;
+	oculusLayer.Fov[1] = hmdEye[1].eyeRenderDesc.Fov;
+	oculusLayer.Viewport[0] = Recti( 0, 0, hmdEye[0].renderTarget.w, hmdEye[0].renderTarget.h );
+	oculusLayer.Viewport[1] = Recti( 0, 0, hmdEye[0].renderTarget.w, hmdEye[0].renderTarget.h );
+	
+	
+	wglSwapIntervalEXT( 0 );// make sure vsync is off.
+	r_swapInterval.SetModified();
+	
+	GL_CheckErrors();
+} 
 		
 /*
 ==============`
@@ -787,32 +823,21 @@ void iVr::HMDGetOrientation(float &roll, float &pitch, float &yaw, idVec3 &hmdPo
 	static ovrPosef lastTrackedPose = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } ;
 	static bool currentlyTracked;
 		
-	//ovrFrameTiming frameTiming;
-	//int frameIndex = tr.frameCount & 0xff;
-	
 	if ( hasOculusRift && hmd ) 
 	{
         
 		if ( vr_trackingPredictionAuto.GetBool() ) 
 		{
-			
-			time = hmdFrameTime.DisplayMidpointSeconds;// ScanoutMidpointSeconds;
-			
+			hmdFrameTime = ovrHmd_GetFrameTiming( hmd, idLib::frameNumber );
+			time = hmdFrameTime.DisplayMidpointSeconds;
 		} 
 		else 
 		{
 			time = ovr_GetTimeInSeconds() + ( vr_trackingPredictionUserDefined.GetFloat() / 1000 );
-			//frameTiming = ovrHmd_GetFrameTiming(hmd,frameIndex);	
-
 		}
-
-		//frameTiming = hmdFrameTime;
-
+			
 		hmdTrackingState = ovrHmd_GetTrackingState( hmd, time );
-		//hmdTrackingState = ovrHmd_GetTrackingState(hmd, frameTiming.ScanoutMidpointSeconds) ;
-
-		//HMDSetFrameData(frameIndex,hmdTrackingState.HeadPose.ThePose);
-		
+				
 		if (hmdTrackingState.StatusFlags & ( ovrStatus_OrientationTracked ) )
 		{
 							
@@ -874,7 +899,7 @@ void iVr::HMDGetOrientation(float &roll, float &pitch, float &yaw, idVec3 &hmdPo
 iVr::FrameStart
 ==============
 */
-void iVr::FrameStart(int index) 
+void iVr::FrameStart( int index ) 
 {
 	// koz fixme move these checks 
 
@@ -897,9 +922,13 @@ void iVr::FrameStart(int index)
 		vr->HydraInit();
 		vr_hydraEnable.ClearModified();
 	}
+	static idVec3 pos;
+	static float roll = 0;
+	static float pitch = 0;
+	static float yaw = 0;
 
-	//hmdFrameTime = ovrHmd_BeginFrameTiming( vr->hmd, index );
-	
+	vr->HMDGetOrientation( roll, pitch, yaw, pos );
+	//hmdFrameTime = ovrHmd_GetFrameTiming( vr->hmd, idLib::frameNumber );
 
 }
 
