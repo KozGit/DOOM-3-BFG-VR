@@ -32,6 +32,13 @@ If you have questions concerning this license or the applicable additional terms
 #include "../renderer/ResolutionScale.h"
 #include "Common_local.h"
 
+// Koz begin
+#include "libs\LibOVR\Include\OVR_CAPI.h"
+#include "vr\Vr.h"
+
+idCVar vr_hmdPerfHud( "vr_hmdPerfHud", "0", CVAR_INTEGER, "Oculus Performance HUD. 0 Off, 1 Latency, 2 CPU/GPU Timing", 0, 2 );
+// Koz end
+
 #define	CON_TEXTSIZE			0x30000
 #define	NUM_CON_TIMES			4
 #define CONSOLE_FIRSTREPEAT		200
@@ -1330,6 +1337,16 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 	}
 	DrawOverlayText( lefty, righty, centery );
 	DrawDebugGraphs();
+
+	// Koz begin
+	// Enable the oculus performance hud
+	if ( vr_hmdPerfHud.IsModified() )
+	{
+		ovrHmd_SetInt( vr->hmd, "PerfHudMode", vr_hmdPerfHud.GetInteger() );
+		vr_hmdPerfHud.ClearModified();
+	}
+	// Koz end
+
 }
 
 /*

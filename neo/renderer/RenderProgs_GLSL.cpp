@@ -104,15 +104,6 @@ enum vertexMask_t
 	VERTEX_MASK_COLOR		= BIT( PC_ATTRIB_INDEX_COLOR ),
 	VERTEX_MASK_TANGENT		= BIT( PC_ATTRIB_INDEX_TANGENT ),
 	VERTEX_MASK_COLOR2		= BIT( PC_ATTRIB_INDEX_COLOR2 ),
-
-	// Koz begin distortion vertex attribs
-	VERTEX_MASX_DIST_POS = BIT( PC_ATTRIB_INDEX_DIST_POS ),
-	VERTEX_MASK_DIST_TEXR = BIT( PC_ATTRIB_INDEX_DIST_TEXR ),
-	VERTEX_MASK_DIST_TEXG = BIT( PC_ATTRIB_INDEX_DIST_TEXG ),
-	VERTEX_MASK_DIST_TEXB = BIT( PC_ATTRIB_INDEX_DIST_TEXB ),
-	VERTEX_MASK_DIST_DCOLOR = BIT( PC_ATTRIB_INDEX_DIST_DCOLOR ),
-	// Koz end
-
 };
 
 attribInfo_t attribsPC[] =
@@ -127,14 +118,6 @@ attribInfo_t attribsPC[] =
 	{ "float4",		"color",		"COLOR0",		"in_Color",				PC_ATTRIB_INDEX_COLOR,			AT_VS_IN,		VERTEX_MASK_COLOR },
 	{ "float4",		"color2",		"COLOR1",		"in_Color2",			PC_ATTRIB_INDEX_COLOR2,			AT_VS_IN,		VERTEX_MASK_COLOR2 },
 	
-	// Koz begin Oculus distortion vertex attributes
-	{ "float2", "pos", "POS", "in_Pos", PC_ATTRIB_INDEX_DIST_POS, AT_VS_IN, VERTEX_MASX_DIST_POS },
-	{ "float2", "texr", "TEXR", "in_TexR", PC_ATTRIB_INDEX_DIST_TEXR, AT_VS_IN, VERTEX_MASK_DIST_TEXR },
-	{ "float2", "texg", "TEXG", "in_TexG", PC_ATTRIB_INDEX_DIST_TEXG, AT_VS_IN, VERTEX_MASK_DIST_TEXG },
-	{ "float2", "texb", "TEXB", "in_TexB", PC_ATTRIB_INDEX_DIST_TEXB, AT_VS_IN, VERTEX_MASK_DIST_TEXB },
-	{ "int4", "dcolor", "DCOLOR", "in_Dcolor", PC_ATTRIB_INDEX_DIST_DCOLOR, AT_VS_IN, VERTEX_MASK_DIST_DCOLOR },
-	// Koz end
-
 	// pre-defined vertex program output
 	{ "float4",		"position",		"POSITION",		"gl_Position",			0,	AT_VS_OUT | AT_VS_OUT_RESERVED,		0 },
 	{ "float",		"clip0",		"CLP0",			"gl_ClipDistance[0]",	0,	AT_VS_OUT,		0 },
@@ -375,15 +358,7 @@ static const char* GLSLParmNames[RENDERPARM_TOTAL] =
 	"rpShadowMatrix5Z",
 	"rpShadowMatrix5W",
 	// RB end
-
-	// Koz begin
-	"rpEyeToSourceUVOffset",
-	"rpEyeToSourceUVScale",
-	"rpInverseResolution",
-	"rpOverdriveScales",
-	"rpVignetteFade",
-	//Koz end
-
+	
 };
 
 // RB begin

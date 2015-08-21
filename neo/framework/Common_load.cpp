@@ -36,6 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "vr\BackgroundSave.h"
 #include "vr\Vr.h"
 #include "sys\win32\win_local.h"
+#include "renderer\AutoRender.h"
 // Koz end
 
 
@@ -399,6 +400,9 @@ Exits with mapSpawned = true
 */
 void idCommonLocal::ExecuteMapChange()
 {
+	vr->loading = true;
+	rAutoRender.StartBackgroundAutoSwaps();
+
 	if( session->GetState() != idSession::LOADING )
 	{
 		idLib::Warning( "Session state is not LOADING in ExecuteMapChange" );
@@ -498,9 +502,11 @@ void idCommonLocal::ExecuteMapChange()
 	bool hellMap = false;
 	LoadLoadingGui( currentMapName, hellMap );
 	
+	// koz
+		
 	// Stop rendering the wipe
-	if ( !game->isVR) ClearWipe(); // Koz skip this to leave the screen black during loads.
-	
+	//if ( !game->isVR) ClearWipe(); // Koz skip this to leave the screen black during loads.
+	ClearWipe();
 	
 	if( fileSystem->UsingResourceFiles() )
 	{
@@ -527,7 +533,7 @@ void idCommonLocal::ExecuteMapChange()
 	{
 		// allow com_engineHz to be changed between map loads
 		
-		if ( vr->hasHMD ) // koz
+		if ( game->isVR ) // koz
 		{
 			com_engineHz_denominator = 100LL * ( vr->hmdHz );
 			com_engineHz_latched = ( vr->hmdHz );
@@ -623,8 +629,9 @@ void idCommonLocal::ExecuteMapChange()
 	declManager->EndLevelLoad();
 	uiManager->EndLevelLoad( currentMapName );
 	fileSystem->EndLevelLoad();
-	
-	if ( game->isVR ) ClearWipe(); // Koz
+			
+
+	//if ( game->isVR ) ClearWipe(); // Koz
 	
 		if( !mapSpawnData.savegameFile && !IsMultiplayer() )
 	{
@@ -644,12 +651,14 @@ void idCommonLocal::ExecuteMapChange()
 			// Koz: make sure to maintain smooth heatracking of loading screen when running frames.
 			if ( game->isVR )
 			{
-				vr->HMDTrackStatic();
+				//vr->HMDTrackStatic();
 				//SwapBuffers( win32.hDC );
 				//glFinish();
 			}
 		}
 		
+		vr->loading = false;
+
 		// kick off an auto-save of the game (so we can always continue in this map if we die before hitting an autosave)
 		common->Printf( "----- Saving Game -----\n" );
 		
@@ -670,7 +679,7 @@ void idCommonLocal::ExecuteMapChange()
 						
 			while ( vr->vrIsBackgroundSaving == true || ( Sys_Milliseconds() - startLoadScreen < vr_minLoadScreenTime.GetFloat() ) )
 			{
-				vr->HMDTrackStatic();
+				//vr->HMDTrackStatic();
 				//UpdateScreen( false, false );
 				//SwapBuffers(win32.hDC);
 				//glFinish();
@@ -744,6 +753,10 @@ void idCommonLocal::ExecuteMapChange()
 	
 	// Issue a render at the very end of the load process to update soundTime before the first frame
 	soundSystem->Render();
+
+	vr->loading = false;
+	rAutoRender.EndBackgroundAutoSwaps();
+
 }
 
 /*
@@ -800,7 +813,7 @@ void idCommonLocal::UpdateLevelLoadPacifier()
 	else
 	{
 		// On the PC just update at a constant rate for the Steam overlay
-		if( time - lastPacifierGuiTime >= 50 ) // koz fixme
+		if( time - lastPacifierGuiTime >= 50  ) // koz fixme
 		{
 			lastPacifierGuiTime = time;
 			UpdateScreen( false );

@@ -54,7 +54,9 @@ public:
 	static void				BindDefault();
 	
 	void					AddColorBuffer( GLuint format, int index );
+	void					AddColorTexture( GLuint format );
 	void					AddDepthBuffer( GLuint format );
+	void					AddDepthTexture( GLuint format );
 	void					AddDepthStencilBuffer( GLuint format ); // Koz bind depth buffer as stencil attachment also.
 	
 	void					AttachImage2D( GLuint target, const idImage* image, int index );
@@ -72,6 +74,7 @@ public:
 	int						GetStencilFormat() const { return stencilFormat; }
 	int						GetColorFormat() const { return colorFormat; }
 	int						GetColorBuffer( int cb ) const { return colorBuffers[cb]; }
+	int						GetMSAATexnum() const { return colorTexnum; }
 	bool					IsMSAA() const { return useMsaa; }
 	idStr					GetName() const { return fboName; }
 	// Koz end
@@ -104,6 +107,10 @@ private:
 
 	bool					useMsaa;
 	int						msaaSamples;
+
+	GLuint					colorTexnum;
+	GLuint					depthTexnum;
+
 	
 	//static idList<Framebuffer*>	framebuffers;
 };

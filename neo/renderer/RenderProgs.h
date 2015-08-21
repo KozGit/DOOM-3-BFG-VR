@@ -37,15 +37,6 @@ static const int PC_ATTRIB_INDEX_COLOR2		= 4;
 static const int PC_ATTRIB_INDEX_ST			= 8;
 static const int PC_ATTRIB_INDEX_TANGENT	= 9;
 
-// Koz begin - disortion vertex attributes
-static const int PC_ATTRIB_INDEX_DIST_POS = 10;
-static const int PC_ATTRIB_INDEX_DIST_TEXR = 11;
-static const int PC_ATTRIB_INDEX_DIST_TEXG = 12;
-static const int PC_ATTRIB_INDEX_DIST_TEXB = 13;
-static const int PC_ATTRIB_INDEX_DIST_DCOLOR = 14;
-// Koz end
-
-
 // This enum list corresponds to the global constant register indecies as defined in global.inc for all
 // shaders.  We used a shared pool to keeps things simple.  If something changes here then it also
 // needs to change in global.inc and vice versa
@@ -163,14 +154,6 @@ enum renderParm_t
 	RENDERPARM_SHADOW_MATRIX_5_W,
 	// RB end
 	
-	// Koz begin 
-	RENDERPARM_EYE_TO_SOURCE_UV_OFFSET,
-	RENDERPARM_EYE_TO_SOURCE_UV_SCALE,
-	RENDERPARM_INVERSE_RESOLUTION,
-	RENDERPARM_OVERDRIVE_SCALES,
-	RENDERPARM_VIGNETTE_FADE,
-	// Koz end
-
 	RENDERPARM_TOTAL,
 	RENDERPARM_USER = 128,
 };
@@ -435,36 +418,9 @@ public:
 	// RB end
 	
 	// Koz begin 
-	// Koz fixme add missing shaders ( timewarp, fxaa )
-
-	void	BindShader_OculusWarp()
-	{
-		BindShader_Builtin( BUILTIN_OCULUS_WARP );
-	}
-
-	void	BindShader_OculusWarpChrAb()
-	{
-		BindShader_Builtin( BUILTIN_OCULUS_WARP_CHRAB );
-	}
-
-	void	BindShader_OculusWarpTimewarp()
-	{
-		//BindShader_Builtin( BUILTIN_OCULUS_WARP_TIMEWARP );
-	}
-
-	void	BindShader_OculusWarpTimewarpChrAb()
-	{
-		//BindShader_Builtin( BUILTIN_OCULUS_WARP_TIMEWARP_CHRAB );
-	}
-
 	void	BindShader_VRFXAA()
 	{
 		//BindShader_Builtin( BUILTIN_VRFXAA );
-	}
-
-	void	BindShader_VRSIMPLE()
-	{
-		//BindShader_Builtin( BUILTIN_VRSIMPLE );
 	}
 	// Koz end
 
@@ -557,12 +513,7 @@ protected:
 		BUILTIN_MOTION_BLUR,
 		
 		BUILTIN_DEBUG_SHADOWMAP,
-
-		// Koz begin
-		BUILTIN_OCULUS_WARP,						// oculus distortion shader
-		BUILTIN_OCULUS_WARP_CHRAB,					// oculus distortion shader w/ chrom ab correction
-		//BUILTIN_OCULUS_WARP_TIMEWARP,				// oculus distortion shader w/ timewarp
-		//BUILTIN_OCULUS_WARP_TIMEWARP_CHRAB,		// oculus distortion shader w/ timewarp & chrom ab correction
+				
 		//BUILTIN_VRFXAA,							// koz fxaa antialiaising shader
 		// Koz end
 		

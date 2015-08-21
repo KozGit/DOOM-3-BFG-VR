@@ -146,10 +146,6 @@ void idRenderProgManager::Init()
 		// RB end
 
 		// Koz begin
-		{ BUILTIN_OCULUS_WARP, "oculusWarp.vfp", 0, false },
-		{ BUILTIN_OCULUS_WARP_CHRAB, "oculusWarpChrAb.vfp", 0, false },
-		//{ BUILTIN_OCULUS_WARP_TIMEWARP, "oculusWarpTimewarp.vfp", 0, false },
-		//{ BUILTIN_OCULUS_WARP_TIMEWARP_CHRAB, "oculusWarpTimewarpChrAb.vfp", 0, false },
 		//{ BUILTIN_VRFXAA, "oculusVrFxaa.vfp", 0, false },
 		// Koz end
 	};

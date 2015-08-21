@@ -483,7 +483,7 @@ void idCommonLocal::Frame()
 
 		if ( game->isVR )
 		{ 
-			vr->FrameStart( idLib::frameNumber );
+			vr->FrameStart( renderSystem->GetFrameCount() );//  idLib::frameNumber );
 		} 
 
 		// allow changing SIMD usage on the fly

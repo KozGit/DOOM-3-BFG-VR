@@ -317,6 +317,8 @@ void GL_SetDefaultState()
 	glEnable( GL_SCISSOR_TEST );
 	//glDrawBuffer( GL_BACK );
 	//glReadBuffer( GL_BACK );
+
+	glEnable( GL_MULTISAMPLE );
 	
 	if( r_useScissor.GetBool() )
 	{

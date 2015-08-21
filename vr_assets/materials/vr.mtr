@@ -1,0 +1,8 @@
+guisurfs/vrstatgui
+{	
+	qer_editorimage	guisurfaces/guisurface.tga
+	guiSurf guis/weapons/vrstatgui.gui
+	discrete
+	description "VR watch stats gui"
+}
+

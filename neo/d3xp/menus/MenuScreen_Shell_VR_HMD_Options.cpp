@@ -31,13 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 const static int NUM_VR_HMD_OPTIONS_OPTIONS = 8;
 
-extern idCVar vr_lowPersistence;
-extern idCVar vr_overdrive;
-extern idCVar vr_chromaCorrection;
-extern idCVar vr_timewarp;
 extern idCVar vr_pixelDensity;
 extern idCVar vr_vignette;
-extern idCVar vr_overdriveEnable;
 extern idCVar vr_scale;
 
 float LinearAdjust( const float input, const float currentMin, const float currentMax, const float desiredMin,  float desiredMax );
@@ -74,38 +69,7 @@ void idMenuScreen_Shell_VR_HMD_Options::Initialize( idMenuHandler * data ) {
 	AddChild( btnBack );
 
 	idMenuWidget_ControlButton * control;
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Low Persistence" );
-	control->SetDataSource( &systemData, idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_LOWPERSISTENCE );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_LOWPERSISTENCE );
-	options->AddChild( control );
-	
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Overdrive" );
-	control->SetDataSource( &systemData, idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_OVERDRIVE );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_OVERDRIVE );
-	options->AddChild( control );
-
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Chroma Correction" );
-	control->SetDataSource( &systemData, idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_CHROMACORRECTION );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_CHROMACORRECTION );
-	options->AddChild( control );
-
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Timewarp" );
-	control->SetDataSource( &systemData, idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_TIMEWARP );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_TIMEWARP );
-	options->AddChild( control );
-	
+		
 	control = new (TAG_SWF) idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "Vignette" );
@@ -333,11 +297,7 @@ idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::LoadData
 ========================
 */
 void idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::LoadData() {
-	
-	originalLowPersistence = vr_lowPersistence.GetInteger();
-	originalOverdrive = vr_overdriveEnable.GetInteger();
-	originalChromaCorrection = vr_chromaCorrection.GetInteger();
-	originalTimewarp = vr_timewarp.GetInteger();
+		
 	originalVignette = vr_vignette.GetInteger();
 	originalPixelDensity = vr_pixelDensity.GetFloat();
 }
@@ -348,9 +308,7 @@ idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::IsRestartReq
 ========================
 */
 bool idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::IsRestartRequired() const {
-	if (originalChromaCorrection != vr_chromaCorrection.GetInteger() ) {
-		return true;
-	}
+	
 	if ( originalVignette != vr_vignette.GetInteger() ) {
 		return true;
 	}
@@ -409,31 +367,8 @@ idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::AdjustField
 void idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::AdjustField( const int fieldIndex, const int adjustAmount ) {
 	switch ( fieldIndex ) {
 		
-		case HMD_OPTIONS_FIELD_LOWPERSISTENCE: {
-			static const int numValues = 2;
-			static const int values[numValues] = { 0, 1 };
-			vr_lowPersistence.SetInteger( AdjustOption( vr_lowPersistence.GetInteger(), values, numValues, adjustAmount ) );
-			break;
-		}
-		case HMD_OPTIONS_FIELD_OVERDRIVE: {
-			const float percent = LinearAdjust( vr_overdrive.GetFloat(), 0.0f, 0.20f, 0.0f, 100.0f );
-			const float adjusted = percent + (float)adjustAmount * 10.0f;
-			const float clamped = idMath::ClampFloat( 0.0f, 100.0f, adjusted );
-			vr_overdrive.SetFloat( LinearAdjust( clamped, 0.0f, 100.0f,0.0f, .20f ) );
-			break;
-		}
-		case HMD_OPTIONS_FIELD_CHROMACORRECTION: {
-			static const int numValues = 2;
-			static const int values[numValues] = { 0, 1 };
-			vr_chromaCorrection.SetInteger( AdjustOption( vr_chromaCorrection.GetInteger(), values, numValues, adjustAmount ) );
-			break;
-		}
-		case HMD_OPTIONS_FIELD_TIMEWARP: {
-			static const int numValues = 2;
-			static const int values[numValues] = { 0, 1 };
-			vr_timewarp.SetInteger( AdjustOption( vr_timewarp.GetInteger(), values, numValues, adjustAmount ) );
-			break;
-		}
+		
+		
 		case HMD_OPTIONS_FIELD_VIGNETTE: {
 			static const int numValues = 2;
 			static const int values[numValues] = { 0, 1 };
@@ -459,31 +394,7 @@ idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::GetField
 */
 idSWFScriptVar idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::GetField( const int fieldIndex ) const {
 	switch ( fieldIndex ) {
-			
-		case HMD_OPTIONS_FIELD_LOWPERSISTENCE: 
-			if ( vr_lowPersistence.GetInteger() == 0 ) {
-				return "#str_swf_disabled";
-			} else {
-				return "#str_swf_enabled";
-			}
 		
-		case HMD_OPTIONS_FIELD_OVERDRIVE:
-			return va( "%0.2f", vr_overdrive.GetFloat() );
-
-		case HMD_OPTIONS_FIELD_CHROMACORRECTION:
-			if ( vr_chromaCorrection.GetInteger() == 0 ) {
-				return "#str_swf_disabled";
-			} else {
-				return "#str_swf_enabled";
-			}
-		
-		case HMD_OPTIONS_FIELD_TIMEWARP:
-			if ( vr_timewarp.GetInteger() == 0 ) {
-				return "#str_swf_disabled";
-			} else {
-				return "#str_swf_enabled";
-			}
-
 		case HMD_OPTIONS_FIELD_VIGNETTE:
 			if ( vr_vignette.GetInteger() == 0 ) {
 				return "#str_swf_disabled";
@@ -504,19 +415,7 @@ idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::IsDataChange
 ========================
 */
 bool idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::IsDataChanged() const {
-	
-	if ( originalLowPersistence != vr_lowPersistence.GetInteger() ) {
-		return true;
-	}
-	if ( originalOverdrive != vr_overdriveEnable.GetInteger() ) {
-		return true;
-	}
-	if ( originalChromaCorrection != vr_chromaCorrection.GetInteger() ) {
-		return true;
-	}
-	if ( originalTimewarp != vr_timewarp.GetInteger() ) {
-		return true;
-	}
+		
 	if ( originalVignette != vr_vignette.GetInteger() ) {
 		return true;
 	}

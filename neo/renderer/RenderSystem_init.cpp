@@ -627,47 +627,28 @@ void R_SetNewMode( const bool fullInit )
 		}
 		
 		glimpParms_t	parms;
-		
-		
-		/*
-		
-		Koz : removed when oculus eliminated extended mode.
 
-		extern idCVar vr_hmdFullscreen;
-		extern idCVar vr_hmdAutoDetect;
-		
-		if ( vr->hasHMD && vr->hasOculusRift && vr_hmdAutoDetect.GetBool() && vr_enable.GetBool() && i == 1 )
+		// Koz
+		// Create a window for the Oculus mirror texture
+
+		if ( vr->hasHMD && vr->hasOculusRift && vr_enable.GetBool() )
 		{
-			int hmdDisplayNum = -1;
-
-			if ( vr_hmdFullscreen.GetBool() && R_GetDisplayNumForDeviceName( vr->hmdDeviceName, hmdDisplayNum ) )
-			{	// set the hmd as fullscreen.
-				parms.x = 0;
-				parms.y = 0;
-				parms.width = vr->hmdWidth;
-				parms.height = vr->hmdHeight;
-				parms.displayHz = vr->hmdHz; // koz fixme
-				parms.fullScreen = ++hmdDisplayNum;
-			}
-			else
-			{	// requested a windowed format or failed to get display num,
-				// create a fullscreen borderless window.
-
-				parms.x = vr->hmdWinPosX;
-				parms.y = vr->hmdWinPosY;
-				parms.width = vr->hmdWidth;
-				parms.height = vr->hmdHeight;
-				parms.fullScreen = -1;
-				parms.displayHz = 0; // ignored
-			}
+			r_fullscreen.SetInteger( 0 ); // force a windowed mode
+			r_windowWidth.SetInteger( vr->hmd->Resolution.w / 2 );
+			r_windowHeight.SetInteger( vr->hmd->Resolution.h / 2 );
+			r_windowWidth.SetInteger( vr->hmd->Resolution.w / 2 );
+			r_windowHeight.SetInteger( vr->hmd->Resolution.h / 2 );
+			r_swapInterval.SetInteger( 0 ); // force Vsync off for hmd.
+						
+			parms.x = r_windowX.GetInteger();
+			parms.y = r_windowY.GetInteger();
+			parms.width = r_windowWidth.GetInteger();
+			parms.height = r_windowHeight.GetInteger();
+			parms.fullScreen = r_fullscreen.GetInteger();
+			parms.displayHz = 0;		// ignored
 		}
-		else
-		{ 
-		*/
-
-		// normal 
-
-		if ( r_fullscreen.GetInteger() <= 0 )
+		// Koz end
+		else if ( r_fullscreen.GetInteger() <= 0 )
 		{
 			// use explicit position / size for window
 			parms.x = r_windowX.GetInteger();
@@ -722,7 +703,7 @@ void R_SetNewMode( const bool fullInit )
 		
 
 		parms.multiSamples = r_multiSamples.GetInteger();
-		if( i == 0 )
+		if( i == 0 && !vr->hasHMD )
 		{
 			parms.stereo = ( stereoRender_enable.GetInteger() == STEREO3D_QUAD_BUFFER );
 		}

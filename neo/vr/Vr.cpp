@@ -19,18 +19,6 @@ using namespace OVR;
 
 #define RADIANS_TO_DEGREES(rad) ((float) rad * (float) (180.0 / idMath::PI))
 
-//koz g_flash cvars allow tweaking of flash position when aiming with hydra
-idCVar vr_flashHand_x( "vr_flashX", "12", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_flashHand_y( "vr_flashY", "-4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_flashHand_z( "vr_flashZ", "-8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_flashScale( "vr_flashScale", ".8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-//koz g_gun cvars allow tweaking of gun position when aiming with hydra
-idCVar vr_gunHand_x( "vr_gunX", "12", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_gunHand_y( "vr_gunY", "4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_gunHand_z( "vr_gunZ", "-8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_scaleGun( "vr_scaleGun", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-
-idCVar vr_hydraPitchOffset( "vr_hydraPitchOffset", "40", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "Pitch offset for awkward hydra grip angle" );
 
 // *** Oculus HMD Variables
 
@@ -39,7 +27,6 @@ idCVar vr_trackingPredictionUserDefined( "vr_trackingPredictionUserDefined", "50
 idCVar vr_pixelDensity( "vr_pixelDensity", "1.25", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "" );
 idCVar vr_lowPersistence( "vr_lowPersistence", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable low persistence. 0 = off 1 = on" );
 idCVar vr_vignette( "vr_vignette", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable warp vignette. 0 = off 1 = on" );
-idCVar vr_FBOEnabled( "vr_FBOEnabled", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Use FBO rendering path." );
 idCVar vr_FBOAAmode( "vr_FBOAAmode", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Antialiasing mode. 0 = Disabled 1 = MSAA 2= FXAA\n" );
 idCVar vr_enable( "vr_enable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable VR mode. 0 = Disabled 1 = Enabled." );
 idCVar vr_FBOscale( "vr_FBOscale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "FBO scaling factor." );
@@ -55,6 +42,20 @@ idCVar vr_hydraEnable( "vr_hydraEnable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR
 idCVar vr_hydraForceDetect( "vr_hydraForceDetect", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Force hydra detection. 0 = normal detection, 1 = force detection." );;
 idCVar vr_hydraMode( "vr_hydraMode", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "razer hydra mode. 0 = left hydra for positional tracking, 1 = left hydra as controller, 2 = left hydra as controller and flashlight" );
 
+//koz g_flash cvars allow tweaking of flash position when aiming with hydra
+idCVar vr_flashHand_x( "vr_flashX", "12", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_flashHand_y( "vr_flashY", "-4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_flashHand_z( "vr_flashZ", "-8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_flashScale( "vr_flashScale", ".8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+
+//koz g_gun cvars allow tweaking of gun position when aiming with hydra
+idCVar vr_gunHand_x( "vr_gunX", "12", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_gunHand_y( "vr_gunY", "4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_gunHand_z( "vr_gunZ", "-8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_scaleGun( "vr_scaleGun", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+
+idCVar vr_hydraPitchOffset( "vr_hydraPitchOffset", "40", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "Pitch offset for awkward hydra grip angle" );
+
 idCVar vr_flashPitchAngle( "vr_flashPitchAngle", "90", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Pitch offset for flashlight using hydra. Default = 90" );
 idCVar vr_flashlightMode( "vr_flashlightMode", "2", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Flashlight mount.\n0 = Body\n1 = Head\n2 = Gun\n3= Hand ( if motion controls available.)" );
 
@@ -67,7 +68,7 @@ idCVar vr_flashlightHelmetPosY( "vr_flashlightHelmetPosY", "-6", CVAR_FLOAT | CV
 idCVar vr_flashlightHelmetPosZ( "vr_flashlightHelmetPosZ", "-20", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight forward offset for helmet mount." );
 idCVar vr_flashlightGunScale( "vr_flashlightGunScale", ".4", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight scale for gun mount." );
 
-// Koz begin : these cvars were just a tool to check model rotations in game
+// Koz begin : these cvars just a tool to check model rotations in game
 idCVar vr_offx( "vr_offx", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, " x offset" );
 idCVar vr_offy( "vr_offy", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, " y offset" );
 idCVar vr_offz( "vr_offz", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, " z offset" );
@@ -85,11 +86,6 @@ idCVar vr_mouse_gunx( "vr_mouse_gunX", "3", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOA
 idCVar vr_mouse_guny( "vr_mouse_gunY", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 idCVar vr_mouse_gunz( "vr_mouse_gunZ", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 idCVar vr_mouse_gun_forearm("vr_mouse_gun_forearm", "16", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "");;
-
-idCVar vr_chromaCorrection( "vr_chromaCorrection", "1", CVAR_INTEGER | CVAR_RENDERER | CVAR_ARCHIVE, "Enable Rift chromatic distortion correction. 0 = disabled, 1 = enabled." );
-idCVar vr_timewarp( "vr_timewarp", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Enable Rift timewarp. 0 = disabled, 1 = enabled." );
-idCVar vr_overdrive( "vr_overdrive", ".1", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "Rift overdrive value." );
-idCVar vr_overdriveEnable( "vr_overdriveEnable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Enable rift Overdrive." );
 
 idCVar vr_guiScale( "vr_guiScale", "1", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "scale reduction factor for full screen menu/pda scale in VR", 0.0001f, 1.0f ); //koz allow scaling of full screen guis/pda
 idCVar vr_guiSeparation( "vr_guiSeparation", ".01", CVAR_FLOAT | CVAR_ARCHIVE, " Screen separation value for fullscreen guis." );
@@ -126,8 +122,6 @@ idCVar vr_headKick( "vr_headKick", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "D
 idCVar vr_showBody( "vr_showBody", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Show player body in VR." );
 idCVar vr_joystickMenuMapping( "vr_joystickMenuMapping", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, " Use alternate joy mapping\n in menus/PDA.\n 0 = D3 Standard\n 1 = VR Mode.\n(Both joys can nav menus,\n joy r/l to change\nselect area in PDA." );
 
-idCVar vr_hmdFullscreen( "vr_hmdFullscreen", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "HMD autodetect screen format. 0 = window, 1 = fullscreen\n" );
-idCVar vr_hmdAutoDetect( "vr_hmdAutoSelect", "1", CVAR_BOOL | CVAR_RENDERER | CVAR_ARCHIVE, "Attempt to autoselect HMD as display.\n" );
 idCVar vr_hmdHz("vr_hmdHz", "0", CVAR_INTEGER | CVAR_RENDERER | CVAR_ARCHIVE, " HMD refresh rate. 0 = Auto, othewise freq in Hz." );
 
 idCVar vr_tweakx( "vr_tweakx", "1.0", CVAR_FLOAT, "xtweaking value.", 0.0f, 2.0f ); // deleteme for dev only
@@ -186,7 +180,7 @@ iVr::iVr()
 	PDArising = false;
 	forceLeftStick = true;	// start the PDA in the left menu.
 	PDAclipModelSet = false;
-	useFBO = 0;
+	useFBO = false;
 	VR_USE_HYDRA = 0;
 
 	eyeOrder[0] = 0;
@@ -236,6 +230,13 @@ iVr::iVr()
 	ocululsDepthTexID = 0;
 	oculusMirrorFboId = 0;
 	oculusMirrorTexture = 0;
+
+	inFrame = false;
+	
+	bool loading = false;
+	int lastRead = 0;
+	int currentRead = 0;
+	bool updateScreen = false;
 
 	hmdEyeImage[0] = 0;
 	hmdEyeImage[1] = 0;
@@ -341,8 +342,7 @@ void iVr::HMDInit( void )
 				hasHMD = true;
 				common->Printf( "\n\nOculus Rift HMD Initialized\n" );
 				hmdInFrame = false;
-				ovrHmd_ResetFrameTiming( hmd, 0 );
-
+				
 				unsigned int caps = 0;
 
 				if ( hmd->HmdCaps & ovrHmdCap_DynamicPrediction )
@@ -355,6 +355,7 @@ void iVr::HMDInit( void )
 				
 				ovrHmd_SetEnabledCaps( hmd, caps );
 				ovrHmd_RecenterPose( hmd ); // lets start looking forward.
+				ovrHmd_ResetFrameTiming( hmd, 0 );
 								
 				hmdWidth = hmd->Resolution.w;
 				hmdHeight = hmd->Resolution.h;
@@ -405,36 +406,25 @@ void iVr::HMDInitializeDistortion()
 
 	game->isVR = true;
 	common->Printf( "VR Mode ENABLED.\n" );
-
-	eyeOrder[0] = vr->hmd->EyeRenderOrder[ovrEye_Left]; //ovrEye_Left;
-	eyeOrder[1] = vr->hmd->EyeRenderOrder[ovrEye_Right];
-
-	common->Printf( "Eyeorder[0] = %d, Eyeorder[1] = %d\n", eyeOrder[0], eyeOrder[1] );
-
-	// koz : create distortion meshes for oculus - copy verts and indexes from oculus supplied mesh
-
-	useFBO = vr_FBOEnabled.GetInteger() && glConfig.framebufferObjectAvailable;
-
-	if ( vr_FBOEnabled.GetInteger() && !glConfig.framebufferObjectAvailable )
-	{
-		common->Printf( "Framebuffer requested but framebufferObject not available.\n Reverting to default GL framebuffer.\n" );
-		useFBO = false;
+	
+	if ( !glConfig.framebufferObjectAvailable ) 
+	{ 
+		common->Error( "Framebuffer object not available.  Framebuffer support required for VR.\n" );
 	}
+		
 	bool fboCreated = false;
 
 
 	int eye = 0;
 	for ( int eye = 0; eye < 2; eye++ )
 	{
-
-
+		
 		hmdEye[eye].eyeFov = vr->hmd->DefaultEyeFov[eye];
 		hmdEye[eye].eyeRenderDesc = ovrHmd_GetRenderDesc( vr->hmd, (ovrEyeType)eye, hmdEye[eye].eyeFov );
 
 		//oculus defaults znear 1 and positive zfar, id uses 1 znear, and the infinite z variation (-.999f) zfar
 		//during cinematics znear is crammed to .25, so create a second matrix for cinematics
 		Matrix4f pEye = ovrMatrix4f_Projection( hmdEye[eye].eyeRenderDesc.Fov, 1.0f, -0.9999999999f, true ); // nzear was 0.01f zfar was 10000
-		Matrix4f pEyeCramZnear = ovrMatrix4f_Projection( hmdEye[eye].eyeRenderDesc.Fov, 0.25f, -0.999f, true ); // nzear was 0.01f zfar was 10000
 		int x, y;
 
 		for ( x = 0; x < 4; x++ )
@@ -442,8 +432,6 @@ void iVr::HMDInitializeDistortion()
 			for ( y = 0; y < 4; y++ )
 			{
 				hmdEye[eye].projectionRift[y * 4 + x] = pEye.M[x][y];						// convert oculus matrices to something this engine likes 
-				//hmdEye[eye].projectionRiftCramZnear[ y*4 + x ] = pEyeCramZnear.M[x][y];	// convert oculus matrices to something this engine likes
-
 			}
 		}
 
@@ -467,7 +455,7 @@ void iVr::HMDInitializeDistortion()
 		hmdEye[eye].renderTarget.w = rendertarget.w;
 		common->Printf( "Eye %d Rendertaget Width x Height = %d x %d\n", eye, rendertarget.w, rendertarget.h );
 
-		if ( useFBO && !fboCreated )
+		if ( !fboCreated )
 		{
 			common->Printf( "Generating FBOs.\n" );
 			common->Printf( "Requested pixel density = %f \n", vr_pixelDensity.GetFloat() );
@@ -482,28 +470,14 @@ void iVr::HMDInitializeDistortion()
 
 				VR_AAmode = vr_FBOAAmode.GetInteger();
 
+				common->Printf( "vr_FBOAAmode %d r_multisamples %d\n", VR_AAmode, r_multiSamples.GetInteger() );
 				if ( VR_AAmode == VR_AA_MSAA && r_multiSamples.GetInteger() == 0 ) VR_AAmode = VR_AA_NONE;
 
 				if ( VR_AAmode == VR_AA_FXAA )
 				{// enable FXAA
 
 					VR_AAmode = VR_AA_NONE;
-
-					/*
-					VR_GenFBO( rendertarget.w, rendertarget.h, VR_FBO, true, false  );
-					VR_GenFBO( rendertarget.w , rendertarget.h , VR_ResolveAAFBO, false, false );
-					VR_GenFBO( (rendertarget.w * 2) , rendertarget.h, VR_FullscreenFBO, false, false );
-					if ( !VR_ResolveAAFBO.valid || !VR_FBO.valid || !VR_FullscreenFBO.valid ) {
-					VR_DeleteFBO( VR_FBO );
-					VR_DeleteFBO( VR_ResolveAAFBO );
-					VR_DeleteFBO( VR_FullscreenFBO );
-					common->Warning("Unable to create FBOs for FXAA antialiasing. Attempting to create FBOs with FXAA disabled.\n", rendertarget.w, rendertarget.h );
-					} else {
-					common->Printf("Successfully created two %d x %d FBOs for FXAA \n", rendertarget.w, rendertarget.h );
-					VR_FBO.MSAAsamples = 0;
-					VR_FBO.aaMode = VR_AA_FXAA;
-					}
-					*/
+										
 				}
 
 				if ( VR_AAmode == VR_AA_MSAA )
@@ -512,10 +486,13 @@ void iVr::HMDInitializeDistortion()
 					globalFramebuffers.primaryFBO = new Framebuffer( "_primaryFBO", rendertarget.w, rendertarget.h, true ); // koz
 					common->Printf( "Adding Depth/Stencil attachments to MSAA framebuffer\n" );
 					globalFramebuffers.primaryFBO->AddDepthStencilBuffer( GL_DEPTH24_STENCIL8 );
+					//globalFramebuffers.primaryFBO->AddDepthTexture( GL_DEPTH24_STENCIL8 );
 					common->Printf( "Adding color attachment to MSAA framebuffer\n" );
 					globalFramebuffers.primaryFBO->AddColorBuffer( GL_RGBA8, 0 );
+					//globalFramebuffers.primaryFBO->AddColorTexture( GL_RGBA8 );
 
 					int status = globalFramebuffers.primaryFBO->Check();
+
 					globalFramebuffers.primaryFBO->Error( status );
 
 					resolveFBOimage = globalImages->ImageFromFunction( "_resolveFBOimage", R_MakeFBOImage );
@@ -525,7 +502,7 @@ void iVr::HMDInitializeDistortion()
 
 					common->Printf( "Adding Depth/Stencil attachments to MSAA framebuffer\n" );
 					globalFramebuffers.resolveFBO->AddDepthStencilBuffer( GL_DEPTH24_STENCIL8 );
-
+					
 					common->Printf( "Adding color attachment to framebuffer\n" );
 					globalFramebuffers.resolveFBO->AttachImage2D( GL_TEXTURE_2D, resolveFBOimage, 0 );
 					resolveFBOimage->Bind();
@@ -553,29 +530,15 @@ void iVr::HMDInitializeDistortion()
 
 					if ( status = GL_FRAMEBUFFER_COMPLETE )
 					{
-						useFBO = 1;
+						useFBO = true;
 						fboCreated = true;
 					}
 					else
 					{
-						useFBO = 0;
+						useFBO = false;
 						fboCreated = false;
 					}
-
-					/*
-					VR_GenFBO( rendertarget.w, rendertarget.h, VR_FBO, true, true  );
-					VR_GenFBO( rendertarget.w , rendertarget.h , VR_ResolveAAFBO, true, false );
-					VR_GenFBO( (rendertarget.w * 2) , rendertarget.h, VR_FullscreenFBO, false, false );
-					if ( !VR_ResolveAAFBO.valid || !VR_FBO.valid || !VR_FullscreenFBO.valid ) {
-					VR_DeleteFBO( VR_FBO );
-					VR_DeleteFBO( VR_ResolveAAFBO );
-					VR_DeleteFBO( VR_FullscreenFBO );
-					common->Warning("Unable to create FBOs for MSAA antialiasing. Attempting to create FBOs with MSAA disabled.\n", rendertarget.w, rendertarget.h );
-					} else {
-					common->Printf("Successfully created %d x %d FBO for MSAA \n", rendertarget.w, rendertarget.h );
-					VR_FBO.aaMode = VR_AA_MSAA;
-					}
-					*/
+										
 				}
 
 				if ( !fboCreated /*!VR_FBO.valid*/ )
@@ -612,7 +575,7 @@ void iVr::HMDInitializeDistortion()
 
 					if ( status = GL_FRAMEBUFFER_COMPLETE )
 					{
-						useFBO = 1;
+						useFBO = true;
 						fboCreated = true;
 					}
 					else
@@ -636,96 +599,7 @@ void iVr::HMDInitializeDistortion()
 		viewport.Size.w = rendertarget.w;
 		viewport.Size.h = rendertarget.h;
 
-		/* -------------------
-
-		Koz:  removed when oculus removed extended mode & client side rendering
-
-		ovrHmd_GetRenderScaleAndOffset( hmdEye[eye].eyeFov, rendertarget, viewport, (ovrVector2f*) hmdEye[eye].UVScaleoffset );
-
-		common->Printf( "Eye %d UVscale x %f y %f  offset x %f , y %f\n", eye,
-		hmdEye[eye].UVScaleoffset[0].x,
-		hmdEye[eye].UVScaleoffset[0].y,
-		hmdEye[eye].UVScaleoffset[1].x,
-		hmdEye[eye].UVScaleoffset[1].y );
-
-
-
-		// create the distortion mesh for this eye
-
-		ovrDistortionMesh meshData = {};
-		distortionVert_t *mesh = NULL;
-		distortionVert_t *v = NULL;
-		ovrDistortionVertex *ov = NULL;
-		unsigned int vtex = 0;
-
-		ovrHmd_CreateDistortionMesh( hmd,
-		hmdEye[eye].eyeRenderDesc.Eye,
-		hmdEye[eye].eyeRenderDesc.Fov,
-		0, // ovrDistortionCap_Chromatic | ovrDistortionCap_SRGB | ovrDistortionCap_TimeWarp | ovrDistortionCap_Vignette  ,
-		&meshData );
-
-		hmdEye[eye].vbo.numVerts = meshData.VertexCount;
-		hmdEye[eye].vbo.numIndexes = meshData.IndexCount;
-		common->Printf(" %d Vertexes  %d Indexes.\n", meshData.VertexCount, meshData.IndexCount);
-
-		mesh = (distortionVert_t *) malloc( sizeof(distortionVert_t) * meshData.VertexCount );
-		v = mesh;
-		ov = meshData.pVertexData;
-
-		for ( vtex = 0; vtex < meshData.VertexCount; vtex++ )
-		{
-
-		v->pos.x = ov->ScreenPosNDC.x;
-		v->pos.y = ov->ScreenPosNDC.y;
-		v->texR = ( *(idVec2*)&ov->TanEyeAnglesR );
-		v->texG = ( *(idVec2*)&ov->TanEyeAnglesG );
-		v->texB = ( *(idVec2*)&ov->TanEyeAnglesB );
-		v->color[0] = v->color[1] = v->color[2] = (GLubyte)( ov->VignetteFactor * 255.99f );
-		v->color[3] = (GLubyte)( ov->TimeWarpFactor * 255.99f );
-		v++; ov++;
-		}
-
-		if ( !hmdEye[eye].vbo.vertBuffHandle )
-		{
-		glGenBuffers( 1, &hmdEye[eye].vbo.vertBuffHandle );
-		GL_CheckErrors();
-		}
-
-		if ( !hmdEye[eye].vbo.indexBuffHandle )
-		{
-		glGenBuffers( 1 , &hmdEye[eye].vbo.indexBuffHandle );
-		GL_CheckErrors();
-		}
-
-		if ( hmdEye[eye].vbo.vertBuffHandle && hmdEye[eye].vbo.indexBuffHandle )
-		{
-		//build the mesh vbo
-		GLint oldVertArray , oldIndexArray = 0;
-
-		glBindVertexArray( glConfig.global_vao );
-
-		glGetIntegerv( GL_ARRAY_BUFFER_BINDING , (GLint *) &oldVertArray );
-		glGetIntegerv( GL_ELEMENT_ARRAY_BUFFER_BINDING, (GLint *) &oldIndexArray );
-
-		glBindBuffer( GL_ARRAY_BUFFER, hmdEye[eye].vbo.vertBuffHandle );
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, hmdEye[eye].vbo.indexBuffHandle );
-
-		glBufferData( GL_ARRAY_BUFFER, sizeof(distortionVert_t) * meshData.VertexCount, mesh,GL_STATIC_DRAW );
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short) * meshData.IndexCount, meshData.pIndexData, GL_STATIC_DRAW); GL_CheckErrors();
-
-		glBindBuffer( GL_ARRAY_BUFFER, oldVertArray );
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, oldIndexArray );
-		GL_CheckErrors();
-
-		} else
-		{
-		common->Warning("ERROR: Unable to allocate vertex buffer data");
-		game->isVR = false;
-		}
-
-		free( mesh );
-		ovrHmd_DestroyDistortionMesh( &meshData );
-		*/
+		
 	}
 
 	// calculate fov for engine
@@ -777,7 +651,7 @@ void iVr::HMDInitializeDistortion()
 	glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, hmdEye[0].renderTarget.w, hmdEye[0].renderTarget.h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL );
 
 
-	ovrHmd_CreateMirrorTextureGL( hmd, GL_RGBA, 860, 540, (ovrTexture**) &oculusMirrorTexture );
+	ovrHmd_CreateMirrorTextureGL( hmd, GL_RGBA, hmd->Resolution.w / 2, hmd->Resolution.h / 2, (ovrTexture**)&oculusMirrorTexture );
 	glGenFramebuffers( 1, &oculusMirrorFboId );
 	glBindFramebuffer( GL_READ_FRAMEBUFFER, oculusMirrorFboId );
 	glFramebufferTexture2D( GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, oculusMirrorTexture->OGL.TexId, 0 );
@@ -828,7 +702,7 @@ void iVr::HMDGetOrientation(float &roll, float &pitch, float &yaw, idVec3 &hmdPo
         
 		if ( vr_trackingPredictionAuto.GetBool() ) 
 		{
-			hmdFrameTime = ovrHmd_GetFrameTiming( hmd, idLib::frameNumber );
+			hmdFrameTime = ovrHmd_GetFrameTiming( hmd, renderSystem->GetFrameCount() );// idLib::frameNumber );
 			time = hmdFrameTime.DisplayMidpointSeconds;
 		} 
 		else 

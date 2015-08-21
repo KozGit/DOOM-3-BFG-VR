@@ -129,7 +129,7 @@ public:
 	int					hmdHeight;
 	int					hmdHz;
 	
-	int					useFBO;
+	bool				useFBO;
 	int					primaryFBOWidth;
 	int					primaryFBOHeight;
 	
@@ -167,7 +167,15 @@ public:
 	GLuint				oculusMirrorFboId;
 
 	ovrLayerEyeFov		oculusLayer;
-		
+	ovrViewScaleDesc	oculusViewScaleDesc;
+
+	volatile bool				inFrame;
+	 
+	bool				loading;
+	int					lastRead;
+	int					currentRead;
+	bool				updateScreen;
+			
 	ovrTrackingState	hmdTrackingState;
 	ovrFrameTiming		hmdFrameTime;
 	bool				hmdPositionTracked;

@@ -92,14 +92,20 @@ resolveFBO will be bound after this operation.
 
 void ResolveMSAA( void ) 
 {
-	if ( vr->useFBO ) {
+	if ( vr->useFBO ) 
+	{
 
 		if ( globalFramebuffers.primaryFBO->IsMSAA() )
 		{	// primary FBO is MSAA enabled, resolve to secondary FBO to perform antialiasing before copy
-			glBindFramebuffer( GL_READ_FRAMEBUFFER, globalFramebuffers.primaryFBO->GetFramebuffer() ); // bind primary FBO for read
+		
 			glBindFramebuffer( GL_DRAW_FRAMEBUFFER, globalFramebuffers.resolveFBO->GetFramebuffer() );// bind resolve FBO for draw
+			glBindFramebuffer( GL_READ_FRAMEBUFFER, globalFramebuffers.primaryFBO->GetFramebuffer() ); // bind primary FBO for read
+			//glClearColor( 0, 0, 0, 0 );
+			//glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+						
 			glBlitFramebuffer( 0, 0, globalFramebuffers.primaryFBO->GetWidth(), globalFramebuffers.primaryFBO->GetHeight(), 0, 0, globalFramebuffers.resolveFBO->GetWidth(), globalFramebuffers.resolveFBO->GetHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR ); // blit from primary FBO to resolve MSAA antialiasing.
 			globalFramebuffers.resolveFBO->Bind();
+			
 		}
 	}
 }
@@ -229,6 +235,30 @@ void Framebuffer::AddColorBuffer( GLuint format, int index )
 	GL_CheckErrors();
 }
 
+void Framebuffer::AddColorTexture( GLuint format )
+{
+	
+	colorFormat = format;
+	
+	bool notCreatedYet = colorTexnum == 0;
+	if ( notCreatedYet )
+	{
+		glGenTextures( 1, &colorTexnum );
+	}
+
+	glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, colorTexnum );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+
+	glTexImage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE, msaaSamples, format, width, height, false );
+	
+	glBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );
+	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, colorTexnum, 0 );
+	GL_CheckErrors();
+}
+
 void Framebuffer::AddDepthBuffer( GLuint format )
 {
 	depthFormat = format;
@@ -257,24 +287,75 @@ void Framebuffer::AddDepthBuffer( GLuint format )
 		
 		glBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );
 		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer );
-		
+				
 	}
 	
 }
 
+void Framebuffer::AddDepthTexture( GLuint format )
+{
+	
+	//bool notCreatedYet = depthTexnum = 0;
+//	if ( notCreatedYet )
+//	{
+		glGenTextures( 1, &depthTexnum );
+//	}
+
+	glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, depthTexnum );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+	glTexImage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE, msaaSamples, format, width, height, false );
+	glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, 0);
+	
+	glBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );
+	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, depthTexnum, 0 );
+	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, depthTexnum, 0 );
+	GL_CheckErrors();
+}
 void Framebuffer::AddDepthStencilBuffer( GLuint format )
 {
 	depthFormat = format;
 	AddDepthBuffer( depthFormat );
 	
 	bool notCreatedYet = stencilBuffer == 0;
-	
+		
+	/*if ( notCreatedYet )
+	{
+		glGenRenderbuffers( 1, &stencilBuffer );
+	}
+
+	glBindRenderbuffer( GL_RENDERBUFFER, stencilBuffer );
+
+	if ( useMsaa )
+	{
+		glRenderbufferStorageMultisample( GL_RENDERBUFFER, msaaSamples, format, width, height );
+	}
+	else
+	{
+		glRenderbufferStorage( GL_RENDERBUFFER, format, width, height );
+	}
+
+	glBindRenderbuffer( GL_RENDERBUFFER, 0 );
+
+	if ( notCreatedYet )
+	{
+
+		glBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );
+		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, stencilBuffer );
+
+	}
+
+*/	
+	// was orig
 	if ( notCreatedYet )
 	{
 		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer );
 		stencilBuffer = depthBuffer;
 		stencilFormat = depthFormat;
 	}
+
 }
 
 void Framebuffer::AttachImage2D( GLuint target, const idImage* image, int index )

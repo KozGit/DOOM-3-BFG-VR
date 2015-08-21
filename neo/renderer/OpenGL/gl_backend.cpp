@@ -133,7 +133,7 @@ const void GL_BlockingSwapBuffers()
 	
 	if( !glConfig.syncAvailable )
 	{
-		// koz reset glFinish();
+		glFinish();
 	}
 	
 	const int beforeSwap = Sys_Milliseconds();
@@ -223,28 +223,6 @@ static void R_MakeStereoRenderImage( idImage* image )
 	image->AllocImage( opts, TF_LINEAR, TR_CLAMP );
 }
 
-/*
-====================
-Koz
-GL_SetupShaderDistortion
-Set uniforms for oculus distortion shader
-====================
-*/
-void GL_SetupShaderDistortion( int eye )
-{
-	
-	float overdriveScaleRegularRise = vr_overdrive.GetFloat();
-	static float overdriveScaleRegularFall = 0.05f;	// falling issues are hardly visible
-	float overdriveScales[4] = { overdriveScaleRegularRise, overdriveScaleRegularFall, 0.0f, 0.0f };
-	float UVScale[4] = { vr->hmdEye[eye].UVScaleoffset[0].x, vr->hmdEye[eye].UVScaleoffset[0].y, 0.0f, 0.0f };
-	float UVOffset[4] = { vr->hmdEye[eye].UVScaleoffset[1].x, vr->hmdEye[eye].UVScaleoffset[1].y, 0.0f, 0.0f };
-
-	renderProgManager.SetRenderParm( RENDERPARM_OVERDRIVE_SCALES, overdriveScales );
-	renderProgManager.SetRenderParm( RENDERPARM_EYE_TO_SOURCE_UV_OFFSET, UVOffset );
-	renderProgManager.SetRenderParm( RENDERPARM_EYE_TO_SOURCE_UV_SCALE, UVScale );
-	renderProgManager.CommitUniforms();
-
-}
 /*
 ====================
 RB_StereoRenderExecuteBackEndCommands
@@ -394,7 +372,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	renderProgManager.SetRenderParm( RENDERPARM_TEXGEN_0_ENABLED, texGenEnabled );
 	
 	renderProgManager.BindShader_Texture();
-	GL_Color( 1, 1, 1, 1 );
+	
 		
 	switch( renderSystem->GetStereo3DMode() )
 	{
@@ -528,7 +506,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	RB_DrawFlickerBox();
 	
 	// make sure the drawing is actually started
-	// koz reset glFlush();
+	glFlush();
 	
 	// we may choose to sync to the swapbuffers before the next frame
 	
@@ -618,7 +596,7 @@ void RB_ExecuteBackEndCommands( const emptyCommand_t* cmds )
 	// Fix for the steam overlay not showing up while in game without Shell/Debug/Console/Menu also rendering
 	glColorMask( 1, 1, 1, 1 );
 	
-	// kox reset glFlush();
+	glFlush();
 	
 	// stop rendering on this thread
 	uint64 backEndFinishTime = Sys_Microseconds();

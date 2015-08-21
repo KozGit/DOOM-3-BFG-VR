@@ -34,7 +34,6 @@ const static int NUM_VR_RENDERING_OPTIONS = 8;
 extern idCVar vr_enable;
 extern idCVar vr_FBOscale;
 extern idCVar r_multiSamples;
-extern idCVar vr_FBOEnabled;
 extern idCVar vr_FBOAAmode;
 
 
@@ -78,14 +77,6 @@ void idMenuScreen_Shell_VR_Rendering_Options::Initialize( idMenuHandler * data )
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::VR_OPTIONS_FIELD_ENABLE_VR );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::VR_OPTIONS_FIELD_ENABLE_VR );
-	options->AddChild( control );
-
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Enable FBO rendering." );// Enable FBO rendering path.
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::VR_OPTIONS_FIELD_ENABLE_FBO );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::VR_OPTIONS_FIELD_ENABLE_FBO );
 	options->AddChild( control );
 
 	control = new (TAG_SWF) idMenuWidget_ControlButton();
@@ -318,7 +309,6 @@ void idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 	
 	
 	originalEnableVR = vr_enable.GetInteger();
-	originalEnableFBO = vr_FBOEnabled.GetInteger();
 	originalFBOsize = vr_FBOscale.GetFloat();
 	originalAntialiasingType = vr_FBOAAmode.GetInteger();
 	originalMSAAlevel = r_multiSamples.GetInteger();
@@ -338,10 +328,7 @@ bool idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 	if ( originalMSAAlevel != r_multiSamples.GetInteger() && vr_FBOAAmode.GetInteger() == VR_AA_MSAA ) {
 		return true;
 	}
-	if ( originalEnableFBO != vr_FBOEnabled.GetInteger() ) {
-		return true;
-	}
-		
+	
 	return false;
 }
 
@@ -369,13 +356,6 @@ void idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 			break;
 		}
 		
-		case VR_OPTIONS_FIELD_ENABLE_FBO: {
-			static const int numValues = 2;
-			static const int values[numValues] = { 0, 1 };
-			vr_FBOEnabled.SetInteger( AdjustOption(vr_FBOEnabled.GetInteger(), values, numValues, adjustAmount ) );
-			break;
-		}
-			
 		case VR_OPTIONS_FIELD_ANTIALIASINGTYPE: {
 			static const int numValues = 3;
 			static const int values[numValues] = { 0, 1, 2 };
@@ -418,17 +398,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_V
 			}
 			
 		}
-		
-		case VR_OPTIONS_FIELD_ENABLE_FBO: {
-			const int FBOenabled = vr_FBOEnabled.GetInteger();
-			
-			if ( FBOenabled == 0 ) {
-				return "#str_swf_disabled";
-			} else {
-				return "#str_swf_enabled";
-			}
-		}
-		
+						
 		case VR_OPTIONS_FIELD_FBO_SIZE: { 
 			
 			 float result =  LinearAdjust( vr_FBOscale.GetFloat(), 0.8f, 4.0f, 0.0f, 100.0f );
@@ -461,9 +431,7 @@ bool idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 	if ( originalEnableVR != vr_enable.GetInteger() ) {
 		return true;
 	}
-	if ( originalEnableFBO != vr_FBOEnabled.GetInteger() ) {
-		return true;
-	}
+	
 	if ( originalFBOsize != vr_FBOscale.GetFloat() ) {
 		return true;
 	}

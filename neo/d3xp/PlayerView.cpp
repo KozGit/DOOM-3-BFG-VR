@@ -862,7 +862,7 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 		}
 
 		// render both eye views each frame on the PC
-		if ( game->isVR ) vr->FrameStart( idLib::frameNumber );
+		//if ( game->isVR ) vr->FrameStart( renderSystem->GetFrameCount() );// idLib::frameNumber );
 
 		for( int eye = 1 ; eye >= -1 ; eye -= 2 )
 		{

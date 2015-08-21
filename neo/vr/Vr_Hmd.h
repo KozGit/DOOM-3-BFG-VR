@@ -53,18 +53,6 @@ typedef struct
 	scaleOffset_t y;
 } eyeScaleOffset_t;
 
-typedef struct
-{
-	GLuint vertBuffHandle;
-	GLuint indexBuffHandle;
-	GLenum usage;
-	GLenum mode;
-	GLsizei count;
-	GLenum type;
-	int numVerts;
-	int numIndexes;
-} vbo_t;
-
 typedef struct _hmdEye
 {
 
@@ -75,41 +63,7 @@ typedef struct _hmdEye
 	ovrSizei			renderTarget;
 	ovrFovPort			eyeFov;
 	ovrVector2f			UVScaleoffset[2];
-	vbo_t				vbo;
+	
 } hmdEye_t;
-
-/*
-========================
-Oculus Distortion Mesh Vertexes
-=======================
-*/
-
-typedef struct _distortionVert
-{
-
-	idVec2				pos;			// 8 bytes
-	idVec2				texR;			// 8 bytes
-	idVec2				texG;			// 8 bytes
-	idVec2				texB;			// 8 bytes 
-	byte				color[4];		// 4 bytes - total size 36 bytes
-
-} distortionVert_t;
-
-typedef struct _distortionMesh
-{
-
-	int							numVerts;
-	distortionVert_t *			verts;
-
-	int 						numIndexes;
-	unsigned short	*			indexes;
-} distortionMesh_t;
-
-#define DISTORTIONVERT_SIZE				36
-#define DISTORTIONVERT_POS_OFFSET		(0*4)
-#define DISTORTIONVERT_TEXR_OFFSET		(2*4)
-#define DISTORTIONVERT_TEXG_OFFSET		(4*4)
-#define DISTORTIONVERT_TEXB_OFFSET		(6*4)
-#define DISTORTIONVERT_DCOLOR_OFFSET	(8*4)
 
 #endif

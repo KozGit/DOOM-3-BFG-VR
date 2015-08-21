@@ -1292,25 +1292,20 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		
 		// re-override anything from the config files with command line args
 		StartupVariable( NULL );
-		
+	
 		// if any archived cvars are modified after this, we will trigger a writing of the config file
 		cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
 		
+
 		// init OpenGL, which will open a window and connect sound and input hardware
 		renderSystem->InitOpenGL();
 		
-		// Support up to 2 digits after the decimal point
 		
-		if ( vr->hasHMD ) // koz
-		{
-			com_engineHz_denominator = 100LL * ( vr->hmdHz );
-			com_engineHz_latched = ( vr->hmdHz );
-		}
-		else
-		{
-			com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
-			com_engineHz_latched = com_engineHz.GetFloat();
-		}
+		// Support up to 2 digits after the decimal point
+				
+		com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
+		com_engineHz_latched = com_engineHz.GetFloat();
+		
 		// start the sound system, but don't do any hardware operations yet
 		soundSystem->Init();
 		
@@ -1328,6 +1323,12 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		// init the Razer Hydra
 		vr->HydraInit();
 		// Koz end
+
+		// koz fixme
+		extern idCVar r_swapInterval;
+		r_swapInterval.SetInteger( 0 );
+		r_swapInterval.SetModified();
+				
 
 		whiteMaterial = declManager->FindMaterial( "_white" );
 		
@@ -1514,6 +1515,17 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 	{
 		Sys_Error( "Error during initialization" );
 	}
+
+	// koz
+	if ( game->isVR ) // koz override these for VR
+	{
+		cvarSystem->SetCVarString( "r_swapInterval", "0" );
+		cvarSystem->SetCVarInteger( "com_engineHz", vr->hmdHz );
+		com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
+		com_engineHz_latched = com_engineHz.GetFloat();
+
+	}
+
 }
 
 /*
@@ -2006,17 +2018,9 @@ void idCommonLocal::PerformGameSwitch()
 	{
 		DoomLib::Interface.Shutdown();
 		
+		com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
+		com_engineHz_latched = com_engineHz.GetFloat();
 		
-		if ( vr->hasHMD ) // koz
-		{
-			com_engineHz_denominator = 100LL * ( vr->hmdHz );
-			com_engineHz_latched = ( vr->hmdHz );
-		}
-		else
-		{
-			com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
-			com_engineHz_latched = com_engineHz.GetFloat();
-		}
 		// Don't MoveToPressStart if we have an invite, we need to go
 		// directly to the lobby.
 		if( session->GetState() <= idSession::IDLE )

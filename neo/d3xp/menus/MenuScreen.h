@@ -1906,7 +1906,6 @@ public:
 		enum vrRenderingOptions_t
 		{
 			VR_OPTIONS_FIELD_ENABLE_VR,
-			VR_OPTIONS_FIELD_ENABLE_FBO,
 			VR_OPTIONS_FIELD_FBO_SIZE,
 			VR_OPTIONS_FIELD_ANTIALIASINGTYPE,
 			VR_OPTIONS_FIELD_MSAALEVEL,
@@ -1934,7 +1933,6 @@ public:
 
 	private:
 		int		originalEnableVR;
-		int		originalEnableFBO;
 		float	originalFBOsize;
 		int		originalAntialiasingType;
 		int		originalMSAAlevel;
@@ -1977,10 +1975,6 @@ public:
 	public:
 		enum vrHMDOptions_t
 		{
-			HMD_OPTIONS_FIELD_LOWPERSISTENCE,
-			HMD_OPTIONS_FIELD_OVERDRIVE,
-			HMD_OPTIONS_FIELD_CHROMACORRECTION,
-			HMD_OPTIONS_FIELD_TIMEWARP,
 			HMD_OPTIONS_FIELD_VIGNETTE,
 			HMD_OPTIONS_FIELD_PIXEL_DENSITY,
 			MAX_HMD_OPTION_FIELDS
@@ -2006,10 +2000,7 @@ public:
 		bool						IsRestartRequired() const;
 
 	private:
-		int		originalLowPersistence;
-		float	originalOverdrive;
-		int		originalChromaCorrection;
-		int		originalTimewarp;
+		
 		int		originalVignette;
 		float	originalPixelDensity;
 	};
