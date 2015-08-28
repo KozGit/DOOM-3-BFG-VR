@@ -356,7 +356,9 @@ public:
 	
 	int						flashlightBattery;
 	idEntityPtr<idWeapon>	flashlight;
-	
+
+	idEntityPtr<idWeapon>	leftHand; // koz model for left hand for motion controls.
+		
 	idEntityPtr<idWeapon>	weapon;
 	idMenuHandler_HUD* 		hudManager;
 	idMenuScreen_HUD* 		hud;

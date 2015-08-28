@@ -1735,6 +1735,10 @@ void idPlayer::SetupWeaponEntity()
 		flashlight = static_cast<idWeapon*>( gameLocal.SpawnEntityType( idWeapon::Type, NULL ) );
 		flashlight.GetEntity()->SetFlashlightOwner( this );
 		//FlashlightOff();
+
+		// koz model for independent left hand in VR when using motion controls
+		//leftHand = static_cast<idWeapon*>(gameLocal.SpawnEntityType( idWeapon::Type, NULL ));
+		//leftHand.GetEntity()->SetLeftHandOwner( this );
 	}
 	
 	for( w = 0; w < MAX_WEAPONS; w++ )
@@ -2308,7 +2312,7 @@ void idPlayer::Spawn()
 		weapon.GetEntity()->ForceAmmoInClip();
 	}
 	
-	ovrHmd_RecenterPose( vr->hmd ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
+	ovr_RecenterPose( vr->hmd ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
 
 }
 
@@ -2980,7 +2984,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		}
 	}
 	
-	ovrHmd_RecenterPose( vr->hmd ); // Koz reset hmd orientation Koz fixme check if still appropriate here.
+	ovr_RecenterPose( vr->hmd ); // Koz reset hmd orientation Koz fixme check if still appropriate here.
 }
 
 /*
@@ -7972,7 +7976,7 @@ void idPlayer::OrientHMDBody()
 	hydraYawOffset += vr->lastHMDYaw;
 	hydraYawOffset = idAngles( 0.0f, hydraYawOffset, 0.0f ).Normalize180().yaw;
 
-	ovrHmd_RecenterPose( vr->hmd );
+	ovr_RecenterPose( vr->hmd );
 	SetViewAngles( newBodyAngles );
 
 	extern idCVar vr_hydraMode;
@@ -9307,7 +9311,7 @@ void idPlayer::Think()
 		spawnAnglesSet = true;
 		SetViewAngles( spawnAngles );
 		oldImpulseSequence = usercmd.impulseSequence;
-		ovrHmd_RecenterPose( vr->hmd ); // koz fixme check if this reset hmd orientation is needed.
+		ovr_RecenterPose( vr->hmd ); // koz fixme check if this reset hmd orientation is needed.
 
 	}
 	

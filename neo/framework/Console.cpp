@@ -36,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "libs\LibOVR\Include\OVR_CAPI.h"
 #include "vr\Vr.h"
 
-idCVar vr_hmdPerfHud( "vr_hmdPerfHud", "0", CVAR_INTEGER, "Oculus Performance HUD. 0 Off, 1 Latency, 2 CPU/GPU Timing", 0, 2 );
+idCVar vr_hmdPerfHud( "vr_hmdPerfHud", "0", CVAR_INTEGER, "Oculus Performance HUD.\n 0 Off\n 1 Latency Timing\n 2 RenderTiming\n 3 Perf Headroom\n 4 Version\n", 0, 4 );
 // Koz end
 
 #define	CON_TEXTSIZE			0x30000
@@ -1342,7 +1342,7 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 	// Enable the oculus performance hud
 	if ( vr_hmdPerfHud.IsModified() )
 	{
-		ovrHmd_SetInt( vr->hmd, "PerfHudMode", vr_hmdPerfHud.GetInteger() );
+		ovr_SetInt( vr->hmd, "PerfHudMode", vr_hmdPerfHud.GetInteger() );
 		vr_hmdPerfHud.ClearModified();
 	}
 	// Koz end

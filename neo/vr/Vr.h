@@ -141,12 +141,15 @@ public:
 	bool				hasOculusRift;
 	
 	ovrHmd				hmd;
+	ovrGraphicsLuid		luid;
+	ovrHmdDesc			hmdDesc;
+
 	float				hmdFovX;
 	float				hmdFovY;
 	float				hmdPixelScale;
 	float				hmdAspect;
 	hmdEye_t			hmdEye[2];
-	int					eyeOrder[2];
+	
 	
 	float				oculusIPD;
 	float				oculusHeight;
@@ -155,10 +158,6 @@ public:
 
 	idImage*			hmdEyeImage[2];
 	idImage*			hmdCurrentRender[2];
-	
-	idImage*			primaryFBOimage;
-	idImage*			resolveFBOimage;
-	idImage*			fullscreenFBOimage;
 
 	ovrSwapTextureSet * oculusTextureSet[2];
 	GLuint				oculusFboId;
@@ -227,7 +226,6 @@ extern idCVar	vr_manualIPD;
 extern idCVar	vr_manualHeight;
 extern idCVar   vr_timewarp;
 extern idCVar	vr_chromaCorrection;
-extern idCVar	vr_oculusHmdDirectMode;
 
 extern idCVar	vr_showBody;
 extern idCVar	vr_viewModelArms;

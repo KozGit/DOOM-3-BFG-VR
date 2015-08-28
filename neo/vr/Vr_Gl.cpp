@@ -477,16 +477,20 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		
 	if ( !vr_skipOvr.GetBool() )
 	{
-		ovrGLTexture* tex = (ovrGLTexture*)&oculusTextureSet[0]->Textures[oculusTextureSet[0]->CurrentIndex];
+		wglSwapIntervalEXT( 0 );
+
+		//ovrGLTexture* tex = (ovrGLTexture*)&oculusTextureSet[0]->Textures[oculusTextureSet[0]->CurrentIndex];
+		//glBindFramebuffer( GL_FRAMEBUFFER, oculusFboId );
+		//glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->OGL.TexId, 0 );
+		//glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ocululsDepthTexID, 0 );
+
+		ovrGLTexture* tex = (ovrGLTexture*)(&oculusTextureSet[0]->Textures[oculusTextureSet[0]->CurrentIndex]);
+
 		glBindFramebuffer( GL_FRAMEBUFFER, oculusFboId );
 		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->OGL.TexId, 0 );
 		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ocululsDepthTexID, 0 );
-
-		//glBindFramebuffer( GL_FRAMEBUFFER, 0);
-
+		
 		glViewport( 0, 0, FBOW, FBOH );
-		//	glViewport( 0, 0, vr->hmdWidth / 2, vr->hmdHeight / 2 );
-		glClearColor( 0, 0, 0, 0 );
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		GL_CheckErrors();
 
@@ -497,13 +501,13 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
 		RB_DrawElementsWithCounters( &backEnd.unitSquareSurface ); // draw it
 
-		tex = (ovrGLTexture*)&oculusTextureSet[1]->Textures[oculusTextureSet[1]->CurrentIndex];
+		tex = (ovrGLTexture*)(&oculusTextureSet[1]->Textures[oculusTextureSet[1]->CurrentIndex]);
 		glBindFramebuffer( GL_FRAMEBUFFER, oculusFboId );
 		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->OGL.TexId, 0 );
 		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ocululsDepthTexID, 0 );
 		glClearColor( 0, 0, 0, 0 );
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
+		
 		// draw the right eye texture
 		glViewport( 0, 0, FBOW, FBOH );
 		GL_SelectTexture( 0 );
@@ -519,7 +523,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0 );
 
 		renderProgManager.Unbind();
-		//SwapBuffers( win32.hDC );
+		
 
 		// Submit frame with one layer we have.
 		ovrLayerHeader *layers = &oculusLayer.Header;
@@ -536,7 +540,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		oculusLayer.RenderPose[0] = eyeRenderPose[0];
 		oculusLayer.RenderPose[1] = eyeRenderPose[1];
 		const int beforeSubmit = Sys_Milliseconds();
-		ovrResult       result = ovrHmd_SubmitFrame( hmd, 0, &oculusViewScaleDesc, &layers, 1 );
+		ovrResult       result = ovr_SubmitFrame( hmd, 0, &oculusViewScaleDesc, &layers, 1 );
 		if ( result != ovrSuccess )
 		{
 			common->Warning( "Vr_GL.cpp HMDRender : Failed to submit oculus layer.\n" );
@@ -552,7 +556,9 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		glBlitFramebuffer( 0, h, w, 0, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST );
 		glBindFramebuffer( GL_READ_FRAMEBUFFER, 0 );
 
-		//globalFramebuffers.primaryFBO->Bind();
+		SwapBuffers( win32.hDC );
+
+		globalFramebuffers.primaryFBO->Bind();
 	}
 
 	else

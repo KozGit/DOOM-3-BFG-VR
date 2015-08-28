@@ -335,7 +335,7 @@ void Sys_Quit() {
 	Sys_ShutdownInput();
 	Sys_DestroyConsole();
 	sixenseExit(); // Koz fixme move this! also shutdown the HMD!
-	ovrHmd_Destroy( vr->hmd );
+	ovr_Destroy( vr->hmd );
 	ExitProcess( 0 );
 }
 

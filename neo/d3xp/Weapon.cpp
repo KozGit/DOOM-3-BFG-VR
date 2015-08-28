@@ -186,7 +186,8 @@ idWeapon::idWeapon()
 	
 	allowDrop				= true;
 	isPlayerFlashlight		= false;
-	
+	isPlayerLeftHand		= false; // koz
+		
 	fraccos = 0.0f;
 	fraccos2 = 0.0f;
 	
@@ -276,6 +277,24 @@ void idWeapon::SetFlashlightOwner( idPlayer* _owner )
 	}
 }
 
+/*
+================
+idWeapon::SetLeftHandOwner
+
+Only called at player spawn time, not each weapon switch
+================
+*/
+void idWeapon::SetLeftHandOwner( idPlayer* _owner )
+{
+	assert( !owner );
+	owner = _owner;
+	SetName( va( "%s_weapon_leftHand", owner->name.c_str() ) );
+
+	if ( worldModel.GetEntity() )
+	{
+		worldModel.GetEntity()->SetName( va( "%s_weapon_leftHand_worldmodel", owner->name.c_str() ) );
+	}
+}
 /*
 ================
 idWeapon::ShouldConstructScriptObjectAtSpawn
@@ -1566,7 +1585,7 @@ void idWeapon::UpdateVRGUI()
 		return;
 	}
 
-	if ( isPlayerFlashlight ) return;
+	if ( isPlayerFlashlight || isPlayerLeftHand ) return;
 
 	if ( owner->weaponGone )
 	{
@@ -2720,12 +2739,41 @@ bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 		case NO_WEAPON:
 		case WEAPON_FISTS:
 		case WEAPON_HANDGRENADE:
-		case WEAPON_CHAINSAW:
 		case WEAPON_SOULCUBE:
 		case WEAPON_PDA:
 			origin = vr->lastViewOrigin; // koz fixme set the origin and axis to the players view
 			axis = vr->lastViewAxis;
 			return false;
+			break;
+		case WEAPON_CHAINSAW:
+		{
+			if ( barrelJointView == INVALID_JOINT )
+			{
+				origin = viewWeaponOrigin; // koz fixme set the origin and axis to the weapon default
+				axis = viewWeaponAxis;
+				return false;
+				break;
+			}
+			else
+			{
+				GetGlobalJointTransform( true, barrelJointView, origin, axis );
+				std::swap( axis[0], axis[2] ); // barrel joint points right, rotate &
+				axis[0] = -axis[0]; // make it point forward.
+
+				// the barrel joint is not actually aligned with the blade
+				// of the chainsaw.  Move the origin to align with the tip of the blade.
+				// fixme -34 forward is a hack to compensate for an overly long
+				// melee range value in VR. Otherwise you can saw something 3 feet away
+				// from the tip of the blade.
+				// should probably change the weapon def instead of this mess.
+				idVec3 move( -34.0f, 2.0f, -6.0f ); // fwd,up,right
+				origin += move * axis;
+
+			}
+			return false;
+			break;
+		}
+			
 	}
 
 	if ( barrelJointView != INVALID_JOINT )
@@ -3175,6 +3223,10 @@ void idWeapon::PresentWeapon( bool showViewModel )
 		viewWeaponOrigin = playerViewOrigin;
 		viewWeaponAxis = playerViewAxis;
 		owner->CalculateViewFlashPos( viewWeaponOrigin, viewWeaponAxis, flashOffsets[int( currentWeapon )] );
+
+	}
+	else if ( isPlayerLeftHand ) // koz left hand
+	{
 
 	}
 	else
@@ -5099,7 +5151,7 @@ void idWeapon::Event_Melee()
 {
 	idEntity*	ent;
 	trace_t		tr;
-	
+	common->Printf( "Melee!!\n" );
 	if( weaponDef == NULL )
 	{
 		gameLocal.Error( "No weaponDef on '%s'", this->GetName() );
@@ -5114,8 +5166,23 @@ void idWeapon::Event_Melee()
 	
 	if( !common->IsClient() )
 	{
-		idVec3 start = playerViewOrigin;
-		idVec3 end = start + playerViewAxis[0] * ( meleeDistance * owner->PowerUpModifier( MELEE_DISTANCE ) );
+		idVec3 meleeOrigin;
+		idMat3 meleeAxis;
+
+		if ( game->isVR )
+		{
+			GetMuzzlePositionWithHacks( meleeOrigin, meleeAxis );
+			//meleeAxis = viewWeaponAxis;
+		}
+		else
+		{
+			meleeOrigin = playerViewOrigin;
+			meleeAxis = playerViewAxis;
+		}
+		
+		
+		idVec3 start = meleeOrigin;
+		idVec3 end = start + meleeAxis[0] * (meleeDistance * owner->PowerUpModifier( MELEE_DISTANCE ));
 		gameLocal.clip.TracePoint( tr, start, end, MASK_SHOT_RENDERMODEL, owner );
 		if( tr.fraction < 1.0f )
 		{

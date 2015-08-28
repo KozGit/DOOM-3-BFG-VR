@@ -56,7 +56,6 @@ public:
 	void					AddColorBuffer( GLuint format, int index );
 	void					AddColorTexture( GLuint format );
 	void					AddDepthBuffer( GLuint format );
-	void					AddDepthTexture( GLuint format );
 	void					AddDepthStencilBuffer( GLuint format ); // Koz bind depth buffer as stencil attachment also.
 	
 	void					AttachImage2D( GLuint target, const idImage* image, int index );

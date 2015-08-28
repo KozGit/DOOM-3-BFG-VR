@@ -634,10 +634,10 @@ void R_SetNewMode( const bool fullInit )
 		if ( vr->hasHMD && vr->hasOculusRift && vr_enable.GetBool() )
 		{
 			r_fullscreen.SetInteger( 0 ); // force a windowed mode
-			r_windowWidth.SetInteger( vr->hmd->Resolution.w / 2 );
-			r_windowHeight.SetInteger( vr->hmd->Resolution.h / 2 );
-			r_windowWidth.SetInteger( vr->hmd->Resolution.w / 2 );
-			r_windowHeight.SetInteger( vr->hmd->Resolution.h / 2 );
+			r_windowWidth.SetInteger( vr->hmdDesc.Resolution.w / 2 );
+			r_windowHeight.SetInteger( vr->hmdDesc.Resolution.h / 2 );
+			r_windowWidth.SetInteger( vr->hmdDesc.Resolution.w / 2 );
+			r_windowHeight.SetInteger( vr->hmdDesc.Resolution.h / 2 );
 			r_swapInterval.SetInteger( 0 ); // force Vsync off for hmd.
 						
 			parms.x = r_windowX.GetInteger();

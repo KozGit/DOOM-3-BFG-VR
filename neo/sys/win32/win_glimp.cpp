@@ -584,45 +584,26 @@ static void GLW_CreateWindowClasses()
 	{
 		return;
 	}
-	if ( vr_enable.GetBool() && vr_oculusHmdDirectMode.GetBool() )
+	
+	memset( &wc, 0, sizeof( wc ) );
+
+	wc.style = 0;
+	wc.lpfnWndProc = (WNDPROC)MainWndProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+	wc.hInstance = win32.hInstance;
+	wc.hIcon = LoadIcon( win32.hInstance, MAKEINTRESOURCE( IDI_ICON1 ) );
+	wc.hCursor = NULL;
+	wc.hbrBackground = (struct HBRUSH__*)COLOR_GRAYTEXT;
+	wc.lpszMenuName = 0;
+	wc.lpszClassName = WIN32_WINDOW_CLASS_NAME;
+
+	if ( !RegisterClass( &wc ) )
 	{
-		memset( &wc, 0, sizeof( wc ) );
-		wc.style = CS_OWNDC;
-		wc.lpfnWndProc = (WNDPROC)MainWndProc;
-		wc.cbClsExtra = 0;
-		wc.cbWndExtra = 0;
-		wc.hCursor = LoadCursor( NULL, IDC_ARROW );
-		wc.hbrBackground = (struct HBRUSH__ *)COLOR_GRAYTEXT;
-		wc.lpszMenuName = 0;
-		wc.lpszClassName = "DOOM3_BFG_VR";
-
-		if ( !RegisterClass( &wc ) )
-		{
-			common->FatalError( "GLW_CreateWindow: could not register window class" );
-		}
-		common->Printf( "...registered window class\n" );
+		common->FatalError( "GLW_CreateWindow: could not register window class" );
 	}
-	else
-	{
-		memset( &wc, 0, sizeof( wc ) );
+	common->Printf( "...registered window class\n" );
 
-		wc.style = 0;
-		wc.lpfnWndProc = (WNDPROC)MainWndProc;
-		wc.cbClsExtra = 0;
-		wc.cbWndExtra = 0;
-		wc.hInstance = win32.hInstance;
-		wc.hIcon = LoadIcon( win32.hInstance, MAKEINTRESOURCE( IDI_ICON1 ) );
-		wc.hCursor = NULL;
-		wc.hbrBackground = (struct HBRUSH__*)COLOR_GRAYTEXT;
-		wc.lpszMenuName = 0;
-		wc.lpszClassName = WIN32_WINDOW_CLASS_NAME;
-
-		if ( !RegisterClass( &wc ) )
-		{
-			common->FatalError( "GLW_CreateWindow: could not register window class" );
-		}
-		common->Printf( "...registered window class\n" );
-	}
 	// now register the fake window class that is only used
 	// to get wgl extensions
 	wc.style         = 0;
@@ -1631,7 +1612,7 @@ bool GLimp_Init( glimpParms_t parms )
 	
 	// wglSwapinterval, etc
 	//GLW_CheckWGLExtensions( win32.hDC );
-	
+		
 	return true;
 }
 
@@ -1772,7 +1753,7 @@ void GLimp_SwapBuffers()
 		}
 	}
 	
-	SwapBuffers( win32.hDC ); 
+	if ( !game->isVR ) SwapBuffers( win32.hDC ); // koz fixme
 }
 // RB end
 

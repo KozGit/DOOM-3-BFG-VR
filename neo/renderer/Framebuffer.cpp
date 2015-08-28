@@ -67,11 +67,7 @@ static void R_ListFramebuffers_f( const idCmdArgs& args )
 			{
 				common->Printf( "	Depthbuffer %d format %x\n", fb->GetDepthBuffer(), fb->GetDepthFormat() );
 			}
-			if ( fb->GetStencilBuffer() )
-			{
-				common->Printf( "	Stencilbuffer %d format %x\n", fb->GetStencilBuffer(), fb->GetStencilFormat() );
-			}
-			for ( int j = 0; j < 16; j++ )
+				for ( int j = 0; j < 16; j++ )
 			{
 				if ( fb->GetColorBuffer( j ) )
 				{
@@ -208,28 +204,33 @@ void Framebuffer::AddColorBuffer( GLuint format, int index )
 		common->Warning( "Framebuffer::AddColorBuffer( %s ): bad index = %i", fboName.c_str(), index );
 		return;
 	}
-	
+	GL_CheckErrors();
 	colorFormat = format;
 	
 	bool notCreatedYet = colorBuffers[index] == 0;
 	if( notCreatedYet )
 	{
 		glGenRenderbuffers( 1, &colorBuffers[index] );
+		GL_CheckErrors();
 	}
 	
 	glBindRenderbuffer( GL_RENDERBUFFER, colorBuffers[index] );
-	
+	GL_CheckErrors();
 	if ( useMsaa ) {
+		common->Printf( "GlRenderBufferStorage GL_RENDERBUFFER, %d, %d, %d, %d\n", msaaSamples, format, width, height );
 		glRenderbufferStorageMultisample( GL_RENDERBUFFER, msaaSamples, format, width, height );
+		GL_CheckErrors();
 	}
 	else
 	{
 		glRenderbufferStorage( GL_RENDERBUFFER, format, width, height );
+		GL_CheckErrors();
 	}
 	
 	if( notCreatedYet )
 	{
 		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, colorBuffers[index] );
+		GL_CheckErrors();
 	}
 	
 	GL_CheckErrors();
@@ -292,28 +293,6 @@ void Framebuffer::AddDepthBuffer( GLuint format )
 	
 }
 
-void Framebuffer::AddDepthTexture( GLuint format )
-{
-	
-	//bool notCreatedYet = depthTexnum = 0;
-//	if ( notCreatedYet )
-//	{
-		glGenTextures( 1, &depthTexnum );
-//	}
-
-	glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, depthTexnum );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-	glTexImage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE, msaaSamples, format, width, height, false );
-	glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, 0);
-	
-	glBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );
-	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, depthTexnum, 0 );
-	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, depthTexnum, 0 );
-	GL_CheckErrors();
-}
 void Framebuffer::AddDepthStencilBuffer( GLuint format )
 {
 	depthFormat = format;
@@ -321,34 +300,6 @@ void Framebuffer::AddDepthStencilBuffer( GLuint format )
 	
 	bool notCreatedYet = stencilBuffer == 0;
 		
-	/*if ( notCreatedYet )
-	{
-		glGenRenderbuffers( 1, &stencilBuffer );
-	}
-
-	glBindRenderbuffer( GL_RENDERBUFFER, stencilBuffer );
-
-	if ( useMsaa )
-	{
-		glRenderbufferStorageMultisample( GL_RENDERBUFFER, msaaSamples, format, width, height );
-	}
-	else
-	{
-		glRenderbufferStorage( GL_RENDERBUFFER, format, width, height );
-	}
-
-	glBindRenderbuffer( GL_RENDERBUFFER, 0 );
-
-	if ( notCreatedYet )
-	{
-
-		glBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );
-		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, stencilBuffer );
-
-	}
-
-*/	
-	// was orig
 	if ( notCreatedYet )
 	{
 		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer );

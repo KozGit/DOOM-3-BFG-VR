@@ -1323,13 +1323,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		// init the Razer Hydra
 		vr->HydraInit();
 		// Koz end
-
-		// koz fixme
-		extern idCVar r_swapInterval;
-		r_swapInterval.SetInteger( 0 );
-		r_swapInterval.SetModified();
-				
-
+		
 		whiteMaterial = declManager->FindMaterial( "_white" );
 		
 		if( idStr::Icmp( sys_lang.GetString(), ID_LANG_FRENCH ) == 0 )
@@ -1521,8 +1515,8 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 	{
 		cvarSystem->SetCVarString( "r_swapInterval", "0" );
 		cvarSystem->SetCVarInteger( "com_engineHz", vr->hmdHz );
-		com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
-		com_engineHz_latched = com_engineHz.GetFloat();
+		com_engineHz_denominator = 100LL * vr->hmdHz;
+		com_engineHz_latched = vr->hmdHz;
 
 	}
 
