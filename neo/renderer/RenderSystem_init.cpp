@@ -3172,6 +3172,10 @@ int idRenderSystemLocal::GetVirtualWidth() const
 	{
 		return SCREEN_WIDTH;
 	}
+	if ( vr->useFBO ) {
+		return globalFramebuffers.primaryFBO->GetWidth();
+	}
+	
 	return glConfig.nativeScreenWidth;
 }
 
@@ -3186,6 +3190,11 @@ int idRenderSystemLocal::GetVirtualHeight() const
 	{
 		return SCREEN_HEIGHT;
 	}
+
+	if ( vr->useFBO ) {
+		return globalFramebuffers.primaryFBO->GetHeight();
+	}
+
 	return glConfig.nativeScreenHeight;
 }
 

@@ -2008,7 +2008,7 @@ void FullscreenFXManager::Process( const renderView_t* view )
 	// do the process
 	for( int i = 0; i < fx.Num(); i++ )
 	{
-		FullscreenFX* pfx = fx[i];
+		FullscreenFX* pfx = fx[i]; 
 		bool drawIt = false;
 		
 		// determine if we need to draw
@@ -2024,6 +2024,7 @@ void FullscreenFXManager::Process( const renderView_t* view )
 		// do the actual drawing
 		if( drawIt ) // koz fix me had temp made this always false, cant remember what I was testing now, make sure nothing is broken.
 		{
+			common->Printf( "Process FullscreenFX %s\n", pfx->GetName().c_str() );
 			atLeastOneFX = true;
 			
 			// we need to dump to _currentRender

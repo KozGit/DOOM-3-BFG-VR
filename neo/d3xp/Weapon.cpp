@@ -2738,13 +2738,19 @@ bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 	{
 		case NO_WEAPON:
 		case WEAPON_FISTS:
-		case WEAPON_HANDGRENADE:
 		case WEAPON_SOULCUBE:
 		case WEAPON_PDA:
 			origin = vr->lastViewOrigin; // koz fixme set the origin and axis to the players view
 			axis = vr->lastViewAxis;
 			return false;
 			break;
+				
+		case WEAPON_HANDGRENADE:
+			origin = viewWeaponOrigin; // koz fixme set the origin and axis to the weapon default
+			axis = viewWeaponAxis;
+			return false;
+			break;
+
 		case WEAPON_CHAINSAW:
 		{
 			if ( barrelJointView == INVALID_JOINT )
@@ -2760,12 +2766,12 @@ bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 				std::swap( axis[0], axis[2] ); // barrel joint points right, rotate &
 				axis[0] = -axis[0]; // make it point forward.
 
-				// the barrel joint is not actually aligned with the blade
-				// of the chainsaw.  Move the origin to align with the tip of the blade.
+				// the barrel joint is not actually aligned with the blade of the chainsaw.  
+				// Move the origin to align with the tip of the blade.
 				// fixme -34 forward is a hack to compensate for an overly long
 				// melee range value in VR. Otherwise you can saw something 3 feet away
 				// from the tip of the blade.
-				// should probably change the weapon def instead of this mess.
+				// should probably change the weapon def instead of using this mess.
 				idVec3 move( -34.0f, 2.0f, -6.0f ); // fwd,up,right
 				origin += move * axis;
 
@@ -4578,6 +4584,15 @@ void idWeapon::GetProjectileLaunchOriginAndAxis( idVec3& origin, idMat3& axis )
 	{
 		common->Printf( "GPLOAA getting muzzle position w/ hacks\n" ); // koz delete me
 		GetMuzzlePositionWithHacks( origin, axis );
+
+		if ( IdentifyWeapon() == WEAPON_BFG )
+		{
+			// BFG pitches up when fired before the projectile is launched.
+			// Hack to correct pitch so projectile doesn't shoot high. 
+			static idMat3 bfgCorrection = idAngles( 0.0, -15.0, 0.0 ).ToMat3();
+			axis = bfgCorrection * axis;
+
+		}
 		return;
 	}
 	

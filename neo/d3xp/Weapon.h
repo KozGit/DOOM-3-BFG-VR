@@ -131,7 +131,7 @@ const idAngles weaponRotOffsets[int( WEAPON_NUM_WEAPONS )] = {	idAngles( 0.0f, 0
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_SHOTGUN_DOUBLE_MP
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_GRABBER
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_ARTIFACT
-																idAngles( 15.0f, -5.0f, -90.0f )	// WEAPON_PDA
+																idAngles( 15.0f, -5.0f, 0.0f )	// WEAPON_PDA
 };
 
 typedef int ammo_t;

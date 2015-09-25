@@ -6513,15 +6513,27 @@ void idPlayer::UpdateFocus()
 	// Koz begin
 	if ( game->isVR ) // koz fixme only when vr actually active.
 	{
-		// Koz  in VR, if weapon equipped, use muzzle orientation to scan for accessible guis, otherwise use player center eye.
-		
+		// Koz  in VR, if weapon equipped, use muzzle orientation to scan for accessible guis, 
+		// otherwise use player center eye.
 		idMat3 weaponAxis;
-		bool fromWeap;
-
-		fromWeap = weapon->GetMuzzlePositionWithHacks( start, weaponAxis );
-		if ( fromWeap ) start -= weaponAxis[1] * weapon->hideOffset; // Koz - if weapon has been lowered (in gui), raise pointer to compensate.
-
-		end = start + weaponAxis[0] * 50.0f;//  Koz originial value was 80.0f - allowed access to gui from too great a distance (IMO), reduced to 50.0f Koz fixme - make cvar?
+		bool scanFromWeap;
+		float scanRange = 50.0f;
+		
+		scanFromWeap = weapon->GetMuzzlePositionWithHacks( start, weaponAxis );
+		if ( !scanFromWeap )
+		{
+			//weapon has no muzzle ( fists, grenades, chainsaw) so scan from center of view.
+			start = vr->lastViewOrigin; 
+			weaponAxis = vr->lastViewAxis;
+			scanRange += 36.0f;
+		}
+		else
+		{
+			// Koz - if weapon has been lowered (in gui), raise pointer to compensate.
+			start -= weaponAxis[1] * weapon->hideOffset; 
+		}
+		
+		end = start + weaponAxis[0] * scanRange;//  Koz originial value was 80.0f - allowed access to gui from too great a distance (IMO), reduced to 50.0f Koz fixme - make cvar?
 	}
 	else
 	{
@@ -10865,6 +10877,11 @@ void idPlayer::ModelOriginOffsetsQuat( idVec3 &origin, idMat3 &axis ) {
 		weaponRotate.roll = vr_offsetRoll.GetFloat();
 		break;
 
+	case 3:
+		weaponRotate.yaw = vr_offsetYaw.GetFloat();
+		weaponRotate.pitch = vr_offsetPitch.GetFloat();
+		weaponRotate.roll = vr_offsetRoll.GetFloat();
+
 	}
 
 	weaponRotate.Normalize180();
@@ -11076,7 +11093,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 			//PDA has been rotated to landscape mode. use a uniform scale value. 
 			//Texture coords have been updated during model load to rotate the view.
 
-			axis *= vr_PDAscale.GetFloat();
+			// axis *= vr_PDAscale.GetFloat(); no longer needed - model is now pre scaled.
 			
 			if ( PDAfixed )
 			{ // pda has already been locked in space, use stored values
@@ -11087,7 +11104,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 			{ // fix the PDA in space, set flag and store position
 				
 				PDAfixed = true;
-				PDAaxis = mat3_identity * vr_PDAscale.GetFloat();
+				PDAaxis = mat3_identity; //  *vr_PDAscale.GetFloat(); no longer needed - model is now pre scaled.
 				origin = vr->lastViewOrigin;// GetEyePosition();
 				origin += 4 * bodyAxis[0]; // move 4 inches in front of eyes
 				origin -= 3 * bodyAxis[2]; // move 3 inches down
@@ -11110,17 +11127,17 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 			idVec3 gunpos = idVec3( vr_mouse_gunx.GetFloat(), vr_mouse_guny.GetFloat(), vr_mouse_gunz.GetFloat() );
 
 			eyeOrigin += gunpos * bodyAxis;			// koz move the gun to the hand position
+			
+			static idQuat angQuat;
 
-			angles[ROLL] = 0.0;
-			angles[YAW] = vr->independentWeaponYaw;
-			angles[PITCH] = vr->independentWeaponPitch;
-
-			gunAxis = gunRot * angles.ToQuat();
+			angQuat = idAngles( 0.0, vr->independentWeaponYaw, 0.0 ).ToQuat() * idAngles( vr->independentWeaponPitch, 0.0, 0.0 ).ToQuat();
+						
+			gunAxis = gunRot * angQuat;
 			gunAxis *= bodyAxis.ToQuat();
 			axis = gunAxis.ToMat3();
 
 			idVec3 forearm = idVec3( vr_mouse_gun_forearm.GetFloat(), 0.0f, 0.0f );
-			origin = eyeOrigin + (vecoff + forearm) * axis;
+			origin = eyeOrigin + ( vecoff + forearm ) * axis;
 
 			origin -= vecoff * bodyAxis;
 						
@@ -11146,7 +11163,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 	
 	//gunRot = idAngles( 0.0f, vr_hydraPitchOffset.GetFloat(), 0.0f ).ToQuat();// offset for odd hydra handle angle.
 		
-	gunRot = idAngles(	weaponRotOffsets[currentWeapon].pitch + vr_hydraPitchOffset.GetFloat(),
+	gunRot = idAngles(	weaponRotOffsets[currentWeapon].pitch , //+ vr_hydraPitchOffset.GetFloat(),
 						weaponRotOffsets[currentWeapon].yaw,
 						weaponRotOffsets[currentWeapon].roll ).Normalize180().ToQuat();// add weapon rotations to point straight.
 
@@ -11186,88 +11203,102 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 {
 	
 	int flashMode = game->isVR ? vr_flashlightMode.GetInteger() : FLASH_BODY;
-
 	idAngles baseAdjustAng = idAngles( 90.0f, 0.0f, 0.0f ); // rotate the flash to point straight ahead
-	idMat3 viewAxis = idAngles( viewAngles.pitch + vr->lastHMDPitch, viewAngles.yaw + vr->lastHMDYaw, viewAngles.roll + vr->lastHMDRoll).Normalize360().ToMat3();
 		
+	//move the flashlight to alternate location for items with no mount
 	if ( ( game->IsPDAOpen() || !vr->VR_USE_HYDRA ) && flashMode == FLASH_HAND ) flashMode = FLASH_HEAD; // move the flashlight to the head if the PDA is open to prevent weird clipping if using motion controls.
-		
+	
+	if ( flashMode == FLASH_GUN && !weapon->GetMuzzlePositionWithHacks( origin, axis ) )
+	{
+		flashMode = FLASH_HEAD;
+	}
+
+	
 	switch ( flashMode )
 	{
-	case FLASH_GUN:
-		
-		if ( weapon->GetMuzzlePositionWithHacks( origin, axis ) )
-		{
+	
+		case FLASH_GUN:
 			// move the flashlight to the weapon
 			origin += flashOffset.x * axis[1] + flashOffset.y * axis[0] + flashOffset.z * axis[2];
 			axis = baseAdjustAng.ToMat3() * axis;
 			axis *= vr_flashlightGunScale.GetFloat();
 			break;
-		}
-		// if the weapon has no muzzle ( fists, grenade, soul cube etc) , fall through to FLASH_HEAD.	
+				
+		case FLASH_HEAD:
+			// Flashlight on helmet 
+			origin = vr->lastViewOrigin;
+			axis = vr->lastViewAxis;
 		
-	case FLASH_HEAD:
-		// Flashlight on helmet 
-		origin += vr_flashlightHelmetPosY.GetFloat() * axis[1] + vr_flashlightHelmetPosZ.GetFloat() * axis[0] + vr_flashlightHelmetPosX.GetFloat() * axis[2];
-		axis = baseAdjustAng.ToMat3() * viewAxis;
-		break;
-	
-	case FLASH_HAND:
-		{	// flashlight in left hand 
-			// correct the flaslight model rotation so it points forward.
-			static idVec3 flashpos( 6.0f, -6.0f, -12.0f );//  koz offset from actual center of the flashlight model to its local origin. values computed using the exacting method of 'well, that looks about right.'
-			static idQuat flashRot = idAngles( 0.0f, 90.0f, 45.0f ).ToQuat();
-			static idQuat flashAxis;
-			hydraData	hydraPos = hydra_zero;
-			idVec3 adjustPos( vr_flashHand_x.GetFloat(), vr_flashHand_y.GetFloat(), vr_flashHand_z.GetFloat() ); //koz offset to move model to left hand
-
-			idAngles angles = idAngles( 0.0, viewAngles.yaw, 0.0f );
-			idVec3 viewOrigin = GetEyePosition();
-			idMat3 viewAxis2 = angles.ToMat3();
-
-			vr->HydraGetLeftWithOffset( hydraPos );
-			adjustPos += hydraPos.position;
-
-			// koz move flashlight to the hand position
-			viewOrigin += adjustPos * viewAxis2;
-
-			flashAxis = flashRot * hydraPos.hydraRotationQuat;
-			flashAxis *= viewAxis2.ToQuat();
-			axis = flashAxis.ToMat3();
-
-			//model center not at local model origin, translate origin by offset to compensate
-			origin = viewOrigin + flashpos * axis;
+			origin += vr_flashlightHelmetPosY.GetFloat() * axis[1] + vr_flashlightHelmetPosZ.GetFloat() * axis[0] + vr_flashlightHelmetPosX.GetFloat() * axis[2];
+			axis = baseAdjustAng.ToMat3() * axis;
 			break;
-		}
+	
+		case FLASH_HAND:
+			{	// flashlight in left hand 
+				// correct the flaslight model rotation so it points forward.
+				
+				//ModelOriginOffsetsQuat( origin, axis );
+				//break;
 
-	case FLASH_BODY:
-	default: // this is the original body mount code.
-		{
-			origin = weapon->playerViewOrigin;
-			axis = weapon->playerViewAxis;
-			float fraccos = cos( (gameLocal.framenum & 255) / 127.0f * idMath::PI );
-			static unsigned int divisor = 32;
-			unsigned int val = (gameLocal.framenum + gameLocal.framenum / divisor) & 255;
-			float fraccos2 = cos( val / 127.0f * idMath::PI );
-			static idVec3 baseAdjustPos = idVec3( -8.0f, -20.0f, -10.0f ); // rt, fwd, up
-			
-			if ( game->isVR )
-			{
-				baseAdjustPos.x += vr_flashlightBodyPosX.GetFloat();
-				baseAdjustPos.y += vr_flashlightBodyPosY.GetFloat();
-				baseAdjustPos.z += vr_flashlightBodyPosZ.GetFloat();
+				
+				static idVec3 flashpos( 6.0f, -6.0f, -12.0f );//  koz offset from actual center of the flashlight model to its local origin. values computed using the exacting method of 'well, that looks about right.'
+				//static idQuat flashRot = idAngles( 0.0f, 90.0f, 45.0f ).ToQuat();
+				static idQuat flashRot = idAngles( 0.0f, 90.0f, 90.0f ).ToQuat();
+				static idQuat flashAxis;
+				//idQuat flashRot = idAngles( vr_offsetPitch.GetFloat(), vr_offsetYaw.GetFloat(), vr_offsetRoll.GetFloat() ).ToQuat();
+				
+				hydraData	hydraPos = hydra_zero;
+				idVec3 adjustPos( vr_flashHand_x.GetFloat(), vr_flashHand_y.GetFloat(), vr_flashHand_z.GetFloat() ); //koz offset to move model to left hand
+
+				idAngles angles = idAngles( 0.0, viewAngles.yaw, 0.0f );
+				idVec3 viewOrigin = GetEyePosition();
+				idMat3 viewAxis2 = angles.ToMat3();
+
+				vr->HydraGetLeftWithOffset( hydraPos );
+				adjustPos += hydraPos.position;
+
+				// koz move flashlight to the hand position
+				viewOrigin += adjustPos * viewAxis2;
+				flashAxis = flashRot * hydraPos.hydraRotationQuat;
+								
+				flashAxis *= viewAxis2.ToQuat();
+				
+				
+				axis = flashAxis.ToMat3();
+
+				//model center not at local model origin, translate origin by offset to compensate
+				origin = viewOrigin + flashpos * axis;
+				break;
 			}
+
+		case FLASH_BODY:
+		default: // this is the original body mount code.
+			{
+				origin = weapon->playerViewOrigin;
+				axis = weapon->playerViewAxis;
+				float fraccos = cos( (gameLocal.framenum & 255) / 127.0f * idMath::PI );
+				static unsigned int divisor = 32;
+				unsigned int val = (gameLocal.framenum + gameLocal.framenum / divisor) & 255;
+				float fraccos2 = cos( val / 127.0f * idMath::PI );
+				static idVec3 baseAdjustPos = idVec3( -8.0f, -20.0f, -10.0f ); // rt, fwd, up
 			
-			static float pscale = 0.5f;
-			static float yscale = 0.125f;
-			idVec3 adjustPos = baseAdjustPos;// + ( idVec3( fraccos, 0.0f, fraccos2 ) * scale );
-			origin += adjustPos.x * axis[1] + adjustPos.y * axis[0] + adjustPos.z * axis[2];
-			// viewWeaponOrigin += owner->viewBob;
-			static idAngles baseAdjustAng = idAngles( 88.0f, 10.0f, 0.0f ); //
-			idAngles adjustAng = baseAdjustAng + idAngles( fraccos * pscale, fraccos2 * yscale, 0.0f );
-			// adjustAng += owner->GetViewBobAngles();
-			axis = adjustAng.ToMat3() * axis;
-		}
+				if ( game->isVR )
+				{
+					baseAdjustPos.x += vr_flashlightBodyPosX.GetFloat();
+					baseAdjustPos.y += vr_flashlightBodyPosY.GetFloat();
+					baseAdjustPos.z += vr_flashlightBodyPosZ.GetFloat();
+				}
+			
+				static float pscale = 0.5f;
+				static float yscale = 0.125f;
+				idVec3 adjustPos = baseAdjustPos;// + ( idVec3( fraccos, 0.0f, fraccos2 ) * scale );
+				origin += adjustPos.x * axis[1] + adjustPos.y * axis[0] + adjustPos.z * axis[2];
+				// viewWeaponOrigin += owner->viewBob;
+				static idAngles baseAdjustAng = idAngles( 88.0f, 10.0f, 0.0f ); //
+				idAngles adjustAng = baseAdjustAng + idAngles( fraccos * pscale, fraccos2 * yscale, 0.0f );
+				// adjustAng += owner->GetViewBobAngles();
+				axis = adjustAng.ToMat3() * axis;
+			}
 	}
 }
 	
