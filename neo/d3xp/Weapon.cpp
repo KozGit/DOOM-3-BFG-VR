@@ -1121,8 +1121,25 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 	const char* guiLightShader = weaponDef->dict.GetString( "mtr_guiLightShader" );
 	if( *guiLightShader != '\0' )
 	{
+		// koz begin
+		// the PDA model was scaled by a factor of 2.5 to make it easier to read in VR.
+		// The weapon guilight size isn't stored in the weapon def, it's hardcoded here,
+		// so check if PDA and resize the guilight accordingly 
+
+		int lightRad = 3;
+		if ( game->isVR )
+		{
+			const char* weapName = weaponDef->dict.GetString( "inv_name" );
+			if ( strstr( weapName, "PDA" ) )
+			{
+				lightRad *= 3; // the PDA guilight needs to be bigger in VR
+			}
+		}
+
+		guiLight.lightRadius[0] = guiLight.lightRadius[1] = guiLight.lightRadius[2] = lightRad;
+		// koz end
+
 		guiLight.shader = declManager->FindMaterial( guiLightShader, false );
-		guiLight.lightRadius[0] = guiLight.lightRadius[1] = guiLight.lightRadius[2] = 3;
 		guiLight.pointLight = true;
 	}
 	

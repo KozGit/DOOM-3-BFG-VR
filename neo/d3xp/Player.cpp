@@ -11106,8 +11106,9 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 				PDAfixed = true;
 				PDAaxis = mat3_identity; //  *vr_PDAscale.GetFloat(); no longer needed - model is now pre scaled.
 				origin = vr->lastViewOrigin;// GetEyePosition();
-				origin += 4 * bodyAxis[0]; // move 4 inches in front of eyes
+				origin += 12 * bodyAxis[0]; // move 12 inches in front of eyes
 				origin -= 3 * bodyAxis[2]; // move 3 inches down
+				origin -= 8 * bodyAxis[1]; // move 8 inches right
 				idAngles pdaAngle = vr->lastViewAxis.ToAngles() + weaponRotOffsets[currentWeapon];
 				pdaAngle.Normalize180();
 				PDAorigin = origin;

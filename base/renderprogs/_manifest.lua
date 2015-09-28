@@ -103,6 +103,8 @@ return
 	"wobblesky.vertex",
 	"zcullReconstruct.pixel",
 	"zcullReconstruct.vertex",
+	"vr_fxaa.pixel",
+	"vr_fxaa.vertex"
 }
 
 	

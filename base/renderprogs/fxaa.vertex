@@ -26,7 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "renderprogs/global.inc"
+#include "global.inc"
 
 struct VS_IN {
 	float4 position : POSITION;
