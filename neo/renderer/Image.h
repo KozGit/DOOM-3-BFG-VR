@@ -367,6 +367,7 @@ public:
 	// Koz begin
 	idImage*			pdaImage;						// koz rendered PDA gui will be copied here 
 	idImage*			hudImage;						// koz hud/menus will be copied here	
+		
 	// Koz end
 	
 	//--------------------------------------------------------

@@ -229,6 +229,7 @@ extern idCVar	vr_chromaCorrection;
 
 extern idCVar	vr_showBody;
 extern idCVar	vr_viewModelArms;
+extern idCVar	vr_wristStatMon;
 extern idCVar	vr_disableWeaponAnimation;
 extern idCVar	vr_headKick;
 

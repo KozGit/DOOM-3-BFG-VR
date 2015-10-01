@@ -101,20 +101,21 @@ const idVec3 weaponOriginOffsets[int( WEAPON_NUM_WEAPONS )] = { idVec3( 0.0f, 0.
 																idVec3( -1.0f, 4.0f, 7.0f ),		// WEAPON_SHOTGUN
 																idVec3( -7.0f, 4.0f, 10.0f ),		// WEAPON_MACHINEGUN
 																idVec3( -7.0f, 4.0f, 7.0f ),		// WEAPON_CHAINGUN
-																idVec3( -13.0f, 0.0f, 9.0f ),		// WEAPON_HANDGRENADE
+																//idVec3( -13.0f, 0.0f, 9.0f ),		// WEAPON_HANDGRENADE old
+																idVec3( -12.0f, 2.0f, 10.0f ),		// WEAPON_HANDGRENADE
 																idVec3( -5.0f, 4.0f, 12.0f ),		// WEAPON_PLASMAGUN
 																idVec3( -9.0f, 4.0f, 14.0f ),		// WEAPON_ROCKETLAUNCHER
-																idVec3( -9.0f, 4.0f, 14.0f ),		// WEAPON_BFG
-																idVec3( -12.0f, 0.0f, 5.0f ),		// WEAPON_SOULCUBE
+																idVec3( -9.0f, 4.0f, 14.0f ),		// WEAPON_BFG											idVec3( -12.0f, 0.0f, 5.0f ),		// WEAPON_SOULCUBE
 																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_SHOTGUN_DOUBLE
 																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_SHOTGUN_DOUBLE_MP
 																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_GRABBER
 																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_ARTIFACT
-																idVec3( -3.0f, 0.0f, 4.5f )			// WEAPON_PDA
+																//idVec3( -3.0f, 0.0f, 4.5f )			// WEAPON_PDA old
+																idVec3( 3.0f, 2.0f, -5.0f )			// WEAPON_PDA old
 };
 
 //koz weaponRotOffsets - weapon rotation around each axis to bring weapon viewmodel to straight/level
-//																			 pitch	yaw	  roll
+//																		 pitch	yaw	  roll
 const idAngles weaponRotOffsets[int( WEAPON_NUM_WEAPONS )] = {	idAngles( 0.0f, 0.0f, 0.0f ),		// NO_WEAPON
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_FISTS
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_CHAINSAW
@@ -122,7 +123,8 @@ const idAngles weaponRotOffsets[int( WEAPON_NUM_WEAPONS )] = {	idAngles( 0.0f, 0
 																idAngles( -6.0f, 0.0f, -5.0f ),		// WEAPON_SHOTGUN
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_MACHINEGUN
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_CHAINGUN
-																idAngles( -7.0f, 0.0f, 46.0f ),		// WEAPON_HANDGRENADE
+																//idAngles( -7.0f, 0.0f, 46.0f ),	// WEAPON_HANDGRENADE old
+																idAngles( 15.0f, 0.0f, 46.0f ),	// WEAPON_HANDGRENADE
 																idAngles( 1.0f, 0.0f, -7.0f ),		// WEAPON_PLASMAGUN
 																idAngles( 0.0f, 0.0f, -2.0f ),		// WEAPON_ROCKETLAUNCHER
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_BFG
@@ -131,7 +133,8 @@ const idAngles weaponRotOffsets[int( WEAPON_NUM_WEAPONS )] = {	idAngles( 0.0f, 0
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_SHOTGUN_DOUBLE_MP
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_GRABBER
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_ARTIFACT
-																idAngles( 15.0f, -5.0f, 0.0f )	// WEAPON_PDA
+																//idAngles( 15.0f, -5.0f, 0.0f )	// WEAPON_PDA old
+																idAngles( 0.0f, -2.0f, 1.0f )	// WEAPON_PDA
 };
 
 typedef int ammo_t;

@@ -1143,8 +1143,29 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 		guiLight.pointLight = true;
 	}
 	
+	// koz begin
+
+	idStr viewModelName = weaponDef->dict.GetString( "model_view" );
+	common->Printf( "Weapon viewmodel name = %s\n", viewModelName.c_str() );
+	if ( game->isVR )
+	{
+		if ( !vr_viewModelArms.GetBool() )
+		{
+			viewModelName += "0h";
+		}
+		else
+		{
+			viewModelName += ( vr->VR_USE_HYDRA )  ? "1h" : "2h";
+			if ( vr_wristStatMon.GetBool() ) viewModelName += "sw";
+		}
+	}
+
+
 	// setup the view model
-	vmodel = weaponDef->dict.GetString( "model_view" );
+	//vmodel = weaponDef->dict.GetString( "model_view" ) + vrModelModifiers.c_str();
+	vmodel = viewModelName.c_str();
+	// koz end
+
 	SetModel( vmodel );
 	
 	// setup the world model
