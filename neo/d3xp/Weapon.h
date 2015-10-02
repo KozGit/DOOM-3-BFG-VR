@@ -534,6 +534,7 @@ private:
 	void					Event_NetReload();
 	void					Event_IsInvisible();
 	void					Event_NetEndReload();
+	void					Event_GetWeaponSkin();
 	
 	idGrabber				grabber;
 	int						grabberState;

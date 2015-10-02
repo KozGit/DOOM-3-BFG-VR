@@ -56,7 +56,7 @@ joints {
 
 mesh {
 	// right hand
-	shader "models/characters/player/arm2"
+	shader "vr/rightarm"
 
 	numverts 327
 	vert 0 ( 0.349583 0.612575 ) 0 2
@@ -1511,7 +1511,7 @@ mesh {
 
 mesh {
 	// left hand
-	shader "models/characters/player/arm2"
+	shader "vr/leftarm"
 
 	numverts 327
 	vert 0 ( 0.697284 0.731860 ) 0 2
@@ -2962,7 +2962,7 @@ mesh {
 
 mesh {
 	// right hand end cap
-	shader "models/characters/player/arm2"
+	shader "vr/rightarm"
 
 	numverts 57
 	vert 0 ( 0.419381 0.914336 ) 0 2
@@ -3163,7 +3163,7 @@ mesh {
 
 mesh {
 	// left hand end cap
-	shader "models/characters/player/arm2"
+	shader "vr/leftarm"
 
 	numverts 57
 	vert 0 ( 0.406716 0.908509 ) 0 2
@@ -6558,7 +6558,7 @@ mesh {
 
 mesh {
 	// meshes: pdabodymesh, pdacdholdertopmesh
-	shader "models/items/pda/pda"
+	shader "vr/statwatch"
 
 	numverts 550
 	vert 0 ( 0.597221 0.135096 ) 0 1
@@ -8144,7 +8144,7 @@ mesh {
 }
 
 mesh {
-	shader "guisurfs/vrstatgui"
+	shader "vr/statwatchgui"
 
 	numverts 4
 	vert 0 ( 1.000000 1.000000 ) 0 1

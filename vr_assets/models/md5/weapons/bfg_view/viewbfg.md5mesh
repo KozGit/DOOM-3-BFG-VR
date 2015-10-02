@@ -54,7 +54,7 @@ joints {
 
 mesh {
 	// left hand
-	shader "_leftArm"
+	shader "vr/leftarm"
 
 	numverts 327
 	vert 0 ( 0.349583 0.612575 ) 0 2
@@ -1506,7 +1506,7 @@ mesh {
 
 mesh {
 	// left hand
-	shader "_leftArm"
+	shader "vr/leftarm"
 
 	numverts 57
 	vert 0 ( 0.102386 0.823966 ) 0 2

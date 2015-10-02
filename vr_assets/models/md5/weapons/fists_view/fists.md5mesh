@@ -34,7 +34,7 @@ joints {
 
 mesh {
 	// right fist
-	shader "models/weapons/berserk/fist"
+	shader "vr/rightfist"
 
 	numverts 172
 	vert 0 ( 0.442312 0.592183 ) 0 1
@@ -723,7 +723,7 @@ mesh {
 
 mesh {
 	// left fist
-	shader "models/weapons/berserk/fist"
+	shader "vr/leftFist"
 
 	numverts 172
 	vert 0 ( 0.697284 0.731860 ) 0 1
@@ -1419,7 +1419,7 @@ mesh {
 
 mesh {
 	// right fist end cap
-	shader "models/weapons/berserk/fist"
+	shader "vr/rightfist"
 
 	numverts 57
 	vert 0 ( 0.342353 0.930914 ) 0 1
@@ -1563,7 +1563,7 @@ mesh {
 
 mesh {
 	// left fist end cap
-	shader "models/weapons/berserk/fist"
+	shader "vr/leftFist"
 
 	numverts 57
 	vert 0 ( 0.333869 0.929872 ) 0 1
@@ -1707,7 +1707,7 @@ mesh {
 
 mesh {
 	//stats watch
-	shader "models/items/pda/pda"
+	shader "vr/statwatch"
 
 	numverts 550
 	vert 0 ( 0.597221 0.135096 ) 0 1
@@ -3076,7 +3076,7 @@ mesh {
 
 mesh {
 	// stats watch gui
-	shader "guisurfs/vrstatgui"
+	shader "vr/statwatchgui"
 
 	numverts 4
 	vert 0 ( 1.000000 1.000000 ) 0 1

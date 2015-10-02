@@ -1,0 +1,190 @@
+skin vr/weaponhands/0h {
+	vr/leftarm textures/common/nodraw
+	vr/lefthand textures/common/nodraw
+	vr/leftfist textures/common/nodraw
+	vr/rightarm textures/common/nodraw
+	vr/righthand textures/common/nodraw
+	vr/rightfist textures/common/nodraw
+	vr/statwatch textures/common/nodraw
+	vr/statwatchgui textures/common/nodraw
+	vr/leftstatwatch textures/common/nodraw
+	vr/leftstatwatchgui textures/common/nodraw
+}
+
+
+skin vr/weaponhands/1h {
+	vr/leftarm textures/common/nodraw
+	vr/lefthand textures/common/nodraw
+	vr/leftfist textures/common/nodraw
+	vr/statwatch textures/common/nodraw
+	vr/statwatchgui textures/common/nodraw
+	vr/leftstatwatch textures/common/nodraw
+	vr/leftstatwatchgui textures/common/nodraw
+}
+
+skin vr/weaponhands/1hsw {
+	vr/leftarm textures/common/nodraw
+	vr/lefthand textures/common/nodraw
+	vr/leftfist textures/common/nodraw
+	vr/leftstatwatch textures/common/nodraw
+	vr/leftstatwatchgui textures/common/nodraw
+}
+
+skin vr/weaponhands/2h {
+	vr/statwatch textures/common/nodraw
+	vr/statwatchgui textures/common/nodraw
+	vr/leftstatwatch textures/common/nodraw
+	vr/leftstatwatchgui textures/common/nodraw
+}
+
+skin vr/weaponhands/2hsw {
+}
+
+
+
+skin skins/models/weapons/0rox {
+	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
+}
+
+skin skins/models/weapons/1rox {
+	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
+}
+
+skin skins/models/weapons/2rox {
+	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
+}
+
+skin skins/models/weapons/3rox {
+	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
+}
+
+skin skins/models/weapons/4rox {
+	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
+}
+
+skin skins/models/weapons/5rox {
+}
+
+skin skins/models/weapons/nade {
+}
+
+skin skins/models/weapons/nade_invis {
+	models/weapons/grenades/grenades3 models/weapons/grenades/grenades3_invis
+	models/characters/player/arm2 models/characters/player/arm2_invis
+	models/weapons/grenades/grenades3fx models/weapons/grenades/grenades3fx_invis
+}
+
+skin skins/models/weapons/nonade {
+	models/weapons/grenades/grenades3 textures/common/nodraw
+	models/weapons/grenades/grenades3fx textures/common/nodraw
+}
+
+skin skins/models/weapons/nonade_invis {
+	models/weapons/grenades/grenades3 textures/common/nodraw
+	models/weapons/grenades/grenades3fx textures/common/nodraw
+	models/characters/player/arm2 models/characters/player/arm2_invis
+}
+
+skin skins/models/weapons/soulcubefire {
+	models/weapons/soulcube/soulcube3 textures/common/nodraw
+	models/weapons/soulcube/soulcube3fx textures/common/nodraw
+	models/weapons/soulcube/soulcube3fx2 textures/common/nodraw
+	models/weapons/soulcube/soulcube3fx3 textures/common/nodraw
+	models/weapons/soulcube/soulcube3fx4 textures/common/nodraw
+	models/weapons/soulcube/soulcube3fx5 textures/common/nodraw
+	models/weapons/soulcube/soulknife textures/common/nodraw
+	models/weapons/soulcube/soulknife2 textures/common/nodraw
+	models/weapons/soulcube/soulknife3 textures/common/nodraw
+	models/weapons/soulcube/soulknife4 textures/common/nodraw
+}
+
+skin skins/models/weapons/soulcubeidle {
+}
+
+skin skins/pistol_invis {
+	models/weapons/pistol/pistol models/weapons/pistol/pistol_invis
+	models/characters/player/arm2	models/characters/player/arm2_invis
+	models/weapons/pistol/w_pistol models/weapons/pistol/w_pistol_invis
+}
+
+skin skins/fists_invis {
+	models/weapons/berserk/fist	 models/weapons/berserk/fist_invis
+}
+
+skin skins/shotgun_invis {
+	models/weapons/shotgun/shotgun2 models/weapons/shotgun/shotgun2_invis
+	models/characters/player/arm2	models/characters/player/arm2_invis
+	models/weapons/shotgun/w_shotgun2 models/weapons/shotgun/w_shotgun2_invis
+	models/weapons/shell1/sshell models/weapons/shell1/sshell_invis
+}
+
+skin skins/machinegun_invis {
+	models/weapons/machinegun/machinegun models/weapons/machinegun/machinegun_invis
+	models/characters/player/arm2	models/characters/player/arm2_invis
+	models/weapons/machinegun/w_machinegun models/weapons/machinegun/w_machinegun_invis
+}
+
+skin skins/chaingun_invis {
+	models/weapons/chaingun/chaingun models/weapons/chaingun/chaingun_invis
+	models/weapons/chaingun/cbar models/weapons/chaingun/cbar_invis
+	models/weapons/chaingun/barrel models/weapons/chaingun/barrel_invis
+	models/characters/player/arm2	models/characters/player/arm2_invis
+	models/weapons/chaingun/w_chaingun models/weapons/chaingun/w_chaingun_invis
+}
+
+skin skins/grenade_invis {
+	models/weapons/grenades/grenades models/weapons/grenades/grenades_invis
+	models/weapons/grenades/grenades2 models/weapons/grenades/grenades2_invis
+	models/weapons/grenades/grenades3 models/weapons/grenades/grenades3_invis
+	models/characters/player/arm2	models/characters/player/arm2_invis
+	models/weapons/grenades/grenades_world models/weapons/grenades/grenades_world_invis
+	models/weapons/grenades/grenades3fx models/weapons/grenades/grenades3fx_invis
+}
+
+skin skins/rocket_invis {
+	models/weapons/rocketlauncher/rocketlauncher models/weapons/rocketlauncher/rocketlauncher_invis
+	models/characters/player/arm2	models/characters/player/arm2_invis
+	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
+	models/weapons/rocketlauncher/w_rocketlauncher models/weapons/rocketlauncher/w_rocketlauncher_invis
+}
+
+skin skins/plasma_invis {
+	models/weapons/plasmagun/plasmagun models/weapons/plasmagun/plasmagun_invis
+	models/weapons/plasmagun/p1 textures/common/nodraw
+	models/weapons/plasmagun/p2 textures/common/nodraw
+	models/weapons/plasmagun/p3 textures/common/nodraw
+	models/weapons/plasmagun/p1x textures/common/nodraw
+	models/weapons/plasmagun/p2x textures/common/nodraw
+	models/weapons/plasmagun/p3x textures/common/nodraw
+	models/characters/player/arm2	models/characters/player/arm2_invis
+	models/weapons/plasmagun/pl_can textures/common/nodraw
+	models/weapons/plasmagun/plasmagun_world models/weapons/plasmagun/plasmagun_world_invis
+}
+
+skin skins/bfg_invis {
+	models/weapons/bfg/bfg models/weapons/bfg/bfg_invis
+	models/characters/player/arm2	models/characters/player/arm2_invis
+	models/weapons/bfg/bfg_world models/weapons/bfg/bfg_world_invis
+	models/weapons/plasmagun/pl_can textures/common/nodraw
+	models/weapons/plasmagun/pl_can_green textures/common/nodraw
+}
+
+skin skins/chainsaw_invis {
+	models/characters/player/arm2 models/characters/player/arm2_invis
+	models/weapons/berserk/fist models/weapons/berserk/fist_invis
+	models/weapons/chainsaw/chainsaw models/weapons/chainsaw/chainsaw_invis
+	models/weapons/chainsaw/chain models/weapons/chainsaw/chain_invis
+	models/weapons/chainsaw/w_chainsaw models/weapons/chainsaw/w_chainsaw_invis
+}

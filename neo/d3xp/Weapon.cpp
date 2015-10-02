@@ -86,6 +86,7 @@ const idEventDef EV_Weapon_StartWeaponParticle( "startWeaponParticle", "s" );
 const idEventDef EV_Weapon_StopWeaponParticle( "stopWeaponParticle", "s" );
 const idEventDef EV_Weapon_StartWeaponLight( "startWeaponLight", "s" );
 const idEventDef EV_Weapon_StopWeaponLight( "stopWeaponLight", "s" );
+const idEventDef EV_Weapon_GetWeaponSkin( "getWeaponSkin", NULL, 's' );
 
 //
 // class def
@@ -138,6 +139,7 @@ EVENT( EV_Weapon_StartWeaponParticle,		idWeapon::Event_StartWeaponParticle )
 EVENT( EV_Weapon_StopWeaponParticle,		idWeapon::Event_StopWeaponParticle )
 EVENT( EV_Weapon_StartWeaponLight,			idWeapon::Event_StartWeaponLight )
 EVENT( EV_Weapon_StopWeaponLight,			idWeapon::Event_StopWeaponLight )
+EVENT( EV_Weapon_GetWeaponSkin,				idWeapon::Event_GetWeaponSkin )
 END_CLASS
 
 
@@ -1142,30 +1144,9 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 		guiLight.shader = declManager->FindMaterial( guiLightShader, false );
 		guiLight.pointLight = true;
 	}
-	
-	// koz begin
-
-	idStr viewModelName = weaponDef->dict.GetString( "model_view" );
-	common->Printf( "Weapon viewmodel name = %s\n", viewModelName.c_str() );
-	if ( game->isVR )
-	{
-		if ( !vr_viewModelArms.GetBool() )
-		{
-			viewModelName += "0h";
-		}
-		else
-		{
-			viewModelName += ( vr->VR_USE_HYDRA )  ? "1h" : "2h";
-			if ( vr_wristStatMon.GetBool() ) viewModelName += "sw";
-		}
-	}
-
-
+		
 	// setup the view model
-	//vmodel = weaponDef->dict.GetString( "model_view" ) + vrModelModifiers.c_str();
-	vmodel = viewModelName.c_str();
-	// koz end
-
+	vmodel = weaponDef->dict.GetString( "model_view" );
 	SetModel( vmodel );
 	
 	// setup the world model
@@ -5445,6 +5426,37 @@ void idWeapon::Event_EjectBrass()
 	debris->GetPhysics()->SetLinearVelocity( linear_velocity );
 	debris->GetPhysics()->SetAngularVelocity( angular_velocity );
 }
+
+
+/*koz
+===============
+idWeapon::Event_GetWeaponSkin
+===============
+*/
+void idWeapon::Event_GetWeaponSkin()
+{
+	if ( !owner || !game->isVR )
+	{
+		idThread::ReturnString( "" );
+		return;
+	}
+
+	// game is vr, return a string name for the skin matching the hand/stat watch config
+	// an empty name will result in no hands or stat watch being displayed
+	idStr vrSkinName = "vr/weaponhands/";
+	
+	if ( vr_viewModelArms.GetBool() )
+	{
+		vrSkinName += vr->VR_USE_HYDRA ? "1h" : "2h";
+		vrSkinName += vr_wristStatMon.GetInteger() == 1 ? "sw" : "";
+	}
+	else vrSkinName += "0h";
+
+	common->Printf( "idWeapon::Event_GetWeaponSkin() returning %s\n", vrSkinName.c_str() );
+	idThread::ReturnString( vrSkinName.c_str() );
+
+}
+
 
 /*
 ===============
