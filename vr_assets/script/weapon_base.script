@@ -6,6 +6,9 @@ Base object for weapons.  Contains variables required by game code.
 
 ***********************************************************************/
 
+//koz
+scriptEvent string	getWeaponSkin();
+
 object weapon_base {
 				// required by game
 	boolean		WEAPON_ATTACK;
