@@ -6,7 +6,6 @@ Base object for weapons.  Contains variables required by game code.
 
 ***********************************************************************/
 
-//koz
 scriptEvent string	getWeaponSkin();
 
 object weapon_base {
@@ -95,10 +94,14 @@ Code is called is only guaranteed to execute for one frame, so any code should e
 =====================
 */
 void weapon_base::UpdateSkin() {
+	string skinName;
+	
 	if ( isInvisible() ) {
 		setSkin( getKey( "skin_invisible" ) );
 	} else {
-		setSkin( getWeaponSkin() );
+		skinName = getWeaponSkin() + ".skin";
+		//setSkin( getWeaponSkin() );
+		setSkin ( skinName );
 	}
 }
 
