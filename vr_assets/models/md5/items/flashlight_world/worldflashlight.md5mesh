@@ -12,8 +12,9 @@ joints {
 
 mesh {
 	// left hand
-	shader "_flashHand"
-
+	//shader "_flashHand"
+	shader "vr/leftarm"
+	
 	numverts 343
 	vert 0 ( 0.805728 0.396600 ) 0 1
 	vert 1 ( 0.833918 0.418322 ) 1 1
@@ -1256,8 +1257,9 @@ mesh {
 
 mesh {
 	// left hand end cap
-	shader "_flashHand"
-
+	//shader "_flashHand"
+	shader "vr/leftarm"
+	
 	numverts 57
 	vert 0 ( 0.315504 0.913461 ) 0 1
 	vert 1 ( 0.319278 0.921272 ) 1 1
@@ -1883,8 +1885,9 @@ mesh {
 
 mesh {
 	// stats watch 
-	shader "vr/leftstatwatch"
-
+	//shader "vr/leftstatwatch"
+	shader "vr/statwatch"
+	
 	numverts 550
 	vert 0 ( 0.597221 0.135096 ) 0 1
 	vert 1 ( 0.592081 0.101407 ) 1 1
@@ -3252,7 +3255,8 @@ mesh {
 
 mesh {
 	// stats watch gui
-	shader "vr/leftstatwatchgui"
+	//shader "vr/leftstatwatchgui"
+	shader "vr/statwatchgui"
 
 	numverts 4
 	vert 0 ( 1.000000 1.000000 ) 0 1

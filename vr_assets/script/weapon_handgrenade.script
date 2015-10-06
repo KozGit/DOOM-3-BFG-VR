@@ -195,17 +195,25 @@ void weapon_handgrenade::GrenadeNoNade() {
 }
 
 void weapon_handgrenade::UpdateSkin() {
+	
+	string skinName;
+	
 	if ( !show_grenade ) {
 		if ( isInvisible() ) {
 			setSkin( skin_nonade_invis );
 		} else {
-			setSkin( skin_nonade );
+			skinName = "skins/models/weapons/nonade" + getWeaponSkin() ;
+			//setSkin( skin_nonade );
+			setSkin ( skinName );
 		}
 	} else {
 		if ( isInvisible() ) {
 			setSkin( skin_nade_invis );
 		} else {
-			setSkin( skin_nade );
+			//setSkin( skin_nade );
+			skinName = "skins/models/weapons/nade" + getWeaponSkin() ;
+			//setSkin( skin_nonade );
+			setSkin ( skinName );
 		}
 	}
 }

@@ -1608,7 +1608,7 @@ void idWeapon::UpdateVRGUI()
 
 	if ( owner->weaponGone )
 	{
-		// dropping weapons was implemented wierd, so we have to not update the gui when it happens or we'll get a negative ammo count
+		// dropping weapons was implemented weird, so we have to not update the gui when it happens or we'll get a negative ammo count
 		return;
 	}
 
@@ -5428,7 +5428,7 @@ void idWeapon::Event_EjectBrass()
 }
 
 
-/*koz
+/*koz - what a mess
 ===============
 idWeapon::Event_GetWeaponSkin
 ===============
@@ -5441,20 +5441,37 @@ void idWeapon::Event_GetWeaponSkin()
 		return;
 	}
 
-	// game is vr, return a string name for the skin matching the hand/stat watch config
-	// an empty name will result in no hands or stat watch being displayed
-	idStr vrSkinName = "vr/weaponhands/";
+	// game is vr, return a string name for the skin matching the hand/statwatch config.
 	
-	if ( vr_viewModelArms.GetBool() )
+	idStr vrSkinName = "vr/weaponhands/";
+
+	if ( isPlayerFlashlight )
 	{
-		vrSkinName += vr->VR_USE_HYDRA ? "1h" : "2h";
-		vrSkinName += vr_wristStatMon.GetInteger() == 1 ? "sw" : "";
+		vrSkinName = "vr/flashhands/";
+		if ( vr_viewModelArms.GetBool() && vr->VR_USE_HYDRA && vr_hydraMode.GetInteger() != 0 )
+		{
+			vrSkinName += "1h";
+			if ( vr_wristStatMon.GetInteger() == 2 ) vrSkinName += "sw";
+		}
+		else
+		{
+			vrSkinName += "0h";
+
+		}
 	}
-	else vrSkinName += "0h";
-
-	common->Printf( "idWeapon::Event_GetWeaponSkin() returning %s\n", vrSkinName.c_str() );
+	else
+	{
+		if ( vr_viewModelArms.GetBool() )
+		{
+			vrSkinName += vr->VR_USE_HYDRA ? "1h" : "2h";
+			vrSkinName += vr_wristStatMon.GetInteger() == 1 ? "sw" : "";
+		}
+		else vrSkinName += "0h";
+	
+	}
+	
+	//common->Printf( "idWeapon::Event_GetWeaponSkin() returning %s\n", vrSkinName.c_str() );
 	idThread::ReturnString( vrSkinName.c_str() );
-
 }
 
 
