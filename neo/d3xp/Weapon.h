@@ -95,17 +95,18 @@ const idVec3 flashOffsets[int( WEAPON_NUM_WEAPONS )] = {	idVec3( 0.0f, 0.0f, 0.0
 
 // koz weaponOriginOffsets - offsets to move local origin of weapon viewmodels to be centered around grip/hand location
 const idVec3 weaponOriginOffsets[int( WEAPON_NUM_WEAPONS )] = { idVec3( 0.0f, 0.0f, 0.0f ),			// NO_WEAPON
-																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_FISTS
-																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_CHAINSAW
-																idVec3( -7.0f, 4.0f, 7.0f ),		// WEAPON_PISTOL
+																idVec3( -8.0f, 7.0f, 7.0f ),			// WEAPON_FISTS
+																idVec3( 6.0f, 3.5f, 16.0f ),			// WEAPON_CHAINSAW
+																idVec3( -7.0f, 5.0f, 7.0f ),		// WEAPON_PISTOL
 																idVec3( -1.0f, 4.0f, 7.0f ),		// WEAPON_SHOTGUN
 																idVec3( -7.0f, 4.0f, 10.0f ),		// WEAPON_MACHINEGUN
-																idVec3( -7.0f, 4.0f, 7.0f ),		// WEAPON_CHAINGUN
+																idVec3( -3.5f, 2.0f, 0.0f ),		// WEAPON_CHAINGUN
 																//idVec3( -13.0f, 0.0f, 9.0f ),		// WEAPON_HANDGRENADE old
 																idVec3( -12.0f, 2.0f, 10.0f ),		// WEAPON_HANDGRENADE
 																idVec3( -5.0f, 4.0f, 12.0f ),		// WEAPON_PLASMAGUN
 																idVec3( -9.0f, 4.0f, 14.0f ),		// WEAPON_ROCKETLAUNCHER
-																idVec3( -9.0f, 4.0f, 14.0f ),		// WEAPON_BFG											idVec3( -12.0f, 0.0f, 5.0f ),		// WEAPON_SOULCUBE
+																idVec3( -9.0f, 4.0f, 14.0f ),		// WEAPON_BFG	
+																idVec3( -8.0f, 6.0f, 7.0f ),		// WEAPON_SOULCUBE
 																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_SHOTGUN_DOUBLE
 																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_SHOTGUN_DOUBLE_MP
 																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_GRABBER
