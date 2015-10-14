@@ -493,7 +493,7 @@ private:
 	const idMaterial* 	splashScreen;
 	
 	const idMaterial* 	whiteMaterial;
-	
+			
 	const idMaterial* 	wipeMaterial;
 	int					wipeStartTime;
 	int					wipeStopTime;

@@ -1073,6 +1073,7 @@ void ExtractTGA_f( const idCmdArgs &args )
 		common->Warning( "Image '%s' not found.\n", args.Argv( 1 ) );
 		return;
 	}
+	common->Printf( "Saving image\n" );
 	img->ActuallySaveImage();
 }
 

@@ -2011,13 +2011,40 @@ void idPlayer::Init()
 	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
 
+	// Koz begin
 	// heading indicator for VR - point the direction the body is facing.
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
 	headingBeamEntity.hModel = renderModelManager->FindModel( "_BEAM" );
-	//headingBeamEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
-	headingBeamEntity.customShader = declManager->FindMaterial( "textures/sfx/fridgeglass1" );
+	headingBeamActive = true;
+		
+	int mode = vr_headingBeamMode.GetInteger();
 
-	// Koz begin
+	switch ( mode )
+	{
+		
+		case 0:
+			headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrowsScroll" );
+			headingBeamActive = false;
+			break;
+
+		case 1:
+			headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamSolid" ); 
+			break;
+
+		case 2:
+			headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrows" );
+			break;
+
+		case 3:
+			headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrowsScroll" );
+			break;
+
+		default:
+			headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrowsScroll" );
+			headingBeamActive = true;
+
+	}
+			
 	laserSightActive = true;
 	headingBeamActive = true;
 	hudActive = true;
@@ -9246,7 +9273,7 @@ idPlayer::UpdateHeadingBeam
 */
 void idPlayer::UpdateHeadingBeam()
 {
-	
+
 	if ( !headingBeamActive )
 	{
 
@@ -9264,7 +9291,7 @@ void idPlayer::UpdateHeadingBeam()
 	}
 		
 	idVec3 beamOrigin = GetEyePosition();
-	beamOrigin.z -= pm_normalviewheight.GetFloat();
+	beamOrigin.z -=  ( pm_normalviewheight.GetFloat() );
 
 	idMat3 beamAxis = idAngles( 0.0f, viewAngles.yaw, 0.0f ).ToMat3();
 	
@@ -9273,6 +9300,8 @@ void idPlayer::UpdateHeadingBeam()
 	headingBeamEntity.allowSurfaceInViewID = entityNumber + 1;
 	headingBeamEntity.axis.Identity();
 	headingBeamEntity.origin = beamOrigin;
+
+	//headingBeamEntity.weaponDepthHack = true;
 		
 	float beamLength = vr_headingBeamLength.GetFloat();
 	

@@ -180,5 +180,45 @@ vr/rightfist
 }
 
 
+headingBeamArrowsScroll
+{
+	qer_editorimage	textures/zaphod/shotgun_laser.TGA
+	translucent
+	noShadows
+	{
+		blend add
+		//blend gl_one,gl_one
+		map models/images/headingbeamarrow.tga
+		rgb			guiLightTable[ time *.25 ] * 1.25
+		scroll	time * -0.02, 0
+	}
+}
 
+headingBeamArrows
+{
+	qer_editorimage	textures/zaphod/shotgun_laser.TGA
+	translucent
+	noShadows
+	{
+		blend add
+		//blend gl_one,gl_one
+		map models/images/headingbeamarrow.tga
+		rgb			guiLightTable[ time *.25 ] * 1.25
+		scroll	time * -0.02, 0
+	}
+}
+
+headingBeamSolid
+{
+	qer_editorimage	textures/zaphod/shotgun_laser.TGA
+	translucent
+	noShadows
+	{
+		blend add
+		//map		textures/bfgEdition/laserSight.tga
+		map models/images/headingbeamsolid.tga
+		rgb			guiLightTable[ time *.25 ] * 1.25
+		scroll	time * -0.02 0
+	}
+}
 

@@ -326,6 +326,7 @@ extern idCVar	vr_interactiveCinematic;
 
 extern idCVar	vr_headingBeamLength;
 extern idCVar	vr_headingBeamWidth;
+extern idCVar	vr_headingBeamMode;
 
 
 extern iVr* vr;

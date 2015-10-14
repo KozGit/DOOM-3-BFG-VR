@@ -87,6 +87,7 @@ R_WriteTGA
 */
 void R_WriteTGA( const char* filename, const byte* data, int width, int height, bool flipVertical, const char* basePath )
 {
+	common->Printf( "R_WriteTGA\n" );
 	byte*	buffer;
 	int		i;
 	int		bufferSize = width * height * 4 + 18;
@@ -114,7 +115,7 @@ void R_WriteTGA( const char* filename, const byte* data, int width, int height, 
 		buffer[i + 2] = data[i - imgStart + 0];		// red
 		buffer[i + 3] = data[i - imgStart + 3];		// alpha
 	}
-	
+	common->Printf( "R_WriteTGA writing %s \n", filename );
 	fileSystem->WriteFile( filename, buffer, bufferSize, basePath );
 }
 
