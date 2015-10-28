@@ -723,7 +723,7 @@ mesh {
 
 mesh {
 	// left fist
-	shader "vr/leftFist"
+	shader "vr/leftfist"
 
 	numverts 172
 	vert 0 ( 0.697284 0.731860 ) 0 1
@@ -1418,8 +1418,8 @@ mesh {
 }
 
 mesh {
-	// right fist end cap
-	shader "vr/rightfist"
+	// left fist end cap
+	shader "vr/leftfist"
 
 	numverts 57
 	vert 0 ( 0.342353 0.930914 ) 0 1
@@ -1562,8 +1562,8 @@ mesh {
 }
 
 mesh {
-	// left fist end cap
-	shader "vr/leftFist"
+	// right fist end cap
+	shader "vr/rightfist"
 
 	numverts 57
 	vert 0 ( 0.333869 0.929872 ) 0 1
