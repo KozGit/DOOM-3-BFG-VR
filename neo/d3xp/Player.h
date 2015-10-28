@@ -548,7 +548,8 @@ public:
 	void					ClearChatMessage( int index );
 	
 	void					DrawHUD( idMenuHandler_HUD* hudManager );
-	
+	void					DrawHUDVR( idMenuHandler_HUD* hudManager );
+
 	void					WeaponFireFeedback( const idDict* weaponDef );
 	
 	float					DefaultFov() const;

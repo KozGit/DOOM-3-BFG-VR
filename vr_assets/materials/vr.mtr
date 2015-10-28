@@ -204,7 +204,7 @@ headingBeamArrows
 		//blend gl_one,gl_one
 		map models/images/headingbeamarrow.tga
 		rgb			guiLightTable[ time *.25 ] * 1.25
-		scroll	time * -0.02, 0
+		//scroll	time * -0.02, 0
 	}
 }
 
@@ -222,3 +222,10 @@ headingBeamSolid
 	}
 }
 
+vr/t/cola1
+{	
+	noselfshadow
+	bumpmap		addnormals (models/mapobjects/filler/cola1_local.tga, heightmap (models/mapobjects/filler/cola1_bmp.tga, 4) ) 
+	diffusemap		models/mapobjects/filler/cola1_d.tga
+	specularmap		models/mapobjects/filler/cola1_s.tga
+}

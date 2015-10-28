@@ -611,6 +611,7 @@ void idImageManager::CreateIntrinsicImages()
 	// hudImage - the rendered hud/menus will be rendered to this image to use as a texture for the hud model
 	pdaImage = ImageFromFunction( "_pdaImage", R_RGBA8Image );
 	hudImage = ImageFromFunction( "_hudImage", R_RGBA8Image );
+	crosshairImage = ImageFromFunction( "_crosshairImage", R_RGBA8Image );
 	// Koz end
 	
 	// save a copy of this for material comparison, because currentRenderImage may get

@@ -1,0 +1,14 @@
+entityDef headingbeam {
+	"inherit"				"item_default"
+	"editor_color"			".3 .3 1"
+	"editor_mins"			"-16 -16 0"
+	"editor_maxs"			"16 16 32"
+
+	"editor_usage"			"Heading Beam"
+
+	"spawnclass"			"idItem"
+	"model" 				"models/mapobjects/headingbeam.lwo"
+	"snd_acquire"			"sound_shard_acquire"
+	"size"					"32 32 32"
+	"inv_name"				"Heading Beam"
+}

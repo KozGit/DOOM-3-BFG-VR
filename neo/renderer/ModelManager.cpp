@@ -65,6 +65,9 @@ private:
 	idRenderModel* 			defaultModel;
 	idRenderModel* 			beamModel;
 	idRenderModel* 			spriteModel;
+	// koz fixme this is all in the wrong place
+	idRenderModel*			headingBeamModel;
+	//koz end
 	bool					insideLevelLoad;		// don't actually load now
 	
 	idRenderModel* 			GetModel( const char* modelName, bool createIfNotFound );
@@ -255,6 +258,18 @@ void idRenderModelManagerLocal::Init()
 	sprite->SetLevelLoadReferenced( true );
 	spriteModel = sprite;
 	AddModel( sprite );
+
+
+	//koz begin
+	idRenderModelStatic* headingBeam = new(TAG_MODEL)idRenderModelStatic;
+	//headingBeam->InitEmpty( "_HEADINGBEAM" );
+	headingBeam->InitFromFile( "/models/mapobjects/headingbeam.lwo" );
+	//headingBeam->LoadLWO( "/models/mapobjects/headingbeam.lwo" );
+	headingBeam->SetLevelLoadReferenced( true );
+	headingBeamModel = headingBeam;
+	AddModel( headingBeam );
+	
+
 }
 
 /*

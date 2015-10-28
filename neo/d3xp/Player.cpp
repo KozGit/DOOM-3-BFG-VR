@@ -60,6 +60,8 @@ idCVar pm_clientAuthoritative_minSpeedSquared( "pm_clientAuthoritative_minSpeedS
 
 extern idCVar g_demoMode;
 
+idCVar vr_weaponSight( "vr_weaponSight", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Weapon Sight.\n 0 = Lasersight\n 1 = red dot\n 2 = crosshair\n" );
+
 /*
 ===============================================================================
 
@@ -2014,7 +2016,8 @@ void idPlayer::Init()
 	// Koz begin
 	// heading indicator for VR - point the direction the body is facing.
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
-	headingBeamEntity.hModel = renderModelManager->FindModel( "_BEAM" );
+	//headingBeamEntity.hModel = renderModelManager->FindModel( "_HEADINGBEAM" );
+	headingBeamEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/headingbeam.lwo" );
 	headingBeamActive = true;
 		
 	int mode = vr_headingBeamMode.GetInteger();
@@ -2023,24 +2026,30 @@ void idPlayer::Init()
 	{
 		
 		case 0:
-			headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrowsScroll" );
+			//headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrowsScroll" );
+			
+			//headingBeamEntity.customSkin = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
 			headingBeamActive = false;
 			break;
 
 		case 1:
-			headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamSolid" ); 
+			//headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamSolid" );
+			headingBeamEntity.customSkin = declManager->FindSkin( "skins/models/headingbeamsolid" );
 			break;
 
 		case 2:
-			headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrows" );
+			//headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrows" );
+			headingBeamEntity.customSkin = declManager->FindSkin( "skins/models/headingbeamarrows" );
 			break;
 
 		case 3:
-			headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrowsScroll" );
+			//headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrowsScroll" );
+			headingBeamEntity.customSkin = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
 			break;
 
 		default:
-			headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrowsScroll" );
+			//headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrowsScroll" );
+			headingBeamEntity.customSkin = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
 			headingBeamActive = true;
 
 	}
@@ -2976,9 +2985,9 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	
 	// koz re-init the heading beam model
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
-	headingBeamEntity.hModel = renderModelManager->FindModel( "_BEAM" );
+	headingBeamEntity.hModel = renderModelManager->FindModel( "_HEADINGBEAM" );
 	//headingBeamEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
-	headingBeamEntity.customShader = declManager->FindMaterial( "textures/sfx/fridgeglass1" );
+	//headingBeamEntity.customShader = declManager->FindMaterial( "textures/sfx/fridgeglass1" );
 	
 	for( int i = 0; i < MAX_PLAYER_PDA; i++ )
 	{
@@ -3719,6 +3728,95 @@ void idPlayer::DrawHUD( idMenuHandler_HUD* _hudManager )
 		hud->SetCursorState( this, CURSOR_NONE, 1 );
 		hud->UpdateCursorState();
 	}
+}
+
+/*
+===============
+idPlayer::DrawHUDVR
+===============
+*/
+void idPlayer::DrawHUDVR( idMenuHandler_HUD* _hudManager )
+{
+	SCOPED_PROFILE_EVENT( "idPlayer::DrawHUD" );
+	// Koz begin
+	
+	if ( !GuiActive()  ) // only draw crosshairs if enabled in VR.
+	{
+		
+		if ( _hudManager && _hudManager->GetHud() )
+		{
+
+			idMenuScreen_HUD* hud = _hudManager->GetHud();
+
+			if ( weapon.GetEntity()->ShowCrosshair() && vr_weaponSight.GetInteger() == 2 )
+			{
+				if ( weapon.GetEntity()->GetGrabberState() == 1 || weapon.GetEntity()->GetGrabberState() == 2 )
+				{
+					hud->SetCursorState( this, CURSOR_GRABBER, 1 );
+					hud->SetCursorState( this, CURSOR_IN_COMBAT, 0 );
+				}
+				else
+				{
+					hud->SetCursorState( this, CURSOR_GRABBER, 0 );
+					hud->SetCursorState( this, CURSOR_IN_COMBAT, 1 );
+				}
+			}
+			else
+			{
+				hud->SetCursorState( this, CURSOR_NONE, 1 );
+			}
+
+			hud->UpdateCursorState();
+
+		}
+	}
+	else if ( _hudManager && _hudManager->GetHud() )
+	{
+
+		idMenuScreen_HUD* hud = _hudManager->GetHud();
+
+		hud->SetCursorState( this, CURSOR_NONE, 1 );
+		hud->UpdateCursorState();
+	}
+
+	renderSystem->CaptureRenderToImage( "_crosshairImage", true );
+	
+	if ( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || vr_hudType.GetInteger() == VR_HUD_NONE )
+	{
+		return;
+	}
+
+	if ( common->IsMultiplayer() )
+	{
+		UpdateChattingHud();
+		UpdateSpectatingText();
+	}
+
+	// Always draw the local client's messages so that chat works correctly while spectating another player.
+	idPlayer* localPlayer = static_cast< idPlayer* >(gameLocal.entities[gameLocal.GetLocalClientNum()]);
+
+	if ( localPlayer != NULL && localPlayer->mpMessages != NULL )
+	{
+		localPlayer->mpMessages->Render( renderSystem, Sys_Milliseconds() );
+	}
+
+
+	UpdateHudStats( _hudManager );
+
+	if ( spectating )
+	{
+		return;
+	}
+
+	if ( _hudManager )
+	{
+		_hudManager->Update();
+	}
+
+	weapon.GetEntity()->UpdateGUI();
+		
+	renderSystem->CaptureRenderToImage( "_hudImage", true );
+	
 }
 
 /*
@@ -9297,19 +9395,22 @@ void idPlayer::UpdateHeadingBeam()
 	
 	// program the beam model
 	// only show in the player's view
-	headingBeamEntity.allowSurfaceInViewID = entityNumber + 1;
-	headingBeamEntity.axis.Identity();
+	
+	//headingBeamEntity.allowSurfaceInViewID = entityNumber + 1;
+	
+	//headingBeamEntity.axis.Identity();
+	headingBeamEntity.axis = beamAxis;
 	headingBeamEntity.origin = beamOrigin;
-
+	headingBeamEntity.bounds.Zero();
 	//headingBeamEntity.weaponDepthHack = true;
 		
-	float beamLength = vr_headingBeamLength.GetFloat();
+	//float beamLength = vr_headingBeamLength.GetFloat();
 	
-	idVec3&	target = *reinterpret_cast<idVec3*>(&headingBeamEntity.shaderParms[SHADERPARM_BEAM_END_X]);
-	target = headingBeamEntity.origin + beamAxis[0] * beamLength;
+	//idVec3&	target = *reinterpret_cast<idVec3*>(&headingBeamEntity.shaderParms[SHADERPARM_BEAM_END_X]);
+	//target = headingBeamEntity.origin + beamAxis[0] * beamLength;
 	
 
-	headingBeamEntity.shaderParms[SHADERPARM_BEAM_WIDTH] = vr_headingBeamWidth.GetFloat();
+	//headingBeamEntity.shaderParms[SHADERPARM_BEAM_WIDTH] = vr_headingBeamWidth.GetFloat();
 
 	if ( headingBeamHandle == -1 )
 	{
