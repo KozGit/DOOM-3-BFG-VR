@@ -159,7 +159,6 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 					break;
 
 				case RENDERING_HUD:
-					scale *= vr_hudScale.GetFloat();
 					break;
 				
 				case RENDERING_NORMAL:
@@ -359,16 +358,7 @@ void idSWF::RenderSprite( idRenderSystem* gui, idSWFSpriteInstance* spriteInstan
 				
 				float widthAdj = swf_titleSafe.GetFloat() * frameWidth;
 				float heightAdj = swf_titleSafe.GetFloat() * frameHeight;
-
-				// Koz begin
-				// Move the HUD into view in VR
-				if ( game->isVR )
-				{
-					widthAdj = ( swf_titleSafe.GetFloat() + vr_hudPosX.GetFloat() ) * frameWidth;
-					heightAdj = ( swf_titleSafe.GetFloat() + vr_hudPosY.GetFloat() ) * frameHeight;
-				}
-				// Koz end
-
+								
 				const float pixelAspect = renderSystem->GetPixelAspect();
 				const float sysWidth = renderSystem->GetWidth() * ( pixelAspect > 1.0f ? pixelAspect : 1.0f );
 				const float sysHeight = renderSystem->GetHeight() / ( pixelAspect < 1.0f ? pixelAspect : 1.0f );

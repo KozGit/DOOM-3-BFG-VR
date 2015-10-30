@@ -62,6 +62,8 @@ extern idCVar g_demoMode;
 
 idCVar vr_weaponSight( "vr_weaponSight", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Weapon Sight.\n 0 = Lasersight\n 1 = red dot\n 2 = crosshair\n" );
 
+
+
 /*
 ===============================================================================
 
@@ -1493,8 +1495,17 @@ idPlayer::idPlayer():
 	laserSightHandle	= -1;
 	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
 	
+	// koz begin
 	headingBeamHandle = -1;
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
+
+	hudHandle = -1;
+	memset( &hudEntity, 0, sizeof( hudEntity ) );
+
+	crosshairHandle = -1;
+	memset( &crosshairEntity, 0, sizeof( crosshairEntity ) );
+	// koz end
+
 
 	weapon					= NULL;
 	primaryObjective		= NULL;
@@ -2014,9 +2025,20 @@ void idPlayer::Init()
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
 
 	// Koz begin
+	
+	// model to place hud in 3d space
+	memset( &hudEntity, 0, sizeof( hudEntity ) );
+	hudEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/hud.lwo" );
+	laserSightRenderEntity.customShader = declManager->FindMaterial( "vr/hud" );
+	
+
+	// model to place crosshair or red dot into 3d space
+	memset( &crosshairEntity, 0, sizeof( crosshairEntity ) );
+	crosshairEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/hud.lwo" );
+	laserSightRenderEntity.customShader = declManager->FindMaterial( "vr/hud" );
+		
 	// heading indicator for VR - point the direction the body is facing.
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
-	//headingBeamEntity.hModel = renderModelManager->FindModel( "_HEADINGBEAM" );
 	headingBeamEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/headingbeam.lwo" );
 	headingBeamActive = true;
 		
@@ -9372,46 +9394,64 @@ idPlayer::UpdateHeadingBeam
 void idPlayer::UpdateHeadingBeam()
 {
 
+	// update the heading beam model
 	if ( !headingBeamActive )
 	{
-
 		// hide it
 		headingBeamEntity.allowSurfaceInViewID = -1;
-		if ( headingBeamHandle == -1 )
+			
+	}
+	else 
+	{
+		idVec3 beamOrigin = GetEyePosition();
+		idMat3 beamAxis = idAngles( 0.0f, viewAngles.yaw, 0.0f ).ToMat3();
+		
+		beamOrigin.z -= (pm_normalviewheight.GetFloat());
+		
+		headingBeamEntity.axis = beamAxis;
+		headingBeamEntity.origin = beamOrigin;
+		headingBeamEntity.bounds.Zero();
+
+	}
+
+	// update the hud model
+	if ( !hudActive )
+	{
+		// hide it
+		hudEntity.allowSurfaceInViewID = -1;
+	}
+	else
+	{
+		static idVec3 hudOrigin;
+		static idMat3 hudAxis;
+		
+		if ( vr_hudPosLock.GetInteger() == 1 )
 		{
-			headingBeamHandle = gameRenderWorld->AddEntityDef( &headingBeamEntity );
+			float pitch = vr_hudType.GetInteger() == 2 ? vr_hudAngle.GetFloat() : 0.0f;
+			//hudAxis = idAngles( 0.0f, viewAngles.yaw, 0.0f ).ToMat3();
+			hudAxis = idAngles( pitch, viewAngles.yaw, 0.0f ).ToMat3();
+			hudOrigin = GetEyePosition();
 		}
 		else
 		{
-			gameRenderWorld->UpdateEntityDef( headingBeamHandle, &headingBeamEntity );
+			hudAxis = vr->lastViewAxis;
+			hudOrigin = vr->lastViewOrigin;
 		}
-		return;
+				
+		hudOrigin = hudOrigin + hudAxis[0] * vr_hudPosDis.GetFloat(); // distance from view
+		hudOrigin = hudOrigin + hudAxis[1] * vr_hudPosHor.GetFloat();
+		hudOrigin = hudOrigin + hudAxis[2] * vr_hudPosVer.GetFloat();
+		
+		hudAxis *= vr_hudScale.GetFloat();
+
+		hudEntity.axis = hudAxis;
+		hudEntity.origin = hudOrigin;
+		hudEntity.bounds.Zero();
+
 	}
-		
-	idVec3 beamOrigin = GetEyePosition();
-	beamOrigin.z -=  ( pm_normalviewheight.GetFloat() );
 
-	idMat3 beamAxis = idAngles( 0.0f, viewAngles.yaw, 0.0f ).ToMat3();
 	
-	// program the beam model
-	// only show in the player's view
-	
-	//headingBeamEntity.allowSurfaceInViewID = entityNumber + 1;
-	
-	//headingBeamEntity.axis.Identity();
-	headingBeamEntity.axis = beamAxis;
-	headingBeamEntity.origin = beamOrigin;
-	headingBeamEntity.bounds.Zero();
-	//headingBeamEntity.weaponDepthHack = true;
-		
-	//float beamLength = vr_headingBeamLength.GetFloat();
-	
-	//idVec3&	target = *reinterpret_cast<idVec3*>(&headingBeamEntity.shaderParms[SHADERPARM_BEAM_END_X]);
-	//target = headingBeamEntity.origin + beamAxis[0] * beamLength;
-	
-
-	//headingBeamEntity.shaderParms[SHADERPARM_BEAM_WIDTH] = vr_headingBeamWidth.GetFloat();
-
+	// make sure the entitydefs are updated
 	if ( headingBeamHandle == -1 )
 	{
 		headingBeamHandle = gameRenderWorld->AddEntityDef( &headingBeamEntity );
@@ -9420,6 +9460,17 @@ void idPlayer::UpdateHeadingBeam()
 	{
 		gameRenderWorld->UpdateEntityDef( headingBeamHandle, &headingBeamEntity );
 	}
+	
+
+	if ( hudHandle == -1 )
+	{
+		hudHandle = gameRenderWorld->AddEntityDef( &hudEntity );
+	}
+	else
+	{
+		gameRenderWorld->UpdateEntityDef( hudHandle, &hudEntity );
+	}
+
 }
 /*
 ==============

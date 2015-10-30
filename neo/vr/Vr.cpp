@@ -89,11 +89,14 @@ idCVar vr_mouse_gun_forearm("vr_mouse_gun_forearm", "16", CVAR_GAME | CVAR_ARCHI
 idCVar vr_guiScale( "vr_guiScale", "1", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "scale reduction factor for full screen menu/pda scale in VR", 0.0001f, 1.0f ); //koz allow scaling of full screen guis/pda
 idCVar vr_guiSeparation( "vr_guiSeparation", ".01", CVAR_FLOAT | CVAR_ARCHIVE, " Screen separation value for fullscreen guis." );
 
-idCVar vr_hudScale( "vr_hudScale", "0.6", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Hud scale", 0.1f, 2.0f ); //scale hud 
-idCVar vr_hudPosX( "vr_hudPosX", "0.25", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "X scale reduction factor for hud element positions in VR", 0.01f, 1.0f ); //scale hud positions so they will be visible in VR if wanted
-idCVar vr_hudPosY( "vr_hudPosY", "0.4", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Y scale reduction factor for hud element positions in VR", 0.01f, 1.0f ); //scale hud positions so they will be visible in VR if wanted
-idCVar vr_hudType( "vr_hudType", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "VR Hud Type. 0 = Disable.\n1 = Full\n2=Look Down\n3=Floating", 0, 3 ); // 
-idCVar vr_hudAngle( "vr_hudAngle", "48", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "HMD pitch to reveal HUD in look down mode." );
+idCVar vr_hudScale( "vr_hudScale", "1.0", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Hud scale", 0.1f, 2.0f ); 
+idCVar vr_hudPosHor( "vr_hudPosHor", "0", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Hud Horizontal offset in inches" ); 
+idCVar vr_hudPosVer( "vr_hudPosVer", "0", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Hud Vertical offset in inches" ); 
+idCVar vr_hudPosDis( "vr_hudPosDis", "30", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Hud Distance from view in inches" );
+idCVar vr_hudPosLock( "vr_hudPosLock", "1", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Lock Hud to:  0 = Face, 1 = Body" );
+
+idCVar vr_hudType( "vr_hudType", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "VR Hud Type. 0 = Disable.\n1 = Full\n2=Look Activate", 0, 2 ); 
+idCVar vr_hudAngle( "vr_hudAngle", "48", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "HMD pitch to reveal HUD in look activate mode." );
 idCVar vr_hudTransparency( "vr_hudTransparency", "1", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, " Hud transparency. 0.0 = Invisible thru 1.0 = full", 0.0, 1.0 );
 
 idCVar vr_hudHealth(	"vr_hudHealth",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show Armor/Health in Hud." );
@@ -108,7 +111,7 @@ idCVar vr_hudComs(		"vr_hudComs",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "S
 idCVar vr_hudWeap(		"vr_hudWeap",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show weapon pickup/change icons in Hud." );
 idCVar vr_hudNewItems(	"vr_hudNewItems",	"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show new items acquired in Hud." );
 idCVar vr_hudFlashlight("vr_hudFlashlight", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show flashlight in Hud." );
-idCVar vr_hudLowHealth( "vr_hudLowHealth",	"0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Show health in hud if hidden when below this." );
+idCVar vr_hudLowHealth( "vr_hudLowHealth", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "If hud hidden show health if below this." );
 
 idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "41", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Tweak talk cursor y pos in VR. % val", 0, 99 );
 

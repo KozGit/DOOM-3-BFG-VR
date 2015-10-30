@@ -491,7 +491,7 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 	}
 
 	// Koz begin
-	if ( g_showHud.GetBool() && !vr->PDAforced && !vr->PDArising ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
+	if ( g_showHud.GetBool() && !game->isVR ) // vr hud was drawn elsewhere and copied to texture
 	{
 		vr->swfRenderMode = RENDERING_HUD;
 		player->DrawHUD( hudManager );
@@ -846,21 +846,32 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 	{
 		// koz fixme pda, render the PDA here. it will be copied to intrinsic image _pdaImage,  
 		// which is the new texture for the PDA viewmodel screen.
-		if ( player->objectiveSystemOpen && game->isVR )
+		
+		if ( game->isVR )
 		{
-			if ( player->pdaMenu != NULL )
+			
+			if ( !vr->PDAforced && !vr->PDArising ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
 			{
-
-				if ( !vr->PDAforced && !vr->PDArising ) // dont render the PDA gui if the PDA model been forced up to display the pause menus.
+				vr->swfRenderMode = RENDERING_HUD;
+				player->DrawHUDVR( hudManager );
+				vr->swfRenderMode = RENDERING_NORMAL;
+			}
+		
+			if ( player->objectiveSystemOpen )
+			{
+				if ( player->pdaMenu != NULL )
 				{
-					vr->swfRenderMode = RENDERING_PDA;
-					player->pdaMenu->Update();
-					renderSystem->CaptureRenderToImage( "_pdaImage" );
-					vr->swfRenderMode = RENDERING_NORMAL;
+
+					if ( !vr->PDAforced && !vr->PDArising ) // dont render the PDA gui if the PDA model been forced up to display the pause menus.
+					{
+						vr->swfRenderMode = RENDERING_PDA;
+						player->pdaMenu->Update();
+						renderSystem->CaptureRenderToImage( "_pdaImage" );
+						vr->swfRenderMode = RENDERING_NORMAL;
+					}
 				}
 			}
 		}
-
 		// render both eye views each frame on the PC
 		//if ( game->isVR ) vr->FrameStart( renderSystem->GetFrameCount() );// idLib::frameNumber );
 

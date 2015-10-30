@@ -278,8 +278,10 @@ extern idCVar	vr_guiScale;
 extern idCVar	vr_guiSeparation;
 
 extern idCVar	vr_hudScale;
-extern idCVar	vr_hudPosX; 
-extern idCVar	vr_hudPosY; 
+extern idCVar	vr_hudPosHor; 
+extern idCVar	vr_hudPosVer; 
+extern idCVar	vr_hudPosDis;
+extern idCVar	vr_hudPosLock;
 extern idCVar	vr_hudType;
 extern idCVar	vr_hudAngle;
 extern idCVar	vr_hudTransparency;

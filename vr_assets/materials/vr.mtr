@@ -222,6 +222,31 @@ headingBeamSolid
 	}
 }
 
+vr/hud
+
+{
+	qer_editorimage	textures/zaphod/shotgun_laser.TGA
+	translucent
+	noShadows
+	{
+		blend add
+		map _hudImage
+	}
+}
+
+vr/weaponsight
+{
+	qer_editorimage	textures/zaphod/shotgun_laser.TGA
+	translucent
+	noShadows
+	{
+		blend add
+		map models/images/laserdot2.tga
+		rgb			guiLightTable[ time *.25 ] * 1.25
+		//scroll	time * -0.02 0
+	}
+}
+
 vr/t/cola1
 {	
 	noselfshadow
