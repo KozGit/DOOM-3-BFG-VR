@@ -294,7 +294,10 @@ public:
 	renderEntity_t			headingBeamEntity; // koz add a heading indicator pointing the direction the players body is facing.
 	qhandle_t				headingBeamHandle;
 	bool					headingBeamActive;
-
+	const idDeclSkin*		skinHeadingSolid;
+	const idDeclSkin*		skinHeadingArrows;
+	const idDeclSkin*		skinHeadinArrowsScroll;
+	
 	renderEntity_t			hudEntity; // koz add a model to place the hud into the world
 	qhandle_t				hudHandle;
 	bool					hudActive;
@@ -302,7 +305,10 @@ public:
 	renderEntity_t			crosshairEntity; // koz add a model to place the crosshair into the world
 	qhandle_t				crosshairHandle;
 	bool					crosshairActive;
-
+	const idDeclSkin*		skinCrosshairDot;
+	const idDeclSkin*		skinCrosshairCircleDot;
+	const idDeclSkin*		skinCrosshairCross;
+	
 	bool					PDAfixed; // koz has the PDA been fixed in space?
 	idVec3					PDAorigin; // koz 
 	idMat3					PDAaxis; // koz

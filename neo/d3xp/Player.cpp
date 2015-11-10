@@ -60,9 +60,6 @@ idCVar pm_clientAuthoritative_minSpeedSquared( "pm_clientAuthoritative_minSpeedS
 
 extern idCVar g_demoMode;
 
-idCVar vr_weaponSight( "vr_weaponSight", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Weapon Sight.\n 0 = Lasersight\n 1 = red dot\n 2 = crosshair\n" );
-
-
 
 /*
 ===============================================================================
@@ -2029,53 +2026,23 @@ void idPlayer::Init()
 	// model to place hud in 3d space
 	memset( &hudEntity, 0, sizeof( hudEntity ) );
 	hudEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/hud.lwo" );
-	laserSightRenderEntity.customShader = declManager->FindMaterial( "vr/hud" );
+	hudEntity.customShader = declManager->FindMaterial( "vr/hud" );
 	
-
 	// model to place crosshair or red dot into 3d space
 	memset( &crosshairEntity, 0, sizeof( crosshairEntity ) );
-	crosshairEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/hud.lwo" );
-	laserSightRenderEntity.customShader = declManager->FindMaterial( "vr/hud" );
-		
+	crosshairEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/weaponsight.lwo" );
+	crosshairEntity.weaponDepthHack = true;
+	skinCrosshairDot = declManager->FindSkin( "skins/vr/crosshairDot" );
+	skinCrosshairCircleDot = declManager->FindSkin( "skins/vr/crosshairCircleDot" );;
+	skinCrosshairCross = declManager->FindSkin( "skins/vr/crosshairCross" );;
+
 	// heading indicator for VR - point the direction the body is facing.
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
 	headingBeamEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/headingbeam.lwo" );
-	headingBeamActive = true;
-		
-	int mode = vr_headingBeamMode.GetInteger();
-
-	switch ( mode )
-	{
-		
-		case 0:
-			//headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrowsScroll" );
-			
-			//headingBeamEntity.customSkin = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
-			headingBeamActive = false;
-			break;
-
-		case 1:
-			//headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamSolid" );
-			headingBeamEntity.customSkin = declManager->FindSkin( "skins/models/headingbeamsolid" );
-			break;
-
-		case 2:
-			//headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrows" );
-			headingBeamEntity.customSkin = declManager->FindSkin( "skins/models/headingbeamarrows" );
-			break;
-
-		case 3:
-			//headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrowsScroll" );
-			headingBeamEntity.customSkin = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
-			break;
-
-		default:
-			//headingBeamEntity.customShader = declManager->FindMaterial( "headingBeamArrowsScroll" );
-			headingBeamEntity.customSkin = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
-			headingBeamActive = true;
-
-	}
-			
+	skinHeadingSolid = declManager->FindSkin( "skins/models/headingbeamsolid" );
+	skinHeadingArrows = declManager->FindSkin( "skins/models/headingbeamarrows" );
+	skinHeadinArrowsScroll = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
+				
 	laserSightActive = true;
 	headingBeamActive = true;
 	hudActive = true;
@@ -3770,7 +3737,7 @@ void idPlayer::DrawHUDVR( idMenuHandler_HUD* _hudManager )
 
 			idMenuScreen_HUD* hud = _hudManager->GetHud();
 
-			if ( weapon.GetEntity()->ShowCrosshair() && vr_weaponSight.GetInteger() == 2 )
+			if ( weapon.GetEntity()->ShowCrosshair() && vr_weaponSight.GetInteger() == 4 )
 			{
 				if ( weapon.GetEntity()->GetGrabberState() == 1 || weapon.GetEntity()->GetGrabberState() == 2 )
 				{
@@ -9312,7 +9279,16 @@ void idPlayer::UpdateLaserSight()
 {
 	idVec3	muzzleOrigin;
 	idMat3	muzzleAxis;
+
+	idVec3 end, start;
+	trace_t traceResults;
 	
+	float beamLength = g_laserSightLength.GetFloat(); // max length to run trace.
+	static int lastCrosshairMode = -1;
+		
+	bool hideSight = false;
+	
+
 	// In Multiplayer, weapon might not have been spawned yet.
 	if( weapon.GetEntity() ==  NULL )
 	{
@@ -9326,14 +9302,69 @@ void idPlayer::UpdateLaserSight()
 		weapon->IsHidden() ||
 		weapon->hideOffset != 0 ||	// koz - turn off lasersight If gun is lowered ( in gui ).
 		game->IsPDAOpen() ||		// koz - turn off laser sight if using pda.
-		weapon.GetEntity()->GetGrabberState() >= 2 || // koz turn off laser sight if grabber is dragging and entity
+		weapon.GetEntity()->GetGrabberState() >= 2 || // koz turn off laser sight if grabber is dragging an entity
 		!weapon->GetMuzzlePositionWithHacks( muzzleOrigin, muzzleAxis ) ) // no lasersight for fists,grenades,soulcube etc
-		
-	{
 
-		// hide it
-		laserSightRenderEntity.allowSurfaceInViewID = -1;
-		if( laserSightHandle == -1 )
+	{
+		hideSight = true;
+	}
+	
+	if ( vr_weaponSight.GetInteger() == 0 ) // using the lasersight
+	{
+		common->Printf( "Using lasersight  hidesight = %i\n", hideSight );
+		
+		// hide the crosshair model
+		crosshairEntity.allowSurfaceInViewID = -1;
+		if ( crosshairHandle == -1 )
+		{
+			crosshairHandle = gameRenderWorld->AddEntityDef( &crosshairEntity );
+		}
+		else
+		{
+			gameRenderWorld->UpdateEntityDef( crosshairHandle, &crosshairEntity );
+		}
+
+		if ( hideSight == true )
+		{
+
+			// hide laser sight
+			laserSightRenderEntity.allowSurfaceInViewID = -1;
+			if ( laserSightHandle == -1 )
+			{
+				laserSightHandle = gameRenderWorld->AddEntityDef( &laserSightRenderEntity );
+			}
+			else
+			{
+				gameRenderWorld->UpdateEntityDef( laserSightHandle, &laserSightRenderEntity );
+			}
+			return;
+		}
+
+
+		// only show in the player's view
+		common->Printf( "Programming model\n" );
+		laserSightRenderEntity.allowSurfaceInViewID = entityNumber + 1;
+		laserSightRenderEntity.axis.Identity();
+		laserSightRenderEntity.origin = muzzleOrigin - muzzleAxis[0] * 2.0f;
+
+		// Koz begin : Keep the lasersight from clipping through everything. 
+
+		start = laserSightRenderEntity.origin;
+		end = start + muzzleAxis[0] * beamLength;
+
+		if ( gameLocal.clip.TracePoint( traceResults, start, end, MASK_SHOT_RENDERMODEL, this ) )
+		{
+			beamLength *= traceResults.fraction;
+
+		}
+
+		// program the beam model
+		idVec3&	target = *reinterpret_cast<idVec3*>(&laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_END_X]);
+		target = muzzleOrigin + muzzleAxis[0] * beamLength;
+
+		laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_WIDTH] = g_laserSightWidth.GetFloat();
+
+		if ( IsGameStereoRendered() && laserSightHandle == -1 )
 		{
 			laserSightHandle = gameRenderWorld->AddEntityDef( &laserSightRenderEntity );
 		}
@@ -9341,41 +9372,15 @@ void idPlayer::UpdateLaserSight()
 		{
 			gameRenderWorld->UpdateEntityDef( laserSightHandle, &laserSightRenderEntity );
 		}
+
 		return;
 	}
 	
-	// program the beam model
-	
-	// only show in the player's view
-	laserSightRenderEntity.allowSurfaceInViewID = entityNumber + 1;
-	laserSightRenderEntity.axis.Identity();
-	
-	laserSightRenderEntity.origin = muzzleOrigin - muzzleAxis[0] * 2.0f;
-	
-	// Koz begin : Keep the lasersight from clipping through everything. 
-	idVec3 end, start;
-	trace_t traceResults;
-	float beamLength = g_laserSightLength.GetFloat(); // max length to run trace.
+	// using the crosshair model instead of the lasersight
 
-	start = laserSightRenderEntity.origin;
-	end = start + muzzleAxis[0] * beamLength;
-
-	if ( gameLocal.clip.TracePoint( traceResults, start, end, MASK_SHOT_RENDERMODEL, this ) )
-	{
-		beamLength *= traceResults.fraction;
-	}
-
-	idVec3&	target = *reinterpret_cast<idVec3*>(&laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_END_X]);
-	target = muzzleOrigin + muzzleAxis[0] * beamLength;
-	// Koz end
-
-	// laserSightRenderEntity.origin = muzzleOrigin + muzzleAxis[0] * ( beamLength - 1 ); // koz laser dot on target instead of a full beam?
-	// koz well, that looked like crap.
-
-	
-	laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_WIDTH] = g_laserSightWidth.GetFloat();
-	
-	if( IsGameStereoRendered() && laserSightHandle == -1 )
+	// hide the lasersight model
+	laserSightRenderEntity.allowSurfaceInViewID = -1;
+	if ( laserSightHandle == -1 )
 	{
 		laserSightHandle = gameRenderWorld->AddEntityDef( &laserSightRenderEntity );
 	}
@@ -9383,6 +9388,82 @@ void idPlayer::UpdateLaserSight()
 	{
 		gameRenderWorld->UpdateEntityDef( laserSightHandle, &laserSightRenderEntity );
 	}
+	
+	
+	// set the crosshair skin
+	int mode = vr_weaponSight.GetInteger();
+	if ( mode != lastCrosshairMode )
+	{
+		
+		lastCrosshairMode = mode;
+
+		switch ( mode )
+		{
+			case 0:
+				hideSight = true;
+				break;
+
+			case 1:
+				crosshairEntity.customSkin = skinCrosshairDot;
+				break;
+
+			case 2:
+				crosshairEntity.customSkin = skinCrosshairCircleDot;
+				break;
+
+			case 3:
+				crosshairEntity.customSkin = skinCrosshairCross;
+				break;
+
+			default:
+				crosshairEntity.customSkin = skinCrosshairDot;
+
+		}
+	}
+		
+	if ( hideSight )
+	{
+
+		// hide crosshair model
+		crosshairEntity.allowSurfaceInViewID = -1;
+		if ( crosshairHandle == -1 )
+		{
+			crosshairHandle = gameRenderWorld->AddEntityDef( &crosshairEntity );
+		}
+		else
+		{
+			gameRenderWorld->UpdateEntityDef( crosshairHandle, &crosshairEntity );
+		}
+		return;
+	}
+	
+	crosshairEntity.allowSurfaceInViewID = entityNumber + 1;
+	crosshairEntity.axis.Identity();
+	crosshairEntity.origin = muzzleOrigin - muzzleAxis[0] * 2.0f;
+	
+	start = crosshairEntity.origin;
+	end = start + muzzleAxis[0] * beamLength;
+
+	if ( gameLocal.clip.TracePoint( traceResults, start, end, MASK_SHOT_RENDERMODEL, this ) )
+	{
+		beamLength *= traceResults.fraction;
+
+	}
+	
+	float muzscale = 1 + beamLength / 100;
+	
+	crosshairEntity.axis = muzzleAxis * muzscale;
+	crosshairEntity.origin = start + muzzleAxis[0] * beamLength;
+	
+	if ( IsGameStereoRendered() && crosshairHandle == -1 )
+	{
+		crosshairHandle = gameRenderWorld->AddEntityDef( &crosshairEntity );
+	}
+	else
+	{
+		gameRenderWorld->UpdateEntityDef( crosshairHandle, &crosshairEntity );
+	}
+
 }
 
 /*
@@ -9393,8 +9474,40 @@ idPlayer::UpdateHeadingBeam
 */
 void idPlayer::UpdateHeadingBeam()
 {
-
+	static int lastSkin = -1;
 	// update the heading beam model
+	
+	int mode = vr_headingBeamMode.GetInteger();
+
+	if ( mode != lastSkin ){
+		lastSkin = mode;
+
+		switch ( mode )
+		{
+
+			case 0:
+				headingBeamActive = false;
+				break;
+
+			case 1:
+				headingBeamEntity.customSkin = skinHeadingSolid;
+				break;
+
+			case 2:
+				headingBeamEntity.customSkin = skinHeadingArrows;
+				break;
+
+			case 3:
+				headingBeamEntity.customSkin = skinHeadinArrowsScroll;
+				break;
+
+			default:
+				headingBeamEntity.customSkin = skinHeadinArrowsScroll;
+				headingBeamActive = true;
+
+		}
+	}
+
 	if ( !headingBeamActive )
 	{
 		// hide it
@@ -9411,9 +9524,13 @@ void idPlayer::UpdateHeadingBeam()
 		headingBeamEntity.axis = beamAxis;
 		headingBeamEntity.origin = beamOrigin;
 		headingBeamEntity.bounds.Zero();
-
+				
 	}
 
+	
+	//================================================================================
+
+	
 	// update the hud model
 	if ( !hudActive )
 	{
@@ -9428,7 +9545,6 @@ void idPlayer::UpdateHeadingBeam()
 		if ( vr_hudPosLock.GetInteger() == 1 )
 		{
 			float pitch = vr_hudType.GetInteger() == 2 ? vr_hudAngle.GetFloat() : 0.0f;
-			//hudAxis = idAngles( 0.0f, viewAngles.yaw, 0.0f ).ToMat3();
 			hudAxis = idAngles( pitch, viewAngles.yaw, 0.0f ).ToMat3();
 			hudOrigin = GetEyePosition();
 		}
@@ -11278,12 +11394,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 
 		if ( currentWeapon == WEAPON_PDA )
 		{ 
-			//scale the PDA so we can (maybe) read it in VR.
-			//PDA has been rotated to landscape mode. use a uniform scale value. 
-			//Texture coords have been updated during model load to rotate the view.
-
-			// axis *= vr_PDAscale.GetFloat(); no longer needed - model is now pre scaled.
-			
+						
 			if ( PDAfixed )
 			{ // pda has already been locked in space, use stored values
 				origin = PDAorigin;
@@ -11295,7 +11406,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 				PDAfixed = true;
 				PDAaxis = bodyAxis; 
 				origin = eyeOrigin;
-				origin += 12 * bodyAxis[0]; // move 12 inches in front of eyes
+				origin += 8 * bodyAxis[0]; // move 12 inches in front of eyes
 				origin.z -= 3;				// move 3 inches down
 				origin -= 8 * bodyAxis[1];	// move 8 inches right
 				idAngles pdaAngle = weaponRotOffsets[currentWeapon];

@@ -259,7 +259,8 @@ void idRenderModelManagerLocal::Init()
 	spriteModel = sprite;
 	AddModel( sprite );
 
-
+	/*
+	// koz deleteme
 	//koz begin
 	idRenderModelStatic* headingBeam = new(TAG_MODEL)idRenderModelStatic;
 	//headingBeam->InitEmpty( "_HEADINGBEAM" );
@@ -268,7 +269,7 @@ void idRenderModelManagerLocal::Init()
 	headingBeam->SetLevelLoadReferenced( true );
 	headingBeamModel = headingBeam;
 	AddModel( headingBeam );
-	
+	*/
 
 }
 

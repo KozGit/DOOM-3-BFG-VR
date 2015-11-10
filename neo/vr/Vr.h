@@ -330,6 +330,7 @@ extern idCVar	vr_headingBeamLength;
 extern idCVar	vr_headingBeamWidth;
 extern idCVar	vr_headingBeamMode;
 
+extern idCVar	vr_weaponSight;
 
 extern iVr* vr;
 

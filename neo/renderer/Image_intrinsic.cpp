@@ -145,6 +145,20 @@ static void R_RGBA8Image( idImage* image )
 	image->GenerateImage( ( byte* )data, DEFAULT_SIZE, DEFAULT_SIZE, TF_DEFAULT, TR_REPEAT, TD_LOOKUP_TABLE_RGBA );
 }
 
+// koz begin
+// used for Hud and PDA surfaces in VR
+static void R_VRSurfaceImage( idImage* image )
+{
+	idImageOpts	opts;
+	opts.width = renderSystem->GetWidth();
+	opts.height = renderSystem->GetHeight();
+	opts.numLevels = 8;
+	opts.format = FMT_RGBA8;
+	opts.genMipsOnCopy = true;
+	image->AllocImage( opts, TF_DEFAULT, TR_CLAMP );
+}
+// koz end
+
 static void R_DepthImage( idImage* image )
 {
 	byte	data[DEFAULT_SIZE][DEFAULT_SIZE][4];
@@ -609,8 +623,8 @@ void idImageManager::CreateIntrinsicImages()
 	// Koz begin
 	// pdaImage - the rendered PDA screen will be copied to this image to use as a texture on the pda model
 	// hudImage - the rendered hud/menus will be rendered to this image to use as a texture for the hud model
-	pdaImage = ImageFromFunction( "_pdaImage", R_RGBA8Image );
-	hudImage = ImageFromFunction( "_hudImage", R_RGBA8Image );
+	pdaImage = ImageFromFunction( "_pdaImage", R_VRSurfaceImage ); // R_RGBA8Image );
+	hudImage = ImageFromFunction( "_hudImage", R_VRSurfaceImage ); // R_RGBA8Image );
 	crosshairImage = ImageFromFunction( "_crosshairImage", R_RGBA8Image );
 	// Koz end
 	
