@@ -52,7 +52,6 @@ typedef enum
 	VR_HUD_NONE,
 	VR_HUD_FULL,
 	VR_HUD_LOOK_DOWN,
-	VR_HUD_FLOATING
 } vr_hud_t;
 
 typedef enum
@@ -122,6 +121,9 @@ public:
 	float				lastHMDYaw;
 	float				lastHMDPitch;
 	float				lastHMDRoll;
+	idVec3				lastHMDViewOrigin;
+	idMat3				lastHMDViewAxis;
+
 
 	float				angles[3];
 	
@@ -285,6 +287,7 @@ extern idCVar	vr_hudPosLock;
 extern idCVar	vr_hudType;
 extern idCVar	vr_hudAngle;
 extern idCVar	vr_hudTransparency;
+extern idCVar	vr_hudOcclusion;
 
 extern idCVar	vr_hudHealth;
 extern idCVar	vr_hudAmmo;

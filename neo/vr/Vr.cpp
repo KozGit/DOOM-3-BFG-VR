@@ -97,8 +97,8 @@ idCVar vr_hudPosLock( "vr_hudPosLock", "1", CVAR_INTEGER | CVAR_GAME | CVAR_ARCH
 
 idCVar vr_hudType( "vr_hudType", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "VR Hud Type. 0 = Disable.\n1 = Full\n2=Look Activate", 0, 2 ); 
 idCVar vr_hudAngle( "vr_hudAngle", "48", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "HMD pitch to reveal HUD in look activate mode." );
-idCVar vr_hudTransparency( "vr_hudTransparency", "1", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, " Hud transparency. 0.0 = Invisible thru 1.0 = full", 0.0, 1.0 );
-
+idCVar vr_hudTransparency( "vr_hudTransparency", "1", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, " Hud transparency. 0.0 = Invisible thru 1.0 = full", 0.0, 100.0 );
+idCVar vr_hudOcclusion( "vr_hudOcclusion",	"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, " Hud occlusion. 0 = Objects occlude HUD, 1 = No occlusion " );
 idCVar vr_hudHealth(	"vr_hudHealth",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show Armor/Health in Hud." );
 idCVar vr_hudAmmo(		"vr_hudAmmo",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show Ammo in Hud." );
 idCVar vr_hudPickUps(	"vr_hudPickUps",	"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show item pick ups in Hud." );
@@ -111,7 +111,7 @@ idCVar vr_hudComs(		"vr_hudComs",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "S
 idCVar vr_hudWeap(		"vr_hudWeap",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show weapon pickup/change icons in Hud." );
 idCVar vr_hudNewItems(	"vr_hudNewItems",	"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show new items acquired in Hud." );
 idCVar vr_hudFlashlight("vr_hudFlashlight", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show flashlight in Hud." );
-idCVar vr_hudLowHealth( "vr_hudLowHealth", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "If hud hidden show health if below this." );
+idCVar vr_hudLowHealth( "vr_hudLowHealth",	"0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "When health low, reveal hud if hidden." );
 
 idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "41", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Tweak talk cursor y pos in VR. % val", 0, 99 );
 
@@ -202,6 +202,8 @@ iVr::iVr()
 	lastHMDYaw = 0.0f;
 	lastHMDPitch = 0.0f;
 	lastHMDRoll = 0.0f;
+	lastHMDViewOrigin = vec3_zero;
+	lastHMDViewAxis = mat3_identity;
 	
 	hydraLeftOffset = hydra_zero;		// koz base offset for left hydra 
 	hydraRightOffset = hydra_zero;		// koz base offset for right hydra 
@@ -1014,7 +1016,7 @@ float iVr::GetHudAlpha()
 		
 	if ( player )
 	{
-		if ( vr_hudLowHealth.GetInteger() >= player->health && player->health >=0 ) force = true;
+		if ( vr_hudLowHealth.GetInteger() >= player->health && player->health >= 0 ) force = true;
 	}
 	
 	if ( lastHMDPitch >= vr_hudAngle.GetFloat() || force ) // fade stats in

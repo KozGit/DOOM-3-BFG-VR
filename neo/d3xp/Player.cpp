@@ -2027,6 +2027,7 @@ void idPlayer::Init()
 	memset( &hudEntity, 0, sizeof( hudEntity ) );
 	hudEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/hud.lwo" );
 	hudEntity.customShader = declManager->FindMaterial( "vr/hud" );
+	hudEntity.weaponDepthHack = vr_hudOcclusion.GetBool();
 	
 	// model to place crosshair or red dot into 3d space
 	memset( &crosshairEntity, 0, sizeof( crosshairEntity ) );
@@ -9526,46 +9527,6 @@ void idPlayer::UpdateHeadingBeam()
 		headingBeamEntity.bounds.Zero();
 				
 	}
-
-	
-	//================================================================================
-
-	
-	// update the hud model
-	if ( !hudActive )
-	{
-		// hide it
-		hudEntity.allowSurfaceInViewID = -1;
-	}
-	else
-	{
-		static idVec3 hudOrigin;
-		static idMat3 hudAxis;
-		
-		if ( vr_hudPosLock.GetInteger() == 1 )
-		{
-			float pitch = vr_hudType.GetInteger() == 2 ? vr_hudAngle.GetFloat() : 0.0f;
-			hudAxis = idAngles( pitch, viewAngles.yaw, 0.0f ).ToMat3();
-			hudOrigin = GetEyePosition();
-		}
-		else
-		{
-			hudAxis = vr->lastViewAxis;
-			hudOrigin = vr->lastViewOrigin;
-		}
-				
-		hudOrigin = hudOrigin + hudAxis[0] * vr_hudPosDis.GetFloat(); // distance from view
-		hudOrigin = hudOrigin + hudAxis[1] * vr_hudPosHor.GetFloat();
-		hudOrigin = hudOrigin + hudAxis[2] * vr_hudPosVer.GetFloat();
-		
-		hudAxis *= vr_hudScale.GetFloat();
-
-		hudEntity.axis = hudAxis;
-		hudEntity.origin = hudOrigin;
-		hudEntity.bounds.Zero();
-
-	}
-
 	
 	// make sure the entitydefs are updated
 	if ( headingBeamHandle == -1 )
@@ -9576,7 +9537,59 @@ void idPlayer::UpdateHeadingBeam()
 	{
 		gameRenderWorld->UpdateEntityDef( headingBeamHandle, &headingBeamEntity );
 	}
-	
+
+}
+
+/*
+==============
+Koz
+idPlayer::UpdateVrHud
+==============
+*/
+void idPlayer::UpdateVrHud()
+{
+
+	// update the hud model
+	if ( !hudActive )
+	{
+		// hide it
+		hudEntity.allowSurfaceInViewID = -1;
+	}
+	else
+	{
+		static idVec3 hudOrigin;
+		static idMat3 hudAxis;
+
+		if ( vr_hudPosLock.GetInteger() == 1 ) // hud in fixed position in space
+		{
+			//float pitch = vr_hudType.GetInteger() == VR_HUD_LOOK_DOWN ? vr_hudAngle.GetFloat() : 10.0f;
+			//hudAxis = idAngles( 0, viewAngles.yaw, 0.0f ).ToMat3();
+			hudaxis = vr_hudType.GetInteger() == VR_HUD_LOOK_DOWN ?  vr->lastViewAxis0, viewAngles.yaw, 0.0f ).ToMat3();
+			hudOrigin = GetEyePosition();
+			hudOrigin = hudOrigin + hudAxis[0] * vr_hudPosDis.GetFloat(); // distance from view
+			hudOrigin = hudOrigin + hudAxis[1] * vr_hudPosHor.GetFloat();
+			hudOrigin = hudOrigin + hudAxis[2] * vr_hudPosVer.GetFloat();
+			hudAxis = idAngles( pitch, viewAngles.yaw, 0.0f ).ToMat3();
+		}
+		else // hud locked to face
+		{
+			hudAxis = vr->lastHMDViewAxis;
+			hudOrigin = vr->lastHMDViewOrigin;
+
+			hudOrigin = hudOrigin + hudAxis[0] * vr_hudPosDis.GetFloat(); // distance from view
+			hudOrigin = hudOrigin + hudAxis[1] * vr_hudPosHor.GetFloat();
+			hudOrigin = hudOrigin + hudAxis[2] * vr_hudPosVer.GetFloat();
+		
+		}
+		
+		hudAxis *= vr_hudScale.GetFloat();
+
+		hudEntity.axis = hudAxis;
+		hudEntity.origin = hudOrigin;
+		hudEntity.bounds.Zero();
+		hudEntity.weaponDepthHack = vr_hudOcclusion.GetBool();
+
+	}
 
 	if ( hudHandle == -1 )
 	{
@@ -9586,7 +9599,6 @@ void idPlayer::UpdateHeadingBeam()
 	{
 		gameRenderWorld->UpdateEntityDef( hudHandle, &hudEntity );
 	}
-
 }
 /*
 ==============
@@ -12074,6 +12086,11 @@ void idPlayer::CalculateRenderView()
 		renderView->vieworg = origin;
 		renderView->viewaxis = angles.ToMat3();//axis;
 				
+		vr->lastHMDViewOrigin = renderView->vieworg;
+		vr->lastHMDViewAxis = renderView->viewaxis;
+
+		UpdateVrHud();
+
 		// koz fixme pause - handle the PDA model if game is paused
 		// really really need to move this somewhere else.
 

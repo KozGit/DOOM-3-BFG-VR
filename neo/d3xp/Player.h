@@ -484,7 +484,8 @@ public:
 	// Koz begin
 	void					ToggleLaserSight(); 
 	void					UpdateHeadingBeam(); 
-	void					ToggleHeadingBeam(); 
+	void					ToggleHeadingBeam();
+	void					UpdateVrHud();
 	void					ToggleHud();
 	// Koz end
 		
