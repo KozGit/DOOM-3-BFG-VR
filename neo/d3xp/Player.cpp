@@ -9548,45 +9548,44 @@ idPlayer::UpdateVrHud
 */
 void idPlayer::UpdateVrHud()
 {
+	static idVec3 hudOrigin;
+	static idMat3 hudAxis;
+	float hudPitch;
 
 	// update the hud model
-	if ( !hudActive )
+	if ( !hudActive && ( vr_hudLowHealth.GetInteger() == 0 ) )
 	{
 		// hide it
 		hudEntity.allowSurfaceInViewID = -1;
 	}
 	else
 	{
-		static idVec3 hudOrigin;
-		static idMat3 hudAxis;
-
 		if ( vr_hudPosLock.GetInteger() == 1 ) // hud in fixed position in space
 		{
-			//float pitch = vr_hudType.GetInteger() == VR_HUD_LOOK_DOWN ? vr_hudAngle.GetFloat() : 10.0f;
-			//hudAxis = idAngles( 0, viewAngles.yaw, 0.0f ).ToMat3();
-			hudaxis = vr_hudType.GetInteger() == VR_HUD_LOOK_DOWN ?  vr->lastViewAxis0, viewAngles.yaw, 0.0f ).ToMat3();
+			hudPitch = vr_hudType.GetInteger() == VR_HUD_LOOK_DOWN ? vr_hudAngle.GetFloat() : 10.0f;
+			
+			hudAxis = idAngles( hudPitch, viewAngles.yaw, 0.0f ).ToMat3();
 			hudOrigin = GetEyePosition();
-			hudOrigin = hudOrigin + hudAxis[0] * vr_hudPosDis.GetFloat(); // distance from view
-			hudOrigin = hudOrigin + hudAxis[1] * vr_hudPosHor.GetFloat();
-			hudOrigin = hudOrigin + hudAxis[2] * vr_hudPosVer.GetFloat();
-			hudAxis = idAngles( pitch, viewAngles.yaw, 0.0f ).ToMat3();
+			
+			hudOrigin += hudAxis[0] * vr_hudPosDis.GetFloat(); 
+			hudOrigin += hudAxis[1] * vr_hudPosHor.GetFloat();
+			hudOrigin.z += vr_hudPosVer.GetFloat();
 		}
 		else // hud locked to face
 		{
 			hudAxis = vr->lastHMDViewAxis;
 			hudOrigin = vr->lastHMDViewOrigin;
 
-			hudOrigin = hudOrigin + hudAxis[0] * vr_hudPosDis.GetFloat(); // distance from view
-			hudOrigin = hudOrigin + hudAxis[1] * vr_hudPosHor.GetFloat();
-			hudOrigin = hudOrigin + hudAxis[2] * vr_hudPosVer.GetFloat();
-		
+			hudOrigin += hudAxis[0] * vr_hudPosDis.GetFloat(); 
+			hudOrigin += hudAxis[1] * vr_hudPosHor.GetFloat();
+			hudOrigin += hudAxis[2] * vr_hudPosVer.GetFloat();
+			
 		}
 		
 		hudAxis *= vr_hudScale.GetFloat();
 
 		hudEntity.axis = hudAxis;
 		hudEntity.origin = hudOrigin;
-		hudEntity.bounds.Zero();
 		hudEntity.weaponDepthHack = vr_hudOcclusion.GetBool();
 
 	}
@@ -11353,7 +11352,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 	idQuat		gunRot;
 	idQuat		gunAxis;
 	hydraData	rHydra = hydra_zero;
-	idVec3		eyeOrigin = GetEyePosition();
+	idVec3		gunOrigin = GetEyePosition();
 	
 
 	if ( vr_testWeaponModel.GetBool() )
@@ -11372,15 +11371,6 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 	idMat3		bodyAxis = idAngles( 0.0, viewAngles.yaw, 0.0f ).ToMat3();
 	
 	idVec3		gravity = physicsObj.GetGravityNormal();
-
-	// adjustPos = Motion control hand offset from center eye position. Values 0,0,0 = the gun grows out of your forehead. 
-	// Use values to move the weapon hand position to a comfortable default. This is also 
-	// the position your hand should be in when you calibrate motion controls to align
-	// your vr 'hand' with your real world one.
-
-	// koz fixme - this won't be needed for solutions like the vive, where the headset position 
-	// and the controller positions are already in the same coordinate space.  Rework this so the motion control routines will work regardless of controller type.
-	idVec3		adjustPos( vr_gunHand_x.GetFloat(), vr_gunHand_y.GetFloat(), vr_gunHand_z.GetFloat() );
 		
 	if ( vr_testWeaponModel.GetBool() )
 	{
@@ -11402,7 +11392,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 	if ( !vr->VR_USE_HYDRA || ( vr_PDAfixLocation.GetBool() && currentWeapon == WEAPON_PDA ) ) // non-motion control & fixed pda positioning.
 	{ 
 		axis = bodyAxis;
-		origin = eyeOrigin + vecoff * axis;
+		origin = gunOrigin + vecoff * axis;
 
 		if ( currentWeapon == WEAPON_PDA )
 		{ 
@@ -11417,7 +11407,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 				
 				PDAfixed = true;
 				PDAaxis = bodyAxis; 
-				origin = eyeOrigin;
+				origin = gunOrigin;
 				origin += 8 * bodyAxis[0]; // move 12 inches in front of eyes
 				origin.z -= 3;				// move 3 inches down
 				origin -= 8 * bodyAxis[1];	// move 8 inches right
@@ -11436,23 +11426,26 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 		}
 		else
 		{
-			// non motion control weapon positioning for everything other than the PDA.
-			gunRot = weaponRotOffsets[currentWeapon].ToQuat(); // add weapon rotations to point straight.
-			idVec3 gunpos = idVec3( vr_mouse_gunx.GetFloat(), vr_mouse_guny.GetFloat(), vr_mouse_gunz.GetFloat() );
-
-			eyeOrigin += gunpos * bodyAxis;			// koz move the gun to the hand position
 			
-			static idQuat angQuat;
-
-			angQuat = idAngles( 0.0, vr->independentWeaponYaw, 0.0 ).ToQuat() * idAngles( vr->independentWeaponPitch, 0.0, 0.0 ).ToQuat();
+			// non motion control weapon positioning for everything except PDA.
 						
+			static idQuat angQuat;
+			static idVec3 gunpos;
+						
+			angQuat = idAngles( 0, 0, 0 ).ToQuat();
+			angQuat *= idAngles( 0, vr->independentWeaponYaw, 0 ).ToQuat();
+			angQuat *= idAngles( vr->independentWeaponPitch, 0, 0 ).ToQuat();
+						
+			gunRot = weaponRotOffsets[currentWeapon].ToQuat(); // add weapon rotations to point straight.
 			gunAxis = gunRot * angQuat;
 			gunAxis *= bodyAxis.ToQuat();
 			axis = gunAxis.ToMat3();
-
-			idVec3 forearm = idVec3( vr_mouse_gun_forearm.GetFloat(), 0.0f, 0.0f );
-			origin = eyeOrigin + ( vecoff + forearm ) * axis;
-
+			
+			gunpos = idVec3( vr_weaponPivotOffsetForward.GetFloat(), vr_weaponPivotOffsetHorizontal.GetFloat(), vr_weaponPivotOffsetVertical.GetFloat() );
+			gunOrigin += gunpos * bodyAxis;			// koz move the gun to the hand position
+			
+			idVec3 forearm = idVec3( vr_weaponPivotForearmLength.GetFloat(), 0.0f, 0.0f );
+			origin = gunOrigin + ( vecoff + forearm ) * axis;
 			origin -= vecoff * bodyAxis;
 						
 		}
@@ -11477,14 +11470,13 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 						weaponRotOffsets[currentWeapon].roll ).Normalize180().ToQuat();// add weapon rotations to point straight.
 
 	vr->HydraGetRightWithOffset( rHydra );
-			
-	adjustPos += rHydra.position;
-	eyeOrigin += adjustPos * bodyAxis;			// koz move the gun to the hand position
+		
+	gunOrigin += rHydra.position * bodyAxis;			// koz move the gun to the hand position
 	gunAxis = gunRot * rHydra.hydraRotationQuat;
 	gunAxis *= bodyAxis.ToQuat();
 
 	axis = gunAxis.ToMat3();
-	origin = eyeOrigin + vecoff * axis;
+	origin = gunOrigin + vecoff * axis;
 
 	if ( currentWeapon == WEAPON_PDA && vr->PDAclipModelSet )
 	{
@@ -11547,23 +11539,19 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 				static idQuat flashAxis;
 				//idQuat flashRot = idAngles( vr_offsetPitch.GetFloat(), vr_offsetYaw.GetFloat(), vr_offsetRoll.GetFloat() ).ToQuat();
 				
-				hydraData	hydraPos = hydra_zero;
-				idVec3 adjustPos( vr_flashHand_x.GetFloat(), vr_flashHand_y.GetFloat(), vr_flashHand_z.GetFloat() ); //koz offset to move model to left hand
-
-				idAngles angles = idAngles( 0.0, viewAngles.yaw, 0.0f );
+				hydraData hydraPos = hydra_zero;
+				
 				idVec3 viewOrigin = GetEyePosition();
-				idMat3 viewAxis2 = angles.ToMat3();
+				idMat3 viewAxis2 = idAngles( 0.0, viewAngles.yaw, 0.0f ).ToMat3();
 
 				vr->HydraGetLeftWithOffset( hydraPos );
-				adjustPos += hydraPos.position;
-
+				
 				// koz move flashlight to the hand position
-				viewOrigin += adjustPos * viewAxis2;
+				viewOrigin += hydraPos.position *viewAxis2;
+				
 				flashAxis = flashRot * hydraPos.hydraRotationQuat;
-								
 				flashAxis *= viewAxis2.ToQuat();
-				
-				
+							
 				axis = flashAxis.ToMat3();
 
 				//model center not at local model origin, translate origin by offset to compensate

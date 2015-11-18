@@ -34,29 +34,31 @@ idCVar vr_manualIPD( "vr_manualIPD", "64", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME
 idCVar vr_manualHeight( "vr_manualHeight", "70", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined player height in inches" );
 idCVar vr_minLoadScreenTime( "vr_minLoadScreenTime", "6000", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Min time to display load screens in ms.", 0.0f, 10000.0f );
 
-idCVar vr_wristStatMon( "vr_wristStatMon", "1", CVAR_INTEGER | CVAR_ARCHIVE, "Use wrist status monitor. 0 = Disable 1 = Right Wrist 2 = Left Wrist " );
 
 //koz cvars for hydra mods
 idCVar vr_hydraEnable( "vr_hydraEnable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, " Enable Razer Hydra. 1 = enabled, 0 = disabled." );
 idCVar vr_hydraForceDetect( "vr_hydraForceDetect", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Force hydra detection. 0 = normal detection, 1 = force detection." );;
 idCVar vr_hydraMode( "vr_hydraMode", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "razer hydra mode. 0 = left hydra for positional tracking, 1 = left hydra as controller, 2 = left hydra as controller and flashlight" );
 
-//koz g_flash cvars allow tweaking of flash position when aiming with hydra
-idCVar vr_flashHand_x( "vr_flashX", "12", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_flashHand_y( "vr_flashY", "-4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_flashHand_z( "vr_flashZ", "-8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_flashScale( "vr_flashScale", ".8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_hydraOffsetForward( "vr_hydraOffsetForward", "10", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_hydraOffsetHorizontal( "vr_hydraOffsetHorizontal", "7", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_hydraOffsetVertical( "vr_hydraOffsetVertical", "-22", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 
-//koz g_gun cvars allow tweaking of gun position when aiming with hydra
-idCVar vr_gunHand_x( "vr_gunX", "12", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_gunHand_y( "vr_gunY", "4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_gunHand_z( "vr_gunZ", "-8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 idCVar vr_scaleGun( "vr_scaleGun", "1", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 
-idCVar vr_hydraPitchOffset( "vr_hydraPitchOffset", "40", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "Pitch offset for awkward hydra grip angle" );
+idCVar vr_hydraPitchOffset( "vr_hydraPitchOffset", "10", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "Pitch offset for awkward hydra grip angle" );
+
+
+
+//flashlight cvars
+
+idCVar vr_flashlightMode( "vr_flashlightMode", "2", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Flashlight mount.\n0 = Body\n1 = Head\n2 = Gun\n3= Hand ( if motion controls available.)" );
+
+//tweak flash position when aiming with hydra
+
+idCVar vr_flashScale( "vr_flashScale", ".8", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 
 idCVar vr_flashPitchAngle( "vr_flashPitchAngle", "90", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Pitch offset for flashlight using hydra. Default = 90" );
-idCVar vr_flashlightMode( "vr_flashlightMode", "2", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Flashlight mount.\n0 = Body\n1 = Head\n2 = Gun\n3= Hand ( if motion controls available.)" );
 
 idCVar vr_flashlightBodyPosX( "vr_flashlightBodyPosX", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight vertical offset for body mount." );
 idCVar vr_flashlightBodyPosY( "vr_flashlightBodyPosY", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight horizontal offset for body mount." );
@@ -81,10 +83,10 @@ idCVar vr_forward_keyhole( "vr_forward_keyhole", "11.25", CVAR_FLOAT | CVAR_ARCH
 idCVar vr_PDAscale( "vr_PDAscale", "3", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, " PDA scale factor" );
 idCVar vr_PDAfixLocation( "vr_PDAfixLocation", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Fix PDA position in space in front of player\n instead of holding in hand." );
 
-idCVar vr_mouse_gunx( "vr_mouse_gunX", "3", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_mouse_guny( "vr_mouse_gunY", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_mouse_gunz( "vr_mouse_gunZ", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_mouse_gun_forearm("vr_mouse_gun_forearm", "16", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "");;
+idCVar vr_weaponPivotOffsetForward( "vr_weaponPivotOffsetForward", "3", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_weaponPivotOffsetHorizontal( "vr_weaponPivotOffsetHorizontal", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_weaponPivotOffsetVertical( "vr_weaponPivotOffsetVertical", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_weaponPivotForearmLength("vr_weaponPivotForearmLength", "16", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "");;
 
 idCVar vr_guiScale( "vr_guiScale", "1", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "scale reduction factor for full screen menu/pda scale in VR", 0.0001f, 1.0f ); //koz allow scaling of full screen guis/pda
 idCVar vr_guiSeparation( "vr_guiSeparation", ".01", CVAR_FLOAT | CVAR_ARCHIVE, " Screen separation value for fullscreen guis." );
@@ -111,9 +113,11 @@ idCVar vr_hudComs(		"vr_hudComs",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "S
 idCVar vr_hudWeap(		"vr_hudWeap",		"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show weapon pickup/change icons in Hud." );
 idCVar vr_hudNewItems(	"vr_hudNewItems",	"1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show new items acquired in Hud." );
 idCVar vr_hudFlashlight("vr_hudFlashlight", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show flashlight in Hud." );
-idCVar vr_hudLowHealth( "vr_hudLowHealth",	"0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "When health low, reveal hud if hidden." );
+idCVar vr_hudLowHealth( "vr_hudLowHealth",	"0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, " 0 = Disable, otherwise show hud if heath below this value." );
 
 idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "41", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Tweak talk cursor y pos in VR. % val", 0, 99 );
+
+idCVar vr_wristStatMon( "vr_wristStatMon", "1", CVAR_INTEGER | CVAR_ARCHIVE, "Use wrist status monitor. 0 = Disable 1 = Right Wrist 2 = Left Wrist " );
 
 // koz display windows monitor name in the resolution selection menu, helpful to ID which is the rift if using extended mode
 idCVar vr_listMonitorName( "vr_listMonitorName", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "List monitor name with resolution." );
@@ -865,12 +869,12 @@ iVr::HydraGetData
 void iVr::HydraGetData( int hydraIndex, hydraData &hydraData ) 
 {
 	
-	idQuat sixtempq;
+	static idQuat sixtempq;
+	static idQuat tempQuat = idQuat_zero;
+
 	sixenseAllControllerData acd;
 	sixenseSetActiveBase(0);
 	sixenseGetAllNewestData(&acd);
-
-	static idQuat tempQuat = idQuat_zero;
 		
 	if ( sixenseIsControllerEnabled(hydraIndex) ) 
 	{
@@ -881,10 +885,10 @@ void iVr::HydraGetData( int hydraIndex, hydraData &hydraData )
 			sixtempq.w =  acd.controllers[hydraIndex].rot_quat[3]; 
 			
 			//add pitch offset to the grip angle of the hydra to make mor comfortable / correct for mounting orientation
-			tempQuat = idAngles(vr_hydraPitchOffset.GetFloat(),0.0f,0.0f).ToQuat();
+			tempQuat = idAngles( vr_hydraPitchOffset.GetFloat(), 0.0f, 0.0f ).ToQuat();
+			
 			hydraData.hydraRotationQuat = tempQuat * sixtempq;
-
-			//hydraData.hydraRotation = sixtempq.ToMat3(); // koz convert quat to rotation matrix in id space
+						
 			hydraData.position.x =-acd.controllers[hydraIndex].pos[2] / 25.4f; // koz convert position (in MM) to inch (1 id unit = 1 inch). (mm/25.4 = inch)  
 			hydraData.position.y =-acd.controllers[hydraIndex].pos[0] / 25.4f; 
 			hydraData.position.z = acd.controllers[hydraIndex].pos[1] / 25.4f; 
@@ -929,15 +933,26 @@ void iVr::HydraGetLeftWithOffset( hydraData &leftOffsetHydra ) {  // will return
 
 	static hydraData leftCurrent = hydra_zero;
 	static hydraData leftOffset = hydra_zero;
+	static idQuat offsetAngles;
+	static idQuat currentAngles;
+	static idAngles ca;
+	static idAngles oa;
+	
+	// HydraGetLeftOffset returns a position of 0 when calibrated
+	// baseoffset vector moves this to the hand/weapon position
+
+	static idVec3 baseOffset; 
+
+	baseOffset = idVec3( vr_hydraOffsetForward.GetFloat(), vr_hydraOffsetHorizontal.GetFloat(), vr_hydraOffsetVertical.GetFloat() );
 
 	HydraGetLeftOffset( leftOffset );
 	HydraGetLeft( leftCurrent );
 	
-	idQuat offsetAngles = leftOffset.hydraRotationQuat;
-	idQuat currentAngles = leftCurrent.hydraRotationQuat;
+	offsetAngles = leftOffset.hydraRotationQuat;
+	currentAngles = leftCurrent.hydraRotationQuat;
 
-	idAngles ca = currentAngles.ToAngles();
-	idAngles oa = offsetAngles.ToAngles();
+	ca = currentAngles.ToAngles();
+	oa = offsetAngles.ToAngles();
 		
 	leftCurrent.position -= leftOffset.position ;
 	leftCurrent.position *= offsetAngles.ToMat3().Inverse();
@@ -947,6 +962,7 @@ void iVr::HydraGetLeftWithOffset( hydraData &leftOffsetHydra ) {  // will return
 
 	leftCurrent.hydraRotationQuat = ca.ToQuat();
 	leftOffsetHydra = leftCurrent;
+	leftOffsetHydra.position += baseOffset;
 }
 
 /*
@@ -959,15 +975,26 @@ void iVr::HydraGetRightWithOffset( hydraData &rightOffsetHydra ) { // will retur
 		
 	static hydraData rightCurrent = hydra_zero;
 	static hydraData rightOffset = hydra_zero;
+	static idQuat offsetAngles;
+	static idQuat currentAngles;
+	static idAngles ca;
+	static idAngles oa;
+
+	// HydraGetLeftOffset returns a position of 0 when calibrated
+	// baseoffset vector moves this to the hand/weapon position
+
+	static idVec3 baseOffset;
 	
+	baseOffset = idVec3( vr_hydraOffsetForward.GetFloat(), -vr_hydraOffsetHorizontal.GetFloat(), vr_hydraOffsetVertical.GetFloat() );
+
 	HydraGetRightOffset( rightOffset );
 	HydraGetRight( rightCurrent );
 	
-	idQuat offsetAngles = rightOffset.hydraRotationQuat;
-	idQuat currentAngles = rightCurrent.hydraRotationQuat;
+	offsetAngles = rightOffset.hydraRotationQuat;
+	currentAngles = rightCurrent.hydraRotationQuat;
 	
-	idAngles ca = currentAngles.ToAngles();
-	idAngles oa = offsetAngles.ToAngles();
+	ca = currentAngles.ToAngles();
+	oa = offsetAngles.ToAngles();
 	
 	rightCurrent.position -= rightOffset.position ;
 	rightCurrent.position *= offsetAngles.ToMat3().Inverse();
@@ -977,6 +1004,8 @@ void iVr::HydraGetRightWithOffset( hydraData &rightOffsetHydra ) { // will retur
 		
 	rightCurrent.hydraRotationQuat = ca.ToQuat(); 
 	rightOffsetHydra = rightCurrent;
+	rightOffsetHydra.position += baseOffset;
+
 }
 
 /*

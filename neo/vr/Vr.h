@@ -208,18 +208,16 @@ private:
 
 #endif
 
-//koz g_flash cvars allow tweaking of flash position when aiming with hydra
-extern idCVar	vr_flashHand_x;
-extern idCVar	vr_flashHand_y;
-extern idCVar	vr_flashHand_z;
-extern idCVar	vr_flashScale;
-//koz g_gun cvars allow tweaking of gun position when aiming with hydra
-extern idCVar	vr_gunHand_x;
-extern idCVar	vr_gunHand_y;
-extern idCVar	vr_gunHand_z;
-extern idCVar	vr_scaleGun;
 
+extern idCVar	vr_scaleGun;
+extern idCVar	vr_flashScale;
+
+//koz g_gun cvars allow tweaking of gun position when aiming with hydra
+extern idCVar	vr_hydraOffsetForward;
+extern idCVar	vr_hydraOffsetHorizontal;
+extern idCVar	vr_hydraOffsetVertical;
 extern idCVar	vr_hydraPitchOffset;
+
 extern idCVar	vr_vignette;
 extern idCVar	vr_overdriveEnable;
 extern idCVar	vr_scale;
@@ -266,10 +264,10 @@ extern idCVar	vr_forward_keyhole;
 extern idCVar	vr_PDAscale;
 extern idCVar	vr_PDAfixLocation;
 
-extern idCVar	vr_mouse_gunx;
-extern idCVar	vr_mouse_guny;
-extern idCVar	vr_mouse_gunz;
-extern idCVar	vr_mouse_gun_forearm;
+extern idCVar	vr_weaponPivotOffsetForward;
+extern idCVar	vr_weaponPivotOffsetHorizontal;
+extern idCVar	vr_weaponPivotOffsetVertical;
+extern idCVar	vr_weaponPivotForearmLength;
 
 extern idCVar	vr_chromaCorrection;
 extern idCVar	vr_timewarp;
