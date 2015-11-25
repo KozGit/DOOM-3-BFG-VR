@@ -78,7 +78,8 @@ public:
 	
 	void				HMDInit( void );
 	void				HMDInitializeDistortion( void );
-	void				HMDGetOrientation( float &roll, float &pitch, float &yaw, idVec3 &hmdPosition );
+	//void				HMDGetOrientation( float &roll, float &pitch, float &yaw, idVec3 &hmdPosition );
+	void				HMDGetOrientation( idAngles &hmdAngles, idVec3 &hmdPosition );
 	void				HMDRender( idImage *leftCurrent, idImage *rightCurrent );
 	void				HMDTrackStatic();
 	void				HUDRender( idImage *image0, idImage *image1 );
@@ -116,6 +117,7 @@ public:
 	
 	bool				vrIsBackgroundSaving;
 
+	int					vrFrame;
 	idVec3				lastViewOrigin;
 	idMat3				lastViewAxis;
 	float				lastHMDYaw;
@@ -180,7 +182,6 @@ public:
 	ovrTrackingState	hmdTrackingState;
 	ovrFrameTiming		hmdFrameTime;
 	bool				hmdPositionTracked;
-	bool				hmdInFrame;
 	
 	bool				isBackgroundSaving;
 
@@ -201,9 +202,7 @@ private:
 	hydraData			hydraLeftOffset;
 	hydraData			hydraRightOffset;
 
-	int					frameDataCount ;
-	int					frameDataIndex[255];
-	ovrPosef			frameDataPose[255];
+	
 };
 
 #endif

@@ -850,6 +850,8 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 		if ( game->isVR )
 		{
 			
+			vr->vrFrame++; // only place this is incremented.
+
 			if ( !vr->PDAforced && !vr->PDArising ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
 			{
 				vr->swfRenderMode = RENDERING_HUD;

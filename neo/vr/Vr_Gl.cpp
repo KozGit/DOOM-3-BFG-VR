@@ -294,7 +294,8 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 			}
 	}
 	
-	HMDGetOrientation( imuAngles[ROLL], imuAngles[PITCH], imuAngles[YAW], hmdTranslation );
+	//HMDGetOrientation( imuAngles[ROLL], imuAngles[PITCH], imuAngles[YAW], hmdTranslation );
+	HMDGetOrientation( imuAngles, hmdTranslation );
 	
 	imuRotation = imuAngles.ToQuat();
 		
@@ -438,7 +439,6 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 
 	inFrame = true;
 		
-	extern bool hmdInFrame;
 	extern ovrFrameTiming hmdFrameTime;
 	
 	static int FBOW ;

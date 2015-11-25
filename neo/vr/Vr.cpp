@@ -199,7 +199,8 @@ iVr::iVr()
 	oculusHeight = 72.0f;
 		
 	hmdPositionTracked = false;
-	hmdInFrame = false;
+
+	vrFrame = 0;
 
 	lastViewOrigin = vec3_zero;
 	lastViewAxis = mat3_identity;
@@ -214,9 +215,6 @@ iVr::iVr()
 	
 	hydraLeftIndex = 0;						// koz fixme should pull these from hydra sdk but it bails for some reason using sample code - fix later.
 	hydraRightIndex = 1;
-
-	frameDataCount = 0;
-	frameDataIndex[255];
 	
 	VR_AAmode = 0;
 
@@ -353,8 +351,7 @@ void iVr::HMDInit( void )
 				hasOculusRift = true;
 				hasHMD = true;
 				common->Printf( "\n\nOculus Rift HMD Initialized\n" );
-				hmdInFrame = false;
-				
+					
 				unsigned int caps = 0;
 									
 				ovr_SetEnabledCaps( hmd, caps );
@@ -653,73 +650,89 @@ iVr::HMDGetOrientation
 ==============
 */
 
-void iVr::HMDGetOrientation(float &roll, float &pitch, float &yaw, idVec3 &hmdPosition) 
+//void iVr::HMDGetOrientation(float &roll, float &pitch, float &yaw, idVec3 &hmdPosition) 
+void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &hmdPosition )
 {
 	
-	if ( !hasOculusRift || !hasHMD ) 
-	{
-		roll = 0;
-		pitch =0;
-		yaw = 0;
-		hmdPosition = idVec3 ( 0, 0, 0 ) ;
-		return;
-	}
 	static double time = 0.0;
 	static ovrPosef translationPose;
-	static ovrPosef	orientationPose; 
-	static ovrPosef lastTrackedPose = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } ;
+	static ovrPosef	orientationPose;
+	static ovrPosef lastTrackedPose = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	static bool currentlyTracked;
-		
-	if ( hasOculusRift && hmd ) 
+	
+	static int lastFrameReturned = -1;
+
+	static float lastRoll = 0.0f;
+	static float lastPitch = 0.0f;
+	static float lastYaw = 0.0f;
+	static idVec3 lastPosition = vec3_zero;
+	static idVec3 lastPositionMoveDelta = vec3_zero;
+
+
+	if ( !hasOculusRift || !hasHMD ) 
 	{
-        
-		if ( vr_trackingPredictionAuto.GetBool() ) 
-		{
-			hmdFrameTime = ovr_GetFrameTiming( hmd, renderSystem->GetFrameCount() );// idLib::frameNumber );
-			time = hmdFrameTime.DisplayMidpointSeconds;
-		} 
-		else 
-		{
-			time = ovr_GetTimeInSeconds() + ( vr_trackingPredictionUserDefined.GetFloat() / 1000 );
-		}
-			
-		hmdTrackingState = ovr_GetTrackingState( hmd, time );
-				
-		if (hmdTrackingState.StatusFlags & ( ovrStatus_OrientationTracked ) )
-		{
-							
-				orientationPose = hmdTrackingState.HeadPose.ThePose; 
-				
-				//float y = 0.0f, p = 0.0f, r = 0.0f;
-				static idQuat poseRot;
-				static idAngles poseAng;
-
-				//orientationPose.Rotation.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&y, &p, &r);
-				
-				poseRot.x = orientationPose.Orientation.z;// x;
-				poseRot.y = orientationPose.Orientation.x;// y;
-				poseRot.z = -orientationPose.Orientation.y;// z;
-				poseRot.w = orientationPose.Orientation.w;
-
-				poseAng = poseRot.ToAngles();
-
-				roll = poseAng.roll;
-				pitch = poseAng.pitch;
-				yaw = poseAng.yaw;
-						
-
-				//roll =   -RADIANS_TO_DEGREES(r); // ???
-				//pitch =  -RADIANS_TO_DEGREES(p); // should be degrees down
-				//yaw =     RADIANS_TO_DEGREES(y); // should be degrees left
-		}
-		
+		hmdAngles.roll = 0.0f;
+		hmdAngles.pitch = 0.0f;
+		hmdAngles.yaw = 0.0f;
+		hmdPosition = vec3_zero;
+		return;
 	}
+
+    
+	if ( vr->vrFrame == lastFrameReturned )
+	{
+		//make sure to return the same values for this frame.
+		hmdAngles.roll = lastRoll;
+		hmdAngles.pitch = lastPitch;
+		hmdAngles.yaw = lastYaw;
+		hmdPosition = lastPosition;
+		return;
+	}
+
+	lastFrameReturned = vr->vrFrame;
+	
+
+	if ( vr_trackingPredictionAuto.GetBool() ) 
+	{
+		hmdFrameTime = ovr_GetFrameTiming( hmd, renderSystem->GetFrameCount() );// idLib::frameNumber );
+		time = hmdFrameTime.DisplayMidpointSeconds;
+	} 
 	else 
 	{
-			roll  = angles[ROLL];
-			pitch = angles[PITCH];
-			yaw   = angles[YAW];
+		time = ovr_GetTimeInSeconds() + ( vr_trackingPredictionUserDefined.GetFloat() / 1000 );
 	}
+			
+	hmdTrackingState = ovr_GetTrackingState( hmd, time );
+				
+	if (hmdTrackingState.StatusFlags & ( ovrStatus_OrientationTracked ) )
+	{
+							
+			orientationPose = hmdTrackingState.HeadPose.ThePose; 
+				
+			//float y = 0.0f, p = 0.0f, r = 0.0f;
+			static idQuat poseRot = idQuat_zero;
+			static idAngles poseAng = ang_zero;
+
+			//orientationPose.Rotation.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&y, &p, &r);
+				
+			poseRot.x = orientationPose.Orientation.z;// x;
+			poseRot.y = orientationPose.Orientation.x;// y;
+			poseRot.z = -orientationPose.Orientation.y;// z;
+			poseRot.w = orientationPose.Orientation.w;
+
+			poseAng = poseRot.ToAngles();
+
+			hmdAngles.roll = poseAng.roll;
+			hmdAngles.pitch = poseAng.pitch;
+			hmdAngles.yaw = poseAng.yaw;
+
+			lastRoll = hmdAngles.roll;
+			lastPitch = hmdAngles.pitch;
+			lastYaw = hmdAngles.yaw;
+			
+			
+	}
+		
 		
 	// now read the HMD position if equiped
 
@@ -739,7 +752,9 @@ void iVr::HMDGetOrientation(float &roll, float &pitch, float &yaw, idVec3 &hmdPo
 	hmdPosition.x = ( -translationPose.Position.z * 1000 ) / 25.4f ; // koz convert position (in meters) to inch (1 id unit = 1 inch). (mm/25.4 = inch)   
 	hmdPosition.y = ( -translationPose.Position.x * 1000 ) / 25.4f ; 
 	hmdPosition.z = ( translationPose.Position.y * 1000 ) / 25.4f ; 
-			
+	
+	lastPosition = hmdPosition;
+
 	if ( hmdDesc.AvailableTrackingCaps && (ovrTrackingCap_Position) ) 
 	{
 		if ( currentlyTracked && !hmdPositionTracked ) 
@@ -753,6 +768,8 @@ void iVr::HMDGetOrientation(float &roll, float &pitch, float &yaw, idVec3 &hmdPo
 			hmdPositionTracked = false;
 		}
 	}
+
+	//common->Printf( "Updated imuangles %f %f %f\n", hmdAngles.roll, hmdAngles.pitch, hmdAngles.yaw );
 }
 
 /*
@@ -772,11 +789,9 @@ void iVr::FrameStart( int index )
 		vr_hydraEnable.ClearModified();
 	}
 	static idVec3 pos;
-	static float roll = 0;
-	static float pitch = 0;
-	static float yaw = 0;
+	static idAngles rot;
 
-	vr->HMDGetOrientation( roll, pitch, yaw, pos );
+	vr->HMDGetOrientation( rot, pos );
 
 }
 
@@ -790,9 +805,6 @@ iVr::FrameEnd
 void iVr::FrameEnd() 
 {
 	// koz fixme
-
-	//ovrHmd_EndFrameTiming( vr->hmd );
-	//hmdInFrame = false;
 
 }
 

@@ -11939,7 +11939,8 @@ create the renderView for the current tic
 */
 void idPlayer::CalculateRenderView()
 {
-	idAngles imuAngles;  // koz add headtracking
+	  // koz add headtracking
+	static idAngles hmdAngles = { 0.0, 0.0, 0.0 };
 	static idVec3 lastValidHmdTranslation = vec3_zero;
 	idVec3 hmdTranslation = vec3_zero;
 		
@@ -12034,35 +12035,27 @@ void idPlayer::CalculateRenderView()
 	{
 		// koz headtracker does not actually update the head model position or axis, we simply add offsets to body rotation at render time
 		// koz fixme fix this.
-		vr->HMDGetOrientation( imuAngles[ROLL], imuAngles[PITCH], imuAngles[YAW], hmdTranslation );
+		//static idAngles hmdAngles = ang_zero;
 		
+		vr->HMDGetOrientation( hmdAngles, hmdTranslation );
+		//common->Printf( "Roll pitch yay %f %f %f\n", hmdAngles.roll, hmdAngles.pitch, hmdAngles.yaw );
 		// Koz begin : Add headtracking
 		idVec3 origin = renderView->vieworg;
 		idAngles angles = renderView->viewaxis.ToAngles(); //viewAngles + viewBobAngles + playerView.AngleOffset();
 		idMat3 axis = renderView->viewaxis;
 
-		angles.yaw += imuAngles.yaw;    // add the current hmd orientation
-		angles.pitch += imuAngles.pitch;
-		angles.roll += imuAngles.roll;
-		angles = angles.Normalize180();
+		
+		angles.yaw += hmdAngles.yaw;    // add the current hmd orientation
+		angles.pitch += hmdAngles.pitch;
+		angles.roll += hmdAngles.roll;
+		angles.Normalize180();
 
-		vr->lastHMDYaw = imuAngles.yaw;
-		vr->lastHMDPitch = imuAngles.pitch;
-		vr->lastHMDRoll = imuAngles.roll;
+		vr->lastHMDYaw = hmdAngles.yaw;
+		vr->lastHMDPitch = hmdAngles.pitch;
+		vr->lastHMDRoll = hmdAngles.roll;
 
-		//common->Printf("Current yaw %f pitch %f roll %f\n",imuAngles.yaw,imuAngles.pitch,imuAngles.roll);
-		//common->Printf("Positional tracking: %s translation x %f  y %f z %f\n",
-		//				hmdPositionTracked ? "active" : "incative",hmdTranslation.x,hmdTranslation.x,hmdTranslation.z);
-
-		if ( vr->hmdPositionTracked )
-		{
-			lastValidHmdTranslation = hmdTranslation;
-			origin += axis[0] * hmdTranslation.x + axis[1] * hmdTranslation.y + axis[2] * hmdTranslation.z; // add hmd translation
-		}
-		else
-		{
-			//origin += axis[0] * lastValidHmdTranslation.x + axis[1] * lastValidHmdTranslation.y + axis[2] * lastValidHmdTranslation.z; // add last valid hmd translation
-		}
+		origin += axis[0] * hmdTranslation.x + axis[1] * hmdTranslation.y + axis[2] * hmdTranslation.z; // add hmd translation
+	
 
 		/*	if ( vr_hydraMode.GetInteger() == 1 ) {
 		VR_MotionSensor_Get_Left_Hydra_With_Offset(hydraPositional);
