@@ -27,6 +27,7 @@ object weapon_handgrenade : weapon_base {
 	string		skin_nonade;
 	string		skin_nonade_invis;
 	entity		projectile;
+		
 	
 	boolean		show_grenade;
 	
@@ -56,7 +57,7 @@ void weapon_handgrenade::init() {
 	skin_nade_invis		= getKey( "skin_nade_invis" );
 	skin_nonade			= getKey( "skin_nonade" );
 	skin_nonade_invis	= getKey( "skin_nonade_invis" );
-	
+		
 	GrenadeNade();
 	
 	weaponState( "Raise", 0 );
@@ -111,6 +112,7 @@ void weapon_handgrenade::Fire() {
 		projectile.startSound( "snd_throw", SND_CHANNEL_BODY, true );
 	}
 	
+		
 	playAnim( ANIMCHANNEL_ALL, "throw_start" );
 	
 	current_time = sys.getTime();
@@ -132,16 +134,18 @@ void weapon_handgrenade::Fire() {
 
 	if ( time_held < HANDGRENADE_QUICKTHROWTIME ) {
 		playAnim( ANIMCHANNEL_ALL, "throw_quick" );
-		sys.wait( HANDGRENADE_QUICKTHROWLAUNCH );
+		// koz for motion control  sys.wait( HANDGRENADE_QUICKTHROWLAUNCH );
 		exploded = false;
 	} else if ( time_held < HANDGRENADE_FUSE ) {
 		playAnim( ANIMCHANNEL_ALL, "throw" );
-		sys.wait( HANDGRENADE_NORMALTHROWLAUNCH	);
+		// koz for motion control sys.wait( HANDGRENADE_NORMALTHROWLAUNCH	);
 		exploded = false;
 	} else {
 		// no anim.  grenade just blows up
 		ExplodeInHand();
 		exploded = true;
+		
+		
 	}
 	
 	if ( !exploded ) {

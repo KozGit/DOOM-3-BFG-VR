@@ -68,6 +68,7 @@ entityDef weapon_flashlight {
 
 	"snd_acquire"				"flashlight_pickup"
 	
+	// koz hand skins
 	"skin_flashskin_1b"				"skins/models/weapons/flashlight_onvr/flashhands/1hsw"
 	"skin_flashskin_2b"				"skins/models/weapons/flashlight_onvr/flashhands/1h"
 	"skin_flashskin_3b"				"skins/models/weapons/flashlight_onvr/flashhands/0h"
@@ -82,6 +83,7 @@ entityDef weapon_flashlight {
 	"skin_off"					"skins/models/weapons/flashlight_off"
 	"skin_off_invis"			"skins/models/weapons/flashlight_off_invis"
 }
+
 
 entityDef moveable_item_flashlight {
 	"inherit"					"weapon_flashlight"

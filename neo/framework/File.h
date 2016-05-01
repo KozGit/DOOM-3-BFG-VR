@@ -117,13 +117,6 @@ public:
 	{
 		size_t r = Read( &c, sizeof( c ) );
 		idSwap::Big( c );
-		
-		if ( game->isVR && vr->updateScreen )
-		{
-			vr->HMDTrackStatic();
-			vr->updateScreen = false;
-				
-		}
 		return r;
 	}
 	

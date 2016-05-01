@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "vr_hmd.h"
 #include "vr_sixense.h"
 #include "..\renderer\Framebuffer.h"
-
+#include "..\LibOVR\Include\OVR_CAPI_Audio.h"
 
 #ifndef __VR_H__
 #define __VR_H__
@@ -69,6 +69,7 @@ typedef enum
 	FLASH_HAND
 } vr_flashlight_mode_t;
 
+class idClipModel;
 
 class iVr
 {
@@ -77,9 +78,10 @@ public:
 	iVr();
 	
 	void				HMDInit( void );
+	void				HMDShutdown( void );
 	void				HMDInitializeDistortion( void );
-	//void				HMDGetOrientation( float &roll, float &pitch, float &yaw, idVec3 &hmdPosition );
-	void				HMDGetOrientation( idAngles &hmdAngles, idVec3 &hmdPosition );
+	void				HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idVec3 &bodyPositionDelta, bool immediate = false );
+	void				HMDGetOrientationAbsolute( idAngles &hmdAngles, idVec3 &positoin );
 	void				HMDRender( idImage *leftCurrent, idImage *rightCurrent );
 	void				HMDTrackStatic();
 	void				HUDRender( idImage *image0, idImage *image1 );
@@ -93,10 +95,9 @@ public:
 	void				HydraGetRight( hydraData &rightHydra );
 	void				HydraGetLeftWithOffset( hydraData &leftOffsetHydra );
 	void				HydraGetRightWithOffset( hydraData &rightOffsetHydra );
-		
-	void				FrameStart( int index );
-	void				FrameEnd();
-	void				FrameWait();
+
+	void				PushFrame( int index, ovrPosef pose, double sampleTime );
+	void				PopFrame( int &frame, ovrPosef &pose, double &sampleTime );
 	
 	void				MSAAResolve( void );
 	void				FXAAResolve( idImage * leftCurrent, idImage * rightCurrent );
@@ -111,6 +112,8 @@ public:
 	bool				PDAforcetoggle;
 	bool				PDAforced;
 	bool				PDArising;
+	bool				gameSaving;
+
 	int					swfRenderMode;
 	bool				PDAclipModelSet;
 	bool				forceLeftStick;
@@ -118,15 +121,24 @@ public:
 	bool				vrIsBackgroundSaving;
 
 	int					vrFrame;
+	double				sensorSampleTime;  
+	ovrPosef            EyeRenderPose[2];
+	
 	idVec3				lastViewOrigin;
 	idMat3				lastViewAxis;
+	
+	idVec3				lastCenterEyeOrigin;
+	idMat3				lastCenterEyeAxis;
+
+	float				bodyYawOffset;
 	float				lastHMDYaw;
 	float				lastHMDPitch;
 	float				lastHMDRoll;
 	idVec3				lastHMDViewOrigin;
 	idMat3				lastHMDViewAxis;
 
-
+	bool				isWalking;
+	
 	float				angles[3];
 	
 	int					hmdWidth;
@@ -143,9 +155,10 @@ public:
 	
 	bool				hasHMD;
 	bool				hasOculusRift;
+
+	ovrSession			hmdSession;
+	ovrGraphicsLuid		ovrLuid;
 	
-	ovrHmd				hmd;
-	ovrGraphicsLuid		luid;
 	ovrHmdDesc			hmdDesc;
 
 	float				hmdFovX;
@@ -163,34 +176,62 @@ public:
 	idImage*			hmdEyeImage[2];
 	idImage*			hmdCurrentRender[2];
 
-	ovrSwapTextureSet * oculusTextureSet[2];
+	ovrTextureSwapChain oculusSwapChain[2];
+	
 	GLuint				oculusFboId;
 	GLuint				ocululsDepthTexID;
-	ovrGLTexture*		oculusMirrorTexture;
+
+	ovrMirrorTexture	oculusMirrorTexture;
+	GLuint				mirrorTexId;
 	GLuint				oculusMirrorFboId;
+	int					mirrorW;
+	int					mirrorH;
 
 	ovrLayerEyeFov		oculusLayer;
 	ovrViewScaleDesc	oculusViewScaleDesc;
 
-	volatile bool				inFrame;
-	 
-	bool				loading;
-	int					lastRead;
-	int					currentRead;
-	bool				updateScreen;
-			
+	GUID				oculusGuid;
+	WCHAR				oculusGuidStr[OVR_AUDIO_MAX_DEVICE_STR_SIZE];
+						
 	ovrTrackingState	hmdTrackingState;
-	ovrFrameTiming		hmdFrameTime;
+	double				hmdFrameTime;
 	bool				hmdPositionTracked;
-	
-	bool				isBackgroundSaving;
+	int					currentEye;
 
+
+	idVec3				hmdBodyTranslation;
+	
 	float				independentWeaponYaw;
 	float				independentWeaponPitch;
 
 	float				playerDead;
 
+	int frameStack[100];
+	ovrPosef framePose[100];
+	double	sampleTime[100];
+	int frameHead;
+	int frameTail;
+	int frameCount;
+
+
 	
+	// wip stuff
+	int wipNumSteps;
+	int wipStepState;
+	int wipLastPeriod;
+	float wipCurrentDelta;
+	float wipCurrentVelocity;
+	float wipPeriodVel;
+
+	float wipTotalDelta;
+	float wipLastAcces;
+	float wipAvgPeriod;
+	float wipTotalDeltaAvg;
+
+	// clip stuff
+	idClipModel* bodyClip;
+	idClipModel* headClip;
+			
 	//---------------------------
 private:
 	
@@ -206,10 +247,6 @@ private:
 };
 
 #endif
-
-
-extern idCVar	vr_scaleGun;
-extern idCVar	vr_flashScale;
 
 //koz g_gun cvars allow tweaking of gun position when aiming with hydra
 extern idCVar	vr_hydraOffsetForward;
@@ -236,6 +273,8 @@ extern idCVar	vr_hydraEnable;
 extern idCVar	vr_hydraForceDetect;
 extern idCVar	vr_hydraMode;
 
+extern idCVar	vr_armIKenable;
+
 extern idCVar	vr_flashPitchAngle;
 extern idCVar	vr_flashlightMode;
 
@@ -257,6 +296,14 @@ extern idCVar	vr_rotateAxis;
 extern idCVar	vr_offsetYaw;
 extern idCVar	vr_offsetPitch;
 extern idCVar	vr_offsetRoll;
+
+extern idCVar	vr_off_leftx;
+extern idCVar	vr_off_lefty;
+extern idCVar	vr_off_leftz;
+
+extern idCVar	vr_offset_leftYaw;
+extern idCVar	vr_offset_leftPitch;
+extern idCVar	vr_offset_leftRoll;
 
 extern idCVar	vr_forward_keyhole;
 
@@ -312,6 +359,8 @@ extern idCVar	vr_joystickMenuMapping;
 extern idCVar	vr_trackingPredictionAuto;
 extern idCVar	vr_trackingPredictionUserDefined;
 
+extern idCVar	vr_clipPositional;
+
 extern idCVar	vr_minLoadScreenTime;
 
 extern idCVar	vr_tweakx;
@@ -331,6 +380,7 @@ extern idCVar	vr_headingBeamWidth;
 extern idCVar	vr_headingBeamMode;
 
 extern idCVar	vr_weaponSight;
+extern idCVar	vr_weaponSightToSurface;
 
 extern iVr* vr;
 

@@ -2,7 +2,7 @@ export jay8 {
 	// view model grabber
 	options -prefix PISTOL_ -keep sidelight grabber_root beam guilight light_upper light_lower particle_upper particle_lower smokeparticle -parent sidelight grabber_root -parent smokeparticle grabber_cylinder01 -parent particle_upper grabber_root -parent particle_lower grabber_root -parent light_upper grabber_root -parent light_lower grabber_root -parent guilight grabber_root -rename origin blah -sourcedir models/weapons/grabber/cycles -destdir models/md5/weapons/grabber_view
 
-	mesh	idleopen.ma -dest viewgrabber
+	mesh	idleopen.ma
 	anim	idleopen.ma
 	anim	idleclosed.ma
 	anim	raise.ma

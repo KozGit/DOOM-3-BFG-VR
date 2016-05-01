@@ -93,6 +93,7 @@ entityDef weapon_rocketlauncher {
 	"skin_5"					"skins/models/weapons/4rox.skin"
 	"skin_6"					"skins/models/weapons/5rox.skin"
 	
+	// koz hand/statwatch skins
 	"skin_7"					"skins/models/weapons/0roxvr/weaponhands/0h.skin"
 	"skin_8"					"skins/models/weapons/1roxvr/weaponhands/0h.skin"
 	"skin_9"					"skins/models/weapons/2roxvr/weaponhands/0h.skin"
@@ -121,12 +122,12 @@ entityDef weapon_rocketlauncher {
 	"skin_29"					"skins/models/weapons/4roxvr/weaponhands/1hsw.skin"
 	"skin_30"					"skins/models/weapons/5roxvr/weaponhands/1hsw.skin"
 	
-	"skin_1"					"skins/models/weapons/0roxvr/weaponhands/2hsw.skin"
-	"skin_2"					"skins/models/weapons/1roxvr/weaponhands/2hsw.skin"
-	"skin_3"					"skins/models/weapons/2roxvr/weaponhands/2hsw.skin"
-	"skin_4"					"skins/models/weapons/3roxvr/weaponhands/2hsw.skin"
-	"skin_5"					"skins/models/weapons/4roxvr/weaponhands/2hsw.skin"
-	"skin_6"					"skins/models/weapons/5roxvr/weaponhands/2hsw.skin"
+	"skin_31"					"skins/models/weapons/0roxvr/weaponhands/2hsw.skin"
+	"skin_32"					"skins/models/weapons/1roxvr/weaponhands/2hsw.skin"
+	"skin_33"					"skins/models/weapons/2roxvr/weaponhands/2hsw.skin"
+	"skin_34"					"skins/models/weapons/3roxvr/weaponhands/2hsw.skin"
+	"skin_35"					"skins/models/weapons/4roxvr/weaponhands/2hsw.skin"
+	"skin_36"					"skins/models/weapons/5roxvr/weaponhands/2hsw.skin"
 	
 	
 	
@@ -139,6 +140,7 @@ entityDef weapon_rocketlauncher {
 	"controllerShakeLowMag"		"0.9"
 	"controllerShakeLowTime"	"750"
 }
+
 
 entityDef moveable_item_rocketlauncher {
 	"inherit"					"weapon_rocketlauncher"

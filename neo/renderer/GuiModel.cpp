@@ -138,7 +138,8 @@ void idGuiModel::EmitSurfaces( float modelMatrix[16], float modelViewMatrix[16],
 	// screenSeparation parameter for an X offset.
 	// The value is stored in the drawSurf sort value, which adjusts the matrix in the
 	// backend.
-	float defaultStereoDepth = stereoRender_defaultGuiDepth.GetFloat();	// default to at-screen
+	float 
+		defaultStereoDepth = stereoRender_defaultGuiDepth.GetFloat();	// default to at-screen
 	
 	// add the surfaces to this view
 	for( int i = 0; i < surfaces.Num(); i++ )
@@ -253,7 +254,7 @@ void idGuiModel::EmitFullScreen()
 		if ( game->isVR )
 		{
 			extern idCVar vr_guiSeparation;
-			screenSeparation = vr_guiSeparation.GetFloat();
+		//	screenSeparation = vr_guiSeparation.GetFloat();
 		}
 		
 		// this will be negated on the alternate eyes, both rendered each frame
@@ -267,6 +268,7 @@ void idGuiModel::EmitFullScreen()
 		}
 	}
 	
+
 	viewDef->scissor.x1 = 0;
 	viewDef->scissor.y1 = 0;
 	viewDef->scissor.x2 = viewDef->viewport.x2 - viewDef->viewport.x1;
@@ -281,8 +283,8 @@ void idGuiModel::EmitFullScreen()
 	viewDef->projectionMatrix[1 * 4 + 1] = -2.0f / renderSystem->GetVirtualHeight();
 	viewDef->projectionMatrix[1 * 4 + 2] = 0.0f;
 	viewDef->projectionMatrix[1 * 4 + 3] = 0.0f;
+	viewDef->projectionMatrix[2 * 4 + 0] = 0.0f; 
 	
-	viewDef->projectionMatrix[2 * 4 + 0] = 0.0f;
 	viewDef->projectionMatrix[2 * 4 + 1] = 0.0f;
 	viewDef->projectionMatrix[2 * 4 + 2] = -2.0f;
 	viewDef->projectionMatrix[2 * 4 + 3] = 0.0f;
@@ -291,7 +293,7 @@ void idGuiModel::EmitFullScreen()
 	viewDef->projectionMatrix[3 * 4 + 1] = 1.0f;
 	viewDef->projectionMatrix[3 * 4 + 2] = -1.0f;
 	viewDef->projectionMatrix[3 * 4 + 3] = 1.0f;
-	
+
 	// make a tech5 renderMatrix for faster culling
 	idRenderMatrix::Transpose( *( idRenderMatrix* )viewDef->projectionMatrix, viewDef->projectionRenderMatrix );
 	

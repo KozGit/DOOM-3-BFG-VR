@@ -187,7 +187,6 @@ headingBeamArrowsScroll
 	noShadows
 	{
 		blend add
-		//blend gl_one,gl_one
 		map models/images/headingbeamarrow.tga
 		rgb			guiLightTable[ time *.25 ] * 1.25
 		scroll	time * -0.02, 0
@@ -201,10 +200,8 @@ headingBeamArrows
 	noShadows
 	{
 		blend add
-		//blend gl_one,gl_one
 		map models/images/headingbeamarrow.tga
 		rgb			guiLightTable[ time *.25 ] * 1.25
-		//scroll	time * -0.02, 0
 	}
 }
 
@@ -215,10 +212,9 @@ headingBeamSolid
 	noShadows
 	{
 		blend add
-		//map		textures/bfgEdition/laserSight.tga
 		map models/images/headingbeamsolid.tga
 		rgb			guiLightTable[ time *.25 ] * 1.25
-		scroll	time * -0.02 0
+		scroll	time * -0.02, 0
 	}
 }
 
@@ -241,16 +237,73 @@ vr/weaponsight
 	noShadows
 	{
 		blend add
-		map models/images/laserdot2.tga
+		map models/images/laserdot.tga
 		rgb			guiLightTable[ time *.25 ] * 1.25
-		//scroll	time * -0.02 0
 	}
 }
 
-vr/t/cola1
+vr/weaponsightCircleDot
+{
+	qer_editorimage	textures/zaphod/shotgun_laser.TGA
+	translucent
+	noShadows
+	{
+		blend add
+		map models/images/lasercircledot.tga
+		rgb			guiLightTable[ time *.25 ] * 1.25
+	}
+}
+
+vr/weaponsightCross
+{
+	qer_editorimage	textures/zaphod/shotgun_laser.TGA
+	translucent
+	noShadows
+	{
+		blend add
+		map models/images/lasercrosshair.tga
+		rgb			guiLightTable[ time *.25 ] * 1.25
+	}
+}
+
+models/mapobjects/filler/cola1vr
 {	
+	renderbump -size 256 256
 	noselfshadow
 	bumpmap		addnormals (models/mapobjects/filler/cola1_local.tga, heightmap (models/mapobjects/filler/cola1_bmp.tga, 4) ) 
+	//bumpmap heightmap (models/mapobjects/filler/cola1_bmp.tga, 4)
 	diffusemap		models/mapobjects/filler/cola1_d.tga
 	specularmap		models/mapobjects/filler/cola1_s.tga
 }
+
+models/mapobjects/filler/cola2vr
+{	
+	renderbump -size 256 256
+	noselfshadow
+	bumpmap		addnormals (models/mapobjects/filler/cola1_local.tga, heightmap (models/mapobjects/filler/cola1_bmp.tga, 4) ) 
+	//bumpmap heightmap (models/mapobjects/filler/cola1_bmp.tga, 4)
+	diffusemap		models/mapobjects/filler/cola1_d.tga
+	specularmap		models/mapobjects/filler/cola1_s.tga
+}
+
+models/mapobjects/filler/mkeyboardvr
+{
+	noSelfShadow
+	
+ 	//renderbump  -size 256 256 -aa 2 -colorMap  models/mapobjects/filler/mkeyboard_local.tga models/mapobjects/filler/mkeyboard_hi.lwo
+	
+	//bumpmap			models/mapobjects/filler/mkeyboard_local.tga
+	map		models/mapobjects/filler/mkeyboard.tga
+	//diffusemap		models/mapobjects/filler/mkeyboard.tga
+	//specularmap		models/mapobjects/filler/mkeyboard_s.tga
+}
+
+models/mapobjects/filler/mkeyboard2
+{
+	noSelfShadow	
+	map		models/mapobjects/filler/mkeyboard.tga
+	//bumpmap			models/mapobjects/filler/mkeyboard_local.tga
+	//diffusemap		models/mapobjects/filler/mkeyboard2.tga
+	//specularmap		models/mapobjects/filler/mkeyboard_s.tga
+}
+

@@ -78,6 +78,9 @@ idCVar com_speeds( "com_speeds", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "s
 // DG: support "com_showFPS 2" for fps-only view like in classic doom3 => make it CVAR_INTEGER
 idCVar com_showFPS( "com_showFPS", "0", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT, "show frames rendered per second. 0: off 1: default bfg values, 2: only show FPS (classic view)" );
 // DG end
+
+idCVar vr_showWIP( "vr_showWIP", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_ARCHIVE, "show VR walk in place data\n" );
+
 idCVar com_showMemoryUsage( "com_showMemoryUsage", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "show total and per frame memory usage" );
 idCVar com_updateLoadSize( "com_updateLoadSize", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "update the load size after loading a map" );
 
@@ -432,7 +435,17 @@ void idCommonLocal::WriteConfiguration()
 	// Koz begin
 	if ( vr->hasOculusRift ) 
 	{
-		WriteConfigToFile( "oculus_config.cfg" );
+		//WriteConfigToFile( "oculus_config.cfg", "fs_basepath" );
+		idFile* f = fileSystem->OpenFileWrite( "oculus_config.cfg", "fs_basepath" );
+		if ( !f )
+		{
+			Printf( "Couldn't write oculus_config.cfg in fs_basepath.\n" );
+			return;
+		}
+
+		idKeyInput::WriteBindings( f );
+		cvarSystem->WriteFlaggedVariables( CVAR_ARCHIVE, "set", f );
+		fileSystem->CloseFile( f );
 	}
 	else
 	// Koz end
@@ -892,6 +905,8 @@ void idCommonLocal::RenderSplash()
 	
 	const emptyCommand_t* cmd = renderSystem->SwapCommandBuffers( &time_frontend, &time_backend, &time_shadows, &time_gpu );
 	renderSystem->RenderCommandBuffers( cmd );
+
+	if ( game->isVR ) vr->HMDTrackStatic();
 	
 }
 
@@ -1313,8 +1328,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		renderSystem->Init();
 
 		// Koz begin
-		// Create the Oculus distortion meshes. 
-		// GL must be initialized to do this.
+		// initialize the HMD
 		if ( vr->hasOculusRift )
 		{
 			vr->HMDInitializeDistortion();
@@ -1322,8 +1336,21 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		
 		// init the Razer Hydra
 		vr->HydraInit();
+					
 		// Koz end
 		
+		// koz
+		// restart the filesystem
+		// to reflect changes is vr state
+		// filesystem->restart() will update the 
+		// fs_game path to reflect VR or VRIK directories
+		// ( this sucks )
+		
+		if ( game->isVR )
+		{
+			fileSystem->Restart();
+		}
+
 		whiteMaterial = declManager->FindMaterial( "_white" );
 		
 		if( idStr::Icmp( sys_lang.GetString(), ID_LANG_FRENCH ) == 0 )

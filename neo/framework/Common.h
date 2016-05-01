@@ -140,6 +140,10 @@ extern idCVar		com_showMemoryUsage;
 extern idCVar		com_updateLoadSize;
 extern idCVar		com_productionMode;
 
+// koz
+extern idCVar		vr_showWIP;
+
+
 struct MemInfo_t
 {
 	idStr			filebase;

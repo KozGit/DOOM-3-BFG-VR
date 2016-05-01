@@ -74,6 +74,7 @@ void main( VS_IN vertex, out VS_OUT result ) {
 	// what the original game did
 	const float magicProjectionAdjust = 0.43f;
 	float x = dot4 ( vec, rpProjectionMatrixY ) * magicProjectionAdjust;
+	
 	float w = dot4 ( vec, rpProjectionMatrixW );
 
 	// don't let the recip get near zero for polygons that cross the view plane
@@ -85,5 +86,6 @@ void main( VS_IN vertex, out VS_OUT result ) {
 	x = min( x, 0.02 );
 
 	const float4 deformMagnitude = rpUser1;
+	deformMagnitude *= rpStereoCorrection.x;
 	result.texcoord2 = x * deformMagnitude;
 }

@@ -584,6 +584,15 @@ void idActor::Spawn()
 	LoadAF();
 	
 	walkIK.Init( this, IK_ANIM, modelOffset );
+
+	// koz begin
+	armIK.Init( this, IK_ANIM, modelOffset );
+	
+	if ( armIK.IsInitialized() ) {
+		common->Printf( "ArmIK initialized for %s.\n",name.c_str() );
+	}
+	
+	// koz end
 	
 	// the animation used to be set to the IK_ANIM at this point, but that was fixed, resulting in
 	// attachments not binding correctly, so we're stuck setting the IK_ANIM before attaching things.
@@ -1914,6 +1923,8 @@ idActor::UpdateAnimationControllers
 bool idActor::UpdateAnimationControllers()
 {
 
+	bool success = false;
+
 	if( af.IsActive() )
 	{
 		return idAFEntity_Base::UpdateAnimationControllers();
@@ -1926,10 +1937,17 @@ bool idActor::UpdateAnimationControllers()
 	if( walkIK.IsInitialized() )
 	{
 		walkIK.Evaluate();
-		return true;
+		success = true;
 	}
 	
-	return false;
+	// koz vr arm ik
+	if ( game->isVR && vr_showBody.GetBool() && armIK.IsInitialized() )
+	{
+		armIK.Evaluate();
+		success = true;
+	}
+
+	return success;
 }
 
 /*

@@ -36,7 +36,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "vr\BackgroundSave.h"
 #include "vr\Vr.h"
 #include "sys\win32\win_local.h"
-#include "renderer\AutoRender.h"
+
 // Koz end
 
 
@@ -231,6 +231,12 @@ void idCommonLocal::UnloadMap()
 {
 	StopPlayingRenderDemo();
 	
+	vr->PDArising = false;
+	vr->PDAforced = false;
+	vr->playerDead = false;
+	vr->vrIsBackgroundSaving = false;
+	vr->VR_GAME_PAUSED = false;
+
 	// end the current map in the game
 	if( game )
 	{
@@ -400,9 +406,7 @@ Exits with mapSpawned = true
 */
 void idCommonLocal::ExecuteMapChange()
 {
-	vr->loading = true;
-	rAutoRender.StartBackgroundAutoSwaps();
-
+	
 	if( session->GetState() != idSession::LOADING )
 	{
 		idLib::Warning( "Session state is not LOADING in ExecuteMapChange" );
@@ -624,12 +628,16 @@ void idCommonLocal::ExecuteMapChange()
 		}
 	}
 	
+	StartWipe( "wipeMaterial", true );
+
 	renderSystem->EndLevelLoad();
 	soundSystem->EndLevelLoad();
 	declManager->EndLevelLoad();
 	uiManager->EndLevelLoad( currentMapName );
 	fileSystem->EndLevelLoad();
 			
+	
+	
 
 	//if ( game->isVR ) ClearWipe(); // Koz
 	
@@ -657,12 +665,11 @@ void idCommonLocal::ExecuteMapChange()
 			}
 		}
 		
-		vr->loading = false;
 
 		// kick off an auto-save of the game (so we can always continue in this map if we die before hitting an autosave)
 		common->Printf( "----- Saving Game -----\n" );
 		
-		if ( !game->isVR )
+		if ( 1 /*!game->isVR*/ )
 		{
 			SaveGame( "autosave" );
 		}
@@ -681,6 +688,7 @@ void idCommonLocal::ExecuteMapChange()
 			{
 				//vr->HMDTrackStatic();
 				//UpdateScreen( false, false );
+				//vr->HMDTrackStatic();
 				//SwapBuffers(win32.hDC);
 				//glFinish();
 				
@@ -754,8 +762,11 @@ void idCommonLocal::ExecuteMapChange()
 	// Issue a render at the very end of the load process to update soundTime before the first frame
 	soundSystem->Render();
 
-	vr->loading = false;
-	rAutoRender.EndBackgroundAutoSwaps();
+	vr->PDArising = false;
+	vr->PDAforced = false;
+	vr->playerDead = false;
+	vr->vrIsBackgroundSaving = false;
+	vr->VR_GAME_PAUSED = false;
 
 }
 
@@ -845,7 +856,7 @@ void idCommonLocal::UpdateLevelLoadPacifier()
 			}
 			txtVal->SetStrokeInfo( true, 1.75f, 0.75f );
 		}
-		UpdateScreen( false );
+	if (!game->isVR) 	UpdateScreen( false ); // koz
 		if( autoswapsRunning )
 		{
 			renderSystem->BeginAutomaticBackgroundSwaps( icon );
@@ -902,25 +913,34 @@ idCommonLocal::SaveGame
 */
 bool idCommonLocal::SaveGame( const char* saveName )
 {
+	
+	StartWipe( "wipeMaterial", true );
+	CompleteWipe();
+
+	//common->Printf( "Beginning save\n" );
 	if( pipelineFile != NULL )
 	{
 		// We're already in the middle of a save. Leave us alone.
+		ClearWipe();
 		return false;
 	}
 	
 	if( com_disableAllSaves.GetBool() || ( com_disableAutoSaves.GetBool() && ( idStr::Icmp( saveName, "autosave" ) == 0 ) ) )
 	{
+		ClearWipe();
 		return false;
 	}
 	
 	if( IsMultiplayer() )
 	{
 		common->Printf( "Can't save during net play.\n" );
+		ClearWipe();
 		return false;
 	}
 	
 	if( mapSpawnData.savegameFile != NULL )
 	{
+		ClearWipe();
 		return false;
 	}
 	
@@ -928,6 +948,7 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	if( persistentPlayerInfo.GetInt( "health" ) <= 0 )
 	{
 		common->Printf( "You must be alive to save the game\n" );
+		ClearWipe();
 		return false;
 	}
 	
@@ -935,7 +956,7 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	soundSystem->SetPlayingSoundWorld( menuSoundWorld );
 	soundSystem->Render();
 	
-	if ( !game->isVR ) // Koz fixme : implement this.shows saving dialog during save.currently disabled in VR for smoother headtracking.
+	if ( 1  ) //; 0 &&  !game->isVR ) // Koz fixme : implement this.shows saving dialog during save.currently disabled in VR for smoother headtracking.
 
 	{
 		Dialog().ShowSaveIndicator( true );
@@ -950,6 +971,7 @@ bool idCommonLocal::SaveGame( const char* saveName )
 			for ( int i = 0; i < NumScreenUpdatesToShowDialog; ++i )
 			{
 				UpdateScreen( captureToImage );
+				
 			}
 			renderSystem->BeginAutomaticBackgroundSwaps( AUTORENDER_DIALOGICON );
 		}
@@ -981,6 +1003,7 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	// let the game save its state
 	game->SaveGame( pipelineFile, &stringsFile );
 	
+	common->Printf( "Beginning game->SaveGame\n" );
 	pipelineFile->Finish();
 	
 	idSaveGameDetails gameDetails;
@@ -1004,7 +1027,20 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	}
 	
 	syncNextGameFrame = true;
+	common->Printf( "Returning from idCommonLocal SaveGame\n" );
+		
+	//ClearWipe();
+	Dialog().ShowSaveIndicator( false );
 	
+	
+	// Here make sure we pump the gui enough times to clear the 'saving' dialog
+	const bool captureToImage = false;
+	for ( int i = 0; i < NumScreenUpdatesToShowDialog; ++i )
+	{
+		UpdateScreen( captureToImage );
+
+	}
+	ClearWipe();
 	return true;
 }
 
@@ -1340,15 +1376,16 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 {
 	
 	const char* savename = ( args.Argc() > 1 ) ? args.Argv( 1 ) : "quick";
-	
+		
+
 	// Koz begin background save in VR
-	if ( game->isVR )
+	if ( 0 && game->isVR )
 	{
 		vrBackgroundSave.StartBackgroundSave( BACKGROUND_SAVE, savename );
 		
 		while ( vr->vrIsBackgroundSaving == true )
 		{
-			vr->HMDTrackStatic();
+			//vr->HMDTrackStatic();
 			//SwapBuffers( win32.hDC );
 			//glFinish();
 		}
@@ -1357,10 +1394,13 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 	}
 	// Koz end
 	
+	vr->gameSaving = true;
 	if( commonLocal.SaveGame( savename ) )
 	{
 		common->Printf( "Saved: %s\n", savename );
 	}
+	vr->gameSaving = false;
+
 }
 
 /*

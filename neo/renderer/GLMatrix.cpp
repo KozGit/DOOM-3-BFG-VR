@@ -459,8 +459,8 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 	width = xmax - xmin;
 	height = ymax - ymin;
 
-	const int viewWidth = viewDef->viewport.x2 - viewDef->viewport.x1 + 1;
-	const int viewHeight = viewDef->viewport.y2 - viewDef->viewport.y1 + 1;
+	 int viewWidth = viewDef->viewport.x2 - viewDef->viewport.x1 + 1;
+	 int viewHeight = viewDef->viewport.y2 - viewDef->viewport.y1 + 1;
 
 	jitterx = jitterx * width / viewWidth;
 	jitterx += r_centerX.GetFloat();

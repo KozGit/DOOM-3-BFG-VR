@@ -1242,6 +1242,8 @@ void idAI::Think()
 		{
 			// clear the ik before we do anything else so the skeleton doesn't get updated twice
 			walkIK.ClearJointMods();
+			//koz
+			armIK.ClearJointMods();
 			
 			switch( move.moveType )
 			{

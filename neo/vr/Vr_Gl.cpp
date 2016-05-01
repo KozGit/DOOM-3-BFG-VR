@@ -7,9 +7,10 @@
 #include "renderer\tr_local.h"
 #include "sys\win32\win_local.h"
 #include "libs\LibOVR\Include\OVR_CAPI_GL.h"
+#include "libs\LibOVR\Include\Extras\OVR_Math.h"
 
 	
-idCVar vr_transz( "vr_transz", "-1", CVAR_RENDERER | CVAR_FLOAT, "test z trans" );
+idCVar vr_transz( "vr_transz", "1", CVAR_RENDERER | CVAR_FLOAT, "test z trans" );
 idCVar vr_transscale( "vr_transscale",".5",	CVAR_RENDERER | CVAR_FLOAT, "test trans scale" );
 idCVar vr_skipOvr( "vr_skipOvr", "0", CVAR_BOOL | CVAR_ARCHIVE, "Skip oculus rendering" );
 
@@ -277,7 +278,8 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 	static idQuat imuRotation = { 0.0, 0.0, 0.0, 0.0 };
 	static idQuat imuRotationGL = { 0.0, 0.0, 0.0, 0.0 };
 	static idVec3 lastValidHmdTranslation = vec3_zero;
-	static idVec3 hmdTranslation = vec3_zero;
+	static idVec3 headPositionDelta = vec3_zero;
+	static idVec3 bodyPositionDelta = vec3_zero;
 			
 	static float rot[4][4], trans[4][4], eye[4][4], proj[4][4], result[4][4] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	static float glMatrix[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
@@ -295,8 +297,9 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 	}
 	
 	//HMDGetOrientation( imuAngles[ROLL], imuAngles[PITCH], imuAngles[YAW], hmdTranslation );
-	HMDGetOrientation( imuAngles, hmdTranslation );
+	HMDGetOrientation( imuAngles, headPositionDelta, bodyPositionDelta, false);
 	
+	imuAngles = ang_zero;
 	imuRotation = imuAngles.ToQuat();
 		
 	imuRotationGL.x = -imuRotation.y; // convert from id coord system to gl 
@@ -312,24 +315,38 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 	VR_QuatToRotation( imuRotationGL, rot );
 	VR_TranslationMatrix( 0, 0, vr_transz.GetFloat() , trans );
 		
+
+	static int destWidth, destHeight,drawWidth;
+	static int sourceOffset;
+
+	destWidth = renderSystem->GetWidth();
+	destHeight = renderSystem->GetHeight();
+	drawWidth = destWidth;
+	sourceOffset = 0;
+
 	if ( vr->useFBO ) // we dont want to render this into an MSAA FBO.
 	{
 		if ( globalFramebuffers.primaryFBO->IsMSAA() )
 		{
 			globalFramebuffers.resolveFBO->Bind();
-			GL_ViewportAndScissor( 0, 0, globalFramebuffers.resolveFBO->GetWidth(), globalFramebuffers.resolveFBO->GetHeight() );
+			//GL_ViewportAndScissor( 0, 0, globalFramebuffers.resolveFBO->GetWidth(), globalFramebuffers.resolveFBO->GetHeight() );
+			
+			
 		}
 		else
 		{
 			globalFramebuffers.primaryFBO->Bind();
-			GL_ViewportAndScissor( 0, 0, globalFramebuffers.primaryFBO->GetWidth(), globalFramebuffers.primaryFBO->GetHeight() );
+			//GL_ViewportAndScissor( 0, 0, globalFramebuffers.primaryFBO->GetWidth(), globalFramebuffers.primaryFBO->GetHeight() );
 		}
 	}
 	else
 	{
 		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 		glDrawBuffer( GL_BACK );
-		GL_ViewportAndScissor( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
+		sourceOffset = 0;
+		destWidth = renderSystem->GetWidth();
+		destHeight = renderSystem->GetHeight();
+		//GL_ViewportAndScissor( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
 	}
 	
 	glClearColor( 0, 0, 0, 0 );
@@ -350,21 +367,41 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 
 	renderProgManager.BindShader_Texture();
 			
-	for (int index = 0; index < 2; index++)	{
+	for (int index = 0; index < 2; index++)
+	{
 		
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );			
 		
+
+
 		if ( index )  {
 			image1->Bind();
+			
+		//	drawWidth = destWidth * (1 - abs( hmdEye[index].projection.x.offset ));
+		//	sourceOffset = (drawWidth - destWidth);
+		//	common->Printf( "Eye %d drawwidth %d sourceOffset %d\n", index, drawWidth, sourceOffset );
+		//	GL_ViewportAndScissor( sourceOffset, 0, drawWidth, destHeight );
+			
+		
 		} else {
 			image0->Bind();
+				
+		//	drawWidth = destWidth * (1 - abs( hmdEye[index].projection.x.offset ));
+		//	sourceOffset = 0; (destWidth - drawWidth);
+		//	common->Printf( "Eye %d drawwidth %d sourceOffset %d\n", index, drawWidth, sourceOffset );
+		//	GL_ViewportAndScissor( sourceOffset, 0, drawWidth, destHeight );
+
 		}
 				
 		// copy the perspective matrix for this eye
 		memcpy ( proj, hmdEye[index].projectionRift, sizeof(float) *16 );
 				
+		proj[0][2] = hmdEye[index].projection.x.offset;// . 0.0f; // center
+		
 		// move the camera for this eye.
 		VR_TranslationMatrix( -hmdEye[index].viewOffset[0], hmdEye[index].viewOffset[1], hmdEye[index].viewOffset[2], eye );
+		//VR_TranslationMatrix( 0.0f, 0.0f, 0.0f, eye );
+		
 		//common->Printf("-vo0 %f v01 %f vo2 %f\n", hmdEye[index].viewOffset[0], hmdEye[index].viewOffset[1], hmdEye[index].viewOffset[2]);
 		//idMat3 transMat = idVec3(-hmdEye[index].viewOffset[0], hmdEye[index].viewOffset[1], hmdEye[index].viewOffset[2]).ToMat3;
 		//float viewOffset = (6.5f / 20.0f);
@@ -414,11 +451,20 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 		
 		hmdEyeImage[ index ]->Bind();
 		
-		glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, hmdEyeImage[ index ]->GetUploadWidth(), hmdEyeImage[ index ]->GetUploadHeight(), 0 );
+			//drawWidth = destWidth * (1 - abs( hmdEye[index].projection.x.offset ));
+			//sourceOffset = (drawWidth - destWidth);
+			//common->Printf( "Eye %d drawwidth %d sourceOffset %d\n", index, drawWidth, sourceOffset );
+		//	GL_ViewportAndScissor( sourceOffset, 0, drawWidth, destHeight );
+		
+		//glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, hmdEyeImage[ index ]->GetUploadWidth(), hmdEyeImage[ index ]->GetUploadHeight(), 0 );
+			glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, hmdEyeImage[index]->GetUploadWidth(), hmdEyeImage[index]->GetUploadHeight(), 0 );
 		
 	}
 	renderProgManager.Unbind();
 
+	globalFramebuffers.primaryFBO->Bind();
+	
+	//GL_ViewportAndScissor( 0, 0, destWidth, destHeight );
 }
 
 /*
@@ -435,17 +481,13 @@ eye textures: idImage leftCurrent, rightCurrent
 
 void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent ) 
 {
-	while ( inFrame ) {};
-
-	inFrame = true;
+	using namespace OVR;
 		
-	extern ovrFrameTiming hmdFrameTime;
-	
 	static int FBOW ;
 	static int FBOH ;
 		
 	
-	GL_CheckErrors();
+	// koz GL_CheckErrors();
 			
 	// final eye textures now in finalEyeImage[0,1]				
 
@@ -455,12 +497,12 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		FBOW = globalFramebuffers.primaryFBO->GetWidth();
 		FBOH = globalFramebuffers.primaryFBO->GetHeight();
 
-		for ( int i = 0; i < 2; i++ )
+	/*	for ( int i = 0; i < 2; i++ )
 		{
 			oculusTextureSet[i]->CurrentIndex = (oculusTextureSet[i]->CurrentIndex + 1) % oculusTextureSet[i]->TextureCount;
 			
 		}
-		
+	*/	
 
 	}
 	else	{
@@ -478,21 +520,31 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 	if ( !vr_skipOvr.GetBool() )
 	{
 		wglSwapIntervalEXT( 0 );
+		
+		//left eye
+
 
 		//ovrGLTexture* tex = (ovrGLTexture*)&oculusTextureSet[0]->Textures[oculusTextureSet[0]->CurrentIndex];
 		//glBindFramebuffer( GL_FRAMEBUFFER, oculusFboId );
 		//glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->OGL.TexId, 0 );
 		//glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ocululsDepthTexID, 0 );
 
-		ovrGLTexture* tex = (ovrGLTexture*)(&oculusTextureSet[0]->Textures[oculusTextureSet[0]->CurrentIndex]);
+		//ovrGLTexture* tex = (ovrGLTexture*)(&oculusTextureSet[0]->Textures[oculusTextureSet[0]->CurrentIndex]);
+
+		GLuint curTexId;
+		int curIndex;
+
+		ovr_GetTextureSwapChainCurrentIndex( hmdSession, oculusSwapChain[0], &curIndex );
+		ovr_GetTextureSwapChainBufferGL( hmdSession, oculusSwapChain[0], curIndex, &curTexId );
+
 
 		glBindFramebuffer( GL_FRAMEBUFFER, oculusFboId );
-		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->OGL.TexId, 0 );
+		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, curTexId, 0 );
 		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ocululsDepthTexID, 0 );
 		
 		glViewport( 0, 0, FBOW, FBOH );
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-		GL_CheckErrors();
+		// koz GL_CheckErrors();
 
 		// draw the left eye texture.				
 		GL_SelectTexture( 0 );
@@ -501,9 +553,15 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
 		RB_DrawElementsWithCounters( &backEnd.unitSquareSurface ); // draw it
 
-		tex = (ovrGLTexture*)(&oculusTextureSet[1]->Textures[oculusTextureSet[1]->CurrentIndex]);
+		
+		// right eye		
+		//tex = (ovrGLTexture*)(&oculusTextureSet[1]->Textures[oculusTextureSet[1]->CurrentIndex]);
+		ovr_GetTextureSwapChainCurrentIndex( hmdSession, oculusSwapChain[1], &curIndex );
+		ovr_GetTextureSwapChainBufferGL( hmdSession, oculusSwapChain[1], curIndex, &curTexId );
+
+		
 		glBindFramebuffer( GL_FRAMEBUFFER, oculusFboId );
-		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->OGL.TexId, 0 );
+		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, curTexId, 0 );
 		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ocululsDepthTexID, 0 );
 		glClearColor( 0, 0, 0, 0 );
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -526,21 +584,59 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		
 
 		// Submit frame with one layer we have.
-		ovrLayerHeader *layers = &oculusLayer.Header;
+		
+		ovr_CommitTextureSwapChain( hmdSession, oculusSwapChain[0] );
+		ovr_CommitTextureSwapChain( hmdSession, oculusSwapChain[1] );
+		
 		ovrPosef eyeRenderPose[2];
-		ovrVector3f viewOffset[2] = { hmdEye[0].eyeRenderDesc.HmdToEyeViewOffset,
-			hmdEye[1].eyeRenderDesc.HmdToEyeViewOffset };
+		ovrVector3f viewOffset[2] = { hmdEye[0].eyeRenderDesc.HmdToEyeOffset,
+			hmdEye[1].eyeRenderDesc.HmdToEyeOffset };
 
-		ovr_CalcEyePoses( vr->hmdTrackingState.HeadPose.ThePose, viewOffset, eyeRenderPose );
+	//	ovr_CalcEyePoses( vr->hmdTrackingState.HeadPose.ThePose, viewOffset, eyeRenderPose );
+		
+		ovrLayerEyeFov ld;
+		ld.Header.Type = ovrLayerType_EyeFov;
+		ld.Header.Flags = ovrLayerFlag_TextureOriginAtBottomLeft;   // Because OpenGL.
+
+
+		static int frameNo = 0;
+		static ovrPosef framePose;
+		static double sampleTime = 0;
+
+
+		PopFrame( frameNo, framePose, sampleTime );
+
+	
+		//ovr_CalcEyePoses( vr->hmdTrackingState.HeadPose.ThePose, viewOffset, eyeRenderPose );
+		ovr_CalcEyePoses( framePose, viewOffset, eyeRenderPose );
+		
+		for ( int eye = 0; eye < 2; ++eye )
+		{
+			ld.ColorTexture[eye] = oculusSwapChain[eye];// eyeRenderTexture[eye]->TextureChain;
+			ld.Viewport[eye] = hmdEye[eye].eyeRenderDesc.DistortedViewport;// [Recti( Sizei( hmdEye[eye].renderTarget.h, hmdEye[eye].renderTarget.w ) );
+			ld.Fov[eye] = hmdEye[eye].eyeRenderDesc.Fov;// hmdDesc.DefaultEyeFov[eye];
+			ld.RenderPose[eye] = eyeRenderPose[eye];
+			//ld.SensorSampleTime = sensorSampleTime;
+			ld.SensorSampleTime = sampleTime;
+		}
+
+		
+		ovrLayerHeader *layers1 = &ld.Header;// &oculusLayer.Header;
+		ovrLayerHeader *layers =  &oculusLayer.Header;
+	
 
 		oculusViewScaleDesc.HmdSpaceToWorldScaleInMeters = 0.0254f; // inches to meters
-		oculusViewScaleDesc.HmdToEyeViewOffset[0] = hmdEye[0].eyeRenderDesc.HmdToEyeViewOffset;
-		oculusViewScaleDesc.HmdToEyeViewOffset[1] = hmdEye[1].eyeRenderDesc.HmdToEyeViewOffset;
+		oculusViewScaleDesc.HmdToEyeOffset[0] = hmdEye[0].eyeRenderDesc.HmdToEyeOffset;
+		oculusViewScaleDesc.HmdToEyeOffset[1] = hmdEye[1].eyeRenderDesc.HmdToEyeOffset;
 
 		oculusLayer.RenderPose[0] = eyeRenderPose[0];
 		oculusLayer.RenderPose[1] = eyeRenderPose[1];
+		oculusLayer.SensorSampleTime = sampleTime;
+
 		const int beforeSubmit = Sys_Milliseconds();
-		ovrResult       result = ovr_SubmitFrame( hmd, 0, &oculusViewScaleDesc, &layers, 1 );
+		ovrResult       result = ovr_SubmitFrame( hmdSession,frameNo , &oculusViewScaleDesc, &layers, 1 );
+	//	ovrResult result = ovr_SubmitFrame( hmdSession, 1, &oculusViewScaleDesc, &layers1, 1 );
+		
 		if ( result != ovrSuccess )
 		{
 			common->Warning( "Vr_GL.cpp HMDRender : Failed to submit oculus layer.\n" );
@@ -551,19 +647,21 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		// Blit mirror texture to back buffer
 		glBindFramebuffer( GL_READ_FRAMEBUFFER, oculusMirrorFboId );
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-		GLint w = oculusMirrorTexture->OGL.Header.TextureSize.w;
-		GLint h = oculusMirrorTexture->OGL.Header.TextureSize.h;
+		wglSwapIntervalEXT( 0 );
+		GLint w = mirrorW;// oculusMirrorTexture->OGL.Header.TextureSize.w;
+		GLint h = mirrorH; //oculusMirrorTexture->OGL.Header.TextureSize.h;
 		glBlitFramebuffer( 0, h, w, 0, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST );
 		glBindFramebuffer( GL_READ_FRAMEBUFFER, 0 );
-
-		SwapBuffers( win32.hDC );
+		wglSwapIntervalEXT( 0 );
+	
+	//	SwapBuffers( win32.hDC );
 
 		globalFramebuffers.primaryFBO->Bind();
 	}
 
 	else
 	{
-		glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // bind the default framebuffery
+		glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // bind the default framebuffer
 		glDrawBuffer( GL_BACK );
 		backEnd.glState.currentFramebuffer = NULL;
 
@@ -571,7 +669,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		glViewport( 0, 0, vr->hmdWidth , vr->hmdHeight  );
 		glClearColor( 0, 0, 0, 0 );
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-		GL_CheckErrors();
+		//koz GL_CheckErrors();
 
 		// draw the left eye texture.				
 		glViewport( 0, 0, vr->hmdWidth / 4, vr->hmdHeight / 2 );
@@ -590,8 +688,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		RB_DrawElementsWithCounters( &backEnd.unitSquareSurface ); // draw it
 
 	}
-	inFrame = false;
-
+	
 }
 
 /*
@@ -604,11 +701,7 @@ last fullscreen texture then force a buffer swap.
 
 void iVr::HMDTrackStatic()
 {
-	
-	
-	while ( inFrame ) {};
-
-	GL_CheckErrors();
+	// koz GL_CheckErrors();
 	//if ( hasHMD && hasOculusRift && vr_enable.GetBool() ) {
 	if ( game->isVR ) {
 		if ( vr->hmdCurrentRender[0] == NULL ||
@@ -620,8 +713,10 @@ void iVr::HMDTrackStatic()
 		}
 
 		HUDRender(vr->hmdCurrentRender[0], vr->hmdCurrentRender[1]);
+
+		//HMDRender( vr->hmdCurrentRender[0], vr->hmdCurrentRender[1] );
 		HMDRender( hmdEyeImage[0], hmdEyeImage[1] );
-		GL_CheckErrors();
+		// koz GL_CheckErrors();
 	}
 
 	

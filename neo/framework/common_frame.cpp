@@ -295,6 +295,8 @@ void idCommonLocal::Draw()
 		if ( (vr->PDAforced || vr->PDArising) && !vr->playerDead) // koz fixme do we only want to use the PDA model in VR?
 		{
 			game->Shell_Render(); //koz render the menu
+			Dialog().Render( false );
+			console->Draw( false );
 			renderSystem->CaptureRenderToImage( "_pdaImage", true ); // copy the rendered menu then clear buffer
 		}
 		// Koz end
@@ -355,14 +357,24 @@ void idCommonLocal::Draw()
 	
 	{
 		SCOPED_PROFILE_EVENT( "Post-Draw" );
-		
+
 		// draw the wipe material on top of this if it hasn't completed yet
 		DrawWipeModel();
-		
-		Dialog().Render( loadGUI != NULL );
-		
-		// draw the half console / notify console on top of everything
-		console->Draw( false );
+
+		if ( !game->isVR )
+		{
+			Dialog().Render( loadGUI != NULL );
+			console->Draw( false );
+		}
+		else
+		{
+			if ( !vr->PDAforced && !vr->PDArising )
+			{
+				Dialog().Render( loadGUI != NULL );
+				if ( game->Shell_IsActive() ) console->Draw( false );
+			}
+			
+		}
 	}
 }
 
@@ -398,13 +410,19 @@ void idCommonLocal::UpdateScreen( bool captureToImage, bool releaseMouse )
 		renderSystem->CaptureRenderToImage( "_currentRender", false );
 	}
 	
-	// this should exit right after vsync, with the GPU idle and ready to draw
-	const emptyCommand_t* cmd = renderSystem->SwapCommandBuffers( &time_frontend, &time_backend, &time_shadows, &time_gpu );
+	
+	
+
+		// this should exit right after vsync, with the GPU idle and ready to draw
+		const emptyCommand_t* cmd = renderSystem->SwapCommandBuffers( &time_frontend, &time_backend, &time_shadows, &time_gpu );
 		
+		// get the GPU busy with new commands
+		renderSystem->RenderCommandBuffers( cmd );
 	
-	// get the GPU busy with new commands
-	renderSystem->RenderCommandBuffers( cmd );
-	
+	if ( game->isVR )
+	{
+		//vr->HMDTrackStatic(); // koz fixme
+	}
 	insideUpdateScreen = false;
 }
 /*
@@ -479,13 +497,6 @@ void idCommonLocal::Frame()
 		// This is the only place this is incremented
 		idLib::frameNumber++;
 		
-		// koz delete me
-
-		if ( game->isVR )
-		{ 
-			vr->FrameStart( renderSystem->GetFrameCount() );//  idLib::frameNumber );
-		} 
-
 		// allow changing SIMD usage on the fly
 		if( com_forceGenericSIMD.IsModified() )
 		{
@@ -674,6 +685,7 @@ void idCommonLocal::Frame()
 							}
 							else if ( vr->PDAforced && !vr->PDArising )
 							{
+								common->Printf( "idCommonLocal::Frame() 1 setting PDAforceToggle true\n" );
 								vr->PDAforcetoggle = true;
 								PDAopenedByPause = false;
 								vr->VR_GAME_PAUSED = false;
@@ -690,7 +702,7 @@ void idCommonLocal::Frame()
 				}
 				else // game is not paused, see if we need to pause it
 				{
-					if ( pauseGame && ingame ) // we need to pause 
+					if ( pauseGame && ingame && !vr->gameSaving ) // we need to pause 
 					{
 						if ( game->IsPDAOpen() && !PDAopenedByPause ) // the PDA was already opened, dont toggle it
 						{
@@ -699,8 +711,9 @@ void idCommonLocal::Frame()
 							vr->PDAforced = false;
 							vr->PDArising = false;
 						}
-						else if ( !vr->PDAforced && !vr->PDArising ) // force a PDA toggle;
+						else if ( !vr->PDAforced && !vr->PDArising  ) // force a PDA toggle;
 						{
+							common->Printf( "idCommonLocal::Frame() 2 setting PDAforceToggle true\n" );
 							vr->PDAforcetoggle = true;
 							PDAopenedByPause = true;
 						}
@@ -964,13 +977,7 @@ void idCommonLocal::Frame()
 		mainFrameTiming = frameTiming;
 		
 		session->GetSaveGameManager().Pump();
-		
-		// Koz begin
-		if ( game->isVR )
-		{
-			vr->FrameEnd();
-		}
-		// Koz end
+				
 	}
 		
 

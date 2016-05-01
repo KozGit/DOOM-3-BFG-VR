@@ -340,10 +340,11 @@ void idGrabber::StartDrag( idEntity* grabEnt, int id )
 
 	// start the screen warp
 
-	if ( !game->isVR ) // koz don't warp in VR - it's a pukefest.
+	if ( !game->isVR ) // koz don't warp in VR.  This needs a new shader if 
 	{
 		warpId = thePlayer->playerView.AddWarp( phys->GetOrigin(), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 160, 2000 );
 	}
+	
 }
 
 /*
@@ -421,7 +422,21 @@ void idGrabber::StopDrag( bool dropOnly )
 		else
 		{
 			// Shoot the object forward
-			ent->ApplyImpulse( thePlayer, 0, ent->GetPhysics()->GetOrigin(), thePlayer->firstPersonViewAxis[0] * THROW_SCALE * ent->GetPhysics()->GetMass() );
+			// koz begin : in vr launch the object in the direction the grabber is pointing
+			if ( game->isVR )
+			{
+				static idVec3 launchOrigin = vec3_zero;
+				static idMat3 launchAxis = mat3_identity;
+				
+				thePlayer->weapon->GetProjectileLaunchOriginAndAxis( launchOrigin, launchAxis );
+				ent->ApplyImpulse( thePlayer, 0, ent->GetPhysics()->GetOrigin(), launchAxis[0] * THROW_SCALE * ent->GetPhysics()->GetMass() );
+			}
+			else // in normal play launch in the direction the body is facing
+			{
+				ent->ApplyImpulse( thePlayer, 0, ent->GetPhysics()->GetOrigin(), thePlayer->firstPersonViewAxis[0] * THROW_SCALE * ent->GetPhysics()->GetMass() );
+			}
+			// koz end
+
 			thePlayer->StartSoundShader( declManager->FindSound( "grabber_release" ), SND_CHANNEL_WEAPON, 0, false, NULL );
 			
 			// Orient projectiles away from the player

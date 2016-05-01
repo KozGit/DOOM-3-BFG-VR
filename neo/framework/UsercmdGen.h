@@ -84,6 +84,8 @@ const int IMPULSE_34			= 34;			// comfort turn right
 const int IMPULSE_35			= 35;			// comfort turn left
 const int IMPULSE_36			= 36;			// toggle hud
 const int IMPULSE_37			= 37;			// toggle headingbeam
+const int IMPULSE_38			= 38;			// walk in place
+const int IMPULSE_39			= 39;			// freelook
 //koz end
 
 class usercmd_t
@@ -201,6 +203,8 @@ typedef enum
 	UB_IMPULSE35, // comfort turn left
 	UB_IMPULSE36, // hud toggle
 	UB_IMPULSE37, // headingbeam toggle
+	UB_IMPULSE38, // walk in place
+	UB_IMPULSE39, // freelook
 	// Koz end
 	
 	UB_MAX_BUTTONS

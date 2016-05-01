@@ -55,6 +55,7 @@ entityDef weapon_fists {
 	"snd_acquire"				"guisounds_weapon"
 	"skin_invisible"			"skins/fists_invis"
 	
+	// koz hand skins
 	"skin_1a"					"vr/weaponhands/0h.skin"
 	"skin_2a"					"vr/weaponhands/1h.skin"
 	"skin_3a"					"vr/weaponhands/2h.skin"
@@ -76,6 +77,7 @@ entityDef weapon_fists {
 	"controllerShakeLowMag"		"0.6"
 	"controllerShakeLowTime"	"100"
 }
+
 
 model viewmodel_fists {
 	mesh			models/md5/weapons/fists_view/fists.md5mesh

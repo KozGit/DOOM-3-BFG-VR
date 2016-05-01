@@ -53,7 +53,7 @@ typedef enum
 } weaponStatus_t;
 
 typedef enum { // koz weapon enumerations
-	NO_WEAPON = 0,
+	WEAPON_NONE = 0,
 	WEAPON_FISTS,
 	WEAPON_CHAINSAW,
 	WEAPON_PISTOL,
@@ -74,7 +74,7 @@ typedef enum { // koz weapon enumerations
 } weapon_t;
 
 // koz flashOffsets - values are used to move flashlight model to 'mount' to the active weapon.  Hacky McCrappyHack was here.
-const idVec3 flashOffsets[int( WEAPON_NUM_WEAPONS )] = {	idVec3( 0.0f, 0.0f, 0.0f ),			// NO_WEAPON
+const idVec3 flashOffsets[int( WEAPON_NUM_WEAPONS )] = {	idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_NONE
 															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_FISTS
 															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_CHAINSAW
 															idVec3( -4.0f, -9.0f, -1.6f ),		// WEAPON_PISTOL
@@ -94,7 +94,7 @@ const idVec3 flashOffsets[int( WEAPON_NUM_WEAPONS )] = {	idVec3( 0.0f, 0.0f, 0.0
 };
 
 // koz weaponOriginOffsets - offsets to move local origin of weapon viewmodels to be centered around grip/hand location
-const idVec3 weaponOriginOffsets[int( WEAPON_NUM_WEAPONS )] = { idVec3( 0.0f, 0.0f, 0.0f ),			// NO_WEAPON
+const idVec3 weaponOriginOffsets[int( WEAPON_NUM_WEAPONS )] = { idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_NONE
 																idVec3( -8.0f, 7.0f, 7.0f ),			// WEAPON_FISTS
 																idVec3( 6.0f, 3.5f, 16.0f ),			// WEAPON_CHAINSAW
 																idVec3( -7.0f, 5.0f, 7.0f ),		// WEAPON_PISTOL
@@ -102,14 +102,15 @@ const idVec3 weaponOriginOffsets[int( WEAPON_NUM_WEAPONS )] = { idVec3( 0.0f, 0.
 																idVec3( -7.0f, 4.0f, 10.0f ),		// WEAPON_MACHINEGUN
 																idVec3( -3.5f, 2.0f, 0.0f ),		// WEAPON_CHAINGUN
 																//idVec3( -13.0f, 0.0f, 9.0f ),		// WEAPON_HANDGRENADE old
-																idVec3( -12.0f, 2.0f, 10.0f ),		// WEAPON_HANDGRENADE
+																//idVec3( -12.0f, 2.0f, 10.0f ),		// WEAPON_HANDGRENADE
+																idVec3( 0, 0, 0 ),		// WEAPON_HANDGRENADE
 																idVec3( -5.0f, 4.0f, 12.0f ),		// WEAPON_PLASMAGUN
 																idVec3( -9.0f, 4.0f, 14.0f ),		// WEAPON_ROCKETLAUNCHER
 																idVec3( -9.0f, 4.0f, 14.0f ),		// WEAPON_BFG	
 																idVec3( -8.0f, 6.0f, 7.0f ),		// WEAPON_SOULCUBE
-																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_SHOTGUN_DOUBLE
-																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_SHOTGUN_DOUBLE_MP
-																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_GRABBER
+																idVec3( 3.0f, 3.0f, 5.0f ),			// WEAPON_SHOTGUN_DOUBLE
+																idVec3( 3.0f, 3.0f, 5.0f ),			// WEAPON_SHOTGUN_DOUBLE_MP
+																idVec3( -7.0f, 5.8f, 6.5f ),			// WEAPON_GRABBER
 																idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_ARTIFACT
 																//idVec3( -3.0f, 0.0f, 4.5f )			// WEAPON_PDA old
 																idVec3( 3.0f, 2.0f, -5.0f )			// WEAPON_PDA old
@@ -117,7 +118,7 @@ const idVec3 weaponOriginOffsets[int( WEAPON_NUM_WEAPONS )] = { idVec3( 0.0f, 0.
 
 //koz weaponRotOffsets - weapon rotation around each axis to bring weapon viewmodel to straight/level
 //																		 pitch	yaw	  roll
-const idAngles weaponRotOffsets[int( WEAPON_NUM_WEAPONS )] = {	idAngles( 0.0f, 0.0f, 0.0f ),		// NO_WEAPON
+const idAngles weaponRotOffsets[int( WEAPON_NUM_WEAPONS )] = {	idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_NONE
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_FISTS
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_CHAINSAW
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_PISTOL
@@ -125,12 +126,13 @@ const idAngles weaponRotOffsets[int( WEAPON_NUM_WEAPONS )] = {	idAngles( 0.0f, 0
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_MACHINEGUN
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_CHAINGUN
 																//idAngles( -7.0f, 0.0f, 46.0f ),	// WEAPON_HANDGRENADE old
-																idAngles( 15.0f, 0.0f, 46.0f ),	// WEAPON_HANDGRENADE
+																//idAngles( 15.0f, 0.0f, 46.0f ),	// WEAPON_HANDGRENADE
+																idAngles( 0.0f, 0.0f, 0.0f ),	// WEAPON_HANDGRENADE
 																idAngles( 1.0f, 0.0f, -7.0f ),		// WEAPON_PLASMAGUN
 																idAngles( 0.0f, 0.0f, -2.0f ),		// WEAPON_ROCKETLAUNCHER
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_BFG
 																idAngles( 30.0f, 0.0f, -2.0f ),		// WEAPON_SOULCUBE
-																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_SHOTGUN_DOUBLE
+																idAngles( 5.0f, -7.0f, 3.0f ),		// WEAPON_SHOTGUN_DOUBLE
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_SHOTGUN_DOUBLE_MP
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_GRABBER
 																idAngles( 0.0f, 0.0f, 0.0f ),		// WEAPON_ARTIFACT

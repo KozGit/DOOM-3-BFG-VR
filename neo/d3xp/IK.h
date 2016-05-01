@@ -55,6 +55,7 @@ public:
 	virtual void			ClearJointMods();
 	
 	bool					SolveTwoBones( const idVec3& startPos, const idVec3& endPos, const idVec3& dir, float len0, float len1, idVec3& jointPos );
+	bool					SolveTwoArmBones( idVec3& startPos, idVec3& endPos, const idVec3& dir, float len0, float len1, idVec3& jointPos );
 	float					GetBoneAxis( const idVec3& startPos, const idVec3& endPos, const idVec3& dir, idMat3& axis );
 	
 protected:
@@ -160,16 +161,20 @@ public:
 	virtual bool			Init( idEntity* self, const char* anim, const idVec3& modelOffset );
 	virtual void			Evaluate();
 	virtual void			ClearJointMods();
-	
-private:
 
-	static const int		MAX_ARMS	= 2;
-	
-	int						numArms;
-	int						enabledArms;
+	// koz begin  - moved from private
+	static const int		MAX_ARMS = 2;
 	jointHandle_t			handJoints[MAX_ARMS];
 	jointHandle_t			elbowJoints[MAX_ARMS];
 	jointHandle_t			shoulderJoints[MAX_ARMS];
+	jointHandle_t			wristJoints[MAX_ARMS];
+	// koz end
+
+private:
+		
+	int						numArms;
+	int						enabledArms;
+	
 	jointHandle_t			dirJoints[MAX_ARMS];
 	
 	idVec3					shoulderForward[MAX_ARMS];

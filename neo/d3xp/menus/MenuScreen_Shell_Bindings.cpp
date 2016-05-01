@@ -52,6 +52,9 @@ static bindInfo_t keyboardBinds[] =
 	{ "Comfort Turn Left", "_impulse35" },		// KOZ COMFORT TURN LEFT
 	{ "Comfort Turn Right", "_impulse34" },		// KOZ COMFORT TURN RIGHT
 	{ "Toggle Heading Beam", "_impulse37" },	// KOZ TOGGLE HEADING BEAM
+	{ "Walk in Place", "_impulse38" },			// KOZ Walk In Place
+	{ "Freelook", "_impulse39" },				// KOZ Freelook
+	
 	{ "                                ", "" }, // koz divider
 	{ "#str_02095", "" },						// HEADING
 	{ "#str_02112", "_attack" },				// ATTACK

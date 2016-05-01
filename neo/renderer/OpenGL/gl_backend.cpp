@@ -128,67 +128,76 @@ We want to exit this with the GPU idle, right at vsync
 const void GL_BlockingSwapBuffers()
 {
 	RENDERLOG_PRINTF( "***************** GL_BlockingSwapBuffers *****************\n\n\n" );
-	
+
 	const int beforeFinish = Sys_Milliseconds();
-	
-	if( !glConfig.syncAvailable )
+	int beforeFence = Sys_Milliseconds();
+//	if ( game->isVR )
+//	{
+//		int beforeFence = Sys_Milliseconds();
+//		glFinish();
+	//}
+//	else
 	{
-		glFinish();
-	}
-	
-	const int beforeSwap = Sys_Milliseconds();
-	if( r_showSwapBuffers.GetBool() && beforeSwap - beforeFinish > 1 )
-	{
-		common->Printf( "%i msec to glFinish\n", beforeSwap - beforeFinish );
-	}
-	
-	GLimp_SwapBuffers();
-	
-	const int beforeFence = Sys_Milliseconds();
-	if( r_showSwapBuffers.GetBool() && beforeFence - beforeSwap > 1 )
-	{
-		common->Printf( "%i msec to swapBuffers\n", beforeFence - beforeSwap );
-	}
-	
-	if( glConfig.syncAvailable  ) 
-	{
-		swapIndex ^= 1;
-		
-		if( glIsSync( renderSync[swapIndex] ) )
+		if ( !glConfig.syncAvailable )
 		{
-			glDeleteSync( renderSync[swapIndex] );
+			glFinish();
 		}
-		// draw something tiny to ensure the sync is after the swap
-		const int start = Sys_Milliseconds();
-		glScissor( 0, 0, 1, 1 );
-		glEnable( GL_SCISSOR_TEST );
-		glClear( GL_COLOR_BUFFER_BIT );
-		renderSync[swapIndex] = glFenceSync( GL_SYNC_GPU_COMMANDS_COMPLETE, 0 );
-		const int end = Sys_Milliseconds();
-		if( r_showSwapBuffers.GetBool() && end - start > 1 )
+
+		const int beforeSwap = Sys_Milliseconds();
+		if ( r_showSwapBuffers.GetBool() && beforeSwap - beforeFinish > 1 )
 		{
-			common->Printf( "%i msec to start fence\n", end - start );
+			common->Printf( "%i msec to glFinish\n", beforeSwap - beforeFinish );
 		}
-		
-		GLsync	syncToWaitOn;
-		if( r_syncEveryFrame.GetBool() )
+
+		GLimp_SwapBuffers();
+
+		beforeFence = Sys_Milliseconds();
+		if ( r_showSwapBuffers.GetBool() && beforeFence - beforeSwap > 1 )
 		{
-			syncToWaitOn = renderSync[swapIndex];
+			common->Printf( "%i msec to swapBuffers\n", beforeFence - beforeSwap );
 		}
-		else
+
+		if ( glConfig.syncAvailable )
 		{
-			syncToWaitOn = renderSync[!swapIndex];
-		}
-		
-		if( glIsSync( syncToWaitOn ) )
-		{
-			for( GLenum r = GL_TIMEOUT_EXPIRED; r == GL_TIMEOUT_EXPIRED; )
+			swapIndex ^= 1;
+
+			if ( glIsSync( renderSync[swapIndex] ) )
 			{
-				r = glClientWaitSync( syncToWaitOn, GL_SYNC_FLUSH_COMMANDS_BIT, 1000 * 1000 );
+				glDeleteSync( renderSync[swapIndex] );
+			}
+			// draw something tiny to ensure the sync is after the swap
+			const int start = Sys_Milliseconds();
+			glScissor( 0, 0, 1, 1 );
+			glEnable( GL_SCISSOR_TEST );
+			glClear( GL_COLOR_BUFFER_BIT );
+			renderSync[swapIndex] = glFenceSync( GL_SYNC_GPU_COMMANDS_COMPLETE, 0 );
+			const int end = Sys_Milliseconds();
+			if ( r_showSwapBuffers.GetBool() && end - start > 1 )
+			{
+				common->Printf( "%i msec to start fence\n", end - start );
+			}
+
+			GLsync	syncToWaitOn;
+			if ( r_syncEveryFrame.GetBool() )
+			{
+				syncToWaitOn = renderSync[swapIndex];
+			}
+			else
+			{
+				syncToWaitOn = renderSync[!swapIndex];
+			}
+
+			if ( glIsSync( syncToWaitOn ) )
+			{
+				for ( GLenum r = GL_TIMEOUT_EXPIRED; r == GL_TIMEOUT_EXPIRED; )
+				{
+					r = glClientWaitSync( syncToWaitOn, GL_SYNC_FLUSH_COMMANDS_BIT, 1000 * 1000 );
+				}
 			}
 		}
+
+
 	}
-	
 	const int afterFence = Sys_Milliseconds();
 	if( r_showSwapBuffers.GetBool() && afterFence - beforeFence > 1 )
 	{
@@ -247,7 +256,8 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	{
 		globalFramebuffers.primaryFBO->Bind();
 	}
-	else {
+	else
+	{
 		glDrawBuffer( GL_BACK_LEFT );
 	}
 	// Koz end
@@ -421,10 +431,8 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			
 			if ( game->isVR ) 
 			{
-							
-				
-
-				if ( vr->playerDead || (game->Shell_IsActive() && !vr->PDAforced && !vr->PDArising) )
+			
+				if ( vr->playerDead || (game->Shell_IsActive() && !vr->PDAforced && !vr->PDArising ) || (!vr->PDAforced && common->Dialog().IsDialogActive() ) ) 
 				{
 					vr->HMDTrackStatic();
 				}
@@ -433,7 +441,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 					vr->HMDRender( stereoRenderImages[0], stereoRenderImages[1] );
 				}
 
-				GL_CheckErrors();
+				//koz GL_CheckErrors();
 				break;
 			}
 			

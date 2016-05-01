@@ -652,11 +652,11 @@ idClipModel::Unlink
 void idClipModel::Unlink()
 {
 	clipLink_t* link;
-	
-	for( link = clipLinks; link; link = clipLinks )
+
+	for ( link = clipLinks; link; link = clipLinks )
 	{
 		clipLinks = link->nextLink;
-		if( link->prevInSector )
+		if ( link->prevInSector )
 		{
 			link->prevInSector->nextInSector = link->nextInSector;
 		}
@@ -664,12 +664,13 @@ void idClipModel::Unlink()
 		{
 			link->sector->clipLinks = link->nextInSector;
 		}
-		if( link->nextInSector )
+		if ( link->nextInSector )
 		{
 			link->nextInSector->prevInSector = link->prevInSector;
 		}
 		clipLinkAllocator.Free( link );
 	}
+	
 }
 
 /*

@@ -229,6 +229,61 @@ bool idIK::SolveTwoBones( const idVec3& startPos, const idVec3& endPos, const id
 
 /*
 ================
+// koz
+// Moves the elbow towards the wrist (stretches the upper arm) if player reach exceeds model arm length when using motion controls
+// idIK::SolveTwoArmBones
+================
+*/
+bool idIK::SolveTwoArmBones( idVec3& startPos, idVec3& endPos, const idVec3& dir, float len0, float len1, idVec3& jointPos )
+{
+	float length, lengthSqr, lengthInv, x, y, maxLen, lenDif;
+	idVec3 vec0, vec1, vec2, vec3;
+
+	vec0 = endPos - startPos;
+	lengthSqr = vec0.LengthSqr();
+	lengthInv = idMath::InvSqrt( lengthSqr );
+	length = lengthInv * lengthSqr;
+
+	// if the start and end position are too far out or too close to each other
+	maxLen = ( len0 + len1 ) * 1.40f;
+
+	if ( length > maxLen && 0 )
+	{
+		
+		lenDif = ( maxLen - length ) / 2.0f;
+		vec0.Normalize();
+		endPos = startPos + maxLen * vec0;
+		
+		jointPos = endPos - ( len1 - lenDif ) * vec0;
+		startPos = startPos + lenDif * vec0;
+		return false;
+	}
+	
+	if ( length > len0 + len1 )
+	{
+		vec0.Normalize();
+		jointPos = endPos - len1 * vec0;
+		return false;
+	}
+	else if ( length < idMath::Fabs( len0 - len1 ) )
+	{
+		jointPos = startPos + 0.5f * vec0;
+		return false;
+	}
+
+	vec0 *= lengthInv;
+	vec1 = dir - vec0 * dir * vec0;
+	vec1.Normalize();
+
+	x = (length * length + len0 * len0 - len1 * len1) * (0.5f * lengthInv);
+	y = idMath::Sqrt( len0 * len0 - x * x );
+
+	jointPos = startPos + x * vec0 + y * vec1;
+
+	return true;
+}
+/*
+================
 idIK::GetBoneAxis
 ================
 */
@@ -598,7 +653,6 @@ bool idIK_Walk::Init( idEntity* self, const char* anim, const idVec3& modelOffse
 	}
 	
 	initialized = true;
-	
 	return true;
 }
 
@@ -1052,12 +1106,16 @@ bool idIK_Reach::Init( idEntity* self, const char* anim, const idVec3& modelOffs
 		return false;
 	}
 	
+	jointName = self->spawnArgs.GetString("mesh" );
+	if ( strstr( jointName, "spplayer" ) ) common->Printf( "IK Player found" );
+	
 	numArms = Min( self->spawnArgs.GetInt( "ik_numArms", "0" ), MAX_ARMS );
 	if( numArms == 0 )
 	{
 		return true;
 	}
-	
+	else common->Printf( "idIK_Reach::Init IK found %d Arms\n",numArms );
+
 	if( !idIK::Init( self, anim, modelOffset ) )
 	{
 		return false;
@@ -1094,6 +1152,13 @@ bool idIK_Reach::Init( idEntity* self, const char* anim, const idVec3& modelOffs
 		if( shoulderJoints[i] == INVALID_JOINT )
 		{
 			gameLocal.Error( "idIK_Reach::Init: invalid shoulder joint '%s'\n", jointName );
+		}
+
+		jointName = self->spawnArgs.GetString( va( "ik_wrist%d", i + 1 ) );
+		wristJoints[i] = animator->GetJointHandle( jointName );
+		if ( wristJoints[i] == INVALID_JOINT )
+		{
+			gameLocal.Error( "idIK_Reach::Init: invalid wrist joint '%s'\n", jointName );
 		}
 		
 		jointName = self->spawnArgs.GetString( va( "ik_elbowDir%d", i + 1 ) );
@@ -1150,10 +1215,13 @@ idIK_Reach::Evaluate
 */
 void idIK_Reach::Evaluate()
 {
+	
+	
 	int i;
 	idVec3 modelOrigin, shoulderOrigin, elbowOrigin, handOrigin, shoulderDir, elbowDir;
 	idMat3 modelAxis, axis;
 	idMat3 shoulderAxis[MAX_ARMS], elbowAxis[MAX_ARMS];
+	idVec3 elbowPos[MAX_ARMS], handPos[MAX_ARMS], shoulderPos[MAX_ARMS]; // koz
 	trace_t trace;
 	
 	modelOrigin = self->GetRenderEntity()->origin;
@@ -1162,7 +1230,6 @@ void idIK_Reach::Evaluate()
 	// solve IK
 	for( i = 0; i < numArms; i++ )
 	{
-	
 		// get the position of the shoulder in world space
 		animator->GetJointTransform( shoulderJoints[i], gameLocal.time, shoulderOrigin, axis );
 		shoulderOrigin = modelOrigin + shoulderOrigin * modelAxis;
@@ -1173,16 +1240,28 @@ void idIK_Reach::Evaluate()
 		handOrigin = modelOrigin + handOrigin * modelAxis;
 		
 		// get first collision going from shoulder to hand
-		gameLocal.clip.TracePoint( trace, shoulderOrigin, handOrigin, CONTENTS_SOLID, self );
-		handOrigin = trace.endpos;
+	//	gameLocal.clip.TracePoint( trace, shoulderOrigin, handOrigin, CONTENTS_SOLID, self );
+	//	handOrigin = trace.endpos;
 		
 		// get the IK bend direction
 		animator->GetJointTransform( elbowJoints[i], gameLocal.time, elbowOrigin, axis );
 		elbowDir = elbowForward[i] * axis * modelAxis;
 		
 		// solve IK and calculate elbow position
-		SolveTwoBones( shoulderOrigin, handOrigin, elbowDir, upperArmLength[i], lowerArmLength[i], elbowOrigin );
+		SolveTwoArmBones( shoulderOrigin, handOrigin, elbowDir, upperArmLength[i], lowerArmLength[i], elbowOrigin );
 		
+		elbowPos[i] = elbowOrigin - modelOrigin; // koz actually move the elbow joint
+		elbowPos[i] *= modelAxis.Inverse();
+
+		handPos[i] = handOrigin - modelOrigin; // koz restrain hand position to 1.2 times arm length to prevent plasticman arms
+		handPos[i] *= modelAxis.Inverse(); 
+
+		shoulderPos[i] = shoulderOrigin - modelOrigin;
+		shoulderPos[i] *= modelAxis.Inverse();
+
+		//common->Printf( "Hand %d position %f %f %f\n", i, handOrigin.x, handOrigin.y, handOrigin.z );
+		//common->Printf( "Elbow %d position %f %f %f\n", i, elbowPos[i].x, elbowPos[i].y, elbowPos[i].z );
+
 		if( ik_debug.GetBool() )
 		{
 			gameRenderWorld->DebugLine( colorCyan, shoulderOrigin, elbowOrigin );
@@ -1200,10 +1279,13 @@ void idIK_Reach::Evaluate()
 		elbowAxis[i] = lowerArmToElbowJoint[i] * ( axis * modelAxis.Transpose() );
 	}
 	
-	for( i = 0; i < numArms; i++ )
+	for ( i = 0; i < numArms; i++ )
 	{
 		animator->SetJointAxis( shoulderJoints[i], JOINTMOD_WORLD_OVERRIDE, shoulderAxis[i] );
 		animator->SetJointAxis( elbowJoints[i], JOINTMOD_WORLD_OVERRIDE, elbowAxis[i] );
+		animator->SetJointPos( elbowJoints[i], JOINTMOD_WORLD_OVERRIDE, elbowPos[i] );// koz
+		animator->SetJointPos( handJoints[i], JOINTMOD_WORLD_OVERRIDE, handPos[i] );// koz
+		
 	}
 	
 	ik_activate = true;

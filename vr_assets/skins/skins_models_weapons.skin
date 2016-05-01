@@ -642,12 +642,23 @@ skin skins/models/weapons/flashlight_offvr/flashhands/0h {
 	vr/leftarm textures/common/nodraw
 }
 
-skin skins/models/headingbeamarrowsscroll {
+skin skins/models/headingbeamarrowsscroll{
 }
 
-skin skins/models/headingbeamarrows {
+skin skins/models/headingbeamarrows{
     headingBeamArrowsScroll headingBeamArrows
 }
-skin skins/models/headingbeamsolid {
+skin skins/models/headingbeamsolid{
     headingBeamArrowsScroll headingBeamSolid
+}
+
+skin skins/vr/crosshairDot{
+}
+
+skin skins/vr/crosshairCircleDot{
+	vr/weaponsight vr/weaponsightCircleDot
+}
+
+skin skins/vr/crosshairCross{
+	vr/weaponsight vr/weaponsightCross
 }

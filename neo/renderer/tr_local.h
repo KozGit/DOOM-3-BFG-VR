@@ -1453,7 +1453,6 @@ void RB_SetMVP( const idRenderMatrix& mvp );
 void RB_DrawElementsWithCounters( const drawSurf_t* surf );
 
 void RB_DrawStripWithCounters( const drawSurf_t *surf ); // koz fixme dont use strips for hmd mesh 
-void RB_DrawDistortionMesh( int eye, bool timewarp, int ocuframe, ovrPosef thePose ); //koz mesh
 
 void RB_DrawViewInternal( const viewDef_t* viewDef, const int stereoEye );
 void RB_DrawView( const void* data, const int stereoEye );

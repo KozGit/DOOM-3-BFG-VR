@@ -57,7 +57,7 @@ entityDef weapon_flashlight_new {
 	"skin_off"					"skins/models/weapons/flashlight_off"
 	"skin_off_invis"			"skins/models/weapons/flashlight_off_invis_new"
 	
-	
+	// koz hand skins
 	"skin_flashskin_1a"				"skins/models/weapons/flashlight_onvr/flashhands/1hsw"
 	"skin_flashskin_2a"				"skins/models/weapons/flashlight_onvr/flashhands/1h"
 	"skin_flashskin_3a"				"skins/models/weapons/flashlight_onvr/flashhands/0h"
@@ -68,6 +68,7 @@ entityDef weapon_flashlight_new {
 
 	"start_off"					"1"
 }
+
 
 entityDef moveable_item_flashlight_new {
 	"inherit"					"weapon_flashlight_new"

@@ -175,6 +175,9 @@ userCmdString_t	userCmdStrings[] =
 	{ "_impulse35", UB_IMPULSE35 }, // new impulse for comfort turn left
 	{ "_impulse36", UB_IMPULSE36 }, // new impulse for hud toggle;
 	{ "_impulse37", UB_IMPULSE37 }, // new impulse for headingbeam toggle;
+	{ "_impulse38", UB_IMPULSE38 }, // new impulse for walk in place
+	{ "_impulse39", UB_IMPULSE39 }, // new impulse for freelook
+	// koz end
 	
 
 		
@@ -1063,7 +1066,7 @@ void DrawJoypadTexture( const int size, byte image[] )
 Koz - mapAxis
 
 Want to be able to map any joystic axis/direction to any movement/look command.
-Process each joystic axis, and update mapped look and move vectors so
+Process each joystic axis, and update to mapped look and move axes so
 the normal joystick handling can process movement scaling, etc.
 =================
 */
@@ -1082,7 +1085,7 @@ float idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int ax
 														K_HYDRA_RIGHT_STICK_LEFT,	K_HYDRA_RIGHT_STICK_RIGHT,
 														K_HYDRA_RIGHT_STICK_UP,		K_HYDRA_RIGHT_STICK_DOWN,
 														K_L_HYDRATRIG,				K_L_HYDRATRIG,
-														K_R_HYDRATRIG,			K_R_HYDRATRIG
+														K_R_HYDRATRIG,				K_R_HYDRATRIG
 	};
 
 	float jaxisValue = 0.0f;
@@ -1320,6 +1323,7 @@ void idUsercmdGenLocal::CmdButtons()
 	{
 		cmd.buttons |= BUTTON_CROUCH;
 	}
+	
 }
 
 /*
@@ -1377,9 +1381,45 @@ void idUsercmdGenLocal::MakeCurrent()
 		
 		// get basic movement from keyboard
 		KeyMove();
-		
+
 		// aim assist
 		AimAssist();
+
+		if ( vr->isWalking )
+		{
+			// WIP button pressed
+			// if freelook not enabled, turn body to last view
+
+			if ( !usercmdGen->ButtonState( UB_IMPULSE39 ) )
+			{
+				// turn body to view
+				//player->SnapBodyToView();
+			
+				
+				viewangles[YAW] += vr->lastHMDYaw - vr->bodyYawOffset;
+				//newBodyAngles.Normalize180();
+
+				hydraData currentHydra = hydra_zero;
+				hydraData currentHydraOffset = hydra_zero;
+				idQuat rotQuat;
+
+				rotQuat = idAngles( 0.0f, (vr->lastHMDYaw - vr->bodyYawOffset), 0.0f ).Normalize180().ToQuat();
+
+
+				vr->bodyYawOffset = vr->lastHMDYaw;
+				//SetViewAngles( newBodyAngles );
+				//viewAngles.yaw = newBodyAngles.yaw;
+			
+				vr->HydraGetLeftOffset( currentHydra );
+				currentHydra.hydraRotationQuat *= rotQuat;
+				vr->HydraSetLeftOffset( currentHydra );
+
+				vr->HydraGetRightOffset( currentHydra );
+				currentHydra.hydraRotationQuat *= rotQuat;
+				vr->HydraSetRightOffset( currentHydra );
+
+			}
+		}
 		
 		// check to make sure the angles haven't wrapped
 		if( viewangles[PITCH] - oldAngles[PITCH] > 90 )

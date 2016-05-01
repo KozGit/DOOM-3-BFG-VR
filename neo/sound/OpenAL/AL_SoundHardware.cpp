@@ -168,6 +168,10 @@ void idSoundHardware_OpenAL::Init()
 	
 	common->Printf( "Setup OpenAL device and context... " );
 	
+
+
+
+
 	openalDevice = alcOpenDevice( NULL );
 	if( openalDevice == NULL )
 	{

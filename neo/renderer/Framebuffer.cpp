@@ -32,6 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_local.h"
 #include "Framebuffer.h"
 
+#include "sys\win32\win_local.h"
+
+
 //idList<Framebuffer*>	Framebuffer::framebuffers;
 
 static idList<Framebuffer*>	framebuffers;
@@ -98,7 +101,7 @@ void ResolveMSAA( void )
 			glBindFramebuffer( GL_READ_FRAMEBUFFER, globalFramebuffers.primaryFBO->GetFramebuffer() ); // bind primary FBO for read
 			//glClearColor( 0, 0, 0, 0 );
 			//glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
-						
+			//GL_Clear( true, true, true, STENCIL_SHADOW_TEST_VALUE, 0, 0, 0, 0 );
 			glBlitFramebuffer( 0, 0, globalFramebuffers.primaryFBO->GetWidth(), globalFramebuffers.primaryFBO->GetHeight(), 0, 0, globalFramebuffers.resolveFBO->GetWidth(), globalFramebuffers.resolveFBO->GetHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR ); // blit from primary FBO to resolve MSAA antialiasing.
 			globalFramebuffers.resolveFBO->Bind();
 			
@@ -128,6 +131,8 @@ Framebuffer::Framebuffer( const char* name, int w, int h, bool msaa )
 	// Koz
 	useMsaa = msaa;
 	msaaSamples = r_multiSamples.GetInteger();
+	//if ( !useMsaa ) msaaSamples = 0;
+	//common->Printf( "Use MSAA = %d Framebuffer msaaSamples = %d\n", useMsaa, msaaSamples ); //koz fixme
 	if ( msaaSamples == 0 ) useMsaa = false;
 	// Koz end
 	
@@ -170,10 +175,12 @@ void Framebuffer::Bind()
 	}
 #endif
 	
+
 	if( backEnd.glState.currentFramebuffer != this )
 	{
 		glBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );
 		backEnd.glState.currentFramebuffer = this;
+		wglSwapIntervalEXT( 0 );
 	}
 }
 

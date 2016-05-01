@@ -328,6 +328,14 @@ void idGameLocal::Init()
 	declManager->RegisterDeclFolder( "af",				".af",				DECL_AF );
 	declManager->RegisterDeclFolder( "newpdas",			".pda",				DECL_PDA );
 	
+	// koz fixme
+	// the filesystem was not scanning the 'materials' folder
+	// in the fs_game path, probably because of the way the filesystem is 
+	// being restarted to assign the base/vr or base/vrik paths to the fs_game cvar
+	// Registering the materials decl folder here corrects the issue
+	// but should really find/fix the root cause.
+	declManager->RegisterDeclFolder( "materials",		".mtr", DECL_MATERIAL );// koz
+
 	cmdSystem->AddCommand( "listModelDefs", idListDecls_f<DECL_MODELDEF>, CMD_FL_SYSTEM | CMD_FL_GAME, "lists model defs" );
 	cmdSystem->AddCommand( "printModelDefs", idPrintDecls_f<DECL_MODELDEF>, CMD_FL_SYSTEM | CMD_FL_GAME, "prints a model def", idCmdSystem::ArgCompletion_Decl<DECL_MODELDEF> );
 	
@@ -5762,7 +5770,14 @@ bool idGameLocal::Shell_IsActive() const
 {
 	if( shellHandler != NULL )
 	{
-		return shellHandler->IsActive();
+		if ( game->isVR )
+		{
+			return common->Dialog().IsDialogActive() || shellHandler->IsActive();
+		}
+		else
+		{
+			return shellHandler->IsActive();
+		}
 	}
 	return false;
 }

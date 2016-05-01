@@ -75,7 +75,7 @@ entityDef weapon_handgrenade {
 	"skin_nonade"				"skins/models/weapons/nonade"
 	"skin_nonade_invis"			"skins/models/weapons/nonade_invis"
 	
-	
+	// koz skins for hands/ statswatch
 	"skin_nade_1" 				"skins/models/weapons/nadevr/weaponhands/0h"
 	"skin_nade_2" 				"skins/models/weapons/nadevr/weaponhands/1h"
 	"skin_nade_3" 				"skins/models/weapons/nadevr/weaponhands/1hsw"
@@ -97,6 +97,7 @@ entityDef weapon_handgrenade {
 	"controllerShakeLowMag"		"0.6"
 	"controllerShakeLowTime"	"100"
 }
+
 
 entityDef env_grenade_explodeinhand {
 	"spawnclass"				"idAnimatedEntity"
@@ -141,13 +142,18 @@ model viewmodel_grenade {
 		// Was frame 6 -Xian
 	}		
 	anim throw 					models/md5/weapons/grenade_view/grenade_throw.md5anim {
-		frame 1					object_call GrenadeNade
-		frame 8					object_call GrenadeNoNade
+		
+		// koz changed so grenade is released from hand immediately in VR when using motion controls
+		frame 1					object_call GrenadeNoNade
+		//koz frame 1					object_call GrenadeNade
+		//koz frame 8					object_call GrenadeNoNade
 	}
 
 	anim throw_quick 			models/md5/weapons/grenade_view/grenade_fastthrow.md5anim {
-		frame 1					object_call GrenadeNade
-		frame 14				object_call GrenadeNoNade
+		// koz changed so grenade is released from hand immediately in VR when using motion controls
+		frame 1					object_call GrenadeNoNade
+		//koz frame 1				object_call GrenadeNade
+		//koz frame 14				object_call GrenadeNoNade
 	}
 }
 

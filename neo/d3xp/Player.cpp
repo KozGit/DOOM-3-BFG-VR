@@ -58,6 +58,22 @@ idCVar pm_clientInterpolation_Divergence( "pm_clientInterpolation_Divergence", "
 
 idCVar pm_clientAuthoritative_minSpeedSquared( "pm_clientAuthoritative_minSpeedSquared", "1000.0f", CVAR_FLOAT, "" );
 
+idCVar vr_wipScale( "vr_wipScale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "" );
+
+idCVar vr_wipPeriodMin( "vr_wipPeriodMin", "10.0", CVAR_FLOAT | CVAR_ARCHIVE, "" );
+idCVar vr_wipPeriodMax( "vr_wipPeriodMax", "2000.0", CVAR_FLOAT | CVAR_ARCHIVE, "" );
+
+idCVar vr_wipVelocityMin( "vr_wipVelocityMin", ".05", CVAR_FLOAT | CVAR_ARCHIVE, "" );
+idCVar vr_wipVelocityMax( "vr_wipVelocityMax", "2.0", CVAR_FLOAT | CVAR_ARCHIVE, "" );
+
+idCVar vr_headbbox( "vr_headbbox", "10.0", CVAR_FLOAT | CVAR_ARCHIVE, "" );
+
+idCVar vr_lbicep( "vr_lbicep", "-30", CVAR_FLOAT | CVAR_ARCHIVE, "" );
+
+idCVar vr_offsetWristYaw( "vr_offsetWristYaw", "0", CVAR_FLOAT | CVAR_ARCHIVE, "" );
+idCVar vr_offsetWristPitch( "vr_offsetWristPitch", "0", CVAR_FLOAT | CVAR_ARCHIVE, "" );
+idCVar vr_offsetWristRoll( "vr_offsetWristRoll", "0", CVAR_FLOAT | CVAR_ARCHIVE, "" );
+
 extern idCVar g_demoMode;
 
 
@@ -1958,7 +1974,16 @@ void idPlayer::Init()
 	{
 		gameLocal.Error( "Joint '%s' not found for 'bone_head' on '%s'", value, name.c_str() );
 	}
-	
+
+	// koz begin
+	value = spawnArgs.GetString( "bone_neck", "" );
+	neckJoint = animator.GetJointHandle( value );
+	if ( neckJoint == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str() );
+	}
+	// koz end	
+
 	// initialize the script variables
 	AI_FORWARD		= false;
 	AI_BACKWARD		= false;
@@ -2042,7 +2067,7 @@ void idPlayer::Init()
 	headingBeamEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/headingbeam.lwo" );
 	skinHeadingSolid = declManager->FindSkin( "skins/models/headingbeamsolid" );
 	skinHeadingArrows = declManager->FindSkin( "skins/models/headingbeamarrows" );
-	skinHeadinArrowsScroll = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
+	skinHeadingArrowsScroll = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
 				
 	laserSightActive = true;
 	headingBeamActive = true;
@@ -2051,6 +2076,10 @@ void idPlayer::Init()
 	PDAfixed = false;			// koz has the PDA been fixed in space?
 	PDAorigin = vec3_zero;
 	PDAaxis = mat3_identity;
+	
+	throwDirection = vec3_zero;
+	throwVelocity = vec3_zero;
+		
 	// Koz end
 
 }
@@ -2154,6 +2183,7 @@ void idPlayer::Spawn()
 	{
 		// supress model in non-player views, but allow it in mirrors and remote views
 		renderEntity.suppressSurfaceInViewID = entityNumber + 1;
+	
 	}
 	// koz end
 	
@@ -2165,6 +2195,7 @@ void idPlayer::Spawn()
 	{
 		headEnt->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1; //Carl: We still suppress the head with vr_showBody in 1st person
 		headEnt->GetRenderEntity()->noSelfShadow = true;
+		
 	}
 	
 	if( common->IsMultiplayer() )
@@ -2338,7 +2369,8 @@ void idPlayer::Spawn()
 		weapon.GetEntity()->ForceAmmoInClip();
 	}
 	
-	ovr_RecenterPose( vr->hmd ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
+	ovr_RecenterTrackingOrigin( vr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
+	
 
 }
 
@@ -2964,21 +2996,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	savefile->ReadInt( playedTimeResidual );
 	
 	aimAssist.Init( this );
-	
-	laserSightHandle = -1;
-	headingBeamHandle = -1; // koz
-	
-	// re-init the laser model
-	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
-	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
-	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
-	
-	// koz re-init the heading beam model
-	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
-	headingBeamEntity.hModel = renderModelManager->FindModel( "_HEADINGBEAM" );
-	//headingBeamEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
-	//headingBeamEntity.customShader = declManager->FindMaterial( "textures/sfx/fridgeglass1" );
-	
+		
 	for( int i = 0; i < MAX_PLAYER_PDA; i++ )
 	{
 		savefile->ReadBool( pdaHasBeenRead[i] );
@@ -3010,7 +3028,73 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		}
 	}
 	
-	ovr_RecenterPose( vr->hmd ); // Koz reset hmd orientation Koz fixme check if still appropriate here.
+	
+	//------------------------------------------------------------
+	// koz begin - VR specific initialization
+	
+	ovr_RecenterTrackingOrigin( vr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
+	
+	// make sure the clipmodels for the body and head are re-initialized.
+	SetClipModel();
+	
+	// get the neck bone
+	const char*			value;
+	value = spawnArgs.GetString( "bone_neck", "" );
+	neckJoint = animator.GetJointHandle( value );
+	if ( neckJoint == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str() );
+	}
+		
+	//re-init the VR ui models
+	laserSightHandle = -1;
+	headingBeamHandle = -1;
+	hudHandle = -1;
+	crosshairHandle = -1;
+
+	// re-init hud model
+	memset( &hudEntity, 0, sizeof( hudEntity ) );
+	hudEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/hud.lwo" );
+	hudEntity.customShader = declManager->FindMaterial( "vr/hud" );
+	hudEntity.weaponDepthHack = vr_hudOcclusion.GetBool();
+
+	// re-init crosshair model
+	memset( &crosshairEntity, 0, sizeof( crosshairEntity ) );
+	crosshairEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/weaponsight.lwo" );
+	crosshairEntity.weaponDepthHack = true;
+	
+	// re-init the lasersight model
+	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
+	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
+	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
+
+	// re-init the heading beam model
+	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
+	headingBeamEntity.hModel = renderModelManager->FindModel( "_HEADINGBEAM" );
+	
+	// re-init skins for heading indicator and crosshair
+	skinHeadingSolid = declManager->FindSkin( "skins/models/headingbeamsolid" );
+	skinHeadingArrows = declManager->FindSkin( "skins/models/headingbeamarrows" );
+	skinHeadingArrowsScroll = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
+	skinCrosshairDot = declManager->FindSkin( "skins/vr/crosshairDot" );
+	skinCrosshairCircleDot = declManager->FindSkin( "skins/vr/crosshairCircleDot" );;
+	skinCrosshairCross = declManager->FindSkin( "skins/vr/crosshairCross" );;
+	
+	laserSightActive = true;
+	headingBeamActive = true;
+	hudActive = true;
+
+	PDAfixed = false;			// koz has the PDA been fixed in space?
+	PDAorigin = vec3_zero;
+	PDAaxis = mat3_identity;
+
+	throwDirection = vec3_zero;
+	throwVelocity = vec3_zero;
+
+	armIK.Init( this, IK_ANIM, modelOffset );
+
+	// Koz end
+
 }
 
 /*
@@ -3771,6 +3855,7 @@ void idPlayer::DrawHUDVR( idMenuHandler_HUD* _hudManager )
 
 	renderSystem->CaptureRenderToImage( "_crosshairImage", true );
 	
+
 	if ( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || vr_hudType.GetInteger() == VR_HUD_NONE )
 	{
 		return;
@@ -3804,6 +3889,8 @@ void idPlayer::DrawHUDVR( idMenuHandler_HUD* _hudManager )
 	}
 
 	weapon.GetEntity()->UpdateGUI();
+	
+	console->Draw( false );
 		
 	renderSystem->CaptureRenderToImage( "_hudImage", true );
 	
@@ -5097,10 +5184,12 @@ void idPlayer::GivePDA( const idDeclPDA* pda, const char* securityItem, bool tog
 				{
 					if ( !game->isVR )
 					{
+						common->Printf( "idPlayer::GivePDA calling TogglePDA\n" );
 						TogglePDA();
 					}
 					else
 					{
+						common->Printf( "idPlayer::GivePDA calling Select Weapon for PDA\n" );
 						SelectWeapon( weapon_pda, true );
 					}
 				}
@@ -5433,6 +5522,7 @@ idPlayer::SelectWeapon
 */
 void idPlayer::SelectWeapon( int num, bool force )
 {
+	common->Printf( "Select weapon called\n" );
 	const char* weap;
 	
 	if( !weaponEnabled || spectating || gameLocal.inCinematic || health < 0 )
@@ -6571,7 +6661,7 @@ the focus and sending it a mouse move event
 */
 void idPlayer::UpdateFocus()
 {
-	idClipModel* clipModelList[ MAX_GENTITIES ];
+	idClipModel* clipModelList[MAX_GENTITIES];
 	idClipModel* clip;
 	int			listedClipModels;
 	idEntity*	oldFocus;
@@ -6589,15 +6679,15 @@ void idPlayer::UpdateFocus()
 	const idKeyValue* kv;
 	sysEvent_t	ev;
 	idUserInterface* ui;
-	
-	if( gameLocal.inCinematic )
+
+	if ( gameLocal.inCinematic )
 	{
 		return;
 	}
-	
+
 	// only update the focus character when attack button isn't pressed so players
 	// can still chainsaw NPC's
-	if( common->IsMultiplayer() || ( !focusCharacter && ( usercmd.buttons & BUTTON_ATTACK ) ) )
+	if ( common->IsMultiplayer() || ( !focusCharacter && (usercmd.buttons & BUTTON_ATTACK )) )
 	{
 		allowFocus = false;
 	}
@@ -6605,26 +6695,26 @@ void idPlayer::UpdateFocus()
 	{
 		allowFocus = true;
 	}
-	
-	oldFocus		= focusGUIent;
-	oldUI			= focusUI;
-	oldChar			= focusCharacter;
-	oldTalkCursor	= talkCursor;
-	oldVehicle		= focusVehicle;
-	
-	if( focusTime <= gameLocal.time )
+
+	oldFocus = focusGUIent;
+	oldUI = focusUI;
+	oldChar = focusCharacter;
+	oldTalkCursor = talkCursor;
+	oldVehicle = focusVehicle;
+
+	if ( focusTime <= gameLocal.time )
 	{
 		ClearFocus();
 	}
-	
+
 	// don't let spectators interact with GUIs
-	if( spectating )
+	if ( spectating )
 	{
 		return;
 	}
-	
+
 	start = GetEyePosition();
-	
+
 	// Koz begin
 	if ( game->isVR ) // koz fixme only when vr actually active.
 	{
@@ -6633,21 +6723,21 @@ void idPlayer::UpdateFocus()
 		idMat3 weaponAxis;
 		bool scanFromWeap;
 		float scanRange = 50.0f;
-		
+
 		scanFromWeap = weapon->GetMuzzlePositionWithHacks( start, weaponAxis );
 		if ( !scanFromWeap )
 		{
 			//weapon has no muzzle ( fists, grenades, chainsaw) so scan from center of view.
-			start = vr->lastViewOrigin; 
+			start = vr->lastViewOrigin;
 			weaponAxis = vr->lastViewAxis;
 			scanRange += 36.0f;
 		}
 		else
 		{
 			// Koz - if weapon has been lowered (in gui), raise pointer to compensate.
-			start -= weaponAxis[1] * weapon->hideOffset; 
+			start -= weaponAxis[1] * weapon->hideOffset;
 		}
-		
+
 		end = start + weaponAxis[0] * scanRange;//  Koz originial value was 80.0f - allowed access to gui from too great a distance (IMO), reduced to 50.0f Koz fixme - make cvar?
 	}
 	else
@@ -6655,96 +6745,110 @@ void idPlayer::UpdateFocus()
 		end = start + firstPersonViewAxis[0] * 80.0f;
 	}
 	// Koz end
-	
+
 	// player identification -> names to the hud
-	if( common->IsMultiplayer() && IsLocallyControlled() )
+	if ( common->IsMultiplayer() && IsLocallyControlled() )
 	{
 		idVec3 end = start + viewAngles.ToForward() * 768.0f;
 		gameLocal.clip.TracePoint( trace, start, end, MASK_SHOT_BOUNDINGBOX, this );
 		int iclient = -1;
-		if( ( trace.fraction < 1.0f ) && ( trace.c.entityNum < MAX_CLIENTS ) )
+		if ( (trace.fraction < 1.0f) && (trace.c.entityNum < MAX_CLIENTS) )
 		{
 			iclient = trace.c.entityNum;
 		}
-		if( MPAim != iclient )
+		if ( MPAim != iclient )
 		{
 			lastMPAim = MPAim;
 			MPAim = iclient;
 			lastMPAimTime = gameLocal.realClientTime;
 		}
 	}
-	
+
 	idBounds bounds( start );
 	bounds.AddPoint( end );
-	
-	listedClipModels = gameLocal.clip.ClipModelsTouchingBounds( bounds, -1, clipModelList, MAX_GENTITIES );
-	
-	// no pretense at sorting here, just assume that there will only be one active
-	// gui within range along the trace
-
+		
 	// Koz begin
-	// In VR, when the PDA model is active it needs to be hitscanned as if it were a gui.
+	// In VR, when the PDA model is active it needs to be hitscanned as if it were a gui. Because it's a gui.
 	if ( game->isVR )
 	{
-		if ( vr->VR_GAME_PAUSED || (game->IsPDAOpen() && vr->PDAclipModelSet) ) // koz scan the list for the PDA & process if hit.
+		if ( vr->VR_GAME_PAUSED || game->IsPDAOpen() ) 
 		{
-			for ( i = 0; i < listedClipModels; i++ )
+
+			pt = gameRenderWorld->GuiTrace( weapon->GetModelDefHandle(), weapon->GetAnimator(), start, end );
+
+			if ( pt.x != -1 )
 			{
-				clip = clipModelList[i];
-				ent = clip->GetEntity();
-
-				if ( ent->entityNumber == weapon->entityNumber )  // we hit the PDA
+				
+				static int screenX;
+				static int screenY;
+				
+				if ( vr->VR_GAME_PAUSED )
 				{
-					pt = gameRenderWorld->GuiTrace( ent->GetModelDefHandle(), start, end );
-
-					if ( pt.x != -1 )
-					{
-						// we have a hit
-						// clamp the mouse to the corner
-						ev = sys->GenerateMouseMoveEvent( -2000, -2000 );
-						if ( vr->VR_GAME_PAUSED )
-						{
-							game->Shell_HandleGuiEvent( &ev );
-						}
-						else HandleGuiEvents( &ev );
-
-						// move to an absolute position
-						ev = sys->GenerateMouseMoveEvent( pt.x * 1080, 1080 - ( pt.y * 1080 ) );//koz fixme hardcoded res
-						if ( vr->VR_GAME_PAUSED )
-						{
-							game->Shell_HandleGuiEvent( &ev );
-						}
-						else 	HandleGuiEvents( &ev );
-						return;
-					}
+					screenX = renderSystem->GetWidth();
+					screenY = renderSystem->GetHeight();
 				}
+				else
+				{
+					screenX = globalImages->pdaImage->GetUploadWidth();
+					screenY = globalImages->pdaImage->GetUploadHeight();
+				}
+
+				// move to an absolute position
+				pt.y = 1 - pt.y; // texture was copied from framebuffer and is upside down so invert y 
+							
+				screenX *= pt.x;
+				screenY *= pt.y;
+			
+				//common->Printf( "Mouse x %d mouse y %d\n", screenX, screenY );
+				
+				ev.evType = SE_MOUSE_ABSOLUTE;
+				ev.evValue = pt.x * screenX;
+				ev.evValue2 = pt.y * screenY;
+				ev.evPtrLength = 0;
+				ev.evPtr = NULL;
+								
+				if ( vr->VR_GAME_PAUSED )
+				{
+					game->Shell_HandleGuiEvent( &ev );
+				}
+				else
+				{
+					HandleGuiEvents( &ev );
+				}
+
+				return;
 			}
+
 		}
 	}
 	// Koz end
 
-	for( i = 0; i < listedClipModels; i++ )
+	listedClipModels = gameLocal.clip.ClipModelsTouchingBounds( bounds, -1, clipModelList, MAX_GENTITIES );
+	// no pretense at sorting here, just assume that there will only be one active
+	// gui within range along the trace
+
+	for ( i = 0; i < listedClipModels; i++ )
 	{
-		clip = clipModelList[ i ];
+		clip = clipModelList[i];
 		ent = clip->GetEntity();
-		
-		if( ent->IsHidden() )
+
+		if ( ent->IsHidden() )
 		{
 			continue;
 		}
-		
-		if( allowFocus )
+
+		if ( allowFocus )
 		{
-			if( ent->IsType( idAFAttachment::Type ) )
+			if ( ent->IsType( idAFAttachment::Type ) )
 			{
-				idEntity* body = static_cast<idAFAttachment*>( ent )->GetBody();
-				if( body != NULL && body->IsType( idAI::Type ) && ( static_cast<idAI*>( body )->GetTalkState() >= TALK_OK ) )
+				idEntity* body = static_cast<idAFAttachment*>(ent)->GetBody();
+				if ( body != NULL && body->IsType( idAI::Type ) && (static_cast<idAI*>(body)->GetTalkState() >= TALK_OK) )
 				{
 					gameLocal.clip.TracePoint( trace, start, end, MASK_SHOT_RENDERMODEL, this );
-					if( ( trace.fraction < 1.0f ) && ( trace.c.entityNum == ent->entityNumber ) )
+					if ( (trace.fraction < 1.0f) && (trace.c.entityNum == ent->entityNumber) )
 					{
 						ClearFocus();
-						focusCharacter = static_cast<idAI*>( body );
+						focusCharacter = static_cast<idAI*>(body);
 						talkCursor = 1;
 						focusTime = gameLocal.time + FOCUS_TIME;
 						break;
@@ -6752,16 +6856,16 @@ void idPlayer::UpdateFocus()
 				}
 				continue;
 			}
-			
-			if( ent->IsType( idAI::Type ) )
+
+			if ( ent->IsType( idAI::Type ) )
 			{
-				if( static_cast<idAI*>( ent )->GetTalkState() >= TALK_OK )
+				if ( static_cast<idAI*>(ent)->GetTalkState() >= TALK_OK )
 				{
 					gameLocal.clip.TracePoint( trace, start, end, MASK_SHOT_RENDERMODEL, this );
-					if( ( trace.fraction < 1.0f ) && ( trace.c.entityNum == ent->entityNumber ) )
+					if ( (trace.fraction < 1.0f) && (trace.c.entityNum == ent->entityNumber) )
 					{
 						ClearFocus();
-						focusCharacter = static_cast<idAI*>( ent );
+						focusCharacter = static_cast<idAI*>(ent);
 						talkCursor = 1;
 						focusTime = gameLocal.time + FOCUS_TIME;
 						break;
@@ -6769,128 +6873,129 @@ void idPlayer::UpdateFocus()
 				}
 				continue;
 			}
-			
-			if( ent->IsType( idAFEntity_Vehicle::Type ) )
+
+			if ( ent->IsType( idAFEntity_Vehicle::Type ) )
 			{
 				gameLocal.clip.TracePoint( trace, start, end, MASK_SHOT_RENDERMODEL, this );
-				if( ( trace.fraction < 1.0f ) && ( trace.c.entityNum == ent->entityNumber ) )
+				if ( (trace.fraction < 1.0f) && (trace.c.entityNum == ent->entityNumber) )
 				{
 					ClearFocus();
-					focusVehicle = static_cast<idAFEntity_Vehicle*>( ent );
+					focusVehicle = static_cast<idAFEntity_Vehicle*>(ent);
 					focusTime = gameLocal.time + FOCUS_TIME;
 					break;
 				}
 				continue;
 			}
 		}
-		
-		if ( (!ent->GetRenderEntity() || !ent->GetRenderEntity()->gui[0] || !ent->GetRenderEntity()->gui[0]->IsInteractive()) && (!game->IsPDAOpen() && !vr->PDAclipModelSet) ) // Koz don't bail if the PDA is open and clipmodel is set.
+
+		if ( (!ent->GetRenderEntity() || !ent->GetRenderEntity()->gui[0] || !ent->GetRenderEntity()->gui[0]->IsInteractive()) && ( !game->IsPDAOpen() /* && !vr->PDAclipModelSet */) ) // Koz don't bail if the PDA is open and clipmodel is set.
 
 		{
 			continue;
 		}
-		
-		if( ent->spawnArgs.GetBool( "inv_item" ) )
+
+		if ( ent->spawnArgs.GetBool( "inv_item" ) )
 		{
 			// don't allow guis on pickup items focus
 			continue;
 		}
-		
-		pt = gameRenderWorld->GuiTrace( ent->GetModelDefHandle(), start, end );
-		if( pt.x != -1 )
+		ent->GetAnimator();
+		//	pt = gameRenderWorld->GuiTrace( ent->GetModelDefHandle(), start, end );
+		pt = gameRenderWorld->GuiTrace( ent->GetModelDefHandle(), ent->GetAnimator(), start, end ); // koz
+		if ( pt.x != -1 )
 		{
 			// we have a hit
 			renderEntity_t* focusGUIrenderEntity = ent->GetRenderEntity();
-			if( !focusGUIrenderEntity )
+			if ( !focusGUIrenderEntity )
 			{
 				continue;
 			}
-			
-			if( pt.guiId == 1 )
+
+			if ( pt.guiId == 1 )
 			{
-				ui = focusGUIrenderEntity->gui[ 0 ];
+				ui = focusGUIrenderEntity->gui[0];
 			}
-			else if( pt.guiId == 2 )
+			else if ( pt.guiId == 2 )
 			{
-				ui = focusGUIrenderEntity->gui[ 1 ];
+				ui = focusGUIrenderEntity->gui[1];
 			}
 			else
 			{
-				ui = focusGUIrenderEntity->gui[ 2 ];
+				ui = focusGUIrenderEntity->gui[2];
 			}
-			
-			if( ui == NULL )
+
+			if ( ui == NULL )
 			{
 				continue;
 			}
-			
+
 			ClearFocus();
 			focusGUIent = ent;
 			focusUI = ui;
-			
-			if( oldFocus != ent )
+
+			if ( oldFocus != ent )
 			{
 				// new activation
 				// going to see if we have anything in inventory a gui might be interested in
 				// need to enumerate inventory items
 				focusUI->SetStateInt( "inv_count", inventory.items.Num() );
-				for( j = 0; j < inventory.items.Num(); j++ )
+				for ( j = 0; j < inventory.items.Num(); j++ )
 				{
-					idDict* item = inventory.items[ j ];
+					idDict* item = inventory.items[j];
 					const char* iname = item->GetString( "inv_name" );
 					const char* iicon = item->GetString( "inv_icon" );
 					const char* itext = item->GetString( "inv_text" );
-					
+
 					focusUI->SetStateString( va( "inv_name_%i", j ), iname );
 					focusUI->SetStateString( va( "inv_icon_%i", j ), iicon );
 					focusUI->SetStateString( va( "inv_text_%i", j ), itext );
 					kv = item->MatchPrefix( "inv_id", NULL );
-					if( kv )
+					if ( kv )
 					{
 						focusUI->SetStateString( va( "inv_id_%i", j ), kv->GetValue() );
 					}
 					focusUI->SetStateInt( iname, 1 );
 				}
-				
-				
-				for( j = 0; j < inventory.pdaSecurity.Num(); j++ )
+
+
+				for ( j = 0; j < inventory.pdaSecurity.Num(); j++ )
 				{
-					const char* p = inventory.pdaSecurity[ j ];
-					if( p && *p )
+					const char* p = inventory.pdaSecurity[j];
+					if ( p && *p )
 					{
 						focusUI->SetStateInt( p, 1 );
 					}
 				}
-				
+
 				int powerCellCount = 0;
-				for( j = 0; j < inventory.items.Num(); j++ )
+				for ( j = 0; j < inventory.items.Num(); j++ )
 				{
-					idDict* item = inventory.items[ j ];
-					if( item->GetInt( "inv_powercell" ) )
+					idDict* item = inventory.items[j];
+					if ( item->GetInt( "inv_powercell" ) )
 					{
 						powerCellCount++;
 					}
 				}
 				focusUI->SetStateInt( "powercell_count", powerCellCount );
-				
-				int staminapercentage = ( int )( 100.0f * stamina / pm_stamina.GetFloat() );
+
+				int staminapercentage = (int)(100.0f * stamina / pm_stamina.GetFloat());
 				focusUI->SetStateString( "player_health", va( "%i", health ) );
 				focusUI->SetStateString( "player_stamina", va( "%i%%", staminapercentage ) );
 				focusUI->SetStateString( "player_armor", va( "%i%%", inventory.armor ) );
-				
+
 				kv = focusGUIent->spawnArgs.MatchPrefix( "gui_parm", NULL );
-				while( kv )
+				while ( kv )
 				{
 					focusUI->SetStateString( kv->GetKey(), kv->GetValue() );
 					kv = focusGUIent->spawnArgs.MatchPrefix( "gui_parm", kv );
 				}
 			}
-			
+
 			// clamp the mouse to the corner
 			ev = sys->GenerateMouseMoveEvent( -2000, -2000 );
 			command = focusUI->HandleEvent( &ev, gameLocal.time );
 			HandleGuiCommands( focusGUIent, command );
-			
+
 			// move to an absolute position
 			ev = sys->GenerateMouseMoveEvent( pt.x * SCREEN_WIDTH, pt.y * SCREEN_HEIGHT );
 			command = focusUI->HandleEvent( &ev, gameLocal.time );
@@ -6899,10 +7004,10 @@ void idPlayer::UpdateFocus()
 			break;
 		}
 	}
-	
-	if( focusGUIent && focusUI )
+
+	if ( focusGUIent && focusUI )
 	{
-		if( !oldFocus || oldFocus != focusGUIent )
+		if ( !oldFocus || oldFocus != focusGUIent )
 		{
 			command = focusUI->Activate( true, gameLocal.time );
 			HandleGuiCommands( focusGUIent, command );
@@ -6911,21 +7016,21 @@ void idPlayer::UpdateFocus()
 			// HideObjective();
 		}
 	}
-	else if( oldFocus && oldUI )
+	else if ( oldFocus && oldUI )
 	{
 		command = oldUI->Activate( false, gameLocal.time );
 		HandleGuiCommands( oldFocus, command );
 		StartSound( "snd_guiexit", SND_CHANNEL_ANY, 0, false, NULL );
 	}
-	
-	if( hud )
+
+	if ( hud )
 	{
 		hud->SetCursorState( this, CURSOR_TALK, talkCursor );
 	}
-	
-	if( oldChar != focusCharacter && hud )
+
+	if ( oldChar != focusCharacter && hud )
 	{
-		if( focusCharacter )
+		if ( focusCharacter )
 		{
 			hud->SetCursorText( "#str_02036", focusCharacter->spawnArgs.GetString( "npc_name", "Joe" ) );
 			hud->UpdateCursorState();
@@ -7704,6 +7809,8 @@ idPlayer::TogglePDA
 */
 void idPlayer::TogglePDA()
 {
+	common->Printf( "Toggle PDA\n" );
+	
 	// Koz begin : reset PDA controls
 	vr->forceLeftStick = true;
 	// Koz end
@@ -7807,6 +7914,8 @@ void idPlayer::SetClipModel()
 		newClip = new( TAG_PHYSICS_CLIP_ENTITY ) idClipModel( idTraceModel( bounds, 8 ) );
 		newClip->Translate( physicsObj.PlayerGetOrigin() );
 		physicsObj.SetClipModel( newClip, 1.0f );
+
+		
 	}
 	else
 	{
@@ -7814,6 +7923,33 @@ void idPlayer::SetClipModel()
 		newClip->Translate( physicsObj.PlayerGetOrigin() );
 		physicsObj.SetClipModel( newClip, 1.0f );
 	}
+
+	if ( game->isVR )
+	{
+		vr->bodyClip = newClip;
+		
+		idClipModel* newClip2;
+
+		bounds[0].Set( -vr_headbbox.GetFloat() * 0.5f, -vr_headbbox.GetFloat() * 0.5f, 0 );
+		bounds[1].Set( vr_headbbox.GetFloat() * 0.5f, vr_headbbox.GetFloat() * 0.5f, pm_normalheight.GetFloat() );
+		
+		if ( pm_usecylinder.GetBool() )
+		{
+			newClip2 = new(TAG_PHYSICS_CLIP_ENTITY)idClipModel( idTraceModel( bounds, 8 ) );
+			newClip2->Translate( physicsObj.PlayerGetOrigin() );
+			//physicsObj.SetClipModel( newClip, 1.0f );
+		}
+		else
+		{
+			newClip2 = new(TAG_PHYSICS_CLIP_ENTITY)idClipModel( idTraceModel( bounds ) );
+			newClip2->Translate( physicsObj.PlayerGetOrigin() );
+			//physicsObj.SetClipModel( newClip, 1.0f );
+		}
+
+		vr->headClip = newClip2;
+		
+	}
+	
 }
 
 /*
@@ -7912,6 +8048,8 @@ void idPlayer::PerformImpulse( int impulse )
 		}
 		case IMPULSE_19:
 		{
+			
+			common->Printf( "Impulse 19\n" );
 			// when we're not in single player, IMPULSE_19 is used for showScores
 			// otherwise it opens the pda
 			if( !common->IsMultiplayer() )
@@ -7922,10 +8060,13 @@ void idPlayer::PerformImpulse( int impulse )
 #endif
 					if( objectiveSystemOpen )
 					{
+						common->Printf( "idPlayer::PerformImpulse calling TogglePDA\n" );
 						TogglePDA();
 					}
 					else if( weapon_pda >= 0 )
 					{
+						
+						common->Printf( "idPlayer::PerformImpulse  calling Select Weapon for PDA\n" );
 						SelectWeapon( weapon_pda, true );
 					}
 #if !defined(ID_RETAIL) && !defined(ID_RETAIL_INTERNAL)
@@ -8080,6 +8221,37 @@ void idPlayer::ToggleHud()
 }
 
 
+void idPlayer::SnapBodyToView()
+{
+	idAngles newBodyAngles;
+	newBodyAngles = viewAngles;
+	newBodyAngles.pitch = 0;
+	newBodyAngles.roll = 0;
+	newBodyAngles.yaw += vr->lastHMDYaw - vr->bodyYawOffset;
+	newBodyAngles.Normalize180();
+
+	hydraData currentHydra = hydra_zero;
+	hydraData currentHydraOffset = hydra_zero;
+	idQuat rotQuat;
+	
+	rotQuat = idAngles( 0.0f, ( vr->lastHMDYaw - vr->bodyYawOffset ), 0.0f ).Normalize180().ToQuat();
+
+
+	vr->bodyYawOffset = vr->lastHMDYaw;
+	SetViewAngles( newBodyAngles );
+	//viewAngles.yaw = newBodyAngles.yaw;
+
+
+	
+
+	vr->HydraGetLeftOffset( currentHydra );
+	currentHydra.hydraRotationQuat *= rotQuat;
+	vr->HydraSetLeftOffset( currentHydra );
+
+	vr->HydraGetRightOffset( currentHydra );
+	currentHydra.hydraRotationQuat *= rotQuat;
+	vr->HydraSetRightOffset( currentHydra );
+}
 /*
 ==============
 idPlayer::OrientHMDBody  Koz align the body with the view  ( move the body to point the same direction as the HMD view - does not change the view. ) 
@@ -8089,34 +8261,29 @@ void idPlayer::OrientHMDBody()
 {
 
 	static float hydraYawOffset = 0;
-
 	hydraData currentHydra = hydra_zero;
-	idAngles newBodyAngles;
 	idQuat rotQuat;
 
-	newBodyAngles = viewAngles;
-	newBodyAngles.pitch = 0;
-	newBodyAngles.roll = 0;
-	newBodyAngles.yaw += vr->lastHMDYaw;
-	newBodyAngles.Normalize180();
+	SnapBodyToView();
+	vr->bodyYawOffset = 0;
+	vr->lastHMDYaw = 0;
+	
+	//hydraYawOffset = vr->lastHMDYaw;
+	//hydraYawOffset = idAngles( 0.0f, hydraYawOffset, 0.0f ).Normalize180().yaw;
+	ovr_RecenterTrackingOrigin( vr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
 
-	hydraYawOffset += vr->lastHMDYaw;
-	hydraYawOffset = idAngles( 0.0f, hydraYawOffset, 0.0f ).Normalize180().yaw;
-
-	ovr_RecenterPose( vr->hmd );
-	SetViewAngles( newBodyAngles );
-
+	
 	extern idCVar vr_hydraMode;
 	if ( vr->VR_USE_HYDRA ) // vr_hydraMode.GetInteger() !=0 ) {
 	{
 		rotQuat = idAngles( 0.0f, hydraYawOffset, 0.0f ).Normalize180().ToQuat();
 
 		vr->HydraGetLeft( currentHydra );
-		currentHydra.hydraRotationQuat = rotQuat;
+		//currentHydra.hydraRotationQuat = rotQuat;
 		vr->HydraSetLeftOffset( currentHydra );
 
 		vr->HydraGetRight( currentHydra );
-		currentHydra.hydraRotationQuat = rotQuat;
+		//currentHydra.hydraRotationQuat = rotQuat;
 		vr->HydraSetRightOffset( currentHydra );
 	}
 }
@@ -8724,7 +8891,271 @@ void idPlayer::Move()
 			physicsObj.SetPlayerInput( usercmd, axis[0] );
 		}
 		else
-		{	// koz fixme this isnt working.
+		{	
+					
+			// positional tracking
+			// move the player body based on body offset calculated by HMDGetOrientation
+			// only add offsets once per frame -there are some instances where move is called
+			// more than once per rendered frame
+			// still need to implement clipping.
+
+			static int lastFrame = -1;
+			static idAngles hmdAng = ang_zero;
+			static idVec3	headDelta = vec3_zero;
+			static idVec3	bodyDelta = vec3_zero;
+			static idVec3	bodyOrigin = vec3_zero;
+			static idVec3	newBodyOrigin = vec3_zero;
+			static idMat3	bodyAxis = mat3_identity;
+			
+			static int		currentTime = 0;
+			static int		walkInPlace = 0;
+			static int		lastWalkInPlace = 0;
+			//static bool		isWalking = false;
+			static float	curDeltaY = 0.0f;
+			static float	curY = 0.0f;
+			static float	 lastY = 0.0f;
+			//static bool clipped = false;
+
+			static int		halfStep = 0;
+			static int		halfStepWaiting = 2;
+			static int		halfStepStarted = 1;
+			static int		halfStepCompleted = 0;
+			
+			static float	baseVelocity = 0.0f;
+			static float	velocityMod = 0.0f;
+
+			static int moveDir = 0;
+			static int lastMoveDir = 0;
+			static int movingLeft = 0;
+			static int movingRight = 1;
+			static int lastMovementTime = 0;
+			static int lastPeriod = 0;
+			static int periodStartTime = 0;
+			static int bailoutTime = 0;
+			static int periodBuffer = 0;
+			static int currentPeriodTime;
+			static float walkDistance = 0;
+
+			static float periodTotals = 0.0f;
+			static float deltaTotals = 0.0f;
+			static float lastDeltaTotals = 0.0f;
+			static float deltaTotalsSum = 0.0f;
+			static float avgAccel = 0.0f;
+			
+
+			static int		avgWalkPeriod = 600;
+			static float	minStartWalking = 0.05f;
+			static float	minPaceSensitivity = 0.01;//  06f; // .996 worked well
+			static float	lastZ = -.9999f;
+			static float	curDeltaZ = 0.0f;
+
+			if ( lastFrame != vr->vrFrame )
+			{
+				lastFrame = vr->vrFrame;
+				vr->HMDGetOrientation( hmdAng, headDelta, bodyDelta,false);
+
+				float deltTot = ((bodyDelta + headDelta )* hmdAng.ToMat3().Inverse()).y;
+				//curDeltaY = ( ( bodyDelta /* + headDelta*/ ) * hmdAng.ToMat3().Inverse() ).y;
+								
+				curY = deltTot; // ((headDelta)* hmdAng.ToMat3().Inverse()).y;
+				curDeltaY = curY - lastY;
+				lastY = curY; 
+
+				if ( lastZ == -.9999f ) lastZ = headDelta.z;
+
+				curDeltaZ = headDelta.z - lastZ;
+				lastZ = headDelta.z;
+
+				//if ( abs( curDeltaZ ) > abs( curDeltaY ) ) curDeltaY = curDeltaZ;
+
+
+				currentTime = gameLocal.GetTime();
+
+				bodyOrigin = physicsObj.PlayerGetOrigin();
+				GetViewPos( org, bodyAxis );
+
+				// walk in place? ---------------------------
+				walkInPlace = usercmdGen->ButtonState( UB_IMPULSE38 );
+				
+				if ( !walkInPlace )
+				{
+					vr->isWalking = false;
+					vr->wipNumSteps = 0;
+					vr->wipStepState = 3;
+					vr->wipCurrentDelta = 0.0f;
+					vr->wipCurrentVelocity = 0.0f;
+					vr->wipLastPeriod = 0.0f;
+					vr->wipTotalDelta = 0.0f;
+					vr->wipLastAcces = 0.0f;
+					vr->wipAvgPeriod = 0.0f;
+					vr->wipPeriodVel = 0.0f;
+
+					periodTotals = 0.0f;
+					deltaTotals = 0.0f;
+					avgAccel = 0.0f;
+					deltaTotalsSum = 0.0f;
+					lastDeltaTotals = 0.0f;
+
+				}
+				else
+				{
+					
+					if ( !vr->isWalking ) // wait for head movement
+					{
+						halfStep = 3;
+						if ( abs( curDeltaY ) >= minStartWalking )
+						{
+						
+							vr->isWalking = true;
+							halfStep = halfStepWaiting;
+							baseVelocity = 50.0f / avgWalkPeriod; //  (600) = .051 (walk in per MS) // 31.0 should be avg step
+							velocityMod = 0.0f;
+							lastMovementTime = currentTime;
+
+							vr->wipNumSteps = 0;
+							vr->wipStepState = 3;
+							vr->wipCurrentDelta = 0.0f;
+							vr->wipCurrentVelocity = 0.0f;
+							vr->wipLastPeriod = 0.0f;
+							vr->wipTotalDelta = 0.0f;
+							vr->wipLastAcces = 0.0f;
+							vr->wipAvgPeriod = 0.0f;
+							periodTotals = 0.0f;
+							deltaTotals = 0.0f;
+							avgAccel = 0.0f;
+							deltaTotalsSum = 0.0f;
+							lastDeltaTotals = 0.0f;
+
+						}
+					}
+					else // head movement has already started
+					{
+
+						if ( halfStep == halfStepCompleted )
+						{
+
+							// player was moving, but head translation now under threshold.
+							// how long to wait before halting movement?
+							// if head is at either end of arc, we should wait a little longer.
+							// if the head is in the middle of an arc, we should bail faster
+
+							currentPeriodTime = currentTime - periodStartTime;
+							periodBuffer = lastPeriod * 0.2f;
+						//	common->Printf( "Bailout check: currentPeriodTime = %d, currentTime = %d, periodStartTime = %dl lastPeriod = %d, pbuffer = %d\n", currentPeriodTime, currentTime, periodStartTime, lastPeriod, periodBuffer );
+							if ( currentPeriodTime < periodBuffer || currentPeriodTime > lastPeriod - periodBuffer ) // at the end of arc; 
+							{
+								bailoutTime = periodBuffer < 100 ? 100 : periodBuffer * 1.5f;
+							}
+							else
+							{
+								bailoutTime = 100;// periodBuffer / 2.0f;
+							}
+
+							if ( (currentTime - lastMovementTime ) > bailoutTime )
+							{
+								vr->isWalking = false;
+							//	common->Printf( "BAILOUT! bailoutTime = %d elapsed time = %d\n", bailoutTime, currentTime - lastMovementTime );
+							}
+							else
+							{
+								int maxWalkSpeed = 60;
+
+								walkDistance = float ( maxWalkSpeed ) - (( float( lastPeriod ) * ( float ( maxWalkSpeed ) / 2 )) / float( avgWalkPeriod) );
+								if ( walkDistance < 0.0f ) walkDistance = 0.0f;
+							//	velocityMod = float ( avgWalkPeriod ) / float ( lastPeriod );
+								//common->Printf( "Moving %f lastperiod = %d currentTime = %d lastMovement = %d velocity Mod = %f \n", baseVelocity * ( currentTime - lastMovementTime ) * velocityMod, lastPeriod,currentTime, lastMovementTime, velocityMod );
+								////bodyDelta.x += baseVelocity * ( currentTime - lastMovementTime ) * velocityMod;
+						//		bodyDelta.x += baseVelocity * velocityMod * ( 1000 /vr->hmdHz ) ;
+								
+								
+								float lastVel1 =abs (  lastDeltaTotals / (float)lastPeriod ) * 100;
+								vr->wipPeriodVel = lastVel1;
+
+								walkDistance = ( (1.0f / ((float)lastPeriod + 1)) * lastDeltaTotals ) * 1000.0f;
+								walkDistance += vr_wipVelocityMin.GetFloat();
+								walkDistance *= vr_wipScale.GetFloat();
+								
+								//walkDistance = vr_wipVelocityMax.GetFloat();
+							//	common->Printf( "Moving bodyDelta.x = %f\n", walkDistance );
+								
+								vr->wipCurrentVelocity = walkDistance;
+
+								usercmd.forwardmove = idMath::ClampChar( idMath::Ftoi( walkDistance ) );
+							}
+						}
+
+						if ( abs( curDeltaY ) >= minPaceSensitivity ) // valid movement in same period
+						{
+							
+							deltaTotals += abs( curDeltaY );
+							moveDir = curDeltaY > 0.0f ? movingRight : movingLeft;
+							lastMovementTime = currentTime;
+
+							if ( halfStep == halfStepWaiting ) // wait
+							{
+								common->Printf( "HalfStepWaitin changed to halfStepStarted\n" );
+								periodStartTime = currentTime;
+								lastMoveDir = moveDir;
+								halfStep = halfStepStarted;
+							}
+							else if ( moveDir != lastMoveDir )
+							{
+								
+								lastMoveDir = moveDir;
+								lastPeriod = currentTime - periodStartTime;
+								common->Printf( "Step detected ( change in head movement direction) period %d \n", lastPeriod );
+								
+								vr->wipNumSteps++;
+								periodTotals += (float) lastPeriod;
+
+								vr->wipAvgPeriod = periodTotals / (float)  vr->wipNumSteps;
+								vr->wipTotalDelta = deltaTotals;
+								deltaTotalsSum += deltaTotals;
+								vr->wipTotalDeltaAvg = deltaTotalsSum / vr->wipNumSteps;
+								lastDeltaTotals = deltaTotals;
+								deltaTotals = 0;
+								
+								periodStartTime = currentTime;
+								if ( halfStep == halfStepStarted )
+								{
+									lastPeriod *= 2;
+									halfStep = halfStepCompleted;
+									common->Printf( "HalfStepWaitin changed to halfStepCompleted\n" );
+								}
+							}
+						}
+					
+						vr->wipStepState = halfStep;
+						vr->wipCurrentDelta = curDeltaY;
+						vr->wipLastPeriod = lastPeriod;
+					
+					}
+				}
+				
+				// move body based on normal head movement from motion tracker
+				newBodyOrigin = bodyOrigin + bodyAxis[0] * bodyDelta.x + bodyAxis[1] * bodyDelta.y;// +bodyAxis[2] * 0.0f;
+
+				// clip against the player clipmodel
+				trace_t trace;
+				idMat3 clipAxis;
+
+				clipAxis = physicsObj.GetClipModel()->GetAxis();
+
+				vr->headClip->Translate( physicsObj.GetClipModel()->GetOrigin() );
+
+				gameLocal.clip.Translation( trace, bodyOrigin, newBodyOrigin, vr->headClip, clipAxis, CONTENTS_SOLID, NULL );
+				
+				if ( trace.fraction >= 1.0f )
+				{
+					// no collision - move player body based on head translation from motion sensor.
+					physicsObj.SetOrigin( newBodyOrigin );
+				}
+
+				GetViewPos( org, axis ); //koz default movement
+				physicsObj.SetPlayerInput( usercmd, axis[0] );
+			}
+			
+			// koz fixme this isnt working.
 			//=================================================
 			// koz add movement/view keyhole.  Sometimes wearing the rift, it *feels* like I'm looking straight ahead, but in reality 
 			// my head is rotated slightly in relation to my body.  Then when I move forward, since I feel 'centered', I expect to move where im looking, but instead move
@@ -8732,8 +9163,11 @@ void idPlayer::Move()
 			// forward will move where the I'm looking,  not where my avatar is facing. Hopefully this will feel more natural for normal movement, but still allow me to look hard left 
 			// or right and move forward in relation to the virtual body for run and gun movement.  Or set it to 90 and always run where you look.
 			//==================================================*/
+			
+			
+			/*
 
-			idMat3	bodyAxis; // koz direction body is facing
+			//idMat3	bodyAxis; // koz direction body is facing
 			idMat3  viewAxis; // koz direction player is looking
 			idMat3	moveAxis; // koz direction player will move
 			idAngles bodyAngles;
@@ -8764,6 +9198,7 @@ void idPlayer::Move()
 			else moveAxis = bodyAxis; // koz set the move axis to the direction the body (not head) is facing.
 
 			physicsObj.SetPlayerInput( usercmd, moveAxis[0] );
+			*/
 		}
 	}
 	
@@ -9312,7 +9747,7 @@ void idPlayer::UpdateLaserSight()
 	
 	if ( vr_weaponSight.GetInteger() == 0 ) // using the lasersight
 	{
-		common->Printf( "Using lasersight  hidesight = %i\n", hideSight );
+		// common->Printf( "Using lasersight  hidesight = %i\n", hideSight );
 		
 		// hide the crosshair model
 		crosshairEntity.allowSurfaceInViewID = -1;
@@ -9343,8 +9778,8 @@ void idPlayer::UpdateLaserSight()
 
 
 		// only show in the player's view
-		common->Printf( "Programming model\n" );
-		laserSightRenderEntity.allowSurfaceInViewID = entityNumber + 1;
+		// koz - changed show lasersight shows up in all views/reflections in VR
+		laserSightRenderEntity.allowSurfaceInViewID = 0;// entityNumber + 1;
 		laserSightRenderEntity.axis.Identity();
 		laserSightRenderEntity.origin = muzzleOrigin - muzzleAxis[0] * 2.0f;
 
@@ -9356,7 +9791,6 @@ void idPlayer::UpdateLaserSight()
 		if ( gameLocal.clip.TracePoint( traceResults, start, end, MASK_SHOT_RENDERMODEL, this ) )
 		{
 			beamLength *= traceResults.fraction;
-
 		}
 
 		// program the beam model
@@ -9389,7 +9823,6 @@ void idPlayer::UpdateLaserSight()
 	{
 		gameRenderWorld->UpdateEntityDef( laserSightHandle, &laserSightRenderEntity );
 	}
-	
 	
 	// set the crosshair skin
 	int mode = vr_weaponSight.GetInteger();
@@ -9437,23 +9870,56 @@ void idPlayer::UpdateLaserSight()
 		}
 		return;
 	}
-	
+		
 	crosshairEntity.allowSurfaceInViewID = entityNumber + 1;
 	crosshairEntity.axis.Identity();
 	crosshairEntity.origin = muzzleOrigin - muzzleAxis[0] * 2.0f;
 	
 	start = crosshairEntity.origin;
 	end = start + muzzleAxis[0] * beamLength;
+	
+	static float muzscale = 0.0f ;
+
+	muzscale = 1 + beamLength / 100;
+	crosshairEntity.axis = muzzleAxis * muzscale;
 
 	if ( gameLocal.clip.TracePoint( traceResults, start, end, MASK_SHOT_RENDERMODEL, this ) )
 	{
 		beamLength *= traceResults.fraction;
+		muzscale = 1 + beamLength / 100;
 
+		if ( vr_weaponSightToSurface.GetBool() )
+		{
+
+			// fake it till you make it.
+
+			static idAngles surfaceAngle = ang_zero;
+			static idAngles muzzleAngle = ang_zero;
+			static idAngles diffAngle = ang_zero;
+			static float rollDiff = 0.0f;
+			
+			surfaceAngle = traceResults.c.normal.ToAngles().Normalize180();
+			muzzleAngle = muzzleAxis.ToAngles().Normalize180();
+			
+			surfaceAngle.pitch *= -1;
+			surfaceAngle.yaw += 180;
+			surfaceAngle.Normalize180();
+				
+			diffAngle = idAngles( 0, 0, muzzleAngle.yaw - surfaceAngle.yaw ).Normalize180();
+						
+			rollDiff = diffAngle.roll * 1 / ( 90 / surfaceAngle.pitch );
+						
+			surfaceAngle.roll = muzzleAngle.roll - rollDiff;
+			surfaceAngle.Normalize180();
+		
+			crosshairEntity.axis = surfaceAngle.ToMat3() * muzscale;
+		}
+		else
+		{
+			crosshairEntity.axis = muzzleAxis * muzscale;
+		}
 	}
-	
-	float muzscale = 1 + beamLength / 100;
-	
-	crosshairEntity.axis = muzzleAxis * muzscale;
+
 	crosshairEntity.origin = start + muzzleAxis[0] * beamLength;
 	
 	if ( IsGameStereoRendered() && crosshairHandle == -1 )
@@ -9499,11 +9965,11 @@ void idPlayer::UpdateHeadingBeam()
 				break;
 
 			case 3:
-				headingBeamEntity.customSkin = skinHeadinArrowsScroll;
+				headingBeamEntity.customSkin = skinHeadingArrowsScroll;
 				break;
 
 			default:
-				headingBeamEntity.customSkin = skinHeadinArrowsScroll;
+				headingBeamEntity.customSkin = skinHeadingArrowsScroll;
 				headingBeamActive = true;
 
 		}
@@ -9525,6 +9991,8 @@ void idPlayer::UpdateHeadingBeam()
 		headingBeamEntity.axis = beamAxis;
 		headingBeamEntity.origin = beamOrigin;
 		headingBeamEntity.bounds.Zero();
+
+		headingBeamEntity.allowSurfaceInViewID = entityNumber + 1 ;
 				
 	}
 	
@@ -9553,13 +10021,15 @@ void idPlayer::UpdateVrHud()
 	float hudPitch;
 
 	// update the hud model
-	if ( !hudActive && ( vr_hudLowHealth.GetInteger() == 0 ) )
+	if ( ( !hudActive && ( vr_hudLowHealth.GetInteger() == 0 ) ) || vr->PDAforced || game->IsPDAOpen() )
 	{
 		// hide it
 		hudEntity.allowSurfaceInViewID = -1;
 	}
 	else
 	{
+		hudEntity.allowSurfaceInViewID = entityNumber + 1;
+		
 		if ( vr_hudPosLock.GetInteger() == 1 ) // hud in fixed position in space
 		{
 			hudPitch = vr_hudType.GetInteger() == VR_HUD_LOOK_DOWN ? vr_hudAngle.GetFloat() : 10.0f;
@@ -9623,6 +10093,9 @@ void idPlayer::Think()
 	
 	// clear the ik before we do anything else so the skeleton doesn't get updated twice
 	walkIK.ClearJointMods();
+
+	//KOZ
+	armIK.ClearJointMods();
 	
 	// if this is the very first frame of the map, set the delta view angles
 	// based on the usercmd angles
@@ -9631,7 +10104,8 @@ void idPlayer::Think()
 		spawnAnglesSet = true;
 		SetViewAngles( spawnAngles );
 		oldImpulseSequence = usercmd.impulseSequence;
-		ovr_RecenterPose( vr->hmd ); // koz fixme check if this reset hmd orientation is needed.
+		ovr_RecenterTrackingOrigin( vr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
+
 
 	}
 	
@@ -9646,6 +10120,7 @@ void idPlayer::Think()
 	{
 		if( objectiveSystemOpen && AI_PAIN )
 		{
+			common->Printf( "idPlayer::Think calling TogglePDA\n" );
 			TogglePDA();
 		}
 		usercmd.forwardmove = 0;
@@ -11353,7 +11828,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 	idQuat		gunAxis;
 	hydraData	rHydra = hydra_zero;
 	idVec3		gunOrigin = GetEyePosition();
-	
+
 
 	if ( vr_testWeaponModel.GetBool() )
 	{
@@ -11362,7 +11837,8 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 	}
 
 
-	// model center not at model origin, vecoff is the offset to bring the center of the weapon handle to the model origin
+	// model rotation point ( center of handle ) is not at the model origin, 
+	// vecoff is the offset to bring the center of the weapon handle to the model origin
 	idVec3		vecoff(	weaponOriginOffsets[currentWeapon].x,
 						weaponOriginOffsets[currentWeapon].y,
 						weaponOriginOffsets[currentWeapon].z );
@@ -11408,8 +11884,8 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 				PDAfixed = true;
 				PDAaxis = bodyAxis; 
 				origin = gunOrigin;
-				origin += 8 * bodyAxis[0]; // move 12 inches in front of eyes
-				origin.z -= 3;				// move 3 inches down
+				origin += 12 * bodyAxis[0]; // move 12 inches in front of eyes
+				//origin.z += 3;				// move 3 inches down
 				origin -= 8 * bodyAxis[1];	// move 8 inches right
 				idAngles pdaAngle = weaponRotOffsets[currentWeapon];
 				pdaAngle += weaponRotOffsets[currentWeapon];
@@ -11419,10 +11895,11 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 				axis = PDAaxis;
 			}
 			
-			if ( vr->PDAclipModelSet )
+		/*	if ( vr->PDAclipModelSet )
 			{
 				weapon->UpdateWeaponClipPosition( origin, axis );
 			}
+		*/
 		}
 		else
 		{
@@ -11444,10 +11921,19 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 			gunpos = idVec3( vr_weaponPivotOffsetForward.GetFloat(), vr_weaponPivotOffsetHorizontal.GetFloat(), vr_weaponPivotOffsetVertical.GetFloat() );
 			gunOrigin += gunpos * bodyAxis;			// koz move the gun to the hand position
 			
+			
 			idVec3 forearm = idVec3( vr_weaponPivotForearmLength.GetFloat(), 0.0f, 0.0f );
 			origin = gunOrigin + ( vecoff + forearm ) * axis;
 			origin -= vecoff * bodyAxis;
-						
+			
+			
+			idMat3 jax = axis;
+			idVec3 org = origin;
+
+			animator.SetJointAxis( armIK.elbowJoints[0], JOINTMOD_LOCAL, jax );
+			//animator.SetJointPos( armIK.handJoints[0], JOINTMOD_LOCAL, org );
+			
+			
 		}
 		
 		// drop the weapon when landing after a jump / fall
@@ -11470,19 +11956,204 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 						weaponRotOffsets[currentWeapon].roll ).Normalize180().ToQuat();// add weapon rotations to point straight.
 
 	vr->HydraGetRightWithOffset( rHydra );
-		
+	
+
+	
 	gunOrigin += rHydra.position * bodyAxis;			// koz move the gun to the hand position
 	gunAxis = gunRot * rHydra.hydraRotationQuat;
 	gunAxis *= bodyAxis.ToQuat();
 
 	axis = gunAxis.ToMat3();
 	origin = gunOrigin + vecoff * axis;
+	
 
-	if ( currentWeapon == WEAPON_PDA && vr->PDAclipModelSet )
+	if ( vr->VR_USE_HYDRA && vr_armIKenable.GetBool() && vr_showBody.GetBool() )
+	{
+		SetHandIKPos( 0, gunOrigin, axis, rHydra.hydraRotationQuat );
+	}
+
+
+	if ( vr_showBody.GetBool())
+
+	{
+		idAngles headAngles,lastView = ang_zero;
+		lastView =  vr->lastHMDViewAxis.ToAngles();
+		headAngles.roll = lastView.pitch;
+		headAngles.pitch = vr->lastHMDYaw - vr->bodyYawOffset; //lastView.yaw - 180.0f;
+		headAngles.yaw = lastView.roll;
+		headAngles.Normalize360();
+		animator.SetJointAxis( neckJoint, JOINTMOD_LOCAL, headAngles.ToMat3() );
+	}
+
+	/*if ( currentWeapon == WEAPON_PDA && vr->PDAclipModelSet )
 	{
 		weapon->UpdateWeaponClipPosition( origin, axis );
 	}
+	
+	*/
 
+	// track current weapon movement direction and velocity
+
+	/*static int lastTime = gameLocal.GetTime() - 10; 
+	static idVec3 lastPosition = origin;
+	static int curTime = 0;
+	static int timeDelta = 0;
+	
+	curTime = gameLocal.GetTime(); 
+	timeDelta = curTime - lastTime;
+	if ( timeDelta == 0 ) timeDelta = 1;
+
+	lastTime = curTime;
+	throwDirection = origin - lastPosition;
+	lastPosition = origin;
+	
+	throwVelocity = ( throwDirection / timeDelta ) * 1000; 		
+
+	*/
+	
+	idPlayer* player = gameLocal.GetLocalPlayer();
+	
+	//common->Printf( "Current playerskin = %s\n", player->GetRenderEntity()->customSkin->GetName() );
+
+	static int frameTime[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	static idVec3 position[10] {vec3_zero, vec3_zero, vec3_zero, vec3_zero, vec3_zero, vec3_zero, vec3_zero, vec3_zero, vec3_zero};
+	static int frameNum = 0;
+	static int curTime = 0;
+	static int timeDelta = 0;
+	static int startFrameNum = 0;
+
+	frameNum = idLib::frameNumber % 10;
+	frameTime[frameNum] = gameLocal.GetTime();
+	position[frameNum] = origin;
+
+	startFrameNum = frameNum - 5;
+	if ( startFrameNum < 0 ) startFrameNum = 9 - frameNum;
+
+	timeDelta = frameTime[frameNum] - frameTime[startFrameNum];
+	if ( timeDelta == 0 ) timeDelta = 1;
+
+	throwDirection = position[frameNum] - position[startFrameNum];
+	throwVelocity = ( throwDirection / timeDelta ) * 1000;
+
+}
+
+
+
+/*
+==============
+koz idPlayer::SetHandIKPos
+Set the position for the hand based on weapon origin
+==============
+*/
+void idPlayer::SetHandIKPos(int hand, idVec3 gunOrigin, idMat3 gunAxis, idQuat rotation )
+{	
+	// hand == 0 == right, 1 == left
+	
+	
+	// this is for arm IK when viewing player body	
+	// the position for the player hand joint is modified 
+	// to reflect the position of the viewmodel.  
+	// armIK / reach_ik then performs crude IK on arm using new positon.
+
+	jointHandle_t originJoint = weapon->animator.GetJointHandle( "origin" );
+	jointHandle_t rootJoint = INVALID_JOINT;
+	
+	if ( hand == 0 )
+	{
+		rootJoint = weapon->animator.GetJointHandle( "rightHandAttach" );
+	}
+	else
+	{
+		rootJoint = weapon->animator.GetJointHandle( "leftHandAttach" );
+	}
+	static idVec3 modelOrigin = vec3_zero;
+	static idMat3 modelAxis = mat3_identity;
+
+	static idVec3 modelRoot = vec3_zero;
+	static idVec3 rootDelta = vec3_zero;
+
+
+	weapon->animator.GetJointTransform( originJoint, gameLocal.time, modelOrigin, modelAxis );
+
+	if ( rootJoint == INVALID_JOINT ) {
+		//common->Printf( "Invalid rootjoint\n" );
+		rootJoint = originJoint;
+		modelRoot = vec3_zero;
+	}
+	else
+	{
+		weapon->animator.GetJointTransform( rootJoint, gameLocal.time, modelRoot, modelAxis );
+	}
+
+	rootDelta = modelRoot - modelOrigin;
+	/*	common->Printf( "Origin %f %f %f root %f %f %f delta %f %f %f\n",
+	modelOrigin.x,
+	modelOrigin.y,
+	modelOrigin.z,
+	modelRoot.x,
+	modelRoot.y,
+	modelRoot.z,
+	rootDelta.x,
+	rootDelta.y,
+	rootDelta.z
+	); */
+
+
+	idQuat handCorrectAxis = idQuat_zero;
+	
+	if ( hand == 0 ) handCorrectAxis = idAngles( vr_offsetPitch.GetFloat(), vr_offsetYaw.GetFloat(), vr_offsetRoll.GetFloat() ).ToQuat();
+	if ( hand == 1 ) handCorrectAxis = idAngles( vr_offset_leftPitch.GetFloat(), vr_offset_leftYaw.GetFloat(), vr_offset_leftRoll.GetFloat() ).ToQuat();
+	
+
+
+	idQuat ax2 = handCorrectAxis * rotation; // rHydra.hydraRotationQuat;
+	
+
+	idVec3 correctTrans = vec3_zero;
+	if ( hand == 0 ) correctTrans = idVec3( vr_offx.GetFloat(), vr_offy.GetFloat(), vr_offz.GetFloat() );
+	if ( hand == 1 ) correctTrans = idVec3( vr_off_leftx.GetFloat(), vr_off_lefty.GetFloat(), vr_off_leftz.GetFloat() );
+	correctTrans = modelRoot + correctTrans;// *idAngles( -90.0f, 0.0f, 0.0f ).ToMat3();
+	correctTrans *=  rotation.ToMat3(); //rHydra.hydraRotationQuat.ToMat3();
+
+	idVec3 weaponDelta = gunOrigin - renderEntity.origin;
+
+	weaponDelta *= renderEntity.axis.Inverse();
+	//weaponDelta += rootDelta;
+
+	idVec3 weaponModelPos = /*modelOrigin +*/ weaponDelta;
+
+
+	GetAnimator()->SetJointPos( armIK.handJoints[hand], JOINTMOD_WORLD_OVERRIDE, weaponModelPos + correctTrans );
+	GetAnimator()->SetJointAxis( armIK.handJoints[hand], JOINTMOD_WORLD_OVERRIDE, ax2.ToMat3() );
+
+	//armIK.Evaluate();
+
+	// roll the forearm and bicep a little based on wrist movement.
+	float hydraRoll = rotation.ToAngles().roll; //rHydra.hydraRotationQuat.ToAngles().roll;
+	idMat3 forearmRoll = idAngles( hydraRoll, 0.0f, 0.0f ).ToMat3();
+	idMat3 currentForearmAxis = mat3_identity;
+	idMat3 currentWristAxis = mat3_identity;
+	idVec3 currentForearmPos = vec3_zero;
+
+
+	// roll forearm with wrist
+	GetAnimator()->GetJointTransform( armIK.elbowJoints[hand], gameLocal.time, currentForearmPos, currentForearmAxis );
+	currentForearmAxis = forearmRoll * currentForearmAxis;
+	
+	GetAnimator()->SetJointAxis( armIK.elbowJoints[hand], JOINTMOD_WORLD_OVERRIDE, currentForearmAxis );
+	
+	// roll bicep a little
+	//int rollbase = hand == 0 ? 15 : -15; 
+	int rollbase = 15;
+	forearmRoll = idAngles( rollbase + hydraRoll * 0.33f, 0.0f, 0.0f ).ToMat3();
+	if ( hand == 1 ) forearmRoll = idAngles(  vr_lbicep.GetFloat() + hydraRoll * 0.33f , 0.0f, 0.0f ).ToMat3();
+	GetAnimator()->GetJointTransform( armIK.shoulderJoints[hand], gameLocal.time, currentForearmPos, currentForearmAxis );
+	currentForearmAxis = forearmRoll * currentForearmAxis;
+	GetAnimator()->SetJointAxis( armIK.shoulderJoints[hand], JOINTMOD_WORLD_OVERRIDE, currentForearmAxis );
+	
+	//armIK.Evaluate();
+
+	// end IK
 }
 
 /*
@@ -11547,7 +12218,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 				vr->HydraGetLeftWithOffset( hydraPos );
 				
 				// koz move flashlight to the hand position
-				viewOrigin += hydraPos.position *viewAxis2;
+				viewOrigin += hydraPos.position * viewAxis2;
 				
 				flashAxis = flashRot * hydraPos.hydraRotationQuat;
 				flashAxis *= viewAxis2.ToQuat();
@@ -11556,6 +12227,12 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 
 				//model center not at local model origin, translate origin by offset to compensate
 				origin = viewOrigin + flashpos * axis;
+				
+				if ( vr->VR_USE_HYDRA && vr_armIKenable.GetBool() && vr_showBody.GetBool() )
+				{
+					SetHandIKPos( 1, viewOrigin , axis, hydraPos.hydraRotationQuat );//; hydraPos.hydraRotationQuat );
+				}
+				
 				break;
 			}
 
@@ -11698,12 +12375,18 @@ void idPlayer::GetViewPos( idVec3& origin, idMat3& axis ) const
 {
 	idAngles angles;
 
+	if ( game->isVR )
+	{
+		GetViewPosVR( origin, axis );
+		return;
+	}
+
 	// if dead, fix the angle and don't add any kick
 	if ( health <= 0 )
 	{
-		if ( vr_enable.GetBool() ) // koz use the viewAngles to keep track of HMD viewpoint 
+		if ( game->isVR ) // koz 
 		{
-			angles = viewAngles;  // koz fixme need to really check the results of this whole routine, esp adjusting origin based on the nodals
+			angles = viewAngles; 
 		}
 		else
 		{
@@ -11737,14 +12420,13 @@ idPlayer::GetViewPosVR
 ===============
 */
 void idPlayer::GetViewPosVR( idVec3 &origin, idMat3 &axis ) const {
+	
 	idAngles angles;
 
 	// if dead, fix the angle and don't add any kick
 	if ( health <= 0 )
 	{
 		angles = viewAngles;
-		//Carl:Never roll the camera in VR unless the user does!
-		//Carl:Probably not a good idea to pitch either
 		axis = angles.ToMat3();
 		origin = GetEyePosition();
 	}
@@ -11753,89 +12435,100 @@ void idPlayer::GetViewPosVR( idVec3 &origin, idMat3 &axis ) const {
 		//Carl: Use head and neck rotation model
 		float eyeHeightAboveRotationPoint;
 		float eyeShiftRight = 0;
+		weapon_t currentWeapon;
+
 		//Carl: When we can see our body, it leans from the torso, not the neck!
-		if ( vr_showBody.GetBool() )
+		if ( vr_showBody.GetBool() && 0 )
 		{
 			// with different weapons, we pivot from a different place
-			if ( weapon && weapon->pdaIcon == "guis/assets/hud/icons/fists_new.tga" )
+			currentWeapon = weapon->IdentifyWeapon();
+
+			switch ( currentWeapon )
 			{
+			case WEAPON_FISTS:
 				eyeHeightAboveRotationPoint = 12.5f;
 				eyeShiftRight = -4;
-			}
-			else if ( weapon && weapon->pdaIcon == "guis/assets/hud/icons/chainsaw_new.tga" )
-			{
+				break;
+
+			case WEAPON_CHAINSAW:
 				eyeHeightAboveRotationPoint = 13;
 				eyeShiftRight = 2;
-			}
-			else if ( weapon && weapon->displayName == "#str_00100207" )
-			{ // grabber
+				break;
+
+			case WEAPON_GRABBER:
 				eyeHeightAboveRotationPoint = 10;
 				eyeShiftRight = 1;
-			}
-			else if ( weapon && weapon->pdaIcon == "guis/assets/hud/icons/soul_cube.tga" )
-			{
+				break;
+
+			case WEAPON_SOULCUBE:
 				eyeHeightAboveRotationPoint = 10;
 				eyeShiftRight = -1;
-			}
-			else if ( weapon && weapon->displayName == "#str_00100209" )
-			{ // artifact
+				break;
+
+			case WEAPON_ARTIFACT:
 				eyeHeightAboveRotationPoint = 10;
 				eyeShiftRight = -1;
-			}
-			else if ( weapon && weapon->pdaIcon == "guis/assets/hud/icons/pistol_new.tga" )
-			{
+				break;
+
+			case WEAPON_PISTOL:
 				eyeHeightAboveRotationPoint = 15;
 				eyeShiftRight = 0;
-			}
-			else if ( weapon && weapon->pdaIcon == "guis/assets/hud/icons/shotgun_new.tga" )
-			{
+				break;
+
+			case WEAPON_SHOTGUN:
 				eyeHeightAboveRotationPoint = 23;
 				eyeShiftRight = 2;
-			}
-			else if ( weapon && weapon->displayName == "#str_00100191" )
-			{ // double-barrelled shotgun
+				break;
+
+			case WEAPON_SHOTGUN_DOUBLE_MP:
+			case WEAPON_SHOTGUN_DOUBLE:
 				eyeHeightAboveRotationPoint = 23;
 				eyeShiftRight = 2;
-			}
-			else if ( weapon && weapon->pdaIcon == "guis/assets/hud/icons/machinegun_new.tga" )
-			{
+				break;
+
+			case WEAPON_MACHINEGUN:
 				eyeHeightAboveRotationPoint = 17;
 				eyeShiftRight = 0;
-			}
-			else if ( weapon && weapon->pdaIcon == "guis/assets/hud/icons/chaingun_new.tga" )
-			{
+				break;
+
+			case WEAPON_CHAINGUN:
 				eyeHeightAboveRotationPoint = 12;
 				eyeShiftRight = 6;
-			}
-			else if ( weapon && weapon->pdaIcon == "guis/assets/hud/icons/grenade_new.tga" )
-			{
+				break;
+
+			case WEAPON_HANDGRENADE:
 				eyeHeightAboveRotationPoint = 15;
 				eyeShiftRight = 0;
-			}
-			else if ( weapon && weapon->pdaIcon == "guis/assets/hud/icons/plasmagun_new.tga" )
-			{
+				break;
+
+			case WEAPON_PLASMAGUN:
 				eyeHeightAboveRotationPoint = 6;
 				eyeShiftRight = 2;
-			}
-			else if ( weapon && weapon->pdaIcon == "guis/assets/hud/icons/rocketlauncher_new.tga" )
-			{
+				break;
+
+			case WEAPON_ROCKETLAUNCHER:
 				eyeHeightAboveRotationPoint = 20;
 				eyeShiftRight = 1;
-			}
-			else if ( weapon && weapon->pdaIcon == "guis/assets/hud/icons/bfg_new.tga" )
-			{
+				break;
+
+			case WEAPON_BFG:
 				eyeHeightAboveRotationPoint = 21;
 				eyeShiftRight = 5;
-			}
-			else
-			{
+				break;
+
+
+			default:
+
 				eyeHeightAboveRotationPoint = 14;
 				eyeShiftRight = 0;
+
 			}
 		}
 		else
 		{
-			eyeHeightAboveRotationPoint = g_viewNodalZ.GetFloat();
+			//eyeHeightAboveRotationPoint = g_viewNodalZ.GetFloat();
+			eyeShiftRight = 0;
+			eyeHeightAboveRotationPoint = 14;
 		}
 
 		origin = GetEyePosition() + viewBob;
@@ -11847,39 +12540,11 @@ void idPlayer::GetViewPosVR( idVec3 &origin, idMat3 &axis ) const {
 		const idVec3 & gravityVector = physicsObj.GetGravityNormal();
 		origin += gravityVector * g_viewNodalZ.GetFloat();
 
-		//mmdanggg2: hooray for positional tracking being a bitch with math and stuff....
-		if ( 1 /*IN_MotionSensor_CanReadPosition()*/ ){
-			if ( vr_showBody.GetBool() ) {
-				eyeHeightAboveRotationPoint = 16.5f;
-			}
-			else {
-				eyeHeightAboveRotationPoint = g_viewNodalZ.GetFloat();
-			}
-			eyeShiftRight = 0;
-			origin += axis[0] * g_viewNodalX.GetFloat() - axis[1] * eyeShiftRight + axis[2];
 
-			float posTrackx = 0.0f, posTracky = 0.0f, posTrackz = 0.0f, posTrackxAdj = 0.0f, posTrackyAdj = 0.0f;
-			//IN_MotionSensor_ReadPosition(posTrackx, posTrackz, posTracky); // Swapped z and y coz oculus returns retarded y=up coords
+		// adjust the origin based on the camera nodal distance (eye distance from neck)
+		//origin += axis[0] * g_viewNodalX.GetFloat() - axis[1] * eyeShiftRight + axis[2] * eyeHeightAboveRotationPoint;
+		origin +=  axis[1] * -eyeShiftRight + axis[2] * eyeHeightAboveRotationPoint;
 
-			double yawRad = DEG2RAD( angles.yaw - 90 ); // -90deg because then it works
-			double angleCosine = cos( yawRad );
-			double angleSine = sin( yawRad );
-
-			posTracky = -posTracky;// invert the y axis beacuse then it works
-
-			posTrackxAdj = posTrackx * angleCosine - posTracky * angleSine; // rotate the vector so the users pos is aligned with the character
-			posTrackyAdj = posTrackx * angleSine + posTracky * angleCosine;
-
-			idVec3 posTrackVec( posTrackxAdj, posTrackyAdj, posTrackz );
-
-			origin += posTrackVec * 40.0f; // the number is how much the pos tracking affects the view, 40 is a complete guess
-
-			origin.z += eyeHeightAboveRotationPoint; // offset the height so it is on the neck
-		}
-		else {
-			// adjust the origin based on the camera nodal distance (eye distance from neck)
-			origin += axis[0] * g_viewNodalX.GetFloat() - axis[1] * eyeShiftRight + axis[2] * eyeHeightAboveRotationPoint;
-		}
 	}
 }
 
@@ -11942,7 +12607,8 @@ void idPlayer::CalculateRenderView()
 	  // koz add headtracking
 	static idAngles hmdAngles = { 0.0, 0.0, 0.0 };
 	static idVec3 lastValidHmdTranslation = vec3_zero;
-	idVec3 hmdTranslation = vec3_zero;
+	static idVec3 headPositionDelta = vec3_zero;
+	static idVec3 bodyPositionDelta = vec3_zero;
 		
 	int i;
 	float range;
@@ -12033,19 +12699,23 @@ void idPlayer::CalculateRenderView()
 
 	if ( game->isVR )
 	{
-		// koz headtracker does not actually update the head model position or axis, we simply add offsets to body rotation at render time
-		// koz fixme fix this.
-		//static idAngles hmdAngles = ang_zero;
+		// koz headtracker does not modify the model rotations
+		// offsets to body rotation added here
 		
-		vr->HMDGetOrientation( hmdAngles, hmdTranslation );
-		//common->Printf( "Roll pitch yay %f %f %f\n", hmdAngles.roll, hmdAngles.pitch, hmdAngles.yaw );
+		// body position based on neck model
+		// koz fixme fix this.
+				
 		// Koz begin : Add headtracking
+		
+		
+		vr->HMDGetOrientation( hmdAngles, headPositionDelta, bodyPositionDelta, gameLocal.inCinematic );
+				
 		idVec3 origin = renderView->vieworg;
-		idAngles angles = renderView->viewaxis.ToAngles(); //viewAngles + viewBobAngles + playerView.AngleOffset();
+		idAngles angles = renderView->viewaxis.ToAngles(); 
 		idMat3 axis = renderView->viewaxis;
 
 		
-		angles.yaw += hmdAngles.yaw;    // add the current hmd orientation
+		angles.yaw += hmdAngles.yaw - vr->bodyYawOffset;    // add the current hmd orientation
 		angles.pitch += hmdAngles.pitch;
 		angles.roll += hmdAngles.roll;
 		angles.Normalize180();
@@ -12054,7 +12724,9 @@ void idPlayer::CalculateRenderView()
 		vr->lastHMDPitch = hmdAngles.pitch;
 		vr->lastHMDRoll = hmdAngles.roll;
 
-		origin += axis[0] * hmdTranslation.x + axis[1] * hmdTranslation.y + axis[2] * hmdTranslation.z; // add hmd translation
+		origin += axis[0] * headPositionDelta.x + axis[1] * headPositionDelta.y + axis[2] * headPositionDelta.z; // add hmd translation
+
+		//origin += axis[0] * camPos.x + axis[1] * camPos.y + axis[2] * camPos.z; // add hmd translation
 	
 
 		/*	if ( vr_hydraMode.GetInteger() == 1 ) {
@@ -12069,7 +12741,7 @@ void idPlayer::CalculateRenderView()
 				
 		vr->lastHMDViewOrigin = renderView->vieworg;
 		vr->lastHMDViewAxis = renderView->viewaxis;
-
+		
 		UpdateVrHud();
 
 		// koz fixme pause - handle the PDA model if game is paused
@@ -12081,6 +12753,7 @@ void idPlayer::CalculateRenderView()
 			{
 				if ( !vr->PDArising )
 				{
+					common->Printf( "idPlayer::CalculateRenderView calling SelectWeapon for PDA\nPDA Forced = %i, PDA Rising = %i, PDAForceToggle = %i\n",vr->PDAforced,vr->PDArising,vr->PDAforcetoggle );
 					SelectWeapon( weapon_pda, true );
 					vr->PDAforcetoggle = false;
 					vr->PDArising = true;
@@ -12099,6 +12772,7 @@ void idPlayer::CalculateRenderView()
 			{ // pda has been already been forced active, put it away.
 				if ( vr->PDAforcetoggle )
 				{
+					common->Printf( "idPlayer::CalculateRenderView calling TogglePDA\n" );
 					TogglePDA();
 					vr->PDAforcetoggle = false;
 					vr->PDAforced = false;
@@ -12647,6 +13321,7 @@ void idPlayer::Event_OpenPDA()
 {
 	if( !common->IsMultiplayer() )
 	{
+		common->Printf( "idPlayer::Event_OpenPDA() calling TogglePDA\n" );
 		TogglePDA();
 	}
 }
@@ -12797,6 +13472,9 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 	
 	// clear the ik before we do anything else so the skeleton doesn't get updated twice
 	walkIK.ClearJointMods();
+	
+	// koz
+	armIK.ClearJointMods();
 	
 	if( gameLocal.isNewFrame )
 	{

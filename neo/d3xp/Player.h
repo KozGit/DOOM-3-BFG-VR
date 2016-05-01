@@ -296,7 +296,7 @@ public:
 	bool					headingBeamActive;
 	const idDeclSkin*		skinHeadingSolid;
 	const idDeclSkin*		skinHeadingArrows;
-	const idDeclSkin*		skinHeadinArrowsScroll;
+	const idDeclSkin*		skinHeadingArrowsScroll;
 	
 	renderEntity_t			hudEntity; // koz add a model to place the hud into the world
 	qhandle_t				hudHandle;
@@ -312,6 +312,9 @@ public:
 	bool					PDAfixed; // koz has the PDA been fixed in space?
 	idVec3					PDAorigin; // koz 
 	idMat3					PDAaxis; // koz
+
+	idVec3 throwDirection; // for motion control throwing actions e.g. grenade
+	idVec3 throwVelocity;
 	
 	//float					independentWeaponPitch; // deltas to provide aim independent of body/view orientation
 	//float					independentWeaponYaw;
@@ -569,6 +572,7 @@ public:
 	float					CalcFov( bool honorZoom );
 	void					CalculateViewWeaponPos( idVec3& origin, idMat3& axis );
 	void					CalculateViewWeaponPosVR( idVec3& origin, idMat3& axis );
+	void					SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQuat rotation );
 
 	// Koz begin
 	void					CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flashOffset ); // koz aim the flashlight with the hydra
@@ -854,7 +858,15 @@ private:
 	jointHandle_t			hipJoint;
 	jointHandle_t			chestJoint;
 	jointHandle_t			headJoint;
-	
+
+	// koz begin
+	jointHandle_t			neckJoint;
+	jointHandle_t			ik_hand[2];
+	jointHandle_t			ik_elbow[2];
+	jointHandle_t			ik_shoulder[2];
+	// koz end
+
+		
 	idPhysics_Player		physicsObj;			// player physics
 	
 	idList<aasLocation_t, TAG_IDLIB_LIST_PLAYER>	aasLocation;		// for AI tracking the player
@@ -995,6 +1007,7 @@ private:
 	void					AdjustSpeed();
 	void					AdjustBodyAngles();
 
+	void					SnapBodyToView(); // koz align body to current view;
 	void					OrientHMDBody(); // koz reset hmd/body orientations
 
 	void					InitAASLocation();

@@ -103,6 +103,10 @@ private:
 	float				DrawFPS( float y );
 	float				DrawMemoryUsage( float y );
 	
+	// koz 
+	float				DrawVRWip( float y );
+	// koz end
+
 	void				DrawOverlayText( float& leftY, float& rightY, float& centerY );
 	void				DrawDebugGraphs();
 	
@@ -256,6 +260,12 @@ float idConsoleLocal::DrawFPS( float y )
 	// DG: "com_showFPS 2" means: show FPS only, like in classic doom3
 	if( com_showFPS.GetInteger() == 2 )
 	{
+		
+		const char* s = va( "%icount", vr->frameCount );
+		int w = strlen( s ) * BIGCHAR_WIDTH;
+
+		renderSystem->DrawBigStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s, colorWhite, true );
+		y += BIGCHAR_HEIGHT + 4;
 		return y;
 	}
 	// DG end
@@ -323,6 +333,120 @@ float idConsoleLocal::DrawMemoryUsage( float y )
 {
 	return y;
 }
+
+
+/*
+==================
+koz begin
+idConsoleLocal::DrawVRWip
+==================
+*/
+float idConsoleLocal::DrawVRWip( float y )
+{
+	
+
+	y += BIGCHAR_HEIGHT * 10;
+	
+
+	idStr stepStr;
+	stepStr.Format( "Num Steps: %d", vr->wipNumSteps );
+	int w = stepStr.Length() * SMALLCHAR_WIDTH;
+	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w , idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, true );
+	y += SMALLCHAR_HEIGHT + 4;
+
+	switch ( vr->wipStepState )
+	{
+		case 3:
+			stepStr = S_COLOR_RED;
+			stepStr += "Waiting";
+			break;
+		case 2:
+			stepStr = S_COLOR_RED;
+			stepStr += "HalfStepWaiting";
+			break;
+		
+		case 1:
+			stepStr = S_COLOR_BLUE;
+			stepStr += "HalfStepStarted";
+			break;
+		case 0:
+			stepStr = S_COLOR_GREEN;
+			stepStr += "Stepping";
+			break;
+		default:
+			stepStr = S_COLOR_WHITE;
+			stepStr += "????";
+	}
+		
+	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
+	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
+	y += SMALLCHAR_HEIGHT + 4;
+
+	stepStr.Format( "LPeriod: %d", vr->wipLastPeriod );
+	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
+	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
+	y += SMALLCHAR_HEIGHT + 4;
+	
+	stepStr.Format( "LPeriod Vel: %f", vr->wipPeriodVel );
+	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
+	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
+	y += SMALLCHAR_HEIGHT + 4;
+	
+	stepStr.Format( "Avg Period: %f", vr->wipAvgPeriod );
+	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
+	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
+	y += SMALLCHAR_HEIGHT + 4;
+
+	stepStr.Format( "Cur Delta %f", vr->wipCurrentDelta );
+	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
+	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
+	y += SMALLCHAR_HEIGHT + 4;
+
+	stepStr.Format( "Cur Vel %f", vr->wipCurrentVelocity );
+	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
+	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
+	y += SMALLCHAR_HEIGHT + 4;
+
+	stepStr.Format( "Delta Tot %f", vr->wipTotalDelta );
+	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
+	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
+	y += SMALLCHAR_HEIGHT + 4;
+
+	stepStr.Format( "Delta Tot Avg %f", vr->wipTotalDeltaAvg );
+	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
+	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
+	y += SMALLCHAR_HEIGHT + 4;
+
+
+
+
+
+
+
+	
+	//wipLastAcces = 0.0f;
+
+
+	/*stepStr.Format( "%sSV: %4.1f", rendererShadowsTime > maxTime * 1000 ? S_COLOR_RED : "", rendererShadowsTime / 1000.0f );
+	w = stepStr.LengthWithoutColors() * BIGCHAR_WIDTH;
+	renderSystem->DrawBigStringExt( LOCALSAFE_RIGHT - 100 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
+	y += BIGCHAR_HEIGHT + 4;
+
+	stepStr.Format( "%sIDLE: %4.1f", rendererGPUIdleTime > maxTime * 1000 ? S_COLOR_RED : "", rendererGPUIdleTime / 1000.0f );
+	w = stepStr.LengthWithoutColors() * BIGCHAR_WIDTH;
+	renderSystem->DrawBigStringExt( LOCALSAFE_RIGHT - 100 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
+	y += BIGCHAR_HEIGHT + 4;
+
+	stepStr.Format( "%sGPU: %4.1f", rendererGPUTime > maxTime * 1000 ? S_COLOR_RED : "", rendererGPUTime / 1000.0f );
+	w = stepStr.LengthWithoutColors() * BIGCHAR_WIDTH;
+	renderSystem->DrawBigStringExt( LOCALSAFE_RIGHT - 100 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
+	*/
+
+	return y + BIGCHAR_HEIGHT + 4;
+}
+// koz end
+
+
 
 //=========================================================================
 
@@ -1335,6 +1459,13 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 	{
 		righty = DrawMemoryUsage( righty );
 	}
+	// koz
+	if ( vr_showWIP.GetBool() )
+	{
+		righty = DrawVRWip( righty );
+	}
+	// koz end
+
 	DrawOverlayText( lefty, righty, centery );
 	DrawDebugGraphs();
 
@@ -1342,7 +1473,7 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 	// Enable the oculus performance hud
 	if ( vr_hmdPerfHud.IsModified() )
 	{
-		ovr_SetInt( vr->hmd, "PerfHudMode", vr_hmdPerfHud.GetInteger() );
+		ovr_SetInt( vr->hmdSession, "PerfHudMode", vr_hmdPerfHud.GetInteger() );
 		vr_hmdPerfHud.ClearModified();
 	}
 	// Koz end

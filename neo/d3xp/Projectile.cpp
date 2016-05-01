@@ -42,6 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 
 idCVar g_projectileDebug( "g_projectileDebug", "0", CVAR_BOOL, "Debug projectiles" );
 
+idCVar vr_throwPower( "vr_throwPower", "4.75", CVAR_FLOAT, "Throw power" );
+
 
 // This is used in MP to simulate frames to catchup a projectile's state. Similiar to how players work much lighter weight.
 
@@ -354,6 +356,22 @@ void idProjectile::Launch( const idVec3& start, const idVec3& dir, const idVec3&
 	spawnArgs.GetVector( "velocity", "0 0 0", velocity );
 	
 	speed = velocity.Length() * launchPower;
+
+	//koz if throwing a grenade use the tracked hand velocity when using motion controls
+	if ( game->isVR && vr->VR_USE_HYDRA )
+	{
+
+		idPlayer* player = static_cast<idPlayer*>(owner.GetEntity());
+
+		if ( player->weapon )
+		{
+			if ( player->weapon->IdentifyWeapon() == WEAPON_HANDGRENADE )
+			{
+				speed = player->throwVelocity.Length() * vr_throwPower.GetFloat();
+			}
+		}
+	}
+	// koz end
 	
 	damagePower = dmgPower;
 	

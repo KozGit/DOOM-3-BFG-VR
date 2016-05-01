@@ -246,6 +246,9 @@ protected:
 	jointHandle_t			soundJoint;
 	
 	idIK_Walk				walkIK;
+	// koz
+	idIK_Reach				armIK;
+	// koz
 	
 	idStr					animPrefix;
 	idStr					painAnim;

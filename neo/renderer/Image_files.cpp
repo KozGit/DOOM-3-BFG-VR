@@ -155,6 +155,7 @@ LoadTGA
 */
 static void LoadTGA( const char* name, byte** pic, int* width, int* height, ID_TIME_T* timestamp )
 {
+	
 	int		columns, rows, numPixels, fileSize, numBytes;
 	byte*	pixbuf;
 	int		row, column;

@@ -44,7 +44,7 @@ If you have questions concerning this license or the applicable additional terms
 // Koz begin
 #undef strncmp // koz fixme to prevent conflict with oculus SDK.
 #include "vr\vr.h"
-#include "libs\LibOVR\Include\OVR.h"
+#include "libs\LibOVR\Include\OVR_CAPI.h"
 // Koz end
 
 // DeviceContext bypasses RenderSystem to work directly with this
@@ -636,8 +636,6 @@ void R_SetNewMode( const bool fullInit )
 			r_fullscreen.SetInteger( 0 ); // force a windowed mode
 			r_windowWidth.SetInteger( vr->hmdDesc.Resolution.w / 2 );
 			r_windowHeight.SetInteger( vr->hmdDesc.Resolution.h / 2 );
-			r_windowWidth.SetInteger( vr->hmdDesc.Resolution.w / 2 );
-			r_windowHeight.SetInteger( vr->hmdDesc.Resolution.h / 2 );
 			r_swapInterval.SetInteger( 0 ); // force Vsync off for hmd.
 						
 			parms.x = r_windowX.GetInteger();
@@ -703,6 +701,7 @@ void R_SetNewMode( const bool fullInit )
 		
 
 		parms.multiSamples = r_multiSamples.GetInteger();
+		common->Printf( "R_SetNewMode r_multisamples = %d\n", parms.multiSamples );// koz fixme
 		if( i == 0 && !vr->hasHMD )
 		{
 			parms.stereo = ( stereoRender_enable.GetInteger() == STEREO3D_QUAD_BUFFER );
@@ -745,6 +744,7 @@ void R_SetNewMode( const bool fullInit )
 safeMode:
 		// if we failed, set everything back to "safe mode"
 		// and try again
+		common->Printf( "R_SetNewMode trying safemode\n" ); //koz fixme
 		r_vidMode.SetInteger( 0 );
 		r_fullscreen.SetInteger( 1 );
 		r_displayRefresh.SetInteger( 0 );

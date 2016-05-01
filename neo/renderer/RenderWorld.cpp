@@ -32,13 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_local.h"
 
 #include "vr\vr.h" // koz
-
-// Koz fixme - for pda guitracing, need to eliminate these and do it the right way.
-idCVar vv_height( "vv_height", "30", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "" );
-idCVar vv_width( "vv_width", "30", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "" );
-idCVar vv_depth( "vv_depth", "-5", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "" );
-idCVar vv_hoffset( "vv_hoffset", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "" );
-idCVar vv_woffset( "vv_woffset", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "" );
+#include "../d3xp/Game_local.h" // koz
+#include "../d3xp/anim/Anim.h"// koz
 
 /*
 ===================
@@ -282,6 +277,8 @@ void idRenderWorldLocal::UpdateEntityDef( qhandle_t entityHandle, const renderEn
 	
 	if( !re->hModel && !re->callback )
 	{
+		return;// koz fixme!
+
 		common->Error( "idRenderWorld::UpdateEntityDef: NULL hModel" );
 	}
 	
@@ -1237,61 +1234,61 @@ this doesn't do any occlusion testing, simply ignoring non-gui surfaces.
 start / end are in global world coordinates.
 ================
 */
-guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, const idVec3 start, const idVec3 end ) const
+guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, idAnimator* animator, const idVec3 start, const idVec3 end ) const// koz
 {
+
 	guiPoint_t	pt;
 	pt.x = pt.y = -1;
 	pt.guiId = 0;
 
 	// koz begin
-	// koz fixeme this is for hacked PDA guitracing, get rid of this crap and figure out how to do it right
-	idVec3 v0, v1, v2, v3;
-
-	float whalf, hhalf, vdepth, hoffset, woffset;
-
-	whalf = vv_width.GetFloat() / 2;
-	hhalf = vv_height.GetFloat() / 2;
-
-	vdepth = vv_depth.GetFloat();
-	hoffset = vv_hoffset.GetFloat();
-	woffset = vv_woffset.GetFloat();
-
-	v0 = idVec3( vdepth, -whalf + woffset, hhalf + hoffset );
-	v1 = idVec3( vdepth, whalf + woffset, hhalf + hoffset );
-	v2 = idVec3( vdepth, -whalf + woffset, -hhalf + hoffset );
-	v3 = idVec3( vdepth, whalf + woffset, -hhalf + hoffset );
-
 	bool isPDA = false;
 	// koz end
 
-	if ( (entityHandle < 0) || (entityHandle >= entityDefs.Num()) )
+	if ( (entityHandle < 0) || ( entityHandle >= entityDefs.Num()) )
 	{
-		common->Printf( "idRenderWorld::GuiTrace: invalid handle %i\n", entityHandle );
 		return pt;
 	}
 
 	idRenderEntityLocal* def = entityDefs[entityHandle];
 	if ( def == NULL )
 	{
-		common->Printf( "idRenderWorld::GuiTrace: handle %i is NULL\n", entityHandle );
 		return pt;
 	}
 
 	idRenderModel* model = def->parms.hModel;
-	if ( model == NULL ) // koz || model->IsDynamicModel() != DM_STATIC || def->parms.callback != NULL )
+	if ( model == NULL ) // koz static model check moved below || model->IsDynamicModel() != DM_STATIC || def->parms.callback != NULL )
 	{
 		return pt;
 	}
 
 	// Koz begin
-	// koz fixme allow the PDA model to be traced. 
+	// koz allow the PDA model to be traced. 
 
-	if ( game->IsPDAOpen() && vr->PDAclipModelSet )
+	jointHandle_t guiJoints[4];
+
+	if ( game->IsPDAOpen() && game->isVR )
 	{
-		isPDA = (idStr::Icmp( "models/md5/items/pda_view/idle.md5mesh", model->Name() ) == 0);
+		isPDA = idStr::Icmp( "models/md5/items/pda_view/idle.md5mesh", model->Name() ) == 0;
+						
+		if ( isPDA )
+		{
+			guiJoints[0] = model->GetJointHandle( "BLgui" );
+			guiJoints[1] = model->GetJointHandle( "BRgui" );
+			guiJoints[2] = model->GetJointHandle( "TRgui" );
+			guiJoints[3] = model->GetJointHandle( "TLgui" );
+
+			for ( int checkJoint = 0; checkJoint < 4; checkJoint++ )
+			{
+				if ( guiJoints[checkJoint] == INVALID_JOINT ) isPDA = false;
+			}
+		}
+		
+		// if ( isPDA ) common->Printf( "IsPDA = true\n" );
+		// common->Printf( "Model surfaces = %d\n", model->NumSurfaces() );		
 	}
 
-	if ( (model->IsDynamicModel() != DM_STATIC || def->parms.callback != NULL) && !isPDA )
+	if ( (model->IsDynamicModel() != DM_STATIC || def->parms.callback != NULL ) && !isPDA )
 	{
 		return pt;
 	}
@@ -1304,6 +1301,7 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, const idVec3 st
 
 	for ( int i = 0; i < model->NumSurfaces(); i++ )
 	{
+
 		const modelSurface_t* surf = model->Surface( i );
 
 		const srfTriangles_t* tri = surf->geometry;
@@ -1317,21 +1315,31 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, const idVec3 st
 		{
 			continue;
 		}
-		// only trace against gui surfaces
-		if ( !shader->HasGui() )
+		// only trace against gui surfaces and the PDA if in VR
+		if ( !shader->HasGui() && !isPDA )
 		{
 			continue;
 		}
 
 		// Koz begin
-		// Koz fixme
+		
 		if ( isPDA )
 		{
-			// overwrite surface coords for testing
-			tri->verts[0].xyz = v0;
-			tri->verts[1].xyz = v1;
-			tri->verts[2].xyz = v2;
-			tri->verts[3].xyz = v3;
+			
+			idMat3 discardAxis = mat3_identity;
+			idVec3 modelOrigin = def->parms.origin;
+			idMat3 modelAxis = def->parms.axis;
+
+			for ( int jj = 0; jj < 4; jj++ )
+			{
+				// overwrite surface coords for testing
+				animator->GetJointTransform( guiJoints[jj], gameLocal.time, tri->verts[jj].xyz, discardAxis );
+
+				// draw debug lines from view start to gui corners
+				gameRenderWorld->DebugLine( colorYellow, start, modelOrigin + tri->verts[jj].xyz * modelAxis, 0 );
+
+			}
+
 		}
 		// Koz end
 
@@ -1357,6 +1365,10 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, const idVec3 st
 
 	return pt;
 }
+
+
+
+
 
 /*
 ===================

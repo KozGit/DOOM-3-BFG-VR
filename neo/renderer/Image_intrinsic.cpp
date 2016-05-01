@@ -621,11 +621,12 @@ void idImageManager::CreateIntrinsicImages()
 	currentDepthImage = ImageFromFunction( "_currentDepth", R_DepthImage );
 
 	// Koz begin
-	// pdaImage - the rendered PDA screen will be copied to this image to use as a texture on the pda model
+	// pdaImage - the rendered PDA screen will be copied here from the framebuffer to use as a texture on the pda model
 	// hudImage - the rendered hud/menus will be rendered to this image to use as a texture for the hud model
 	pdaImage = ImageFromFunction( "_pdaImage", R_VRSurfaceImage ); // R_RGBA8Image );
 	hudImage = ImageFromFunction( "_hudImage", R_VRSurfaceImage ); // R_RGBA8Image );
-	crosshairImage = ImageFromFunction( "_crosshairImage", R_RGBA8Image );
+	common->Printf( "pdaImage size %d %d\n", pdaImage->GetUploadWidth(), pdaImage->GetUploadHeight() );
+	common->Printf( "Hudimage size %d %d\n", hudImage->GetUploadWidth(), hudImage->GetUploadHeight() );
 	// Koz end
 	
 	// save a copy of this for material comparison, because currentRenderImage may get

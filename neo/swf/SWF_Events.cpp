@@ -293,7 +293,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				{
 					useMouse = true;
 				}
-
+				
 				idSWFScriptObject* hitObject = HitTest( mainspriteInstance, swfRenderState_t(), mouseX, mouseY, NULL );
 				if ( hitObject != NULL )
 				{
@@ -354,7 +354,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				}
 			}
 
-			//return false; // koz fixme hydra this was just a return, but let hydra key events fall through
+			return false; // koz fixme hydra this was just a return, but let hydra key events fall through
 
 		}
 

@@ -145,9 +145,9 @@ END_CLASS
 
 idCVar cg_projectile_clientAuthoritative_maxCatchup( "cg_projectile_clientAuthoritative_maxCatchup", "500", CVAR_INTEGER, "" );
 
-idCVar g_useWeaponDepthHack( "g_useWeaponDepthHack", "1", CVAR_BOOL, "Crunch z depth on weapons" );
+idCVar g_useWeaponDepthHack( "g_useWeaponDepthHack", "0", CVAR_BOOL | CVAR_GAME |  CVAR_ARCHIVE, "Crunch z depth on weapons" );// koz
 
-idCVar g_weaponShadows( "g_weaponShadows", "0", CVAR_BOOL | CVAR_ARCHIVE, "Cast shadows from weapons" );
+idCVar g_weaponShadows( "g_weaponShadows", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Cast shadows from weapons" ); // koz
 
 extern idCVar cg_predictedSpawn_debug;
 
@@ -206,11 +206,13 @@ idWeapon::~idWeapon()
 idWeapon::~idWeapon()
 {
 	// Koz begin
-	if ( vr->PDAclipModelSet ) //koz PDA delete PDA clip model.
+	/*if ( vr->PDAclipModelSet ) //koz PDA delete PDA clip model.
 	{
 		delete PDAclipModel;
 		vr->PDAclipModelSet = false;
 	}
+	*/
+	
 	// Koz end
 	Clear();
 	delete worldModel.GetEntity();
@@ -754,6 +756,10 @@ void idWeapon::Restore( idRestoreGame* savefile )
 		}
 		weaponLights.Set( newLight.name, newLight );
 	}
+
+	// Koz begin - gui for stats device on player wrist in VR. 
+	vrStatGui = uiManager->FindGui( "guis/weapons/vrstatgui.gui", true, false, true );
+	// Koz end
 }
 
 /***********************************************************************
@@ -1067,8 +1073,8 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 	}
 	
 	assert( owner );
-	
-	weaponDef			= gameLocal.FindEntityDef( objectname );
+		
+	weaponDef = gameLocal.FindEntityDef( objectname );
 	
 	ammoType			= GetAmmoNumForName( weaponDef->dict.GetString( "ammoType" ) );
 	ammoRequired		= weaponDef->dict.GetInt( "ammoRequired" );
@@ -1149,14 +1155,18 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 	vmodel = weaponDef->dict.GetString( "model_view" );
 	SetModel( vmodel );
 	
+	// koz weapon shadows
+	
+	renderEntity.noShadow = false;
+
 	// setup the world model
 	InitWorldModel( weaponDef );
+	worldModel.GetEntity()->GetRenderEntity()->noShadow = true; // koz fixme only if using viewweapon for body model
 
-	// Koz begin
-	currentWeaponEnum = IdentifyWeapon(); //koz fixme this whole thing is crap.
-
+	//currentWeaponEnum = IdentifyWeapon(); //koz fixme this whole thing is crap.
+	
 	//koz PDA, if loading the PDA , set a clip model so we can interact with the screen
-	if ( idStr::Icmp( "weapon_pda", objectname ) == 0 )
+/*	if ( idStr::Icmp( "weapon_pda", objectname ) == 0 )
 	{
 		//if ( currentWeaponEnum == WEAPON_PDA ) { koz fixme this didn't work so remove all traces.
 		if ( !vr->PDAclipModelSet )
@@ -1195,6 +1205,10 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 		vr->PDAclipModelSet = false;
 		PDAclipModel->~idClipModel();
 	}
+
+	*/
+
+
 	/*	idRenderModel *mod = renderEntity.hModel;
 	modelSurface_t modsurf;
 	srfTriangles_t tri;
@@ -1229,6 +1243,7 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 	// Koz end
 
 	
+
 	// copy the sounds from the weapon view model def into out spawnargs
 	const idKeyValue* kv = weaponDef->dict.MatchPrefix( "snd_" );
 	while( kv )
@@ -1404,7 +1419,7 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 
 
 	zoomFov = weaponDef->dict.GetInt( "zoomFov", "70" );
-	berserk = weaponDef->dict.GetInt( "berserk", "2" );
+	berserk = weaponDef->dict.GetInt( "berserk", "2" ); 
 	
 	weaponAngleOffsetAverages = weaponDef->dict.GetInt( "weaponAngleOffsetAverages", "10" );
 	weaponAngleOffsetScale = weaponDef->dict.GetFloat( "weaponAngleOffsetScale", "0.25" );
@@ -1418,12 +1433,25 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 		gameLocal.Error( "No 'weapon_scriptobject' set on '%s'.", objectname );
 	}
 	
+	//koz
+	//if game is VR load VR versions script
+	
+	const char* scriptName;
+	if ( game->isVR )
+	{
+		idStr objectname1 = objectType;
+		objectname1 += "_vr";
+
+		scriptName = objectname1.c_str();
+	}
+	
 	// setup script object
 	if( !scriptObject.SetType( objectType ) )
+	//if ( !scriptObject.SetType( scriptName ) )
 	{
 		gameLocal.Error( "Script object '%s' not found on weapon '%s'.", objectType, objectname );
 	}
-	
+	// koz end
 	WEAPON_ATTACK.LinkTo(	scriptObject, "WEAPON_ATTACK" );
 	WEAPON_RELOAD.LinkTo(	scriptObject, "WEAPON_RELOAD" );
 	WEAPON_NETRELOAD.LinkTo(	scriptObject, "WEAPON_NETRELOAD" );
@@ -1785,9 +1813,10 @@ idWeapon::UpdateWeaponClipPosition
 void idWeapon::UpdateWeaponClipPosition( idVec3 &origin, idMat3 &axis )
 {
 
-	PDAclipModel->SetPosition( origin, axis );
+	/*PDAclipModel->SetPosition( origin, axis );
 	PDAclipModel->Link( gameLocal.clip );
-
+	*/
+	
 }
 
 /*
@@ -2745,7 +2774,7 @@ Returns false for hands, grenades, and chainsaw.
 bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 {
 
-	static weapon_t currentWeap;
+	static weapon_t currentWeap = WEAPON_NONE;
 	idVec3	discardedOrigin;
 
 	origin = playerViewOrigin;
@@ -2755,7 +2784,7 @@ bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 
 	switch ( currentWeap )
 	{
-		case NO_WEAPON:
+		case WEAPON_NONE:
 		case WEAPON_FISTS:
 		case WEAPON_SOULCUBE:
 		case WEAPON_PDA:
@@ -2886,8 +2915,8 @@ koz return weapon enumeration
 weapon_t idWeapon::IdentifyWeapon()
 {
 	static int lastFrame = 0;
-	static weapon_t currentWeapon = NO_WEAPON;
-	static weapon_t lastWeapon = NO_WEAPON; // lastweapon holds the last actual weapon value, so the weapon enum will never return a value of 'weapon_flaslight'. nothing to do with the players previous weapon
+	static weapon_t currentWeapon = WEAPON_NONE;
+	static weapon_t lastWeapon = WEAPON_NONE; // lastweapon holds the last actual weapon value, so the weapon enum will never return a value of 'weapon_flaslight'. nothing to do with the players previous weapon
 
 	if ( lastFrame == idLib::frameNumber ) // only check once per game frame.
 	{
@@ -2896,33 +2925,33 @@ weapon_t idWeapon::IdentifyWeapon()
 
 	lastFrame = idLib::frameNumber;
 
-	if ( weaponDef != NULL )
-	{
-		idStr weaponName = weaponDef->GetName();
+	currentWeapon = WEAPON_NONE;
 
-		if ( idStr::Icmp( "weapon_fists", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_FISTS;
-		else if ( idStr::Icmp( "weapon_chainsaw", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_CHAINSAW;
-		else if ( idStr::Icmp( "weapon_pistol", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_PISTOL;
-		else if ( idStr::Icmp( "weapon_shotgun", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SHOTGUN;
-		else if ( idStr::Icmp( "weapon_machinegun", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_MACHINEGUN;
-		else if ( idStr::Icmp( "weapon_chaingun", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_CHAINGUN;
-		else if ( idStr::Icmp( "weapon_handgrenade", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_HANDGRENADE;
-		else if ( idStr::Icmp( "weapon_plasmagun", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_PLASMAGUN;
-		else if ( idStr::Icmp( "weapon_rocketlauncher", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_ROCKETLAUNCHER;
-		else if ( idStr::Icmp( "weapon_bfg", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_BFG;
-		else if ( idStr::Icmp( "weapon_soulcube", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SOULCUBE;
-		else if ( idStr::Icmp( "weapon_shotgun_double_mp", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SHOTGUN_DOUBLE_MP;
-		else if ( idStr::Icmp( "weapon_grabber", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_GRABBER;
-		else if ( idStr::Icmp( "weapon_shotgun_double", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SHOTGUN_DOUBLE;
-		else if ( idStr::Icmp( "weapon_artifact", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_ARTIFACT;
-		else if ( idStr::Icmp( "weapon_pda", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_PDA;
-		else if ( idStr::Icmp( "weapon_flashlight_new", weaponDef->GetName() ) == 0 ) currentWeapon = lastWeapon;
-		else currentWeapon = NO_WEAPON;
-		lastWeapon = currentWeapon;
-	}
-	else
+	if ( this )
 	{
-		currentWeapon = NO_WEAPON;
+		if ( weaponDef != NULL )
+		{
+			idStr weaponName = weaponDef->GetName();
+			if ( idStr::Icmp( "weapon_fists", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_FISTS;
+			else if ( idStr::Icmp( "weapon_chainsaw", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_CHAINSAW;
+			else if ( idStr::Icmp( "weapon_pistol", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_PISTOL;
+			else if ( idStr::Icmp( "weapon_shotgun", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SHOTGUN;
+			else if ( idStr::Icmp( "weapon_machinegun", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_MACHINEGUN;
+			else if ( idStr::Icmp( "weapon_chaingun", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_CHAINGUN;
+			else if ( idStr::Icmp( "weapon_handgrenade", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_HANDGRENADE;
+			else if ( idStr::Icmp( "weapon_plasmagun", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_PLASMAGUN;
+			else if ( idStr::Icmp( "weapon_rocketlauncher", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_ROCKETLAUNCHER;
+			else if ( idStr::Icmp( "weapon_bfg", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_BFG;
+			else if ( idStr::Icmp( "weapon_soulcube", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SOULCUBE;
+			else if ( idStr::Icmp( "weapon_shotgun_double_mp", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SHOTGUN_DOUBLE_MP;
+			else if ( idStr::Icmp( "weapon_grabber", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_GRABBER;
+			else if ( idStr::Icmp( "weapon_shotgun_double", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SHOTGUN_DOUBLE;
+			else if ( idStr::Icmp( "weapon_artifact", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_ARTIFACT;
+			else if ( idStr::Icmp( "weapon_pda", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_PDA;
+			else if ( idStr::Icmp( "weapon_flashlight_new", weaponDef->GetName() ) == 0 ) currentWeapon = lastWeapon;
+			else currentWeapon = WEAPON_NONE;
+			lastWeapon = currentWeapon;
+		}
 	}
 		
 	return currentWeapon;
@@ -3010,8 +3039,18 @@ void idWeapon::PresentWeaponOriginal( bool showViewModel )
 	UpdateAnimation();
 	
 	// only show the surface in player view
-	renderEntity.allowSurfaceInViewID = owner->entityNumber + 1;
-	
+	// koz begin
+	if ( game->isVR )
+	{
+		renderEntity.allowSurfaceInViewID = 0;
+	}
+	else
+	{
+		renderEntity.allowSurfaceInViewID = owner->entityNumber + 1;
+	}
+
+	// koz end
+
 	// crunch the depth range so it never pokes into walls this breaks the machine gun gui
 	renderEntity.weaponDepthHack = g_useWeaponDepthHack.GetBool();
 	
@@ -3239,6 +3278,9 @@ idWeapon::PresentWeapon
 */
 void idWeapon::PresentWeapon( bool showViewModel )
 {
+	
+	worldModel.GetEntity()->GetRenderEntity()->allowSurfaceInViewID = -1;
+	
 	playerViewOrigin = owner->firstPersonViewOrigin;
 	playerViewAxis = owner->firstPersonViewAxis;
 	weapon_t currentWeapon = IdentifyWeapon();
@@ -3307,9 +3349,16 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	if ( vr_showBody.GetBool() && game->isVR ) // koz fixme only in vr
 	{
 		//Carl: Never allow drawing the weapon's view model if showing our body (we are using the body's world model)
-		renderEntity.allowSurfaceInViewID = -1;
+		
+		// koz renderEntity.allowSurfaceInViewID = -1;
+		//renderEntity.allowSurfaceInViewID = owner->entityNumber + 1;
+		renderEntity.allowSurfaceInViewID = 0;
 		//Carl: don't suppress drawing the player's body in 1st person if we want to see it (in VR)
 		owner->GetRenderEntity()->suppressSurfaceInViewID = 0;
+	}
+	else if ( game->isVR )
+	{
+		renderEntity.allowSurfaceInViewID = 0;
 	}
 	else
 	{
@@ -4601,15 +4650,34 @@ void idWeapon::GetProjectileLaunchOriginAndAxis( idVec3& origin, idMat3& axis )
 	assert( owner != NULL );
 	if ( game->isVR )
 	{
+		static weapon_t curWeap = WEAPON_NONE;
+
 		common->Printf( "GPLOAA getting muzzle position w/ hacks\n" ); // koz delete me
 		GetMuzzlePositionWithHacks( origin, axis );
+				
+		curWeap = IdentifyWeapon();
 
-		if ( IdentifyWeapon() == WEAPON_BFG )
+		switch ( curWeap )
 		{
-			// BFG pitches up when fired before the projectile is launched.
-			// Hack to correct pitch so projectile doesn't shoot high. 
-			static idMat3 bfgCorrection = idAngles( 0.0, -15.0, 0.0 ).ToMat3();
-			axis = bfgCorrection * axis;
+			case WEAPON_BFG:
+				{
+					// BFG pitches up when fired before the projectile is launched.
+					// Hack to correct pitch so projectile doesn't shoot high. 
+					static idMat3 bfgCorrection = idAngles( 0.0, -15.0, 0.0 ).ToMat3();
+					axis = bfgCorrection * axis;
+
+				}
+				break;
+
+			case WEAPON_HANDGRENADE:
+			{
+				// if using motion controls, the muzzle axis should be the tracked direction of
+				// hand movement, not the barrel axis.
+				axis = owner->throwDirection.ToMat3();
+				break;
+			}
+			default:
+				break;
 
 		}
 		return;

@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "vr\Vr.h" // Koz
 
+idCVar vr_screenSeparation( "vr_screenSeparation", "0", CVAR_FLOAT, "" );
+
 // _D3XP : rename all gameLocal.time to gameLocal.slow.time for merge!
 
 const int IMPULSE_DELAY = 150;
@@ -499,6 +501,7 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 	}
 	// Koz end
 
+	
 	// draw screen blobs
 	if( !pm_thirdPerson.GetBool() && !g_skipViewEffects.GetBool() )
 	{
@@ -797,6 +800,8 @@ void idPlayerView::EmitStereoEyeView( const int eye, idMenuHandler_HUD* hudManag
 										stereoRender_convergence.GetFloat(),
 										view->fov_x );
 										
+
+	
 	eyeView.vieworg += eye * dists.worldSeparation * eyeView.viewaxis[1];
 	
 	eyeView.viewEyeBuffer = stereoRender_swapEyes.GetBool() ? eye : -eye;
@@ -850,15 +855,25 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 		if ( game->isVR )
 		{
 			
+			vr->lastCenterEyeAxis = view->viewaxis;
+			vr->lastCenterEyeOrigin = view->vieworg;
+			
 			vr->vrFrame++; // only place this is incremented.
+			vr->PushFrame( vr->vrFrame,vr->hmdTrackingState.HeadPose.ThePose,vr->sensorSampleTime );
 
-			if ( !vr->PDAforced && !vr->PDArising ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
+		
+
+			//Dialog().Render( loadGUI != NULL );
+			
+			
+
+			if ( !vr->PDAforced && !vr->PDArising && !game->IsPDAOpen() ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
 			{
 				vr->swfRenderMode = RENDERING_HUD;
 				player->DrawHUDVR( hudManager );
 				vr->swfRenderMode = RENDERING_NORMAL;
 			}
-		
+			
 			if ( player->objectiveSystemOpen )
 			{
 				if ( player->pdaMenu != NULL )
@@ -875,8 +890,7 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 			}
 		}
 		// render both eye views each frame on the PC
-		//if ( game->isVR ) vr->FrameStart( renderSystem->GetFrameCount() );// idLib::frameNumber );
-
+		
 		for( int eye = 1 ; eye >= -1 ; eye -= 2 )
 		{
 			EmitStereoEyeView( eye, hudManager );

@@ -122,18 +122,24 @@ idMD5Anim::Length
 int idMD5Anim::Length() const
 {
 	if ( vr_disableWeaponAnimation.GetBool() && game->isVR )
-	{	// koz - disable weapon idle animations in VR, so aim is only affected by hydra.
+	{	// koz - disable weapon idle animations in VR, so aim is only affected by motion controls
 		// Originally set the length to 1 at animation load time, but this way the user can toggle
 		// animations without having to reload them all.  
-
-		if ( (strstr( name, "artifact" ) ||
-			strstr( name, "bfg" ) ||
-			strstr( name, "chaingun" ) ||
-			strstr( name, "grenade" ) ||
-			strstr( name, "machinegun" ) ||
-			strstr( name, "pistol" ) ||
-			strstr( name, "plasma" ) ||
-			strstr( name, "shotgun" )) && strstr( name, "idle" ) )
+				
+		if (	strstr( name, "idle")  &&  // is this an idle animation?
+				// on disable idle animations with the following in their path:
+				strstr( name, "artifact" ) ||
+				strstr( name, "bfg" ) ||
+				strstr( name, "chaingun" ) ||
+				strstr( name, "grenade" ) ||
+				strstr( name, "machinegun" ) || 
+				strstr( name, "rocketlauncher" ) ||
+				strstr( name, "pistol" ) ||
+				strstr( name, "plasma" ) ||
+				strstr( name, "shotgun" ) ||
+				strstr( name, "grabber" ) ||
+				strstr( name, "doublebarrel" ) ||
+				strstr( name, "blood_orb" ) )
 		{
 			return 1;	// set anmination length to 1
 		}

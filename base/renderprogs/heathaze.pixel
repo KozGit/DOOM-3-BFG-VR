@@ -50,6 +50,7 @@ void main( PS_IN fragment, out PS_OUT result ) {
 
 	// calculate the screen texcoord in the 0.0 to 1.0 range
 	float2 screenTexCoord = vposToScreenPosTexCoord( fragment.position.xy );
+	
 	screenTexCoord += ( localNormal * fragment.texcoord1.xy );
 	screenTexCoord = saturate( screenTexCoord );
 

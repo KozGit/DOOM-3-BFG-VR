@@ -1753,7 +1753,8 @@ void GLimp_SwapBuffers()
 		}
 	}
 	
-	if ( !game->isVR ) SwapBuffers( win32.hDC ); // koz fixme
+	//if ( !game->isVR ) SwapBuffers( win32.hDC ); // koz fixme
+	SwapBuffers( win32.hDC );
 }
 // RB end
 

@@ -458,13 +458,11 @@ bool idGuiScript::Parse( idTokenParser* src )
 		parms.Append( wv );
 	}
 	
-	//
 	//  verify min/max params
 	if( handler && ( parms.Num() < commandList[i].mMinParms || parms.Num() > commandList[i].mMaxParms ) )
 	{
 		src->Error( "incorrect number of parameters for script %s", commandList[i].name );
 	}
-	//
 	
 	return true;
 }

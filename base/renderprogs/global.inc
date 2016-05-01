@@ -117,6 +117,8 @@ uniform float4 rpEyeToSourceUVScale		:	register(c61);
 uniform float4 rpInverseResolution		:	register(c62);
 uniform float4 rpOverdriveScales		:	register(c63);
 uniform float4 rpVignetteFade			:	register(c64);
+
+uniform float4 rpStereoCorrection		:	register(c65);
 // Koz end
 
 static float dot2( float2 a, float2 b ) { return dot( a, b ); }

@@ -850,6 +850,7 @@ void idImage::CopyFramebuffer( int x, int y, int imageWidth, int imageHeight )
 	{
 		if ( vr->VR_AAmode == VR_AA_MSAA ) // resolve the MSAA renderbuffer before copy.
 		{
+			glDisable( GL_SCISSOR_TEST ); // koz hack - issue with nvidia msaa, if scissor test is enabled when blitting/resolving the framebuffer the post processing is corrupt.
 			ResolveMSAA();
 		}
 		else
@@ -891,7 +892,9 @@ void idImage::CopyFramebuffer( int x, int y, int imageWidth, int imageHeight )
 	if ( vr->useFBO )
 	{
 		globalFramebuffers.primaryFBO->Bind();
-    }
+		if ( vr->VR_AAmode == VR_AA_MSAA ) glEnable( GL_SCISSOR_TEST);// koz hack - re-enable scissor test 
+		
+	}
 }
 
 /*
@@ -911,7 +914,7 @@ void idImage::CopyDepthbuffer( int x, int y, int imageWidth, int imageHeight )
 		else
 		{
 			globalFramebuffers.primaryFBO->Bind();
-       	}
+		}
 	}
 	else
 	{

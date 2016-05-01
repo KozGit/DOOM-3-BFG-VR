@@ -44,6 +44,8 @@ idCVar r_skipShaderPasses( "r_skip`R_USE`ShaderPasses", "0", CVAR_RENDERER | CVA
 idCVar r_skipInteractionFastPath( "r_skipInteractionFastPath", "1", CVAR_RENDERER | CVAR_BOOL, "" );
 idCVar r_useLightStencilSelect( "r_useLightStencilSelect", "0", CVAR_RENDERER | CVAR_BOOL, "use stencil select pass" );
 
+
+idCVar vr_stereoOverlap( "vr_stereoOverlap" , "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "stereoOverlap" );
 extern idCVar stereoRender_swapEyes;
 
 backEndState_t	backEnd;
@@ -3254,8 +3256,19 @@ static int RB_DrawShaderPasses( const drawSurf_t* const* const drawSurfs, const 
 			continue;
 		}
 		
-		renderLog.OpenBlock( shader->GetName() );
+		float sOffset[4] = { 1, 1, 1, 1 };
+
+		if ( game->isVR )
+		{
+						
+			sOffset[0] =  vr_stereoOverlap.GetFloat() * (float) stereoEye ;
+		}
 		
+		SetVertexParm( RENDERPARM_STEREO_CORRECTION, sOffset );
+
+		renderLog.OpenBlock( shader->GetName() );
+
+			
 		// determine the stereoDepth offset
 		// guiStereoScreenOffset will always be zero for 3D views, so the !=
 		// check will never force an update due to the current sort value.
@@ -3264,14 +3277,18 @@ static int RB_DrawShaderPasses( const drawSurf_t* const* const drawSurfs, const 
 		// change the matrix and other space related vars if needed
 		if( surf->space != backEnd.currentSpace || thisGuiStereoOffset != currentGuiStereoOffset )
 		{
+						
 			backEnd.currentSpace = surf->space;
 			currentGuiStereoOffset = thisGuiStereoOffset;
 			
+		//	currentGuiStereoOffset = vr_stereoOverlap.GetFloat() * stereoEye;// koz
+
 			const viewEntity_t* space = backEnd.currentSpace;
 			
-			if( guiStereoScreenOffset != 0.0f )
+			if( guiStereoScreenOffset != 0.0f  )
 			{
 				RB_SetMVPWithStereoOffset( space->mvp, currentGuiStereoOffset );
+				//common->Printf( "RB_SetMVPWithStereoOffset %f\n", currentGuiStereoOffset );// koz
 			}
 			else
 			{
@@ -3280,7 +3297,10 @@ static int RB_DrawShaderPasses( const drawSurf_t* const* const drawSurfs, const 
 			
 			// set eye position in local space
 			idVec4 localViewOrigin( 1.0f );
+
+			
 			R_GlobalPointToLocal( space->modelMatrix, backEnd.viewDef->renderView.vieworg, localViewOrigin.ToVec3() );
+						
 			SetVertexParm( RENDERPARM_LOCALVIEWORIGIN, localViewOrigin.ToFloatPtr() );
 			
 			// set model Matrix
@@ -3304,7 +3324,7 @@ static int RB_DrawShaderPasses( const drawSurf_t* const* const drawSurfs, const 
 			backEnd.currentScissor = surf->scissorRect;
 		}
 		
-		// get the expressions for conditionals / color / texcoords
+				// get the expressions for conditionals / color / texcoords
 		const float*	regs = surf->shaderRegisters;
 		
 		// set face culling appropriately
@@ -3377,6 +3397,7 @@ static int RB_DrawShaderPasses( const drawSurf_t* const* const drawSurfs, const 
 				renderProgManager.BindShader( newStage->glslProgram, newStage->vertexProgram, newStage->fragmentProgram, false );
 				// RB end
 				
+
 				for( int j = 0; j < newStage->numVertexParms; j++ )
 				{
 					float parm[4];
@@ -4055,19 +4076,19 @@ void RB_DrawViewInternal( const viewDef_t* viewDef, const int stereoEye )
 	//-------------------------------------------------
 	if( processed < numDrawSurfs && !r_skipPostProcess.GetBool() )
 	{
+		
 		int x = backEnd.viewDef->viewport.x1;
 		int y = backEnd.viewDef->viewport.y1;
 		int	w = backEnd.viewDef->viewport.x2 - backEnd.viewDef->viewport.x1 + 1;
 		int	h = backEnd.viewDef->viewport.y2 - backEnd.viewDef->viewport.y1 + 1;
 		
 		RENDERLOG_PRINTF( "Resolve to %i x %i buffer\n", w, h );
-		
 		GL_SelectTexture( 0 );
-		
-		// resolve the screen
+
 		globalImages->currentRenderImage->CopyFramebuffer( x, y, w, h );
 		backEnd.currentRenderCopied = true;
-		
+				
+
 		// RENDERPARM_SCREENCORRECTIONFACTOR amd RENDERPARM_WINDOWCOORD overlap
 		// diffuseScale and specularScale
 		
@@ -4091,6 +4112,7 @@ void RB_DrawViewInternal( const viewDef_t* viewDef, const int stereoEye )
 		renderLog.OpenMainBlock( MRB_DRAW_SHADER_PASSES_POST );
 		RB_DrawShaderPasses( drawSurfs + processed, numDrawSurfs - processed, 0.0f /* definitely not a gui */, stereoEye );
 		renderLog.CloseMainBlock();
+			
 	}
 	
 	//-------------------------------------------------
@@ -4124,7 +4146,7 @@ void RB_MotionBlur()
 		return;
 	}
 	
-	GL_CheckErrors();
+	// koz GL_CheckErrors();
 	
 	// clear the alpha buffer and draw only the hands + weapon into it so
 	// we can avoid blurring them
@@ -4210,7 +4232,7 @@ void RB_MotionBlur()
 	globalImages->currentDepthImage->Bind();
 	
 	RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
-	GL_CheckErrors();
+	// koz GL_CheckErrors();
 }
 
 /*
