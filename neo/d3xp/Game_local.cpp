@@ -2567,7 +2567,7 @@ void idGameLocal::RunFrame( idUserCmdMgr& cmdMgr, gameReturn_t& ret )
 	
 	player = GetLocalPlayer();
 	
-	if ( !common->IsMultiplayer() && g_stopTime.GetBool() || vr->VR_GAME_PAUSED ) // koz vr pause
+	if ( !common->IsMultiplayer() && g_stopTime.GetBool() || commonVr->VR_GAME_PAUSED ) // koz vr pause
 	{
 		// clear any debug lines from a previous frame
 		gameRenderWorld->DebugClearLines( time + 1 );
@@ -3057,8 +3057,8 @@ void idGameLocal::CalcFov( float base_fov, float& fov_x, float& fov_y ) const
 	
 	if ( game->isVR )
 	{
-		fov_x = vr->hmdFovX;
-		fov_y = vr->hmdFovY;
+		fov_x = commonVr->hmdFovX;
+		fov_y = commonVr->hmdFovY;
 		return;
 	}
 	

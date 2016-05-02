@@ -50,9 +50,6 @@ extern idCVar stereoRender_swapEyes;
 
 backEndState_t	backEnd;
 
-ovrPosef qPose; // koz fixme = hmdTrackingState.HeadPose.ThePose; koz check still using?
-int qframeIndex = 0; // koz
-
 /*
 ================
 SetVertexParm

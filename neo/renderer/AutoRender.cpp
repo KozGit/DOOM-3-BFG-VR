@@ -31,7 +31,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "renderer\AutoRender.h"
 #include "tr_local.h"
 #include "vr\Vr.h"
-#include "libs\LibOVR\Include\OVR_CAPI.h"
 #include "sys\win32\win_local.h"
 
 const int AUTO_RENDER_STACK_SIZE = 256 * 1024;
@@ -74,7 +73,7 @@ void idAutoRender::StartBackgroundAutoSwaps(  ) {
 	if ( IsRunning() ) {
 		EndBackgroundAutoSwaps();
 	}
-	vr->lastRead = Sys_Milliseconds();
+	commonVr->lastRead = Sys_Milliseconds();
 	
 	//autoRenderIcon = iconType;
 
@@ -103,7 +102,7 @@ idAutoRender::EndBackgroundAutoSwaps
 void idAutoRender::EndBackgroundAutoSwaps() {
 	idLib::Printf("End Background AutoSwaps\n");
 	StopThread();
-	vr->updateScreen = false;
+	commonVr->updateScreen = false;
 
 }
 
@@ -114,11 +113,11 @@ idAutoRender::RenderFrame
 */
 void idAutoRender::RenderFrame() {
 
-	vr->currentRead = Sys_Milliseconds();
-	if ( vr->currentRead - vr->lastRead >= 5  )
+	commonVr->currentRead = Sys_Milliseconds();
+	if ( commonVr->currentRead - commonVr->lastRead >= 5  )
 	{
-		vr->updateScreen = true;
-		vr->lastRead = vr->currentRead;
+		commonVr->updateScreen = true;
+		commonVr->lastRead = commonVr->currentRead;
 	}
 
 }

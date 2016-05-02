@@ -1493,8 +1493,8 @@ idPlayer::idPlayer():
 	cmdAngles				= ang_zero;
 	
 	// Koz begin : for independent weapon aiming in VR.
-	vr->independentWeaponYaw = 0.0f;
-	vr->independentWeaponPitch = 0.0f;
+	commonVr->independentWeaponYaw = 0.0f;
+	commonVr->independentWeaponPitch = 0.0f;
 	// Koz end
 	
 	oldButtons				= 0;
@@ -2369,7 +2369,7 @@ void idPlayer::Spawn()
 		weapon.GetEntity()->ForceAmmoInClip();
 	}
 	
-	ovr_RecenterTrackingOrigin( vr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
+	// koz fixme ovr_RecenterTrackingOrigin( commonVr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
 	
 
 }
@@ -3032,7 +3032,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	//------------------------------------------------------------
 	// koz begin - VR specific initialization
 	
-	ovr_RecenterTrackingOrigin( vr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
+	// koz fixme ovr_RecenterTrackingOrigin( commonVr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
 	
 	// make sure the clipmodels for the body and head are re-initialized.
 	SetClipModel();
@@ -6728,8 +6728,8 @@ void idPlayer::UpdateFocus()
 		if ( !scanFromWeap )
 		{
 			//weapon has no muzzle ( fists, grenades, chainsaw) so scan from center of view.
-			start = vr->lastViewOrigin;
-			weaponAxis = vr->lastViewAxis;
+			start = commonVr->lastViewOrigin;
+			weaponAxis = commonVr->lastViewAxis;
 			scanRange += 36.0f;
 		}
 		else
@@ -6771,7 +6771,7 @@ void idPlayer::UpdateFocus()
 	// In VR, when the PDA model is active it needs to be hitscanned as if it were a gui. Because it's a gui.
 	if ( game->isVR )
 	{
-		if ( vr->VR_GAME_PAUSED || game->IsPDAOpen() ) 
+		if ( commonVr->VR_GAME_PAUSED || game->IsPDAOpen() ) 
 		{
 
 			pt = gameRenderWorld->GuiTrace( weapon->GetModelDefHandle(), weapon->GetAnimator(), start, end );
@@ -6782,7 +6782,7 @@ void idPlayer::UpdateFocus()
 				static int screenX;
 				static int screenY;
 				
-				if ( vr->VR_GAME_PAUSED )
+				if ( commonVr->VR_GAME_PAUSED )
 				{
 					screenX = renderSystem->GetWidth();
 					screenY = renderSystem->GetHeight();
@@ -6807,7 +6807,7 @@ void idPlayer::UpdateFocus()
 				ev.evPtrLength = 0;
 				ev.evPtr = NULL;
 								
-				if ( vr->VR_GAME_PAUSED )
+				if ( commonVr->VR_GAME_PAUSED )
 				{
 					game->Shell_HandleGuiEvent( &ev );
 				}
@@ -6888,7 +6888,7 @@ void idPlayer::UpdateFocus()
 			}
 		}
 
-		if ( (!ent->GetRenderEntity() || !ent->GetRenderEntity()->gui[0] || !ent->GetRenderEntity()->gui[0]->IsInteractive()) && ( !game->IsPDAOpen() /* && !vr->PDAclipModelSet */) ) // Koz don't bail if the PDA is open and clipmodel is set.
+		if ( (!ent->GetRenderEntity() || !ent->GetRenderEntity()->gui[0] || !ent->GetRenderEntity()->gui[0]->IsInteractive()) && ( !game->IsPDAOpen() /* && !commonVr->PDAclipModelSet */) ) // Koz don't bail if the PDA is open and clipmodel is set.
 
 		{
 			continue;
@@ -7812,7 +7812,7 @@ void idPlayer::TogglePDA()
 	common->Printf( "Toggle PDA\n" );
 	
 	// Koz begin : reset PDA controls
-	vr->forceLeftStick = true;
+	commonVr->forceLeftStick = true;
 	// Koz end
 		
 	if ( inventory.pdas.Num() == 0 )
@@ -7926,7 +7926,7 @@ void idPlayer::SetClipModel()
 
 	if ( game->isVR )
 	{
-		vr->bodyClip = newClip;
+		commonVr->bodyClip = newClip;
 		
 		idClipModel* newClip2;
 
@@ -7946,7 +7946,7 @@ void idPlayer::SetClipModel()
 			//physicsObj.SetClipModel( newClip, 1.0f );
 		}
 
-		vr->headClip = newClip2;
+		commonVr->headClip = newClip2;
 		
 	}
 	
@@ -8227,30 +8227,30 @@ void idPlayer::SnapBodyToView()
 	newBodyAngles = viewAngles;
 	newBodyAngles.pitch = 0;
 	newBodyAngles.roll = 0;
-	newBodyAngles.yaw += vr->lastHMDYaw - vr->bodyYawOffset;
+	newBodyAngles.yaw += commonVr->lastHMDYaw - commonVr->bodyYawOffset;
 	newBodyAngles.Normalize180();
 
 	hydraData currentHydra = hydra_zero;
 	hydraData currentHydraOffset = hydra_zero;
 	idQuat rotQuat;
 	
-	rotQuat = idAngles( 0.0f, ( vr->lastHMDYaw - vr->bodyYawOffset ), 0.0f ).Normalize180().ToQuat();
+	rotQuat = idAngles( 0.0f, ( commonVr->lastHMDYaw - commonVr->bodyYawOffset ), 0.0f ).Normalize180().ToQuat();
 
 
-	vr->bodyYawOffset = vr->lastHMDYaw;
+	commonVr->bodyYawOffset = commonVr->lastHMDYaw;
 	SetViewAngles( newBodyAngles );
 	//viewAngles.yaw = newBodyAngles.yaw;
 
 
 	
 
-	vr->HydraGetLeftOffset( currentHydra );
+	commonVr->HydraGetLeftOffset( currentHydra );
 	currentHydra.hydraRotationQuat *= rotQuat;
-	vr->HydraSetLeftOffset( currentHydra );
+	commonVr->HydraSetLeftOffset( currentHydra );
 
-	vr->HydraGetRightOffset( currentHydra );
+	commonVr->HydraGetRightOffset( currentHydra );
 	currentHydra.hydraRotationQuat *= rotQuat;
-	vr->HydraSetRightOffset( currentHydra );
+	commonVr->HydraSetRightOffset( currentHydra );
 }
 /*
 ==============
@@ -8265,26 +8265,27 @@ void idPlayer::OrientHMDBody()
 	idQuat rotQuat;
 
 	SnapBodyToView();
-	vr->bodyYawOffset = 0;
-	vr->lastHMDYaw = 0;
+	commonVr->bodyYawOffset = 0;
+	commonVr->lastHMDYaw = 0;
 	
-	//hydraYawOffset = vr->lastHMDYaw;
+	//hydraYawOffset = commonVr->lastHMDYaw;
 	//hydraYawOffset = idAngles( 0.0f, hydraYawOffset, 0.0f ).Normalize180().yaw;
-	ovr_RecenterTrackingOrigin( vr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
+	
+	// koz fixme recenter ovr_RecenterTrackingOrigin( commonVr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
 
 	
 	extern idCVar vr_hydraMode;
-	if ( vr->VR_USE_HYDRA ) // vr_hydraMode.GetInteger() !=0 ) {
+	if ( commonVr->VR_USE_HYDRA ) // vr_hydraMode.GetInteger() !=0 ) {
 	{
 		rotQuat = idAngles( 0.0f, hydraYawOffset, 0.0f ).Normalize180().ToQuat();
 
-		vr->HydraGetLeft( currentHydra );
+		commonVr->HydraGetLeft( currentHydra );
 		//currentHydra.hydraRotationQuat = rotQuat;
-		vr->HydraSetLeftOffset( currentHydra );
+		commonVr->HydraSetLeftOffset( currentHydra );
 
-		vr->HydraGetRight( currentHydra );
+		commonVr->HydraGetRight( currentHydra );
 		//currentHydra.hydraRotationQuat = rotQuat;
-		vr->HydraSetRightOffset( currentHydra );
+		commonVr->HydraSetRightOffset( currentHydra );
 	}
 }
 
@@ -8945,14 +8946,14 @@ void idPlayer::Move()
 
 			static int		avgWalkPeriod = 600;
 			static float	minStartWalking = 0.05f;
-			static float	minPaceSensitivity = 0.01;//  06f; // .996 worked well
+			static float	minPaceSensitivity = 0.01f;//  06f; // .996 worked well
 			static float	lastZ = -.9999f;
 			static float	curDeltaZ = 0.0f;
 
-			if ( lastFrame != vr->vrFrame )
+			if ( lastFrame != commonVr->vrFrameNumber )
 			{
-				lastFrame = vr->vrFrame;
-				vr->HMDGetOrientation( hmdAng, headDelta, bodyDelta,false);
+				lastFrame = commonVr->vrFrameNumber;
+				commonVr->HMDGetOrientation( hmdAng, headDelta, bodyDelta,false);
 
 				float deltTot = ((bodyDelta + headDelta )* hmdAng.ToMat3().Inverse()).y;
 				//curDeltaY = ( ( bodyDelta /* + headDelta*/ ) * hmdAng.ToMat3().Inverse() ).y;
@@ -8979,16 +8980,16 @@ void idPlayer::Move()
 				
 				if ( !walkInPlace )
 				{
-					vr->isWalking = false;
-					vr->wipNumSteps = 0;
-					vr->wipStepState = 3;
-					vr->wipCurrentDelta = 0.0f;
-					vr->wipCurrentVelocity = 0.0f;
-					vr->wipLastPeriod = 0.0f;
-					vr->wipTotalDelta = 0.0f;
-					vr->wipLastAcces = 0.0f;
-					vr->wipAvgPeriod = 0.0f;
-					vr->wipPeriodVel = 0.0f;
+					commonVr->isWalking = false;
+					commonVr->wipNumSteps = 0;
+					commonVr->wipStepState = 3;
+					commonVr->wipCurrentDelta = 0.0f;
+					commonVr->wipCurrentVelocity = 0.0f;
+					commonVr->wipLastPeriod = 0.0f;
+					commonVr->wipTotalDelta = 0.0f;
+					commonVr->wipLastAcces = 0.0f;
+					commonVr->wipAvgPeriod = 0.0f;
+					commonVr->wipPeriodVel = 0.0f;
 
 					periodTotals = 0.0f;
 					deltaTotals = 0.0f;
@@ -9000,26 +9001,26 @@ void idPlayer::Move()
 				else
 				{
 					
-					if ( !vr->isWalking ) // wait for head movement
+					if ( !commonVr->isWalking ) // wait for head movement
 					{
 						halfStep = 3;
 						if ( abs( curDeltaY ) >= minStartWalking )
 						{
 						
-							vr->isWalking = true;
+							commonVr->isWalking = true;
 							halfStep = halfStepWaiting;
 							baseVelocity = 50.0f / avgWalkPeriod; //  (600) = .051 (walk in per MS) // 31.0 should be avg step
 							velocityMod = 0.0f;
 							lastMovementTime = currentTime;
 
-							vr->wipNumSteps = 0;
-							vr->wipStepState = 3;
-							vr->wipCurrentDelta = 0.0f;
-							vr->wipCurrentVelocity = 0.0f;
-							vr->wipLastPeriod = 0.0f;
-							vr->wipTotalDelta = 0.0f;
-							vr->wipLastAcces = 0.0f;
-							vr->wipAvgPeriod = 0.0f;
+							commonVr->wipNumSteps = 0;
+							commonVr->wipStepState = 3;
+							commonVr->wipCurrentDelta = 0.0f;
+							commonVr->wipCurrentVelocity = 0.0f;
+							commonVr->wipLastPeriod = 0.0f;
+							commonVr->wipTotalDelta = 0.0f;
+							commonVr->wipLastAcces = 0.0f;
+							commonVr->wipAvgPeriod = 0.0f;
 							periodTotals = 0.0f;
 							deltaTotals = 0.0f;
 							avgAccel = 0.0f;
@@ -9053,7 +9054,7 @@ void idPlayer::Move()
 
 							if ( (currentTime - lastMovementTime ) > bailoutTime )
 							{
-								vr->isWalking = false;
+								commonVr->isWalking = false;
 							//	common->Printf( "BAILOUT! bailoutTime = %d elapsed time = %d\n", bailoutTime, currentTime - lastMovementTime );
 							}
 							else
@@ -9065,11 +9066,11 @@ void idPlayer::Move()
 							//	velocityMod = float ( avgWalkPeriod ) / float ( lastPeriod );
 								//common->Printf( "Moving %f lastperiod = %d currentTime = %d lastMovement = %d velocity Mod = %f \n", baseVelocity * ( currentTime - lastMovementTime ) * velocityMod, lastPeriod,currentTime, lastMovementTime, velocityMod );
 								////bodyDelta.x += baseVelocity * ( currentTime - lastMovementTime ) * velocityMod;
-						//		bodyDelta.x += baseVelocity * velocityMod * ( 1000 /vr->hmdHz ) ;
+						//		bodyDelta.x += baseVelocity * velocityMod * ( 1000 /commonVr->hmdHz ) ;
 								
 								
 								float lastVel1 =abs (  lastDeltaTotals / (float)lastPeriod ) * 100;
-								vr->wipPeriodVel = lastVel1;
+								commonVr->wipPeriodVel = lastVel1;
 
 								walkDistance = ( (1.0f / ((float)lastPeriod + 1)) * lastDeltaTotals ) * 1000.0f;
 								walkDistance += vr_wipVelocityMin.GetFloat();
@@ -9078,7 +9079,7 @@ void idPlayer::Move()
 								//walkDistance = vr_wipVelocityMax.GetFloat();
 							//	common->Printf( "Moving bodyDelta.x = %f\n", walkDistance );
 								
-								vr->wipCurrentVelocity = walkDistance;
+								commonVr->wipCurrentVelocity = walkDistance;
 
 								usercmd.forwardmove = idMath::ClampChar( idMath::Ftoi( walkDistance ) );
 							}
@@ -9105,13 +9106,13 @@ void idPlayer::Move()
 								lastPeriod = currentTime - periodStartTime;
 								common->Printf( "Step detected ( change in head movement direction) period %d \n", lastPeriod );
 								
-								vr->wipNumSteps++;
+								commonVr->wipNumSteps++;
 								periodTotals += (float) lastPeriod;
 
-								vr->wipAvgPeriod = periodTotals / (float)  vr->wipNumSteps;
-								vr->wipTotalDelta = deltaTotals;
+								commonVr->wipAvgPeriod = periodTotals / (float)  commonVr->wipNumSteps;
+								commonVr->wipTotalDelta = deltaTotals;
 								deltaTotalsSum += deltaTotals;
-								vr->wipTotalDeltaAvg = deltaTotalsSum / vr->wipNumSteps;
+								commonVr->wipTotalDeltaAvg = deltaTotalsSum / commonVr->wipNumSteps;
 								lastDeltaTotals = deltaTotals;
 								deltaTotals = 0;
 								
@@ -9125,9 +9126,9 @@ void idPlayer::Move()
 							}
 						}
 					
-						vr->wipStepState = halfStep;
-						vr->wipCurrentDelta = curDeltaY;
-						vr->wipLastPeriod = lastPeriod;
+						commonVr->wipStepState = halfStep;
+						commonVr->wipCurrentDelta = curDeltaY;
+						commonVr->wipLastPeriod = lastPeriod;
 					
 					}
 				}
@@ -9141,9 +9142,9 @@ void idPlayer::Move()
 
 				clipAxis = physicsObj.GetClipModel()->GetAxis();
 
-				vr->headClip->Translate( physicsObj.GetClipModel()->GetOrigin() );
+				commonVr->headClip->Translate( physicsObj.GetClipModel()->GetOrigin() );
 
-				gameLocal.clip.Translation( trace, bodyOrigin, newBodyOrigin, vr->headClip, clipAxis, CONTENTS_SOLID, NULL );
+				gameLocal.clip.Translation( trace, bodyOrigin, newBodyOrigin, commonVr->headClip, clipAxis, CONTENTS_SOLID, NULL );
 				
 				if ( trace.fraction >= 1.0f )
 				{
@@ -10021,7 +10022,7 @@ void idPlayer::UpdateVrHud()
 	float hudPitch;
 
 	// update the hud model
-	if ( ( !hudActive && ( vr_hudLowHealth.GetInteger() == 0 ) ) || vr->PDAforced || game->IsPDAOpen() )
+	if ( ( !hudActive && ( vr_hudLowHealth.GetInteger() == 0 ) ) || commonVr->PDAforced || game->IsPDAOpen() )
 	{
 		// hide it
 		hudEntity.allowSurfaceInViewID = -1;
@@ -10043,8 +10044,8 @@ void idPlayer::UpdateVrHud()
 		}
 		else // hud locked to face
 		{
-			hudAxis = vr->lastHMDViewAxis;
-			hudOrigin = vr->lastHMDViewOrigin;
+			hudAxis = commonVr->lastHMDViewAxis;
+			hudOrigin = commonVr->lastHMDViewOrigin;
 
 			hudOrigin += hudAxis[0] * vr_hudPosDis.GetFloat(); 
 			hudOrigin += hudAxis[1] * vr_hudPosHor.GetFloat();
@@ -10104,7 +10105,7 @@ void idPlayer::Think()
 		spawnAnglesSet = true;
 		SetViewAngles( spawnAngles );
 		oldImpulseSequence = usercmd.impulseSequence;
-		ovr_RecenterTrackingOrigin( vr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
+		// koz fixme recenter ovr_RecenterTrackingOrigin( commonVr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
 
 
 	}
@@ -10196,7 +10197,7 @@ void idPlayer::Think()
 		RunPhysics_RemoteClientCorrection();
 	}
 	
-	if ( !g_stopTime.GetBool() && !vr->VR_GAME_PAUSED )  // Koz pause vr
+	if ( !g_stopTime.GetBool() && !commonVr->VR_GAME_PAUSED )  // Koz pause vr
 	{
 	
 		if( !noclip && !spectating && ( health > 0 ) && !IsHidden() )
@@ -10352,7 +10353,7 @@ void idPlayer::Think()
 		headRenderEnt->suppressShadowInLightID = LIGHTID_VIEW_MUZZLE_FLASH + entityNumber;
 	}
 	
-	if ( !g_stopTime.GetBool() && !vr->VR_GAME_PAUSED )  // koz pause in VR
+	if ( !g_stopTime.GetBool() && !commonVr->VR_GAME_PAUSED )  // koz pause in VR
 	{
 		UpdateAnimation();
 		
@@ -11438,7 +11439,7 @@ float idPlayer::DefaultFov() const
 
 	if ( game->isVR ) // koz fixme report HMD fov in VR. 
 	{
-		fov = vr->hmdFovX;
+		fov = commonVr->hmdFovX;
 	}
 	else
 	{
@@ -11853,7 +11854,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 		origin = GetEyePosition();
 		origin += 30 * bodyAxis[0]; // move 30 inches in front of eyes
 		origin -= 6 * bodyAxis[2];	// move 6 inches down
-		axis = idAngles( 0.0f, vr->independentWeaponYaw, vr->independentWeaponPitch ).ToMat3();
+		axis = idAngles( 0.0f, commonVr->independentWeaponYaw, commonVr->independentWeaponPitch ).ToMat3();
 
 		origin += vecoff * axis;	// move the gun model origin to center of handle.
 		return;
@@ -11865,7 +11866,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 		PDAfixed = false; // release the PDA if weapon has been switched.
 	}
 	
-	if ( !vr->VR_USE_HYDRA || ( vr_PDAfixLocation.GetBool() && currentWeapon == WEAPON_PDA ) ) // non-motion control & fixed pda positioning.
+	if ( !commonVr->VR_USE_HYDRA || ( vr_PDAfixLocation.GetBool() && currentWeapon == WEAPON_PDA ) ) // non-motion control & fixed pda positioning.
 	{ 
 		axis = bodyAxis;
 		origin = gunOrigin + vecoff * axis;
@@ -11895,7 +11896,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 				axis = PDAaxis;
 			}
 			
-		/*	if ( vr->PDAclipModelSet )
+		/*	if ( commonVr->PDAclipModelSet )
 			{
 				weapon->UpdateWeaponClipPosition( origin, axis );
 			}
@@ -11910,8 +11911,8 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 			static idVec3 gunpos;
 						
 			angQuat = idAngles( 0, 0, 0 ).ToQuat();
-			angQuat *= idAngles( 0, vr->independentWeaponYaw, 0 ).ToQuat();
-			angQuat *= idAngles( vr->independentWeaponPitch, 0, 0 ).ToQuat();
+			angQuat *= idAngles( 0, commonVr->independentWeaponYaw, 0 ).ToQuat();
+			angQuat *= idAngles( commonVr->independentWeaponPitch, 0, 0 ).ToQuat();
 						
 			gunRot = weaponRotOffsets[currentWeapon].ToQuat(); // add weapon rotations to point straight.
 			gunAxis = gunRot * angQuat;
@@ -11955,7 +11956,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 						weaponRotOffsets[currentWeapon].yaw,
 						weaponRotOffsets[currentWeapon].roll ).Normalize180().ToQuat();// add weapon rotations to point straight.
 
-	vr->HydraGetRightWithOffset( rHydra );
+	commonVr->HydraGetRightWithOffset( rHydra );
 	
 
 	
@@ -11967,7 +11968,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 	origin = gunOrigin + vecoff * axis;
 	
 
-	if ( vr->VR_USE_HYDRA && vr_armIKenable.GetBool() && vr_showBody.GetBool() )
+	if ( commonVr->VR_USE_HYDRA && vr_armIKenable.GetBool() && vr_showBody.GetBool() )
 	{
 		SetHandIKPos( 0, gunOrigin, axis, rHydra.hydraRotationQuat );
 	}
@@ -11977,15 +11978,15 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 
 	{
 		idAngles headAngles,lastView = ang_zero;
-		lastView =  vr->lastHMDViewAxis.ToAngles();
+		lastView =  commonVr->lastHMDViewAxis.ToAngles();
 		headAngles.roll = lastView.pitch;
-		headAngles.pitch = vr->lastHMDYaw - vr->bodyYawOffset; //lastView.yaw - 180.0f;
+		headAngles.pitch = commonVr->lastHMDYaw - commonVr->bodyYawOffset; //lastView.yaw - 180.0f;
 		headAngles.yaw = lastView.roll;
 		headAngles.Normalize360();
 		animator.SetJointAxis( neckJoint, JOINTMOD_LOCAL, headAngles.ToMat3() );
 	}
 
-	/*if ( currentWeapon == WEAPON_PDA && vr->PDAclipModelSet )
+	/*if ( currentWeapon == WEAPON_PDA && commonVr->PDAclipModelSet )
 	{
 		weapon->UpdateWeaponClipPosition( origin, axis );
 	}
@@ -12169,7 +12170,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 	idAngles baseAdjustAng = idAngles( 90.0f, 0.0f, 0.0f ); // rotate the flash to point straight ahead
 		
 	//move the flashlight to alternate location for items with no mount
-	if ( ( game->IsPDAOpen() || !vr->VR_USE_HYDRA ) && flashMode == FLASH_HAND ) flashMode = FLASH_HEAD; // move the flashlight to the head if the PDA is open to prevent weird clipping if using motion controls.
+	if ( ( game->IsPDAOpen() || !commonVr->VR_USE_HYDRA ) && flashMode == FLASH_HAND ) flashMode = FLASH_HEAD; // move the flashlight to the head if the PDA is open to prevent weird clipping if using motion controls.
 	
 	if ( flashMode == FLASH_GUN && !weapon->GetMuzzlePositionWithHacks( origin, axis ) )
 	{
@@ -12189,8 +12190,8 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 				
 		case FLASH_HEAD:
 			// Flashlight on helmet 
-			origin = vr->lastViewOrigin;
-			axis = vr->lastViewAxis;
+			origin = commonVr->lastViewOrigin;
+			axis = commonVr->lastViewAxis;
 		
 			origin += vr_flashlightHelmetPosY.GetFloat() * axis[1] + vr_flashlightHelmetPosZ.GetFloat() * axis[0] + vr_flashlightHelmetPosX.GetFloat() * axis[2];
 			axis = baseAdjustAng.ToMat3() * axis;
@@ -12215,7 +12216,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 				idVec3 viewOrigin = GetEyePosition();
 				idMat3 viewAxis2 = idAngles( 0.0, viewAngles.yaw, 0.0f ).ToMat3();
 
-				vr->HydraGetLeftWithOffset( hydraPos );
+				commonVr->HydraGetLeftWithOffset( hydraPos );
 				
 				// koz move flashlight to the hand position
 				viewOrigin += hydraPos.position * viewAxis2;
@@ -12228,7 +12229,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 				//model center not at local model origin, translate origin by offset to compensate
 				origin = viewOrigin + flashpos * axis;
 				
-				if ( vr->VR_USE_HYDRA && vr_armIKenable.GetBool() && vr_showBody.GetBool() )
+				if ( commonVr->VR_USE_HYDRA && vr_armIKenable.GetBool() && vr_showBody.GetBool() )
 				{
 					SetHandIKPos( 1, viewOrigin , axis, hydraPos.hydraRotationQuat );//; hydraPos.hydraRotationQuat );
 				}
@@ -12653,7 +12654,7 @@ void idPlayer::CalculateRenderView()
 	}
 	else
 	{
-		if ( g_stopTime.GetBool() || vr->VR_GAME_PAUSED ) // Koz 
+		if ( g_stopTime.GetBool() || commonVr->VR_GAME_PAUSED ) // Koz 
 		{
 			renderView->vieworg = firstPersonViewOrigin;
 			renderView->viewaxis = firstPersonViewAxis;
@@ -12708,21 +12709,21 @@ void idPlayer::CalculateRenderView()
 		// Koz begin : Add headtracking
 		
 		
-		vr->HMDGetOrientation( hmdAngles, headPositionDelta, bodyPositionDelta, gameLocal.inCinematic );
+		commonVr->HMDGetOrientation( hmdAngles, headPositionDelta, bodyPositionDelta, gameLocal.inCinematic );
 				
 		idVec3 origin = renderView->vieworg;
 		idAngles angles = renderView->viewaxis.ToAngles(); 
 		idMat3 axis = renderView->viewaxis;
 
 		
-		angles.yaw += hmdAngles.yaw - vr->bodyYawOffset;    // add the current hmd orientation
+		angles.yaw += hmdAngles.yaw - commonVr->bodyYawOffset;    // add the current hmd orientation
 		angles.pitch += hmdAngles.pitch;
 		angles.roll += hmdAngles.roll;
 		angles.Normalize180();
 
-		vr->lastHMDYaw = hmdAngles.yaw;
-		vr->lastHMDPitch = hmdAngles.pitch;
-		vr->lastHMDRoll = hmdAngles.roll;
+		commonVr->lastHMDYaw = hmdAngles.yaw;
+		commonVr->lastHMDPitch = hmdAngles.pitch;
+		commonVr->lastHMDRoll = hmdAngles.roll;
 
 		origin += axis[0] * headPositionDelta.x + axis[1] * headPositionDelta.y + axis[2] * headPositionDelta.z; // add hmd translation
 
@@ -12739,44 +12740,44 @@ void idPlayer::CalculateRenderView()
 		renderView->vieworg = origin;
 		renderView->viewaxis = angles.ToMat3();//axis;
 				
-		vr->lastHMDViewOrigin = renderView->vieworg;
-		vr->lastHMDViewAxis = renderView->viewaxis;
+		commonVr->lastHMDViewOrigin = renderView->vieworg;
+		commonVr->lastHMDViewAxis = renderView->viewaxis;
 		
 		UpdateVrHud();
 
 		// koz fixme pause - handle the PDA model if game is paused
 		// really really need to move this somewhere else.
 
-		if ( vr->PDAforcetoggle || vr->PDArising )
+		if ( commonVr->PDAforcetoggle || commonVr->PDArising )
 		{
-			if ( !vr->PDAforced )
+			if ( !commonVr->PDAforced )
 			{
-				if ( !vr->PDArising )
+				if ( !commonVr->PDArising )
 				{
-					common->Printf( "idPlayer::CalculateRenderView calling SelectWeapon for PDA\nPDA Forced = %i, PDA Rising = %i, PDAForceToggle = %i\n",vr->PDAforced,vr->PDArising,vr->PDAforcetoggle );
+					common->Printf( "idPlayer::CalculateRenderView calling SelectWeapon for PDA\nPDA Forced = %i, PDA Rising = %i, PDAForceToggle = %i\n",commonVr->PDAforced,commonVr->PDArising,commonVr->PDAforcetoggle );
 					SelectWeapon( weapon_pda, true );
-					vr->PDAforcetoggle = false;
-					vr->PDArising = true;
+					commonVr->PDAforcetoggle = false;
+					commonVr->PDArising = true;
 				}
 				else
 				{
 					if ( weapon->IdentifyWeapon() == WEAPON_PDA && weapon->status == WP_READY )
 					{
-						vr->PDAforced = true;
-						vr->PDArising = false;
+						commonVr->PDAforced = true;
+						commonVr->PDArising = false;
 						
 					}
 				}
 			}
 			else
 			{ // pda has been already been forced active, put it away.
-				if ( vr->PDAforcetoggle )
+				if ( commonVr->PDAforcetoggle )
 				{
 					common->Printf( "idPlayer::CalculateRenderView calling TogglePDA\n" );
 					TogglePDA();
-					vr->PDAforcetoggle = false;
-					vr->PDAforced = false;
-					vr->PDArising = false;
+					commonVr->PDAforcetoggle = false;
+					commonVr->PDAforced = false;
+					commonVr->PDArising = false;
 				}
 			}
 
@@ -13524,7 +13525,7 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 		}
 	}
 	
-	if ( !g_stopTime.GetBool() && !vr->VR_GAME_PAUSED ) // Koz 
+	if ( !g_stopTime.GetBool() && !commonVr->VR_GAME_PAUSED ) // Koz 
 
 	{
 		if( !noclip && !spectating && ( health > 0 ) && !IsHidden() )

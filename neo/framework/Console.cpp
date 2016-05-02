@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "Common_local.h"
 
 // Koz begin
-#include "libs\LibOVR\Include\OVR_CAPI.h"
+
 #include "vr\Vr.h"
 
 idCVar vr_hmdPerfHud( "vr_hmdPerfHud", "0", CVAR_INTEGER, "Oculus Performance HUD.\n 0 Off\n 1 Latency Timing\n 2 RenderTiming\n 3 Perf Headroom\n 4 Version\n", 0, 4 );
@@ -259,13 +259,7 @@ float idConsoleLocal::DrawFPS( float y )
 	
 	// DG: "com_showFPS 2" means: show FPS only, like in classic doom3
 	if( com_showFPS.GetInteger() == 2 )
-	{
-		
-		const char* s = va( "%icount", vr->frameCount );
-		int w = strlen( s ) * BIGCHAR_WIDTH;
-
-		renderSystem->DrawBigStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s, colorWhite, true );
-		y += BIGCHAR_HEIGHT + 4;
+	{		
 		return y;
 	}
 	// DG end
@@ -349,12 +343,12 @@ float idConsoleLocal::DrawVRWip( float y )
 	
 
 	idStr stepStr;
-	stepStr.Format( "Num Steps: %d", vr->wipNumSteps );
+	stepStr.Format( "Num Steps: %d", commonVr->wipNumSteps );
 	int w = stepStr.Length() * SMALLCHAR_WIDTH;
 	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w , idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, true );
 	y += SMALLCHAR_HEIGHT + 4;
 
-	switch ( vr->wipStepState )
+	switch ( commonVr->wipStepState )
 	{
 		case 3:
 			stepStr = S_COLOR_RED;
@@ -382,37 +376,37 @@ float idConsoleLocal::DrawVRWip( float y )
 	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
 	y += SMALLCHAR_HEIGHT + 4;
 
-	stepStr.Format( "LPeriod: %d", vr->wipLastPeriod );
+	stepStr.Format( "LPeriod: %d", commonVr->wipLastPeriod );
 	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
 	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
 	y += SMALLCHAR_HEIGHT + 4;
 	
-	stepStr.Format( "LPeriod Vel: %f", vr->wipPeriodVel );
+	stepStr.Format( "LPeriod Vel: %f", commonVr->wipPeriodVel );
 	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
 	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
 	y += SMALLCHAR_HEIGHT + 4;
 	
-	stepStr.Format( "Avg Period: %f", vr->wipAvgPeriod );
+	stepStr.Format( "Avg Period: %f", commonVr->wipAvgPeriod );
 	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
 	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
 	y += SMALLCHAR_HEIGHT + 4;
 
-	stepStr.Format( "Cur Delta %f", vr->wipCurrentDelta );
+	stepStr.Format( "Cur Delta %f", commonVr->wipCurrentDelta );
 	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
 	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
 	y += SMALLCHAR_HEIGHT + 4;
 
-	stepStr.Format( "Cur Vel %f", vr->wipCurrentVelocity );
+	stepStr.Format( "Cur Vel %f", commonVr->wipCurrentVelocity );
 	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
 	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
 	y += SMALLCHAR_HEIGHT + 4;
 
-	stepStr.Format( "Delta Tot %f", vr->wipTotalDelta );
+	stepStr.Format( "Delta Tot %f", commonVr->wipTotalDelta );
 	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
 	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
 	y += SMALLCHAR_HEIGHT + 4;
 
-	stepStr.Format( "Delta Tot Avg %f", vr->wipTotalDeltaAvg );
+	stepStr.Format( "Delta Tot Avg %f", commonVr->wipTotalDeltaAvg );
 	w = stepStr.LengthWithoutColors() * SMALLCHAR_WIDTH;
 	renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - 150 - w, idMath::Ftoi( y ) + 2, stepStr.c_str(), colorWhite, false );
 	y += SMALLCHAR_HEIGHT + 4;
@@ -1473,8 +1467,8 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 	// Enable the oculus performance hud
 	if ( vr_hmdPerfHud.IsModified() )
 	{
-		ovr_SetInt( vr->hmdSession, "PerfHudMode", vr_hmdPerfHud.GetInteger() );
-		vr_hmdPerfHud.ClearModified();
+		//ovr_SetInt( commonVr->hmdSession, "PerfHudMode", vr_hmdPerfHud.GetInteger() );
+		//vr_hmdPerfHud.ClearModified();
 	}
 	// Koz end
 

@@ -240,7 +240,7 @@ void idMenuScreen_HUD::UpdateHealthArmor( idPlayer* player )
 	if ( game->isVR && playerInfo->GetSprite() != NULL )
 	{
 		float alpha;
-		alpha = vr_hudHealth.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
+		alpha = vr_hudHealth.GetBool() == true ? commonVr->GetHudAlpha() : 0.0f;
 		playerInfo->GetSprite()->SetAlpha( alpha );
 	}
 	// Koz end
@@ -333,7 +333,7 @@ void idMenuScreen_HUD::UpdateStamina( idPlayer* player )
 	if ( game->isVR && stamina->GetSprite() != NULL )
 	{
 		float alpha;
-		alpha = vr_hudStamina.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
+		alpha = vr_hudStamina.GetBool() == true ? commonVr->GetHudAlpha() : 0.0f;
 		stamina->GetSprite()->SetAlpha( alpha );
 	}
 	// Koz end
@@ -381,20 +381,20 @@ void idMenuScreen_HUD::UpdateWeaponInfo( idPlayer* player )
 	if ( game->isVR && ammoInfo != NULL )
 	{
 		float alpha;
-		alpha = vr_hudAmmo.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
+		alpha = vr_hudAmmo.GetBool() == true ? commonVr->GetHudAlpha() : 0.0f;
 		ammoInfo->SetAlpha( alpha );
 						
 				
 		// updateWeaponStates not called every frame, so update the alpha here.
 		if ( weaponPills && weaponPills->GetSprite() != NULL )
 		{
-			alpha = vr_hudPills.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
+			alpha = vr_hudPills.GetBool() == true ? commonVr->GetHudAlpha() : 0.0f;
 			weaponPills->GetSprite()->SetAlpha( alpha );
 		}
 
 		if ( weaponImg != NULL )
 		{
-			alpha = vr_hudWeap.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
+			alpha = vr_hudWeap.GetBool() == true ? commonVr->GetHudAlpha() : 0.0f;
 			weaponImg->SetAlpha( alpha );
 		}
 
@@ -1381,7 +1381,7 @@ void idMenuScreen_HUD::UpdateLocation( idPlayer* player )
 	{
 		// Set the fade
 		float alpha;
-		alpha = vr_hudLocation.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
+		alpha = vr_hudLocation.GetBool() == true ? commonVr->GetHudAlpha() : 0.0f;
 		locationName->color.a = int( alpha * 255.0f );
 	}
 	// Koz end
@@ -1541,7 +1541,7 @@ void idMenuScreen_HUD::UpdatedSecurity()
 	// Hud fade
 	if ( game->isVR && security != NULL )
 	{
-		security->SetAlpha( vr->GetHudAlpha() );
+		security->SetAlpha( commonVr->GetHudAlpha() );
 	}
 	// Koz end
 	
@@ -1714,7 +1714,7 @@ void  idMenuScreen_HUD::UpdateCommunication( bool show, idPlayer* player )
 	if ( game->isVR && communication != NULL )
 	{
 		float alpha;
-		alpha = vr_hudComs.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
+		alpha = vr_hudComs.GetBool() == true ? commonVr->GetHudAlpha() : 0.0f;
 		communication->SetAlpha( alpha );
 	}
 	// Koz end
@@ -1867,7 +1867,7 @@ void  idMenuScreen_HUD::UpdateOxygen( bool show, int val )
 	// Hud fade
 	if ( game->isVR && oxygen )
 	{
-		oxygen->SetAlpha( vr->GetHudAlpha() );
+		oxygen->SetAlpha( commonVr->GetHudAlpha() );
 	}
 	// Koz end
 }
@@ -2369,7 +2369,7 @@ void idMenuScreen_HUD::UpdateFlashlight( idPlayer* player )
 	if ( game->isVR && flashlight )
 	{
 		float alpha;
-		alpha = vr_hudFlashlight.GetBool() == true ? vr->GetHudAlpha() : 0.0f;
+		alpha = vr_hudFlashlight.GetBool() == true ? commonVr->GetHudAlpha() : 0.0f;
 		flashlight->SetAlpha( alpha );
 	}
 	// Koz end

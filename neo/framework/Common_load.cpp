@@ -231,11 +231,11 @@ void idCommonLocal::UnloadMap()
 {
 	StopPlayingRenderDemo();
 	
-	vr->PDArising = false;
-	vr->PDAforced = false;
-	vr->playerDead = false;
-	vr->vrIsBackgroundSaving = false;
-	vr->VR_GAME_PAUSED = false;
+	commonVr->PDArising = false;
+	commonVr->PDAforced = false;
+	commonVr->playerDead = false;
+	commonVr->vrIsBackgroundSaving = false;
+	commonVr->VR_GAME_PAUSED = false;
 
 	// end the current map in the game
 	if( game )
@@ -539,8 +539,8 @@ void idCommonLocal::ExecuteMapChange()
 		
 		if ( game->isVR ) // koz
 		{
-			com_engineHz_denominator = 100LL * ( vr->hmdHz );
-			com_engineHz_latched = ( vr->hmdHz );
+			com_engineHz_denominator = 100LL * ( commonVr->hmdHz );
+			com_engineHz_latched = ( commonVr->hmdHz );
 		}
 		else
 		{
@@ -659,7 +659,7 @@ void idCommonLocal::ExecuteMapChange()
 			// Koz: make sure to maintain smooth heatracking of loading screen when running frames.
 			if ( game->isVR )
 			{
-				//vr->HMDTrackStatic();
+				//commonVr->HMDTrackStatic();
 				//SwapBuffers( win32.hDC );
 				//glFinish();
 			}
@@ -684,11 +684,11 @@ void idCommonLocal::ExecuteMapChange()
 			int startLoadScreen = Sys_Milliseconds();
 			vrBackgroundSave.StartBackgroundSave( BACKGROUND_SAVE, "autosave" );
 						
-			while ( vr->vrIsBackgroundSaving == true || ( Sys_Milliseconds() - startLoadScreen < vr_minLoadScreenTime.GetFloat() ) )
+			while ( commonVr->vrIsBackgroundSaving == true || ( Sys_Milliseconds() - startLoadScreen < vr_minLoadScreenTime.GetFloat() ) )
 			{
-				//vr->HMDTrackStatic();
+				//commonVr->HMDTrackStatic();
 				//UpdateScreen( false, false );
-				//vr->HMDTrackStatic();
+				//commonVr->HMDTrackStatic();
 				//SwapBuffers(win32.hDC);
 				//glFinish();
 				
@@ -762,11 +762,11 @@ void idCommonLocal::ExecuteMapChange()
 	// Issue a render at the very end of the load process to update soundTime before the first frame
 	soundSystem->Render();
 
-	vr->PDArising = false;
-	vr->PDAforced = false;
-	vr->playerDead = false;
-	vr->vrIsBackgroundSaving = false;
-	vr->VR_GAME_PAUSED = false;
+	commonVr->PDArising = false;
+	commonVr->PDAforced = false;
+	commonVr->playerDead = false;
+	commonVr->vrIsBackgroundSaving = false;
+	commonVr->VR_GAME_PAUSED = false;
 
 }
 
@@ -1054,11 +1054,11 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	// Koz begin
 	// koz fixme do this right.
 	// Make sure the pda is in a valid state on game load.
-	vr->PDAforced = false;
-	vr->PDArising = false;
-	vr->PDAforcetoggle = false;
-	vr->VR_GAME_PAUSED = false; 
-	vr->playerDead = false;
+	commonVr->PDAforced = false;
+	commonVr->PDArising = false;
+	commonVr->PDAforcetoggle = false;
+	commonVr->VR_GAME_PAUSED = false; 
+	commonVr->playerDead = false;
 	// Koz end
 	
 	if( IsMultiplayer() )
@@ -1383,9 +1383,9 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 	{
 		vrBackgroundSave.StartBackgroundSave( BACKGROUND_SAVE, savename );
 		
-		while ( vr->vrIsBackgroundSaving == true )
+		while ( commonVr->vrIsBackgroundSaving == true )
 		{
-			//vr->HMDTrackStatic();
+			//commonVr->HMDTrackStatic();
 			//SwapBuffers( win32.hDC );
 			//glFinish();
 		}
@@ -1394,12 +1394,12 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 	}
 	// Koz end
 	
-	vr->gameSaving = true;
+	commonVr->gameSaving = true;
 	if( commonLocal.SaveGame( savename ) )
 	{
 		common->Printf( "Saved: %s\n", savename );
 	}
-	vr->gameSaving = false;
+	commonVr->gameSaving = false;
 
 }
 

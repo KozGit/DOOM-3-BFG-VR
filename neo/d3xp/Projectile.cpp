@@ -358,7 +358,7 @@ void idProjectile::Launch( const idVec3& start, const idVec3& dir, const idVec3&
 	speed = velocity.Length() * launchPower;
 
 	//koz if throwing a grenade use the tracked hand velocity when using motion controls
-	if ( game->isVR && vr->VR_USE_HYDRA )
+	if ( game->isVR && commonVr->VR_USE_HYDRA )
 	{
 
 		idPlayer* player = static_cast<idPlayer*>(owner.GetEntity());

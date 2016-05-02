@@ -3176,7 +3176,7 @@ void idFileSystemLocal::Restart()
 	if ( 0 )// game->isVR )
 	{
 
-		if ( vr->VR_USE_HYDRA && vr_armIKenable.GetBool() && vr_showBody.GetBool() )
+		if ( commonVr->VR_USE_HYDRA && vr_armIKenable.GetBool() && vr_showBody.GetBool() )
 		{
 			fs_game.SetString( "base\\vrik" );
 		}
@@ -3433,7 +3433,7 @@ idFile* idFileSystemLocal::OpenFileReadFlags( const char* relativePath3, int sea
 				}
 				else
 				{
-					if ( vr->VR_USE_HYDRA && vr_armIKenable.GetBool()  )
+					if ( commonVr->VR_USE_HYDRA && vr_armIKenable.GetBool()  )
 					{
 						searchPath = "vrik/";
 					}

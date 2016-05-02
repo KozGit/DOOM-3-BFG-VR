@@ -433,7 +433,7 @@ void idCommonLocal::WriteConfiguration()
 	com_developer.SetBool( false );
 	
 	// Koz begin
-	if ( vr->hasOculusRift ) 
+	if ( commonVr->hasOculusRift ) 
 	{
 		//WriteConfigToFile( "oculus_config.cfg", "fs_basepath" );
 		idFile* f = fileSystem->OpenFileWrite( "oculus_config.cfg", "fs_basepath" );
@@ -906,7 +906,7 @@ void idCommonLocal::RenderSplash()
 	const emptyCommand_t* cmd = renderSystem->SwapCommandBuffers( &time_frontend, &time_backend, &time_shadows, &time_gpu );
 	renderSystem->RenderCommandBuffers( cmd );
 
-	if ( game->isVR ) vr->HMDTrackStatic();
+	if ( game->isVR ) commonVr->HMDTrackStatic();
 	
 }
 
@@ -1275,7 +1275,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		// this needs to happen before the cfg files are loaded.
 		
 		// Koz
-		vr->HMDInit(); // Koz init the HMD.
+		commonVr->HMDInit(); // Koz init the HMD.
 				
 		// exec the startup scripts
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec default.cfg\n" );
@@ -1288,7 +1288,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		}
 #endif
 		// Koz begin
-		if ( vr->hasOculusRift )
+		if ( commonVr->hasOculusRift )
 		{
 			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec oculus_default.cfg\n" );
 				
@@ -1329,13 +1329,13 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 
 		// Koz begin
 		// initialize the HMD
-		if ( vr->hasOculusRift )
+		if ( commonVr->hasOculusRift )
 		{
-			vr->HMDInitializeDistortion();
+			commonVr->HMDInitializeDistortion();
 		}
 		
 		// init the Razer Hydra
-		vr->HydraInit();
+		commonVr->HydraInit();
 					
 		// Koz end
 		
@@ -1541,9 +1541,9 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 	if ( game->isVR ) // koz override these for VR
 	{
 		cvarSystem->SetCVarString( "r_swapInterval", "0" );
-		cvarSystem->SetCVarInteger( "com_engineHz", vr->hmdHz );
-		com_engineHz_denominator = 100LL * vr->hmdHz;
-		com_engineHz_latched = vr->hmdHz;
+		cvarSystem->SetCVarInteger( "com_engineHz", commonVr->hmdHz );
+		com_engineHz_denominator = 100LL * commonVr->hmdHz;
+		com_engineHz_latched = commonVr->hmdHz;
 
 	}
 

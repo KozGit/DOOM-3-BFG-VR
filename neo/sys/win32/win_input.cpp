@@ -1109,7 +1109,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 	}
 	
 	// Koz begin add hydras
-	if ( vr->VR_USE_HYDRA )
+	if ( commonVr->VR_USE_HYDRA )
 	{
 
 		// koz check the hydras -  my god it's full of ugly. Lots of remapping. Dont ask :(
@@ -1133,7 +1133,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 			J_ACTION30, 0,				// Button Joystick, Unused
 		};
 
-		vr->HydraGetLeft( hydraCurrent ); // begin processing left hydra
+		commonVr->HydraGetLeft( hydraCurrent ); // begin processing left hydra
 
 		if ( hydraCurrent.trigger != hydraLeftOld.trigger )
 		{
@@ -1161,7 +1161,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 		hydraLeftOld = hydraCurrent;
 
-		vr->HydraGetRight( hydraCurrent );	// begin processing right hydra	
+		commonVr->HydraGetRight( hydraCurrent );	// begin processing right hydra	
 
 		if ( hydraCurrent.trigger != hydraRightOld.trigger )
 		{

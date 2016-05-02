@@ -131,73 +131,80 @@ const void GL_BlockingSwapBuffers()
 
 	const int beforeFinish = Sys_Milliseconds();
 	int beforeFence = Sys_Milliseconds();
-//	if ( game->isVR )
-//	{
-//		int beforeFence = Sys_Milliseconds();
-//		glFinish();
-	//}
-//	else
+
+	if ( game->isVR )
 	{
-		if ( !glConfig.syncAvailable )
-		{
-			glFinish();
-		}
-
-		const int beforeSwap = Sys_Milliseconds();
-		if ( r_showSwapBuffers.GetBool() && beforeSwap - beforeFinish > 1 )
-		{
-			common->Printf( "%i msec to glFinish\n", beforeSwap - beforeFinish );
-		}
-
-		GLimp_SwapBuffers();
-
-		beforeFence = Sys_Milliseconds();
-		if ( r_showSwapBuffers.GetBool() && beforeFence - beforeSwap > 1 )
-		{
-			common->Printf( "%i msec to swapBuffers\n", beforeFence - beforeSwap );
-		}
-
-		if ( glConfig.syncAvailable )
-		{
-			swapIndex ^= 1;
-
-			if ( glIsSync( renderSync[swapIndex] ) )
-			{
-				glDeleteSync( renderSync[swapIndex] );
-			}
-			// draw something tiny to ensure the sync is after the swap
-			const int start = Sys_Milliseconds();
-			glScissor( 0, 0, 1, 1 );
-			glEnable( GL_SCISSOR_TEST );
-			glClear( GL_COLOR_BUFFER_BIT );
-			renderSync[swapIndex] = glFenceSync( GL_SYNC_GPU_COMMANDS_COMPLETE, 0 );
-			const int end = Sys_Milliseconds();
-			if ( r_showSwapBuffers.GetBool() && end - start > 1 )
-			{
-				common->Printf( "%i msec to start fence\n", end - start );
-			}
-
-			GLsync	syncToWaitOn;
-			if ( r_syncEveryFrame.GetBool() )
-			{
-				syncToWaitOn = renderSync[swapIndex];
-			}
-			else
-			{
-				syncToWaitOn = renderSync[!swapIndex];
-			}
-
-			if ( glIsSync( syncToWaitOn ) )
-			{
-				for ( GLenum r = GL_TIMEOUT_EXPIRED; r == GL_TIMEOUT_EXPIRED; )
-				{
-					r = glClientWaitSync( syncToWaitOn, GL_SYNC_FLUSH_COMMANDS_BIT, 1000 * 1000 );
-				}
-			}
-		}
-
+		/*
+		HMDGetOrientation calls IVRCompositor::WaitGetPoses, which is a blocking call.
+		This can only be called once per rendered frame, so call here (via FrameStart) where it won't stall other frames from starting.
+		Subsequent calls to HMDGetOrientation within the same vrFrameNumber return stored results
+		and make no additional calls to WaitGetPoses.
+		*/
+		
+		commonVr->vrFrameNumber++;
+		commonVr->FrameStart();
 
 	}
+
+	
+	if ( !glConfig.syncAvailable )
+	{
+		glFinish();
+	}
+
+	const int beforeSwap = Sys_Milliseconds();
+	if ( r_showSwapBuffers.GetBool() && beforeSwap - beforeFinish > 1 )
+	{
+		common->Printf( "%i msec to glFinish\n", beforeSwap - beforeFinish );
+	}
+
+	GLimp_SwapBuffers();
+
+	beforeFence = Sys_Milliseconds();
+	if ( r_showSwapBuffers.GetBool() && beforeFence - beforeSwap > 1 )
+	{
+		common->Printf( "%i msec to swapBuffers\n", beforeFence - beforeSwap );
+	}
+
+	if ( glConfig.syncAvailable )
+	{
+		swapIndex ^= 1;
+
+		if ( glIsSync( renderSync[swapIndex] ) )
+		{
+			glDeleteSync( renderSync[swapIndex] );
+		}
+		// draw something tiny to ensure the sync is after the swap
+		const int start = Sys_Milliseconds();
+		glScissor( 0, 0, 1, 1 );
+		glEnable( GL_SCISSOR_TEST );
+		glClear( GL_COLOR_BUFFER_BIT );
+		renderSync[swapIndex] = glFenceSync( GL_SYNC_GPU_COMMANDS_COMPLETE, 0 );
+		const int end = Sys_Milliseconds();
+		if ( r_showSwapBuffers.GetBool() && end - start > 1 )
+		{
+			common->Printf( "%i msec to start fence\n", end - start );
+		}
+
+		GLsync	syncToWaitOn;
+		if ( r_syncEveryFrame.GetBool() )
+		{
+			syncToWaitOn = renderSync[swapIndex];
+		}
+		else
+		{
+			syncToWaitOn = renderSync[!swapIndex];
+		}
+
+		if ( glIsSync( syncToWaitOn ) )
+		{
+			for ( GLenum r = GL_TIMEOUT_EXPIRED; r == GL_TIMEOUT_EXPIRED; )
+			{
+				r = glClientWaitSync( syncToWaitOn, GL_SYNC_FLUSH_COMMANDS_BIT, 1000 * 1000 );
+			}
+		}
+	}
+	
 	const int afterFence = Sys_Milliseconds();
 	if( r_showSwapBuffers.GetBool() && afterFence - beforeFence > 1 )
 	{
@@ -252,7 +259,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	// that eye.
 	
 	//Koz begin
-	if ( vr->useFBO )
+	if ( commonVr->useFBO )
 	{
 		globalFramebuffers.primaryFBO->Bind();
 	}
@@ -347,7 +354,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		
 		// copy to the target
 		stereoRenderImages[targetEye]->CopyFramebuffer( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
-		vr->hmdCurrentRender[targetEye] = stereoRenderImages[targetEye];
+		commonVr->hmdCurrentRender[targetEye] = stereoRenderImages[targetEye];
 	}
 	
 	// perform the final compositing / warping / deghosting to the actual framebuffer(s)
@@ -363,7 +370,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	// a confusing, half-ghosted view.
 	if( renderSystem->GetStereo3DMode() != STEREO3D_QUAD_BUFFER )
 	{
-		if ( !vr->useFBO ) glDrawBuffer( GL_BACK ); // Koz 
+		if ( !commonVr->useFBO ) glDrawBuffer( GL_BACK ); // Koz 
 	}
 	
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
@@ -432,13 +439,13 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			if ( game->isVR ) 
 			{
 			
-				if ( vr->playerDead || (game->Shell_IsActive() && !vr->PDAforced && !vr->PDArising ) || (!vr->PDAforced && common->Dialog().IsDialogActive() ) ) 
+				if ( commonVr->playerDead || (game->Shell_IsActive() && !commonVr->PDAforced && !commonVr->PDArising ) || (!commonVr->PDAforced && common->Dialog().IsDialogActive() ) ) 
 				{
-					vr->HMDTrackStatic();
+					commonVr->HMDTrackStatic();
 				}
 				else
 				{
-					vr->HMDRender( stereoRenderImages[0], stereoRenderImages[1] );
+					commonVr->HMDRender( stereoRenderImages[0], stereoRenderImages[1] );
 				}
 
 				//koz GL_CheckErrors();
@@ -563,7 +570,7 @@ void RB_ExecuteBackEndCommands( const emptyCommand_t* cmds )
 	// If we have a stereo pixel format, this will draw to both
 	// the back left and back right buffers, which will have a
 	// performance penalty.
-	if ( !vr->useFBO ) glDrawBuffer( GL_BACK ); // Koz
+	if ( !commonVr->useFBO ) glDrawBuffer( GL_BACK ); // Koz
 	
 	for( ; cmds != NULL; cmds = ( const emptyCommand_t* )cmds->next )
 	{

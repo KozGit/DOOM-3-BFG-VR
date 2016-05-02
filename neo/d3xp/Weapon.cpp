@@ -206,10 +206,10 @@ idWeapon::~idWeapon()
 idWeapon::~idWeapon()
 {
 	// Koz begin
-	/*if ( vr->PDAclipModelSet ) //koz PDA delete PDA clip model.
+	/*if ( commonVr->PDAclipModelSet ) //koz PDA delete PDA clip model.
 	{
 		delete PDAclipModel;
-		vr->PDAclipModelSet = false;
+		commonVr->PDAclipModelSet = false;
 	}
 	*/
 	
@@ -1169,7 +1169,7 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 /*	if ( idStr::Icmp( "weapon_pda", objectname ) == 0 )
 	{
 		//if ( currentWeaponEnum == WEAPON_PDA ) { koz fixme this didn't work so remove all traces.
-		if ( !vr->PDAclipModelSet )
+		if ( !commonVr->PDAclipModelSet )
 		{
 
 			idBounds bounds;
@@ -1191,7 +1191,7 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 			player->CalculateViewWeaponPos( modelOrig, modelAxis );
 
 			newClip = new (TAG_PHYSICS_CLIP_ENTITY)idClipModel( modelDefHandle );
-			vr->PDAclipModelSet = true;
+			commonVr->PDAclipModelSet = true;
 			PDAclipModel = newClip;
 			//PDAclipModel->SetId(999999);
 			PDAclipModel->SetEntity( this );
@@ -1201,8 +1201,8 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 
 		}
 	}
-	else if ( vr->PDAclipModelSet ) {
-		vr->PDAclipModelSet = false;
+	else if ( commonVr->PDAclipModelSet ) {
+		commonVr->PDAclipModelSet = false;
 		PDAclipModel->~idClipModel();
 	}
 
@@ -2788,8 +2788,8 @@ bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 		case WEAPON_FISTS:
 		case WEAPON_SOULCUBE:
 		case WEAPON_PDA:
-			origin = vr->lastViewOrigin; // koz fixme set the origin and axis to the players view
-			axis = vr->lastViewAxis;
+			origin = commonVr->lastViewOrigin; // koz fixme set the origin and axis to the players view
+			axis = commonVr->lastViewAxis;
 			return false;
 			break;
 				
@@ -5516,7 +5516,7 @@ void idWeapon::Event_GetWeaponSkin()
 	if ( isPlayerFlashlight )
 	{
 		vrSkinName = "vr/flashhands/";
-		if ( vr_viewModelArms.GetBool() && vr->VR_USE_HYDRA && vr_hydraMode.GetInteger() != 0 )
+		if ( vr_viewModelArms.GetBool() && commonVr->VR_USE_HYDRA && vr_hydraMode.GetInteger() != 0 )
 		{
 			vrSkinName += "1h";
 			if ( vr_wristStatMon.GetInteger() == 2 ) vrSkinName += "sw";
@@ -5531,7 +5531,7 @@ void idWeapon::Event_GetWeaponSkin()
 	{
 		if ( vr_viewModelArms.GetBool() )
 		{
-			vrSkinName += vr->VR_USE_HYDRA ? "1h" : "2h";
+			vrSkinName += commonVr->VR_USE_HYDRA ? "1h" : "2h";
 			vrSkinName += vr_wristStatMon.GetInteger() == 1 ? "sw" : "";
 		}
 		else vrSkinName += "0h";

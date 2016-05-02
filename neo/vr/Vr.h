@@ -29,12 +29,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-#include "..\LibOVR\Include\OVR_CAPI.h"
-#include "..\LibOVR\Include\OVR_CAPI_GL.h"
 #include "vr_hmd.h"
 #include "vr_sixense.h"
 #include "..\renderer\Framebuffer.h"
-#include "..\LibOVR\Include\OVR_CAPI_Audio.h"
+#include "..\libs\OpenVR\headers\openvr.h"
+
 
 #ifndef __VR_H__
 #define __VR_H__
@@ -86,6 +85,8 @@ public:
 	void				HMDTrackStatic();
 	void				HUDRender( idImage *image0, idImage *image1 );
 
+	void				FrameStart( void );
+
 	void				HydraInit( void );
 	void				HydraSetLeftOffset( hydraData hydraOffset );
 	void				HydraSetRightOffset( hydraData hydraOffset );
@@ -95,9 +96,6 @@ public:
 	void				HydraGetRight( hydraData &rightHydra );
 	void				HydraGetLeftWithOffset( hydraData &leftOffsetHydra );
 	void				HydraGetRightWithOffset( hydraData &rightOffsetHydra );
-
-	void				PushFrame( int index, ovrPosef pose, double sampleTime );
-	void				PopFrame( int &frame, ovrPosef &pose, double &sampleTime );
 	
 	void				MSAAResolve( void );
 	void				FXAAResolve( idImage * leftCurrent, idImage * rightCurrent );
@@ -120,10 +118,8 @@ public:
 	
 	bool				vrIsBackgroundSaving;
 
-	int					vrFrame;
-	double				sensorSampleTime;  
-	ovrPosef            EyeRenderPose[2];
-	
+	int					vrFrameNumber;
+			
 	idVec3				lastViewOrigin;
 	idMat3				lastViewAxis;
 	
@@ -141,8 +137,8 @@ public:
 	
 	float				angles[3];
 	
-	int					hmdWidth;
-	int					hmdHeight;
+	uint32_t			hmdWidth;
+	uint32_t			hmdHeight;
 	int					hmdHz;
 	
 	bool				useFBO;
@@ -156,44 +152,52 @@ public:
 	bool				hasHMD;
 	bool				hasOculusRift;
 
-	ovrSession			hmdSession;
-	ovrGraphicsLuid		ovrLuid;
+	bool				m_bDebugOpenGL;
+	bool				m_bVerbose;
+	bool				m_bPerf;
+	bool				m_bVblank;
+	bool				m_bGlFinishHack;
+
+	vr::IVRSystem			*m_pHMD;
+	vr::IVRCompositor		*m_pCompositor;
+	vr::IVRRenderModels		*m_pRenderModels;
+	vr::TrackedDevicePose_t	m_rTrackedDevicePose[vr::k_unMaxTrackedDeviceCount];
+	vr::TrackedDevicePose_t	m1_rTrackedDevicePose[vr::k_unMaxTrackedDeviceCount];
 	
-	ovrHmdDesc			hmdDesc;
+	idStr				m_strDriver;
+	idStr				m_strDisplay;
+	
+	char				m_rDevClassChar[vr::k_unMaxTrackedDeviceCount];
+	idMat4				m_rmat4DevicePose[vr::k_unMaxTrackedDeviceCount];
+	bool				m_rbShowTrackedDevice[vr::k_unMaxTrackedDeviceCount];
+
+	idMat4				m_mat4ProjectionLeft;
+	idMat4				m_mat4ProjectionRight;
+	idMat4				m_mat4eyePosLeft;
+	idMat4				m_mat4eyePosRight;
 
 	float				hmdFovX;
 	float				hmdFovY;
-	float				hmdPixelScale;
 	float				hmdAspect;
 	hmdEye_t			hmdEye[2];
 	
 	
-	float				oculusIPD;
-	float				oculusHeight;
+	float				openVrIPD;
+	float				openVrHeight;
+	
 	float				manualIPD;
 	float				manualHeight;
 
 	idImage*			hmdEyeImage[2];
 	idImage*			hmdCurrentRender[2];
-
-	ovrTextureSwapChain oculusSwapChain[2];
 	
-	GLuint				oculusFboId;
-	GLuint				ocululsDepthTexID;
-
-	ovrMirrorTexture	oculusMirrorTexture;
-	GLuint				mirrorTexId;
-	GLuint				oculusMirrorFboId;
 	int					mirrorW;
 	int					mirrorH;
 
-	ovrLayerEyeFov		oculusLayer;
-	ovrViewScaleDesc	oculusViewScaleDesc;
-
-	GUID				oculusGuid;
-	WCHAR				oculusGuidStr[OVR_AUDIO_MAX_DEVICE_STR_SIZE];
+	idImage*			primaryFBOimage;
+	idImage*			resolveFBOimage;
+	idImage*			fullscreenFBOimage;
 						
-	ovrTrackingState	hmdTrackingState;
 	double				hmdFrameTime;
 	bool				hmdPositionTracked;
 	int					currentEye;
@@ -206,31 +210,27 @@ public:
 
 	float				playerDead;
 
-	int frameStack[100];
-	ovrPosef framePose[100];
-	double	sampleTime[100];
-	int frameHead;
-	int frameTail;
-	int frameCount;
-
+	int					lastRead;
+	int					currentRead;
+	bool				updateScreen;
+	
 
 	
 	// wip stuff
-	int wipNumSteps;
-	int wipStepState;
-	int wipLastPeriod;
-	float wipCurrentDelta;
-	float wipCurrentVelocity;
-	float wipPeriodVel;
-
-	float wipTotalDelta;
-	float wipLastAcces;
-	float wipAvgPeriod;
-	float wipTotalDeltaAvg;
+	int					wipNumSteps;
+	int					wipStepState;
+	int					wipLastPeriod;
+	float				wipCurrentDelta;
+	float				wipCurrentVelocity;
+	float				wipPeriodVel;
+	float				wipTotalDelta;
+	float				wipLastAcces;
+	float				wipAvgPeriod;
+	float				wipTotalDeltaAvg;
 
 	// clip stuff
-	idClipModel* bodyClip;
-	idClipModel* headClip;
+	idClipModel*		bodyClip;
+	idClipModel*		headClip;
 			
 	//---------------------------
 private:
@@ -382,40 +382,6 @@ extern idCVar	vr_headingBeamMode;
 extern idCVar	vr_weaponSight;
 extern idCVar	vr_weaponSightToSurface;
 
-extern iVr* vr;
+extern iVr* commonVr;
 
-/*
-extern bool		VR_GAME_PAUSED;
-extern bool		PDAforcetoggle;
-extern bool		PDAforced;
-extern bool		PDArising;
-extern int		swfRenderMode;
-extern idVec3	lastViewOrigin;
-extern idMat3	lastViewAxis;
-extern float	lastHMDYaw;
 
-extern int		useFBO;
-extern int		VR_USE_HYDRA;
-extern int		VR_AAmode;
-
-extern bool		PDAclipModelSet;
-
-extern ovrHmd	hmd;
-extern hmdEye_t hmdEye[2];
-extern float	hmdFovX;
-extern float	hmdFovY;
-
-extern float	oculusIPD;
-extern float	oculusHeight;
-
-extern idImage * hmdEyeImage[2];
-extern idImage * hmdCurrentRender[2];
-
-extern bool vrIsBackgroundSaving;
-
-extern float independentWeaponYaw;
-extern float independentWeaponPitch;
-
-extern bool hasHMD;
-extern bool hasOculusRift;
-*/

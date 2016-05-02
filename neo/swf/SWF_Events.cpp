@@ -401,7 +401,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 			if ( thisMenu.Icmp( lastMenu.c_str() ) != 0 ) 
 			{
 				//start new menus or screen with either stick.
-				vr->forceLeftStick = true;
+				commonVr->forceLeftStick = true;
 				lastMenu = thisMenu;
 			}
 
@@ -412,19 +412,19 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 
 			if ( !inPDAmenu ) // not in the PDA menu, force all stick axis movement to the left stick for menu control
 			{ 
-				vr->forceLeftStick = true;
+				commonVr->forceLeftStick = true;
 			}
 			else 
 			{ // we are in the PDA menu. handle toggling sticks and changing mappings as needed
 
-				if ( !vr->forceLeftStick ) 
+				if ( !commonVr->forceLeftStick ) 
 				{
 					if ( keyValue == K_HYDRA_RIGHT_STICK_LEFT ||
 						keyValue == K_HYDRA_LEFT_STICK_LEFT ||
 						keyValue == K_JOY_STICK1_LEFT ||
 						keyValue == K_JOY_STICK2_LEFT ) 
 					{
-						vr->forceLeftStick = true;
+						commonVr->forceLeftStick = true;
 					}
 				}
 				else 
@@ -434,12 +434,12 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 						keyValue == K_JOY_STICK1_RIGHT ||
 						keyValue == K_JOY_STICK2_RIGHT ) 
 					{
-						vr->forceLeftStick = false;
+						commonVr->forceLeftStick = false;
 					}
 				}
 			}
 
-			if ( vr->forceLeftStick ) { // in the pda map right stick movement to the left sticks if forced
+			if ( commonVr->forceLeftStick ) { // in the pda map right stick movement to the left sticks if forced
 				sourceAxis = rightStick;
 				destAxis = leftStick;
 			}

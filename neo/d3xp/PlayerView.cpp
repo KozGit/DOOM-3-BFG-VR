@@ -495,9 +495,9 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 	// Koz begin
 	if ( g_showHud.GetBool() && !game->isVR ) // vr hud was drawn elsewhere and copied to texture
 	{
-		vr->swfRenderMode = RENDERING_HUD;
+		commonVr->swfRenderMode = RENDERING_HUD;
 		player->DrawHUD( hudManager );
-		vr->swfRenderMode = RENDERING_NORMAL;
+		commonVr->swfRenderMode = RENDERING_NORMAL;
 	}
 	// Koz end
 
@@ -810,8 +810,8 @@ void idPlayerView::EmitStereoEyeView( const int eye, idMenuHandler_HUD* hudManag
 	// Koz begin
 	if ( game->isVR )
 	{
-		vr->lastViewOrigin = eyeView.vieworg;
-		vr->lastViewAxis = eyeView.viewaxis;
+		commonVr->lastViewOrigin = eyeView.vieworg;
+		commonVr->lastViewAxis = eyeView.viewaxis;
 	}
 	// Koz end
 	
@@ -855,23 +855,16 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 		if ( game->isVR )
 		{
 			
-			vr->lastCenterEyeAxis = view->viewaxis;
-			vr->lastCenterEyeOrigin = view->vieworg;
+			commonVr->lastCenterEyeAxis = view->viewaxis;
+			commonVr->lastCenterEyeOrigin = view->vieworg;
 			
-			vr->vrFrame++; // only place this is incremented.
-			vr->PushFrame( vr->vrFrame,vr->hmdTrackingState.HeadPose.ThePose,vr->sensorSampleTime );
-
-		
-
 			//Dialog().Render( loadGUI != NULL );
 			
-			
-
-			if ( !vr->PDAforced && !vr->PDArising && !game->IsPDAOpen() ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
+			if ( !commonVr->PDAforced && !commonVr->PDArising && !game->IsPDAOpen() ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
 			{
-				vr->swfRenderMode = RENDERING_HUD;
+				commonVr->swfRenderMode = RENDERING_HUD;
 				player->DrawHUDVR( hudManager );
-				vr->swfRenderMode = RENDERING_NORMAL;
+				commonVr->swfRenderMode = RENDERING_NORMAL;
 			}
 			
 			if ( player->objectiveSystemOpen )
@@ -879,12 +872,12 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 				if ( player->pdaMenu != NULL )
 				{
 
-					if ( !vr->PDAforced && !vr->PDArising ) // dont render the PDA gui if the PDA model been forced up to display the pause menus.
+					if ( !commonVr->PDAforced && !commonVr->PDArising ) // dont render the PDA gui if the PDA model been forced up to display the pause menus.
 					{
-						vr->swfRenderMode = RENDERING_PDA;
+						commonVr->swfRenderMode = RENDERING_PDA;
 						player->pdaMenu->Update();
 						renderSystem->CaptureRenderToImage( "_pdaImage" );
-						vr->swfRenderMode = RENDERING_NORMAL;
+						commonVr->swfRenderMode = RENDERING_NORMAL;
 					}
 				}
 			}

@@ -292,7 +292,7 @@ void idCommonLocal::Draw()
 		// when paused capture the shell render to the PDA screen texture,
 		// then draw the game frame
 		
-		if ( (vr->PDAforced || vr->PDArising) && !vr->playerDead) // koz fixme do we only want to use the PDA model in VR?
+		if ( (commonVr->PDAforced || commonVr->PDArising) && !commonVr->playerDead) // koz fixme do we only want to use the PDA model in VR?
 		{
 			game->Shell_Render(); //koz render the menu
 			Dialog().Render( false );
@@ -309,10 +309,10 @@ void idCommonLocal::Draw()
 		}
 		
 		// Koz begin
-		if ( !game->isVR || vr->playerDead || ( !vr->PDAforced && !vr->PDArising ) )
+		if ( !game->isVR || commonVr->playerDead || ( !commonVr->PDAforced && !commonVr->PDArising ) )
 		{
 			game->Shell_Render(); //koz render any menus outside of game ( main menu etc )
-			//if ( game->isVR ) vr->HMDTrackStatic(); // add headtracking to menus
+			//if ( game->isVR ) commonVr->HMDTrackStatic(); // add headtracking to menus
 		}
 		//Koz end
 
@@ -368,7 +368,7 @@ void idCommonLocal::Draw()
 		}
 		else
 		{
-			if ( !vr->PDAforced && !vr->PDArising )
+			if ( !commonVr->PDAforced && !commonVr->PDArising )
 			{
 				Dialog().Render( loadGUI != NULL );
 				if ( game->Shell_IsActive() ) console->Draw( false );
@@ -421,7 +421,7 @@ void idCommonLocal::UpdateScreen( bool captureToImage, bool releaseMouse )
 	
 	if ( game->isVR )
 	{
-		//vr->HMDTrackStatic(); // koz fixme
+		//commonVr->HMDTrackStatic(); // koz fixme
 	}
 	insideUpdateScreen = false;
 }
@@ -671,7 +671,7 @@ void idCommonLocal::Frame()
 			{
 				//common->Printf("Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->ishellactive = %d\n",ingame,VR_GAME_PAUSED,pauseGame,game->Shell_IsActive());
 				//common->Printf("Pause diag: PDAforcetoggle = %d, PDAforced = %d, PDA rising =%d\n",PDAforcetoggle,PDAforced,PDArising);
-				if ( vr->VR_GAME_PAUSED ) // game is paused, check to exit
+				if ( commonVr->VR_GAME_PAUSED ) // game is paused, check to exit
 				{
 					if ( ingame )
 					{
@@ -679,49 +679,49 @@ void idCommonLocal::Frame()
 						{
 							if ( !PDAopenedByPause )
 							{
-								vr->VR_GAME_PAUSED = false;
-								vr->PDArising = false;
-								vr->PDAforced = false;
+								commonVr->VR_GAME_PAUSED = false;
+								commonVr->PDArising = false;
+								commonVr->PDAforced = false;
 							}
-							else if ( vr->PDAforced && !vr->PDArising )
+							else if ( commonVr->PDAforced && !commonVr->PDArising )
 							{
 								common->Printf( "idCommonLocal::Frame() 1 setting PDAforceToggle true\n" );
-								vr->PDAforcetoggle = true;
+								commonVr->PDAforcetoggle = true;
 								PDAopenedByPause = false;
-								vr->VR_GAME_PAUSED = false;
+								commonVr->VR_GAME_PAUSED = false;
 							}
 						}
 					}
 					else
 					{
-						vr->VR_GAME_PAUSED = false;
+						commonVr->VR_GAME_PAUSED = false;
 						PDAopenedByPause = false;
-						vr->PDArising = false;
-						vr->PDAforced = false;
+						commonVr->PDArising = false;
+						commonVr->PDAforced = false;
 					}
 				}
 				else // game is not paused, see if we need to pause it
 				{
-					if ( pauseGame && ingame && !vr->gameSaving ) // we need to pause 
+					if ( pauseGame && ingame && !commonVr->gameSaving ) // we need to pause 
 					{
 						if ( game->IsPDAOpen() && !PDAopenedByPause ) // the PDA was already opened, dont toggle it
 						{
-							vr->VR_GAME_PAUSED = true;
+							commonVr->VR_GAME_PAUSED = true;
 							PDAopenedByPause = false;
-							vr->PDAforced = false;
-							vr->PDArising = false;
+							commonVr->PDAforced = false;
+							commonVr->PDArising = false;
 						}
-						else if ( !vr->PDAforced && !vr->PDArising  ) // force a PDA toggle;
+						else if ( !commonVr->PDAforced && !commonVr->PDArising  ) // force a PDA toggle;
 						{
 							common->Printf( "idCommonLocal::Frame() 2 setting PDAforceToggle true\n" );
-							vr->PDAforcetoggle = true;
+							commonVr->PDAforcetoggle = true;
 							PDAopenedByPause = true;
 						}
-						else if ( vr->PDAforced ) // pda is up, pause the game.
+						else if ( commonVr->PDAforced ) // pda is up, pause the game.
 						{
-							vr->VR_GAME_PAUSED = true;
+							commonVr->VR_GAME_PAUSED = true;
 							PDAopenedByPause = true;
-							vr->PDArising = false;
+							commonVr->PDArising = false;
 						}
 					}
 				}

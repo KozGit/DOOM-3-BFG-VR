@@ -786,7 +786,7 @@ void idRenderSystemLocal::SwapCommandBuffers_FinishRendering(
 	// check for errors
 	GL_CheckErrors();
 	
-	// koz fixme vr->FrameEnd();
+	// koz fixme commonVr->FrameEnd();
 
 }
 
@@ -1099,7 +1099,7 @@ void idRenderSystemLocal::CaptureRenderToFile( const char* fileName, bool fixAlp
 	guiModel->Clear();
 	RenderCommandBuffers( frameData->cmdHead );
 	
-	if ( !vr->useFBO ) // koz
+	if ( !commonVr->useFBO ) // koz
 	{
 		glReadBuffer( GL_BACK );
 	}

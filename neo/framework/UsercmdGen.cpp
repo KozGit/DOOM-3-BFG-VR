@@ -491,7 +491,7 @@ void idUsercmdGenLocal::AdjustAngles()
 			pitchdelta = speed * in_pitchSpeed.GetFloat();
 		}
 
-		vr->CalcAimMove( yawdelta, pitchdelta ); // update the independent weapon angles and return any movement changes.
+		commonVr->CalcAimMove( yawdelta, pitchdelta ); // update the independent weapon angles and return any movement changes.
 		viewangles[YAW] += yawdelta;
 		viewangles[PITCH] += pitchdelta;
 		
@@ -587,7 +587,7 @@ void idUsercmdGenLocal::MouseMove()
 	if ( vr_enable.GetBool() )
 	{
 		// update the independent weapon angles and return any view changes based on current aim mode
-		vr->CalcAimMove( yawdelta, pitchdelta );
+		commonVr->CalcAimMove( yawdelta, pitchdelta );
 	}
 
 	viewangles[YAW] += yawdelta;
@@ -1223,7 +1223,7 @@ void idUsercmdGenLocal::JoystickMove2()
 
 	if ( game->isVR )
 	{
-		vr->CalcAimMove( yawDelta, pitchDelta );
+		commonVr->CalcAimMove( yawDelta, pitchDelta );
 	}
 
 	viewangles[PITCH] += pitchDelta;
@@ -1236,7 +1236,7 @@ void idUsercmdGenLocal::JoystickMove2()
 
 	// Koz hydra -------------------do this again with the hydras
 
-	if ( vr->VR_USE_HYDRA ) // vr_hydraMode.GetInteger() != 0 ) {
+	if ( commonVr->VR_USE_HYDRA ) // vr_hydraMode.GetInteger() != 0 ) {
 	{
 		comfortTurn = 0.0 ;
 		static bool lastComfortHydra = false;
@@ -1271,7 +1271,7 @@ void idUsercmdGenLocal::JoystickMove2()
 
 		if ( game->isVR )
 		{
-			vr->CalcAimMove( yawDelta, pitchDelta );
+			commonVr->CalcAimMove( yawDelta, pitchDelta );
 		}
 
 		viewangles[PITCH] += pitchDelta;
@@ -1385,7 +1385,7 @@ void idUsercmdGenLocal::MakeCurrent()
 		// aim assist
 		AimAssist();
 
-		if ( vr->isWalking )
+		if ( commonVr->isWalking )
 		{
 			// WIP button pressed
 			// if freelook not enabled, turn body to last view
@@ -1396,27 +1396,27 @@ void idUsercmdGenLocal::MakeCurrent()
 				//player->SnapBodyToView();
 			
 				
-				viewangles[YAW] += vr->lastHMDYaw - vr->bodyYawOffset;
+				viewangles[YAW] += commonVr->lastHMDYaw - commonVr->bodyYawOffset;
 				//newBodyAngles.Normalize180();
 
 				hydraData currentHydra = hydra_zero;
 				hydraData currentHydraOffset = hydra_zero;
 				idQuat rotQuat;
 
-				rotQuat = idAngles( 0.0f, (vr->lastHMDYaw - vr->bodyYawOffset), 0.0f ).Normalize180().ToQuat();
+				rotQuat = idAngles( 0.0f, (commonVr->lastHMDYaw - commonVr->bodyYawOffset), 0.0f ).Normalize180().ToQuat();
 
 
-				vr->bodyYawOffset = vr->lastHMDYaw;
+				commonVr->bodyYawOffset = commonVr->lastHMDYaw;
 				//SetViewAngles( newBodyAngles );
 				//viewAngles.yaw = newBodyAngles.yaw;
 			
-				vr->HydraGetLeftOffset( currentHydra );
+				commonVr->HydraGetLeftOffset( currentHydra );
 				currentHydra.hydraRotationQuat *= rotQuat;
-				vr->HydraSetLeftOffset( currentHydra );
+				commonVr->HydraSetLeftOffset( currentHydra );
 
-				vr->HydraGetRightOffset( currentHydra );
+				commonVr->HydraGetRightOffset( currentHydra );
 				currentHydra.hydraRotationQuat *= rotQuat;
-				vr->HydraSetRightOffset( currentHydra );
+				commonVr->HydraSetRightOffset( currentHydra );
 
 			}
 		}
