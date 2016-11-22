@@ -2052,7 +2052,7 @@ idPhysics_Player::ApplyImpulse
 */
 void idPhysics_Player::ApplyImpulse( const int id, const idVec3& point, const idVec3& impulse )
 {
-	if( current.movementType != PM_NOCLIP )
+	if ( current.movementType != PM_NOCLIP && !(game->isVR && !vr_knockBack.GetBool())) // koz fixme knockback
 	{
 		current.velocity += impulse * invMass;
 	}

@@ -89,7 +89,7 @@ void idCommonLocal::CompleteWipe()
 	while( Sys_Milliseconds() < wipeStopTime )
 	{
 		BusyWait();
-		Sys_Sleep( 10 );
+		if (!game->isVR) Sys_Sleep( 10 ); // updatescreen calls waitgetposes which runs once per frame
 	}
 	
 	// ensure it is completely faded out
@@ -231,6 +231,7 @@ void idCommonLocal::UnloadMap()
 {
 	StopPlayingRenderDemo();
 	
+	commonVr->PDAforcetoggle = false;
 	commonVr->PDArising = false;
 	commonVr->PDAforced = false;
 	commonVr->playerDead = false;
@@ -762,11 +763,13 @@ void idCommonLocal::ExecuteMapChange()
 	// Issue a render at the very end of the load process to update soundTime before the first frame
 	soundSystem->Render();
 
+	commonVr->PDAforcetoggle = false;
 	commonVr->PDArising = false;
 	commonVr->PDAforced = false;
 	commonVr->playerDead = false;
 	commonVr->vrIsBackgroundSaving = false;
 	commonVr->VR_GAME_PAUSED = false;
+	commonVr->pdaToggleTime = Sys_Milliseconds();
 
 }
 
@@ -824,7 +827,13 @@ void idCommonLocal::UpdateLevelLoadPacifier()
 	else
 	{
 		// On the PC just update at a constant rate for the Steam overlay
-		if( time - lastPacifierGuiTime >= 50  ) // koz fixme
+		
+		int timeDel;
+		timeDel = game->isVR ? ( 1000 / commonVr->hmdHz ) * 3  : 50;
+		
+		
+		//if( time - lastPacifierGuiTime >= 50  ) // koz fixme
+		if ( time - lastPacifierGuiTime >= timeDel ) // koz fixme
 		{
 			lastPacifierGuiTime = time;
 			UpdateScreen( false );
@@ -956,9 +965,12 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	soundSystem->SetPlayingSoundWorld( menuSoundWorld );
 	soundSystem->Render();
 	
-	if ( 1  ) //; 0 &&  !game->isVR ) // Koz fixme : implement this.shows saving dialog during save.currently disabled in VR for smoother headtracking.
+	if (  0 &&  !game->isVR ) // Koz fixme : implement this.shows saving dialog during save.currently disabled in VR for smoother headtracking.
 
 	{
+		
+		commonVr->vrIsBackgroundSaving = true;
+
 		Dialog().ShowSaveIndicator( true );
 		if ( insideExecuteMapChange )
 		{
@@ -1041,6 +1053,8 @@ bool idCommonLocal::SaveGame( const char* saveName )
 
 	}
 	ClearWipe();
+
+	commonVr->vrIsBackgroundSaving = false;
 	return true;
 }
 
@@ -1059,6 +1073,8 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	commonVr->PDAforcetoggle = false;
 	commonVr->VR_GAME_PAUSED = false; 
 	commonVr->playerDead = false;
+	commonVr->VR_GAME_PAUSED = false;
+	commonVr->pdaToggleTime = Sys_Milliseconds() + 1000;
 	// Koz end
 	
 	if( IsMultiplayer() )
@@ -1136,6 +1152,7 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	saveFile.Clear( false );
 	stringsFile.Clear( false );
 	
+
 	saveGameHandle_t loadGameHandle = session->LoadGameSync( slotName, files );
 	if( loadGameHandle != 0 )
 	{
@@ -1146,6 +1163,7 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	{
 		ClearWipe();
 	}
+	
 	return false;
 }
 

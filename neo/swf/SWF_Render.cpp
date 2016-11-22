@@ -133,10 +133,17 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 	float sysHeight = renderSystem->GetHeight() / ( pixelAspect < 1.0f ? pixelAspect : 1.0f );
 	
 	// Koz begin
+	
+	float vr_mScale = 1.0;
+
+	
 	if ( commonVr->swfRenderMode == RENDERING_PDA ) // We dont need to render a full resolution PDA, it will be scaled down to fit the model in VR.  
 	{
-		sysWidth = 640;
-		sysHeight = 480;
+		//sysWidth = 640;
+		//sysHeight = 480;
+		sysWidth = 1280;
+		sysHeight = 960;
+
 	}
 	// Koz end
 
@@ -144,7 +151,7 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 
 	// koz begin
 	// In VR, scale SWF elements to a more appropriate size.
-	if ( game->isVR )
+	if ( game->isVR  )
 	{
 		if ( commonVr->VR_GAME_PAUSED )
 		{
@@ -166,7 +173,10 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 					scale = vr_guiScale.GetFloat();
 			}
 		}
+	
+		vr_mScale = scale;
 	}
+
 	// koz end
 	
 	swfRenderState_t renderState;
@@ -209,17 +219,26 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 		
 		// koz begin
 		// scale the mouse pointer in VR on gui screens.
-		float mScale = game->isVR ? vr_guiScale.GetFloat() : 1.0f;
+		// float mScale = game->isVR ? vr_guiScale.GetFloat() : 1.0f;
+		// vr_mScale set earlier
 		// koz end
+	//	vr_mScale = 1.0f;
 
 		
-		if( !hasHitObject )    //hitObject == NULL ) {
+		//if ( !game->isVR || !game->IsInGame() || !(commonVr->VR_USE_MOTION_CONTROLS && vr_guiMode.GetInteger() == 2) ) //  hide the mouse cursor if using touchscreen
+		if ( !game->IsInGame() )
 		{
-			DrawStretchPic( mouse.x, mouse.y, 32.0f * mScale, 32.0f * mScale, 0, 0, 1, 1, guiCursor_arrow );
-		}
-		else
-		{
-			DrawStretchPic( mouse.x, mouse.y, 32.0f * mScale, 32.0f * mScale, 0, 0, 1, 1, guiCursor_hand );
+
+			if ( !hasHitObject )    //hitObject == NULL ) {
+			{
+				DrawStretchPic( mouse.x, mouse.y, 32.0f * vr_mScale, 32.0f * vr_mScale, 0, 0, 1, 1, guiCursor_arrow );
+				//DrawStretchPic( mouseX, mouseY, 32.0f * vr_mScale, 32.0f * vr_mScale, 0, 0, 1, 1, guiCursor_arrow );
+			}
+			else
+			{
+				DrawStretchPic( mouse.x, mouse.y, 32.0f * vr_mScale, 32.0f * vr_mScale, 0, 0, 1, 1, guiCursor_hand );
+				//DrawStretchPic( mouseX, mouseY, 32.0f * vr_mScale, 32.0f * vr_mScale, 0, 0, 1, 1, guiCursor_hand );
+			}
 		}
 	}
 	

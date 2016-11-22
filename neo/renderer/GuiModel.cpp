@@ -144,7 +144,8 @@ void idGuiModel::EmitSurfaces( float modelMatrix[16], float modelViewMatrix[16],
 	// add the surfaces to this view
 	for( int i = 0; i < surfaces.Num(); i++ )
 	{
-		const guiModelSurface_t& guiSurf = surfaces[i];
+		// koz fixme const guiModelSurface_t& guiSurf = surfaces[i];
+		guiModelSurface_t& guiSurf = surfaces[i];
 		if( guiSurf.numIndexes == 0 )
 		{
 			continue;
@@ -180,10 +181,34 @@ void idGuiModel::EmitSurfaces( float modelMatrix[16], float modelViewMatrix[16],
 			shader->EvaluateRegisters( regs, shaderParms, tr.viewDef->renderView.shaderParms, tr.viewDef->renderView.time[1] * 0.001f, NULL );
 		}
 		R_LinkDrawSurfToView( drawSurf, tr.viewDef );
-		if( allowFullScreenStereoDepth )
+		if( allowFullScreenStereoDepth || game->isVR  )
 		{
 			// override sort with the stereoDepth
 			//drawSurf->sort = stereoDepth;
+				
+			//koz
+			// this is an unbelievably gross hack,
+			// but it adds some depth to the in game guis so they dont look like stickers.
+			// ideally could define depth per surface in gui definition, but would be really time consuming,
+			// maybe should at least add a depth parm to the gui materials that could be referenced here? 
+			if ( game->isVR && drawSurf->sort == SS_GUI && vr_3dgui.GetBool() )
+			{
+			
+				if ( strstr( guiSurf.material->GetName(), "bg" ) || strstr( guiSurf.material->GetName(), "spin") )   // bg is normally a background image. spinny things are also normally background images.
+				{
+					guiSurf.stereoType = STEREO_DEPTH_TYPE_IG_FAR;
+				}
+				else if ( strstr( guiSurf.material->GetName(), "logo" ) )// put logos in the mid field
+				{
+					guiSurf.stereoType = STEREO_DEPTH_TYPE_IG_MID;
+				}
+				else
+				{
+					guiSurf.stereoType = STEREO_DEPTH_TYPE_IG_NEAR;
+				}
+			}
+			else if ( !allowFullScreenStereoDepth )  guiSurf.stereoType = STEREO_DEPTH_TYPE_NONE;
+
 			
 			switch( guiSurf.stereoType )
 			{
@@ -196,6 +221,19 @@ void idGuiModel::EmitSurfaces( float modelMatrix[16], float modelViewMatrix[16],
 				case STEREO_DEPTH_TYPE_FAR:
 					drawSurf->sort = STEREO_DEPTH_FAR;
 					break;
+				
+				case STEREO_DEPTH_TYPE_IG_NEAR:
+					drawSurf->sort = STEREO_DEPTH_NEAR + 1000; // adding 1000 to the depth marks as in in game gui, so a different separation value can be used in backend_draw
+					break;
+				
+				case STEREO_DEPTH_TYPE_IG_MID:
+					drawSurf->sort = STEREO_DEPTH_MID + 1000;
+					break;
+				
+				case STEREO_DEPTH_TYPE_IG_FAR:
+					drawSurf->sort = STEREO_DEPTH_FAR + 1000;
+					break;
+				
 				case STEREO_DEPTH_TYPE_NONE:
 				default:
 					drawSurf->sort = defaultStereoDepth;
@@ -250,13 +288,7 @@ void idGuiModel::EmitFullScreen()
 	if( stereoEnabled )
 	{
 		float screenSeparation = GetScreenSeparationForGuis();
-
-		if ( game->isVR )
-		{
-			extern idCVar vr_guiSeparation;
-		//	screenSeparation = vr_guiSeparation.GetFloat();
-		}
-		
+				
 		// this will be negated on the alternate eyes, both rendered each frame
 		viewDef->renderView.stereoScreenSeparation = screenSeparation;
 		

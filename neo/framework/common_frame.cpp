@@ -95,6 +95,8 @@ be called directly in the foreground thread for comparison.
 */
 int idGameThread::Run()
 {
+	if (game->isVR) commonVr->FrameStart();
+	
 	commonLocal.frameTiming.startGameTime = Sys_Microseconds();
 	
 	// debugging tool to test frame dropping behavior
@@ -292,7 +294,9 @@ void idCommonLocal::Draw()
 		// when paused capture the shell render to the PDA screen texture,
 		// then draw the game frame
 		
-		if ( (commonVr->PDAforced || commonVr->PDArising) && !commonVr->playerDead) // koz fixme do we only want to use the PDA model in VR?
+		//koz fixme had playerdead here, can't remember why... but it was breaking the exit game selection in the pause menu, so
+		//commented out, need to test all this crap again.
+		if ( (commonVr->PDAforced || commonVr->PDArising) ) //&& !commonVr->playerDead) // koz fixme do we only want to use the PDA model in VR?
 		{
 			game->Shell_Render(); //koz render the menu
 			Dialog().Render( false );
@@ -410,7 +414,19 @@ void idCommonLocal::UpdateScreen( bool captureToImage, bool releaseMouse )
 		renderSystem->CaptureRenderToImage( "_currentRender", false );
 	}
 	
+	if ( game->isVR )
+	{
+		static int lastTrack = Sys_Milliseconds();
+		if ( Sys_Milliseconds() - lastTrack > 30 )
+		{
+			lastTrack = Sys_Milliseconds();
+			commonVr->HMDTrackStatic(); // koz fixme
+		}
 	
+
+		// this will hopefully update the steamvr compositor white room
+		//renderSystem->CaptureRenderToImage( "_skyBoxSides", false );
+	}
 	
 
 		// this should exit right after vsync, with the GPU idle and ready to draw
@@ -419,10 +435,7 @@ void idCommonLocal::UpdateScreen( bool captureToImage, bool releaseMouse )
 		// get the GPU busy with new commands
 		renderSystem->RenderCommandBuffers( cmd );
 	
-	if ( game->isVR )
-	{
-		//commonVr->HMDTrackStatic(); // koz fixme
-	}
+
 	insideUpdateScreen = false;
 }
 /*
@@ -490,6 +503,11 @@ idCommonLocal::Frame
 */
 void idCommonLocal::Frame()
 {
+	
+//	if ( game->isVR ) commonVr->FrameStart();
+
+	
+	
 	try
 	{
 		SCOPED_PROFILE_EVENT( "Common::Frame" );
@@ -557,11 +575,13 @@ void idCommonLocal::Frame()
 		
 		// RB begin
 #if defined(USE_DOOMCLASSIC)
-		const bool pauseGame = ( !mapSpawned
+		 bool pauseGame = ( !mapSpawned
 								 || ( !IsMultiplayer()
 									  && ( Dialog().IsDialogPausing() || session->IsSystemUIShowing()
 										   || ( game && game->Shell_IsActive() ) || com_pause.GetInteger() ) ) )
 							   && !IsPlayingDoomClassic();
+
+	
 #else
 		const bool pauseGame = ( !mapSpawned
 								 || ( !IsMultiplayer()
@@ -669,8 +689,15 @@ void idCommonLocal::Frame()
 			
 			if ( isVR )
 			{
-				//common->Printf("Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->ishellactive = %d\n",ingame,VR_GAME_PAUSED,pauseGame,game->Shell_IsActive());
-				//common->Printf("Pause diag: PDAforcetoggle = %d, PDAforced = %d, PDA rising =%d\n",PDAforcetoggle,PDAforced,PDArising);
+				
+				/*
+				if ( pauseGame )
+				{
+					common->Printf( "Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->ishellactive = %d\n", ingame, commonVr->VR_GAME_PAUSED, pauseGame, game->Shell_IsActive() );
+					common->Printf( "Pause diag: PDAforcetoggle = %d, PDAforced = %d, PDA rising =%d\n", commonVr->PDAforcetoggle, commonVr->PDAforced, commonVr->PDArising );
+				}
+				*/
+
 				if ( commonVr->VR_GAME_PAUSED ) // game is paused, check to exit
 				{
 					if ( ingame )
@@ -682,10 +709,11 @@ void idCommonLocal::Frame()
 								commonVr->VR_GAME_PAUSED = false;
 								commonVr->PDArising = false;
 								commonVr->PDAforced = false;
+								commonVr->PDAforcetoggle = false; //koz 11-20
 							}
 							else if ( commonVr->PDAforced && !commonVr->PDArising )
 							{
-								common->Printf( "idCommonLocal::Frame() 1 setting PDAforceToggle true\n" );
+								//common->Printf( "idCommonLocal::Frame() 1 setting PDAforceToggle true\n" );
 								commonVr->PDAforcetoggle = true;
 								PDAopenedByPause = false;
 								commonVr->VR_GAME_PAUSED = false;
@@ -698,6 +726,7 @@ void idCommonLocal::Frame()
 						PDAopenedByPause = false;
 						commonVr->PDArising = false;
 						commonVr->PDAforced = false;
+
 					}
 				}
 				else // game is not paused, see if we need to pause it
@@ -713,7 +742,7 @@ void idCommonLocal::Frame()
 						}
 						else if ( !commonVr->PDAforced && !commonVr->PDArising  ) // force a PDA toggle;
 						{
-							common->Printf( "idCommonLocal::Frame() 2 setting PDAforceToggle true\n" );
+							// koz debugcommon->Printf( "idCommonLocal::Frame() 2 setting PDAforceToggle true\n" );
 							commonVr->PDAforcetoggle = true;
 							PDAopenedByPause = true;
 						}
@@ -759,7 +788,12 @@ void idCommonLocal::Frame()
 			{
 				// How much time to wait before running the next frame,
 				// based on com_engineHz
-				const int frameDelay = FRAME_TO_MSEC( gameFrame + 1 ) - FRAME_TO_MSEC( gameFrame );
+				
+				//koz begin compositor reprojection can drop framerate by half, make sure to adapt.  (engineHZ will be changed dynamically) 
+				static int frameDelay = 0; 
+				frameDelay = FRAME_TO_MSEC( gameFrame + 1 ) - FRAME_TO_MSEC( gameFrame );
+				//koz end
+
 				if( gameTimeResidual < frameDelay )
 				{
 					break;
@@ -844,12 +878,13 @@ void idCommonLocal::Frame()
 		// build a new usercmd
 		int deviceNum = session->GetSignInManager().GetMasterInputDevice();
 		usercmdGen->BuildCurrentUsercmd( deviceNum );
-		if( deviceNum == -1 )
+		if( 1 ) // deviceNum == -1 ) // koz FIXME FIXME FIXME, sometimes skipping the hydra and steamvr controllers, need to figure out why 
 		{
 			for( int i = 0; i < MAX_INPUT_DEVICES; i++ )
 			{
-				Sys_PollJoystickInputEvents( i );
-				Sys_EndJoystickInputEvents();
+				//Sys_PollJoystickInputEvents( i );
+				//Sys_EndJoystickInputEvents();
+				usercmdGen->BuildCurrentUsercmd( i );
 			}
 		}
 		if( pauseGame )

@@ -259,6 +259,7 @@ typedef struct
 {
 	float				x, y;			// 0.0 to 1.0 range if trace hit a gui, otherwise -1
 	int					guiId;			// id of gui ( 0, 1, or 2 ) that the trace happened against
+	float				fraction;		// koz added fraction of trace completed for touch screens
 } guiPoint_t;
 
 

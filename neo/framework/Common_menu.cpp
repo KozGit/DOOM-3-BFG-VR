@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "Common_local.h"
+#include "d3xp\Game_local.h"
 
 /*
 ==============
@@ -145,11 +146,29 @@ idCommonLocal::StartMainMenu
 */
 void idCommonLocal::StartMenu( bool playIntro )
 {
+	
+	//common->Printf( "idCommonLocal::StartMenu\n" ); // koz debug
 	if( game && game->Shell_IsActive() )
 	{
 		return;
 	}
 	
+	//koz fixme pause menu
+	//if escape is pressed while the pda is rising, it will bring up the pause menu when we really want to close the pda, so hack that shit here for now.
+	if ( game->isVR )
+	{	
+		if ( Sys_Milliseconds() - commonVr->pdaToggleTime < 3000 )
+		{
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			if ( player != NULL )
+			{
+				player->TogglePDA();
+				return;
+			}
+		}
+
+	}
+
 	if( readDemo )
 	{
 		// if we're playing a demo, esc kills it

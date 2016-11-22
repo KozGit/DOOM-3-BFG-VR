@@ -33,20 +33,22 @@ model worldmodel_grabber {
 	anim putaway				models/md5/weapons/grabber_world/grabber_idle.md5anim
 }
 
-model viewmodel_grabber {
-	mesh					models/md5/weapons/grabber_view/idleopen.md5mesh
-	offset					( -1 -1 0 )
+model viewmodel_grabber_vr {
+	mesh					models/md5/weapons/grabber_view/grabber_vr.md5mesh
+	//offset					( -1 -1 0 )
 
-	anim raise 				models/md5/weapons/grabber_view/raise.md5anim {
+	offset						( 0 0 0 )
+	anim raise 				models/md5/weapons/grabber_view/grabber_vr_raise.md5anim {
 		frame 1					sound_weapon grabber_present
 	}
-	anim idleopen			models/md5/weapons/grabber_view/idleopen.md5anim
-	anim idleclosed			models/md5/weapons/grabber_view/idleclosed.md5anim
-	anim idle				models/md5/weapons/grabber_view/idleclosed.md5anim
-	anim open				models/md5/weapons/grabber_view/open.md5anim
-	anim close				models/md5/weapons/grabber_view/close.md5anim
-	anim fire				models/md5/weapons/grabber_view/fire.md5anim
-	anim putaway 			models/md5/weapons/grabber_view/put_away.md5anim
+	
+	anim idleclosed			models/md5/weapons/grabber_view/grabber_vr_idleclosed.md5anim
+	anim idle				models/md5/weapons/grabber_view/grabber_vr_idleclosed.md5anim
+	anim open				models/md5/weapons/grabber_view/grabber_vr_open.md5anim
+	anim close				models/md5/weapons/grabber_view/grabber_vr_close.md5anim
+	anim fire				models/md5/weapons/grabber_view/grabber_vr_fire.md5anim
+	anim putaway 			models/md5/weapons/grabber_view/grabber_vr_put_away.md5anim
+	anim idleopen			models/md5/weapons/grabber_view/grabber_vr_idlopen.md5anim
 }
 
 entityDef weapon_grabber {
@@ -60,7 +62,7 @@ entityDef weapon_grabber {
 	"spawnclass"			"idItem"
 	"size"					"32 32 32"
 	"model" 				"models/weapons/grabber/grabber_world.ase"
-	"model_view"			"viewmodel_grabber"
+	"model_view"			"viewmodel_grabber_vr"
 	"model_world" 			"worldmodel_grabber"
 	"joint_attach"			"SHOTGUN_ATTACHER"
 
@@ -157,6 +159,8 @@ entityDef weapon_grabber {
 	// Precache effects
 	"model_barrelburn"			"barrelfire.prt"
 	"model_precache1"			"grabber_upper.prt"
+	"model_precache2"			"grabber_lower.prt"
+	"model_precache3"			"grabber_beam.prt"
 	"mtr_precache2"				"lights/grabberLight"
 	"mtr_precache3"				"lights/grabberLight2"
 	"mtr_precache4"				"lights/grabberguilightblue"

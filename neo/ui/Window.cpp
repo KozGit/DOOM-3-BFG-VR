@@ -1031,6 +1031,9 @@ const char* idWindow::HandleEvent( const sysEvent_t* event, bool* updateVisuals 
 			}
 			else if( ( event->evValue == K_ESCAPE || event->evValue == K_JOY9 ) && event->evValue2 )
 			{
+				
+				common->Printf( "idWindow::HandleEvent handling escape seq\n" );
+				
 				if( GetFocusedChild() )
 				{
 					const char* childRet = GetFocusedChild()->HandleEvent( event, updateVisuals );

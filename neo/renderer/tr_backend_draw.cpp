@@ -44,8 +44,8 @@ idCVar r_skipShaderPasses( "r_skip`R_USE`ShaderPasses", "0", CVAR_RENDERER | CVA
 idCVar r_skipInteractionFastPath( "r_skipInteractionFastPath", "1", CVAR_RENDERER | CVAR_BOOL, "" );
 idCVar r_useLightStencilSelect( "r_useLightStencilSelect", "0", CVAR_RENDERER | CVAR_BOOL, "use stencil select pass" );
 
+//idCVar vr_gui2( "vr_gui2", "-.03", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "vr in game gui separation" );
 
-idCVar vr_stereoOverlap( "vr_stereoOverlap" , "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "stereoOverlap" );
 extern idCVar stereoRender_swapEyes;
 
 backEndState_t	backEnd;
@@ -3184,8 +3184,12 @@ be multiplied by guiEye for polarity and screenSeparation for scale.
 =====================
 */
 static int RB_DrawShaderPasses( const drawSurf_t* const* const drawSurfs, const int numDrawSurfs,
-								const float guiStereoScreenOffset, const int stereoEye )
+								float guiStereoScreenOffset, const int stereoEye )
 {
+	
+	static float guiOffset = 0.0f;
+	static float guiSort = 0.0f;
+	
 	// only obey skipAmbient if we are rendering a view
 	if( backEnd.viewDef->viewEntitys && r_skipAmbient.GetBool() )
 	{
@@ -3254,13 +3258,7 @@ static int RB_DrawShaderPasses( const drawSurf_t* const* const drawSurfs, const 
 		}
 		
 		float sOffset[4] = { 1, 1, 1, 1 };
-
-		if ( game->isVR )
-		{
-						
-			sOffset[0] =  vr_stereoOverlap.GetFloat() * (float) stereoEye ;
-		}
-		
+				
 		SetVertexParm( RENDERPARM_STEREO_CORRECTION, sOffset );
 
 		renderLog.OpenBlock( shader->GetName() );
@@ -3269,20 +3267,38 @@ static int RB_DrawShaderPasses( const drawSurf_t* const* const drawSurfs, const 
 		// determine the stereoDepth offset
 		// guiStereoScreenOffset will always be zero for 3D views, so the !=
 		// check will never force an update due to the current sort value.
-		const float thisGuiStereoOffset = guiStereoScreenOffset * surf->sort;
 		
+		
+		// koz begin
+		// this is more of the gross hack to add some depth to in game guis
+		guiOffset = guiStereoScreenOffset;
+		guiSort = surf->sort;
+		
+		if ( guiSort >= 1000 ) // 1000 added to the depth marks this as an in game gui, so a different separation value can be used 
+		{
+			//guiOffset = vr_gui2.GetFloat() * -stereoEye;
+			
+			guiOffset = stereoEye * .03; //.03 is the stereo separation to use on in game guis
+			guiSort -= 1000; 
+		}
+				
+		//const float thisGuiStereoOffset = guiStereoScreenOffset * surf->sort;
+		float thisGuiStereoOffset = guiOffset * guiSort ;
+		// koz end
+
+
+
 		// change the matrix and other space related vars if needed
 		if( surf->space != backEnd.currentSpace || thisGuiStereoOffset != currentGuiStereoOffset )
 		{
 						
 			backEnd.currentSpace = surf->space;
 			currentGuiStereoOffset = thisGuiStereoOffset;
-			
-		//	currentGuiStereoOffset = vr_stereoOverlap.GetFloat() * stereoEye;// koz
-
+	
 			const viewEntity_t* space = backEnd.currentSpace;
 			
-			if( guiStereoScreenOffset != 0.0f  )
+			//if( guiStereoScreenOffset != 0.0f  
+			if ( guiOffset != 0.0f ) // koz
 			{
 				RB_SetMVPWithStereoOffset( space->mvp, currentGuiStereoOffset );
 				//common->Printf( "RB_SetMVPWithStereoOffset %f\n", currentGuiStereoOffset );// koz
@@ -4040,14 +4056,18 @@ void RB_DrawViewInternal( const viewDef_t* viewDef, const int stereoEye )
 	{
 		renderLog.OpenMainBlock( MRB_DRAW_SHADER_PASSES );
 		float guiScreenOffset;
-		if( viewDef->viewEntitys != NULL )
+		if (  viewDef->viewEntitys != NULL )
 		{
 			// guiScreenOffset will be 0 in non-gui views
 			guiScreenOffset = 0.0f;
 		}
 		else
 		{
-			guiScreenOffset = stereoEye * viewDef->renderView.stereoScreenSeparation;
+			//koz fixme guiScreenOffset = stereoEye * viewDef->renderView.stereoScreenSeparation;
+			
+			extern idCVar vr_guiSeparation;
+			guiScreenOffset = stereoEye * vr_guiSeparation.GetFloat(); //viewDef->renderView.stereoScreenSeparation;
+
 		}
 		processed = RB_DrawShaderPasses( drawSurfs, numDrawSurfs, guiScreenOffset, stereoEye );
 		renderLog.CloseMainBlock();

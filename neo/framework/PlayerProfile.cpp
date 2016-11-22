@@ -445,6 +445,12 @@ void idPlayerProfile::ExecConfig( bool save, bool forceDefault )
 		cmdSystem->AppendCommandText( "exec joy_360_0.cfg\n" );
 	}
 	
+	if ( game->isVR )
+	{
+		cmdSystem->AppendCommandText( "exec vr_default.cfg\n" );
+		cmdSystem->AppendCommandText( "exec vr.cfg\n" );
+	}
+
 	cmdSystem->ExecuteCommandBuffer();
 	
 	if( !save )

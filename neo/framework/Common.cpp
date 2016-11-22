@@ -433,19 +433,9 @@ void idCommonLocal::WriteConfiguration()
 	com_developer.SetBool( false );
 	
 	// Koz begin
-	if ( commonVr->hasOculusRift ) 
+	if ( game->isVR ) 
 	{
-		//WriteConfigToFile( "oculus_config.cfg", "fs_basepath" );
-		idFile* f = fileSystem->OpenFileWrite( "oculus_config.cfg", "fs_basepath" );
-		if ( !f )
-		{
-			Printf( "Couldn't write oculus_config.cfg in fs_basepath.\n" );
-			return;
-		}
-
-		idKeyInput::WriteBindings( f );
-		cvarSystem->WriteFlaggedVariables( CVAR_ARCHIVE, "set", f );
-		fileSystem->CloseFile( f );
+		WriteConfigToFile( "vr.cfg" );
 	}
 	else
 	// Koz end
@@ -884,10 +874,13 @@ void idCommonLocal::RenderSplash()
 	const float sysWidth = renderSystem->GetWidth() * renderSystem->GetPixelAspect();
 	const float sysHeight = renderSystem->GetHeight();
 	const float sysAspect = sysWidth / sysHeight;
-	const float splashAspect = 16.0f / 9.0f;
+	const float splashAspect = 5.0f / 4.0f;
 	const float adjustment = sysAspect / splashAspect;
 	const float barHeight = ( adjustment >= 1.0f ) ? 0.0f : ( 1.0f - adjustment ) * ( float )renderSystem->GetVirtualHeight() * 0.25f;
 	const float barWidth = ( adjustment <= 1.0f ) ? 0.0f : ( adjustment - 1.0f ) * ( float )renderSystem->GetVirtualWidth() * 0.25f;
+	
+	Framebuffer::BindDefault();
+		
 	if( barHeight > 0.0f )
 	{
 		renderSystem->SetColor( colorBlack );
@@ -905,9 +898,15 @@ void idCommonLocal::RenderSplash()
 	
 	const emptyCommand_t* cmd = renderSystem->SwapCommandBuffers( &time_frontend, &time_backend, &time_shadows, &time_gpu );
 	renderSystem->RenderCommandBuffers( cmd );
-
-	if ( game->isVR ) commonVr->HMDTrackStatic();
 	
+	
+	if ( game->isVR )
+	{
+		// now handled inside updatescreen
+		
+		//commonVr->HMDTrackStatic();
+		//vr::VRCompositor()->PostPresentHandoff();
+	}
 }
 
 /*
@@ -936,88 +935,92 @@ void idCommonLocal::RenderBink( const char* path )
 	int	mouseEvents[MAX_MOUSE_EVENTS][2];
 	
 	bool escapeEvent = false;
-	while( ( Sys_Milliseconds() <= ( material->GetCinematicStartTime() + cinematicLength ) ) && material->CinematicIsPlaying() )
+	while ( (Sys_Milliseconds() <= (material->GetCinematicStartTime() + cinematicLength)) && material->CinematicIsPlaying() )
 	{
 		renderSystem->DrawStretchPic( chop, 0, imageWidth, renderSystem->GetVirtualHeight(), 0, 0, 1, 1, material );
 		const emptyCommand_t* cmd = renderSystem->SwapCommandBuffers( &time_frontend, &time_backend, &time_shadows, &time_gpu );
 		renderSystem->RenderCommandBuffers( cmd );
-		
+
 		Sys_GenerateEvents();
-		
+
 		// queue system events ready for polling
 		Sys_GetEvent();
-		
+
 		// RB: allow to escape video by pressing anything
 		int numKeyEvents = Sys_PollKeyboardInputEvents();
-		if( numKeyEvents > 0 )
+		if ( numKeyEvents > 0 )
 		{
-			for( int i = 0; i < numKeyEvents; i++ )
+			for ( int i = 0; i < numKeyEvents; i++ )
 			{
 				int key;
 				bool state;
-				
-				if( Sys_ReturnKeyboardInputEvent( i, key, state ) )
+
+				if ( Sys_ReturnKeyboardInputEvent( i, key, state ) )
 				{
-					if( key == K_ESCAPE && state == true )
+					if ( key == K_ESCAPE && state == true )
 					{
 						escapeEvent = true;
 					}
 					break;
 				}
 			}
-			
+
 			Sys_EndKeyboardInputEvents();
 		}
-		
+
 		int numMouseEvents = Sys_PollMouseInputEvents( mouseEvents );
-		if( numMouseEvents > 0 )
+		if ( numMouseEvents > 0 )
 		{
-			for( int i = 0; i < numMouseEvents; i++ )
+			for ( int i = 0; i < numMouseEvents; i++ )
 			{
 				int action = mouseEvents[i][0];
-				switch( action )
+				switch ( action )
 				{
-					case M_ACTION1:
-					case M_ACTION2:
-					case M_ACTION3:
-					case M_ACTION4:
-					case M_ACTION5:
-					case M_ACTION6:
-					case M_ACTION7:
-					case M_ACTION8:
-						escapeEvent = true;
-						break;
-						
-					default:	// some other undefined button
-						break;
+				case M_ACTION1:
+				case M_ACTION2:
+				case M_ACTION3:
+				case M_ACTION4:
+				case M_ACTION5:
+				case M_ACTION6:
+				case M_ACTION7:
+				case M_ACTION8:
+					escapeEvent = true;
+					break;
+
+				default:	// some other undefined button
+					break;
 				}
 			}
 		}
-		
-		int numJoystickEvents = Sys_PollJoystickInputEvents( 0 );
-		if( numJoystickEvents > 0 )
+
+
+		for ( int eachJ = 0; eachJ < MAX_INPUT_DEVICES; eachJ ++ )
 		{
-			for( int i = 0; i < numJoystickEvents; i++ )
+			
+			int numJoystickEvents = Sys_PollJoystickInputEvents( eachJ );
+			if ( numJoystickEvents > 0 )
 			{
-				int action;
-				int value;
-				
-				if( Sys_ReturnJoystickInputEvent( i, action, value ) )
+				for ( int i = 0; i < numJoystickEvents; i++ )
 				{
-					if( action >= J_ACTION1 && action <= J_ACTION_MAX )
+					int action;
+					int value;
+
+					if ( Sys_ReturnJoystickInputEvent( i, action, value ) )
 					{
-						if( value != 0 )
+						if ( action >= J_ACTION1 && action <= J_ACTION_MAX )
 						{
-							escapeEvent = true;
-							break;
+							if ( value != 0 )
+							{
+								escapeEvent = true;
+								break;
+							}
 						}
 					}
 				}
+
+				Sys_EndJoystickInputEvents();
 			}
-			
-			Sys_EndJoystickInputEvents();
 		}
-		
 		if( escapeEvent )
 		{
 			break;
@@ -1287,21 +1290,24 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec " CONFIG_FILE "\n" );
 		}
 #endif
-		// Koz begin
-		if ( commonVr->hasOculusRift )
-		{
-			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec oculus_default.cfg\n" );
-				
-			if ( !SafeMode() && !g_demoMode.GetBool() )
-			{
-				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec oculus_config.cfg\n" );
-			}
-
-		}
-		// Koz end
+		
 		
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec autoexec.cfg\n" );
 		
+		// Koz begin
+		if ( commonVr->hasOculusRift )
+		{
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_default.cfg\n" );
+		}
+
+		if ( !SafeMode() && !g_demoMode.GetBool() )
+		{
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr.cfg\n" );
+		}
+
+		// Koz end
+
+
 		// run cfg execution
 		cmdSystem->ExecuteCommandBuffer();
 		
@@ -1335,20 +1341,19 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		}
 		
 		// init the Razer Hydra
-		commonVr->HydraInit();
+		// koz fixme disabled fornow commonVr->HydraInit();
 					
 		// Koz end
-		
-		// koz
-		// restart the filesystem
-		// to reflect changes is vr state
-		// filesystem->restart() will update the 
-		// fs_game path to reflect VR or VRIK directories
-		// ( this sucks )
+			
 		
 		if ( game->isVR )
 		{
-			fileSystem->Restart();
+			
+			if ( vr_controllerStandard.GetInteger() == 1 )
+			{
+				common->Printf( "vr_controllerStandard has disabled motion controls\n" );
+				commonVr->VR_USE_MOTION_CONTROLS = false;
+			}
 		}
 
 		whiteMaterial = declManager->FindMaterial( "_white" );
@@ -1369,8 +1374,11 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 			splashScreen = declManager->FindMaterial( "guis/assets/splash/legal_english" );
 		}
 		
-		const int legalMinTime = 1000; //Carl: Don't force them to wait more than a second
+		const int legalMinTime = 5000; //Carl: Don't force them to wait more than a second
 		const bool showVideo = ( !com_skipIntroVideos.GetBool() && fileSystem->UsingResourceFiles() );
+		
+		if ( game->isVR ) commonVr->HMDResetTrackingOriginOffset();
+		
 		if( showVideo )
 		{
 			RenderBink( "video\\loadvideo.bik" );
@@ -1475,6 +1483,73 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 			Sys_Sleep( 10 );
 		};
 		
+		commonVr->HMDResetTrackingOriginOffset();
+
+		splashScreen = declManager->FindMaterial( "guis/lookforward");
+
+		bool centered = false;
+
+		if ( game->isVR )
+		{
+			while ( !centered )
+			{
+				RenderSplash();
+				Sys_GenerateEvents();
+
+				// queue system events ready for polling
+				Sys_GetEvent();
+
+				// RB: allow to escape video by pressing anything
+				int numKeyEvents = Sys_PollKeyboardInputEvents();
+
+				if ( numKeyEvents > 0 ) centered = true;
+
+				for ( int eachJ = 0; eachJ < MAX_INPUT_DEVICES; eachJ++ )
+				{
+
+					int numJoystickEvents = Sys_PollJoystickInputEvents( eachJ );
+					if ( numJoystickEvents > 0 )
+					{
+						int action;
+						int value;
+						if ( Sys_ReturnJoystickInputEvent( eachJ, action, value ) )
+						{
+							if ( action >= J_ACTION1 && action <= J_ACTION_MAX || action < J_ACTION_MAX && action < MAX_JOY_EVENT )
+							{
+								centered = true;
+							}
+							else if ( action > J_AXIS_MIN && action < J_AXIS_MAX )
+							{
+								if ( abs( value ) > 16384 ) centered = true;
+							}
+						}
+					}
+				}
+			}
+		}
+								/*
+								int joyButton = K_JOY1 + (action - J_ACTION1);
+								Key( joyButton, (value != 0) );
+							}
+							else if ( (action >= J_AXIS_MIN) && (action <= J_AXIS_MAX) )
+							{
+								joystickAxis[action - J_AXIS_MIN] = static_cast<float>(value) / 32767.0f;
+							}
+							else if ( action >= J_DPAD_UP && action <= J_DPAD_RIGHT )
+							{
+								int joyButton = K_JOY_DPAD_UP + (action - J_DPAD_UP);
+								Key( joyButton, (value != 0) );
+							}
+							else
+							{
+								assert( !"Unknown joystick event" );
+							}
+							*/
+							
+		if ( game->isVR ) commonVr->HMDResetTrackingOriginOffset();
+
+
+
 		// print all warnings queued during initialization
 		PrintWarnings();
 		
@@ -1846,9 +1921,30 @@ idCommonLocal::ProcessEvent
 bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
 {
 	// hitting escape anywhere brings up the menu
-	if( game && game->IsInGame() )
+	
+	// hack this the hell up
+	// not enough buttons on the steamvr controller and still want to be able to bail out of cinematics, so the PDA button will nuke a cinematic
+	if ( game->isVR )
 	{
-		if( event->evType == SE_KEY && event->evValue2 == 1 && ( event->evValue == K_ESCAPE || event->evValue == K_JOY9 ) )
+		static bool send1 = false;
+		if ( game->CheckInCinematic() == true && !send1 )
+		{
+			if ( ButtonState( UB_IMPULSE19 ) )
+			{
+				void Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
+				Sys_QueEvent( SE_KEY, K_ESCAPE, 1, 0, NULL, 0 );
+				send1 = true;
+			}
+		}
+		else
+		{
+			send1 = false;
+		}
+	}
+	
+	if ( game && game->IsInGame() )
+	{
+		if ( event->evType == SE_KEY && event->evValue2 == 1 && (event->evValue == K_ESCAPE || event->evValue == K_JOY9  ) )
 		{
 			if( game->CheckInCinematic() == true )
 			{

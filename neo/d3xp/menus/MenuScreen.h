@@ -1651,6 +1651,7 @@ public:
 	virtual void			ShowScreen( const mainMenuTransition_t transitionType );
 	virtual void			HideScreen( const mainMenuTransition_t transitionType );
 	
+	float					GetHudAlpha(); // koz
 	void					UpdateHealthArmor( idPlayer* player );
 	void					UpdateStamina( idPlayer* player );
 	void					UpdateLocation( idPlayer* player );

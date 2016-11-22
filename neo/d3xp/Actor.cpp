@@ -251,6 +251,9 @@ bool idAnimState::AnimDone( int blendFrames ) const
 	int animDoneTime;
 	
 	animDoneTime = animator->CurrentAnim( channel )->GetEndTime();
+	
+	//koz deleteme was debugging	if ( channel == ANIMCHANNEL_LEFTHAND || channel == ANIMCHANNEL_RIGHTHAND ) common->Printf( "Anim endtime = %d\n", animDoneTime );
+	
 	if( animDoneTime < 0 )
 	{
 		// playing a cycle
@@ -819,6 +822,7 @@ void idActor::SetupHead()
 	}
 }
 
+
 /*
 ================
 idActor::CopyJointsFromBodyToHead
@@ -948,6 +952,12 @@ void idActor::Save( idSaveGame* savefile ) const
 	headAnim.Save( savefile );
 	torsoAnim.Save( savefile );
 	legsAnim.Save( savefile );
+
+	//koz begin
+	leftHandAnim.Save( savefile );
+	rightHandAnim.Save( savefile );
+	//koz end
+
 	
 	savefile->WriteBool( allowPain );
 	savefile->WriteBool( allowEyeFocus );
@@ -1087,6 +1097,11 @@ void idActor::Restore( idRestoreGame* savefile )
 	torsoAnim.Restore( savefile );
 	legsAnim.Restore( savefile );
 	
+	//koz begin
+	leftHandAnim.Restore( savefile );
+	rightHandAnim.Restore( savefile );
+	//koz end
+
 	savefile->ReadBool( allowPain );
 	savefile->ReadBool( allowEyeFocus );
 	
@@ -1318,6 +1333,12 @@ void idActor::SetupBody()
 	
 	torsoAnim.Init( this, &animator, ANIMCHANNEL_TORSO );
 	legsAnim.Init( this, &animator, ANIMCHANNEL_LEGS );
+
+	//koz
+	leftHandAnim.Init( this, &animator, ANIMCHANNEL_LEFTHAND );
+	rightHandAnim.Init( this, &animator, ANIMCHANNEL_RIGHTHAND );
+	//koz end
+
 }
 
 /*
@@ -1401,6 +1422,12 @@ void idActor::ShutdownThreads()
 	headAnim.Shutdown();
 	torsoAnim.Shutdown();
 	legsAnim.Shutdown();
+
+	//koz
+	leftHandAnim.Shutdown();
+	rightHandAnim.Shutdown();
+	//koz end
+
 	
 	if( scriptThread )
 	{
@@ -2209,7 +2236,17 @@ void idActor::SetAnimState( int channel, const char* statename, int blendFrames 
 			allowPain = true;
 			allowEyeFocus = true;
 			break;
-			
+		
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			leftHandAnim.SetState( statename, blendFrames );
+			break;
+
+		case ANIMCHANNEL_RIGHTHAND :
+			rightHandAnim.SetState( statename, blendFrames );
+			break;
+		//koz end
+
 		default:
 			gameLocal.Error( "idActor::SetAnimState: Unknown anim group" );
 			break;
@@ -2236,7 +2273,17 @@ const char* idActor::GetAnimState( int channel ) const
 		case ANIMCHANNEL_LEGS :
 			return legsAnim.state;
 			break;
-			
+
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			return leftHandAnim.state;
+			break;
+
+		case ANIMCHANNEL_RIGHTHAND :
+			return rightHandAnim.state;
+			break;
+		//koz end
+
 		default:
 			gameLocal.Error( "idActor::GetAnimState: Unknown anim group" );
 			return NULL;
@@ -2273,6 +2320,22 @@ bool idActor::InAnimState( int channel, const char* statename ) const
 				return true;
 			}
 			break;
+
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			if ( leftHandAnim.state == statename )
+			{
+				return true;
+			}
+			break;
+
+		case ANIMCHANNEL_RIGHTHAND :
+			if ( rightHandAnim.state == statename )
+			{
+				return true;
+			}
+			break;
+		//koz end
 			
 		default:
 			gameLocal.Error( "idActor::InAnimState: Unknown anim group" );
@@ -2319,6 +2382,13 @@ void idActor::UpdateAnimState()
 	headAnim.UpdateState();
 	torsoAnim.UpdateState();
 	legsAnim.UpdateState();
+
+	//koz begin
+	leftHandAnim.UpdateState();
+	rightHandAnim.UpdateState();
+	//koz end
+
+
 }
 
 /*
@@ -3104,9 +3174,20 @@ void idActor::Event_StopAnim( int channel, int frames )
 		case ANIMCHANNEL_LEGS :
 			legsAnim.StopAnim( frames );
 			break;
+
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			leftHandAnim.StopAnim( frames );
+			break;
+
+		case ANIMCHANNEL_RIGHTHAND :
+			rightHandAnim.StopAnim( frames );
+			break; 
+		//koz end
+
 			
 		default:
-			gameLocal.Error( "Unknown anim group" );
+			gameLocal.Error( "Event_StopAnim Unknown anim group" );
 			break;
 	}
 }
@@ -3122,6 +3203,8 @@ void idActor::Event_PlayAnim( int channel, const char* animname )
 	idEntity* headEnt;
 	int	anim;
 	
+	// koz debug if ( channel == ANIMCHANNEL_LEFTHAND || channel == ANIMCHANNEL_RIGHTHAND ) common->Printf( "Player Playing anim %s %d\n", animname, gameLocal.time );
+
 	anim = GetAnim( channel, animname );
 	if( !anim )
 	{
@@ -3199,9 +3282,50 @@ void idActor::Event_PlayAnim( int channel, const char* animname )
 				}
 			}
 			break;
-			
+		//koz fix anims add hand channels to leg and torso cases?
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			leftHandAnim.idleAnim = false;
+			leftHandAnim.PlayAnim( anim );
+		/*	flags = leftHandAnim.GetAnimFlags();
+			if ( !flags.prevent_idle_override )
+			{
+				if ( torsoAnim.IsIdle() )
+				{
+					torsoAnim.animBlendFrames = leftHandAnim.lastAnimBlendFrames;
+					SyncAnimChannels( ANIMCHANNEL_TORSO, ANIMCHANNEL_LEFTHAND, leftHandAnim.lastAnimBlendFrames );
+					if ( legsAnim.IsIdle() )
+					{
+						legsAnim.animBlendFrames = leftHandAnim.lastAnimBlendFrames;
+						SyncAnimChannels( ANIMCHANNEL_LEGS, ANIMCHANNEL_LEFTHAND, leftHandAnim.lastAnimBlendFrames );
+					}
+				}
+			}*/
+			break;
+
+		case ANIMCHANNEL_RIGHTHAND:
+			rightHandAnim.idleAnim = false;
+			rightHandAnim.PlayAnim( anim );
+			/*flags = rightHandAnim.GetAnimFlags();
+			if ( !flags.prevent_idle_override )
+			{
+				if ( torsoAnim.IsIdle() )
+				{
+					torsoAnim.animBlendFrames = rightHandAnim.lastAnimBlendFrames;
+					SyncAnimChannels( ANIMCHANNEL_TORSO, ANIMCHANNEL_RIGHTHAND, rightHandAnim.lastAnimBlendFrames );
+					if ( legsAnim.IsIdle() )
+					{
+						legsAnim.animBlendFrames = rightHandAnim.lastAnimBlendFrames;
+						SyncAnimChannels( ANIMCHANNEL_LEGS, ANIMCHANNEL_RIGHTHAND, rightHandAnim.lastAnimBlendFrames );
+					}
+				}
+			}*/
+			break;
+		// koz end
+
+
 		default :
-			gameLocal.Error( "Unknown anim group" );
+			gameLocal.Error( "Event_PlayAnim Unknown anim group" );
 			break;
 	}
 	idThread::ReturnInt( 1 );
@@ -3217,6 +3341,8 @@ void idActor::Event_PlayCycle( int channel, const char* animname )
 	animFlags_t	flags;
 	int			anim;
 	
+	//koz delete me debugging if ( channel == ANIMCHANNEL_LEFTHAND || channel == ANIMCHANNEL_RIGHTHAND ) common->Printf( "Player PlayCycle %s %d\n", animname, gameLocal.time );
+
 	anim = GetAnim( channel, animname );
 	if( !anim )
 	{
@@ -3287,9 +3413,51 @@ void idActor::Event_PlayCycle( int channel, const char* animname )
 				}
 			}
 			break;
+
+		//koz fix anim ad handanims to head/leg/torso cases?
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			leftHandAnim.idleAnim = false;
+			leftHandAnim.CycleAnim( anim );
+		/*	flags = leftHandAnim.GetAnimFlags();
+			if ( !flags.prevent_idle_override )
+			{
+				if ( torsoAnim.IsIdle() )
+				{
+					torsoAnim.animBlendFrames = leftHandAnim.lastAnimBlendFrames;
+					SyncAnimChannels( ANIMCHANNEL_TORSO, ANIMCHANNEL_LEFTHAND, leftHandAnim.lastAnimBlendFrames );
+					if ( headAnim.IsIdle() )
+					{
+						headAnim.animBlendFrames = leftHandAnim.lastAnimBlendFrames;
+						SyncAnimChannels( ANIMCHANNEL_HEAD, ANIMCHANNEL_LEFTHAND, leftHandAnim.lastAnimBlendFrames );
+					}
+				}
+			}*/
+			break;
+	
+		case ANIMCHANNEL_RIGHTHAND:
+			rightHandAnim.idleAnim = false;
+			rightHandAnim.CycleAnim( anim );
+			/*flags = rightHandAnim.GetAnimFlags();
+			if ( !flags.prevent_idle_override )
+			{
+				if ( torsoAnim.IsIdle() )
+				{
+					torsoAnim.animBlendFrames = rightHandAnim.lastAnimBlendFrames;
+					SyncAnimChannels( ANIMCHANNEL_TORSO, ANIMCHANNEL_RIGHTHAND, rightHandAnim.lastAnimBlendFrames );
+					if ( headAnim.IsIdle() )
+					{
+						headAnim.animBlendFrames = rightHandAnim.lastAnimBlendFrames;
+						SyncAnimChannels( ANIMCHANNEL_HEAD, ANIMCHANNEL_RIGHTHAND, rightHandAnim.lastAnimBlendFrames );
+					}
+				}
+			}*/
+			break;
+		// koz end
+
 			
 		default:
-			gameLocal.Error( "Unknown anim group" );
+			gameLocal.Error( "Even_PlayCycle Unknown anim group" );
 	}
 	
 	idThread::ReturnInt( true );
@@ -3329,9 +3497,21 @@ void idActor::Event_IdleAnim( int channel, const char* animname )
 			case ANIMCHANNEL_LEGS :
 				legsAnim.BecomeIdle();
 				break;
+
+			//koz begin
+			case ANIMCHANNEL_LEFTHAND :
+				leftHandAnim.BecomeIdle();
+				break;
+
+			case ANIMCHANNEL_RIGHTHAND :
+				rightHandAnim.BecomeIdle();
+				break;
+			//koz end
+
+			
 				
 			default:
-				gameLocal.Error( "Unknown anim group" );
+				gameLocal.Error( "Event_IdleAnim Unknown anim group" );
 		}
 		
 		idThread::ReturnInt( false );
@@ -3420,9 +3600,21 @@ void idActor::Event_IdleAnim( int channel, const char* animname )
 				SyncAnimChannels( ANIMCHANNEL_LEGS, ANIMCHANNEL_TORSO, legsAnim.animBlendFrames );
 			}
 			break;
+
+		//koz fix anims
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			leftHandAnim.BecomeIdle();
+			break;
+
+		case ANIMCHANNEL_RIGHTHAND :
+			rightHandAnim.BecomeIdle();
+			break;
+		//koz end
+
 			
 		default:
-			gameLocal.Error( "Unknown anim group" );
+			gameLocal.Error( "Event_IdleAnim Unknown anim group" );
 	}
 	
 	idThread::ReturnInt( true );
@@ -3482,9 +3674,21 @@ void idActor::Event_SetSyncedAnimWeight( int channel, int anim, float weight )
 				}
 			}
 			break;
+
+		//koz fix anims
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			animator.CurrentAnim( ANIMCHANNEL_LEFTHAND )->SetSyncedAnimWeight( anim, weight );
+			break;
+
+		case ANIMCHANNEL_RIGHTHAND :
+			animator.CurrentAnim( ANIMCHANNEL_RIGHTHAND )->SetSyncedAnimWeight( anim, weight );
+			break;
+		//koz end
+
 			
 		default:
-			gameLocal.Error( "Unknown anim group" );
+			gameLocal.Error( "Event_SetSyncedAnimWeight Unknown anim group" );
 	}
 }
 
@@ -3523,8 +3727,19 @@ void idActor::Event_OverrideAnim( int channel )
 			SyncAnimChannels( ANIMCHANNEL_LEGS, ANIMCHANNEL_TORSO, torsoAnim.lastAnimBlendFrames );
 			break;
 			
+		//koz fix anim
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			leftHandAnim.Disable();
+			break;
+
+		case ANIMCHANNEL_RIGHTHAND :
+			rightHandAnim.Disable();
+			break;
+		//koz end
+
 		default:
-			gameLocal.Error( "Unknown anim group" );
+			gameLocal.Error( "Event_OverrideAnim Unknown anim group" );
 			break;
 	}
 }
@@ -3549,9 +3764,20 @@ void idActor::Event_EnableAnim( int channel, int blendFrames )
 		case ANIMCHANNEL_LEGS :
 			legsAnim.Enable( blendFrames );
 			break;
+
+		//koz fix anim
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			leftHandAnim.Enable( blendFrames );
+			break;
+
+		case ANIMCHANNEL_RIGHTHAND :
+			rightHandAnim.Enable( blendFrames );
+			break;
+		//koz end
 			
 		default:
-			gameLocal.Error( "Unknown anim group" );
+			gameLocal.Error( "Event_EnableAnim Unknown anim group" );
 			break;
 	}
 }
@@ -3579,9 +3805,22 @@ void idActor::Event_SetBlendFrames( int channel, int blendFrames )
 			legsAnim.animBlendFrames = blendFrames;
 			legsAnim.lastAnimBlendFrames = blendFrames;
 			break;
-			
+
+		//koz fix anims
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			leftHandAnim.animBlendFrames = blendFrames;
+			leftHandAnim.lastAnimBlendFrames = blendFrames;
+			break;
+
+		case ANIMCHANNEL_RIGHTHAND :
+			rightHandAnim.animBlendFrames = blendFrames;
+			rightHandAnim.lastAnimBlendFrames = blendFrames;
+			break;
+		//koz end
+					
 		default:
-			gameLocal.Error( "Unknown anim group" );
+			gameLocal.Error( "Event_SetBlendFrames Unknown anim group" );
 			break;
 	}
 }
@@ -3606,9 +3845,20 @@ void idActor::Event_GetBlendFrames( int channel )
 		case ANIMCHANNEL_LEGS :
 			idThread::ReturnInt( legsAnim.animBlendFrames );
 			break;
-			
+
+		//koz fix anims
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			idThread::ReturnInt( leftHandAnim.animBlendFrames );
+			break;
+
+		case ANIMCHANNEL_RIGHTHAND :
+			idThread::ReturnInt( rightHandAnim.animBlendFrames );
+			break;
+		//koz end
+						
 		default:
-			gameLocal.Error( "Unknown anim group" );
+			gameLocal.Error( "Event_GetBlendFrames Unknown anim group" );
 			break;
 	}
 }
@@ -3687,9 +3937,22 @@ void idActor::Event_AnimDone( int channel, int blendFrames )
 			result = legsAnim.AnimDone( blendFrames );
 			idThread::ReturnInt( result );
 			break;
+		
+		//koz fix anims
+		//koz begin
+		case ANIMCHANNEL_LEFTHAND :
+			result = leftHandAnim.AnimDone( blendFrames );
+			idThread::ReturnInt( result );
+			break;
+
+		case ANIMCHANNEL_RIGHTHAND :
+			result = rightHandAnim.AnimDone( blendFrames );
+			idThread::ReturnInt( result );
+			break;
+		//koz end
 			
 		default:
-			gameLocal.Error( "Unknown anim group" );
+			gameLocal.Error( "Event_AnimDone Unknown anim group" );
 	}
 }
 

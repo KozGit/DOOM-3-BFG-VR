@@ -786,8 +786,7 @@ void idRenderSystemLocal::SwapCommandBuffers_FinishRendering(
 	// check for errors
 	GL_CheckErrors();
 	
-	// koz fixme commonVr->FrameEnd();
-
+	
 }
 
 /*

@@ -56,7 +56,8 @@ public:
 	
 	bool					SolveTwoBones( const idVec3& startPos, const idVec3& endPos, const idVec3& dir, float len0, float len1, idVec3& jointPos );
 	bool					SolveTwoArmBones( idVec3& startPos, idVec3& endPos, const idVec3& dir, float len0, float len1, idVec3& jointPos );
-	float					GetBoneAxis( const idVec3& startPos, const idVec3& endPos, const idVec3& dir, idMat3& axis );
+	float					GetBoneAxis( const idVec3& startPos, const idVec3& endPos, const idVec3& dir, idMat3& axis, bool debug = false );
+	float					GetBoneAxis2( const idVec3& startPos, const idVec3& endPos, const idVec3& dir, idMat3& axis );
 	
 protected:
 	bool					initialized;
@@ -168,6 +169,7 @@ public:
 	jointHandle_t			elbowJoints[MAX_ARMS];
 	jointHandle_t			shoulderJoints[MAX_ARMS];
 	jointHandle_t			wristJoints[MAX_ARMS];
+	idMat3					elbowAxisMotion[2];
 	// koz end
 
 private:

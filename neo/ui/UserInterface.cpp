@@ -34,6 +34,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "Window.h"
 #include "UserInterfaceLocal.h"
 
+#include "d3xp\Game_local.h"
+#include "d3xp\Player.h"
+
 extern idCVar r_skipGuiShaders;		// 1 = don't render any gui elements on surfaces
 
 idUserInterfaceManagerLocal	uiManagerLocal;
@@ -530,7 +533,11 @@ void idUserInterfaceLocal::DrawCursor()
 	}
 	else
 	{
-		dc->DrawCursor( &cursorX, &cursorY, 56.0f );
+		// koz dont draw cursor if using motion controls in touchscreen mode
+		if ( !game->isVR || vr_controllerStandard.GetInteger() == 1 || !commonVr->VR_USE_MOTION_CONTROLS || vr_guiMode.GetInteger() != 2 )//!gameLocal.GetLocalPlayer()->GuiActive()
+		{
+			dc->DrawCursor( &cursorX, &cursorY, 56.0f );
+		}
 	}
 }
 

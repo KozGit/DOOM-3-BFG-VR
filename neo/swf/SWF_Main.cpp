@@ -791,6 +791,37 @@ idSWFScriptVar idSWF::idSWFScriptFunction_shortcutKeys_clear::Call( idSWFScriptO
 	object->Set( "L_HYDRATRIG", "ENTER" );	// Left hydra trigger
 	// Koz end hydras
 
+	// Koz add SteamVR controller aliases
+	object->Set( "JOY33", "ENTER" );		// Left openvr trig
+	object->Set( "JOY32", "BACKSPACE" );	// Left openvr grip
+	object->Set( "STEAMVR_LEFT_PAD_UP", "STICK1_UP" );
+	object->Set( "STEAMVR_LEFT_PAD_DOWN", "STICK1_DOWN" );
+	object->Set( "STEAMVR_LEFT_PAD_LEFT", "STICK1_LEFT" );
+	object->Set( "STEAMVR_LEFT_PAD_RIGHT", "STICK1_RIGHT" );
+
+	object->Set( "JOY37", "ENTER" );		// right openvr trig
+	object->Set( "JOY36", "BACKSPACE" );	// right openvr grip
+	object->Set( "STEAMVR_RIGHT_PAD_UP", "STICK2_UP" );
+	object->Set( "STEAMVR_RIGHT_PAD_DOWN", "STICK2_DOWN" );
+	object->Set( "STEAMVR_RIGHT_PAD_LEFT", "STICK2_LEFT" );
+	object->Set( "STEAMVR_RIGHT_PAD_RIGHT", "STICK2_RIGHT" );
+
+	//object->Set( "JOY17", "ENTER" );		// Left hydra button 1
+	//object->Set( "JOY18", "BACKSPACE" );	// Left hydra button 2
+	//object->Set( "JOY19", "LB" );			// Left hydra  button 3 = left bumper PDA nav
+	//object->Set( "JOY20", "RB" );			// Left hydra  button 4 = right bumper PDA nav
+	//object->Set( "JOY22", "LB" );			// Left hydra bumper
+	object->Set( "L_STEAMVRTRIG", "ENTER" );	// Left steamVR trigger
+
+	//object->Set( "JOY24", "ENTER" );		// Right hydra button 1
+	//object->Set( "JOY25", "BACKSPACE" );	// Right hydra button 2
+	//object->Set( "JOY26", "LB" );			// Right hydra  button 3 = left bumper PDA nav
+	//object->Set( "JOY27", "RB" );			// Right hydra  button 4 = right bumper PDA nav
+	//object->Set( "JOY29", "RB" );			// Right hydra bumper
+	object->Set( "R_STEAMVRTRIG", "ENTER" );	// right SteamVR trigger
+	// Koz end steamvr
+	object->Set( "K_R_STEAMVRTRIG", "ENTER" );
+	object->Set( "K_L_STEAMVRTRIG", "ENTER" );
 	object->Set( "KP_ENTER", "ENTER" );
 	object->Set( "MWHEELDOWN", "MWHEEL_DOWN" );
 	object->Set( "MWHEELUP", "MWHEEL_UP" );

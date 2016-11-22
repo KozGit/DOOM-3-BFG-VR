@@ -250,6 +250,15 @@ keyname_t keynames[] =
 	NAMEKEY( JOY28, "R_HYDRASTART" ),
 	NAMEKEY( JOY29, "R_HYDRABUMP" ),
 	NAMEKEY( JOY30, "R_HYDRASTICK" ),
+	// OpenVR controllers
+	NAMEKEY( JOY31, "L_STEAMVR_APP" ),
+	NAMEKEY( JOY32, "L_STEAMVR_GRIP" ),
+	NAMEKEY( JOY33, "L_STEAMVR_TRIG" ),
+	NAMEKEY( JOY34, "L_STEAMVR_PAD" ),
+	NAMEKEY( JOY35, "R_STEAMVR_APP" ),
+	NAMEKEY( JOY36, "R_STEAMVR_GRIP" ),
+	NAMEKEY( JOY37, "R_STEAMVR_TRIG" ),
+	NAMEKEY( JOY38, "R_STEAMVR_PAD" ),
 
 	NAMEKEY( HYDRA_LEFT_STICK_UP, "L_HYDRA_U" ),
 	NAMEKEY( HYDRA_LEFT_STICK_DOWN, "L_HYDRA_D" ),
@@ -263,8 +272,23 @@ keyname_t keynames[] =
 
 	NAMEKEY( L_HYDRATRIG, "L_HYDRA_TR" ),
 	NAMEKEY( R_HYDRATRIG, "R_HYDRA_TR" ),
-	// koz end hydra defs
 	
+	// koz SteamVr defs
+	NAMEKEY( STEAMVR_LEFT_PAD_UP, "L_STEAMVR_U" ),
+	NAMEKEY( STEAMVR_LEFT_PAD_DOWN, "L_STEAMVR_D" ),
+	NAMEKEY( STEAMVR_LEFT_PAD_LEFT, "L_STEAMVR_L" ),
+	NAMEKEY( STEAMVR_LEFT_PAD_RIGHT, "L_STEAMVR_R" ),
+
+	NAMEKEY( STEAMVR_RIGHT_PAD_UP, "R_STEAMVR_U" ),
+	NAMEKEY( STEAMVR_RIGHT_PAD_DOWN, "R_STEAMVR_D" ),
+	NAMEKEY( STEAMVR_RIGHT_PAD_LEFT, "R_STEAMVR_L" ),
+	NAMEKEY( STEAMVR_RIGHT_PAD_RIGHT, "R_STEAMVR_R" ),
+
+	NAMEKEY( L_STEAMVRTRIG, "L_STEAMVR_TR" ),
+	NAMEKEY( R_STEAMVRTRIG, "R_STEAMVR_TR" ),
+	// Koz end
+
+
 	NAMEKEY2( JOY_DPAD_UP ),
 	NAMEKEY2( JOY_DPAD_DOWN ),
 	NAMEKEY2( JOY_DPAD_LEFT ),
@@ -497,7 +521,10 @@ void idKeyInput::SetBinding( int keynum, const char* binding )
 	{
 		return;
 	}
-	
+	idStr temp = binding;
+	//koz debug
+	//common->Printf( "Setting Binding %i %s\n", keynum, temp.c_str()  );
+
 	// Clear out all button states so we aren't stuck forever thinking this key is held down
 	usercmdGen->Clear();
 	

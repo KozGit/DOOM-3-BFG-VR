@@ -51,10 +51,13 @@ idCVar joy_deltaPerMSLook( "joy_deltaPerMSLook", "0.003", CVAR_FLOAT | CVAR_ARCH
 idCVar in_mouseSpeed( "in_mouseSpeed", "1",	CVAR_ARCHIVE | CVAR_FLOAT, "speed at which the mouse moves", 0.25f, 4.0f );
 idCVar in_alwaysRun( "in_alwaysRun", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "always run (reverse _speed button) - only in MP" );
 
-idCVar in_useJoystick( "in_useJoystick", "0", CVAR_ARCHIVE | CVAR_BOOL, "enables/disables the gamepad for PC use" );
+idCVar in_useJoystick( "in_useJoystick", "1", CVAR_ARCHIVE | CVAR_BOOL, "enables/disables the gamepad for PC use" );
 idCVar in_joystickRumble( "in_joystickRumble", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "enable joystick rumble" );
 idCVar in_invertLook( "in_invertLook", "0", CVAR_ARCHIVE | CVAR_BOOL, "inverts the look controls so the forward looks up (flight controls) - the proper way to play games!" );
 idCVar in_mouseInvertLook( "in_mouseInvertLook", "0", CVAR_ARCHIVE | CVAR_BOOL, "inverts the look controls so the forward looks up (flight controls) - the proper way to play games!" );
+
+idCVar vr_comfortRepeat( "vr_comfortRepeat", "100", CVAR_ARCHIVE | CVAR_INTEGER, "Delay in MS between repeating comfort snap turns." );
+
 
 /*
 ================
@@ -507,6 +510,7 @@ Sets the usercmd_t based on key states
 */
 void idUsercmdGenLocal::KeyMove()
 {
+	
 	int forward = 0;
 	int side = 0;
 	
@@ -692,6 +696,7 @@ void idUsercmdGenLocal::HandleJoystickAxis( int keyNum, float unclampedValue, fl
 	}
 	
 	int action = idKeyInput::GetUsercmdAction( keyNum );
+	
 	if( action >= UB_ATTACK )
 	{
 		Key( keyNum, pressed );
@@ -1085,7 +1090,13 @@ float idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int ax
 														K_HYDRA_RIGHT_STICK_LEFT,	K_HYDRA_RIGHT_STICK_RIGHT,
 														K_HYDRA_RIGHT_STICK_UP,		K_HYDRA_RIGHT_STICK_DOWN,
 														K_L_HYDRATRIG,				K_L_HYDRATRIG,
-														K_R_HYDRATRIG,				K_R_HYDRATRIG
+														K_R_HYDRATRIG,				K_R_HYDRATRIG,
+														K_STEAMVR_LEFT_PAD_LEFT,	K_STEAMVR_LEFT_PAD_RIGHT,
+														K_STEAMVR_LEFT_PAD_UP,		K_STEAMVR_LEFT_PAD_DOWN,
+														K_STEAMVR_RIGHT_PAD_LEFT,	K_STEAMVR_RIGHT_PAD_RIGHT,
+														K_STEAMVR_RIGHT_PAD_UP,		K_STEAMVR_RIGHT_PAD_DOWN,
+														K_L_STEAMVRTRIG,			K_L_STEAMVRTRIG,
+														K_R_STEAMVRTRIG,			K_R_STEAMVRTRIG
 	};
 
 	float jaxisValue = 0.0f;
@@ -1094,8 +1105,25 @@ float idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int ax
 
 	static int lastLeft =0 ;
 	static int lastRight = 0;
+
+	static int joyActiveState[int( MAX_JOYSTICK_AXIS )][2];
 	
 	jaxisValue = joystickAxis[axisNum];
+		
+	if ( fabs( jaxisValue ) <= 0.001 )
+	{
+		// if the value is this small, treat it as no input, clear the button states for both axes, and return a 0.0 value. 	
+		if ( joyActiveState[axisNum][0] == 1 || joyActiveState[axisNum][1] == 1 )
+		{
+			joyDir = axisName[axisNum][0];
+			Key( joyDir, 0 );
+			joyDir = axisName[axisNum][1];
+			Key( joyDir, 0 );
+			joyActiveState[axisNum][0] = 0;
+			joyActiveState[axisNum][1] = 0;
+		}
+		return 0.0f;
+	}
 
 	if ( jaxisValue < 0 )
 	{
@@ -1146,17 +1174,40 @@ float idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int ax
 
 		case UB_IMPULSE34: // comfort turn right
 			jaxisValue = jaxisValue > 0.0 ? jaxisValue : -jaxisValue;
-			if ( jaxisValue > .25 ) {
+			if ( jaxisValue > vr_padToButtonThreshold.GetFloat() ) {
 				return -vr_comfortDelta.GetFloat();
 			}
 			break;
 	
 		case UB_IMPULSE35: // comfort turn left
 			jaxisValue = jaxisValue > 0.0 ? jaxisValue : -jaxisValue;
-			if ( jaxisValue > .25 ) {
+			if ( jaxisValue > vr_padToButtonThreshold.GetFloat() ) {
 				return vr_comfortDelta.GetFloat();
 			}
 			break;
+
+		default:
+			
+			// axis is mapped to a non-movement impulse, exec here
+									
+			int ax = jaxisValue > 0.0f ? 0 : 1;
+
+			jaxisValue = fabs( jaxisValue );
+			
+			if ( (joyCmd >= UB_ATTACK && joyCmd <= UB_MAX_BUTTONS) || ( joyCmd > UB_NONE && joyCmd < UB_LOOKLEFT ) ) // non movement actions + jump & crouch
+			{
+				if ( jaxisValue > vr_padToButtonThreshold.GetFloat() ) // button pressed
+				{
+					if ( joyActiveState[axisNum][ax] == 0 ) // button not already pressed, exec impulse
+					{
+						joyActiveState[axisNum][ax] = 1;
+						Key( joyDir, 1 );
+					}
+					
+				}
+	
+			}
+			
 	}
 	
 	return 0.0;
@@ -1174,12 +1225,13 @@ void idUsercmdGenLocal::JoystickMove2()
 
 	// koz const bool invertLook =			in_invertLook.GetBool(); dont need anymore remap instead.
 
-	const float threshold = joy_deadZone.GetFloat();
-	const float range = joy_range.GetFloat();
-	const transferFunction_t shape = (transferFunction_t)joy_gammaLook.GetInteger();
-	const bool mergedThreshold = joy_mergedThreshold.GetBool();
-	const float pitchSpeed = joy_pitchSpeed.GetFloat();
-	const float yawSpeed = joy_yawSpeed.GetFloat();
+	//koz fixme these were const changed for easier testing
+	 float threshold = joy_deadZone.GetFloat();
+	 float range = joy_range.GetFloat();
+	 transferFunction_t shape = (transferFunction_t)joy_gammaLook.GetInteger();
+	 bool mergedThreshold = joy_mergedThreshold.GetBool();
+	 float pitchSpeed = joy_pitchSpeed.GetFloat();
+	 float yawSpeed = joy_yawSpeed.GetFloat();
 	
 	idGame* game = common->Game();
 	const float aimAssist = game != NULL ? game->GetAimAssistSensitivity() : 1.0f;
@@ -1188,20 +1240,19 @@ void idUsercmdGenLocal::JoystickMove2()
 	idVec2 mappedLook = vec2_zero;
 
 	float comfortTurn = 0.0 ;
-	static bool lastComfort = false;
+	static int lastComfortTime = 0;
 
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_X ); //koz remamp axis
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_Y );
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_X );
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_Y );
 
-	if ( comfortTurn != 0.0 && !lastComfort )
+	
+	if ( comfortTurn != 0.0 && (Sys_Milliseconds() - lastComfortTime >= vr_comfortRepeat.GetInteger()) )
 	{
 		viewangles[YAW] += comfortTurn;
-		lastComfort = true;
-		
+		lastComfortTime = Sys_Milliseconds();
 	}
-	if ( comfortTurn == 0.0 ) lastComfort = false;
 	
 	// save for visualization
 	lastLookJoypad = mappedLook;
@@ -1236,7 +1287,7 @@ void idUsercmdGenLocal::JoystickMove2()
 
 	// Koz hydra -------------------do this again with the hydras
 
-	if ( commonVr->VR_USE_HYDRA ) // vr_hydraMode.GetInteger() != 0 ) {
+	if ( commonVr->motionControlType == MOTION_HYDRA ) // vr_hydraMode.GetInteger() != 0 ) {
 	{
 		comfortTurn = 0.0 ;
 		static bool lastComfortHydra = false;
@@ -1279,6 +1330,57 @@ void idUsercmdGenLocal::JoystickMove2()
 		
 		HandleJoystickAxis( K_L_HYDRATRIG, joystickAxis[AXIS_LEFT_HYDRA_TRIG], triggerThreshold, true );
 		HandleJoystickAxis( K_R_HYDRATRIG, joystickAxis[AXIS_RIGHT_HYDRA_TRIG], triggerThreshold, true );
+
+	}
+
+	// Koz SteamVR -------------------and again for SteamVR left and right controllers
+
+	if ( commonVr->motionControlType == MOTION_STEAMVR ) // vr_hydraMode.GetInteger() != 0 ) {
+	{
+		comfortTurn = 0.0;
+		static int lastComfortTimeSteamVr = 0;
+
+		mappedMove = vec2_zero;
+		mappedLook = vec2_zero;
+
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_STEAMVR_X );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_STEAMVR_Y );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_STEAMVR_X );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_STEAMVR_Y );
+
+		//if ( comfortTurn != 0.0 && !lastComfortSteamVr )
+		if ( comfortTurn != 0.0 && ( Sys_Milliseconds() - lastComfortTimeSteamVr >= vr_comfortRepeat.GetInteger()) )
+		{
+			viewangles[YAW] += comfortTurn;
+			lastComfortTimeSteamVr = Sys_Milliseconds();
+		}
+		
+
+
+		leftMapped = JoypadFunction( mappedMove, 1.0f, threshold, range, shape, mergedThreshold );
+		rightMapped = JoypadFunction( mappedLook, aimAssist, threshold, range, shape, mergedThreshold );
+
+	//	CircleToSquare( leftMapped.x, leftMapped.y );
+
+		leftMapped = mappedMove;
+		rightMapped = mappedLook;
+
+		cmd.forwardmove = idMath::ClampChar( cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y );
+		cmd.rightmove = idMath::ClampChar( cmd.rightmove + KEY_MOVESPEED * leftMapped.x );
+
+		pitchDelta = MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed;;
+		yawDelta = MS2SEC( pollTime - lastPollTime ) * -rightMapped.x * yawSpeed;
+
+		if ( game->isVR )
+		{
+			commonVr->CalcAimMove( yawDelta, pitchDelta );
+		}
+
+		viewangles[PITCH] += pitchDelta;
+		viewangles[YAW] += yawDelta;
+
+		HandleJoystickAxis( K_L_STEAMVRTRIG, joystickAxis[AXIS_LEFT_STEAMVR_TRIG], triggerThreshold, true );
+		HandleJoystickAxis( K_R_STEAMVRTRIG, joystickAxis[AXIS_RIGHT_STEAMVR_TRIG], triggerThreshold, true );
 
 	}
 }
@@ -1398,25 +1500,9 @@ void idUsercmdGenLocal::MakeCurrent()
 				
 				viewangles[YAW] += commonVr->lastHMDYaw - commonVr->bodyYawOffset;
 				//newBodyAngles.Normalize180();
-
-				hydraData currentHydra = hydra_zero;
-				hydraData currentHydraOffset = hydra_zero;
-				idQuat rotQuat;
-
-				rotQuat = idAngles( 0.0f, (commonVr->lastHMDYaw - commonVr->bodyYawOffset), 0.0f ).Normalize180().ToQuat();
-
-
+				
+				commonVr->MotionControlSetRotationOffset();
 				commonVr->bodyYawOffset = commonVr->lastHMDYaw;
-				//SetViewAngles( newBodyAngles );
-				//viewAngles.yaw = newBodyAngles.yaw;
-			
-				commonVr->HydraGetLeftOffset( currentHydra );
-				currentHydra.hydraRotationQuat *= rotQuat;
-				commonVr->HydraSetLeftOffset( currentHydra );
-
-				commonVr->HydraGetRightOffset( currentHydra );
-				currentHydra.hydraRotationQuat *= rotQuat;
-				commonVr->HydraSetRightOffset( currentHydra );
 
 			}
 		}
@@ -1437,6 +1523,19 @@ void idUsercmdGenLocal::MakeCurrent()
 		mouseDy = 0;
 	}
 	
+
+	extern idCVar vr_bodyToMove;
+
+	if ( 0 && vr_bodyToMove.GetBool() )
+	{
+		if ( commonVr->bodyMoveAng != ang_zero )
+		{
+			viewangles[YAW] = commonVr->bodyMoveAng.yaw;
+			viewangles[PITCH] = commonVr->bodyMoveAng.pitch;
+			viewangles[ROLL] = commonVr->bodyMoveAng.roll;
+		}
+	}
+
 	for( int i = 0; i < 3; i++ )
 	{
 		cmd.angles[i] = ANGLE2SHORT( viewangles[i] ); // koz this sets player body
@@ -1717,8 +1816,6 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 		int value;
 		if( Sys_ReturnJoystickInputEvent( i, action, value ) )
 		{
-//		common->Printf("idUsercmdGenLocal::Joystick: i = %i / action = %i / value = %i\n", i, action, value);
-
 			if( action >= J_ACTION1 && action <= J_ACTION_MAX )
 			{
 				int joyButton = K_JOY1 + ( action - J_ACTION1 );

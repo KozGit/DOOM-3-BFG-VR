@@ -19,13 +19,15 @@ model model_sp_marine {
 
 	mesh								models/md5/characters/npcs/playermoves/spplayer_vrik.md5mesh
 
-	channel torso						( *Waist )
+	channel torso						( *Waist -*Lhand -*Rhand )
 	channel legs						( *origin -*Waist SPINNER eyecontrol)
-
+	channel rightHand					( *Rhand )
+	channel leftHand					( *Lhand )
+	
 	anim af_pose						models/md5/characters/npcs/playermoves/initial_vrik.md5anim
 	anim ik_pose						models/md5/characters/npcs/playermoves/initial_vrik.md5anim
 	anim initial						models/md5/characters/npcs/playermoves/initial_vrik.md5anim
-
+	anim default						models/md5/characters/npcs/playermoves/ik_pistol_idle_vrik.md5anim
 	anim teleport						models/md5/characters/npcs/playermoves/teleportin_vrik.md5anim
 	anim exit							models/md5/characters/npcs/playermoves/exit_teleporter_vrik.md5anim
 
@@ -140,100 +142,99 @@ model model_sp_marine {
 		prevent_idle_override
 	}
 
-	anim pda_raise					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim pda_idle					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim pda_lower					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
+	anim finger_gui					models/md5/characters/npcs/playermoves/ik_point_vrik.md5anim
 	
-	anim fists_raise					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim fists_idle						models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim fists_aim						models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim fists_punch_right				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim fists_punch_left				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim fists_lower					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
+	anim pda_raise					models/md5/characters/npcs/playermoves/ik_pda_idle_vrik.md5anim
+	anim pda_idle					models/md5/characters/npcs/playermoves/ik_pda_idle_vrik.md5anim
+	anim pda_lower					models/md5/characters/npcs/playermoves/ik_pda_idle_vrik.md5anim
+	
+	anim fists_raise					models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim
+	anim fists_idle						models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim
+//	anim fists_aim						models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim
+	anim fists_punch_right				models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim
+	anim fists_punch_left				models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim
+	anim fists_lower					models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim
 
-	anim pistol_raise					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim pistol_idle					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim pistol_aim						models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim pistol_fire1					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim pistol_reload					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim pistol_lower					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
+	anim pistol_raise					models/md5/characters/npcs/playermoves/ik_pistol_idle_vrik.md5anim
+	anim pistol_idle					models/md5/characters/npcs/playermoves/ik_pistol_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_pistol_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_pistol_idle_vrik.md5anim
+//	anim pistol_aim						models/md5/characters/npcs/playermoves/ik_pistol_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_pistol_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_pistol_idle_vrik.md5anim
+	anim pistol_fire1					models/md5/characters/npcs/playermoves/ik_pistol_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_pistol_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_pistol_fire_vrik.md5anim
+	anim pistol_reload					models/md5/characters/npcs/playermoves/ik_pistol_idle_vrik.md5anim
+	anim pistol_lower					models/md5/characters/npcs/playermoves/ik_pistol_idle_vrik.md5anim
 
-	anim shotgun_raise					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
+	anim shotgun_raise					models/md5/characters/npcs/playermoves/ik_shotgun_idle_vrik.md5anim
+	anim shotgun_idle					models/md5/characters/npcs/playermoves/ik_shotgun_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_shotgun_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_shotgun_idle_vrik.md5anim
+//	anim shotgun_aim					models/md5/characters/npcs/playermoves/ik_shotgun_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_shotgun_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_shotgun_fire_vrik.md5anim
+	anim shotgun_fire1					models/md5/characters/npcs/playermoves/ik_shotgun_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_shotgun_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_shotgun_fire_vrik.md5anim
+	anim shotgun_reload_start			models/md5/characters/npcs/playermoves/ik_shotgun_idle_vrik.md5anim
+	anim shotgun_reload_loop			models/md5/characters/npcs/playermoves/ik_shotgun_idle_vrik.md5anim
+	anim shotgun_reload_end				models/md5/characters/npcs/playermoves/ik_shotgun_idle_vrik.md5anim
+	anim shotgun_lower					models/md5/characters/npcs/playermoves/ik_shotgun_idle_vrik.md5anim
 
-	anim shotgun_idle					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim shotgun_aim					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim shotgun_fire1					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim shotgun_reload_start			models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim shotgun_reload_loop			models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim shotgun_reload_end				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim shotgun_lower					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
+	anim machinegun_raise				models/md5/characters/npcs/playermoves/ik_machinegun_idle_vrik.md5anim
+	anim machinegun_idle				models/md5/characters/npcs/playermoves/ik_machinegun_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_machinegun_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_machinegun_idle_vrik.md5anim
+//	anim machinegun_aim					models/md5/characters/npcs/playermoves/ik_machinegun_aim_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_machinegun_aim_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_machinegun_aim_vrik.md5anim
+	anim machinegun_fire1				models/md5/characters/npcs/playermoves/ik_machinegun_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_machinegun_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_machinegun_fire_vrik.md5anim
+	anim machinegun_reload				models/md5/characters/npcs/playermoves/ik_machinegun_idle_vrik.md5anim
+	anim machinegun_lower				models/md5/characters/npcs/playermoves/ik_machinegun_idle_vrik.md5anim
 
-	anim machinegun_raise				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim machinegun_idle				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim machinegun_aim					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim machinegun_fire1				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim machinegun_reload				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim machinegun_lower				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-
-	anim chaingun_raise					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim chaingun_idle					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim chaingun_aim					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim chaingun_fire					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim chaingun_reload				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim chaingun_lower					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-
-
-	anim plasmagun_raise				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim plasmagun_idle					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim plasmagun_aim					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim plasmagun_fire1				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-
-	anim plasmagun_reload				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim plasmagun_lower				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-
-	anim handgrenade_raise				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim handgrenade_idle				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim handgrenade_aim				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim handgrenade_throw_quick		models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim handgrenade_throw_start		models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim handgrenade_throw				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-
-	anim handgrenade_startfire			models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim handgrenade_fire				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim handgrenade_lower				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-
-	anim chainsaw_raise					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim chainsaw_idle					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim chainsaw_aim					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim chainsaw_fire					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim chainsaw_lower					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-
-	anim rocketlauncher_raise			models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim rocketlauncher_idle			models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim rocketlauncher_aim				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim rocketlauncher_fire			models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim rocketlauncher_reload			models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim rocketlauncher_lower			models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-
-	anim flashlight_raise				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim flashlight_idle				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim flashlight_lower				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim flashlight_aim					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim flashlight_fire1				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim flashlight_fire2				models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
+	anim chaingun_raise					models/md5/characters/npcs/playermoves/ik_chaingun_idle_vrik.md5anim
+	anim chaingun_idle					models/md5/characters/npcs/playermoves/ik_chaingun_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_chaingun_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_chaingun_idle_vrik.md5anim
+//	anim chaingun_aim					models/md5/characters/npcs/playermoves/ik_chaingun_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_chaingun_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_chaingun_idle_vrik.md5anim
+	anim chaingun_fire					models/md5/characters/npcs/playermoves/ik_chaingun_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_chaingun_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_chaingun_fire_vrik.md5anim
+	anim chaingun_reload				models/md5/characters/npcs/playermoves/ik_chaingun_idle_vrik.md5anim
+	anim chaingun_lower					models/md5/characters/npcs/playermoves/ik_chaingun_idle_vrik.md5anim
 
 
-	anim bfg_raise						models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim bfg_idle						models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim bfg_aim						models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim bfg_startfire					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim bfg_fire						models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim bfg_reload						models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim bfg_lower						models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
+	anim plasmagun_raise				models/md5/characters/npcs/playermoves/ik_plasmagun_idle_vrik.md5anim
+	anim plasmagun_idle					models/md5/characters/npcs/playermoves/ik_plasmagun_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_plasmagun_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_plasmagun_idle_vrik.md5anim
+//	anim plasmagun_aim					models/md5/characters/npcs/playermoves/ik_plasmagun_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_plasmagun_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_plasmagun_idle_vrik.md5anim
+	anim plasmagun_fire1				models/md5/characters/npcs/playermoves/ik_plasmagun_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_plasmagun_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_plasmagun_fire_vrik.md5anim
+	anim plasmagun_reload				models/md5/characters/npcs/playermoves/ik_plasmagun_idle_vrik.md5anim
+	anim plasmagun_lower				models/md5/characters/npcs/playermoves/ik_plasmagun_idle_vrik.md5anim
+
+	anim handgrenade_raise				models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim
+	anim handgrenade_idle				models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim
+//	anim handgrenade_aim				models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim
+	anim handgrenade_throw_quick		models/md5/characters/npcs/playermoves/ik_grenade_throw_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_throw_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_throw_vrik.md5anim
+	anim handgrenade_throw_start		models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim
+	anim handgrenade_throw				models/md5/characters/npcs/playermoves/ik_grenade_throw_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_throw_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_throw_vrik.md5anim
+//	anim handgrenade_startfire			models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim
+	anim handgrenade_fire				models/md5/characters/npcs/playermoves/ik_grenade_throw_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_throw_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grenade_throw_vrik.md5anim
+	anim handgrenade_lower				models/md5/characters/npcs/playermoves/ik_grenade_idle_vrik.md5anim
+
+	anim chainsaw_raise					models/md5/characters/npcs/playermoves/ik_chainsaw_idle_vrik.md5anim
+	anim chainsaw_idle					models/md5/characters/npcs/playermoves/ik_chainsaw_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_chainsaw_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_chainsaw_idle_vrik.md5anim
+//	anim chainsaw_aim					models/md5/characters/npcs/playermoves/ik_chainsaw_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_chainsaw_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_chainsaw_idle_vrik.md5anim
+	anim chainsaw_fire					models/md5/characters/npcs/playermoves/ik_chainsaw_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_chainsaw_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_chainsaw_fire_vrik.md5anim
+	anim chainsaw_lower					models/md5/characters/npcs/playermoves/ik_chainsaw_idle_vrik.md5anim
+
+	anim rocketlauncher_raise			models/md5/characters/npcs/playermoves/ik_rocketlauncher_idle_vrik.md5anim
+	anim rocketlauncher_idle			models/md5/characters/npcs/playermoves/ik_rocketlauncher_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_rocketlauncher_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_rocketlauncher_idle_vrik.md5anim
+//	anim rocketlauncher_aim				models/md5/characters/npcs/playermoves/ik_rocketlauncher_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_rocketlauncher_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_rocketlauncher_idle_vrik.md5anim
+	anim rocketlauncher_fire			models/md5/characters/npcs/playermoves/ik_rocketlauncher_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_rocketlauncher_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_rocketlauncher_fire_vrik.md5anim
+	anim rocketlauncher_reload			models/md5/characters/npcs/playermoves/ik_rocketlauncher_idle_vrik.md5anim
+	anim rocketlauncher_lower			models/md5/characters/npcs/playermoves/ik_rocketlauncher_idle_vrik.md5anim
+
+	anim flashlight_raise				models/md5/characters/npcs/playermoves/ik_flashlight_idle_vrik.md5anim
+	anim flashlight_idle				models/md5/characters/npcs/playermoves/ik_flashlight_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_flashlight_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_flashlight_idle_vrik.md5anim
+	anim flashlight_lower				models/md5/characters/npcs/playermoves/ik_flashlight_idle_vrik.md5anim
+	anim flashlight_aim					models/md5/characters/npcs/playermoves/ik_flashlight_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_flashlight_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_flashlight_idle_vrik.md5anim
+	anim flashlight_fire1				models/md5/characters/npcs/playermoves/ik_flashlight_fire1_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_flashlight_fire1_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_flashlight_fire1_vrik.md5anim
+	anim flashlight_fire2				models/md5/characters/npcs/playermoves/ik_flashlight_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_flashlight_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_flashlight_idle_vrik.md5anim
+
+
+	anim bfg_raise						models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
+	anim bfg_idle						models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
+//	anim bfg_aim						models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
+//	anim bfg_startfire					models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
+	anim bfg_fire						models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
+	anim bfg_reload						models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
+	anim bfg_lower						models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
 
 	anim soulcube_raise					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
 	anim soulcube_idle					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim soulcube_aim					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
+//	anim soulcube_aim					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
 	anim soulcube_fire					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
 	anim soulcube_lower					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
 }
@@ -416,7 +417,7 @@ entityDef player_base {
 	"pm_jumpheight"						"48"
 	"pm_stepsize"						"16"
 	"pm_crouchspeed"					"100"
-	"pm_walkspeed"						"175"
+	"pm_walkspeed"						"140"
 	"pm_runspeed"						"275"
 	"pm_noclipspeed"					"300"
 	"pm_minviewpitch"					"-89"	// looking up
@@ -535,6 +536,9 @@ entityDef player_base {
 	"ik_elbow2"							"Lloarm"
 	"ik_hand1"							"Rhand1" // koz changed "Rfings2" to Rhand1
 	"ik_hand2"							"Lhand1" // koz changed "Lfings2" to Lhand1
+	"ik_elbowDir1"						"RelbowDir" // koz
+	"ik_elbowDir2"						"LelbowDir" // koz
+	
 	
 	"snd_stepladder"					"player_climb_ladder"
 	"snd_weapon_switch"					"player_sounds_weapon_switch"
@@ -569,6 +573,18 @@ entityDef player_base {
 	"snd_invisibility"					"invisibility_pickup"
 	"snd_megahealth"					"megasphere_pickup"
 	"snd_healthtake"					"player_takehealth"
+	
+	
+	"skin_player_1" 			"skins/characters/player/d3xp_sp_vrik/vrBody"
+	"skin_player_2" 			"skins/characters/player/d3xp_sp_vrik/vrWeaponsOnly"
+	"skin_player_3" 			"skins/characters/player/d3xp_sp_vrik/vrHandsOnly"
+	"skin_player_4" 			"skins/characters/player/tshirt_mp/vrHandsOnly"
+	"skin_player_5" 			"skins/characters/player/tshirt_mp/vrBody"
+	"skin_player_6" 			"skins/characters/player/tshirt_mp/vrWeaponsOnly"
+	"skin_player_7" 			"skins/characters/player/greenmarine_arm2/vrBody"
+	"skin_player_8" 			"skins/characters/player/greenmarine_arm2/vrWeaponsOnly"
+	"skin_player_9" 			"skins/characters/player/greenmarine_arm2/vrHandsOnly"
+	
 }
 
 /***********************************************************************

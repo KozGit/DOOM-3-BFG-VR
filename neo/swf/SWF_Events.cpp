@@ -262,7 +262,9 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 		and still want to select something with a controller,
 		so add some controller buttons too.
 		*/
-
+	
+		//common->Printf( "SWFEvents SE_KEY = %d\n", event->evValue );
+		
 		if ( event->evValue == K_MOUSE1
 			|| event->evValue == K_L_HYDRATRIG 	// koz hydra left trigger
 			|| event->evValue == K_R_HYDRATRIG 	// koz hydra right trigger
@@ -272,6 +274,12 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 			|| event->evValue == K_JOY_TRIGGER2
 			//||	event->evValue == K_JOY2 
 			//||	event->evValue == K_JOY1
+			|| event->evValue == K_L_STEAMVRTRIG
+			|| event->evValue == K_R_STEAMVRTRIG 
+			|| event->evValue == K_JOY37 // button for steam trig
+			|| event->evValue == K_JOY33// button for steam trig
+			
+
 			)
 		{
 
@@ -354,7 +362,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				}
 			}
 
-			return false; // koz fixme hydra this was just a return, but let hydra key events fall through
+		//	return false; // koz fixme hydra this was just a return, but let hydra key events fall through
 
 		}
 
@@ -373,7 +381,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 		default for menu navigation.
 		====================================*/
 
-		const keyNum_t joyAxisSwap[8][2] = {	K_JOY_STICK2_UP, K_JOY_STICK1_UP,
+		const keyNum_t joyAxisSwap[12][2] = {	K_JOY_STICK2_UP, K_JOY_STICK1_UP,
 												K_JOY_STICK2_DOWN, K_JOY_STICK1_DOWN,
 												K_JOY_STICK2_LEFT, K_JOY_STICK1_LEFT,
 												K_JOY_STICK2_RIGHT, K_JOY_STICK1_RIGHT,
@@ -381,6 +389,10 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 												K_HYDRA_RIGHT_STICK_DOWN, K_HYDRA_LEFT_STICK_DOWN,
 												K_HYDRA_RIGHT_STICK_LEFT, K_HYDRA_LEFT_STICK_LEFT,
 												K_HYDRA_RIGHT_STICK_RIGHT, K_HYDRA_LEFT_STICK_RIGHT,
+												K_STEAMVR_RIGHT_PAD_UP, K_STEAMVR_LEFT_PAD_UP,
+												K_STEAMVR_RIGHT_PAD_DOWN, K_STEAMVR_LEFT_PAD_DOWN,
+												K_STEAMVR_RIGHT_PAD_LEFT, K_STEAMVR_LEFT_PAD_LEFT,
+												K_STEAMVR_RIGHT_PAD_RIGHT, K_STEAMVR_LEFT_PAD_RIGHT
 
 											}; // will map right stick and right hydra stick to left sticks for nav 
 
@@ -422,7 +434,9 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 					if ( keyValue == K_HYDRA_RIGHT_STICK_LEFT ||
 						keyValue == K_HYDRA_LEFT_STICK_LEFT ||
 						keyValue == K_JOY_STICK1_LEFT ||
-						keyValue == K_JOY_STICK2_LEFT ) 
+						keyValue == K_JOY_STICK2_LEFT ||
+						keyValue == K_STEAMVR_RIGHT_PAD_LEFT ||
+						keyValue == K_STEAMVR_LEFT_PAD_LEFT	) 
 					{
 						commonVr->forceLeftStick = true;
 					}
@@ -432,7 +446,9 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 					if ( keyValue == K_HYDRA_RIGHT_STICK_RIGHT ||
 						keyValue == K_HYDRA_LEFT_STICK_RIGHT ||
 						keyValue == K_JOY_STICK1_RIGHT ||
-						keyValue == K_JOY_STICK2_RIGHT ) 
+						keyValue == K_JOY_STICK2_RIGHT ||
+						keyValue == K_STEAMVR_RIGHT_PAD_RIGHT ||
+						keyValue == K_STEAMVR_LEFT_PAD_RIGHT )
 					{
 						commonVr->forceLeftStick = false;
 					}
@@ -448,7 +464,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				destAxis = rightStick;
 			}
 
-			for ( int j = 0; j<8; j++ ) 
+			for ( int j = 0; j < 12; j++ ) 
 			{ // swap the axis if needed
 				if ( joyAxisSwap[j][sourceAxis] == keyValue ) keyValue = joyAxisSwap[j][destAxis];
 			}
@@ -459,7 +475,8 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 		// const char* keyName = idKeyInput::KeyNumToString( (keyNum_t)event->evValue );
 		const char* keyName = idKeyInput::KeyNumToString( keyValue );
 		// Koz end
-
+		// debug common->Printf( "Keyname %s\n", keyName );
+	
 		idSWFScriptVar var = shortcutKeys->Get( keyName );
 		// anything more than 32 levels of indirection we can be pretty sure is an infinite loop
 		for ( int runaway = 0; runaway < 32; runaway++ )
@@ -596,15 +613,57 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 		if ( event->evType == SE_MOUSE_ABSOLUTE )
 		{
 			const float pixelAspect = renderSystem->GetPixelAspect();
-			const float sysWidth = renderSystem->GetWidth() * (pixelAspect > 1.0f ? pixelAspect : 1.0f);
-			const float sysHeight = renderSystem->GetHeight() / (pixelAspect < 1.0f ? pixelAspect : 1.0f);
+			float sysWidth = renderSystem->GetWidth() * (pixelAspect > 1.0f ? pixelAspect : 1.0f);
+			float sysHeight = renderSystem->GetHeight() / (pixelAspect < 1.0f ? pixelAspect : 1.0f);
+			
+			if ( commonVr->swfRenderMode == RENDERING_PDA ) // We dont need to render a full resolution PDA, it will be scaled down to fit the model in VR.  
+			{
+				sysWidth = 640;
+				sysHeight = 480;
+				//sysWidth = 1280;
+				//sysHeight = 960;
+
+			}
+						
 			float scale = swfScale * sysHeight / (float)frameHeight;
+
+			// koz
+			if ( game->isVR  )
+			{
+				if ( commonVr->VR_GAME_PAUSED )
+				{
+					scale *= 0.8f;
+				}
+				else
+				{
+					switch ( commonVr->swfRenderMode )
+					{
+					case RENDERING_PDA:
+						scale *= 1.25;
+						break;
+
+					case RENDERING_HUD:
+						break;
+
+					case RENDERING_NORMAL:
+					default:
+						scale =  vr_guiScale.GetFloat();
+					}
+				}
+			}
+			//koz end
+
+			sysWidth = renderSystem->GetWidth() * (pixelAspect > 1.0f ? pixelAspect : 1.0f);
+			sysHeight = renderSystem->GetHeight() / (pixelAspect < 1.0f ? pixelAspect : 1.0f);
+			
 			float invScale = 1.0f / scale;
 			float tx = 0.5f * (sysWidth - (frameWidth * scale));
 			float ty = 0.5f * (sysHeight - (frameHeight * scale));
 
 			mouseX = idMath::Ftoi( (static_cast<float>(event->evValue) - tx) * invScale );
 			mouseY = idMath::Ftoi( (static_cast<float>(event->evValue2) - ty) * invScale );
+
+			//common->Printf( "Sysw %f sysH %f fw %f fh %f scale %f  tx %f ty %f mx %d my %d\n", sysWidth, sysHeight, frameWidth, frameHeight, scale, tx, ty, mouseX, mouseY );
 		}
 		else
 		{

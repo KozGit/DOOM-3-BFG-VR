@@ -314,7 +314,8 @@ public:
 	idMat3					PDAaxis; // koz
 
 	idVec3 throwDirection; // for motion control throwing actions e.g. grenade
-	idVec3 throwVelocity;
+	float throwVelocity;
+	
 	
 	//float					independentWeaponPitch; // deltas to provide aim independent of body/view orientation
 	//float					independentWeaponYaw;
@@ -392,7 +393,24 @@ public:
 	int						weapon_bloodstone_active2;
 	int						weapon_bloodstone_active3;
 	bool					harvest_lock;
+	//koz begin
+	int						weapon_pistol;
+	int						weapon_shotgun;
+	int						weapon_shotgun_double;
+	int						weapon_machinegun;
+	int						weapon_chaingun;
+	int						weapon_handgrenade;
+	int						weapon_plasmagun;
+	int						weapon_rocketlauncher;
+	int						weapon_bfg;
+	int						weapon_flashlight_new;
+	int						weapon_grabber;
 	
+	
+	idMat3					ik_elbowCorrectAxis[2];
+	//koz end
+
+
 	int						heartRate;
 	idInterpolate<float>	heartInfo;
 	int						lastHeartAdjust;
@@ -485,11 +503,16 @@ public:
 	void					UpdateLaserSight();
 
 	// Koz begin
+	void					UpdatePlayerSkinsPoses();
+	void					SetWeaponHandPose();
+	void					SetFlashHandPose();
 	void					ToggleLaserSight(); 
 	void					UpdateHeadingBeam(); 
 	void					ToggleHeadingBeam();
 	void					UpdateVrHud();
 	void					ToggleHud();
+	void					UpdateNeckPose();
+	void					TrackWeaponDirection( idVec3 origin );
 	// Koz end
 		
 	// save games
@@ -572,12 +595,10 @@ public:
 	float					CalcFov( bool honorZoom );
 	void					CalculateViewWeaponPos( idVec3& origin, idMat3& axis );
 	void					CalculateViewWeaponPosVR( idVec3& origin, idMat3& axis );
-	void					SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQuat rotation );
+	void					SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQuat rotation, bool isFlashlight = false );
 
 	// Koz begin
 	void					CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flashOffset ); // koz aim the flashlight with the hydra
-	void					ModelOriginOffsets( idVec3 &origin, idMat3 &axis ); // koz dev test weapon model origin offsets
-	void					ModelOriginOffsetsQuat( idVec3 &origin, idMat3 &axis ); // koz dev test weapon model origin offsets
 	// Koz end
 
 	idVec3					GetEyePosition() const;
@@ -848,6 +869,7 @@ public:
 	{
 		numProjectileKills = 0;
 	}
+
 private:
 	// Stats & achievements
 	idAchievementManager	achievementManager;
@@ -864,6 +886,15 @@ private:
 	jointHandle_t			ik_hand[2];
 	jointHandle_t			ik_elbow[2];
 	jointHandle_t			ik_shoulder[2];
+	jointHandle_t			ik_handAttacher[2];
+	bool					handLowered;
+	bool					handRaised;
+
+	idMat3					ik_handCorrectAxis[2][32];
+	idVec3					handWeaponAttachertoWristJointOffset[2][32];
+	idVec3					handWeaponAttacherToDefaultOffset[2][32];
+	
+		
 	// koz end
 
 		
@@ -1024,6 +1055,7 @@ private:
 	
 	void					ClearFocus();
 	void					UpdateFocus();
+	bool					UpdateFocusPDA();
 	void					UpdateLocation();
 	idUserInterface* 		ActiveGui();
 	
@@ -1063,6 +1095,15 @@ private:
 	void					Event_StopHelltime( int mode );
 	void					Event_ToggleBloom( int on );
 	void					Event_SetBloomParms( float speed, float intensity );
+
+	// koz
+	void					Event_GetWeaponHand();
+	void					Event_GetWeaponHandState();
+	void					Event_GetFlashHand();
+	void					Event_GetFlashHandState();
+	void					Event_GetFlashState();
+
+
 };
 
 ID_INLINE bool idPlayer::IsRespawning()

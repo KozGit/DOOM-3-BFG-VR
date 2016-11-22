@@ -132,19 +132,7 @@ const void GL_BlockingSwapBuffers()
 	const int beforeFinish = Sys_Milliseconds();
 	int beforeFence = Sys_Milliseconds();
 
-	if ( game->isVR )
-	{
-		/*
-		HMDGetOrientation calls IVRCompositor::WaitGetPoses, which is a blocking call.
-		This can only be called once per rendered frame, so call here (via FrameStart) where it won't stall other frames from starting.
-		Subsequent calls to HMDGetOrientation within the same vrFrameNumber return stored results
-		and make no additional calls to WaitGetPoses.
-		*/
-		
-		commonVr->vrFrameNumber++;
-		commonVr->FrameStart();
 
-	}
 
 	
 	if ( !glConfig.syncAvailable )
@@ -221,7 +209,6 @@ const void GL_BlockingSwapBuffers()
 	}
 	prevBlockTime = exitBlockTime;
 
-	
 }
 
 /*
@@ -439,6 +426,8 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			if ( game->isVR ) 
 			{
 			
+				if ( commonLocal.insideExecuteMapChange ) break;
+
 				if ( commonVr->playerDead || (game->Shell_IsActive() && !commonVr->PDAforced && !commonVr->PDArising ) || (!commonVr->PDAforced && common->Dialog().IsDialogActive() ) ) 
 				{
 					commonVr->HMDTrackStatic();

@@ -1578,6 +1578,7 @@ void idAnimated::Event_SetAnimation( const char* animName )
 	//BSM Nerve: Need to add some error checking so we don't change the animation
 	//in the middle of the existing animation
 	anim = animator.GetAnim( animName );
+	common->Printf( "Setting animation %s\n", animName );
 	if( !anim )
 	{
 		gameLocal.Error( "idAnimated '%s' at (%s): cannot find anim '%s'", name.c_str(), GetPhysics()->GetOrigin().ToString( 0 ), animName );

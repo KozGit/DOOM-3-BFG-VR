@@ -1239,12 +1239,17 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, idAnimator* ani
 
 	guiPoint_t	pt;
 	pt.x = pt.y = -1;
+	pt.fraction = 1.0f; // koz
 	pt.guiId = 0;
+
+
+
 
 	// koz begin
 	bool isPDA = false;
 	// koz end
 
+	common->Printf( "Begin guitrace\n" );
 	if ( (entityHandle < 0) || ( entityHandle >= entityDefs.Num()) )
 	{
 		return pt;
@@ -1269,23 +1274,23 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, idAnimator* ani
 
 	if ( game->IsPDAOpen() && game->isVR )
 	{
-		isPDA = idStr::Icmp( "models/md5/items/pda_view/idle.md5mesh", model->Name() ) == 0;
-						
+		
+		isPDA = idStr::Icmp( "models/md5/items/pda_view/pda_vr_idle.md5mesh", model->Name() ) == 0;
+		
 		if ( isPDA )
 		{
-			guiJoints[0] = model->GetJointHandle( "BLgui" );
-			guiJoints[1] = model->GetJointHandle( "BRgui" );
-			guiJoints[2] = model->GetJointHandle( "TRgui" );
-			guiJoints[3] = model->GetJointHandle( "TLgui" );
+			guiJoints[3] = model->GetJointHandle( "BLgui" );
+			guiJoints[0] = model->GetJointHandle( "BRgui" );
+			guiJoints[1] = model->GetJointHandle( "TRgui" );
+			guiJoints[2] = model->GetJointHandle( "TLgui" );
 
 			for ( int checkJoint = 0; checkJoint < 4; checkJoint++ )
 			{
 				if ( guiJoints[checkJoint] == INVALID_JOINT ) isPDA = false;
 			}
 		}
-		
-		// if ( isPDA ) common->Printf( "IsPDA = true\n" );
-		// common->Printf( "Model surfaces = %d\n", model->NumSurfaces() );		
+
+
 	}
 
 	if ( (model->IsDynamicModel() != DM_STATIC || def->parms.callback != NULL ) && !isPDA )
@@ -1322,10 +1327,10 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, idAnimator* ani
 		}
 
 		// Koz begin
-		
+	
 		if ( isPDA )
 		{
-			
+
 			idMat3 discardAxis = mat3_identity;
 			idVec3 modelOrigin = def->parms.origin;
 			idMat3 modelAxis = def->parms.axis;
@@ -1336,10 +1341,10 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, idAnimator* ani
 				animator->GetJointTransform( guiJoints[jj], gameLocal.time, tri->verts[jj].xyz, discardAxis );
 
 				// draw debug lines from view start to gui corners
-				gameRenderWorld->DebugLine( colorYellow, start, modelOrigin + tri->verts[jj].xyz * modelAxis, 0 );
+			//	gameRenderWorld->DebugLine( colorYellow, start, modelOrigin + tri->verts[jj].xyz * modelAxis, 20 );
 
 			}
-
+		
 		}
 		// Koz end
 
@@ -1358,7 +1363,7 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, idAnimator* ani
 			pt.x = (cursor * axis[0]) / (axisLen[0] * axisLen[0]);
 			pt.y = (cursor * axis[1]) / (axisLen[1] * axisLen[1]);
 			pt.guiId = shader->GetEntityGui();
-
+			pt.fraction = local.fraction;
 			return pt;
 		}
 	}

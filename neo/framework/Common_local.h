@@ -313,6 +313,8 @@ public:
 	
 	frameTiming_t		frameTiming;
 	frameTiming_t		mainFrameTiming;
+
+	bool				insideExecuteMapChange;	// Enable Pacifier Updates // koz moved to public
 	
 public:	// These are public because they are called directly by static functions in this file
 
@@ -385,7 +387,7 @@ private:
 	bool				menuActive;
 	idSoundWorld* 		menuSoundWorld;			// so the game soundWorld can be muted
 	
-	bool				insideExecuteMapChange;	// Enable Pacifier Updates
+	// koZ fixme was private bool				insideExecuteMapChange;	// Enable Pacifier Updates
 	
 	// This is set if the player enables the console, which disables achievements
 	bool				consoleUsed;

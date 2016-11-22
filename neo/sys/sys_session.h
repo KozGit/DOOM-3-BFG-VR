@@ -37,7 +37,8 @@ static const int MAX_PLAYERS			= 8;
 static const int MAX_REDUNDANT_CMDS	= 3;
 
 static const int MAX_LOCAL_PLAYERS		= 2;
-static const int MAX_INPUT_DEVICES		= 4;
+static const int MAX_INPUT_DEVICES		= 6; // koz was 4, added hydra and steamvr controller
+
 enum matchFlags_t
 {
 	MATCH_STATS						= BIT( 0 ),		// Match will upload leaderboard/achievement scores

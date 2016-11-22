@@ -31,6 +31,9 @@ object weapon_handgrenade : weapon_base {
 	
 	boolean		show_grenade;
 	
+	float		isMC; 
+	string 		mcExtension;
+	
 	void		init();
 	
 	void		Lower();
@@ -49,6 +52,8 @@ object weapon_handgrenade : weapon_base {
 				// used by anim frame commands
 	void		GrenadeNade();
 	void		GrenadeNoNade();
+	void		SetMCState();
+	
 };
 
 void weapon_handgrenade::init() {
@@ -58,12 +63,18 @@ void weapon_handgrenade::init() {
 	skin_nonade			= getKey( "skin_nonade" );
 	skin_nonade_invis	= getKey( "skin_nonade_invis" );
 		
-	GrenadeNade();
+	SetMCState();
 	
+	GrenadeNade();
+			
 	weaponState( "Raise", 0 );
 }
 
 void weapon_handgrenade::Raise() {
+	
+	string animName;
+	SetMCState();
+	
 	if ( !ammoAvailable() ) {
 		weaponHolstered();
 		nextWeapon();
@@ -71,14 +82,18 @@ void weapon_handgrenade::Raise() {
 	}
 	
 	weaponRising();
-	playAnim( ANIMCHANNEL_ALL, "raise" );
+	animName = "raise" + mcExtension;
+	playAnim( ANIMCHANNEL_ALL, animName );
 	waitUntil( animDone( ANIMCHANNEL_ALL, HANDGRENADE_RAISE_TO_IDLE ) );
 	weaponState( "Idle", HANDGRENADE_RAISE_TO_IDLE );
 }
 
 void weapon_handgrenade::Lower() {
+	string animName;
+	SetMCState();
 	weaponLowering();
-	playAnim( ANIMCHANNEL_ALL, "putaway" );
+	animName = "putaway" + mcExtension;
+	playAnim( ANIMCHANNEL_ALL, animName );
 	waitUntil( animDone( ANIMCHANNEL_ALL, 0 ) );
 	weaponHolstered();
 	waitUntil( WEAPON_RAISEWEAPON );
@@ -86,8 +101,13 @@ void weapon_handgrenade::Lower() {
 }
 
 void weapon_handgrenade::Idle() {
+	string animName;
+	SetMCState();
 	weaponReady();
-	playCycle( ANIMCHANNEL_ALL, "idle" );
+	
+	animName = "idle" + mcExtension;
+	playCycle( ANIMCHANNEL_ALL, animName );
+	
 	while( 1 ) {
 		if ( WEAPON_LOWERWEAPON ) {
 			weaponState( "Lower", HANDGRENADE_IDLE_TO_LOWER );
@@ -106,14 +126,17 @@ void weapon_handgrenade::Fire() {
 	float power;
 	boolean exploded;
 	
+	string animName;
+	SetMCState();
+			
 	projectile = createProjectile();
 
 	if ( projectile ) {
 		projectile.startSound( "snd_throw", SND_CHANNEL_BODY, true );
 	}
 	
-		
-	playAnim( ANIMCHANNEL_ALL, "throw_start" );
+	animName = "throw_start" + mcExtension;
+	playAnim( ANIMCHANNEL_ALL, animName );
 	
 	current_time = sys.getTime();
 	fuse_start = current_time;
@@ -132,20 +155,34 @@ void weapon_handgrenade::Fire() {
 		power = HANDGRENADE_MAXPOWER;
 	}
 
-	if ( time_held < HANDGRENADE_QUICKTHROWTIME ) {
-		playAnim( ANIMCHANNEL_ALL, "throw_quick" );
-		// koz for motion control  sys.wait( HANDGRENADE_QUICKTHROWLAUNCH );
+	if ( time_held < HANDGRENADE_QUICKTHROWTIME && isMC == 0 ) {
+		animName = "throw_quick" + mcExtension;
+		
+		playAnim( ANIMCHANNEL_ALL, animName );
+				
+		if ( isMC == 0 )
+		{
+			// koz not when motion controlled
+			sys.wait( HANDGRENADE_QUICKTHROWLAUNCH );
+		}
 		exploded = false;
 	} else if ( time_held < HANDGRENADE_FUSE ) {
-		playAnim( ANIMCHANNEL_ALL, "throw" );
-		// koz for motion control sys.wait( HANDGRENADE_NORMALTHROWLAUNCH	);
+		
+		animName = "throw" + mcExtension;
+		playAnim( ANIMCHANNEL_ALL, animName );
+			
+		GrenadeNoNade();
+		
+		if ( isMC == 0 )
+		{
+			// koz for motion control 
+			sys.wait( HANDGRENADE_NORMALTHROWLAUNCH	);
+		}
 		exploded = false;
 	} else {
 		// no anim.  grenade just blows up
 		ExplodeInHand();
 		exploded = true;
-		
-		
 	}
 	
 	if ( !exploded ) {
@@ -275,5 +312,18 @@ void weapon_handgrenade::ExplodeInHand() {
 
 		// this should kill us
 		sys.radiusDamage( getOrigin(), self, owner, $null_entity, getKey( "def_damage_inhand" ), 1.0 );
+	}
+}
+
+void weapon_handgrenade::SetMCState() {
+
+	isMC = isMotionControlled();
+	if ( isMC == 1 )
+	{
+		mcExtension = "_mc";
+	}
+	else
+	{
+		mcExtension = "";
 	}
 }

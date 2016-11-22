@@ -26,7 +26,7 @@ export fred {
 }
 
 entityDef weapon_fists {
-	"model_view" 				"viewmodel_fists"
+	"model_view" 				"viewmodel_fists_vr"
 
 	"inv_name"					"#str_00100188"
 	"inv_weapon"				"weapon_fists"
@@ -79,21 +79,22 @@ entityDef weapon_fists {
 }
 
 
-model viewmodel_fists {
-	mesh			models/md5/weapons/fists_view/fists.md5mesh
-	offset			( -10 0 -6.5 )
-
-	anim raise			models/md5/weapons/fists_view/raise.md5anim {
+model viewmodel_fists_vr {
+	mesh			models/md5/weapons/fists_view/fists_vr.md5mesh
+	//offset			( -10 0 -6.5 )
+	offset				( 0 0 0)
+	
+	anim raise			models/md5/weapons/fists_view/fists_vr_raise.md5anim {
 		frame	1		sound_weapon fist_raise
 	}
-	anim idle 			models/md5/weapons/fists_view/idle.md5anim
-	anim berserk_idle 	models/md5/weapons/fists_view/berserk_idle.md5anim
-	anim aim 			models/md5/weapons/fists_view/idle.md5anim
-	anim punch_left1	models/md5/weapons/fists_view/berserk_punch1.md5anim
-	anim punch_left2	models/md5/weapons/fists_view/berserk_punch3.md5anim
-	anim punch_right1	models/md5/weapons/fists_view/berserk_punch2.md5anim
-	anim punch_right2	models/md5/weapons/fists_view/berserk_punch4.md5anim
-	anim putaway 		models/md5/weapons/fists_view/lower.md5anim
+	anim idle 			models/md5/weapons/fists_view/fists_vr_idle.md5anim
+	anim berserk_idle 	models/md5/weapons/fists_view/fists_vr_berserk_idle.md5anim
+	anim aim 			models/md5/weapons/fists_view/fists_vr_idle.md5anim
+	anim punch_left1	models/md5/weapons/fists_view/fists_vr_berserk_punch1.md5anim
+	anim punch_left2	models/md5/weapons/fists_view/fists_vr_berserk_punch3.md5anim
+	anim punch_right1	models/md5/weapons/fists_view/fists_vr_berserk_punch2.md5anim
+	anim punch_right2	models/md5/weapons/fists_view/fists_vr_berserk_punch4.md5anim
+	anim putaway 		models/md5/weapons/fists_view/fists_vr_lower.md5anim
 }
 
 entityDef damage_fists {

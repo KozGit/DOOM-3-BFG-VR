@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 //
 // animation channels
 // these can be changed by modmakers and licensees to be whatever they need.
-const int ANIM_NumAnimChannels		= 5;
+const int ANIM_NumAnimChannels		= 7; // koz was 5,  changed to 7 - added channels for left and right player hands
 const int ANIM_MaxAnimsPerChannel	= 3;
 const int ANIM_MaxSyncedAnims		= 3;
 
@@ -43,6 +43,10 @@ const int ANIMCHANNEL_TORSO			= 1;
 const int ANIMCHANNEL_LEGS			= 2;
 const int ANIMCHANNEL_HEAD			= 3;
 const int ANIMCHANNEL_EYELIDS		= 4;
+// koz add channels for right and left hand;
+const int ANIMCHANNEL_RIGHTHAND		= 5;
+const int ANIMCHANNEL_LEFTHAND		= 6;
+// koz end
 
 // for converting from 24 frames per second to milliseconds
 ID_INLINE int FRAME2MS( int framenum )
@@ -519,7 +523,7 @@ public:
 	void						GetOrigin( int currentTime, idVec3& pos ) const;
 	bool						GetBounds( int currentTime, idBounds& bounds );
 	
-	idAnimBlend*					CurrentAnim( int channelNum );
+	idAnimBlend*				CurrentAnim( int channelNum );
 	void						Clear( int channelNum, int currentTime, int cleartime );
 	void						SetFrame( int channelNum, int animnum, int frame, int currenttime, int blendtime );
 	void						CycleAnim( int channelNum, int animnum, int currenttime, int blendtime );
@@ -546,7 +550,7 @@ public:
 	jointHandle_t				GetJointHandle( const char* name ) const;
 	const char* 				GetJointName( jointHandle_t handle ) const;
 	int							GetChannelForJoint( jointHandle_t joint ) const;
-	bool						GetJointTransform( jointHandle_t jointHandle, int currenttime, idVec3& offset, idMat3& axis );
+	bool						GetJointTransform( jointHandle_t jointHandle, int currenttime, idVec3& offset, idMat3& axis, bool force = false );
 	bool						GetJointLocalTransform( jointHandle_t jointHandle, int currentTime, idVec3& offset, idMat3& axis );
 	
 	const animFlags_t			GetAnimFlags( int animnum ) const;
