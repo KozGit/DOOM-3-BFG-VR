@@ -316,6 +316,8 @@ public:
 	idVec3 throwDirection; // for motion control throwing actions e.g. grenade
 	float throwVelocity;
 	
+	idMat3					chestPivotCorrectAxis; //made these public so could be accessed by hmdgetorientation;
+	idVec3					chestPivotDefaultPos;
 	
 	//float					independentWeaponPitch; // deltas to provide aim independent of body/view orientation
 	//float					independentWeaponYaw;
@@ -407,8 +409,7 @@ public:
 	int						weapon_grabber;
 	
 	
-	idMat3					ik_elbowCorrectAxis[2];
-	//koz end
+
 
 
 	int						heartRate;
@@ -883,6 +884,7 @@ private:
 
 	// koz begin
 	jointHandle_t			neckJoint;
+	jointHandle_t			chestPivotJoint;
 	jointHandle_t			ik_hand[2];
 	jointHandle_t			ik_elbow[2];
 	jointHandle_t			ik_shoulder[2];
@@ -890,6 +892,9 @@ private:
 	bool					handLowered;
 	bool					handRaised;
 
+	//idMat3					chestPivotCorrectAxis; //made these public so could be accessed by hmdge
+	//idVec3					chestPivotDefaultPos;
+	idMat3					ik_elbowCorrectAxis[2];
 	idMat3					ik_handCorrectAxis[2][32];
 	idVec3					handWeaponAttachertoWristJointOffset[2][32];
 	idVec3					handWeaponAttacherToDefaultOffset[2][32];
@@ -1055,6 +1060,7 @@ private:
 	
 	void					ClearFocus();
 	void					UpdateFocus();
+	void					SendPDAEvent( const sysEvent_t* sev );
 	bool					UpdateFocusPDA();
 	void					UpdateLocation();
 	idUserInterface* 		ActiveGui();

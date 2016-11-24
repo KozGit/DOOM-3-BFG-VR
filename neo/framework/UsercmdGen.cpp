@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include"vr\Vr.h" // koz
+#include"d3xp\Game_local.h"
 
 
 idCVar joy_mergedThreshold( "joy_mergedThreshold", "1", CVAR_BOOL | CVAR_ARCHIVE, "If the thresholds aren't merged, you drift more off center" );
@@ -37,7 +38,7 @@ idCVar joy_newCode( "joy_newCode", "1", CVAR_BOOL | CVAR_ARCHIVE, "Use the new c
 idCVar joy_triggerThreshold( "joy_triggerThreshold", "0.05", CVAR_FLOAT | CVAR_ARCHIVE, "how far the joystick triggers have to be pressed before they register as down" );
 idCVar joy_deadZone( "joy_deadZone", "0.2", CVAR_FLOAT | CVAR_ARCHIVE, "specifies how large the dead-zone is on the joystick" );
 idCVar joy_range( "joy_range", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "allow full range to be mapped to a smaller offset" );
-idCVar joy_gammaLook( "joy_gammaLook", "1", CVAR_INTEGER | CVAR_ARCHIVE, "use a log curve instead of a power curve for movement" );
+idCVar joy_gammaLook( "joy_gammaLook", "1", CVAR_INTEGER | CVAR_ARCHIVE, "use a log curve instead of a power curve for movement. If 0 use joy_powerscale val" );
 idCVar joy_powerScale( "joy_powerScale", "2", CVAR_FLOAT | CVAR_ARCHIVE, "Raise joystick values to this power" );
 
 //Carl: Allow analog stick pitch (and yaw) to be disabled
@@ -180,6 +181,7 @@ userCmdString_t	userCmdStrings[] =
 	{ "_impulse37", UB_IMPULSE37 }, // new impulse for headingbeam toggle;
 	{ "_impulse38", UB_IMPULSE38 }, // new impulse for walk in place
 	{ "_impulse39", UB_IMPULSE39 }, // new impulse for freelook
+	{ "_impulse40", UB_IMPULSE40 }, // new impulse for freelook
 	// koz end
 	
 
@@ -1360,7 +1362,7 @@ void idUsercmdGenLocal::JoystickMove2()
 		leftMapped = JoypadFunction( mappedMove, 1.0f, threshold, range, shape, mergedThreshold );
 		rightMapped = JoypadFunction( mappedLook, aimAssist, threshold, range, shape, mergedThreshold );
 
-	//	CircleToSquare( leftMapped.x, leftMapped.y );
+		CircleToSquare( leftMapped.x, leftMapped.y );
 
 		leftMapped = mappedMove;
 		rightMapped = mappedLook;
@@ -1486,7 +1488,56 @@ void idUsercmdGenLocal::MakeCurrent()
 
 		// aim assist
 		AimAssist();
+		float yawdelta = 0;
+		/*
+		if ( vr_movePoint.GetInteger() == 1 && usercmdGen->ButtonState( UB_IMPULSE39 ) )
+		{
+			static idVec3 playerPos;
+			static idVec3 weapPos;
+			static idVec3 vector;
+			static idMat3 playerAxis;
+			static idAngles view2;
+			static float yawdiff;
+			view2.yaw = viewangles[YAW];
+			view2.roll = viewangles[ROLL];
+			view2.pitch = viewangles[PITCH];
+			idAngles hmdAng;
+			idVec3 headDelta;
+			idVec3 bodyDelta;
+			idVec3 absolute;
 
+			idVec3 handPos;
+			idQuat handQuat;
+
+			idPlayer*	player;
+			player = gameLocal.GetLocalPlayer();
+
+			if ( player )
+			{
+				playerPos = player->GetPhysics()->GetOrigin();
+				playerAxis = player->viewAxis;
+				playerPos = player->firstPersonViewOrigin;
+
+
+				commonVr->HMDGetOrientation( hmdAng, headDelta, bodyDelta, absolute, false );
+				commonVr->MotionControlGetHand( 1 - vr_weaponHand.GetInteger(), handPos, handQuat );
+
+				vector = handPos - absolute;
+				vector.Normalize();
+
+				common->Printf( "Vector yaw = %f viewangle yaw %f\n", vector.ToAngles().yaw, viewangles[YAW] );
+
+
+			
+
+				viewangles[YAW] = vector.ToAngles().yaw;// 180;// vector.ToAngles().yaw;
+			//	commonVr->bodyYawOffset += vector.ToAngles().yaw;
+				gameRenderWorld->DebugLine( colorYellow, playerPos, weapPos, 15 );
+			}
+		}
+		*/		
+		/*
+		
 		if ( commonVr->isWalking )
 		{
 			// WIP button pressed
@@ -1506,7 +1557,9 @@ void idUsercmdGenLocal::MakeCurrent()
 
 			}
 		}
-		
+		*/
+
+
 		// check to make sure the angles haven't wrapped
 		if( viewangles[PITCH] - oldAngles[PITCH] > 90 )
 		{

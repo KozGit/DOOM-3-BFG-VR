@@ -245,7 +245,7 @@ public:
 
 	idVec3				trackingOriginOffset;
 	float				trackingOriginYawOffset;
-
+	bool				chestDefaultDefined;
 	idVec3				hmdBodyTranslation;
 	
 	float				independentWeaponYaw;
@@ -419,7 +419,7 @@ extern idCVar	vr_mountedWeaponController;
 extern idCVar	vr_walkSpeedAdjust;
 
 
-
+extern idCVar	vr_movePoint;
 
 extern iVr* commonVr;
 

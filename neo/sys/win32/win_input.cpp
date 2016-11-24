@@ -1331,14 +1331,14 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 			padAxisX[0] = pControllerStateL.rAxis[padAxis[0]].x;
 			padAxisY[0] = pControllerStateL.rAxis[padAxis[0]].y;
 			
-			if ( abs( triggerVal[0] ) < dz ) triggerVal[0] = 0.0f;
+			//if ( abs( triggerVal[0] ) < dz ) triggerVal[0] = 0.0f;
 			if ( triggerVal[0] != oldTriggerVal[0] )
 			{
 				// using (testing) the trigger button instead of reading the analog axis
 				//PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_TRIG, triggerVal[0] * 32767.0f );
 			}
 
-			if ( abs( padAxisX[0] ) < dz ) padAxisX[0] = 0.0f;
+			//if ( abs( padAxisX[0] ) < dz ) padAxisX[0] = 0.0f;
 			if ( padAxisX[0] != oldPadAxisX[0] )
 			{
 				PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_X, padAxisX[0] * 32767.0f );
@@ -1413,14 +1413,14 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 			padAxisX[1] = pControllerStateR.rAxis[padAxis[1]].x;
 			padAxisY[1] = pControllerStateR.rAxis[padAxis[1]].y;
 
-			if ( abs( triggerVal[1] ) < dz ) triggerVal[1] = 0.0f;
+		//	if ( abs( triggerVal[1] ) < dz ) triggerVal[1] = 0.0f;
 			if ( triggerVal[1] != oldTriggerVal[1] )
 			{
 				// using (testing) the trigger button instead of reading the analog axis
 				//PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_STEAMVR_TRIG, triggerVal[1] * 32767.0f );
 			}
 
-			if ( abs( padAxisX[1] ) < dz ) padAxisX[1] = 0.0f;
+		//	if ( abs( padAxisX[1] ) < dz ) padAxisX[1] = 0.0f;
 			if ( padAxisX[1] != oldPadAxisX[1] )
 			{
 				PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_STEAMVR_X, padAxisX[1] * 32767.0f );

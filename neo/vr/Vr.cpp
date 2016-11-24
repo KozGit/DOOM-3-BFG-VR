@@ -227,6 +227,8 @@ iVr::iVr()
 	lastHMDViewAxis = mat3_identity;
 	lastAbsolutePosition = vec3_zero;
 
+	chestDefaultDefined = false;
+	
 	currentFlashlightPosition = FLASH_BODY;
 
 	handInGui = false;
@@ -787,9 +789,25 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 		
 	static idVec3 currentNeckPosition = vec3_zero;
 	static idVec3 lastNeckPosition = vec3_zero;
+
+	static idVec3 currentChestPosition = vec3_zero;
+	static idVec3 lastChestPosition = vec3_zero;
+
+	static float chestLength = 0;
+	static bool chestInitialized = false;
+
+	idVec3 neckToChestVec = vec3_zero;
+	idMat3 neckToChestMat = mat3_identity;
+	idAngles neckToChestAng = ang_zero;
+
 	static idVec3 lastHeadPositionDelta = vec3_zero;
 	static idVec3 lastBodyPositionDelta = vec3_zero;
 	static idVec3 lastAbsolutePosition = vec3_zero;
+
+	static vr::TrackedDevicePose_t lastTrackedPose = { 0.0f };
+	static bool currentlyTracked;
+	
+
 	
 	if ( !hasOculusRift || !hasHMD ) 
 	{
@@ -825,21 +843,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 
 	lastFrame = commonVr->vrFrameNumber;
 	
-	static vr::TrackedDevicePose_t lastTrackedPose = { 0.0f };
-	static bool currentlyTracked;
-
-	//virtual EVRCompositorError WaitGetPoses( VR_ARRAY_COUNT( unRenderPoseArrayCount ) TrackedDevicePose_t* pRenderPoseArray, uint32_t unRenderPoseArrayCount,
-	//	VR_ARRAY_COUNT( unGamePoseArrayCount ) TrackedDevicePose_t* pGamePoseArray, uint32_t unGamePoseArrayCount ) = 0;
-
-
-//	void GetDeviceToAbsoluteTrackingPose( TrackingUniverseOrigin eOrigin, float fPredictedSecondsToPhotonsFromNow, 
-//										VR_ARRAY_COUNT( unTrackedDevicePoseArrayCount ) TrackedDevicePose_t *pTrackedDevicePoseArray, 
-//										uint32_t unTrackedDevicePoseArrayCount )
-
-
 	vr::VRCompositor()->WaitGetPoses( m_rTrackedDevicePose, vr::k_unMaxTrackedDeviceCount, NULL, 0 );
-
-	//m_pHMD->GetDeviceToAbsoluteTrackingPose( vr::TrackingUniverseStanding, 0.0f, m_rTrackedDevicePose, vr::k_unMaxTrackedDeviceCount );
 
 	int m_iValidPoseCount = 0;
 	idStr m_strPoseClasses = "";
@@ -935,11 +939,27 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 
 		hmdAxis = hmd2.ToMat3();
 
-	//	currentNeckPosition = hmdPosition + hmdAxis[0] * -3.0f /*+ hmdAxis[1] * 0.0f */ + hmdAxis[2] * -6.0f; // was -4, -6
-		currentNeckPosition = hmdPosition + hmdAxis[0] * vr_nodalX.GetFloat() /*+ hmdAxis[1] * 0.0f */ + hmdAxis[2] * vr_nodalZ.GetFloat(); 
-	//	commonVr->hmdBodyTranslation = currentNeckPosition;
-		
 	
+		currentNeckPosition = hmdPosition + hmdAxis[0] * vr_nodalX.GetFloat() /*+ hmdAxis[1] * 0.0f */ + hmdAxis[2] * vr_nodalZ.GetFloat(); 
+		if ( !chestInitialized )
+		{
+			if ( chestDefaultDefined )
+			{
+				neckToChestVec = currentNeckPosition - gameLocal.GetLocalPlayer()->chestPivotDefaultPos;
+				chestLength = neckToChestVec.Length();
+				chestInitialized = true;
+				common->Printf( "Chest Initialized, length %f\n", chestLength );
+			}
+		}
+		
+		if ( chestInitialized )
+		{
+			neckToChestVec = currentNeckPosition - gameLocal.GetLocalPlayer()->chestPivotDefaultPos;
+			neckToChestVec.Normalize();
+
+			currentChestPosition = currentNeckPosition + (chestLength * neckToChestVec);
+		}
+
 		bodyPositionDelta = currentNeckPosition - lastNeckPosition;
 		lastBodyPositionDelta = bodyPositionDelta;
 		lastNeckPosition = currentNeckPosition;
@@ -947,8 +967,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 		headPositionDelta = hmdPosition - currentNeckPosition;
 		headPositionDelta.z = hmdPosition.z;
 		bodyPositionDelta.z = 0;
-		//lastHmdPos2 = hmdPosition;
-
+	
 		lastBodyPositionDelta = bodyPositionDelta;
 		lastHeadPositionDelta = headPositionDelta;
 	}

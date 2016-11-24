@@ -2037,6 +2037,13 @@ void idPlayer::Init()
 	{
 		gameLocal.Error( "Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str() );
 	}
+
+	value = spawnArgs.GetString( "bone_chest_pivot", "" );
+	chestPivotJoint = animator.GetJointHandle( value );
+	if ( chestPivotJoint == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str() );
+	}
 	
 	// we need to load the starting joint orientations for the hands so we can compute correct offsets later
 	value = spawnArgs.GetString( "ik_hand1", "" ); // right hand
@@ -2081,6 +2088,8 @@ void idPlayer::Init()
 	// create the idle default pose ( in this case set to default which should tranlsate to pistol_idle )
 	gameEdit->ANIM_CreateAnimFrame( animator.ModelHandle(), animator.GetAnim( animNo )->MD5Anim( 0 ), numJoints, joints, 1, animator.ModelDef()->GetVisualOffset() + modelOffset, animator.RemoveOrigin() );
 
+
+
 	static idVec3 defaultWeapAttachOff[2]; // the default distance between the weapon attacher and the hand joint;
 	defaultWeapAttachOff[0] = joints[ik_handAttacher[0]].ToVec3() - joints[ik_hand[0]].ToVec3(); // default 
 	defaultWeapAttachOff[1] = joints[ik_handAttacher[1]].ToVec3() - joints[ik_hand[1]].ToVec3();
@@ -2101,6 +2110,9 @@ void idPlayer::Init()
 		gameLocal.Error( "Joint ik_elbow2 not found for player anim default\n" );
 	}
 	ik_elbowCorrectAxis[1] = joints[j1].ToMat3();
+
+	chestPivotCorrectAxis = joints[chestPivotJoint].ToMat3();
+	chestPivotDefaultPos = joints[chestPivotJoint].ToVec3();
 
 
 	
@@ -2694,6 +2706,7 @@ void idPlayer::Save( idSaveGame* savefile ) const
 
 	//koz begin
 	savefile->WriteJoint( neckJoint );
+	savefile->WriteJoint( chestPivotJoint );
 
 	for ( i = 0; i < 2; i++ )
 	{
@@ -3046,6 +3059,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 
 	//koz begin
 	savefile->ReadJoint( neckJoint );
+	savefile->ReadJoint( chestPivotJoint );
 
 	for ( i = 0; i < 2; i++ )
 	{
@@ -3302,6 +3316,13 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		gameLocal.Error( "Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str() );
 	}
 		
+
+	value = spawnArgs.GetString( "bone_chest_pivot", "" );
+	chestPivotJoint = animator.GetJointHandle( value );
+	if ( chestPivotJoint == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str() );
+	}
 	//re-init the VR ui models
 	laserSightHandle = -1;
 	headingBeamHandle = -1;
@@ -7040,6 +7061,25 @@ void idPlayer::ClearFocus()
 }
 
 
+void idPlayer::SendPDAEvent( const sysEvent_t* sev )
+{
+	if ( common->Dialog().IsDialogActive() || game->Shell_IsActive() ) //commonVr->VR_GAME_PAUSED )
+	{
+		if ( common->Dialog().IsDialogActive() )
+		{
+			common->Dialog().HandleDialogEvent( sev );
+		}
+		else
+		{
+			game->Shell_HandleGuiEvent( sev );
+		}
+	}
+	else
+	{
+		HandleGuiEvents( sev );
+	}
+}
+
 /*
 ================
 idPlayer::UpdateFocusPDA
@@ -7100,6 +7140,13 @@ bool idPlayer::UpdateFocusPDA()
 		// wait for lower weapon to drop the hand to hidedistance and hide the weapon model
 		// then raise the empty hand with pointy finger back to original position
 				
+		if ( !touching )
+		{
+			// send a cursor event to get it off the screen since it is hidden.
+			ev = sys->GenerateMouseMoveEvent( -2000, -2000 );
+			SendPDAEvent( &ev );
+		}
+
 		commonVr->handInGui = true;
 		focusTime = gameLocal.time + FOCUS_TIME;
 				
@@ -7142,6 +7189,8 @@ bool idPlayer::UpdateFocusPDA()
 		{
 			//send mouse button up
 			ev = sys->GenerateMouseButtonEvent( 1, false );
+			SendPDAEvent( &ev );
+			/*
 			if ( common->Dialog().IsDialogActive() || game->Shell_IsActive()  ) //commonVr->VR_GAME_PAUSED )
 			{
 				if ( common->Dialog().IsDialogActive() )
@@ -7157,6 +7206,7 @@ bool idPlayer::UpdateFocusPDA()
 			{
 				HandleGuiEvents( &ev );
 			}
+			*/
 			touching = false;
 		}
 		else
@@ -7169,6 +7219,9 @@ bool idPlayer::UpdateFocusPDA()
 
 					//common->Printf( "Sending mouse off 1 fraction = %f\n",trace.fraction );
 					ev = sys->GenerateMouseButtonEvent( 1, false );
+					SendPDAEvent( &ev );
+
+					/*
 					if ( common->Dialog().IsDialogActive() || game->Shell_IsActive()  ) // commonVr->VR_GAME_PAUSED )
 					{
 						if ( common->Dialog().IsDialogActive() )
@@ -7184,6 +7237,7 @@ bool idPlayer::UpdateFocusPDA()
 					{
 						HandleGuiEvents( &ev );
 					}
+					*/
 					touching = false;
 				}
 				else
@@ -7192,6 +7246,8 @@ bool idPlayer::UpdateFocusPDA()
 					{
 						// clamp the mouse to the corner
 						ev = sys->GenerateMouseMoveEvent( -2000, -2000 );
+						SendPDAEvent( &ev );
+						/*
 						if ( common->Dialog().IsDialogActive() || game->Shell_IsActive() )//(commonVr->VR_GAME_PAUSED)
 						{
 							if ( common->Dialog().IsDialogActive() )
@@ -7207,9 +7263,13 @@ bool idPlayer::UpdateFocusPDA()
 						{
 							HandleGuiEvents( &ev );
 						}
-
+						*/
+						
 						// move to an absolute position
 						ev = sys->GenerateMouseMoveEvent( pt.x * pdaScrX, pt.y * pdaScrY );//( pt.x * SCREEN_WIDTH, pt.y * SCREEN_HEIGHT );
+						SendPDAEvent( &ev );
+						
+						/*
 						if ( common->Dialog().IsDialogActive() || game->Shell_IsActive() )//(commonVr->VR_GAME_PAUSED)
 						{
 							if ( common->Dialog().IsDialogActive() )
@@ -7225,6 +7285,7 @@ bool idPlayer::UpdateFocusPDA()
 						{
 							HandleGuiEvents( &ev );
 						}
+						*/
 					}
 				}
 			}
@@ -7239,6 +7300,9 @@ bool idPlayer::UpdateFocusPDA()
 					{
 						// clamp the mouse to the corner
 						ev = sys->GenerateMouseMoveEvent( -2000, -2000 );
+						SendPDAEvent( &ev );
+						
+						/*
 						if ( common->Dialog().IsDialogActive() || game->Shell_IsActive() )//(commonVr->VR_GAME_PAUSED)
 						{
 							if ( common->Dialog().IsDialogActive() )
@@ -7254,9 +7318,13 @@ bool idPlayer::UpdateFocusPDA()
 						{
 							HandleGuiEvents( &ev );
 						}
+						*/
 
 						// move to an absolute position
 						ev = sys->GenerateMouseMoveEvent( pt.x * pdaScrX, pt.y * pdaScrY );//( pt.x * SCREEN_WIDTH, pt.y * SCREEN_HEIGHT );
+						SendPDAEvent( &ev );
+						
+						/*
 						if ( common->Dialog().IsDialogActive() || game->Shell_IsActive() )//(commonVr->VR_GAME_PAUSED)
 						{
 							if ( common->Dialog().IsDialogActive() )
@@ -7272,9 +7340,12 @@ bool idPlayer::UpdateFocusPDA()
 						{
 							HandleGuiEvents( &ev );
 						}
-
+						*/
 						//send mouse button down
 						ev = sys->GenerateMouseButtonEvent( 1, true );
+						SendPDAEvent( &ev );
+						
+						/*
 						if ( common->Dialog().IsDialogActive() || game->Shell_IsActive() )//(commonVr->VR_GAME_PAUSED)
 						{
 							if ( common->Dialog().IsDialogActive() )
@@ -7290,7 +7361,7 @@ bool idPlayer::UpdateFocusPDA()
 						{
 							HandleGuiEvents( &ev );
 						}
-
+						*/
 						//Rumble the controller to let player know they scored a touch.
 						//SetControllerShake( 0.5f, 100, 0.3f, 60 ); // these are the values from the machine gun
 						SetControllerShake( 0.1f, 12, 0.8f, 12 );
@@ -7302,6 +7373,10 @@ bool idPlayer::UpdateFocusPDA()
 
 					//send mouse button up
 					ev = sys->GenerateMouseButtonEvent( 1, false );
+					SendPDAEvent( &ev );
+
+					/*
+					
 					if ( common->Dialog().IsDialogActive() || game->Shell_IsActive() )//(commonVr->VR_GAME_PAUSED)
 					{
 						if ( common->Dialog().IsDialogActive() )
@@ -7317,6 +7392,7 @@ bool idPlayer::UpdateFocusPDA()
 					{
 						HandleGuiEvents( &ev );
 					}
+					*/
 					touching = false;
 				}
 			}
@@ -9058,7 +9134,7 @@ void idPlayer::PerformImpulse( int impulse )
 			break;
 		}
 
-		
+				
 		// Koz Begin
 		case IMPULSE_32: // HMD/Body orienataion reset. Make fisrtperson axis match view direction.
 		{
@@ -9101,6 +9177,12 @@ void idPlayer::PerformImpulse( int impulse )
 			ToggleHeadingBeam();
 		}
 
+		case IMPULSE_40:
+		{
+			//bring up the system menu
+			void Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
+			Sys_QueEvent( SE_KEY, K_ESCAPE, 1, 0, NULL, 0 );
+		}
 		// Koz end
 		
 	}
@@ -10152,7 +10234,7 @@ void idPlayer::Move()
 
 
 				
-				if ( vr_movePoint.GetInteger() == 1 && usercmd.forwardmove > 0 && commonVr->VR_USE_MOTION_CONTROLS && !vr_controllerStandard.GetInteger()==1 )
+				if ( vr_movePoint.GetInteger() == 1 &&  /*usercmd.forwardmove > 0 &&*/ commonVr->VR_USE_MOTION_CONTROLS && !vr_controllerStandard.GetInteger()==1 )
 				{
 					static idMat3 moveAx = mat3_identity;
 					static idQuat moveQuat = idQuat_zero;
@@ -10164,7 +10246,7 @@ void idPlayer::Move()
 						commonVr->MotionControlGetHand( 1 - vr_weaponHand.GetInteger(), pos1, moveQuat );
 						ang1 = idAngles( 0.0, moveQuat.ToAngles().yaw, 0.0 );
 
-						if ( fabs( ang1.yaw ) > vr_forward_keyhole.GetFloat() )
+						if ( 1 ) fabs( ang1.yaw ) > vr_forward_keyhole.GetFloat() )
 						{
 							moveAx = ang1.ToMat3() * axis;
 							
@@ -10177,7 +10259,7 @@ void idPlayer::Move()
 						//SetAngles( ang1 );
 					
 				}
-				else
+				else 
 				{
 					physicsObj.SetPlayerInput( usercmd, axis[0] );
 				}
