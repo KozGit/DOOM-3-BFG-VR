@@ -46,6 +46,11 @@ If you have questions concerning this license or the applicable additional terms
 #define HAND_RIGHT 0
 #define HAND_LEFT 1
 
+#define POSE_FINGER 8
+#define POSE_INDEX 1
+#define POSE_THUMB 2
+#define POSE_GRIP 4
+
 typedef enum
 {
 	MOTION_NONE,
@@ -172,7 +177,9 @@ public:
 	ovrPosef            EyeRenderPose[2];
 
 	ovrPosef			handPose[2];
-			
+
+	int					fingerPose[2];
+				
 	idVec3				lastViewOrigin;
 	idMat3				lastViewAxis;
 	
@@ -538,6 +545,8 @@ extern idCVar vr_slotDisable;
 
 extern idCVar vr_handSwapsAnalogs;
 extern idCVar vr_autoSwitchControllers;
+
+extern idCVar vr_useHandPoses;
 
 extern iVr* commonVr;
 extern iVoice* commonVoice;

@@ -230,8 +230,8 @@ model model_sp_marine {
 	anim bfg_raise						models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
 	anim bfg_idle						models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
 //	anim bfg_aim						models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
-//	anim bfg_startfire					models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
-	anim bfg_fire						models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
+//	anim bfg_startfire					models/md5/characters/npcs/playermoves/ik_bfg_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_fire_vrik.md5anim
+	anim bfg_fire						models/md5/characters/npcs/playermoves/ik_bfg_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_bfg_fire_vrik.md5anim
 	anim bfg_reload						models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
 	anim bfg_lower						models/md5/characters/npcs/playermoves/ik_bfg_idle_vrik.md5anim
 
@@ -240,6 +240,16 @@ model model_sp_marine {
 //	anim soulcube_aim					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
 	anim soulcube_fire					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
 	anim soulcube_lower					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
+	
+	
+	anim finger_idle					models/md5/characters/npcs/playermoves/ik_idlenothumb_vrik.md5anim
+	anim finger_idleindex				models/md5/characters/npcs/playermoves/ik_idleindex_vrik.md5anim
+	anim finger_idlethumb				models/md5/characters/npcs/playermoves/ik_idlethumb_vrik.md5anim
+	anim finger_idleindexthumb			models/md5/characters/npcs/playermoves/ik_idleindexthumb_vrik.md5anim
+	anim finger_idlegrip				models/md5/characters/npcs/playermoves/ik_thumbsupfistpoint_vrik.md5anim
+	anim finger_idleindexgrip			models/md5/characters/npcs/playermoves/ik_thumbsupfist_vrik.md5anim
+	anim finger_idlethumbgrip			models/md5/characters/npcs/playermoves/ik_point_vrik.md5anim
+	anim finger_idleindexthumbgrip		models/md5/characters/npcs/playermoves/ik_fists_idle_vrik.md5anim
 }
 
 /***********************************************************************

@@ -198,30 +198,30 @@ void player::SetFlashHandPose() {
 	{
 		animHand = ANIMCHANNEL_LEFTHAND;
 	}
-	
-	
+			
 	if ( flashHand != lastFlashHand || flashHandState != lastFlashHandState || flashState != lastFlashState )
 	{
 		lastFlashHand = flashHand;
 		lastFlashHandState = flashHandState;
 		lastFlashState = flashState;
 			
+		flashHandState = flashHandState & 15;
 			
 		if ( flashHandState == 3)
 		{
-			animState( animHand, "Flashlight_Hand_Normal" , 1 ); // koz
+			animState( animHand, "Flashlight_Hand_Normal" , 1 ); 
 		}
 		
 		if ( flashHandState == 2)
 		{
 			if ( flashState == 1 )
 			{
-				animState( animHand, "Flashlight_Hand_On" , 1 ); // koz
+				animState( animHand, "Flashlight_Hand_On" , 1 ); 
 				
 			}
 			if ( flashState == 0 )
 			{
-				animState( animHand, "Flashlight_Hand_Off" , 1 ); // koz
+				animState( animHand, "Flashlight_Hand_Off" , 1 ); 
 				
 			}
 		}
@@ -229,16 +229,18 @@ void player::SetFlashHandPose() {
 		if ( flashHandState == 1 )
 		{
 			
-			animState( animHand, "Flashlight_Hand_Fist" , 1 ); // koz
+			animState( animHand, "Flashlight_Hand_Fist" , 1 ); 
 			
 		}
 		
 		if ( flashHandState == 0 )
 		{
 			
-			animState( animHand, "Flashlight_Hand_Empty" , 1 ); // koz
+			animState( animHand, "Flashlight_Hand_Empty" , 2 ); 
 			
 		}
+		
+		flashHandState = lastFlashHandState;
 	}
 }
 
@@ -261,10 +263,11 @@ void player::SetWeaponHandPose() {
 	{
 		lastWeaponHand = weaponHand;
 		lastWeaponHandState = weaponHandState;
-	
+		weaponHandState = weaponHandState & 15;
+		
 		if ( weaponHandState == 0 ) 
 		{
-			animState( weaponHandChannel, "Weapon_Hand_Empty",6 );
+			animState( weaponHandChannel, "Weapon_Hand_Empty",2 );
 		}
 		
 		if ( weaponHandState == 1 ) 
@@ -274,8 +277,9 @@ void player::SetWeaponHandPose() {
 	
 		if ( weaponHandState == 2 ) 
 		{
-			animState( weaponHandChannel, "Weapon_Hand_Gui",6 );
+			animState( weaponHandChannel, "Weapon_Hand_Gui",2 );
 		}
+		weaponHandState = lastWeaponHandState;
 	}
 }
 
@@ -297,6 +301,8 @@ void player::ForceWeaponHandPose() {
 	lastWeaponHand = weaponHand;
 	lastWeaponHandState = weaponHandState;
 
+	weaponHandState = weaponHandState & 15;
+	
 	if ( weaponHandState == 0 ) 
 	{
 		animState( weaponHandChannel, "Weapon_Hand_Empty",6 );
@@ -312,6 +318,8 @@ void player::ForceWeaponHandPose() {
 		animState( weaponHandChannel, "Weapon_Hand_Gui",6 );
 	}
 
+	weaponHandState = lastWeaponHandState;
+	
 }
 	
 
@@ -941,14 +949,77 @@ void player::Flashlight_Hand_Fist() {
 
 void player::Flashlight_Hand_Empty()
 {
+		//float flashChannel;
 		
-		if ( flashHand == 0 )
+		//if ( flashHand == 0 )
+		//{
+		//	flashChannel = ANIMCHANNEL_RIGHTHAND;
+		//	//playAnim( ANIMCHANNEL_RIGHTHAND, "initial" ); 
+		//}
+		//else
+		//{
+		//	flashChannel = ANIMCHANNEL_LEFTHAND;
+		//}
+		//flashChannel = ANIMCHANNEL_LEFTHAND;
+		//float pose;
+	
+		if ( flashHandState >= 16 ) 
 		{
-			playAnim( ANIMCHANNEL_RIGHTHAND, "initial" ); 
+			//pose = flashHandState;
+			//pose = getFlashHandState();
+			//pose &= 248;
+			//pose = pose / 8;
+			flashHandState = flashHandState & 112;
+			flashHandState = flashHandState / 16;
+			
+			// flashhand anim channel =  ( ANIMCHANNEL_RIGHTHAND + flashHand )
+			
+			if ( flashHandState == 0 )
+			{
+				playAnim( ( ANIMCHANNEL_RIGHTHAND + flashHand ), "finger_idle" ); 
+			}
+			
+			if ( flashHandState == 1 )
+			{
+				playAnim( ( ANIMCHANNEL_RIGHTHAND + flashHand ), "finger_idleindex" ); 
+			}
+			
+			if ( flashHandState == 2 )
+			{
+				playAnim( ( ANIMCHANNEL_RIGHTHAND + flashHand ), "finger_idlethumb" ); 
+			}
+			
+			if ( flashHandState == 3 )
+			{
+				playAnim( ( ANIMCHANNEL_RIGHTHAND + flashHand ), "finger_idleindexthumb" ); 
+			}
+			
+			if ( flashHandState == 4 )
+			{
+				playAnim( ( ANIMCHANNEL_RIGHTHAND + flashHand ), "finger_idlegrip" ); 
+			}
+			
+			if ( flashHandState == 5 )
+			{
+				playAnim( ( ANIMCHANNEL_RIGHTHAND + flashHand ), "finger_idleindexgrip" ); 
+			}
+			
+			if ( flashHandState == 6 )
+			{
+				playAnim( ( ANIMCHANNEL_RIGHTHAND + flashHand ), "finger_idlethumbgrip" ); 
+			}
+			
+			if ( flashHandState == 7 )
+			{
+				playAnim( ( ANIMCHANNEL_RIGHTHAND + flashHand ), "finger_idleindexthumbgrip" ); 
+			}
+			
+			flashHandState = lastFlashHandState;
 		}
 		else
 		{
-			playAnim( ANIMCHANNEL_LEFTHAND, "initial" ); 
+			//playAnim( flashChannel, "initial" ); 
+			playAnim( ( ANIMCHANNEL_RIGHTHAND + flashHand ), "finger_idle" ); 
 		}
 }
 
@@ -977,7 +1048,66 @@ void player::Flashlight_Hand_On() {
 }
 
 void player::Weapon_Hand_Empty() {
-		playAnim( weaponHandChannel, "initial" ); 
+		//playAnim( weaponHandChannel, "initial" ); 
+		
+		
+		if ( weaponHandState >= 16 ) 
+		{
+			weaponHandState  = weaponHandState & 112;
+			weaponHandState = weaponHandState / 16;
+			//pose &= 248;
+			//pose = pose / 8;
+		 
+		
+			if ( weaponHandState == 0 )
+			{
+				playAnim( weaponHandChannel, "finger_idle" ); 
+			}
+			
+			if ( weaponHandState == 1 )
+			{
+				playAnim( weaponHandChannel, "finger_idleindex" ); 
+			}
+			
+			if ( weaponHandState == 2 )
+			{
+				playAnim( weaponHandChannel, "finger_idlethumb" ); 
+			}
+			
+			if ( weaponHandState == 3 )
+			{
+				playAnim( weaponHandChannel, "finger_idleindexthumb" ); 
+			}
+			
+			if ( weaponHandState == 4 )
+			{
+				playAnim( weaponHandChannel, "finger_idlegrip" ); 
+			}
+			
+			if ( weaponHandState == 5 )
+			{
+				playAnim( weaponHandChannel, "finger_idleindexgrip" ); 
+			}
+			
+			if ( weaponHandState == 6 )
+			{
+				playAnim( weaponHandChannel, "finger_idlethumbgrip" ); 
+			}
+			
+			if ( weaponHandState == 7 )
+			{
+				playAnim( weaponHandChannel, "finger_idleindexthumbgrip" ); 
+			}
+			
+			weaponHandState = lastWeaponHandState;
+			
+		}
+		else
+		{
+			//playAnim( weaponHandChannel, "initial" ); 
+			playAnim( weaponHandChannel, "finger_idle" ); 
+		}
+	
 		
 }
 
@@ -988,6 +1118,60 @@ void player::Weapon_Hand_Normal() {
 }
 
 void player::Weapon_Hand_Gui() {
-		playAnim( weaponHandChannel, "finger_gui" ); 
+				
+		if ( weaponHandState >= 16 ) 
+		{
+			weaponHandState = weaponHandState & 112;
+			weaponHandState = weaponHandState / 16;
+			//pose &= 248;
+			//pose = pose / 8;
+		 
+		
+			if ( weaponHandState == 0 )
+			{
+				playAnim( weaponHandChannel, "finger_idle" ); 
+			}
+			
+			if ( weaponHandState == 1 )
+			{
+				playAnim( weaponHandChannel, "finger_idleindex" ); 
+			}
+			
+			if ( weaponHandState == 2 )
+			{
+				playAnim( weaponHandChannel, "finger_idlethumb" ); 
+			}
+			
+			if ( weaponHandState == 3 )
+			{
+				playAnim( weaponHandChannel, "finger_idleindexthumb" ); 
+			}
+			
+			if ( weaponHandState == 4 )
+			{
+				playAnim( weaponHandChannel, "finger_idlegrip" ); 
+			}
+			
+			if ( weaponHandState == 5 )
+			{
+				playAnim( weaponHandChannel, "finger_idleindexgrip" ); 
+			}
+			
+			if ( weaponHandState == 6 )
+			{
+				playAnim( weaponHandChannel, "finger_idlethumbgrip" ); 
+			}
+			
+			if ( weaponHandState == 7 )
+			{
+				playAnim( weaponHandChannel, "finger_idleindexthumbgrip" ); 
+			}
+			
+			weaponHandState = lastWeaponHandState;
+		}
+		else
+		{
+			playAnim( weaponHandChannel, "finger_gui" ); 
+		}
 		
 }

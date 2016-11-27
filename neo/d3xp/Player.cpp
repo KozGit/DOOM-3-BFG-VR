@@ -13097,6 +13097,7 @@ void idPlayer::Think()
 	//	common->Printf( "HideOffset = %f\n", weapon->hideOffset );
 		
 		SetWeaponHandPose();
+		SetFlashHandPose();
 		
 	}
 	else
@@ -13107,7 +13108,6 @@ void idPlayer::Think()
 		// ...then correct if needed.
 		RunPhysics_RemoteClientCorrection();
 	}
-
 
 	if ( !g_stopTime.GetBool() ) // && !commonVr->VR_GAME_PAUSED )  // Koz pause vr
 	{
@@ -13143,7 +13143,7 @@ void idPlayer::Think()
 		UpdateLocation();
 		
 		// update player script
-		UpdateScript();
+		UpdateScript(); 
 		
 		// service animations
 		if( !spectating && !af.IsActive() && !gameLocal.inCinematic )
@@ -13321,7 +13321,6 @@ void idPlayer::Think()
 		headRenderEnt->suppressShadowInLightID = LIGHTID_VIEW_MUZZLE_FLASH + entityNumber;
 	}
 	
-
 
 	if ( !g_stopTime.GetBool() ) //&& !commonVr->VR_GAME_PAUSED )  // koz fixme pause in VR
 	{
@@ -16740,8 +16739,8 @@ void idPlayer::CalculateRenderView()
 				{
 					//common->Printf( "idPlayer::CalculateRenderView calling SelectWeapon for PDA\nPDA Forced = %i, PDAForceToggle = %i\n",commonVr->PDAforced,commonVr->PDAforcetoggle );
 					SelectWeapon( weapon_pda, true );
-
-					const function_t* func;
+					SetWeaponHandPose();
+					/* const function_t* func;
 					func = scriptObject.GetFunction( "SetWeaponHandPose" );
 					if ( func )
 					{
@@ -16751,7 +16750,7 @@ void idPlayer::CalculateRenderView()
 						gameLocal.frameCommandThread->Execute();
 
 					}
-
+					*/
 				}
 				else
 				{
@@ -17338,7 +17337,7 @@ void idPlayer::Event_GetWeaponHandState()
 	// 2 = pointy gui finger 
 	
 	int handState = 0;
-	
+	int fingerPose = 0;
 	if ( commonVr->handInGui || commonVr->PDAforcetoggle || currentWeapon == weapon_pda ) 
 	{
 		handState = 2 ;
@@ -17348,7 +17347,17 @@ void idPlayer::Event_GetWeaponHandState()
 
 		handState = 1 ;
 	}
-		
+	
+	
+	if ( handState != 1 && vr_useHandPoses.GetBool() && !commonVr->PDAforcetoggle && !commonVr->PDAforced )
+	{
+		fingerPose = vr_weaponHand.GetInteger() == 0 ? commonVr->fingerPose[HAND_RIGHT] : commonVr->fingerPose[HAND_LEFT];
+		fingerPose = fingerPose << 4;
+
+		handState += fingerPose;
+		//common->Printf( "Weapon hand finger pose = %d, %d\n", handState, fingerPose );
+	}
+	
 	idThread::ReturnInt( handState );
 }
 
@@ -17382,26 +17391,34 @@ void idPlayer::Event_GetFlashHandState()
 	// 0 = hand empty no weapon
 	// 1 = fist (no flashlight)
 	// 2 = flashlight
-	// 3 = normal idle hand anim - used for holding PDA.
+	// 3 = normal weapon idle hand anim - used for holding PDA.
 			
 	
 	int flashHand = 1;
 	
-	if ( spectating || !weaponEnabled || hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
-	{
-		flashHand = 0;
-	}
-	
-	else if ( weapon->IdentifyWeapon() == WEAPON_PDA )
+	if ( weapon->IdentifyWeapon() == WEAPON_PDA )
 	{
 		flashHand = 3;
 	}
+	else if ( spectating || !weaponEnabled || hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
+	{
+		flashHand = 0;
+	}
+		 
 	//else if ( commonVr->currentFlashlightPosition == FLASH_HAND && !spectating && weaponEnabled &&!hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	else if ( commonVr->currentFlashlightPosition == FLASH_HAND ) //&& !spectating && weaponEnabled &&!hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
 		flashHand = 2;
 	}
 	
+	if ( flashHand <= 1 && vr_useHandPoses.GetBool() )
+	{
+		int fingerPose;
+		fingerPose = vr_weaponHand.GetInteger() != 0 ? commonVr->fingerPose[HAND_RIGHT] : commonVr->fingerPose[HAND_LEFT];
+		fingerPose = fingerPose << 4;
+		//common->Printf( "Flash hand finger pose = %d , %d\n ", flashHand, fingerPose );
+		flashHand += fingerPose;
+	}
 	idThread::ReturnInt( flashHand );
 
 }

@@ -2138,13 +2138,20 @@ models/characters/male_npc/soldier/soldier
 
 models/characters/male_npc/soldier/soldier_arm2
 {
-    noselfShadow
-	clamp
-	unsmoothedTangents
-	flesh
-	forceOverlays
-	//noShadows
+  //  noselfShadow
+	//clamp
+	//unsmoothedTangents
+	//flesh
+	//forceOverlays
 	
+	
+	 noSelfShadow
+	//unsmoothedTangents
+	//flesh
+	//forceOverlays
+	//clamp
+	//collision	
+	//noShadows
 
 
 	{	
@@ -2155,26 +2162,31 @@ models/characters/male_npc/soldier/soldier_arm2
 	}
 
 	
-		renderbump  -size 1024 3072 -trace 0.03 -colorMap -aa 2  models/characters/male_npc/soldier/soldier_local.tga models/characters/male_npc/soldier/soldier_hi.lwo
+		renderbump  -size 512 1536 -trace 0.03 -colorMap -aa 2  models/characters/male_npc/soldier/soldier_local.tga models/characters/male_npc/soldier/soldier_hi.lwo
 		//diffusemap	  models/characters/male_npc/soldier/soldier_new.tga
-		diffusemap	  models/characters/male_npc/soldier/soldier_arm2.tga
-
+		
+		{
+			blend diffusemap
+			map	  models/characters/male_npc/soldier/soldier_arm2.tga
+		}
+		//bumpmap  models/characters/male_npc/soldier/soldier_arm2_local.tga
+		//specularmap	models/characters/male_npc/soldier/soldier_arm2_s.tga
 	
 	{
 		blend bumpmap
-	//	map  addnormals(models/characters/male_npc/soldier/soldier_new_local.tga, heightmap(models/characters/male_npc/soldier/soldier_new_h.tga, 1 ) )
-		map  addnormals(models/characters/male_npc/soldier/soldier_arm2_local.tga, heightmap(models/characters/male_npc/soldier/soldier_arm2_h.tga, 1 ) )
- 		  
+	////	map  addnormals(models/characters/male_npc/soldier/soldier_new_local.tga, heightmap(models/characters/male_npc/soldier/soldier_new_h.tga, 1 ) )
+		map  addnormals(models/characters/male_npc/soldier/soldier_arm2_local.tga,  heightmap(models/characters/male_npc/soldier/soldier_arm21_h.tga, 5 ) )
+ 		
      	}
 		
-	{
-		blend	specularmap	
-		//map	models/characters/male_npc/soldier/soldier_new_s.tga
-		map	models/characters/male_npc/soldier/soldier_arm2_s.tga
-		red	.3
-		green	.3	
-		blue	.3
-	}
+	//{
+	//	blend	specularmap	
+		////map	models/characters/male_npc/soldier/soldier_new_s.tga
+	//	map	models/characters/male_npc/soldier/soldier_arm2_s.tga
+	//	red	.3
+	//	green	.3	
+	//	blue	.3
+	//}
 
 
 

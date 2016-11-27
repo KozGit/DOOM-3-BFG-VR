@@ -182,6 +182,7 @@ idCVar vr_teleportShowAimAssist( "vr_teleportShowAimAssist", "0", CVAR_INTEGER |
 idCVar vr_teleportButtonMode( "vr_teleportButtonMode", "0", CVAR_BOOL | CVAR_ARCHIVE, "0 = Press aim, release teleport.\n1 = 1st press aim, 2nd press teleport" );
 idCVar vr_teleportHint( "vr_teleportHint", "0", CVAR_BOOL | CVAR_ARCHIVE, "" ); // koz blech hack - used for now to keep track if the game has issued the player the hint about ducking when the teleport target is red.
 
+idCVar vr_useHandPoses( "vr_useHandPoses", "0", CVAR_BOOL | CVAR_ARCHIVE, "If using oculus touch, enable finger poses when hands are empty or in guis" );
 // Koz end
 // Carl
 idCVar vr_teleport( "vr_teleport", "2", CVAR_INTEGER | CVAR_ARCHIVE, "Player can teleport at will. 0 = disabled, 1 = gun sight, 2 = right hand, 3 = left hand, 4 = head", 0, 4 );
@@ -333,6 +334,9 @@ iVr::iVr()
 	handRoll[0] = 0.0f;
 	handRoll[1] = 0.0f;
 
+	fingerPose[0] = 0;
+	fingerPose[1] = 0;
+	
 	angles[3] = { 0.0f };
 
 	swfRenderMode = RENDERING_NORMAL;

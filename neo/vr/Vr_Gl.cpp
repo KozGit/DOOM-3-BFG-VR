@@ -603,7 +603,8 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 				glBindFramebuffer( GL_READ_FRAMEBUFFER, oculusMirrorFboId );
 				glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 
-				glBlitFramebuffer( 0, mirrorH, mirrorW, 0, 0, 0, mirrorW, mirrorH, GL_COLOR_BUFFER_BIT, GL_NEAREST );
+				//glBlitFramebuffer( 0, mirrorH, mirrorW, 0, 0, 0, mirrorW, mirrorH, GL_COLOR_BUFFER_BIT, GL_NEAREST );
+				glBlitFramebuffer( 0, mirrorH, mirrorW, 0, 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST );
 				glBindFramebuffer( GL_READ_FRAMEBUFFER, 0 );
 			}
 			else
@@ -614,7 +615,8 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 				backEnd.glState.currentFramebuffer = NULL;
 			
 				// draw the left eye texture.				
-				glViewport( 0, 0, commonVr->hmdWidth / 4, commonVr->hmdHeight / 2 );
+			//	glViewport( 0, 0, commonVr->hmdWidth / 4, commonVr->hmdHeight / 2 );
+				glViewport( 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
 				GL_SelectTexture( 0 );
 				leftCurrent->Bind();
 				glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
@@ -853,7 +855,7 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 				glBindFramebuffer(GL_READ_FRAMEBUFFER, oculusMirrorFboId);
 				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-				glBlitFramebuffer(0, mirrorH, mirrorW, 0, 0, 0, mirrorW, mirrorH, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+				glBlitFramebuffer( 0, mirrorH, mirrorW, 0, 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST );
 				glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 			}
 			else
@@ -864,7 +866,7 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 				backEnd.glState.currentFramebuffer = NULL;
 
 				// draw the left eye texture.				
-				glViewport(0, 0, commonVr->hmdWidth / 4, commonVr->hmdHeight / 2);
+				glViewport( 0, 0, glConfig.nativeScreenWidth, glConfig.nativeScreenHeight );
 				GL_SelectTexture(0);
 				leftCurrent->Bind();
 				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
