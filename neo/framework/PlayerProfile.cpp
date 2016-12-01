@@ -153,6 +153,7 @@ bool idPlayerProfile::Serialize( idSerializer& ser )
 	idDict cvarDict;
 	cvarSystem->MoveCVarsToDict( CVAR_ARCHIVE, cvarDict );
 	cvarDict.Serialize( ser );
+#if 0
 	if( ser.IsReading() )
 	{
 		// Never sync these cvars with Steam because they require an engine or video restart
@@ -163,6 +164,7 @@ bool idPlayerProfile::Serialize( idSerializer& ser )
 		//cvarSystem->SetCVarsFromDict( cvarDict ); //Carl: This makes the .cfg files useless, so comment it out.
 		common->StartupVariable( NULL );
 	}
+#endif
 	
 	// The dlcReleaseVersion is used to determine that new content is available
 	ser.SerializePacked( dlcReleaseVersion );
@@ -197,7 +199,9 @@ bool idPlayerProfile::Serialize( idSerializer& ser )
 			{
 				idStr bind;
 				ser.SerializeString( bind );
+#if 0
 				idKeyInput::SetBinding( i, bind.c_str() );
+#endif
 			}
 		}
 	}
