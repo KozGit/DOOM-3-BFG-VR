@@ -869,13 +869,13 @@ void idMenuHandler_Shell::SetupPCOptions()
 		}
 		else
 		{
-#if !defined ( ID_RETAIL )
-			navOptions.Append( "DEV" );	// DEV
-#endif
 			navOptions.Append( "#str_swf_campaign" );	// singleplayer
 			navOptions.Append( "#str_swf_multiplayer" );	// multiplayer
 			navOptions.Append( "#str_swf_settings" );	// settings
 			navOptions.Append( "#str_swf_credits" );	// credits
+#if !defined ( ID_RETAIL )
+			navOptions.Append( "DEV" );	// DEV
+#endif
 			navOptions.Append( "#str_swf_quit" );	// quit
 			
 			
