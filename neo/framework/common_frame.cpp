@@ -63,7 +63,7 @@ code, and is potentially hazardous.  For now, the overlap will be restricted to 
 which should also be nicely contained.
 
 */
-#define DEFAULT_FIXED_TIC "1"
+#define DEFAULT_FIXED_TIC "0"
 #define DEFAULT_NO_SLEEP "0"
 
 idCVar com_deltaTimeClamp( "com_deltaTimeClamp", "50", CVAR_INTEGER, "don't process more than this time in a single frame" );
@@ -789,12 +789,11 @@ void idCommonLocal::Frame()
 				break;
 			}
 			
+			// How much time to wait before running the next frame,
+			// based on com_engineHz
+			const int frameDelay = FRAME_TO_MSEC( gameFrame + 1 ) - FRAME_TO_MSEC( gameFrame );
 			for( ;; )
 			{
-				// How much time to wait before running the next frame,
-				// based on com_engineHz
-
-				const int frameDelay = FRAME_TO_MSEC( gameFrame + 1 ) - FRAME_TO_MSEC( gameFrame );
 				if( gameTimeResidual < frameDelay )
 				{
 					break;
@@ -807,6 +806,12 @@ void idCommonLocal::Frame()
 			
 			if( numGameFrames > 0 )
 			{
+				// debt forgiveness
+				if( gameTimeResidual < frameDelay/4.0f )
+				{
+					gameTimeResidual = 0;
+				}
+
 				// ready to actually run them
 				break;
 			}
