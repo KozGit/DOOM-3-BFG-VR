@@ -87,6 +87,24 @@ idCVar ftz( "ftz", "0", CVAR_FLOAT, "" );
 
 extern idCVar g_demoMode;
 
+const idVec3 neckOffset(-3,0,-5);
+const int waistZ = -22.f;
+
+idCVar vr_debugSlots("vr_debugSlots", "0", CVAR_BOOL, "visually display slots\n" );
+
+slot_t slots[SLOT_COUNT] = {
+	{ idVec3(0, 9,-8), 9.0f*9.0f },
+	//{ idVec3(0,-9,-8), 9.0f*9.0f },
+	{ idVec3(-9,-4, 0), 9.0f*9.0f },
+	{ idVec3(-9,-4,-waistZ - neckOffset.z), 9.0f*9.0f },
+};
+
+idAngles pdaAngle1(0,-90,0);
+idAngles pdaAngle2(0,0,76.5);
+idAngles pdaAngle3(0,0,0);
+
+extern idCVar g_useWeaponDepthHack;
+
 
 
 /*
@@ -1540,6 +1558,9 @@ idPlayer::idPlayer():
 	laserSightHandle	= -1;
 	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
 	
+	pdaModelDefHandle = -1;
+	memset( &pdaRenderEntity, 0, sizeof( pdaRenderEntity ) );
+
 	// koz begin
 	headingBeamHandle = -1;
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
@@ -2224,6 +2245,8 @@ void idPlayer::Init()
 	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
 	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
+
+	SetupPDASlot();
 
 	// Koz begin
 	
@@ -3311,7 +3334,16 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	savefile->ReadInt( playedTimeResidual );
 	
 	aimAssist.Init( this );
-		
+	
+	laserSightHandle = -1;
+	
+	// re-init the laser model
+	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
+	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
+	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
+
+	SetupPDASlot();
+	
 	for( int i = 0; i < MAX_PLAYER_PDA; i++ )
 	{
 		savefile->ReadBool( pdaHasBeenRead[i] );
@@ -5742,6 +5774,49 @@ void idPlayer::GiveItem( const char* itemname )
 	args.Set( "classname", itemname );
 	args.Set( "owner", name.c_str() );
 	gameLocal.SpawnEntityDef( args );
+}
+
+bool idPlayer::LeftImpulseSlot()
+{
+	if( !commonVr->hasHMD )
+	{
+		return false;
+	}
+	if( leftHandSlot == SLOT_LEFT_HIP )
+	{
+		if( !common->IsMultiplayer() )
+		{
+			if( objectiveSystemOpen )
+			{
+				TogglePDA();
+			}
+			else if( weapon_pda >= 0 )
+			{
+				SelectWeapon( weapon_pda, true );
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+bool idPlayer::RightImpulseSlot()
+{
+	if( !commonVr->hasHMD )
+	{
+		return false;
+	}
+	if( rightHandSlot == SLOT_RIGHT_BACK_BOTTOM )
+	{
+		PrevWeapon();
+		return true;
+	}
+	if( rightHandSlot == SLOT_RIGHT_BACK_TOP )
+	{
+		NextWeapon();
+		return true;
+	}
+	return false;
 }
 
 /*
@@ -8997,7 +9072,10 @@ void idPlayer::PerformImpulse( int impulse )
 	{
 		case IMPULSE_13:
 		{
-			Reload();
+			if( !RightImpulseSlot() )
+			{
+				Reload();
+			}
 			break;
 		}
 		case IMPULSE_14:
@@ -9018,7 +9096,7 @@ void idPlayer::PerformImpulse( int impulse )
 		}
 		case IMPULSE_16:
 		{
-			if( flashlight.IsValid() )
+			if( !LeftImpulseSlot() && flashlight.IsValid() )
 			{
 				if( flashlight.GetEntity()->lightOn )
 				{
@@ -10719,6 +10797,62 @@ bool idPlayer::HandleGuiEvents( const sysEvent_t* ev )
 
 /*
 ==============
+idPlayer::SetupPDASlot
+==============
+*/
+void idPlayer::SetupPDASlot()
+{
+	memset( &pdaRenderEntity, 0, sizeof( pdaRenderEntity ) );
+	pdaRenderEntity.hModel = renderModelManager->FindModel( "models/items/pda/pda_world.lwo" );
+	if( pdaRenderEntity.hModel )
+	{
+		pdaRenderEntity.hModel->Reset();
+		pdaRenderEntity.bounds = pdaRenderEntity.hModel->Bounds( &pdaRenderEntity );
+	}
+	pdaRenderEntity.shaderParms[ SHADERPARM_RED ]	= 1.0f;
+	pdaRenderEntity.shaderParms[ SHADERPARM_GREEN ] = 1.0f;
+	pdaRenderEntity.shaderParms[ SHADERPARM_BLUE ]	= 1.0f;
+	pdaRenderEntity.shaderParms[3] = 1.0f;
+	pdaRenderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] = 0.0f;
+	pdaRenderEntity.shaderParms[5] = 0.0f;
+	pdaRenderEntity.shaderParms[6] = 0.0f;
+	pdaRenderEntity.shaderParms[7] = 0.0f;
+}
+
+/*
+==============
+idPlayer::UpdatePDASlot
+==============
+*/
+void idPlayer::UpdatePDASlot()
+{
+	if( inventory.pdas.Num() && pdaRenderEntity.hModel )
+	{
+		pdaRenderEntity.timeGroup = timeGroup;
+
+		pdaRenderEntity.entityNum = ENTITYNUM_NONE;
+
+		idMat3 pdaAxis = pdaAngle1.ToMat3() * pdaAngle2.ToMat3() * pdaAngle3.ToMat3();
+
+		pdaRenderEntity.axis = pdaAxis * waistAxis;
+		pdaRenderEntity.origin = waistOrigin + slots[SLOT_LEFT_HIP].origin * waistAxis;
+
+		pdaRenderEntity.allowSurfaceInViewID = entityNumber + 1;
+		pdaRenderEntity.weaponDepthHack = g_useWeaponDepthHack.GetBool();
+
+		if( pdaModelDefHandle == -1 )
+		{
+			pdaModelDefHandle = gameRenderWorld->AddEntityDef( &pdaRenderEntity );
+		}
+		else
+		{
+			gameRenderWorld->UpdateEntityDef( pdaModelDefHandle, &pdaRenderEntity );
+		}
+	}
+}
+
+/*
+==============
 idPlayer::UpdateLaserSight
 ==============
 */
@@ -11620,6 +11754,17 @@ void idPlayer::Think()
 		// Update voice groups to match in case something changed
 		session->SetVoiceGroupsToTeams();
 	}
+	UpdatePDASlot();
+
+	if( vr_debugSlots.GetBool() )
+	{
+		for( int i = 0; i < SLOT_COUNT; i++ )
+		{
+			idVec3 origin = waistOrigin + slots[i].origin * waistAxis;
+			idSphere tempSphere( origin, sqrtf(slots[i].radiusSq) );
+			gameRenderWorld->DebugSphere( colorWhite, tempSphere, 18, true );
+		}
+	}
 }
 
 /*
@@ -12197,6 +12342,40 @@ void idPlayer::ControllerShakeFromDamage( int damage )
 		int lowDuration = idMath::Ftoi( highDuration );
 		
 		SetControllerShake( highMag, highDuration, lowMag, lowDuration );
+	}
+	
+}
+
+/*
+============
+idPlayer::ControllerShakeFromDamage
+============
+*/
+void idPlayer::ControllerShakeFromDamage( int damage, const idVec3 &dir )
+{
+
+	// If the player is local. SHAkkkkkkeeee!
+	if( common->IsMultiplayer() && IsLocallyControlled() )
+	{
+	
+		int maxMagScale = pm_controllerShake_damageMaxMag.GetFloat();
+		int maxDurScale = pm_controllerShake_damageMaxDur.GetFloat();
+		
+		// determine rumble
+		// >= 100 damage - will be 300 Mag
+		float highMag = ( Max( damage, 100 ) / 100.0f ) * maxMagScale;
+		int highDuration = idMath::Ftoi( ( Max( damage, 100 ) / 100.0f ) * maxDurScale );
+		
+		if( commonVr->hasHMD )
+		{
+			SetControllerShake( highMag, highDuration, dir );
+		}
+		else
+		{
+			float lowMag = highMag * 0.75f;
+			int lowDuration = idMath::Ftoi( highDuration );
+			SetControllerShake( highMag, highDuration, lowMag, lowDuration );
+		}
 	}
 	
 }
@@ -12842,7 +13021,7 @@ void idPlayer::CalculateViewWeaponPos( idVec3& origin, idMat3& axis )
 	
 	// these cvars are just for hand tweaking before moving a value to the weapon def
 	idVec3	gunpos( g_gun_x.GetFloat(), g_gun_y.GetFloat(), g_gun_z.GetFloat() );
-	
+
 	// as the player changes direction, the gun will take a small lag
 	idVec3	gunOfs = GunAcceleratingOffset();
 	origin = viewOrigin + ( gunpos + gunOfs ) * viewAxis;
@@ -13289,6 +13468,17 @@ void idPlayer::SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQua
 	// the position for the player hand joint is modified 
 	// to reflect the position of the viewmodel.  
 	// armIK / reach_ik then performs crude IK on arm using new positon.
+
+	if (hand)
+	{
+		leftHandOrigin = handOrigin;
+		leftHandAxis = handAxis;
+	}
+	else
+	{
+		rightHandOrigin = handOrigin;
+		rightHandAxis = handAxis;
+	}
 
 	idEntityPtr<idWeapon> curEntity;
 
@@ -13894,6 +14084,120 @@ void idPlayer::CalculateFirstPersonView()
 		firstPersonViewAxis = firstPersonViewAxis * playerView.ShakeAxis();
 #endif
 	}
+	if ( commonVr->hasHMD )
+	{
+		CalculateLeftHand();
+		CalculateRightHand();
+		CalculateWaist();
+	}
+}
+
+void idPlayer::CalculateWaist()
+{
+	idMat3 & hmdAxis = commonVr->lastHMDViewAxis;
+
+	waistOrigin = hmdAxis * neckOffset + commonVr->lastHMDViewOrigin;
+	waistOrigin.z += waistZ;
+
+	if (hmdAxis[0].z < 0) // looking down
+	{
+		if (hmdAxis[2].z > 0)
+		{
+			// use a point between head forward and upward
+			float h = hmdAxis[2].z - hmdAxis[0].z;
+			float x = -hmdAxis[0].z / h;
+			float y = hmdAxis[2].z / h;
+			idVec3 i = hmdAxis[0] * y + hmdAxis[2] * x;
+			float yaw = atan2(i.y, i.x) * idMath::M_RAD2DEG;
+			waistAxis = idAngles(0, yaw, 0).ToMat3();
+		}
+		else
+		{
+			// use a point between head backward and upward
+			float h = -hmdAxis[2].z - hmdAxis[0].z;
+			float x = -hmdAxis[0].z / h;
+			float y = hmdAxis[2].z / h;
+			idVec3 i = hmdAxis[0] * y + hmdAxis[2] * x;
+			float yaw = atan2(i.y, i.x) * idMath::M_RAD2DEG;
+			waistAxis = idAngles(0, yaw, 0).ToMat3();
+		}
+	}
+	else // fallback
+	{
+		waistAxis = idAngles(0, hmdAxis.ToAngles().yaw, 0).ToMat3();
+	}
+}
+
+void idPlayer::CalculateLeftHand()
+{
+	slotIndex_t oldSlot = leftHandSlot;
+	slotIndex_t slot = SLOT_NONE;
+	if ( commonVr->hasHMD )
+	{
+		// remove pitch
+		idMat3 axis = firstPersonViewAxis;
+		//float pitch = idMath::M_RAD2DEG * asin(axis[0][2]);
+		//idAngles angles(pitch, 0, 0);
+		//axis = angles.ToMat3() * axis;
+		//leftHandOrigin = hmdOrigin + (usercmd.vrLeftControllerOrigin - usercmd.vrHeadOrigin) * vrFaceForward * axis;
+		//leftHandAxis = usercmd.vrLeftControllerAxis * vrFaceForward * axis;
+
+		for (int i = 0; i < SLOT_COUNT; i++)
+		{
+			idVec3 origin = waistOrigin + slots[i].origin * waistAxis;
+			if ((leftHandOrigin - origin).LengthSqr() < slots[i].radiusSq)
+			{
+				slot = (slotIndex_t)i;
+				break;
+			}
+		}
+	}
+	else
+	{
+		//leftHandOrigin = hmdOrigin + hmdAxis[2] * -5;
+		//leftHandAxis = hmdAxis;
+	}
+	if (oldSlot != slot)
+	{
+		SetControllerShake(0, 0, 0.75, 50);
+	}
+	leftHandSlot = slot;
+}
+
+void idPlayer::CalculateRightHand()
+{
+	slotIndex_t oldSlot = rightHandSlot;
+	slotIndex_t slot = SLOT_NONE;
+	if ( commonVr->hasHMD )
+	{
+		// remove pitch
+		idMat3 axis = firstPersonViewAxis;
+		//float pitch = idMath::M_RAD2DEG * asin(axis[0][2]);
+		//idAngles angles(pitch, 0, 0);
+		//axis = angles.ToMat3() * axis;
+		//rightHandOrigin = hmdOrigin + (usercmd.vrRightControllerOrigin - usercmd.vrHeadOrigin) * vrFaceForward * axis;
+		//rightHandAxis = usercmd.vrRightControllerAxis * vrFaceForward * axis;
+
+		for (int i = 0; i < SLOT_COUNT; i++)
+		{
+			idVec3 origin = waistOrigin + slots[i].origin * waistAxis;
+			if ((rightHandOrigin - origin).LengthSqr() < slots[i].radiusSq)
+			{
+				slot = (slotIndex_t)i;
+				break;
+			}
+		}
+	}
+	else
+	{
+		//rightHandOrigin = hmdOrigin + hmdAxis[2] * -5;
+		//rightHandAxis = hmdAxis;
+	}
+	if (oldSlot != slot)
+	{
+		SetControllerShake(0.75, 50, 0, 0);
+	}
+	rightHandSlot = slot;
 }
 
 /*
@@ -16084,6 +16388,24 @@ void idPlayer::FreeModelDef()
 	idAFEntity_Base::FreeModelDef();
 	if( common->IsMultiplayer() && gameLocal.mpGame.IsGametypeFlagBased() )
 		playerIcon.FreeIcon();
+}
+
+void idPlayer::SetControllerShake( float magnitude, int duration, const idVec3 &direction )
+{
+	idVec3 dir = direction;
+	dir.Normalize();
+	idVec3 left = leftHandOrigin - rightHandOrigin;
+	float side = left * dir * 0.5 + 0.5;
+
+	// push magnitude up so the middle doesn't feel as weak
+	float invSide = 1.0 - side;
+	float rightSide = 1.0 - side*side;
+	float leftSide = 1.0 - invSide*invSide;
+
+	float leftMag = magnitude * leftSide;
+	float rightMag = magnitude * rightSide;
+
+	SetControllerShake( rightMag, duration, leftMag, duration );
 }
 
 /*
