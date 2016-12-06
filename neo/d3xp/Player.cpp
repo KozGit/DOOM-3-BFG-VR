@@ -94,7 +94,7 @@ idCVar vr_debugSlots("vr_debugSlots", "0", CVAR_BOOL, "visually display slots\n"
 
 slot_t slots[SLOT_COUNT] = {
 	{ idVec3(0, 9,-8), 9.0f*9.0f },
-	//{ idVec3(0,-9,-8), 9.0f*9.0f },
+	{ idVec3(0,-9,-8), 9.0f*9.0f },
 	{ idVec3(-9,-4, 0), 9.0f*9.0f },
 	{ idVec3(-9,-4,-waistZ - neckOffset.z), 9.0f*9.0f },
 };
@@ -1560,6 +1560,9 @@ idPlayer::idPlayer():
 	
 	pdaModelDefHandle = -1;
 	memset( &pdaRenderEntity, 0, sizeof( pdaRenderEntity ) );
+	
+	holsterModelDefHandle = -1;
+	memset( &holsterRenderEntity, 0, sizeof( holsterRenderEntity ) );
 
 	// koz begin
 	headingBeamHandle = -1;
@@ -2247,6 +2250,7 @@ void idPlayer::Init()
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
 
 	SetupPDASlot();
+	holsteredWeapon = weapon_fists;
 
 	// Koz begin
 	
@@ -2591,6 +2595,9 @@ Release any resources used by the player.
 */
 idPlayer::~idPlayer()
 {
+	FreePDASlot();
+	FreeHolsterSlot();
+
 	delete weapon.GetEntity();
 	weapon = NULL;
 	
@@ -3343,6 +3350,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
 
 	SetupPDASlot();
+	holsteredWeapon = weapon_fists;
 	
 	for( int i = 0; i < MAX_PLAYER_PDA; i++ )
 	{
@@ -5806,6 +5814,11 @@ bool idPlayer::RightImpulseSlot()
 	{
 		return false;
 	}
+	if( rightHandSlot == SLOT_RIGHT_HIP )
+	{
+		SetupHolsterSlot();
+		return true;
+	}
 	if( rightHandSlot == SLOT_RIGHT_BACK_BOTTOM )
 	{
 		PrevWeapon();
@@ -5947,6 +5960,10 @@ void idPlayer::NextWeapon()
 		{
 			continue;
 		}
+		if( w == holsteredWeapon && holsteredWeapon != weapon_fists )
+		{
+			continue;
+		}
 		const char* weap = spawnArgs.GetString( va( "def_weapon%d", w ) );
 		if( !spawnArgs.GetBool( va( "weapon%d_cycle", w ) ) )
 		{
@@ -6004,6 +6021,10 @@ void idPlayer::PrevWeapon()
 			break;
 		}
 		if( ( inventory.weapons & ( 1 << w ) ) == 0 )
+		{
+			continue;
+		}
+		if( w == holsteredWeapon && holsteredWeapon != weapon_fists )
 		{
 			continue;
 		}
@@ -10802,6 +10823,8 @@ idPlayer::SetupPDASlot
 */
 void idPlayer::SetupPDASlot()
 {
+	FreePDASlot();
+
 	memset( &pdaRenderEntity, 0, sizeof( pdaRenderEntity ) );
 	pdaRenderEntity.hModel = renderModelManager->FindModel( "models/items/pda/pda_world.lwo" );
 	if( pdaRenderEntity.hModel )
@@ -10817,6 +10840,20 @@ void idPlayer::SetupPDASlot()
 	pdaRenderEntity.shaderParms[5] = 0.0f;
 	pdaRenderEntity.shaderParms[6] = 0.0f;
 	pdaRenderEntity.shaderParms[7] = 0.0f;
+}
+
+/*
+==============
+idPlayer::FreePDASlot
+==============
+*/
+void idPlayer::FreePDASlot()
+{
+	if( pdaModelDefHandle != -1 )
+	{
+		gameRenderWorld->FreeEntityDef( pdaModelDefHandle );
+		pdaModelDefHandle = -1;
+	}
 }
 
 /*
@@ -10847,6 +10884,130 @@ void idPlayer::UpdatePDASlot()
 		else
 		{
 			gameRenderWorld->UpdateEntityDef( pdaModelDefHandle, &pdaRenderEntity );
+		}
+	}
+}
+
+/*
+==============
+idPlayer::SetupHolsterSlot
+==============
+*/
+void idPlayer::SetupHolsterSlot()
+{
+	if( !weapon.GetEntity()->IsReady() )
+	{
+		return;
+	}
+
+	const char * modelname;
+	idRenderModel* renderModel;
+
+	FreeHolsterSlot();
+
+	// can we holster?
+	if( !(modelname = weapon->weaponDef->dict.GetString( "model" )) ||
+		strcmp(modelname, "models/weapons/soulcube/w_soulcube.lwo") == 0 ||
+		strcmp(modelname, "_DEFAULT") == 0 ||
+		strcmp(modelname, "models/items/grenade_ammo/grenade.lwo") == 0 ||
+		!(renderModel = renderModelManager->FindModel( modelname )) )
+	{
+		// can't holster, just unholster
+		if( holsteredWeapon != weapon_fists )
+		{
+			SelectWeapon(holsteredWeapon, false);
+			holsteredWeapon = weapon_fists;
+		}
+		return;
+	}
+
+	// we can holster! so unholster or change weapons
+	int previousWeapon = currentWeapon;
+	if( holsteredWeapon == weapon_fists )
+	{
+		NextWeapon();
+	}
+	else
+	{
+		SelectWeapon(holsteredWeapon, false);
+	}
+	holsteredWeapon = previousWeapon;
+
+	memset( &holsterRenderEntity, 0, sizeof( holsterRenderEntity ) );
+	holsterRenderEntity.hModel = renderModel;
+	if( holsterRenderEntity.hModel )
+	{
+		holsterRenderEntity.hModel->Reset();
+		holsterRenderEntity.bounds = holsterRenderEntity.hModel->Bounds( &holsterRenderEntity );
+	}
+	holsterRenderEntity.shaderParms[ SHADERPARM_RED ]	= 1.0f;
+	holsterRenderEntity.shaderParms[ SHADERPARM_GREEN ] = 1.0f;
+	holsterRenderEntity.shaderParms[ SHADERPARM_BLUE ]	= 1.0f;
+	holsterRenderEntity.shaderParms[3] = 1.0f;
+	holsterRenderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] = 0.0f;
+	holsterRenderEntity.shaderParms[5] = 0.0f;
+	holsterRenderEntity.shaderParms[6] = 0.0f;
+	holsterRenderEntity.shaderParms[7] = 0.0f;
+
+	if( strcmp(modelname, "models/weapons/pistol/w_pistol.lwo") == 0 )
+	{
+		holsterAxis = idAngles(90, 0, 0).ToMat3();
+	}
+	else if( strcmp(modelname, "models/weapons/shotgun/w_shotgun2.lwo") == 0 ||
+		strcmp(modelname, "models/weapons/bfg/bfg_world.lwo") == 0)
+	{
+		holsterAxis = idAngles(0, -90, -90).ToMat3();
+	}
+	else if( strcmp(modelname, "models/weapons/grabber/grabber_world.ase") == 0 )
+	{
+		holsterAxis = idAngles(-90, 180, 0).ToMat3() * 0.5f;
+	}
+	else
+	{
+		holsterAxis = idAngles(0, 90, 90).ToMat3();
+	}
+}
+
+/*
+==============
+idPlayer::FreeHolsterSlot
+==============
+*/
+void idPlayer::FreeHolsterSlot()
+{
+	if( holsterModelDefHandle != -1 )
+	{
+		gameRenderWorld->FreeEntityDef( holsterModelDefHandle );
+		holsterModelDefHandle = -1;
+	}
+}
+
+/*
+==============
+idPlayer::UpdateHolsterSlot
+==============
+*/
+void idPlayer::UpdateHolsterSlot()
+{
+	if( holsterRenderEntity.hModel )
+	{
+		holsterRenderEntity.timeGroup = timeGroup;
+
+		holsterRenderEntity.entityNum = ENTITYNUM_NONE;
+
+		holsterRenderEntity.axis = holsterAxis * waistAxis;
+		holsterRenderEntity.origin = waistOrigin + slots[SLOT_RIGHT_HIP].origin * waistAxis;
+
+		holsterRenderEntity.allowSurfaceInViewID = entityNumber + 1;
+		holsterRenderEntity.weaponDepthHack = g_useWeaponDepthHack.GetBool();
+
+		if( holsterModelDefHandle == -1 )
+		{
+			holsterModelDefHandle = gameRenderWorld->AddEntityDef( &holsterRenderEntity );
+		}
+		else
+		{
+			gameRenderWorld->UpdateEntityDef( holsterModelDefHandle, &holsterRenderEntity );
 		}
 	}
 }
@@ -11755,6 +11916,7 @@ void idPlayer::Think()
 		session->SetVoiceGroupsToTeams();
 	}
 	UpdatePDASlot();
+	UpdateHolsterSlot();
 
 	if( vr_debugSlots.GetBool() )
 	{

@@ -263,7 +263,7 @@ enum slotIndex_t
 {
 	SLOT_NONE = -1,
 	SLOT_LEFT_HIP,
-	//SLOT_RIGHT_HIP,
+	SLOT_RIGHT_HIP,
 	SLOT_RIGHT_BACK_BOTTOM,
 	SLOT_RIGHT_BACK_TOP,
 	SLOT_COUNT
@@ -316,6 +316,11 @@ public:
 	
 	renderEntity_t			pdaRenderEntity;					// used to present a model to the renderer
 	qhandle_t				pdaModelDefHandle;					// handle to static renderer model
+	
+	renderEntity_t			holsterRenderEntity;					// used to present a model to the renderer
+	qhandle_t				holsterModelDefHandle;					// handle to static renderer model
+	idMat3					holsterAxis;
+	int						holsteredWeapon;
 
 	renderEntity_t			hudEntity; // koz add a model to place the hud into the world
 	qhandle_t				hudHandle;
@@ -535,7 +540,13 @@ public:
 	void					Think();
 	
 	void					SetupPDASlot();
+	void					FreePDASlot();
 	void					UpdatePDASlot();
+
+	void					SetupHolsterSlot();
+	void					FreeHolsterSlot();
+	void					UpdateHolsterSlot();
+
 	void					UpdateLaserSight();
 
 	// Koz begin
