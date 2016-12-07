@@ -93,10 +93,11 @@ Run in a background thread for performance, but can also
 be called directly in the foreground thread for comparison.
 ===============
 */
+
+
 int idGameThread::Run()
 {
-	if (game->isVR) commonVr->FrameStart();
-	
+
 	commonLocal.frameTiming.startGameTime = Sys_Microseconds();
 	
 	// debugging tool to test frame dropping behavior
@@ -186,6 +187,9 @@ idGameThread::RunGameAndDraw
 */
 gameReturn_t idGameThread::RunGameAndDraw( int numGameFrames_, idUserCmdMgr& userCmdMgr_, bool isClient_, int startGameFrame )
 {
+	
+	if ( game->isVR ) commonVr->FrameStart();
+	
 	// this should always immediately return
 	this->WaitForThread();
 	
@@ -414,26 +418,27 @@ void idCommonLocal::UpdateScreen( bool captureToImage, bool releaseMouse )
 		renderSystem->CaptureRenderToImage( "_currentRender", false );
 	}
 	
-	if ( game->isVR )
-	{
-		static int lastTrack = Sys_Milliseconds();
-		if ( Sys_Milliseconds() - lastTrack > 30 )
-		{
-			lastTrack = Sys_Milliseconds();
-			commonVr->HMDTrackStatic(); // koz fixme
-		}
-	
 
-		// this will hopefully update the steamvr compositor white room
-		//renderSystem->CaptureRenderToImage( "_skyBoxSides", false );
-	}
-	
 
 		// this should exit right after vsync, with the GPU idle and ready to draw
 		const emptyCommand_t* cmd = renderSystem->SwapCommandBuffers( &time_frontend, &time_backend, &time_shadows, &time_gpu );
 		
 		// get the GPU busy with new commands
 		renderSystem->RenderCommandBuffers( cmd );
+
+		if ( game->isVR )
+		{
+			//static int lastTrack = Sys_Milliseconds();
+			//if ( Sys_Milliseconds() - lastTrack >9 )
+			//	{
+			//	lastTrack = Sys_Milliseconds();
+			//commonVr->HMDTrackStatic(); // koz fixme
+			//	}
+
+
+			// this will hopefully update the steamvr compositor white room
+			//renderSystem->CaptureRenderToImage( "_skyBoxSides", false );
+		}
 	
 
 	insideUpdateScreen = false;
@@ -504,9 +509,6 @@ idCommonLocal::Frame
 void idCommonLocal::Frame()
 {
 	
-//	if ( game->isVR ) commonVr->FrameStart();
-
-	
 	
 	try
 	{
@@ -514,7 +516,8 @@ void idCommonLocal::Frame()
 		
 		// This is the only place this is incremented
 		idLib::frameNumber++;
-		
+				
+
 		// allow changing SIMD usage on the fly
 		if( com_forceGenericSIMD.IsModified() )
 		{
@@ -625,8 +628,13 @@ void idCommonLocal::Frame()
 			// input latency
 			renderSystem->SwapCommandBuffers_FinishRendering( &time_frontend, &time_backend, &time_shadows, &time_gpu );
 		}
+		
+	
+		
 		frameTiming.finishSyncTime = Sys_Microseconds();
 		
+
+
 		//--------------------------------------------
 		// Determine how many game tics we are going to run,
 		// now that the previous frame is completely finished.
@@ -788,12 +796,8 @@ void idCommonLocal::Frame()
 			{
 				// How much time to wait before running the next frame,
 				// based on com_engineHz
-				
-				//koz begin compositor reprojection can drop framerate by half, make sure to adapt.  (engineHZ will be changed dynamically) 
-				static int frameDelay = 0; 
-				frameDelay = FRAME_TO_MSEC( gameFrame + 1 ) - FRAME_TO_MSEC( gameFrame );
-				//koz end
 
+				const int frameDelay = FRAME_TO_MSEC( gameFrame + 1 ) - FRAME_TO_MSEC( gameFrame );
 				if( gameTimeResidual < frameDelay )
 				{
 					break;
@@ -873,20 +877,23 @@ void idCommonLocal::Frame()
 		//--------------------------------------------
 		
 		// get the previous usercmd for bypassed head tracking transform
-		// koz no longer need this : const usercmd_t	previousCmd = usercmdGen->GetCurrentUsercmd();
+		const usercmd_t	previousCmd = usercmdGen->GetCurrentUsercmd();
 		
 		// build a new usercmd
 		int deviceNum = session->GetSignInManager().GetMasterInputDevice();
 		usercmdGen->BuildCurrentUsercmd( deviceNum );
-		if( 1 ) // deviceNum == -1 ) // koz FIXME FIXME FIXME, sometimes skipping the hydra and steamvr controllers, need to figure out why 
+		
+		
+		//if( deviceNum == -1 )  
 		{
-			for( int i = 0; i < MAX_INPUT_DEVICES; i++ )
+			for( int i = 0; i < MAX_INPUT_DEVICES ; i++ )
 			{
-				//Sys_PollJoystickInputEvents( i );
-				//Sys_EndJoystickInputEvents();
-				usercmdGen->BuildCurrentUsercmd( i );
+				Sys_PollJoystickInputEvents( i );
+				Sys_EndJoystickInputEvents();
+				usercmdGen->BuildCurrentUsercmd( deviceNum );
 			}
 		}
+			
 		if( pauseGame )
 		{
 			usercmdGen->Clear();
@@ -940,6 +947,7 @@ void idCommonLocal::Frame()
 		// ASAP to minimize the pipeline bubble.
 		//----------------------------------------
 		frameTiming.startRenderTime = Sys_Microseconds();
+		
 		renderSystem->RenderCommandBuffers( renderCommands );
 		if( com_sleepRender.GetInteger() > 0 )
 		{

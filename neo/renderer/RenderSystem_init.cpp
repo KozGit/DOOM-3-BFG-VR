@@ -441,8 +441,7 @@ static void R_CheckPortableExtensions()
 		{
 			glConfig.uniformBufferOffsetAlignment = 256;
 		}
-		else glConfig.uniformBufferOffsetAlignment = 256; //Carl Kenner
-
+		
 	}
 	// RB: make GPU skinning optional for weak OpenGL drivers
 	glConfig.gpuSkinningAvailable = glConfig.uniformBufferAvailable && ( glConfig.driverType == GLDRV_OPENGL3X || glConfig.driverType == GLDRV_OPENGL32_CORE_PROFILE || glConfig.driverType == GLDRV_OPENGL32_COMPATIBILITY_PROFILE );

@@ -5458,14 +5458,14 @@ idAnimator::GetJointTransform>	gamex86.dll!idAnimator::ForceUpdate()  Line 4268	
 
 =====================
 */
-bool idAnimator::GetJointTransform( jointHandle_t jointHandle, int currentTime, idVec3& offset, idMat3& axis, bool force )// allow force
+bool idAnimator::GetJointTransform( jointHandle_t jointHandle, int currentTime, idVec3& offset, idMat3& axis ) 
 {
 	if( !modelDef || ( jointHandle < 0 ) || ( jointHandle >= modelDef->NumJoints() ) )
 	{
 		return false;
 	}
 	
-	CreateFrame( currentTime, force );
+	CreateFrame( currentTime, false );
 	
 	offset = joints[ jointHandle ].ToVec3();
 	axis = joints[ jointHandle ].ToMat3();

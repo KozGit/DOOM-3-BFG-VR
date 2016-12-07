@@ -89,7 +89,7 @@ void idCommonLocal::CompleteWipe()
 	while( Sys_Milliseconds() < wipeStopTime )
 	{
 		BusyWait();
-		if (!game->isVR) Sys_Sleep( 10 ); // updatescreen calls waitgetposes which runs once per frame
+		Sys_Sleep( 10 );
 	}
 	
 	// ensure it is completely faded out
@@ -827,13 +827,7 @@ void idCommonLocal::UpdateLevelLoadPacifier()
 	else
 	{
 		// On the PC just update at a constant rate for the Steam overlay
-		
-		int timeDel;
-		timeDel = game->isVR ? ( 1000 / commonVr->hmdHz ) * 3  : 50;
-		
-		
-		//if( time - lastPacifierGuiTime >= 50  ) // koz fixme
-		if ( time - lastPacifierGuiTime >= timeDel ) // koz fixme
+		if ( time - lastPacifierGuiTime >= 50 ) 
 		{
 			lastPacifierGuiTime = time;
 			UpdateScreen( false );
@@ -865,7 +859,7 @@ void idCommonLocal::UpdateLevelLoadPacifier()
 			}
 			txtVal->SetStrokeInfo( true, 1.75f, 0.75f );
 		}
-	if (!game->isVR) 	UpdateScreen( false ); // koz
+		UpdateScreen( false ); // koz
 		if( autoswapsRunning )
 		{
 			renderSystem->BeginAutomaticBackgroundSwaps( icon );
@@ -922,34 +916,25 @@ idCommonLocal::SaveGame
 */
 bool idCommonLocal::SaveGame( const char* saveName )
 {
-	
-	StartWipe( "wipeMaterial", true );
-	CompleteWipe();
-
-	//common->Printf( "Beginning save\n" );
 	if( pipelineFile != NULL )
 	{
 		// We're already in the middle of a save. Leave us alone.
-		ClearWipe();
 		return false;
 	}
 	
 	if( com_disableAllSaves.GetBool() || ( com_disableAutoSaves.GetBool() && ( idStr::Icmp( saveName, "autosave" ) == 0 ) ) )
 	{
-		ClearWipe();
 		return false;
 	}
 	
 	if( IsMultiplayer() )
 	{
 		common->Printf( "Can't save during net play.\n" );
-		ClearWipe();
 		return false;
 	}
 	
 	if( mapSpawnData.savegameFile != NULL )
 	{
-		ClearWipe();
 		return false;
 	}
 	
@@ -957,7 +942,6 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	if( persistentPlayerInfo.GetInt( "health" ) <= 0 )
 	{
 		common->Printf( "You must be alive to save the game\n" );
-		ClearWipe();
 		return false;
 	}
 	
@@ -965,29 +949,22 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	soundSystem->SetPlayingSoundWorld( menuSoundWorld );
 	soundSystem->Render();
 	
-	if (  0 &&  !game->isVR ) // Koz fixme : implement this.shows saving dialog during save.currently disabled in VR for smoother headtracking.
-
+	Dialog().ShowSaveIndicator( true );
+	if( insideExecuteMapChange )
 	{
-		
-		commonVr->vrIsBackgroundSaving = true;
-
-		Dialog().ShowSaveIndicator( true );
-		if ( insideExecuteMapChange )
-		{
-			UpdateLevelLoadPacifier();
-		}
-		else
-		{
-			// Heremake sure we pump the gui enough times to show the 'saving' dialog
-			const bool captureToImage = false;
-			for ( int i = 0; i < NumScreenUpdatesToShowDialog; ++i )
-			{
-				UpdateScreen( captureToImage );
-				
-			}
-			renderSystem->BeginAutomaticBackgroundSwaps( AUTORENDER_DIALOGICON );
-		}
+		UpdateLevelLoadPacifier();
 	}
+	else
+	{
+		// Heremake sure we pump the gui enough times to show the 'saving' dialog
+		const bool captureToImage = false;
+		for( int i = 0; i < NumScreenUpdatesToShowDialog; ++i )
+		{
+			UpdateScreen( captureToImage );
+		}
+		renderSystem->BeginAutomaticBackgroundSwaps( AUTORENDER_DIALOGICON );
+	}
+	
 	// Make sure the file is writable and the contents are cleared out (Set to write from the start of file)
 	saveFile.MakeWritable();
 	saveFile.Clear( false );
@@ -1015,7 +992,6 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	// let the game save its state
 	game->SaveGame( pipelineFile, &stringsFile );
 	
-	common->Printf( "Beginning game->SaveGame\n" );
 	pipelineFile->Finish();
 	
 	idSaveGameDetails gameDetails;
@@ -1039,12 +1015,13 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	}
 	
 	syncNextGameFrame = true;
-	common->Printf( "Returning from idCommonLocal SaveGame\n" );
-		
-	//ClearWipe();
+	
+	
+	
+	// koz close the saving dialog before returning or my crappy code to determine when to raise the pda for pause activities gets confused
 	Dialog().ShowSaveIndicator( false );
-	
-	
+
+
 	// Here make sure we pump the gui enough times to clear the 'saving' dialog
 	const bool captureToImage = false;
 	for ( int i = 0; i < NumScreenUpdatesToShowDialog; ++i )
@@ -1412,7 +1389,7 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 	}
 	// Koz end
 	
-	commonVr->gameSaving = true;
+	//commonVr->gameSaving = true;
 	if( commonLocal.SaveGame( savename ) )
 	{
 		common->Printf( "Saved: %s\n", savename );

@@ -47,27 +47,30 @@ static bindInfo_t keyboardBinds[] =
 	{ "#str_02105", "_moveDown" },				// CROUCH
 	{ "#str_02106", "_left" },					// TURN LEFT
 	{ "#str_02107", "_right" },					// TURN RIGHT
+	{ "Click Move", "_impulse41" },				// CLICK TO MOVE;
 	{ "#str_02109", "_speed" },					// SPRINT
 	{ "Reset HMD orientation", "_impulse32" },  // KOZ RESET HMD/BODY ORIENTATION 
 	{ "Comfort Turn Left", "_impulse35" },		// KOZ COMFORT TURN LEFT
 	{ "Comfort Turn Right", "_impulse34" },		// KOZ COMFORT TURN RIGHT
-	{ "Toggle Heading Beam", "_impulse37" },	// KOZ TOGGLE HEADING BEAM
-	{ "Walk in Place", "_impulse38" },			// KOZ Walk In Place
-	{ "Freelook", "_impulse39" },				// KOZ Freelook
 	
+		
 	{ "                                ", "" }, // koz divider
 	{ "#str_02095", "" },						// HEADING
 	{ "#str_02112", "_attack" },				// ATTACK
+	{ "#str_00100187", "_impulse16" },			// FLASHLIGHT
 	{ "#str_02114", "_impulse14" },				// PREV. WEAPON
 	{ "#str_02113", "_impulse15" },				// NEXT WEAPON
 	{ "#str_02115", "_impulse13" },				// RELOAD
-	{ "#str_swf_action_use", "_use" },			// USE
-	{ "#str_02116", "_lookUp" },				// LOOK UP
-	{ "#str_02117", "_lookDown" },				// LOOK DOWN
 	{ "#str_02121", "_impulse19" },				// PDA / SCOREBOARD
 	{ "System Menu (ESC)", "_impulse40" },		// System Menu (escape)
 	{ "Toggle Lasersight", "_impulse33" },		// KOZ TOGGLE LASERSIGHT
 	{ "Toggle HUD", "_impulse36" },				// KOZ TOGGLE HUD
+	{ "Next Flashlight Mode", "_impulse39" },	// KOZ NEXT FLASH MODE 
+	{ "Toggle Heading Beam", "_impulse37" },	// KOZ TOGGLE HEADING BEAM
+	{ "Walk in Place", "_impulse38" },			// KOZ Walk In Place
+	{ "#str_swf_action_use", "_use" },			// USE
+	{ "#str_02116", "_lookUp" },				// LOOK UP
+	{ "#str_02117", "_lookDown" },				// LOOK DOWN
 
 	{ "                                ", "" }, // koz divider
 	{ "#str_02093", "" },						// HEADING
@@ -81,7 +84,7 @@ static bindInfo_t keyboardBinds[] =
 	{ "#str_00100184", "_impulse9" },			// ROCKETS
 	{ "#str_00100185", "_impulse10" },			// BFG
 	{ "#str_swf_soulcube_artifact", "_impulse12" },	// SOULCUBE / ARTIFACT	
-	{ "#str_00100187", "_impulse16" },			// FLASHLIGHT
+
 
 	{ "                                ", "" }, // koz divider
 	{ "#str_04065", "" },						// HEADING

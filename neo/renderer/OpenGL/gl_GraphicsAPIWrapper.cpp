@@ -116,29 +116,6 @@ GL_Scissor
 void GL_Scissor( int x /* left*/, int y /* bottom */, int w, int h )
 {
 	
-	int sw, sh;
-	
-	sw = renderSystem->GetWidth();
-	sh = renderSystem->GetHeight();
-
-	if ( x < 0) x = 0;
-	if ( x > sw ) x = sw;
-	if ( y < 0 ) y = 0;
-	if ( y > sh ) y = sh;
-
-	//if ( x + w > sw ) common->Printf( "Scissor x + w = %d  x %d w %d max = %d\n", x + w, x, w, sw );//w = sw - x;
-	//if ( y + h > sh ) common->Printf( "Scissor y + h = %d  y %d h %d max = %d\n", y + h, y, h, sh );//w = sw - x;y = sh - y;
-	
-	if ( x + w >= sw ) 
-	{
-		w = ( sw - x ) - 1 ;
-	}
-	
-	if ( y + h >= sh )
-	{
-		h = ( sh - y ) -1 ;
-	}
-	
 	glScissor( x, y, w, h );
 	
 }
@@ -150,23 +127,6 @@ GL_Viewport
 */
 void GL_Viewport( int x /* left */, int y /* bottom */, int w, int h )
 {
-	int sw = renderSystem->GetWidth();
-	int sh = renderSystem->GetHeight();
-	
-	if ( x + w > sw )
-	{
-		w = (sw - x);
-		
-
-	}
-
-	if ( y + h > sh )
-	{
-		h = (sh - y);
-		
-
-	}
-
 	glViewport( x, y, w, h );
 }
 
@@ -370,7 +330,7 @@ void GL_SetDefaultState()
 //	if ( useFBO ) {
 //		globalFramebuffers.primaryFBO->Bind();
 //	}
-
+	//renderProgManager.Unbind();
 }
 
 /*

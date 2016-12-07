@@ -1435,7 +1435,7 @@ void idIK_Reach::Evaluate()
 		}
 		else
 		{
-			roll = idAngles( 0.0f, 0.0f, -commonVr->handRoll[i] + 30.0f ).ToMat3();
+			roll = idAngles( 0.0f, 0.0f, -commonVr->handRoll[i] + 30.0f ).Normalize180().ToMat3();
 		}
 	//	roll = mat3_identity;
 		trsp = roll * axis;

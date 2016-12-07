@@ -876,18 +876,18 @@ void idCommonLocal::RenderSplash()
 	const float sysAspect = sysWidth / sysHeight;
 	const float splashAspect = 5.0f / 4.0f;
 	const float adjustment = sysAspect / splashAspect;
-	const float barHeight = ( adjustment >= 1.0f ) ? 0.0f : ( 1.0f - adjustment ) * ( float )renderSystem->GetVirtualHeight() * 0.25f;
-	const float barWidth = ( adjustment <= 1.0f ) ? 0.0f : ( adjustment - 1.0f ) * ( float )renderSystem->GetVirtualWidth() * 0.25f;
-	
-	Framebuffer::BindDefault();
-		
-	if( barHeight > 0.0f )
+	const float barHeight = (adjustment >= 1.0f) ? 0.0f : (1.0f - adjustment) * (float)renderSystem->GetVirtualHeight() * 0.25f;
+	const float barWidth = (adjustment <= 1.0f) ? 0.0f : (adjustment - 1.0f) * (float)renderSystem->GetVirtualWidth() * 0.25f;
+
+	//	Framebuffer::BindDefault();
+
+	if ( barHeight > 0.0f )
 	{
 		renderSystem->SetColor( colorBlack );
 		renderSystem->DrawStretchPic( 0, 0, renderSystem->GetVirtualWidth(), barHeight, 0, 0, 1, 1, whiteMaterial );
 		renderSystem->DrawStretchPic( 0, renderSystem->GetVirtualHeight() - barHeight, renderSystem->GetVirtualWidth(), barHeight, 0, 0, 1, 1, whiteMaterial );
 	}
-	if( barWidth > 0.0f )
+	if ( barWidth > 0.0f )
 	{
 		renderSystem->SetColor( colorBlack );
 		renderSystem->DrawStretchPic( 0, 0, barWidth, renderSystem->GetVirtualHeight(), 0, 0, 1, 1, whiteMaterial );
@@ -895,19 +895,11 @@ void idCommonLocal::RenderSplash()
 	}
 	renderSystem->SetColor4( 1, 1, 1, 1 );
 	renderSystem->DrawStretchPic( barWidth, barHeight, renderSystem->GetVirtualWidth() - barWidth * 2.0f, renderSystem->GetVirtualHeight() - barHeight * 2.0f, 0, 0, 1, 1, splashScreen );
-	
+
 	const emptyCommand_t* cmd = renderSystem->SwapCommandBuffers( &time_frontend, &time_backend, &time_shadows, &time_gpu );
 	renderSystem->RenderCommandBuffers( cmd );
-	
-	
-	if ( game->isVR )
-	{
-		// now handled inside updatescreen
-		
-		//commonVr->HMDTrackStatic();
-		//vr::VRCompositor()->PostPresentHandoff();
-	}
 }
+
 
 /*
 =================
@@ -1356,48 +1348,6 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 			}
 		}
 
-		whiteMaterial = declManager->FindMaterial( "_white" );
-		
-		if( idStr::Icmp( sys_lang.GetString(), ID_LANG_FRENCH ) == 0 )
-		{
-			// If the user specified french, we show french no matter what SKU
-			splashScreen = declManager->FindMaterial( "guis/assets/splash/legal_french" );
-		}
-		else if( idStr::Icmp( defaultLang, ID_LANG_FRENCH ) == 0 )
-		{
-			// If the lead sku is french (ie: europe), display figs
-			splashScreen = declManager->FindMaterial( "guis/assets/splash/legal_figs" );
-		}
-		else
-		{
-			// Otherwise show it in english
-			splashScreen = declManager->FindMaterial( "guis/assets/splash/legal_english" );
-		}
-		
-		const int legalMinTime = 5000; //Carl: Don't force them to wait more than a second
-		const bool showVideo = ( !com_skipIntroVideos.GetBool() && fileSystem->UsingResourceFiles() );
-		
-		if ( game->isVR ) commonVr->HMDResetTrackingOriginOffset();
-		
-		if( showVideo )
-		{
-			RenderBink( "video\\loadvideo.bik" );
-			RenderSplash();
-			RenderSplash();
-			RenderSplash(); // Koz kick it off.
-		}
-		else
-		{
-			idLib::Printf( "Skipping Intro Videos!\n" );
-			// display the legal splash screen
-			// Carl - No clue why we have to render this twice to show up...
-			RenderSplash();
-			RenderSplash();
-			RenderSplash(); // Koz kick it off faster in VR. But really, no idea why 3rd time is the charm.
-		}
-		
-		
-		int legalStartTime = Sys_Milliseconds();
 		declManager->Init2();
 		
 		// initialize string database so we can use it for loading messages
@@ -1475,23 +1425,67 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		AddStartupCommands();
 		
 		StartMenu( true );
-		
-		while( Sys_Milliseconds() - legalStartTime < legalMinTime )
+
+		whiteMaterial = declManager->FindMaterial( "_white" );
+
+		if ( idStr::Icmp( sys_lang.GetString(), ID_LANG_FRENCH ) == 0 )
+		{
+			// If the user specified french, we show french no matter what SKU
+			splashScreen = declManager->FindMaterial( "guis/assets/splash/legal_french" );
+		}
+		else if ( idStr::Icmp( defaultLang, ID_LANG_FRENCH ) == 0 )
+		{
+			// If the lead sku is french (ie: europe), display figs
+			splashScreen = declManager->FindMaterial( "guis/assets/splash/legal_figs" );
+		}
+		else
+		{
+			// Otherwise show it in english
+			splashScreen = declManager->FindMaterial( "guis/assets/splash/legal_english" );
+		}
+
+		const int legalMinTime = 5000; //Carl: Don't force them to wait more than a second
+		const bool showVideo = (!com_skipIntroVideos.GetBool() && fileSystem->UsingResourceFiles());
+
+		if ( game->isVR ) commonVr->HMDResetTrackingOriginOffset();
+
+
+		if ( showVideo )
+		{
+			RenderBink( "video\\loadvideo.bik" );
+			RenderSplash();
+			RenderSplash();
+			RenderSplash(); // Koz kick it off.
+		}
+		else
+		{
+			idLib::Printf( "Skipping Intro Videos!\n" );
+			// display the legal splash screen
+			// Carl - No clue why we have to render this twice to show up...
+			RenderSplash();
+			RenderSplash();
+			RenderSplash(); // Koz kick it off faster in VR. But really, no idea why 3rd time is the charm.
+		}
+
+
+		int legalStartTime = Sys_Milliseconds();
+
+		while ( Sys_Milliseconds() - legalStartTime < legalMinTime )
 		{
 			RenderSplash();
 			Sys_GenerateEvents();
-			Sys_Sleep( 10 );
+			//Sys_Sleep( 10 );
 		};
-		
+
 		commonVr->HMDResetTrackingOriginOffset();
 
-		splashScreen = declManager->FindMaterial( "guis/lookforward");
+		splashScreen = declManager->FindMaterial( "guis/lookforward" );
 
-		bool centered = false;
+		int centered = 0;
 
 		if ( game->isVR )
 		{
-			while ( !centered )
+			while ( centered < 6 )
 			{
 				RenderSplash();
 				Sys_GenerateEvents();
@@ -1502,7 +1496,11 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 				// RB: allow to escape video by pressing anything
 				int numKeyEvents = Sys_PollKeyboardInputEvents();
 
-				if ( numKeyEvents > 0 ) centered = true;
+				if ( numKeyEvents > 0 )
+				{
+					common->Printf( "Bailed from keyevent\n" );
+					centered++;
+				}
 
 				for ( int eachJ = 0; eachJ < MAX_INPUT_DEVICES; eachJ++ )
 				{
@@ -1514,42 +1512,52 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 						int value;
 						if ( Sys_ReturnJoystickInputEvent( eachJ, action, value ) )
 						{
-							if ( action >= J_ACTION1 && action <= J_ACTION_MAX || action < J_ACTION_MAX && action < MAX_JOY_EVENT )
+							if ( action >= J_ACTION1 && action <= J_ACTION_MAX )// || action < J_ACTION_MAX && action < MAX_JOY_EVENT )
 							{
-								centered = true;
+								common->Printf( "Centered %d Bailed from action >= J_ACTION1 && action <= J_ACTION_MAX action %d numevents %d\n", centered ,action, numJoystickEvents );
+								centered ++ ;
 							}
 							else if ( action > J_AXIS_MIN && action < J_AXIS_MAX )
 							{
-								if ( abs( value ) > 16384 ) centered = true;
+								if ( abs( value ) > 16384 )
+								{
+									common->Printf( "Centered %d Bailed from action J_AXIS_MIN && action < J_AXIS_MAX %d %d\n", centered, action, value );
+									centered ++;
+								}
+
 							}
 						}
 					}
 				}
 			}
 		}
-								/*
-								int joyButton = K_JOY1 + (action - J_ACTION1);
-								Key( joyButton, (value != 0) );
-							}
-							else if ( (action >= J_AXIS_MIN) && (action <= J_AXIS_MAX) )
-							{
-								joystickAxis[action - J_AXIS_MIN] = static_cast<float>(value) / 32767.0f;
-							}
-							else if ( action >= J_DPAD_UP && action <= J_DPAD_RIGHT )
-							{
-								int joyButton = K_JOY_DPAD_UP + (action - J_DPAD_UP);
-								Key( joyButton, (value != 0) );
-							}
-							else
-							{
-								assert( !"Unknown joystick event" );
-							}
-							*/
-							
+		/*
+		int joyButton = K_JOY1 + (action - J_ACTION1);
+		Key( joyButton, (value != 0) );
+		}
+		else if ( (action >= J_AXIS_MIN) && (action <= J_AXIS_MAX) )
+		{
+		joystickAxis[action - J_AXIS_MIN] = static_cast<float>(value) / 32767.0f;
+		}
+		else if ( action >= J_DPAD_UP && action <= J_DPAD_RIGHT )
+		{
+		int joyButton = K_JOY_DPAD_UP + (action - J_DPAD_UP);
+		Key( joyButton, (value != 0) );
+		}
+		else
+		{
+		assert( !"Unknown joystick event" );
+		}
+		*/
+
 		if ( game->isVR ) commonVr->HMDResetTrackingOriginOffset();
 
+		commonVr->renderingSplash = false;
 
 
+
+		
+		
 		// print all warnings queued during initialization
 		PrintWarnings();
 		

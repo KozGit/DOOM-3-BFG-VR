@@ -295,8 +295,14 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 		}
 	}
 
-	//HMDGetOrientation( imuAngles[ROLL], imuAngles[PITCH], imuAngles[YAW], hmdTranslation );
-	HMDGetOrientation( imuAngles, headPositionDelta, bodyPositionDelta, absolutePosition, false );
+	
+	//HMDGetOrientation( imuAngles, headPositionDelta, bodyPositionDelta, absolutePosition, false );
+
+	imuAngles = commonVr->poseHmdAngles;
+	headPositionDelta = commonVr->poseHmdHeadPositionDelta;
+	bodyPositionDelta = commonVr->poseHmdBodyPositionDelta;
+	absolutePosition = commonVr->poseHmdAbsolutePosition;
+	
 
 	//imuAngles = ang_zero;
 
@@ -319,7 +325,7 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 	//imuRotationGL.w = imuRotation.w;
 
 
-//	idCVar vr_transz( "vr_transz", "-1.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "test z trans" );
+	//idCVar vr_transz( "vr_transz", "-1.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "test z trans" );
 	
 	VR_QuatToRotation( imuRotationGL, rot );
 	if ( commonVr->vrIsBackgroundSaving )
@@ -329,6 +335,7 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 	else
 	{
 		VR_TranslationMatrix( 0, 0, -1.5 /*vr_transz.GetFloat()*/, trans );
+		//VR_TranslationMatrix( 0, 0, vr_transz.GetFloat(), trans );
 	}
 
 	static int destWidth, destHeight, drawWidth;
@@ -524,7 +531,6 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 		renderProgManager.CommitUniforms();
 
 		// draw the hud for that eye
-		//RB_DrawStripWithCounters( &backEnd.hudSurface );
 		RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
 
 		hmdEyeImage[index]->Bind();
@@ -562,6 +568,7 @@ eye textures: idImage leftCurrent, rightCurrent
 void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent ) 
 {
 	
+	
 	wglSwapIntervalEXT( 0 ); //
 
 	static int FBOW ;
@@ -574,9 +581,12 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 	vr::Texture_t rightEyeTexture = { (void*)rightCurrent->GetTexNum(), vr::API_OpenGL, vr::ColorSpace_Gamma };
 	vr::VRCompositor()->Submit( vr::Eye_Right, &rightEyeTexture );
 		
-	
+	wglSwapIntervalEXT( 0 ); //
 	// Blit mirror texture to back buffer
-	renderProgManager.BindShader_PostProcess(); // pass thru shader
+	//renderProgManager.BindShader_PostProcess(); // pass thru shader
+
+	renderProgManager.BindShader_Texture();
+	GL_Color( 1, 1, 1, 1 );
 
 	glBindFramebuffer( GL_READ_FRAMEBUFFER, 0 );
 	glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
@@ -589,10 +599,11 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 	renderProgManager.Unbind();
 
 	globalFramebuffers.primaryFBO->Bind();
+	
 
 	wglSwapIntervalEXT( 0 );//
 
-	vr::VRCompositor()->PostPresentHandoff();
+	
 		
 }
 
@@ -606,22 +617,23 @@ last fullscreen texture then force a buffer swap.
 
 void iVr::HMDTrackStatic()
 {
+	
+	
 	if ( game->isVR )
 	{
 		
-		FrameStart(); // wait for poses;
-		
-		if ( commonVr->hmdCurrentRender[0] == NULL || commonVr->hmdCurrentRender[1] == NULL) 
+		//common->Printf( "HmdTrackStatic called idFrame #%d\n", idLib::frameNumber);
+		if ( commonVr->hmdCurrentRender[0] == NULL || commonVr->hmdCurrentRender[1] == NULL )
 		{
-			common->Printf("VR_HmdTrackStatic no images to render\n");
+			common->Printf( "VR_HmdTrackStatic no images to render\n" );
 			return;
 		}
-		
+
 
 		commonVr->hmdCurrentRender[0]->CopyFramebuffer( renderSystem->GetWidth(), renderSystem->GetHeight(), renderSystem->GetWidth(), renderSystem->GetHeight() );
 		commonVr->hmdCurrentRender[1]->CopyFramebuffer( renderSystem->GetWidth(), renderSystem->GetHeight(), renderSystem->GetWidth(), renderSystem->GetHeight() );
-		HUDRender(commonVr->hmdCurrentRender[0], commonVr->hmdCurrentRender[1]);
+		HUDRender( commonVr->hmdCurrentRender[0], commonVr->hmdCurrentRender[1] );
 		HMDRender( hmdEyeImage[0], hmdEyeImage[1] );
-		
+				
 	}
 }

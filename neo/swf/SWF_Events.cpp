@@ -264,22 +264,22 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 		*/
 	
 		//common->Printf( "SWFEvents SE_KEY = %d\n", event->evValue );
-		
-		if ( event->evValue == K_MOUSE1
-			|| event->evValue == K_L_HYDRATRIG 	// koz hydra left trigger
-			|| event->evValue == K_R_HYDRATRIG 	// koz hydra right trigger
-			//||	event->evValue == K_JOY17 		// koz hydra left button 1
-			//||	event->evValue == K_JOY24 		// koz hydra right button 1
-			|| event->evValue == K_JOY_TRIGGER1
-			|| event->evValue == K_JOY_TRIGGER2
-			//||	event->evValue == K_JOY2 
-			//||	event->evValue == K_JOY1
-			|| event->evValue == K_L_STEAMVRTRIG
-			|| event->evValue == K_R_STEAMVRTRIG 
-			|| event->evValue == K_JOY37 // button for steam trig
-			|| event->evValue == K_JOY33// button for steam trig
 			
-
+		if (  event->evValue == K_MOUSE1
+				|| ( commonVr->scanningPDA && (
+				   event->evValue == K_L_HYDRATRIG 	// koz hydra left trigger
+				|| event->evValue == K_R_HYDRATRIG 	// koz hydra right trigger
+				//||	event->evValue == K_JOY17 		// koz hydra left button 1
+				//||	event->evValue == K_JOY24 		// koz hydra right button 1
+				|| event->evValue == K_JOY_TRIGGER1
+				|| event->evValue == K_JOY_TRIGGER2
+				//||	event->evValue == K_JOY2 
+				//||	event->evValue == K_JOY1
+				|| event->evValue == K_L_STEAMVRTRIG
+				|| event->evValue == K_R_STEAMVRTRIG 
+				|| event->evValue == K_JOY37 // button for steam trig
+				|| event->evValue == K_JOY33// button for steam trig
+				))
 			)
 		{
 
@@ -362,7 +362,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				}
 			}
 
-		//	return false; // koz fixme hydra this was just a return, but let hydra key events fall through
+			//return false; // koz fixme hydra this was just a return, but let hydra key events fall through
 
 		}
 
@@ -643,6 +643,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 						break;
 
 					case RENDERING_HUD:
+						scale = vr_guiScale.GetFloat();
 						break;
 
 					case RENDERING_NORMAL:

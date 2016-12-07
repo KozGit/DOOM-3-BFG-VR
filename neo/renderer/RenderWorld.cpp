@@ -277,7 +277,7 @@ void idRenderWorldLocal::UpdateEntityDef( qhandle_t entityHandle, const renderEn
 	
 	if( !re->hModel && !re->callback )
 	{
-		return;// koz fixme!
+		//return;// koz fixme!
 
 		common->Error( "idRenderWorld::UpdateEntityDef: NULL hModel" );
 	}
@@ -1249,7 +1249,7 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, idAnimator* ani
 	bool isPDA = false;
 	// koz end
 
-	common->Printf( "Begin guitrace\n" );
+	//common->Printf( "Begin guitrace\n" );
 	if ( (entityHandle < 0) || ( entityHandle >= entityDefs.Num()) )
 	{
 		return pt;

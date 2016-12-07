@@ -205,8 +205,9 @@ typedef enum
 	UB_IMPULSE36, // hud toggle
 	UB_IMPULSE37, // headingbeam toggle
 	UB_IMPULSE38, // walk in place
-	UB_IMPULSE39, // freelook
+	UB_IMPULSE39, // next flash mode
 	UB_IMPULSE40, // system menu
+	UB_IMPULSE41, // click to move
 	// Koz end
 	
 	UB_MAX_BUTTONS

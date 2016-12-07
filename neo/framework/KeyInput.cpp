@@ -521,10 +521,6 @@ void idKeyInput::SetBinding( int keynum, const char* binding )
 	{
 		return;
 	}
-	idStr temp = binding;
-	//koz debug
-	//common->Printf( "Setting Binding %i %s\n", keynum, temp.c_str()  );
-
 	// Clear out all button states so we aren't stuck forever thinking this key is held down
 	usercmdGen->Clear();
 	

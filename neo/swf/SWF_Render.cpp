@@ -145,7 +145,12 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 		sysHeight = 960;
 
 	}
-	// Koz end
+	
+	else if ( commonVr->swfRenderMode == RENDERING_NORMAL )
+	{
+		sysWidth = renderSystem->GetVirtualWidth();
+		sysHeight = renderSystem->GetVirtualHeight() * 1.25; // fix the aspect
+	}
 
 	float scale = swfScale * sysHeight / ( float )frameHeight;
 
@@ -170,7 +175,7 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 				
 				case RENDERING_NORMAL:
 				default:
-					scale = vr_guiScale.GetFloat();
+					scale *= vr_guiScale.GetFloat();
 			}
 		}
 	
@@ -224,9 +229,10 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 		// koz end
 	//	vr_mScale = 1.0f;
 
+		extern idCVar vr_debugTouchCursor;
 		
-		//if ( !game->isVR || !game->IsInGame() || !(commonVr->VR_USE_MOTION_CONTROLS && vr_guiMode.GetInteger() == 2) ) //  hide the mouse cursor if using touchscreen
-		if ( !game->IsInGame() )
+		if ( !game->isVR || !game->IsInGame() || !(commonVr->VR_USE_MOTION_CONTROLS && vr_guiMode.GetInteger() == 2) || vr_debugTouchCursor.GetBool() ) //  hide the mouse cursor if using touchscreen
+	//	if ( !game->IsInGame() )
 		{
 
 			if ( !hasHitObject )    //hitObject == NULL ) {

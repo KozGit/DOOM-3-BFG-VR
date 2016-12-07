@@ -128,13 +128,9 @@ We want to exit this with the GPU idle, right at vsync
 const void GL_BlockingSwapBuffers()
 {
 	RENDERLOG_PRINTF( "***************** GL_BlockingSwapBuffers *****************\n\n\n" );
-
+		
 	const int beforeFinish = Sys_Milliseconds();
-	int beforeFence = Sys_Milliseconds();
 
-
-
-	
 	if ( !glConfig.syncAvailable )
 	{
 		glFinish();
@@ -146,9 +142,15 @@ const void GL_BlockingSwapBuffers()
 		common->Printf( "%i msec to glFinish\n", beforeSwap - beforeFinish );
 	}
 
+
 	GLimp_SwapBuffers();
 
-	beforeFence = Sys_Milliseconds();
+	if ( game->isVR )
+	{
+		commonVr->FrameStart();
+	}
+	
+	const int beforeFence = Sys_Milliseconds();
 	if ( r_showSwapBuffers.GetBool() && beforeFence - beforeSwap > 1 )
 	{
 		common->Printf( "%i msec to swapBuffers\n", beforeFence - beforeSwap );
@@ -357,7 +359,8 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	// a confusing, half-ghosted view.
 	if( renderSystem->GetStereo3DMode() != STEREO3D_QUAD_BUFFER )
 	{
-		if ( !commonVr->useFBO ) glDrawBuffer( GL_BACK ); // Koz 
+		if ( !commonVr->useFBO ) glDrawBuffer( GL_BACK ); // Koz fixme
+	    
 	}
 	
 	GL_State( GLS_DEPTHFUNC_ALWAYS );
@@ -376,8 +379,10 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	renderProgManager.SetRenderParm( RENDERPARM_TEXGEN_0_ENABLED, texGenEnabled );
 	
 	renderProgManager.BindShader_Texture();
+	GL_Color( 1, 1, 1, 1 );
 	
 		
+	//common->Printf( "SREBEC Rendering frame %d\n", idLib::frameNumber );
 	switch( renderSystem->GetStereo3DMode() )
 	{
 		case STEREO3D_QUAD_BUFFER:
@@ -416,7 +421,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			glScissor( 0, 720, 1280, 30 );
 			glClear( GL_COLOR_BUFFER_BIT );
 			break;
-		default:
+		
 		
 		case STEREO3D_HMD:
 			
@@ -426,11 +431,10 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			if ( game->isVR ) 
 			{
 			
-				if ( commonLocal.insideExecuteMapChange ) break;
-
 				if ( commonVr->playerDead || (game->Shell_IsActive() && !commonVr->PDAforced && !commonVr->PDArising ) || (!commonVr->PDAforced && common->Dialog().IsDialogActive() ) ) 
 				{
 					commonVr->HMDTrackStatic();
+					
 				}
 				else
 				{
@@ -438,11 +442,12 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 				}
 
 				//koz GL_CheckErrors();
-				break;
+				
 			}
-			
+			break;
 			//Koz end		
 		
+		default:
 		case STEREO3D_SIDE_BY_SIDE:
 			
 		// a non-warped side-by-side-uncompressed (dual input cable) is rendered
@@ -560,6 +565,7 @@ void RB_ExecuteBackEndCommands( const emptyCommand_t* cmds )
 	// the back left and back right buffers, which will have a
 	// performance penalty.
 	if ( !commonVr->useFBO ) glDrawBuffer( GL_BACK ); // Koz
+	
 	
 	for( ; cmds != NULL; cmds = ( const emptyCommand_t* )cmds->next )
 	{

@@ -4299,6 +4299,66 @@ void RB_DrawView( const void* data, const int stereoEye )
 	
 	RB_ShowOverdraw();
 	
+	//koz vr right before the view is drawn, update the view with the latest pos/angles from the hmd
+	//this isnt really necessary if running in single threaded mode, but if smp is enabled
+	//the game will start generating the next frame early, using old pose info, which causes 
+	//lag, which is especially noticeable when chaperone is showing the bounds;
+
+			
+	if ( game->isVR )
+	{
+		static idVec3 hmdPosDelta = vec3_zero;
+		static idMat3 hmdAxisDelta = mat3_identity;
+		static float ipdOffset = 0.0f;
+
+		idVec3 &drawViewOrigin = cmd->viewDef->renderView.vieworg;
+		idMat3 &drawViewAxis = cmd->viewDef->renderView.viewaxis;
+		
+		hmdPosDelta = ( commonVr->poseHmdAbsolutePosition - commonVr->poseLastHmdAbsolutePosition ) ; // the delta in hmd position since the frame was initialy created and now
+		hmdAxisDelta = commonVr->poseHmdAngles.ToMat3() * commonVr->poseLastHmdAngles.ToMat3().Inverse();// the delta in hmd rotation since the frame was initialy created and now
+			
+		ipdOffset = stereoEye * -commonVr->singleEyeIPD; // adjust origin from the stereoeye position, not the center eye position
+
+		drawViewOrigin -= ipdOffset * drawViewAxis[1];
+		drawViewOrigin += hmdPosDelta;
+
+		drawViewAxis = hmdAxisDelta * drawViewAxis;
+
+		drawViewOrigin += ipdOffset * drawViewAxis[1];
+
+		R_SetupViewMatrix( cmd->viewDef );
+		idRenderMatrix drawViewRenderMatrix;
+		idRenderMatrix::Transpose( *(idRenderMatrix*)cmd->viewDef->projectionMatrix, cmd->viewDef->projectionRenderMatrix );
+		idRenderMatrix::Transpose( *(idRenderMatrix*)cmd->viewDef->worldSpace.modelViewMatrix, drawViewRenderMatrix );
+		idRenderMatrix::Multiply( cmd->viewDef->projectionRenderMatrix, drawViewRenderMatrix, cmd->viewDef->worldSpace.mvp );
+
+
+		//model fixup
+		viewEntity_t *vEntity = cmd->viewDef->viewEntitys;
+		while ( vEntity )
+		//for ( viewEntity_t * vEntity = cmd->viewDef->viewEntitys; vEntity; vEntity = vEntity->next )
+		{
+			
+			// koz from tr_frontend_addmodels
+			R_MatrixMultiply(vEntity->modelMatrix, cmd->viewDef->worldSpace.modelViewMatrix,vEntity->modelViewMatrix );
+						
+			idRenderMatrix viewMat;
+			idRenderMatrix::Transpose( *(idRenderMatrix*) vEntity->modelViewMatrix, viewMat );
+			idRenderMatrix::Multiply( cmd->viewDef->projectionRenderMatrix, viewMat,vEntity->mvp );
+			if (vEntity->weaponDepthHack )
+			{
+				idRenderMatrix::ApplyDepthHack(vEntity->mvp );
+			}
+			if (vEntity->modelDepthHack != 0.0f )
+			{
+				idRenderMatrix::ApplyModelDepthHack( vEntity->mvp, vEntity->modelDepthHack );
+			}
+			vEntity = vEntity->next;
+		}
+	}
+
+	// koz end
+	
 	// render the scene
 	RB_DrawViewInternal( cmd->viewDef, stereoEye );
 	

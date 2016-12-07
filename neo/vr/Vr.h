@@ -76,7 +76,8 @@ typedef enum
 	FLASH_BODY,
 	FLASH_HEAD,
 	FLASH_GUN,
-	FLASH_HAND
+	FLASH_HAND,
+	FLASH_MAX,
 } vr_flashlight_mode_t;
 
 class idClipModel;
@@ -128,10 +129,14 @@ public:
 	void				FXAASetUniforms( Framebuffer FBO );
 
 	void				CalcAimMove( float &yawDelta, float &pitchDelta );
-	
+
+	int					GetCurrentFlashMode();
+	void				NextFlashMode();
+		
 
 	//------------------
 
+	int					currentFlashMode;
 
 	bool				VR_GAME_PAUSED;
 	
@@ -153,6 +158,8 @@ public:
 	bool				vrIsBackgroundSaving;
 
 	int					vrFrameNumber;
+	int					lastPostFrame;
+
 			
 	idVec3				lastViewOrigin;
 	idMat3				lastViewAxis;
@@ -169,8 +176,7 @@ public:
 	float				lastHMDRoll;
 	idVec3				lastHMDViewOrigin;
 	idMat3				lastHMDViewAxis;
-	idVec3				lastAbsolutePosition;
-		
+			
 	bool				isWalking;
 	
 	float				angles[3];
@@ -202,7 +208,12 @@ public:
 	vr::IVRRenderModels		*m_pRenderModels;
 	vr::TrackedDevicePose_t	m_rTrackedDevicePose[vr::k_unMaxTrackedDeviceCount];
 	vr::TrackedDevicePose_t	m1_rTrackedDevicePose[vr::k_unMaxTrackedDeviceCount];
-	
+
+	vr::VRControllerState_t pControllerStateL;
+	vr::VRControllerState_t pControllerStateR;
+	vr::TrackedDeviceIndex_t leftControllerDeviceNo;
+	vr::TrackedDeviceIndex_t rightControllerDeviceNo;
+		
 	idStr				m_strDriver;
 	idStr				m_strDisplay;
 	
@@ -214,7 +225,10 @@ public:
 	idMat4				m_mat4ProjectionRight;
 	idMat4				m_mat4eyePosLeft;
 	idMat4				m_mat4eyePosRight;
-
+	
+	float				singleEyeIPD;
+	float				hmdForwardOffset;
+	
 	float				hmdFovX;
 	float				hmdFovY;
 	float				hmdAspect;
@@ -240,14 +254,17 @@ public:
 	double				hmdFrameTime;
 	bool				hmdPositionTracked;
 	int					currentEye;
-
-
-
+	
 	idVec3				trackingOriginOffset;
 	float				trackingOriginYawOffset;
 	bool				chestDefaultDefined;
 	idVec3				hmdBodyTranslation;
 	
+	idVec3				motionMoveDelta;
+	idVec3				motionMoveVelocity;
+	idVec3				leanOffset;
+
+
 	float				independentWeaponYaw;
 	float				independentWeaponPitch;
 	
@@ -259,7 +276,10 @@ public:
 	int					currentRead;
 	bool				updateScreen;
 
-	idAngles			bodyMoveAng;
+	bool				scanningPDA;
+
+
+	float				bodyMoveAng;
 
 
 	vr_motionControl_t	motionControlType;
@@ -276,6 +296,24 @@ public:
 	float				wipAvgPeriod;
 	float				wipTotalDeltaAvg;
 
+	bool				renderingSplash;
+		
+	idAngles			poseHmdAngles;
+	idVec3				poseHmdHeadPositionDelta;
+	idVec3				poseHmdBodyPositionDelta;
+	idVec3				poseHmdAbsolutePosition;
+
+	idVec3				poseHandPos[2];
+	idQuat				poseHandRotationQuat[2];
+	idMat3				poseHandRotationMat3[2];
+	idAngles			poseHandRotationAngles[2];
+
+	idAngles			poseLastHmdAngles;
+	idVec3				poseLastHmdHeadPositionDelta;
+	idVec3				poseLastHmdBodyPositionDelta;
+	idVec3				poseLastHmdAbsolutePosition;
+	float				lastBodyYawOffset;
+	
 	// clip stuff
 	idClipModel*		bodyClip;
 	idClipModel*		headClip;
@@ -420,6 +458,27 @@ extern idCVar	vr_walkSpeedAdjust;
 
 
 extern idCVar	vr_movePoint;
+
+extern idCVar	vr_crouchTriggerDist;
+
+extern idCVar	vr_wipPeriodMin;
+extern idCVar	vr_wipPeriodMax;
+
+extern idCVar	vr_wipVelocityMin;
+extern idCVar	vr_wipVelocityMax;
+
+extern idCVar	vr_headbbox;
+
+extern idCVar	vr_pdaPosX;
+extern idCVar	vr_pdaPosY;
+extern idCVar	vr_pdaPosZ;
+
+extern idCVar	vr_pdaPitch;
+
+extern idCVar	vr_movePoint;
+extern idCVar	vr_moveClick;
+extern idCVar	vr_playerBodyMode;
+extern idCVar	vr_bodyToMove;
 
 extern iVr* commonVr;
 

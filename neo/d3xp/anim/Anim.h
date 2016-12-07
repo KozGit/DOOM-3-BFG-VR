@@ -550,7 +550,7 @@ public:
 	jointHandle_t				GetJointHandle( const char* name ) const;
 	const char* 				GetJointName( jointHandle_t handle ) const;
 	int							GetChannelForJoint( jointHandle_t joint ) const;
-	bool						GetJointTransform( jointHandle_t jointHandle, int currenttime, idVec3& offset, idMat3& axis, bool force = false );
+	bool						GetJointTransform( jointHandle_t jointHandle, int currenttime, idVec3& offset, idMat3& axis );
 	bool						GetJointLocalTransform( jointHandle_t jointHandle, int currentTime, idVec3& offset, idMat3& axis );
 	
 	const animFlags_t			GetAnimFlags( int animnum ) const;

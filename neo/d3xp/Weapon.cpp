@@ -36,6 +36,12 @@ If you have questions concerning this license or the applicable additional terms
 #include "vr\vr.h" 
 
 idClipModel* PDAclipModel; // koz fixme pda more crappy globals.
+
+
+
+idCVar vr_guiH( "vr_guiH", "100", CVAR_INTEGER, "" );
+idCVar vr_guiA( "vr_guiA", "100", CVAR_INTEGER, "" );
+
 // Koz end
 
 
@@ -1570,7 +1576,11 @@ idWeapon::UpdateVRGUI
 void idWeapon::UpdateVRGUI()
 {
 
-	
+	static int healthv = 0;
+	static int armorv = 0;
+	static float armorb = 0.0f;
+	static float healthb = 0.0f;
+
 	if ( vrStatGui == NULL )
 	{
 		return;
@@ -1632,6 +1642,40 @@ void idWeapon::UpdateVRGUI()
 
 	//Grabber Gui Info
 	vrStatGui->SetStateString( "grabber_state", va( "%i", grabberState ) );
+
+	//health and armor
+	
+	healthv = 0;
+	armorv = 0;
+	healthb = 0;
+	armorb = 0;
+
+	idPlayer* player;
+	player = gameLocal.GetLocalPlayer();
+	if ( player )
+	{
+		healthv = player->health;
+		if ( player->inventory.armor )
+		{
+			armorv = player->inventory.armor;
+		}
+
+		//healthv = vr_guiH.GetInteger();
+		//armorv = vr_guiA.GetInteger();
+				
+		healthv = idMath::ClampInt( 0, 100, healthv );
+		armorv = idMath::ClampInt( 0, 100, armorv );
+		
+		if ( healthv >= 75 ) healthb = ( healthv / 100.0f) ;
+		if ( armorv >= 75 ) armorb = ( armorv / 100.0f ) ;
+		
+	}
+	
+	vrStatGui->SetStateString( "player_health", va( "%i", healthv ) );
+	vrStatGui->SetStateString( "player_armor", va( "%i%%", armorv ) );
+	vrStatGui->SetStateString( "player_healthb", va( "%f", healthb ) );
+	vrStatGui->SetStateString( "player_armorb", va( "%f", armorb ) );
+	
 }
 
 /*
@@ -5526,8 +5570,10 @@ void idWeapon::Event_GetWeaponSkin()
 
 	if ( isPlayerFlashlight )
 	{
-		vrSkinName = vr_flashlightMode.GetInteger() == 2 ? "minivr/flashhands/" : "vr/flashhands/"; // mini flashlight skin for gun mount
-		if ( vr_viewModelArms.GetBool() && commonVr->VR_USE_MOTION_CONTROLS && vr_flashlightMode.GetInteger() == 3 && !vr_showBody.GetInteger() && vr_weaponHand.GetInteger() == 0 )
+		//vrSkinName = vr_flashlightMode.GetInteger() == 2 ? "minivr/flashhands/" : "vr/flashhands/"; // mini flashlight skin for gun mount
+		vrSkinName = commonVr->GetCurrentFlashMode() == 2 ? "minivr/flashhands/" : "vr/flashhands/"; // mini flashlight skin for gun mount
+		//if ( vr_viewModelArms.GetBool() && commonVr->VR_USE_MOTION_CONTROLS && vr_flashlightMode.GetInteger() == 3 && !vr_showBody.GetInteger() && vr_weaponHand.GetInteger() == 0 )
+		if ( vr_viewModelArms.GetBool() && commonVr->VR_USE_MOTION_CONTROLS && commonVr->GetCurrentFlashMode() == 3 && !vr_showBody.GetInteger() && vr_weaponHand.GetInteger() == 0 )
 		{
 			vrSkinName += "1h";
 			if ( vr_wristStatMon.GetInteger() == 2 ) vrSkinName += "sw";

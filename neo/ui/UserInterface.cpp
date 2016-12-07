@@ -48,6 +48,8 @@ idDeviceContext* dc;
 
 idCVar g_useNewGuiCode(	"g_useNewGuiCode",	"1", CVAR_GAME | CVAR_INTEGER, "use optimized device context code, 2 = toggle on/off every frame" );
 
+idCVar vr_debugTouchCursor( "vr_debugTouchCursor", "0", CVAR_BOOL, "Show the cursor position when using touch screen mode." );
+
 extern idCVar sys_lang;
 
 
@@ -534,7 +536,7 @@ void idUserInterfaceLocal::DrawCursor()
 	else
 	{
 		// koz dont draw cursor if using motion controls in touchscreen mode
-		if ( !game->isVR || vr_controllerStandard.GetInteger() == 1 || !commonVr->VR_USE_MOTION_CONTROLS || vr_guiMode.GetInteger() != 2 )//!gameLocal.GetLocalPlayer()->GuiActive()
+		if ( !game->isVR || vr_controllerStandard.GetInteger() == 1 || !commonVr->VR_USE_MOTION_CONTROLS || vr_guiMode.GetInteger() != 2 || vr_debugTouchCursor.GetBool() )//!gameLocal.GetLocalPlayer()->GuiActive()
 		{
 			dc->DrawCursor( &cursorX, &cursorY, 56.0f );
 		}

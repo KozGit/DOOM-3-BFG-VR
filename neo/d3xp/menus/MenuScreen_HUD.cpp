@@ -263,7 +263,7 @@ float idMenuScreen_HUD::GetHudAlpha()
 		currentAlpha -= delta;
 		if ( currentAlpha < 0.0f ) currentAlpha = 0.0f;
 	}
-
+	
 	return currentAlpha;
 }
 

@@ -1451,9 +1451,6 @@ TR_BACKEND_DRAW
 
 void RB_SetMVP( const idRenderMatrix& mvp );
 void RB_DrawElementsWithCounters( const drawSurf_t* surf );
-
-void RB_DrawStripWithCounters( const drawSurf_t *surf ); // koz fixme dont use strips for hmd mesh 
-
 void RB_DrawViewInternal( const viewDef_t* viewDef, const int stereoEye );
 void RB_DrawView( const void* data, const int stereoEye );
 void RB_CopyRender( const void* data );

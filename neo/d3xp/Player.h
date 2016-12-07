@@ -318,7 +318,7 @@ public:
 	
 	idMat3					chestPivotCorrectAxis; //made these public so could be accessed by hmdgetorientation;
 	idVec3					chestPivotDefaultPos;
-	
+	jointHandle_t			chestPivotJoint;
 	//float					independentWeaponPitch; // deltas to provide aim independent of body/view orientation
 	//float					independentWeaponYaw;
 
@@ -884,7 +884,7 @@ private:
 
 	// koz begin
 	jointHandle_t			neckJoint;
-	jointHandle_t			chestPivotJoint;
+	
 	jointHandle_t			ik_hand[2];
 	jointHandle_t			ik_elbow[2];
 	jointHandle_t			ik_shoulder[2];
