@@ -123,7 +123,7 @@ idMenuHandler::GetPlatform
 int idMenuHandler::GetPlatform( bool realPlatform )
 {
 
-	if( platform == 2 && in_useJoystick.GetBool() && !realPlatform )
+	if( platform == 2 && (in_useJoystick.GetBool() || commonVr->hasHMD) && !realPlatform )
 	{
 		return 0;
 	}
