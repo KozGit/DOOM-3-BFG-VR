@@ -1,0 +1,42 @@
+
+models/characters/player_character/body/body2_arm2
+{
+	noSelfShadow	
+	renderbump	-size 2048 4096 -aa 2 -colormap models/characters/player_character/body/body_codpiecefix_arm2_local.tga  models/characters/body/body_hi.lwo
+	unsmoothedTangents	
+	qer_editorimage	models/characters/player_character/body/body2.tga
+
+	diffusemap	models/characters/player_character/body/body2_arm2.tga
+	bumpmap	models/characters/player_character/body/body_codpiecefix_arm2_local.tga
+	specularmap	models/characters/player_character/body/body_arm2_s.tga
+}
+
+models/characters/male_npc/marine/marine2_arm2_vrik
+{
+       noSelfShadow
+		unsmoothedTangents
+		flesh
+		forceOverlays
+		clamp
+		collision	
+		//noShadows
+
+	{	// burning corpse effect
+		if	parm7			// only when dead
+		// make a burned away alpha test for the normal skin
+		blend	gl_zero, gl_one			// don't draw anything
+		
+		noclamp map models/monsters/spectre/global_dis.tga	// replace this with a monster-specific texture
+		alphaTest 0.05 + 1.7 * (time - parm7)
+	}
+
+	renderbump  -size 1024 3072 -trace 0.07 -colorMap -aa 2  models/characters/male_npc/marine/marine_local.tga models/characters/male_npc/marine/marine_hi.lwo
+       // diffusemap	  models/characters/male_npc/marine/marine_arm2.tga
+		diffusemap	models/characters/player_character/body/body2_arm2.tga
+		//bumpmap		  addnormals(models/characters/male_npc/marine/marine_arm2_local.tga, heightmap(models/characters/male_npc/marine/marine_arm_2_h.tga, 5 ) )
+       bumpmap models/characters/player_character/body/body_codpiecefix_local_scaled.tga
+	   // specularmap	  models/characters/male_npc/marine/marine_arm2_s.tga
+	   specularmap	models/characters/player_character/body/body_arm2_s.tga
+}
+
+

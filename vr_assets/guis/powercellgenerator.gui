@@ -1,0 +1,1639 @@
+///////////////////////////////////////////////////////////////////////////////
+// Parameters:
+//	gui_parm1 = Required Cell Count
+//	gui_parm2 = Active Cell Count when level starts
+//	gui_parm3 = Removing Cells script function
+//	gui_parm4 = Adding Cells script function
+//	gui_parm5 = Time in seconds before the remove is complete (only 1, 2, 3, 4 and 5 seconds are supported)
+//	gui_parm6 = Time in seconds before the add is complete (only 1, 2, 3, 4 and 5 seconds are supported)
+///////////////////////////////////////////////////////////////////////////////
+
+windowDef Desktop
+{
+	comment	"gui_parm1 = Required Cell Count; gui_parm2 = Active Cell Count when level starts; gui_parm3 = Removing Cells script function; gui_parm4 = Adding Cells script function; gui_parm5 = Time in seconds before the remove is complete (only 1, 2, 3, 4 and 5 seconds are supported); gui_parm6 = Time in seconds before the add is complete (only 1, 2, 3, 4 and 5 seconds are supported)"
+	rect	0 ,0 ,640 ,480
+	background	"guis/assets/common/bg_rc.tga"
+	matcolor	0,0,0,1
+	visible	1
+
+	float	"initFlag"			0
+	float	"status"			0
+
+	onEvent {
+
+		if(initFlag == 0) {
+			//Initialization
+			set "desktop::initFlag"			"1";
+			set	"gui::requiredCount"		"gui::gui_parm1" ;
+			set	"gui::activeCount"			"gui::gui_parm2" ;
+			set "gui::generatorLocked"		"0";
+
+			//Hack that performs a simple subtraction to determine neededCount
+			if("gui::gui_parm1" == 1) {
+				set "Clip1::visible" "1" ;
+				set "Clip2::visible" "0" ;
+				if("gui::gui_parm2" == 0) {
+					set "gui::neededCount" "1";
+				}
+				if ("gui::gui_parm2" == 1) {
+					set "gui::neededCount" "0";
+					set "BglowBack::matcolor" "0 0 0 0" ;
+					set "Cell1::matcolor" "0.34 0.55 0.75 0.5" ;
+					set "Cell2::matcolor" "0.34 0.55 0.75 0.5" ;
+					set "Cell3::matcolor" "0.34 0.55 0.75 0.5" ;
+					set "CurrentStatusText::forecolor" "1 1 1 0" ;
+					set "TextTitle1::visible" "0" ;
+					set "PowerFillClip::rect" "488 330 137 119" ;
+					set "PowerFill::rect" "0 0 -137 119" ;
+					set "PowerFillClip1::rect" "17 330 137 119" ;
+					set "PowerFill1::rect" "0 0 137 119" ;
+					set "TRCorner::matcolor" "0.5 0.8 1 0.4" ;
+					set "Top2::matcolor" "0.5 0.8 1 0.4" ;
+					set "Bottom2::matcolor""0.5 0.8 1 0.4" ;
+					set "BRCorner::matcolor" "0.5 0.8 1 0.4" ;
+					set "Right2::matcolor" "0.5 0.8 1 0.4" ;
+					set "Left2::matcolor" "0.5 0.8 1 0.4" ;
+					set "TLCorner::matcolor" "0.5 0.8 1 0.4" ;
+					set "BLCorner::matcolor" "0.5 0.8 1 0.4" ;
+					set "MidSpacer1::matcolor" "0.5 0.8 1 0.4" ;
+					set "MidSpacer11::matcolor" "0.5 0.8 1 0.4" ;
+					set "BorderBtm::matcolor" "0.6 0.02 0 0" ;
+					set "BorderTop::matcolor" "0.6 0.02 0 0" ;
+					set	"Button1::matcolor" "1 0.1 0.1 0.6" ;
+					set	"Button::matcolor" "1 0.1 0.1 0.3" ;
+					set	"RemoveButton::forecolor" "1 1 1 1" ;
+					set	"AddButton::forecolor" "1 1 1 0.4" ;
+					set "BlockClip::visible" "0" ;
+					set "PlasMaskTop2::rect" "0 72 642 -272" ;
+					set "BglowBack1::matcolor" "1 0.6 0 0.2" ;
+					set "BglowBack2::matcolor" "1 0.6 0 0.2" ;
+					set "BglowBack3::matcolor" "1 0.6 0 0.2" ;
+					set "Arrow1::matcolor" "0.15 0.3 0.5 1" ;
+					set "Arrow2::matcolor" "0.15 0.3 0.5 1" ;
+					set "Arrow3::matcolor" "0.15 0.3 0.5 1" ;
+					set "PowerLightStrip::visible" "1" ;
+
+					set			"AddButton::noevents" "1";
+					set			"RemoveButton::noevents" "0";
+				}
+			}
+			if("gui::gui_parm1" == 2) {
+				set "Clip1::visible" "0" ;
+				set "Clip2::visible" "1" ;
+				if ("gui::gui_parm2" == 0) {
+					set "gui::neededCount" "2";
+				}
+				if ("gui::gui_parm2" == 1) {
+					set "gui::neededCount" "1";
+				}
+				if ("gui::gui_parm2" == 2) {
+					set "gui::neededCount" "0";
+					set "BglowBack::matcolor" "0 0 0 0" ;
+					set "Cell1::matcolor" "0.34 0.55 0.75 0.5" ;
+					set "Cell2::matcolor" "0.34 0.55 0.75 0.5" ;
+					set "Cell3::matcolor" "0.34 0.55 0.75 0.5" ;
+					set "CurrentStatusText::forecolor" "1 1 1 0" ;
+					set "TextTitle1::visible" "0" ;
+					set "PowerFillClip::rect" "488 330 137 119" ;
+					set "PowerFill::rect" "0 0 -137 119" ;
+					set "PowerFillClip1::rect" "17 330 137 119" ;
+					set "PowerFill1::rect" "0 0 137 119" ;
+					set "TRCorner::matcolor" "0.5 0.8 1 0.4" ;
+					set "Top2::matcolor" "0.5 0.8 1 0.4" ;
+					set "Bottom2::matcolor""0.5 0.8 1 0.4" ;
+					set "BRCorner::matcolor" "0.5 0.8 1 0.4" ;
+					set "Right2::matcolor" "0.5 0.8 1 0.4" ;
+					set "Left2::matcolor" "0.5 0.8 1 0.4" ;
+					set "TLCorner::matcolor" "0.5 0.8 1 0.4" ;
+					set "BLCorner::matcolor" "0.5 0.8 1 0.4" ;
+					set "MidSpacer1::matcolor" "0.5 0.8 1 0.4" ;
+					set "MidSpacer11::matcolor" "0.5 0.8 1 0.4" ;
+					set "BorderBtm::matcolor" "0.6 0.02 0 0" ;
+					set "BorderTop::matcolor" "0.6 0.02 0 0" ;
+					set	"Button1::matcolor" "1 0.1 0.1 0.6" ;
+					set	"Button::matcolor" "1 0.1 0.1 0.3" ;
+					set	"RemoveButton::forecolor" "1 1 1 1" ;
+					set	"AddButton::forecolor" "1 1 1 0.4" ;
+					set "BlockClip::visible" "0" ;
+					set "PlasMaskTop2::rect" "0 72 642 -272" ;
+					set "BglowBack1::matcolor" "1 0.6 0 0.2" ;
+					set "BglowBack2::matcolor" "1 0.6 0 0.2" ;
+					set "BglowBack3::matcolor" "1 0.6 0 0.2" ;
+					set "Arrow1::matcolor" "0.15 0.3 0.5 1" ;
+					set "Arrow2::matcolor" "0.15 0.3 0.5 1" ;
+					set "Arrow3::matcolor" "0.15 0.3 0.5 1" ;
+					set "PowerLightStrip::visible" "1" ;
+					set			"AddButton::noevents" "1";
+					set			"RemoveButton::noevents" "0";
+				}
+			}
+			if("gui::gui_parm1" == 3) {
+				if("gui::gui_parm2" == 0) {
+					set "gui::neededCount" "3";
+				}
+				if("gui::gui_parm2" == 1) {
+					set "gui::neededCount" "2";
+				}
+				if ("gui::gui_parm2" == 2) {
+					set "gui::neededCount" "1";
+				}
+				if ("gui::gui_parm2" == 3) {
+					set "gui::neededCount" "0";
+				}
+			}
+
+
+			//If the gui is initialized on then set the status
+			if("gui::gui_parm1" == "gui::gui_parm2") {
+				set	"desktop::status"		"1" ;
+
+				set "CurrentStatusText::text" "#str_00100162";
+
+
+			}
+		}
+
+		//Stupid Hack to convert our internal variable into a string
+		if("gui::requiredCount" == 0) {
+			set "RequiredCells::text" "0";
+		}
+		if("gui::requiredCount" == 1) {
+			set "RequiredCells::text" "1";
+		}
+		if("gui::requiredCount" == 2) {
+			set "RequiredCells::text" "2";
+		}
+		if("gui::requiredCount" == 3) {
+			set "RequiredCells::text" "3";
+		}
+		if("gui::requiredCount" == 4) {
+			set "RequiredCells::text" "4";
+		}
+		if("gui::requiredCount" == 5) {
+			set "RequiredCells::text" "5";
+		}
+
+		if ("gui::activeCount" >= "gui::requiredCount") {
+			if("desktop::status" == 0) {
+				resetTime "fnTurnOn" "0";
+			}
+		} else {
+			if("desktop::status" == 1) {
+				resetTime "fnTurnOff" "0";
+			}
+		}
+
+		if ("gui::activeCount" == 0) {
+			set "ActiveCells::text" "0";
+		}
+		if ("gui::activeCount" == 1) {
+			set "ActiveCells::text" "1";
+		}
+		if ("gui::activeCount" == 2) {
+			set "ActiveCells::text" "2";
+		}
+		if ("gui::activeCount" == 3) {
+			set "ActiveCells::text" "3";
+		}
+		if ("gui::activeCount" == 4) {
+			set "ActiveCells::text" "4";
+		}
+		if ("gui::activeCount" == 5) {
+			set "ActiveCells::text" "5";
+		}
+	}
+
+	//Locks the powercell generator so the player can't remove the cells
+	onNamedEvent powercellDeviceStarted {
+		set "gui::generatorLocked"		"1";
+	}
+
+	//Unlocks the pwoercell generator so the player can remove the cells
+	onNamedEvent powercellDeviceStopped {
+		set "gui::generatorLocked"		"0";
+	}
+
+
+	windowDef fnTurnOn {
+		noTime 1
+
+		onTime 0 {
+			//Turning On
+			set "desktop::status"	"1";
+		}
+	}
+
+	windowDef fnTurnOff {
+		noTime 1
+
+		onTime 0 {
+			//Turning Off
+			set "desktop::status"	"0";
+		}
+	}
+	windowDef fnRemoveButton {
+		notime	1
+		onTime 0 {
+			if("gui::generatorLocked" == 0) {
+				if("gui::activeCount" > 0) {
+					//No Events While Removing
+					set			"AddButton::noevents" "1";
+					set			"RemoveButton::noevents" "1";
+
+					//Go through the process of removing the cells
+					resetTime "fnRemoveCellsAction" "0";
+				} else {
+					//Notify the user that they do not have enough cells
+					resetTime "fnRemoveCellsFailure" "0";
+				}
+			} else {
+				//Notify the user that they do not have enough cells
+				resetTime "fnRemoveCellsFailureLocked" "0";
+			}
+		}
+	}
+
+	///////////////////////////////////
+	//Add Button Action
+	///////////////////////////////////
+	windowDef fnAddButton {
+		notime	1
+		onTime 0 {
+			if("gui::neededCount" != "0") {
+				if("gui::powercell_count" >= "gui::neededCount") {
+					//No Events While Removing
+					set			"AddButton::noevents" "1";
+					set			"RemoveButton::noevents" "1";
+
+					//Go through the process of adding the cells
+					resetTime "fnAddCellsAction" "0";
+				} else {
+					//Notify the user that they do not have enough cells
+					resetTime "fnAddCellsFailure" "0";
+				}
+			} else {
+				//There is no need to add anymore cells
+				resetTime "fnAddCellsFailure2" "0";
+			}
+		}
+	}
+	/////////////////////////////////////////////
+	//Called when the user is removing powercells
+	/////////////////////////////////////////////
+	windowDef fnRemoveCellsAction {
+		notime	1
+
+		onTime 0 {
+			set "cmd" "play guisounds_click" ;
+			//Runs the level script to actually remove the cells
+		
+			//No Events While Removing
+			set			"AddButton::noevents" "1";
+			set			"RemoveButton::noevents" "1";
+
+			runScript	"gui::gui_parm3" ;
+			
+			//Set the status to removing
+			set			"CurrentStatusText::text"	"#str_00100163";
+			set "TextClip::visible" "0" ;
+			transition "CurrentStatusText::forecolor" "1 1 1 0" "1 1 1 0.7" "500" ;
+
+		}
+
+		//Each time interval is checked to see if the complete should display
+		onTime 1000 {
+			if("gui::gui_parm5" == 1) {
+				resetTime "fnRemoveCellsComplete" "0";
+			}
+		}
+		onTime 2000 {
+			if("gui::gui_parm5" == 2 || "gui::gui_parm5" == 0) {
+				resetTime "fnRemoveCellsComplete" "0";
+			}
+		}
+		onTime 3000 {
+			if("gui::gui_parm5" == 3) {
+				resetTime "fnRemoveCellsComplete" "0";
+			}
+		}
+		onTime 4000 {
+			if("gui::gui_parm5" == 4) {
+				resetTime "fnRemoveCellsComplete" "0";
+			}
+		}
+		onTime 5000 {
+			if("gui::gui_parm5" == 5) {
+				resetTime "fnRemoveCellsComplete" "0";
+			}
+		}
+	}
+
+	///////////////////////////////////
+	// Called at the appropriate time when the remove is complete
+	///////////////////////////////////
+	windowDef fnRemoveCellsComplete {
+		notime	1
+
+		onTime 0 {
+			transition "BglowBack::matcolor" "0 0 0 0" "1 0 0 0.2" "1200" ;
+			transition "Cell1::matcolor" "0.34 0.55 0.75 0.5" "0 0 0 0" "1000" ;
+			transition "Cell2::matcolor" "0.34 0.55 0.75 0.5" "0 0 0 0" "1000" ;
+			transition "Cell3::matcolor" "0.34 0.55 0.75 0.5" "0 0 0 0" "1000" ;
+
+			transition "CurrentStatusText::forecolor" "1 1 1 0.7" "1 1 1 0" "500" ;
+
+			transition "PowerFillClip::rect" "488 330 137 119" "488 448 137 1" "1200" "0" "1" ;
+			transition "PowerFill::rect" "0 0 -137 119" "0 -118 -137 119" "1200" "0" "1" ;
+			transition "PowerFillClip1::rect" "17 330 137 119" "17 448 137 1" "1200" "0" "1" ;
+			transition "PowerFill1::rect" "0 0 137 119" "0 -118 137 119" "1200" "0" "1" ;
+
+			transition "TRCorner::matcolor" "0.5 0.8 1 0.4" "0.7 0 0 0.4" "1000" ;
+			transition "Top2::matcolor" "0.5 0.8 1 0.4" "0.7 0 0 0.4" "1000" ;
+			transition "Bottom2::matcolor" "0.5 0.8 1 0.4" "0.7 0 0 0.4" "1000" ;
+			transition "BRCorner::matcolor" "0.5 0.8 1 0.4" "0.7 0 0 0.4" "1000" ;
+			transition "Right2::matcolor" "0.5 0.8 1 0.4" "0.7 0 0 0.4" "1000" ;
+			transition "Left2::matcolor" "0.5 0.8 1 0.4" "0.7 0 0 0.4" "1000" ;
+			transition "TLCorner::matcolor" "0.5 0.8 1 0.4" "0.7 0 0 0.4" "1000" ;
+			transition "BLCorner::matcolor" "0.5 0.8 1 0.4" "0.7 0 0 0.4" "1000" ;
+			transition "MidSpacer1::matcolor" "0.5 0.8 1 0.4" "0.7 0 0 0.4" "1000" ;
+			transition "MidSpacer11::matcolor" "0.5 0.8 1 0.4" "0.7 0 0 0.4" "1000" ;
+
+			transition "BorderBtm::matcolor" "0.6 0.02 0 0" "0.6 0.02 0 0.5" "500" ;
+			transition "BorderTop::matcolor" "0.6 0.02 0 0" "0.6 0.02 0 0.5" "500" ;
+
+			transition "BglowBack1::matcolor" "1 0.6 0 0.2" "0 0 0 0" "300" ;
+			transition "BglowBack2::matcolor" "1 0.6 0 0.2" "0 0 0 0" "300" ;
+			transition "BglowBack3::matcolor" "1 0.6 0 0.2" "0 0 0 0" "300" ;
+			set "PowerLightStrip::visible" "0" ;
+			transition "Arrow1::matcolor" "0.15 0.3 0.5 1" "0 0 0 0" "300" ;
+			transition "Arrow2::matcolor" "0.15 0.3 0.5 1" "0 0 0 0" "300" ;
+			transition "Arrow3::matcolor" "0.15 0.3 0.5 1" "0 0 0 0" "300" ;
+		}
+
+		onTime 500 {
+
+			transition	"Button1::matcolor" "1 0.1 0.1 0.3" "1 0.1 0.1 0.3" "500" ;
+			transition	"Button::matcolor" "1 0.1 0.1 0.6" "1 0.1 0.1 0.6" "500" ;
+			transition	"RemoveButton::forecolor" "1 1 1 1" "1 1 1 0.4" "500" ;
+			transition	"AddButton::forecolor" "1 1 1 0.4" "1 1 1 1" "500" ;
+
+
+			transition "PlasMaskTop2::rect" "0 72 642 -272" "0 162 642 -272" "700" "0" "0.6" ;
+	}
+
+
+		onTime 1200 {
+			set "BlockClip::visible" "1" ;
+			set "TextTitle1::visible" "1" ;
+			set "TextClip::visible" "1" ;
+
+			//Set the status to offline
+			set			"CurrentStatusText::text"	"#str_00100164";
+
+
+			//Allow Events Again
+			set			"AddButton::noevents" "0";
+		//	set			"RemoveButton::noevents" "0";
+
+			//Set the counts to their correct levels
+			set			"gui::activeCount"	"0";
+			set			"gui::neededCount"	"gui::requiredCount";
+		}
+	}
+
+	/////////////////////////////////////////////
+	//Called there are no powercells to remove
+	/////////////////////////////////////////////
+	windowDef fnRemoveCellsFailure {
+		notime	1
+
+		onTime 0 {
+			set			"cmd" "play guisounds_error" ;
+			set	"CurrentStatusText::text"	"#str_00100165";
+		}
+		onTime 2000 {
+			set	"CurrentStatusText::text"	"#str_00100166";
+		}
+
+	}
+
+	/////////////////////////////////////////////
+	//Called the user tries to remove the cells from a running device
+	/////////////////////////////////////////////
+	windowDef fnRemoveCellsFailureLocked {
+		notime	1
+
+		onTime 0 {
+			set			"cmd" "play guisounds_error" ;
+			transition "CurrentStatusText::forecolor" "1 1 1 0" "1 1 1 0.7" "500" ;
+			set	"CurrentStatusText::text"	"#str_00100167";
+
+			set			"AddButton::noevents" "1";
+			set			"RemoveButton::noevents" "1";
+		}
+		onTime 1500 {
+			transition "CurrentStatusText::forecolor" "1 1 1 0.7" "1 1 1 0" "500" ;
+		}
+		onTime 2000 {
+			set	"CurrentStatusText::text"	"#str_00100168";
+			set			"RemoveButton::noevents" "0";
+		}
+
+	}
+
+	/////////////////////////////////////////////////////////////
+	//Called when the user is adding powercells to the device
+	/////////////////////////////////////////////////////////////
+	windowDef fnAddCellsAction {
+		notime	1
+
+		onTime 0 {
+			set "cmd" "play guisounds_click" ;
+			runScript	"gui::gui_parm4" ;
+			//No Events While Adding
+			set			"AddButton::noevents" "1";
+			set			"RemoveButton::noevents" "1";
+
+			//Set the status text
+			set			"CurrentStatusText::text" "#str_00100169";
+			set "TextClip::visible" "0" ;
+			transition "CurrentStatusText::forecolor" "1 1 1 0" "1 1 1 0.7" "500" ;
+		}
+
+		//Each time interval is checked to see if the complete should display
+		onTime 1000 {
+			if("gui::gui_parm6" == 1) {
+				resetTime "fnAddCellsComplete" "0";
+			}
+		}
+		onTime 2000 {
+			if("gui::gui_parm6" == 2 || "gui::gui_parm6" == 0) {
+				resetTime "fnAddCellsComplete" "0";
+			}
+		}
+		onTime 3000 {
+			if("gui::gui_parm6" == 3) {
+				resetTime "fnAddCellsComplete" "0";
+			}
+		}
+		onTime 4000 {
+			if("gui::gui_parm6" == 4) {
+				resetTime "fnAddCellsComplete" "0";
+			}
+		}
+		onTime 5000 {
+			if("gui::gui_parm6" == 5) {
+				resetTime "fnAddCellsComplete" "0";
+			}
+		}
+	}
+
+	///////////////////////////////////
+	// Called at the appropriate time when the add is complete
+	///////////////////////////////////
+	windowDef fnAddCellsComplete {
+		notime	1
+
+		onTime 0 {
+			transition "BglowBack::matcolor" "1 0 0 0.2" "0 0 0 0" "1200" ;
+			transition "Cell1::matcolor" "0 0 0 0" "0.34 0.55 0.75 0.5" "1000" ;
+			transition "Cell2::matcolor" "0 0 0 0" "0.34 0.55 0.75 0.5" "1000" ;
+			transition "Cell3::matcolor" "0 0 0 0" "0.34 0.55 0.75 0.5" "1000" ;
+
+			transition "CurrentStatusText::forecolor" "1 1 1 0.7" "1 1 1 0" "500" ;
+
+			set "TextTitle1::visible" "0" ;
+
+			transition "PowerFillClip::rect" "488 448 137 1" "488 330 137 119" "1200" "0" "1" ;
+			transition "PowerFill::rect" "0 -118 -137 119" "0 0 -137 119" "1200" "0" "1" ;
+			transition "PowerFillClip1::rect" "17 448 137 1" "17 330 137 119" "1200" "0" "1" ;
+			transition "PowerFill1::rect" "0 -118 137 119" "0 0 137 119" "1200" "0" "1" ;
+
+			transition "TRCorner::matcolor" "0.7 0 0 0.4" "0.5 0.8 1 0.4" "1000" ;
+			transition "Top2::matcolor" "0.7 0 0 0.4" "0.5 0.8 1 0.4" "1000" ;
+			transition "Bottom2::matcolor" "0.7 0 0 0.4" "0.5 0.8 1 0.4" "1000" ;
+			transition "BRCorner::matcolor" "0.7 0 0 0.4" "0.5 0.8 1 0.4" "1000" ;
+			transition "Right2::matcolor" "0.7 0 0 0.4" "0.5 0.8 1 0.4" "1000" ;
+			transition "Left2::matcolor" "0.7 0 0 0.4" "0.5 0.8 1 0.4" "1000" ;
+			transition "TLCorner::matcolor" "0.7 0 0 0.4" "0.5 0.8 1 0.4" "1000" ;
+			transition "BLCorner::matcolor" "0.7 0 0 0.4" "0.5 0.8 1 0.4" "1000" ;
+			transition "MidSpacer1::matcolor" "0.7 0 0 0.4" "0.5 0.8 1 0.4" "1000" ;
+			transition "MidSpacer11::matcolor" "0.7 0 0 0.4" "0.5 0.8 1 0.4" "1000" ;
+
+
+
+		}
+		onTime 300 {
+			transition "BorderBtm::matcolor" "0.6 0.02 0 0.5" "0.6 0.02 0 0" "500" ;
+			transition "BorderTop::matcolor" "0.6 0.02 0 0.5" "0.6 0.02 0 0" "500" ;
+		}
+
+		onTime 500 {
+
+			transition	"Button1::matcolor" "1 0.1 0.1 0.6" "1 0.1 0.1 0.6" "500" ;
+			transition	"Button::matcolor" "1 0.1 0.1 0.3" "1 0.1 0.1 0.3" "500" ;
+			transition	"RemoveButton::forecolor" "1 1 1 0.4" "1 1 1 1" "500" ;
+			transition	"AddButton::forecolor" "1 1 1 1" "1 1 1 0.4" "500" ;
+
+			set "BlockClip::visible" "0" ;
+			transition "PlasMaskTop2::rect" "0 162 642 -272" "0 72 642 -272" "700" "0" "0.6" ;
+		}
+
+		onTime 900 {
+			transition "BglowBack1::matcolor" "0 0 0 0" "1 0.6 0 0.2" "300" ;
+			transition "BglowBack2::matcolor" "0 0 0 0" "1 0.6 0 0.2" "300" ;
+			transition "BglowBack3::matcolor" "0 0 0 0" "1 0.6 0 0.2" "300" ;
+
+			transition "Arrow1::matcolor" "0 0 0 0" "0.15 0.3 0.5 1" "300" ;
+			transition "Arrow2::matcolor" "0 0 0 0" "0.15 0.3 0.5 1" "300" ;
+			transition "Arrow3::matcolor" "0 0 0 0" "0.15 0.3 0.5 1" "300" ;
+		}
+
+
+		onTime 1200 {
+			resetTime "Anim" "0" ;
+			set "PowerLightStrip::visible" "1" ;
+
+			set			"CurrentStatusText::text"		"#str_00100168";
+
+			//Reactivate Events
+		//	set			"AddButton::noevents" "0";
+			set			"RemoveButton::noevents" "0";
+
+			//Set the correct internal data values
+			set			"gui::activeCount"			"gui::requiredCount";
+			set			"gui::neededCount"			"0";
+		}
+	}
+
+	///////////////////////////////////
+	//Called when the user doesn't have
+	//enough power cells
+	///////////////////////////////////
+	windowDef fnAddCellsFailure {
+		notime	1
+
+		onTime 0 {
+			set			"cmd" "play guisounds_error" ;
+			set	"CurrentStatusText::text"	"#str_00100170";
+			set "TextClip::visible" "0" ;
+			transition "CurrentStatusText::forecolor" "1 1 1 0" "1 1 1 0.7" "500" ;
+
+			set			"AddButton::noevents" "1";
+			set			"RemoveButton::noevents" "1";
+		}
+		onTime 1500 {
+
+			transition "CurrentStatusText::forecolor" "1 1 1 0.7" "1 1 1 0" "500" ;
+		}
+
+		onTime 2000 {
+			set "TextClip::visible" "1" ;
+			set	"CurrentStatusText::text"	" ";
+
+			set			"AddButton::noevents" "0";
+		}
+	}
+
+	///////////////////////////////////
+	//Called when the user is trying to
+	//add powercells to a device that
+	//is already on
+	///////////////////////////////////
+	windowDef fnAddCellsFailure2 {
+		notime	1
+
+		onTime 0 {
+			set			"cmd" "play guisounds_error" ;
+			set	"CurrentStatusText::text"	"#str_00100171";
+
+		}
+		onTime 2000 {
+			set	"CurrentStatusText::text"	"#str_00100162";
+		}
+	}
+///////////////////////////////////////////////////////////////////////////////
+//Background Windows
+///////////////////////////////////////////////////////////////////////////////
+
+	windowDef precacheicon {
+		rect -10, -10, 0, 0
+		visible 0
+		background	"guis/assets/hud/icons/powercellw.tga"
+	}
+
+	windowDef BG1
+	{
+		rect	5,105,630,370
+		visible	0
+		background	"guis/assets/common/scibox/bg2"
+		matcolor	1,1,1,0.5
+	}
+	windowDef holoBack
+	{
+		rect	29,163,585,278
+		visible	0
+		background	"gui/hologram/hologram1"
+		matcolor	0,0.1,0.2,1
+		matscalex	4
+		matscaley	1.5
+	}
+	windowDef Clip
+	{
+		rect	5,85,630,390
+		visible	1
+		windowDef MapGrid
+		{
+			rect	3,-28,622,559
+			visible	1
+			background	"gui/grid2"
+			matcolor	1,1,1,0.07
+			matscalex	6
+			matscaley	6.5
+		}
+		windowDef Clip1
+		{
+			rect	0,0,630,390
+			visible	0
+			windowDef CellBG1
+			{
+				rect	191,77,248,287
+				matcolor	0.34,0.55,0.75,0.5
+				background	"guis/assets/generator/1cell"
+				visible	1
+			}
+			windowDef BglowBack1
+			{
+				rect	226,47,-176,342
+				background	"guis/assets/cpuserver/bglow.tga"
+				visible	1
+				matcolor	0, 0, 0, 0
+			}
+			windowDef Arrow1
+			{
+				rect	258,96,108,249
+				matcolor	0 ,0 ,0 ,0
+				visible	1
+				background	"gui/airlock/varrow"
+				matscalex	2
+			}
+			windowDef Cell1
+			{
+				rect	199,77,232,287
+				matcolor	0,0,0,0
+				background	"guis/assets/generator/cell"
+				visible	1
+			}
+		}
+		windowDef Clip2
+		{
+			rect	0,0,630,390
+			visible	0
+			windowDef CellBG2
+			{
+				rect	63,77,496,287
+				matcolor	0.34,0.55,0.75,0.5
+				background	"guis/assets/generator/2cell"
+				visible	1
+			}
+			windowDef BglowBack2
+			{
+				rect	151,47,-176,342
+				background	"guis/assets/cpuserver/bglow.tga"
+				visible	1
+				matcolor	0, 0, 0, 0
+			}
+			windowDef BglowBack3
+			{
+				rect	302,47,-176,342
+				background	"guis/assets/cpuserver/bglow.tga"
+				visible	1
+				matcolor	0, 0, 0, 0
+			}
+			windowDef Arrow2
+			{
+				rect	185,96,108,249
+				matcolor	0 ,0 ,0 ,0
+				visible	1
+				background	"gui/airlock/varrow"
+				matscalex	2
+			}
+			windowDef Arrow3
+			{
+				rect	337,96,108,249
+				matcolor	0 ,0 ,0 ,0
+				visible	1
+				background	"gui/airlock/varrow"
+				matscalex	2
+			}
+			windowDef Cell2
+			{
+				rect	125,77,232,287
+				matcolor	0,0,0,0
+				background	"guis/assets/generator/cell"
+				visible	1
+			}
+			windowDef Cell3
+			{
+				rect	276,77,232,287
+				matcolor	0,0,0,0
+				background	"guis/assets/generator/cell"
+				visible	1
+			}
+		}
+		windowDef BglowBack
+		{
+			rect	93,48,-417,342
+			background	"guis/assets/cpuserver/bglow.tga"
+			visible	1
+			matcolor	1, 0, 0, 0.2
+		}
+	}
+	windowDef Text
+	"{"
+		rect	26,124,-117,325
+		matcolor	1 ,1 ,1 ,1
+		visible	0
+		background	"gui/textscroll"
+		matscalex	1
+		matscaley	2
+	}
+	windowDef PowerLightStrip
+	{
+		rect	0,91,640,100
+		visible	0
+		windowDef Anim
+		{
+			rect	0,0,0,0
+			visible	0
+
+			onTime 0 {
+				transition "BigButtonM1::matcolor" "1 0.6 0.2 0.4" "1 0.6 0.2 0" "1000" ;
+				transition "BigButtonM2::matcolor" "1 0.6 0.2 0.4" "1 0.6 0.2 0" "1000" ;
+				transition "BigButtonM3::matcolor" "1 0.6 0.2 0.4" "1 0.6 0.2 0" "1000" ;
+				transition "BigButtonM4::matcolor" "1 0.6 0.2 0.4" "1 0.6 0.2 0" "1000" ;
+				transition "BigButtonM5::matcolor" "1 0.6 0.2 0.4" "1 0.6 0.2 0" "1000" ;
+				transition "BigButtonM6::matcolor" "1 0.6 0.2 0.4" "1 0.6 0.2 0" "1000" ;
+
+				transition "BigButtonL10::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+				transition "BigButtonR10::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+			}
+
+			onTime 100 {
+				transition "BigButtonL9::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+				transition "BigButtonR9::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+			}
+
+			onTime 200 {
+				transition "BigButtonL8::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+				transition "BigButtonR8::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+			}
+
+			onTime 300 {
+				transition "BigButtonL7::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+				transition "BigButtonR7::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+			}
+
+			onTime 400 {
+				transition "BigButtonL6::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+				transition "BigButtonR6::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+			}
+
+			onTime 500 {
+				transition "BigButtonL5::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+				transition "BigButtonR5::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+			}
+
+			onTime 600 {
+				transition "BigButtonL4::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+				transition "BigButtonR4::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+			}
+
+			onTime 700 {
+				transition "BigButtonL3::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+				transition "BigButtonR3::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+			}
+
+			onTime 800 {
+				transition "BigButtonL2::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+				transition "BigButtonR2::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+			}
+
+			onTime 900 {
+				transition "BigButtonL1::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+				transition "BigButtonR1::matcolor" "1 0.6 0.2 0.6" "1 0.6 0.2 0" "500" ;
+			}
+
+			onTime 1050 {
+				transition "BigButtonM1::matcolor" "1 0.6 0.2 0" "1 0.6 0.2 0.4" "100" ;
+				transition "BigButtonM2::matcolor" "1 0.6 0.2 0" "1 0.6 0.2 0.4" "100" ;
+				transition "BigButtonM3::matcolor" "1 0.6 0.2 0" "1 0.6 0.2 0.4" "100" ;
+				transition "BigButtonM4::matcolor" "1 0.6 0.2 0" "1 0.6 0.2 0.4" "100" ;
+				transition "BigButtonM5::matcolor" "1 0.6 0.2 0" "1 0.6 0.2 0.4" "100" ;
+				transition "BigButtonM6::matcolor" "1 0.6 0.2 0" "1 0.6 0.2 0.4" "100" ;
+			}
+
+			onTime 1100 {
+				resetTIme "0" ;
+			}
+
+		}
+		windowDef BigButtonL1
+		{
+			rect	21,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonL2
+		{
+			rect	42,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonL3
+		{
+			rect	63,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonL4
+		{
+			rect	84,69,20,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonL5
+		{
+			rect	105,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonL6
+		{
+			rect	126,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonL7
+		{
+			rect	147,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonL8
+		{
+			rect	168,69,20,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonL9
+		{
+			rect	190,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonL10
+		{
+			rect	211,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonR10
+		{
+			rect	411,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonR9
+		{
+			rect	432,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonR8
+		{
+			rect	453,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonR7
+		{
+			rect	474,69,20,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonR6
+		{
+			rect	495,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonR5
+		{
+			rect	516,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonR4
+		{
+			rect	537,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonR3
+		{
+			rect	558,69,20,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonR2
+		{
+			rect	580,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonR1
+		{
+			rect	601,69,19,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonM1
+		{
+			rect	232,69,28,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonM2
+		{
+			rect	261,69,28,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonM3
+		{
+			rect	291,69,28,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonM4
+		{
+			rect	320,69,29,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonM5
+		{
+			rect	351,69,28,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+		windowDef BigButtonM6
+		{
+			rect	380,69,28,16
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,1,1,0
+		}
+	}
+	windowDef BlockClip
+	{
+		rect	29,148,582,327
+		visible	1
+		notime	1
+
+		onTime 0 {
+			transition "Block1::rect" "-35 7 313 41" "-313 7 313 41" "500" "1" "0" ;
+			transition "Block11::rect" "344 7 313 41" "657 7 313 41" "500" "1" "0" ;
+		}
+
+		onTime 50 {
+			transition "Block2::rect" "-35 53 313 41" "-313 53 313 41" "500" "1" "0" ;
+			transition "Block21::rect" "344 53 313 41" "657 53 313 41" "500" "1" "0" ;
+		}
+
+		onTime 100 {
+			transition "Block3::rect" "-35 98 313 41" "-313 98 313 41" "500" "1" "0" ;
+			transition "Block31::rect" "344 98 313 41" "657 98 313 41" "500" "1" "0" ;
+		}
+
+		onTime 150 {
+			transition "Block4::rect" "-35 144 313 41" "-313 144 313 41" "500" "1" "0" ;
+			transition "Block41::rect" "344 144 313 41" "657 144 313 41" "500" "1" "0" ;
+		}
+
+		onTime 200 {
+			transition "Block5::rect" "-35 190 313 41" "-313 190 313 41" "500" "1" "0" ;
+			transition "Block51::rect" "344 190 313 41" "657 190 313 41" "500" "1" "0" ;
+		}
+
+		onTime 250 {
+			transition "Block6::rect" "-35 236 313 41" "-313 236 313 41" "500" "1" "0" ;
+			transition "Block61::rect" "344 236 313 41" "657 236 313 41" "500" "1" "0" ;
+		}
+
+		onTime 300 {
+			transition "Block7::rect" "-35 281 313 41" "-313 281 313 41" "500" "1" "0" ;
+			transition "Block71::rect" "344 281 313 41" "657 281 313 41" "500" "1" "0" ;
+		}
+
+		onTime 350 {
+			transition "Block8::rect" "-35 326 313 41" "-313 326 313 41" "500" "1" "0" ;
+			transition "Block81::rect" "344 326 313 41" "657 326 313 41" "500" "1" "0" ;
+		}
+
+		windowDef Block1
+		{
+			rect	-14,7,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+
+			onTime 0 {
+				transition "Block1::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+				transition "Block11::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+			}
+
+			onTime 200 {
+				transition "Block2::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+				transition "Block21::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+			}
+
+			onTime 400 {
+				transition "Block3::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+				transition "Block31::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+			}
+
+			onTime 600 {
+				transition "Block4::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+				transition "Block41::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+			}
+
+			onTime 800 {
+				transition "Block5::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+				transition "Block51::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+			}
+
+			onTime 1000 {
+				transition "Block6::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+				transition "Block61::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+			}
+
+			onTime 1200 {
+				transition "Block7::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+				transition "Block71::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+			}
+
+			onTime 1400 {
+				transition "Block8::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+				transition "Block81::matcolor" "0.8 0.1 0 0.6" "0.8 0.1 0 0" "1000" ;
+			}
+
+			onTime 1800 {
+				resetTime "0" ;
+			}
+
+		}
+		windowDef Block11
+		{
+			rect	461,7,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block2
+		{
+			rect	-15,48,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block21
+		{
+			rect	461,48,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block3
+		{
+			rect	-15,88,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block31
+		{
+			rect	461,88,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block4
+		{
+			rect	-15,130,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block41
+		{
+			rect	461,130,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block5
+		{
+			rect	-15,171,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block51
+		{
+			rect	461,171,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block6
+		{
+			rect	-15,212,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block61
+		{
+			rect	461,212,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block7
+		{
+			rect	-14,252,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block71
+		{
+			rect	461,252,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block8
+		{
+			rect	-14,292,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+		windowDef Block81
+		{
+			rect	461,292,135,37
+			visible	1
+			background	"guis/assets/cpuserver/bgwhitesmall"
+			matcolor	0.8,0.1,0,0.5
+		}
+	}
+	windowDef PlasMaskClipLeft
+	{
+		rect	-24,145,351,329
+		visible	1
+		windowDef PlasMask2
+		{
+			rect	10,-52,-469,423
+			matcolor	0,0,0,1
+			background	"guis/assets/delta2/plasmask"
+			visible	1
+		}
+	}
+	windowDef PlasMaskClipRight
+	{
+		rect	314,145,351,329
+		visible	1
+		windowDef PlasMask3
+		{
+			rect	-127,-52,469,423
+			matcolor	0,0,0,1
+			background	"guis/assets/delta2/plasmask"
+			visible	1
+		}
+	}
+	windowDef PlasMaskTop
+	{
+		rect	0,76,642,-272
+		matcolor	0,0,0,1
+		background	"guis/assets/delta2/plasmask2"
+		visible	1
+	}
+	windowDef PlasMaskTop2
+	{
+		rect	0,162,642,-272
+		matcolor	0,0,0,1
+		background	"guis/assets/delta2/plasmask2"
+		visible	1
+	}
+	windowDef BorderBtm
+	{
+		rect	20,221,601,25
+		matcolor	0.6,0.02,0,0.5
+		visible	1
+		background	"gui/line/horizwarn2"
+	}
+	windowDef BorderTop
+	{
+		rect	20,163,601,25
+		matcolor	0.6,0.02,0,0.5
+		visible	1
+		background	"gui/line/horizwarn2"
+	}
+	windowDef TextClip {
+		rect 0,0,640,480
+
+		windowDef TextTitle1
+		{
+			rect	46,173,557,58
+			visible	1
+			text	"#str_00100166"
+			forecolor	0.6,0,0,0.5
+			textscale	0.82
+			font	"fonts/micro"
+
+			onTime 0 {
+				transition "forecolor" "0.8 0.02 0 0.2" "0.8 0.02 0 0.5" "500" ;
+			}
+
+			onTime 500 {
+				transition "forecolor" "0.8 0.02 0 0.5" "0.8 0.02 0 0.2" "500" ;
+			}
+
+			onTime 1200 {
+				resetTIme "0" ;
+			}
+
+		}
+	}
+
+	windowDef CurrentStatusText
+	{
+		rect	0,177,640,58
+		visible	1
+		textalign	1
+		text	" "
+		forecolor	1,1,1,0
+		textscale	0.7
+		font	"fonts/micro"
+	}
+
+	windowDef TextTitle11
+	{
+		rect	154,414,469,58
+		visible	1
+		text	"#str_00980"
+		forecolor	1,1,1,0
+		textscale	0.76
+		font	"fonts/micro"
+	}
+	windowDef ScanClip
+	{
+		rect	0,0,356,480
+		visible	0
+		windowDef Scan111
+		{
+			rect	-173,277,497,101
+			visible	1
+			background	"gui/chart/chart4"
+			matcolor	0,0.2,1,0.7
+			matscalex	1.4
+			rotate	90
+		}
+		windowDef Scan211
+		{
+			rect	-173,277,497,101
+			visible	1
+			background	"gui/chart/chart3"
+			matcolor	0.2,0.2,1,0.6
+			rotate	90
+		}
+		windowDef Scan311
+		{
+			rect	-173,277,497,101
+			visible	1
+			background	"gui/chart/chart2"
+			matcolor	0.4,0.4,1,0.8
+			matscalex	0.8
+			rotate	90
+		}
+		windowDef Scan411
+		{
+			rect	-173,277,497,101
+			visible	1
+			background	"gui/chart/chart1"
+			matcolor	0.6,0.6,1,0.6
+			matscalex	0.6
+			shear	0,0
+			rotate	90
+		}
+	}
+	windowDef powerbg
+	{
+		rect	488,330,-137,119
+		visible	1
+		background	"guis/assets/delta2/plasmeterfill"
+		matcolor	1,0.2,0,0.2
+	}
+	windowDef powerfillClip
+	{
+		rect	488,448,137,0
+		visible	1
+		windowDef powerfill
+		{
+			rect	0,-118,-137,119
+			visible	1
+			background	"guis/assets/delta2/plasmeter"
+			matcolor	1,0.5,0.2,0.7
+		}
+	}
+	windowDef powerbg1
+	{
+		rect	17,330,137,119
+		visible	1
+		background	"guis/assets/delta2/plasmeterfill"
+		matcolor	1,0.2,0,0.2
+	}
+	windowDef powerfillClip1
+	{
+		rect	17,448,137,0
+		visible	1
+		windowDef powerfill1
+		{
+			rect	0,-118,137,119
+			visible	1
+			background	"guis/assets/delta2/plasmeter"
+			matcolor	1,0.5,0.2,0.7
+		}
+	}
+	windowDef TextTitle
+	{
+		rect	21,8,600,43
+		visible	1
+		text	"#str_00100172"
+		forecolor	1,1,1,0.3
+		textscale	0.7
+		font	"fonts/micro"
+		textalign	1
+	}
+	windowDef RequiredCellsLabel
+	{
+		rect	134,46,479,40
+		visible	1
+		text	"#str_00100173"
+		forecolor	0.3,0.3,0.34,0.8
+		textscale	0.28
+		font	"fonts/micro"
+	}
+	windowDef RequiredCells
+	{
+		rect	308,46,479,40
+		visible	1
+		text	"2"
+		forecolor	0.5,0.5,0.54,1
+		textscale	0.28
+		font	"fonts/micro"
+	}
+	windowDef ActiveCellsLabel
+	{
+		rect	338,46,153,34
+		visible	1
+		text	"#str_00100174"
+		forecolor	0.3,0.3,0.34,0.8
+		textscale	0.28
+		font	"fonts/micro"
+	}
+	windowDef ActiveCells
+	{
+		rect	485,46,153,34
+		visible	1
+		text	"0"
+		forecolor	0.5,0.5,0.54,1
+		textscale	0.28
+		font	"fonts/micro"
+	}
+	windowDef BGFrame
+	{
+		rect	2,3,635,475
+		visible	1
+		windowDef TRCorner
+		{
+			rect	590,1,-44,42
+			visible	1
+			background	"guis/assets/common/scibox/g_cornerRound2"
+			matcolor	0.7,0,0,0.4
+		}
+		windowDef Top2
+		{
+			rect	46,1,544,42
+			visible	1
+			background	"guis/assets/common/scibox/g_horiz"
+			matcolor	0.7,0,0,0.4
+		}
+		windowDef Bottom2
+		{
+			rect	46,433,544,-42
+			visible	1
+			background	"guis/assets/common/scibox/g_horiz"
+			matcolor	0.7,0,0,0.4
+		}
+		windowDef BRCorner
+		{
+			rect	590,433,-44,-42
+			visible	1
+			background	"guis/assets/common/scibox/g_cornerRound2"
+			matcolor	0.7,0,0,0.4
+		}
+		windowDef Right2
+		{
+			rect	590,83,44,350
+			visible	1
+			background	"guis/assets/common/scibox/g_vert"
+			matcolor	0.7,0,0,0.4
+		}
+		windowDef Left2
+		{
+			rect	2,83,-44,350
+			visible	1
+			background	"guis/assets/common/scibox/g_vert"
+			matcolor	0.7,0,0,0.4
+		}
+		windowDef TLCorner
+		{
+			rect	2,1,44,42
+			visible	1
+			background	"guis/assets/common/scibox/g_cornerRound2"
+			matcolor	0.7,0,0,0.4
+		}
+		windowDef BLCorner
+		{
+			rect	2,433,44,-42
+			visible	1
+			background	"guis/assets/common/scibox/g_cornerRound2"
+			matcolor	0.7,0,0,0.4
+		}
+		windowDef SpacerClip
+		{
+			rect	0,43,640,54
+			visible	1
+			windowDef MidSpacer1
+			{
+				rect	2,-12,176,52
+				visible	1
+				background	"guis/assets/common/scibox/g_spacerLarge"
+				matcolor	0.7,0,0,0.4
+			}
+			windowDef MidSpacer11
+			{
+				rect	458,-12,-176,52
+				visible	1
+				background	"guis/assets/common/scibox/g_spacerLarge"
+				matcolor	0.7,0,0,0.4
+			}
+		}
+	}
+
+	windowDef Button
+	{
+		rect	21,83,306,58
+		matcolor	1 ,0.1 ,0.1 ,0.6
+		background	"guis/assets/power/button"
+		visible	1
+	}
+	windowDef Button1
+	{
+		rect	308,83,306,58
+		matcolor	1 ,0.1 ,0.1 ,0.4
+		background	"guis/assets/power/button"
+		visible	1
+	}
+
+	windowDef AddButton
+	{
+		rect	47,86,259,54
+		visible	1
+		forecolor	1,1,1,1
+		text	"#str_00100175"
+		textscale	0.7
+		font	"fonts/micro"
+		textalign	1
+
+		onMouseEnter {
+			transition	"Button::matcolor" "1 0.1 0.1 0.6" "1 0.1 0.1 1" "200" ;
+		}
+		onMouseExit {
+			transition	"Button::matcolor" "1 0.1 0.1 1" "1 0.1 0.1 0.6" "200" ;
+		}
+		onAction {
+			resetTime "fnAddButton" "0";
+			transition	"Button::matcolor" "1 0.1 0.1 1" "1 0.1 0.1 0.6" "200" ;
+		}
+	}
+
+	windowDef RemoveButton
+	{
+		rect	333,86,269,54
+		visible	1
+		forecolor	1,1,1,0.4
+		text	"#str_00100176"
+		textscale	0.7
+		font	"fonts/micro"
+		textalign	1
+		noevents 1
+
+		onMouseEnter {
+			transition	"Button1::matcolor" "1 0.1 0.1 0.6" "1 0.1 0.1 1" "200" ;
+		}
+		onMouseExit {
+			transition	"Button1::matcolor" "1 0.1 0.1 1" "1 0.1 0.1 0.6" "200" ;
+		}
+		onAction {
+			resetTime "fnRemoveButton" "0";
+			transition	"Button1::matcolor" "1 0.1 0.1 1" "1 0.1 0.1 0.6" "200" ;
+		}
+	}
+
+
+
+	windowDef Bglow
+	{
+		rect	0,0,-640,480
+		background	"guis/assets/cpuserver/bglow.tga"
+		visible	1
+		matcolor	0.4, 0.8, 1, 0.05
+	}
+	windowDef scanlinesAlt1
+	{
+		rect	0,0,-640,480
+		matcolor	0.1,0.1,0.1,1
+		background	"gui/test/gui_scanlines5"
+		matscaley	2
+		visible	1
+	}
+	windowDef Static1
+	{
+		rect	0,0,-640,480
+		visible	1
+		background	"gui/static"
+		matcolor	1, 1, 1, pdhalffade[ time * 0.001 ] / 15
+	}
+	windowDef Reflect
+	{
+		rect	0,-7,-646,470
+		matcolor	1 ,1 ,1 ,0.05
+		visible	1
+		background	"gui/reflect1"
+	}
+	windowDef Addhighlight1
+	{
+		rect	0,7,-640,480
+		background	"gui/addhighlight"
+		matcolor	0.4 ,0.2 ,0.2 ,1
+		visible	1
+	}
+	windowDef Outershadow1
+	{
+		rect	0,0,-640,480
+		background	"guis/assets/common/outershadow"
+		matcolor	1 ,1 ,1 ,1
+		visible	1
+	}
+
+}

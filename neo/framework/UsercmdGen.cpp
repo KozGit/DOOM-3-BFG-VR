@@ -1131,7 +1131,10 @@ float idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int ax
 	int joyCmd = 0;
 	int joyDir = 0;
 
-	static int lastLeft =0 ;
+	float rVal = 0.0f;
+	float ct = 0.0f;
+
+	static int lastLeft = 0;
 	static int lastRight = 0;
 
 	static int joyActiveState[int( MAX_JOYSTICK_AXIS )][2];
@@ -1201,16 +1204,16 @@ float idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int ax
 			break;
 
 		case UB_IMPULSE34: // comfort turn right
-			jaxisValue = jaxisValue > 0.0 ? jaxisValue : -jaxisValue;
-			if ( jaxisValue > vr_padToButtonThreshold.GetFloat() ) {
-				return -vr_comfortDelta.GetFloat();
+			ct = fabs( jaxisValue );
+			if ( ct > vr_padToButtonThreshold.GetFloat() ) {
+				rVal = -vr_comfortDelta.GetFloat();
 			}
 			break;
-	
+
 		case UB_IMPULSE35: // comfort turn left
-			jaxisValue = jaxisValue > 0.0 ? jaxisValue : -jaxisValue;
-			if ( jaxisValue > vr_padToButtonThreshold.GetFloat() ) {
-				return vr_comfortDelta.GetFloat();
+			ct = fabs( jaxisValue );
+			if ( ct > vr_padToButtonThreshold.GetFloat() ) {
+				rVal = vr_comfortDelta.GetFloat();
 			}
 			break;
 
@@ -1238,7 +1241,7 @@ float idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int ax
 			
 	}
 	
-	return 0.0;
+	return rVal;
 }
 
 /*

@@ -170,9 +170,9 @@ enum sys_jEvents
 	J_ACTION14,
 	J_ACTION15,
 	J_ACTION16,
-	J_ACTION17,
+	J_ACTION17, //touch button start
 	J_ACTION18,
-	J_ACTION19, // hydra button start
+	J_ACTION19, 
 	J_ACTION20,
 	J_ACTION21,
 	J_ACTION22,

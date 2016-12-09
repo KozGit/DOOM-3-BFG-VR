@@ -9064,7 +9064,7 @@ void idPlayer::PerformImpulse( int impulse )
 		{
 			//bring up the system menu
 			
-			if ( !( vr_guiMode.GetInteger() == 2 && commonVr->handInGui ))
+			if ( !(vr_guiMode.GetInteger() == 2 && commonVr->handInGui) && (Sys_Milliseconds() - commonVr->pdaToggleTime > 3000) )
 			{
 				void Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
 				Sys_QueEvent( SE_KEY, K_ESCAPE, 1, 0, NULL, 0 );
