@@ -231,11 +231,12 @@ void idCommonLocal::UnloadMap()
 {
 	StopPlayingRenderDemo();
 	
-	vr->PDArising = false;
-	vr->PDAforced = false;
-	vr->playerDead = false;
-	vr->vrIsBackgroundSaving = false;
-	vr->VR_GAME_PAUSED = false;
+	commonVr->PDAforcetoggle = false;
+	commonVr->PDArising = false;
+	commonVr->PDAforced = false;
+	commonVr->playerDead = false;
+	commonVr->vrIsBackgroundSaving = false;
+	commonVr->VR_GAME_PAUSED = false;
 
 	// end the current map in the game
 	if( game )
@@ -539,8 +540,8 @@ void idCommonLocal::ExecuteMapChange()
 		
 		if ( game->isVR ) // koz
 		{
-			com_engineHz_denominator = 100LL * ( vr->hmdHz );
-			com_engineHz_latched = ( vr->hmdHz );
+			com_engineHz_denominator = 100LL * ( commonVr->hmdHz );
+			com_engineHz_latched = ( commonVr->hmdHz );
 		}
 		else
 		{
@@ -659,7 +660,7 @@ void idCommonLocal::ExecuteMapChange()
 			// Koz: make sure to maintain smooth heatracking of loading screen when running frames.
 			if ( game->isVR )
 			{
-				//vr->HMDTrackStatic();
+				//commonVr->HMDTrackStatic();
 				//SwapBuffers( win32.hDC );
 				//glFinish();
 			}
@@ -684,11 +685,11 @@ void idCommonLocal::ExecuteMapChange()
 			int startLoadScreen = Sys_Milliseconds();
 			vrBackgroundSave.StartBackgroundSave( BACKGROUND_SAVE, "autosave" );
 						
-			while ( vr->vrIsBackgroundSaving == true || ( Sys_Milliseconds() - startLoadScreen < vr_minLoadScreenTime.GetFloat() ) )
+			while ( commonVr->vrIsBackgroundSaving == true || ( Sys_Milliseconds() - startLoadScreen < vr_minLoadScreenTime.GetFloat() ) )
 			{
-				//vr->HMDTrackStatic();
+				//commonVr->HMDTrackStatic();
 				//UpdateScreen( false, false );
-				//vr->HMDTrackStatic();
+				//commonVr->HMDTrackStatic();
 				//SwapBuffers(win32.hDC);
 				//glFinish();
 				
@@ -762,11 +763,13 @@ void idCommonLocal::ExecuteMapChange()
 	// Issue a render at the very end of the load process to update soundTime before the first frame
 	soundSystem->Render();
 
-	vr->PDArising = false;
-	vr->PDAforced = false;
-	vr->playerDead = false;
-	vr->vrIsBackgroundSaving = false;
-	vr->VR_GAME_PAUSED = false;
+	commonVr->PDAforcetoggle = false;
+	commonVr->PDArising = false;
+	commonVr->PDAforced = false;
+	commonVr->playerDead = false;
+	commonVr->vrIsBackgroundSaving = false;
+	commonVr->VR_GAME_PAUSED = false;
+	commonVr->pdaToggleTime = Sys_Milliseconds();
 
 }
 
@@ -824,7 +827,7 @@ void idCommonLocal::UpdateLevelLoadPacifier()
 	else
 	{
 		// On the PC just update at a constant rate for the Steam overlay
-		if( time - lastPacifierGuiTime >= 50  ) // koz fixme
+		if ( time - lastPacifierGuiTime >= 50 ) 
 		{
 			lastPacifierGuiTime = time;
 			UpdateScreen( false );
@@ -856,7 +859,7 @@ void idCommonLocal::UpdateLevelLoadPacifier()
 			}
 			txtVal->SetStrokeInfo( true, 1.75f, 0.75f );
 		}
-	if (!game->isVR) 	UpdateScreen( false ); // koz
+		if ( !game->isVR ) 	UpdateScreen( false ); // koz
 		if( autoswapsRunning )
 		{
 			renderSystem->BeginAutomaticBackgroundSwaps( icon );
@@ -913,34 +916,25 @@ idCommonLocal::SaveGame
 */
 bool idCommonLocal::SaveGame( const char* saveName )
 {
-	
-	StartWipe( "wipeMaterial", true );
-	CompleteWipe();
-
-	//common->Printf( "Beginning save\n" );
 	if( pipelineFile != NULL )
 	{
 		// We're already in the middle of a save. Leave us alone.
-		ClearWipe();
 		return false;
 	}
 	
 	if( com_disableAllSaves.GetBool() || ( com_disableAutoSaves.GetBool() && ( idStr::Icmp( saveName, "autosave" ) == 0 ) ) )
 	{
-		ClearWipe();
 		return false;
 	}
 	
 	if( IsMultiplayer() )
 	{
 		common->Printf( "Can't save during net play.\n" );
-		ClearWipe();
 		return false;
 	}
 	
 	if( mapSpawnData.savegameFile != NULL )
 	{
-		ClearWipe();
 		return false;
 	}
 	
@@ -948,7 +942,6 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	if( persistentPlayerInfo.GetInt( "health" ) <= 0 )
 	{
 		common->Printf( "You must be alive to save the game\n" );
-		ClearWipe();
 		return false;
 	}
 	
@@ -956,26 +949,22 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	soundSystem->SetPlayingSoundWorld( menuSoundWorld );
 	soundSystem->Render();
 	
-	if ( 1  ) //; 0 &&  !game->isVR ) // Koz fixme : implement this.shows saving dialog during save.currently disabled in VR for smoother headtracking.
-
+	Dialog().ShowSaveIndicator( true );
+	if( insideExecuteMapChange )
 	{
-		Dialog().ShowSaveIndicator( true );
-		if ( insideExecuteMapChange )
-		{
-			UpdateLevelLoadPacifier();
-		}
-		else
-		{
-			// Heremake sure we pump the gui enough times to show the 'saving' dialog
-			const bool captureToImage = false;
-			for ( int i = 0; i < NumScreenUpdatesToShowDialog; ++i )
-			{
-				UpdateScreen( captureToImage );
-				
-			}
-			renderSystem->BeginAutomaticBackgroundSwaps( AUTORENDER_DIALOGICON );
-		}
+		UpdateLevelLoadPacifier();
 	}
+	else
+	{
+		// Heremake sure we pump the gui enough times to show the 'saving' dialog
+		const bool captureToImage = false;
+		for( int i = 0; i < NumScreenUpdatesToShowDialog; ++i )
+		{
+			UpdateScreen( captureToImage );
+		}
+		renderSystem->BeginAutomaticBackgroundSwaps( AUTORENDER_DIALOGICON );
+	}
+	
 	// Make sure the file is writable and the contents are cleared out (Set to write from the start of file)
 	saveFile.MakeWritable();
 	saveFile.Clear( false );
@@ -1003,7 +992,6 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	// let the game save its state
 	game->SaveGame( pipelineFile, &stringsFile );
 	
-	common->Printf( "Beginning game->SaveGame\n" );
 	pipelineFile->Finish();
 	
 	idSaveGameDetails gameDetails;
@@ -1027,12 +1015,13 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	}
 	
 	syncNextGameFrame = true;
-	common->Printf( "Returning from idCommonLocal SaveGame\n" );
-		
-	//ClearWipe();
+	
+	
+	
+	// koz close the saving dialog before returning or my crappy code to determine when to raise the pda for pause activities gets confused
 	Dialog().ShowSaveIndicator( false );
-	
-	
+
+
 	// Here make sure we pump the gui enough times to clear the 'saving' dialog
 	const bool captureToImage = false;
 	for ( int i = 0; i < NumScreenUpdatesToShowDialog; ++i )
@@ -1041,6 +1030,8 @@ bool idCommonLocal::SaveGame( const char* saveName )
 
 	}
 	ClearWipe();
+
+	commonVr->vrIsBackgroundSaving = false;
 	return true;
 }
 
@@ -1054,11 +1045,13 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	// Koz begin
 	// koz fixme do this right.
 	// Make sure the pda is in a valid state on game load.
-	vr->PDAforced = false;
-	vr->PDArising = false;
-	vr->PDAforcetoggle = false;
-	vr->VR_GAME_PAUSED = false; 
-	vr->playerDead = false;
+	commonVr->PDAforced = false;
+	commonVr->PDArising = false;
+	commonVr->PDAforcetoggle = false;
+	commonVr->VR_GAME_PAUSED = false; 
+	commonVr->playerDead = false;
+	commonVr->VR_GAME_PAUSED = false;
+	commonVr->pdaToggleTime = Sys_Milliseconds() + 1000;
 	// Koz end
 	
 	if( IsMultiplayer() )
@@ -1136,6 +1129,7 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	saveFile.Clear( false );
 	stringsFile.Clear( false );
 	
+
 	saveGameHandle_t loadGameHandle = session->LoadGameSync( slotName, files );
 	if( loadGameHandle != 0 )
 	{
@@ -1146,6 +1140,7 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	{
 		ClearWipe();
 	}
+	
 	return false;
 }
 
@@ -1379,13 +1374,13 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 		
 
 	// Koz begin background save in VR
-	if ( 0 && game->isVR )
+	if ( game->isVR )
 	{
 		vrBackgroundSave.StartBackgroundSave( BACKGROUND_SAVE, savename );
 		
-		while ( vr->vrIsBackgroundSaving == true )
+		while ( commonVr->vrIsBackgroundSaving == true )
 		{
-			//vr->HMDTrackStatic();
+			//commonVr->HMDTrackStatic();
 			//SwapBuffers( win32.hDC );
 			//glFinish();
 		}
@@ -1394,12 +1389,12 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 	}
 	// Koz end
 	
-	vr->gameSaving = true;
+	//commonVr->gameSaving = true;
 	if( commonLocal.SaveGame( savename ) )
 	{
 		common->Printf( "Saved: %s\n", savename );
 	}
-	vr->gameSaving = false;
+	commonVr->gameSaving = false;
 
 }
 

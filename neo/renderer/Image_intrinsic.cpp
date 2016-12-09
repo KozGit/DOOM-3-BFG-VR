@@ -152,10 +152,21 @@ static void R_VRSurfaceImage( idImage* image )
 	idImageOpts	opts;
 	opts.width = renderSystem->GetWidth();
 	opts.height = renderSystem->GetHeight();
-	opts.numLevels = 8;
+	opts.numLevels = 6;
 	opts.format = FMT_RGBA8;
 	opts.genMipsOnCopy = true;
 	image->AllocImage( opts, TF_DEFAULT, TR_CLAMP );
+}
+
+static void R_VrSkyBoxImage( idImage* image )
+{
+	idImageOpts opts;
+	opts.width = renderSystem->GetWidth();
+	opts.height = renderSystem->GetHeight();
+	opts.format = FMT_RGBA8; // FMT_DXT5; 
+	opts.genMipsOnCopy = false;
+	image->AllocImage( opts, TF_DEFAULT, TR_CLAMP );
+
 }
 // koz end
 
@@ -625,6 +636,12 @@ void idImageManager::CreateIntrinsicImages()
 	// hudImage - the rendered hud/menus will be rendered to this image to use as a texture for the hud model
 	pdaImage = ImageFromFunction( "_pdaImage", R_VRSurfaceImage ); // R_RGBA8Image );
 	hudImage = ImageFromFunction( "_hudImage", R_VRSurfaceImage ); // R_RGBA8Image );
+
+	//skyBoxFront = ImageFromFunction( "_skyBoxFront", R_VrSkyBoxImage );
+	//skyBoxSides = ImageFromFunction( "_skyBoxSides", R_VrSkyBoxImage );
+
+	skyBoxFront = ImageFromFunction( "_skyBoxFront", R_BlackImage );
+	skyBoxSides = ImageFromFunction( "_skyBoxSides", R_BlackImage );
 	common->Printf( "pdaImage size %d %d\n", pdaImage->GetUploadWidth(), pdaImage->GetUploadHeight() );
 	common->Printf( "Hudimage size %d %d\n", hudImage->GetUploadWidth(), hudImage->GetUploadHeight() );
 	// Koz end

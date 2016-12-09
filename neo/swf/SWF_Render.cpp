@@ -133,26 +133,38 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 	float sysHeight = renderSystem->GetHeight() / ( pixelAspect < 1.0f ? pixelAspect : 1.0f );
 	
 	// Koz begin
-	if ( vr->swfRenderMode == RENDERING_PDA ) // We dont need to render a full resolution PDA, it will be scaled down to fit the model in VR.  
+	
+	float vr_mScale = 1.0;
+
+	
+	if ( commonVr->swfRenderMode == RENDERING_PDA ) // We dont need to render a full resolution PDA, it will be scaled down to fit the model in VR.  
 	{
-		sysWidth = 640;
-		sysHeight = 480;
+		//sysWidth = 640;
+		//sysHeight = 480;
+		sysWidth = 1280;
+		sysHeight = 960;
+
 	}
-	// Koz end
+	
+	else if ( commonVr->swfRenderMode == RENDERING_NORMAL )
+	{
+		sysWidth = renderSystem->GetVirtualWidth();
+		sysHeight = renderSystem->GetVirtualHeight() * 1.25; // fix the aspect
+	}
 
 	float scale = swfScale * sysHeight / ( float )frameHeight;
 
 	// koz begin
 	// In VR, scale SWF elements to a more appropriate size.
-	if ( game->isVR )
+	if ( game->isVR  )
 	{
-		if ( vr->VR_GAME_PAUSED )
+		if ( commonVr->VR_GAME_PAUSED )
 		{
 			scale *= 0.8f;
 		}
 		else
 		{
-			switch ( vr->swfRenderMode )
+			switch ( commonVr->swfRenderMode )
 			{
 				case RENDERING_PDA:
 					scale *= 1.25;
@@ -163,10 +175,13 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 				
 				case RENDERING_NORMAL:
 				default:
-					scale = vr_guiScale.GetFloat();
+					scale *= vr_guiScale.GetFloat();
 			}
 		}
+	
+		vr_mScale = scale;
 	}
+
 	// koz end
 	
 	swfRenderState_t renderState;
@@ -209,17 +224,27 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 		
 		// koz begin
 		// scale the mouse pointer in VR on gui screens.
-		float mScale = game->isVR ? vr_guiScale.GetFloat() : 1.0f;
+		// float mScale = game->isVR ? vr_guiScale.GetFloat() : 1.0f;
+		// vr_mScale set earlier
 		// koz end
+	//	vr_mScale = 1.0f;
 
+		extern idCVar vr_debugTouchCursor;
 		
-		if( !hasHitObject )    //hitObject == NULL ) {
+		if ( !game->isVR || !game->IsInGame() || !(commonVr->VR_USE_MOTION_CONTROLS && vr_guiMode.GetInteger() == 2) || vr_debugTouchCursor.GetBool() ) //  hide the mouse cursor if using touchscreen
+	//	if ( !game->IsInGame() )
 		{
-			DrawStretchPic( mouse.x, mouse.y, 32.0f * mScale, 32.0f * mScale, 0, 0, 1, 1, guiCursor_arrow );
-		}
-		else
-		{
-			DrawStretchPic( mouse.x, mouse.y, 32.0f * mScale, 32.0f * mScale, 0, 0, 1, 1, guiCursor_hand );
+
+			if ( !hasHitObject )    //hitObject == NULL ) {
+			{
+				DrawStretchPic( mouse.x, mouse.y, 32.0f * vr_mScale, 32.0f * vr_mScale, 0, 0, 1, 1, guiCursor_arrow );
+				//DrawStretchPic( mouseX, mouseY, 32.0f * vr_mScale, 32.0f * vr_mScale, 0, 0, 1, 1, guiCursor_arrow );
+			}
+			else
+			{
+				DrawStretchPic( mouse.x, mouse.y, 32.0f * vr_mScale, 32.0f * vr_mScale, 0, 0, 1, 1, guiCursor_hand );
+				//DrawStretchPic( mouseX, mouseY, 32.0f * vr_mScale, 32.0f * vr_mScale, 0, 0, 1, 1, guiCursor_hand );
+			}
 		}
 	}
 	

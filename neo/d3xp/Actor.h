@@ -265,6 +265,11 @@ protected:
 	idAnimState				headAnim;
 	idAnimState				torsoAnim;
 	idAnimState				legsAnim;
+
+	//koz
+	idAnimState				leftHandAnim;
+	idAnimState				rightHandAnim;
+	//koz end
 	
 	bool					allowPain;
 	bool					allowEyeFocus;
@@ -284,6 +289,7 @@ protected:
 	
 	// copies animation from body to head joints
 	void					CopyJointsFromBodyToHead();
+
 	
 private:
 	void					SyncAnimChannels( int channel, int syncToChannel, int blendFrames );

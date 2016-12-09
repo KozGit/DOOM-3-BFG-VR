@@ -313,7 +313,6 @@ idMenuHandler_Shell::HandleGuiEvent
 */
 bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 {
-
 	if( IsPacifierVisible() )
 	{
 		return true;
@@ -337,9 +336,15 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 				return true;
 			}
 			*/
-						
+			if ( sev->evValue >= K_TOUCH_LEFT_STICK_UP && sev->evValue <= K_STEAMVR_RIGHT_PAD_RIGHT )
+			{
+				//koz check why dis I disable remapping this?
+				//return true;
+			}
 			if( sev->evValue == K_ESCAPE )
 			{
+				
+				common->Printf( "idMenuHandlerShell handlegui event k_escape\n" ); // koz debug
 				waitForBinding = false;
 				
 				idMenuScreen_Shell_Bindings* bindScreen = dynamic_cast< idMenuScreen_Shell_Bindings* >( menuScreens[ SHELL_AREA_KEYBOARD ] );

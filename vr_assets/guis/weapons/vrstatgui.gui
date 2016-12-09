@@ -1,7 +1,12 @@
-windowDef Desktop {
-	rect	0 ,0 ,640 ,480 
-	backcolor 0, 0, 0, 0.6
+windowDef Desktop
+{
+	rect	0 ,0 ,640 ,480
+	backcolor	0, 0, 0, 0.6
 
+//		rect	0 ,00 ,640 ,480
+//		background	"gui/weapons/statwatch/background"
+//		matcolor	1 ,1 ,1 ,1
+//		visible	1
 
 	onEvent {
 		if ("gui::player_clip_low" == 1) {
@@ -45,112 +50,148 @@ windowDef Desktop {
 			set "ammoempty::visible" "0" ;
 			set "ammovalue3::forecolor" "0.6 0.95 1 0.5" ;
 		}
-	} 
-
-	windowDef gridscroll {
-		rect		-50 ,-180 ,740 ,820
-		background	"gui/weapons/machinegun/gridscroll"
-		matcolor	1 ,1 ,1 ,0.1
-		visible		1
 	}
 
-	windowDef bg1 {
-		rect		0 ,00 ,640 ,480 
-		background	"guis/assets/machinegun/plasmabg"
+	windowDef gridscroll
+	{
+		rect	-50 ,-180 ,740 ,820
+		background	"gui/weapons/machinegun/gridscroll"
+		matcolor	1 ,1 ,1 ,0.1
+		visible	1
+	}
+	windowDef bg1
+	{
+		rect	0 ,00 ,640 ,480
+		background	"guis/assets/statwatch/statbg2"
 		matcolor	1 ,1 ,1 ,0
-		visible		1
+		visible	1
 
 		onTime 0 {
 			transition "matcolor" "1 1 1 0" "1 1 1 0.4" "500" ;
 		}
+
 		onTime 500 {
 			transition "matcolor" "1 1 1 0.4" "1 1 1 0" "500" ;
 		}
+
 		onTime 1000 {
 			resetTime "0" ;
 		}
-	}
 
-	windowDef bg2 {
-		rect		0 ,00 ,640 ,480 
-		background	"gui/weapons/plasmagun/background"
+	}
+	windowDef bg2
+	{
+		rect	0 ,00 ,640 ,480
+		background	"gui/weapons/statwatch/background"
 		matcolor	1 ,1 ,1 ,1
-		visible		1
+		visible	1
 	}
-
-	windowDef ammovalue {
-		text		"gui::player_ammo"
-		rect		20 ,-20 ,640 ,220 
+	
+	windowDef ammovalue
+	{
+		text	"gui::player_ammo"
+		rect	20 ,-20 ,640 ,220
 		forecolor	0.6 ,0.8 ,1 ,1
-		visible		1
+		visible	1
 		textscale	6
-		font		"fonts/bank"
+		font	"fonts/bank"
 		textalign	1
 	}
-
-	windowDef NumTest3 {
-		rect		100 ,105 ,220 ,200 
+	windowDef NumTest3
+	{
+		rect	100 ,105 ,220 ,200
 		background	"gui/weapons/machinegun/num"
-	//	background	"guis/assets/machinegun/numtest"
 		matcolor	1 ,1 ,1 ,1
-		visible		1
+		visible	1
 	}
-
-	windowDef NumTest4 {
-		rect		305 ,105 ,220 ,200 
+	windowDef NumTest4
+	{
+		rect	305 ,105 ,220 ,200
 		background	"gui/weapons/machinegun/num"
-	//	background	"guis/assets/machinegun/numtest"
 		matcolor	1 ,1 ,1 ,1
-		visible		1
+		visible	1
 	}
-
-	windowDef ammovalue3 {
-		text		"gui::player_totalammo"
-		font		"fonts/bank"
-		rect		0 ,250 ,640 ,220 
-		forecolor	0.6 ,0.8 ,1 ,1 
-		visible		1
+	windowDef ammovalue3
+	{
+		text	"gui::player_totalammo"
+		font	"fonts/bank"
+		rect	0 ,250 ,640 ,220
+		forecolor	0.6 ,0.8 ,1 ,1
+		visible	1
 		textscale	3
 		textalign	1
 	}
-
-
-	windowDef ammoempty {
-		rect		265 ,375 ,390 ,-120 
+	windowDef ammoempty
+	{
+		rect	265 ,375 ,390 ,-120
 		background	"gui/weapons/machinegun/warning"
-		matcolor	1 ,1 ,1 ,1 
-		visible		0
+		matcolor	1 ,1 ,1 ,1
+		visible	0
 	}
-	windowDef ammoempty2 {
-		rect		-20 ,375 ,-390 ,-120 
+	windowDef ammoempty2
+	{
+		rect	-20 ,375 ,-390 ,-120
 		background	"gui/weapons/machinegun/warning"
-		matcolor	1 ,1 ,1 ,1 
-		visible		0
+		matcolor	1 ,1 ,1 ,1
+		visible	0
 	}
-
-	windowDef cliplow {
-		rect		265 ,10 ,350 ,120 
+	windowDef cliplow
+	{
+		rect	265 ,10 ,350 ,120
 		background	"gui/weapons/machinegun/warning"
-		matcolor	1 ,1 ,1 ,1 
-		visible		0
+		matcolor	1 ,1 ,1 ,1
+		visible	0
 	}
-	windowDef cliplow2 {
-		rect		20 ,10 ,-350 ,120 
+	windowDef cliplow2
+	{
+		rect	20 ,10 ,-350 ,120
 		background	"gui/weapons/machinegun/warning"
-		matcolor	1 ,1 ,1 ,1 
-		visible		0
+		matcolor	1 ,1 ,1 ,1
+		visible	0
 	}
-
-	windowDef clipempty {
-		rect		265 ,10 ,350 ,120 
+	windowDef clipempty
+	{
+		rect	265 ,10 ,350 ,120
 		background	"gui/weapons/machinegun/warning"
-		matcolor	1 ,1 ,1 ,1 
-		visible		0
+		matcolor	1 ,1 ,1 ,1
+		visible	0
 	}
-	windowDef clipempty2 {
-		rect		20 ,10 ,-350 ,120 
+	windowDef clipempty2
+	{
+		rect	20 ,10 ,-350 ,120
 		background	"gui/weapons/machinegun/warning"
-		matcolor	1 ,1 ,1 ,1 
-		visible		0
+		matcolor	1 ,1 ,1 ,1
+		visible	0
+	}
+	
+	windowDef healthFill
+	{
+		rect	0,90,86,("gui::player_health" * 3 )
+		
+		windowDef healthFillBg
+		{
+			rect	0,0,86,299
+			background	"guis/assets/statwatch/statHealthFill"
+			//matcolor	0.6 ,0.9 ,1 ,0.3
+			
+			matcolor ( 2 * (1 -("gui::player_health" / 100 ))),("gui::player_health" / 50 ),  ("gui::player_healthb" ), 0.28 
+						
+			visible		1
+		}
+	}
+	windowDef armorFill
+	{
+		rect	554,90,86,("gui::player_armor" * 3 )
+		
+		windowDef armorFillBg
+		{
+			rect	0,0,86,299
+			background	"guis/assets/statwatch/statArmorFill"
+			//matcolor	0.6 ,0.9 ,1 ,0.3
+			
+			matcolor ( 2 * (1 -("gui::player_armor" / 100 ))),("gui::player_armor" / 50 ), ("gui::player_armorb"), 0.28
+			
+			visible		1
+		}
 	}
 }

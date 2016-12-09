@@ -65,6 +65,12 @@ entityDef weapon_flashlight_new {
 	"skin_flashskin_5a"				"skins/models/weapons/flashlight_offvr/flashhands/1h"
 	"skin_flashskin_6a"				"skins/models/weapons/flashlight_offvr/flashhands/0h"
 	
+	"skin_flashskin_7a"				"skins/models/weapons/flashlight_onminivr/flashhands/1hsw"
+	"skin_flashskin_8a"				"skins/models/weapons/flashlight_onminivr/flashhands/1h"
+	"skin_flashskin_9a"				"skins/models/weapons/flashlight_onminivr/flashhands/0h"
+	"skin_flashskin_10a"			"skins/models/weapons/flashlight_offminivr/flashhands/1hsw"
+	"skin_flashskin_11a"			"skins/models/weapons/flashlight_offminivr/flashhands/1h"
+	"skin_flashskin_12a"			"skins/models/weapons/flashlight_offminivr/flashhands/0h"
 
 	"start_off"					"1"
 }
@@ -80,38 +86,39 @@ entityDef moveable_item_flashlight_new {
 }
 
 model worldmodel_flashlight_new {
-	mesh						models/md5/items/flashlight_world/worldflashlight.md5mesh
+	mesh						models/md5/items/flashlight_world/worldflashlight_vr.md5mesh
 
-	anim raise 					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim idle 					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim aim					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim fire					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim reload					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim noammo					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim putaway				models/md5/items/flashlight_world/flashlight_idle.md5anim
+	anim raise 					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim idle 					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim aim					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim fire					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim reload					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim noammo					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim putaway				models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
 }
 
 model viewmodel_flashlight_new {
-	mesh						models/md5/items/flashlight_world/worldflashlight.md5mesh
-	offset						( -7 2 16 )
-
+	mesh						models/md5/items/flashlight_world/worldflashlight_vr.md5mesh
+	//offset						( -7 2 16 )
+	offset							( 0 0 0)
+	
 // 	anim raise					models/md5/items/flashlight_view/raise.md5anim {
 // 		frame	1				sound_weapon flashlight_raise
 // 	}
 //	anim idle 					models/md5/items/flashlight_view/idle.md5anim
-	anim fire1 					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim fire2 					models/md5/items/flashlight_world/flashlight_idle.md5anim
+	anim fire1 					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim fire2 					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
 //	anim putaway				models/md5/items/flashlight_view/lower.md5anim
 //	anim reload					models/md5/items/flashlight_view/pushbutton.md5anim
 //	anim noammo					models/md5/items/flashlight_view/idle.md5anim
 
-	anim raise 					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim idle 					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim aim					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim fire					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim reload					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim noammo					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim putaway				models/md5/items/flashlight_world/flashlight_idle.md5anim
+	anim raise 					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim idle 					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim aim					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim fire					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim reload					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim noammo					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim putaway				models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
 }
 
 entityDef	damage_flashlight_new {

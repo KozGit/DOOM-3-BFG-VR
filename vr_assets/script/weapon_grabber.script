@@ -173,7 +173,7 @@ weapon_grabber::Fire
 */
 void weapon_grabber::Fire() {
 	float grabState;
-
+	playAnim( ANIMCHANNEL_ALL, "fire" );
 	playCycle( ANIMCHANNEL_ALL, "idleopen" );
 	while(1) {
 

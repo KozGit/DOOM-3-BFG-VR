@@ -786,8 +786,7 @@ void idRenderSystemLocal::SwapCommandBuffers_FinishRendering(
 	// check for errors
 	GL_CheckErrors();
 	
-	// koz fixme vr->FrameEnd();
-
+	
 }
 
 /*
@@ -913,22 +912,6 @@ Returns the current cropped pixel coordinates
 void idRenderSystemLocal::GetCroppedViewport( idScreenRect* viewport )
 {
 	*viewport = renderCrops[currentRenderCrop];
-
-	int x1, y1,x2,y2, w, h, sw, sh;
-
-	sw = renderSystem->GetWidth();
-	sh = renderSystem->GetHeight();
-
-	x1 = renderCrops[currentRenderCrop].x1;
-	y1 = renderCrops[currentRenderCrop].y1;
-	w = renderCrops[currentRenderCrop].GetWidth();
-	h = renderCrops[currentRenderCrop].GetHeight();
-	x2 = renderCrops[currentRenderCrop].x2;
-	y2 = renderCrops[currentRenderCrop].y2;
-
-	if ( x1 + w > sw ) common->Printf( "Crop width exceeded x1 %d w %d tot %d x2 %d sysw %d\n", x1, w, x1 + w, sw );
-	if ( y1 + h > sh ) common->Printf( "Crop height exceeded y1 %d h %d tot %d y2 %d sysh %d\n", y1, h, y1 + h, sh );
-	
 
 }
 
@@ -1099,7 +1082,7 @@ void idRenderSystemLocal::CaptureRenderToFile( const char* fileName, bool fixAlp
 	guiModel->Clear();
 	RenderCommandBuffers( frameData->cmdHead );
 	
-	if ( !vr->useFBO ) // koz
+	if ( !commonVr->useFBO ) // koz
 	{
 		glReadBuffer( GL_BACK );
 	}

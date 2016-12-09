@@ -3167,27 +3167,6 @@ void idFileSystemLocal::Restart()
 {
 	// free anything we currently have loaded
 	Shutdown( true );
-	
-	// koz hack alert
-	// set the fs_game path to reflect vr or vrik
-	// this allows separate models/animations/scripts for
-	// the standard, VR, and VR w/ arm IK game modes.
-
-	if ( 0 )// game->isVR )
-	{
-
-		if ( vr->VR_USE_HYDRA && vr_armIKenable.GetBool() && vr_showBody.GetBool() )
-		{
-			fs_game.SetString( "base\\vrik" );
-		}
-		else
-		{
-			fs_game.SetString( "base\\vr" );
-		}
-		common->Printf( "Sys_DefaultSavePath() = %s\n", Sys_DefaultSavePath() );//koz fixme
-		fs_savepath.SetString( Sys_DefaultSavePath() );
-	}
-
 
 	Startup();
 	
@@ -3362,7 +3341,7 @@ Used for streaming data out of either a
 separate file or a ZIP file.
 ===========
 */
-idFile* idFileSystemLocal::OpenFileReadFlags( const char* relativePath3, int searchFlags, bool allowCopyFiles, const char* gamedir )
+idFile* idFileSystemLocal::OpenFileReadFlags( const char* relativePath, int searchFlags, bool allowCopyFiles, const char* gamedir )
 {
 	//common->Printf( "Gamedir = %s\n", gamedir );//koz deleteme
 	//common->Printf( "RelPath = %s\n\n", relativePath3 );
@@ -3373,40 +3352,40 @@ idFile* idFileSystemLocal::OpenFileReadFlags( const char* relativePath3, int sea
 		return NULL;
 	}
 	
-	if( relativePath3 == NULL )
+	if( relativePath == NULL )
 	{
 		common->FatalError( "idFileSystemLocal::OpenFileRead: NULL 'relativePath' parameter passed\n" );
 		return NULL;
 	}
 	
 	// qpaths are not supposed to have a leading slash
-	if( relativePath3[0] == '/' || relativePath3[0] == '\\' )
+	if( relativePath[0] == '/' || relativePath[0] == '\\' )
 	{
-		relativePath3++;
+		relativePath++;
 	}
 	
 	// make absolutely sure that it can't back up the path.
 	// The searchpaths do guarantee that something will always
 	// be prepended, so we don't need to worry about "c:" or "//limbo"
-	if( strstr( relativePath3, ".." ) || strstr( relativePath3, "::" ) )
+	if( strstr( relativePath, ".." ) || strstr( relativePath, "::" ) )
 	{
 		return NULL;
 	}
 	
 	// edge case
-	if( relativePath3[0] == '\0' )
+	if( relativePath[0] == '\0' )
 	{
 		return NULL;
 	}
 	
 	if( fs_debug.GetBool() )
 	{
-		idLib::Printf( "FILE DEBUG: opening %s\n", relativePath3 );
+		idLib::Printf( "FILE DEBUG: opening %s\n", relativePath );
 	}
 	
 	if( resourceFiles.Num() > 0 && fs_resourceLoadPriority.GetInteger() ==  1 )
 	{
-		idFile* rf = GetResourceFile( relativePath3, ( searchFlags & FSFLAG_RETURN_FILE_MEM ) != 0 );
+		idFile* rf = GetResourceFile( relativePath, ( searchFlags & FSFLAG_RETURN_FILE_MEM ) != 0 );
 		if( rf != NULL )
 		{
 			return rf;
@@ -3418,56 +3397,17 @@ idFile* idFileSystemLocal::OpenFileReadFlags( const char* relativePath3, int sea
 	//
 	if( searchFlags & FSFLAG_SEARCH_DIRS )
 	{
-		idStr searchPath = "";
-		idStr spGameDir = "";
-		idStr spGamePath = "";
-
-		for( int sp = searchPaths.Num() /*koz was - 1*/ ; sp >= 0; sp-- )
+		for( int sp = searchPaths.Num() - 1; sp >= 0; sp-- )
 		{
-			searchPath = "";
-			if ( sp == searchPaths.Num() )
-			{
-				if ( !game->isVR )
-				{
-					continue;
-				}
-				else
-				{
-					if ( vr->VR_USE_HYDRA && vr_armIKenable.GetBool()  )
-					{
-						searchPath = "vrik/";
-					}
-					else
-					{
-						searchPath = "vr/";
-					}
-
-					spGameDir = searchPaths[ 0 ].gamedir;
-					spGamePath = searchPaths[ 0 ].path;
-				}
-			}
-			else
-			{
-				spGameDir = searchPaths[sp].gamedir;
-				spGamePath = searchPaths[sp].path;
-			}
-			
-			searchPath += relativePath3;
-
-			const char* relativePath = searchPath.c_str();
-
-			// common->Printf( "New relativePath = %s\n", relativePath );//koz deleteme
-			
 			if( gamedir != NULL && gamedir[0] != 0 )
 			{
-				if( spGameDir != gamedir )
+				if ( searchPaths[sp].gamedir != gamedir ) 
 				{
 					continue;
 				}
 			}
 			
-			idStr netpath = BuildOSPath( spGamePath, spGameDir, relativePath ); // koz changes to spGamePath
-			// common->Printf( "SearchPath path %s SearchPath gameDir %s Netpath = %s\n", spGamePath.c_str(), spGameDir.c_str(), netpath.c_str() ); // koz fixme
+			idStr netpath = BuildOSPath( searchPaths[sp].path, searchPaths[sp].gamedir, relativePath ); 
 			idFileHandle fp = OpenOSFile( netpath, FS_READ );
 			if( !fp )
 			{
@@ -3482,7 +3422,7 @@ idFile* idFileSystemLocal::OpenFileReadFlags( const char* relativePath3, int sea
 			file->fileSize = DirectFileLength( file->o );
 			if( fs_debug.GetInteger() )
 			{
-				common->Printf( "idFileSystem::OpenFileRead: %s (found in '%s/%s')\n", relativePath, spGamePath.c_str(), spGameDir.c_str() );
+				common->Printf( "idFileSystem::OpenFileRead: %s (found in '%s/%s')\n", relativePath, searchPaths[sp].path.c_str(), searchPaths[sp].gamedir.c_str() );
 			}
 			
 			// if fs_copyfiles is set
@@ -3491,7 +3431,7 @@ idFile* idFileSystemLocal::OpenFileReadFlags( const char* relativePath3, int sea
 			
 				idStr copypath;
 				idStr name;
-				copypath = BuildOSPath( fs_savepath.GetString(), spGameDir, relativePath ); 
+				copypath = BuildOSPath( fs_savepath.GetString(), searchPaths[sp].gamedir, relativePath );
 				netpath.ExtractFileName( name );
 				copypath.StripFilename();
 				copypath += PATHSEPARATOR_STR;
@@ -3583,7 +3523,7 @@ idFile* idFileSystemLocal::OpenFileReadFlags( const char* relativePath3, int sea
 	
 	if( resourceFiles.Num() > 0 && fs_resourceLoadPriority.GetInteger() ==  0 )
 	{
-		idFile* rf = GetResourceFile( relativePath3, ( searchFlags & FSFLAG_RETURN_FILE_MEM ) != 0 );
+		idFile * rf = GetResourceFile( relativePath, (searchFlags & FSFLAG_RETURN_FILE_MEM) != 0 );
 		if( rf != NULL )
 		{
 			return rf;
@@ -3592,7 +3532,7 @@ idFile* idFileSystemLocal::OpenFileReadFlags( const char* relativePath3, int sea
 	
 	if( fs_debug.GetInteger( ) )
 	{
-		common->Printf( "Can't find %s\n", relativePath3 );
+		common->Printf( "Can't find %s\n", relativePath );
 	}
 	
 	return NULL;

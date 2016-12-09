@@ -125,10 +125,12 @@ int idMD5Anim::Length() const
 	{	// koz - disable weapon idle animations in VR, so aim is only affected by motion controls
 		// Originally set the length to 1 at animation load time, but this way the user can toggle
 		// animations without having to reload them all.  
-				
-		if (	strstr( name, "idle")  &&  // is this an idle animation?
-				// on disable idle animations with the following in their path:
-				strstr( name, "artifact" ) ||
+	
+		//common->Printf( "Anim name %s\n", name.c_str() );
+		
+		/*if (	strstr( name, "idle")  &&  // is this an idle animation?
+				// only disable idle animations with the following in their path:
+				( strstr( name, "artifact" ) ||
 				strstr( name, "bfg" ) ||
 				strstr( name, "chaingun" ) ||
 				strstr( name, "grenade" ) ||
@@ -139,9 +141,16 @@ int idMD5Anim::Length() const
 				strstr( name, "shotgun" ) ||
 				strstr( name, "grabber" ) ||
 				strstr( name, "doublebarrel" ) ||
-				strstr( name, "blood_orb" ) )
-		{
-			return 1;	// set anmination length to 1
+				strstr( name, "blood_orb" )) )
+		*/
+
+		if ( strstr( name, "idle" ) && strstr( name, "md5/weapons" ) )
+		{	
+			// let the idle animations play for the soulcube, artifact, & bloodstone
+			if ( !strstr( name, "soulcube" ) && !strstr( name, "artifact" ) && !strstr( name, "blood_orb" ) )
+			{
+				return 1;	// set anmination length to 1
+			}
 		}
 	}
 	return animLength;

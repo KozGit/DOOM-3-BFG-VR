@@ -43,7 +43,7 @@ entityDef weapon_rocketlauncher {
 	"spawnclass"				"idItem"
 	"size"						"32 32 32"
 	"model" 					"models/weapons/rocketlauncher/w_rocketlauncher.lwo"
-	"model_view" 				"viewmodel_rocketlauncher"
+	"model_view" 				"viewmodel_rocketlauncher_vr"
 	"model_world" 				"worldmodel_rocketlauncher"
 	"joint_attach"				"RL_ATTACHER"
 	"def_dropItem"				"moveable_item_rocketlauncher"
@@ -163,21 +163,22 @@ model worldmodel_rocketlauncher {
 	anim putaway				models/md5/weapons/rocketlauncher_world/rocketlauncher_aim.md5anim
 }
 
-model viewmodel_rocketlauncher {
-	mesh 						models/md5/weapons/rocketlauncher_view/viewrocketlauncher.md5mesh
-	offset						( -6 -3 -60 )
+model viewmodel_rocketlauncher_vr {
+	mesh 						models/md5/weapons/rocketlauncher_view/viewrocketlauncher_vr.md5mesh
+	//offset						( -6 -3 -60 )
+	offset						( 0 0 0 )
 
-	anim raise 					models/md5/weapons/rocketlauncher_view/raise.md5anim {
+	anim raise 					models/md5/weapons/rocketlauncher_view/viewrocketlauncher_vr_raise.md5anim {
 		frame 1					sound_weapon player_rocketlauncher_raise
 	}
-	anim idle 					models/md5/weapons/rocketlauncher_view/idle.md5anim
-	anim fire 					models/md5/weapons/rocketlauncher_view/fire.md5anim {
+	anim idle 					models/md5/weapons/rocketlauncher_view/viewrocketlauncher_vr_idle.md5anim
+	anim fire 					models/md5/weapons/rocketlauncher_view/viewrocketlauncher_vr_fire.md5anim {
 		frame 1					sound_weapon player_rocketlauncher_fire
 	}
-	anim reload 				models/md5/weapons/rocketlauncher_view/reload.md5anim {
+	anim reload 				models/md5/weapons/rocketlauncher_view/viewrocketlauncher_vr_reload.md5anim {
 		frame 1					sound_weapon player_rocketlauncher_reload
 	}
-	anim putaway 				models/md5/weapons/rocketlauncher_view/lower.md5anim
+	anim putaway 				models/md5/weapons/rocketlauncher_view/viewrocketlauncher_vr_lower.md5anim
 }
 
 entityDef projectile_rocket {

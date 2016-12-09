@@ -271,7 +271,7 @@ void idMenuScreen_Shell_Pause::ShowScreen( const mainMenuTransition_t transition
 				
 				if ( game->isVR )
 				{
-					vr->playerDead = true;
+					commonVr->playerDead = true;
 				}
 				
 				option.Append( "#str_02187" );	// load game

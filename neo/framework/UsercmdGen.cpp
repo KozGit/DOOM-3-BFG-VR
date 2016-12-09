@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include"vr\Vr.h" // koz
+#include"d3xp\Game_local.h"
 
 
 idCVar joy_mergedThreshold( "joy_mergedThreshold", "1", CVAR_BOOL | CVAR_ARCHIVE, "If the thresholds aren't merged, you drift more off center" );
@@ -37,7 +38,7 @@ idCVar joy_newCode( "joy_newCode", "1", CVAR_BOOL | CVAR_ARCHIVE, "Use the new c
 idCVar joy_triggerThreshold( "joy_triggerThreshold", "0.05", CVAR_FLOAT | CVAR_ARCHIVE, "how far the joystick triggers have to be pressed before they register as down" );
 idCVar joy_deadZone( "joy_deadZone", "0.2", CVAR_FLOAT | CVAR_ARCHIVE, "specifies how large the dead-zone is on the joystick" );
 idCVar joy_range( "joy_range", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "allow full range to be mapped to a smaller offset" );
-idCVar joy_gammaLook( "joy_gammaLook", "1", CVAR_INTEGER | CVAR_ARCHIVE, "use a log curve instead of a power curve for movement" );
+idCVar joy_gammaLook( "joy_gammaLook", "1", CVAR_INTEGER | CVAR_ARCHIVE, "use a log curve instead of a power curve for movement. If 0 use joy_powerscale val" );
 idCVar joy_powerScale( "joy_powerScale", "2", CVAR_FLOAT | CVAR_ARCHIVE, "Raise joystick values to this power" );
 
 //Carl: Allow analog stick pitch (and yaw) to be disabled
@@ -51,10 +52,18 @@ idCVar joy_deltaPerMSLook( "joy_deltaPerMSLook", "0.003", CVAR_FLOAT | CVAR_ARCH
 idCVar in_mouseSpeed( "in_mouseSpeed", "1",	CVAR_ARCHIVE | CVAR_FLOAT, "speed at which the mouse moves", 0.25f, 4.0f );
 idCVar in_alwaysRun( "in_alwaysRun", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "always run (reverse _speed button) - only in MP" );
 
-idCVar in_useJoystick( "in_useJoystick", "0", CVAR_ARCHIVE | CVAR_BOOL, "enables/disables the gamepad for PC use" );
+idCVar in_useJoystick( "in_useJoystick", "1", CVAR_ARCHIVE | CVAR_BOOL, "enables/disables the gamepad for PC use" );
 idCVar in_joystickRumble( "in_joystickRumble", "1", CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_BOOL, "enable joystick rumble" );
 idCVar in_invertLook( "in_invertLook", "0", CVAR_ARCHIVE | CVAR_BOOL, "inverts the look controls so the forward looks up (flight controls) - the proper way to play games!" );
 idCVar in_mouseInvertLook( "in_mouseInvertLook", "0", CVAR_ARCHIVE | CVAR_BOOL, "inverts the look controls so the forward looks up (flight controls) - the proper way to play games!" );
+
+idCVar vr_comfortRepeat( "vr_comfortRepeat", "100", CVAR_ARCHIVE | CVAR_INTEGER, "Delay in MS between repeating comfort snap turns." );
+
+idCVar vr_joyCurves( "vr_joyCurves", "0", CVAR_ARCHIVE | CVAR_INTEGER, "Joy powercurves. 0 = Doom default\n 1 = Mixed curve with vr_joyCurveSensitivity and vr_joyCurveLin\n" );
+idCVar vr_joyCurveSensitivity( "vr_joyCurveSensitivity", "9", CVAR_ARCHIVE | CVAR_FLOAT, "Sensitivity val 0 - 9\n" );
+idCVar vr_joyCurveLin( "vr_joyCurveLin", "4", CVAR_ARCHIVE | CVAR_FLOAT, "Linear point for joyCurves\n sens < lin = power curve\n, sens = lin = linear\n, sens > lin = frac power curve.\n" );
+
+
 
 /*
 ================
@@ -176,7 +185,9 @@ userCmdString_t	userCmdStrings[] =
 	{ "_impulse36", UB_IMPULSE36 }, // new impulse for hud toggle;
 	{ "_impulse37", UB_IMPULSE37 }, // new impulse for headingbeam toggle;
 	{ "_impulse38", UB_IMPULSE38 }, // new impulse for walk in place
-	{ "_impulse39", UB_IMPULSE39 }, // new impulse for freelook
+	{ "_impulse39", UB_IMPULSE39 }, // new impulse for next flash mode;
+	{ "_impulse40", UB_IMPULSE40 }, // new impulse for system menu;
+	{ "_impulse41", UB_IMPULSE41 }, // new impulse for click to move;
 	// koz end
 	
 
@@ -271,7 +282,8 @@ public:
 private:
 	void			MakeCurrent();
 	void			InitCurrent();
-	
+	void			EvaluateVRMoveMode();
+
 	bool			Inhibited();
 	void			AdjustAngles();
 	void			KeyMove();
@@ -491,7 +503,7 @@ void idUsercmdGenLocal::AdjustAngles()
 			pitchdelta = speed * in_pitchSpeed.GetFloat();
 		}
 
-		vr->CalcAimMove( yawdelta, pitchdelta ); // update the independent weapon angles and return any movement changes.
+		commonVr->CalcAimMove( yawdelta, pitchdelta ); // update the independent weapon angles and return any movement changes.
 		viewangles[YAW] += yawdelta;
 		viewangles[PITCH] += pitchdelta;
 		
@@ -507,6 +519,7 @@ Sets the usercmd_t based on key states
 */
 void idUsercmdGenLocal::KeyMove()
 {
+	
 	int forward = 0;
 	int side = 0;
 	
@@ -587,7 +600,7 @@ void idUsercmdGenLocal::MouseMove()
 	if ( vr_enable.GetBool() )
 	{
 		// update the independent weapon angles and return any view changes based on current aim mode
-		vr->CalcAimMove( yawdelta, pitchdelta );
+		commonVr->CalcAimMove( yawdelta, pitchdelta );
 	}
 
 	viewangles[YAW] += yawdelta;
@@ -692,6 +705,7 @@ void idUsercmdGenLocal::HandleJoystickAxis( int keyNum, float unclampedValue, fl
 	}
 	
 	int action = idKeyInput::GetUsercmdAction( keyNum );
+	
 	if( action >= UB_ATTACK )
 	{
 		Key( keyNum, pressed );
@@ -844,6 +858,23 @@ idVec2 JoypadFunction(
 	const bool	mergedThreshold )
 {
 
+	if ( game->isVR && vr_joyCurves.GetInteger() != 0 )
+	{
+		// skip default joy curves.
+		float sens = vr_joyCurveSensitivity.GetFloat();
+		float lin = vr_joyCurveLin.GetFloat();
+		static idVec2 result;
+		common->Printf( "raw %s    :", raw.ToString() );
+		result.x = idMath::Pow( raw.x, (1 + ((lin - sens) / 9)) );
+		result.y = idMath::Pow( raw.y, (1 + ((lin - sens) / 9)) );
+		common->Printf( "curve %f   %f \n", result.x, result.y );
+		return result;
+
+	}
+
+	
+	
+	
 	if( range <= threshold )
 	{
 		return idVec2( 0.0f, 0.0f );
@@ -912,7 +943,9 @@ idVec2 JoypadFunction(
 	}
 	else  	// FUNC_LINEAR
 	{
-		accelerated = rescaledLen;
+		float power = joy_powerScale.GetFloat();
+		//accelerated = rescaledLen; this was only line in the original code
+		accelerated = idMath::Pow( rescaledLen, power );
 	}
 	
 	// optionally slow down for aim-assist
@@ -1080,22 +1113,48 @@ float idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int ax
 														K_JOY_STICK2_UP,			K_JOY_STICK2_DOWN,
 														K_JOY_TRIGGER1,				K_JOY_TRIGGER1,
 														K_JOY_TRIGGER2,				K_JOY_TRIGGER2,
-														K_HYDRA_LEFT_STICK_LEFT,	K_HYDRA_LEFT_STICK_RIGHT,
-														K_HYDRA_LEFT_STICK_UP,		K_HYDRA_LEFT_STICK_DOWN,
-														K_HYDRA_RIGHT_STICK_LEFT,	K_HYDRA_RIGHT_STICK_RIGHT,
-														K_HYDRA_RIGHT_STICK_UP,		K_HYDRA_RIGHT_STICK_DOWN,
-														K_L_HYDRATRIG,				K_L_HYDRATRIG,
-														K_R_HYDRATRIG,				K_R_HYDRATRIG
+														K_TOUCH_LEFT_STICK_LEFT,	K_TOUCH_LEFT_STICK_RIGHT,
+														K_TOUCH_LEFT_STICK_UP,		K_TOUCH_LEFT_STICK_DOWN,
+														K_TOUCH_RIGHT_STICK_LEFT,	K_TOUCH_RIGHT_STICK_RIGHT,
+														K_TOUCH_RIGHT_STICK_UP,		K_TOUCH_RIGHT_STICK_DOWN,
+														K_L_TOUCHTRIG,				K_L_TOUCHTRIG,
+														K_R_TOUCHTRIG,				K_R_TOUCHTRIG,
+														K_STEAMVR_LEFT_PAD_LEFT,	K_STEAMVR_LEFT_PAD_RIGHT,
+														K_STEAMVR_LEFT_PAD_UP,		K_STEAMVR_LEFT_PAD_DOWN,
+														K_STEAMVR_RIGHT_PAD_LEFT,	K_STEAMVR_RIGHT_PAD_RIGHT,
+														K_STEAMVR_RIGHT_PAD_UP,		K_STEAMVR_RIGHT_PAD_DOWN,
+														K_L_STEAMVRTRIG,			K_L_STEAMVRTRIG,
+														K_R_STEAMVRTRIG,			K_R_STEAMVRTRIG
 	};
 
 	float jaxisValue = 0.0f;
 	int joyCmd = 0;
 	int joyDir = 0;
 
+	float rVal = 0.0f;
+	float ct = 0.0f;
+
 	static int lastLeft =0 ;
 	static int lastRight = 0;
+
+	static int joyActiveState[int( MAX_JOYSTICK_AXIS )][2];
 	
 	jaxisValue = joystickAxis[axisNum];
+		
+	if ( fabs( jaxisValue ) <= 0.001 )
+	{
+		// if the value is this small, treat it as no input, clear the button states for both axes, and return a 0.0 value. 	
+		if ( joyActiveState[axisNum][0] == 1 || joyActiveState[axisNum][1] == 1 )
+		{
+			joyDir = axisName[axisNum][0];
+			Key( joyDir, 0 );
+			joyDir = axisName[axisNum][1];
+			Key( joyDir, 0 );
+			joyActiveState[axisNum][0] = 0;
+			joyActiveState[axisNum][1] = 0;
+		}
+		return 0.0f;
+	}
 
 	if ( jaxisValue < 0 )
 	{
@@ -1145,21 +1204,44 @@ float idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int ax
 			break;
 
 		case UB_IMPULSE34: // comfort turn right
-			jaxisValue = jaxisValue > 0.0 ? jaxisValue : -jaxisValue;
-			if ( jaxisValue > .25 ) {
-				return -vr_comfortDelta.GetFloat();
+			ct  = fabs(jaxisValue);
+			if ( ct > vr_padToButtonThreshold.GetFloat() ) {
+				rVal = -vr_comfortDelta.GetFloat();
 			}
 			break;
 	
 		case UB_IMPULSE35: // comfort turn left
-			jaxisValue = jaxisValue > 0.0 ? jaxisValue : -jaxisValue;
-			if ( jaxisValue > .25 ) {
-				return vr_comfortDelta.GetFloat();
+			ct = fabs( jaxisValue );
+			if ( ct > vr_padToButtonThreshold.GetFloat() ) {
+				rVal =  vr_comfortDelta.GetFloat();
 			}
 			break;
+
+		default:
+			
+			// axis is mapped to a non-movement impulse, exec here
+									
+			int ax = jaxisValue > 0.0f ? 0 : 1;
+
+			jaxisValue = fabs( jaxisValue );
+			
+			if ( (joyCmd >= UB_ATTACK && joyCmd <= UB_MAX_BUTTONS) || ( joyCmd > UB_NONE && joyCmd < UB_LOOKLEFT ) ) // non movement actions + jump & crouch
+			{
+				if ( jaxisValue > vr_padToButtonThreshold.GetFloat() ) // button pressed
+				{
+					if ( joyActiveState[axisNum][ax] == 0 ) // button not already pressed, exec impulse
+					{
+						joyActiveState[axisNum][ax] = 1;
+						Key( joyDir, 1 );
+					}
+					
+				}
+	
+			}
+			
 	}
 	
-	return 0.0;
+	return rVal;
 }
 
 /*
@@ -1174,12 +1256,13 @@ void idUsercmdGenLocal::JoystickMove2()
 
 	// koz const bool invertLook =			in_invertLook.GetBool(); dont need anymore remap instead.
 
-	const float threshold = joy_deadZone.GetFloat();
-	const float range = joy_range.GetFloat();
-	const transferFunction_t shape = (transferFunction_t)joy_gammaLook.GetInteger();
-	const bool mergedThreshold = joy_mergedThreshold.GetBool();
-	const float pitchSpeed = joy_pitchSpeed.GetFloat();
-	const float yawSpeed = joy_yawSpeed.GetFloat();
+	//koz fixme these were const changed for easier testing
+	 float threshold = joy_deadZone.GetFloat();
+	 float range = joy_range.GetFloat();
+	 transferFunction_t shape = (transferFunction_t)joy_gammaLook.GetInteger();
+	 bool mergedThreshold = joy_mergedThreshold.GetBool();
+	 float pitchSpeed = joy_pitchSpeed.GetFloat();
+	 float yawSpeed = joy_yawSpeed.GetFloat();
 	
 	idGame* game = common->Game();
 	const float aimAssist = game != NULL ? game->GetAimAssistSensitivity() : 1.0f;
@@ -1188,20 +1271,20 @@ void idUsercmdGenLocal::JoystickMove2()
 	idVec2 mappedLook = vec2_zero;
 
 	float comfortTurn = 0.0 ;
-	static bool lastComfort = false;
+	static int lastComfortTime = 0;
 
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_X ); //koz remamp axis
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_Y );
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_X );
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_Y );
 
-	if ( comfortTurn != 0.0 && !lastComfort )
+	
+	if ( comfortTurn != 0.0 && (Sys_Milliseconds() - lastComfortTime >= vr_comfortRepeat.GetInteger()) )
 	{
 		viewangles[YAW] += comfortTurn;
-		lastComfort = true;
-		
+
+		lastComfortTime = Sys_Milliseconds();
 	}
-	if ( comfortTurn == 0.0 ) lastComfort = false;
 	
 	// save for visualization
 	lastLookJoypad = mappedLook;
@@ -1223,7 +1306,7 @@ void idUsercmdGenLocal::JoystickMove2()
 
 	if ( game->isVR )
 	{
-		vr->CalcAimMove( yawDelta, pitchDelta );
+		commonVr->CalcAimMove( yawDelta, pitchDelta );
 	}
 
 	viewangles[PITCH] += pitchDelta;
@@ -1233,31 +1316,28 @@ void idUsercmdGenLocal::JoystickMove2()
 	HandleJoystickAxis( K_JOY_TRIGGER1, joystickAxis[AXIS_LEFT_TRIG], triggerThreshold, true );
 	HandleJoystickAxis( K_JOY_TRIGGER2, joystickAxis[AXIS_RIGHT_TRIG], triggerThreshold, true );
 
+	// Koz hydra -------------------do this again with the touch
 
-	// Koz hydra -------------------do this again with the hydras
-
-	if ( vr->VR_USE_HYDRA ) // vr_hydraMode.GetInteger() != 0 ) {
+	if ( commonVr->motionControlType == MOTION_OCULUS ) 
 	{
-		comfortTurn = 0.0 ;
+		comfortTurn = 0.0;
 		static bool lastComfortHydra = false;
 
 		mappedMove = vec2_zero;
 		mappedLook = vec2_zero;
 
-		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_HYDRA_X );
-		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_HYDRA_Y );
-		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_HYDRA_X );
-		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_HYDRA_Y );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_TOUCH_X );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_TOUCH_Y );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_TOUCH_X );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_TOUCH_Y );
 
-		if ( comfortTurn != 0.0 && !lastComfortHydra )
+		if ( comfortTurn != 0.0 && (Sys_Milliseconds() - lastComfortTime >= vr_comfortRepeat.GetInteger()) )
 		{
 			viewangles[YAW] += comfortTurn;
-			lastComfortHydra = true;
 
+			lastComfortTime = Sys_Milliseconds();
 		}
-		if ( comfortTurn == 0.0 ) lastComfortHydra = false;
-
-
+		
 		leftMapped = JoypadFunction( mappedMove, 1.0f, threshold, range, shape, mergedThreshold );
 		rightMapped = JoypadFunction( mappedLook, aimAssist, threshold, range, shape, mergedThreshold );
 
@@ -1271,14 +1351,82 @@ void idUsercmdGenLocal::JoystickMove2()
 
 		if ( game->isVR )
 		{
-			vr->CalcAimMove( yawDelta, pitchDelta );
+			commonVr->CalcAimMove( yawDelta, pitchDelta );
 		}
 
 		viewangles[PITCH] += pitchDelta;
 		viewangles[YAW] += yawDelta;
+
+		HandleJoystickAxis( K_L_TOUCHTRIG, joystickAxis[AXIS_LEFT_TOUCH_TRIG], triggerThreshold, true );
+		HandleJoystickAxis( K_R_TOUCHTRIG, joystickAxis[AXIS_RIGHT_TOUCH_TRIG], triggerThreshold, true );
+
+	}
+
+	// Koz SteamVR -------------------and again for SteamVR left and right controllers
+
+	if ( commonVr->motionControlType == MOTION_STEAMVR ) 
+	{
+		comfortTurn = 0.0;
+		static int lastComfortTimeSteamVr = 0;
+
+		mappedMove = vec2_zero;
+		mappedLook = vec2_zero;
+
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_STEAMVR_X );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_STEAMVR_Y );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_STEAMVR_X );
+		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_STEAMVR_Y );
+
+		//if ( comfortTurn != 0.0 && !lastComfortSteamVr )
+		if ( comfortTurn != 0.0 && ( Sys_Milliseconds() - lastComfortTimeSteamVr >= vr_comfortRepeat.GetInteger()) )
+		{
+			viewangles[YAW] += comfortTurn;
+			lastComfortTimeSteamVr = Sys_Milliseconds();
+		}
 		
-		HandleJoystickAxis( K_L_HYDRATRIG, joystickAxis[AXIS_LEFT_HYDRA_TRIG], triggerThreshold, true );
-		HandleJoystickAxis( K_R_HYDRATRIG, joystickAxis[AXIS_RIGHT_HYDRA_TRIG], triggerThreshold, true );
+
+		if ( !game->isVR || (game->isVR && vr_joyCurves.GetInteger() < 2) )
+		{
+			leftMapped = JoypadFunction( mappedMove, 1.0f, threshold, range, shape, mergedThreshold );
+			rightMapped = JoypadFunction( mappedLook, aimAssist, threshold, range, shape, mergedThreshold );
+		}
+		
+		CircleToSquare( leftMapped.x, leftMapped.y );
+
+		if ( game->isVR && vr_joyCurves.GetInteger() == 3 )
+		{
+			float lenSq = leftMapped.LengthSqr();
+			float len = sqrtf( lenSq );
+			float dif = lenSq - len;
+			len += dif * vr_joyCurveLin.GetFloat();
+			leftMapped *= len;
+		}
+
+		if ( game->isVR && vr_joyCurves.GetInteger() == 4 )
+		{
+			leftMapped.x = 60 + leftMapped.x * .55;
+			leftMapped.y = 60 + leftMapped.y * .55;
+		}
+
+		leftMapped = mappedMove;
+		rightMapped = mappedLook;
+
+		cmd.forwardmove = idMath::ClampChar( cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y );
+		cmd.rightmove = idMath::ClampChar( cmd.rightmove + KEY_MOVESPEED * leftMapped.x );
+
+		pitchDelta = MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed;;
+		yawDelta = MS2SEC( pollTime - lastPollTime ) * -rightMapped.x * yawSpeed;
+
+		if ( game->isVR )
+		{
+			commonVr->CalcAimMove( yawDelta, pitchDelta );
+		}
+
+		viewangles[PITCH] += pitchDelta;
+		viewangles[YAW] += yawDelta;
+
+		HandleJoystickAxis( K_L_STEAMVRTRIG, joystickAxis[AXIS_LEFT_STEAMVR_TRIG], triggerThreshold, true );
+		HandleJoystickAxis( K_R_STEAMVRTRIG, joystickAxis[AXIS_RIGHT_STEAMVR_TRIG], triggerThreshold, true );
 
 	}
 }
@@ -1304,11 +1452,16 @@ void idUsercmdGenLocal::CmdButtons()
 	}
 	
 	// check the run button
-	if( toggled_run.on || ( in_alwaysRun.GetBool() && common->IsMultiplayer() ) )
+
+	if ( !game->isVR || game->isVR && vr_moveClick.GetInteger() <= 2 ) // koz, do normal run if moveClick = 0
 	{
-		cmd.buttons |= BUTTON_RUN;
+		if ( toggled_run.on || (in_alwaysRun.GetBool() && common->IsMultiplayer()) )
+		{
+			cmd.buttons |= BUTTON_RUN;
+		}
 	}
-	
+
+
 	// check the zoom button
 	if( toggled_zoom.on )
 	{
@@ -1323,6 +1476,13 @@ void idUsercmdGenLocal::CmdButtons()
 	{
 		cmd.buttons |= BUTTON_CROUCH;
 	}
+
+	
+	//koz begin crouch in game by crouching in real life
+	
+	//commonVr->HMDGetOrientation( hmdAng, headDelta, bodyDelta, absolute, false );
+
+	if ( commonVr->poseHmdHeadPositionDelta.z < -vr_crouchTriggerDist.GetFloat() ) cmd.buttons |= BUTTON_CROUCH;
 	
 }
 
@@ -1340,6 +1500,142 @@ void idUsercmdGenLocal::InitCurrent()
 	cmd.impulse = impulse;
 	cmd.buttons |= ( in_alwaysRun.GetBool() && common->IsMultiplayer() ) ? BUTTON_RUN : 0;
 }
+
+
+/*
+================
+Koz begin
+idUsercmdGenLocal::EvaluateVRMoveMode()
+
+Process the different VR movement mode options
+================
+*/
+void idUsercmdGenLocal::EvaluateVRMoveMode()
+{
+	static bool moveStarted = 0; // no movement
+	static int numButtonClicks = 0; // start not pressed.
+	static int pressedLastPoll = false;
+	static int lastMoveTime = Sys_Milliseconds();
+	
+	bool okToMove = false;
+	bool moveRequested = (abs( cmd.forwardmove ) >= 0.05 || abs( cmd.rightmove >= 0.05 ));
+
+	if ( moveRequested )
+	{
+		lastMoveTime = Sys_Milliseconds();
+	}
+	else if ( Sys_Milliseconds() - lastMoveTime < 100 )
+	{
+		moveRequested = true;
+	}
+	
+	int buttonCurrentlyClicked = ButtonState( UB_IMPULSE41 );
+
+	if ( game->CheckInCinematic() == true ) return; // do nothing in cinematics
+
+
+	//common->Printf( "Forwardmove %d rightmove %d\n", cmd.forwardmove, cmd.rightmove );
+	if ( buttonCurrentlyClicked && !pressedLastPoll && moveRequested )
+	{
+		numButtonClicks++;
+		if ( numButtonClicks == 3 ) numButtonClicks = 1;
+		pressedLastPoll = true;
+	}
+	
+	if ( !buttonCurrentlyClicked )
+	{
+		pressedLastPoll = false;
+	}
+
+	if ( !moveRequested )
+	{
+		numButtonClicks = 0;
+		moveStarted = false;
+	}
+	else
+	{
+		switch ( vr_moveClick.GetInteger() )
+		{
+			case 0: // normal movement
+				
+					okToMove = true;
+					break;
+
+			case 1: // click and hold to walk
+				
+					if ( numButtonClicks > 0 && buttonCurrentlyClicked )
+					{
+						okToMove = true;
+					}
+					break;
+
+			case 2: // click to start walking, then touch only.
+
+					if ( numButtonClicks > 0 )
+					{
+						okToMove = true;
+					}
+					break;
+
+			case 3: // click to start walking, pressing again will run while pressed
+					if ( numButtonClicks > 0 )
+					{
+						okToMove = true;
+					}
+					if ( numButtonClicks == 2 )
+					{
+						moveStarted = true;
+					}
+					if ( moveStarted && buttonCurrentlyClicked )
+					{
+						cmd.buttons |= BUTTON_RUN;
+					}
+					break;
+
+			case 4: // click to start walking, clicking again will toggle running on and off
+					if ( numButtonClicks > 0 )
+					{
+						okToMove = true;
+					}
+					if ( numButtonClicks == 2 )
+					{
+						cmd.buttons |= BUTTON_RUN;
+					}
+					break;
+
+			default:
+				okToMove = true;
+				break;
+		}
+	}
+
+	if ( !okToMove )
+	{
+		cmd.forwardmove = 0.0f;
+		cmd.rightmove = 0.0f;
+		return;
+	}
+
+	if ( vr_movePoint.GetInteger() == 1 && (abs( cmd.forwardmove ) >= .1 || abs( cmd.rightmove ) >= .1) ) // body will follow motion from move vector
+	{
+		static idAngles controllerAng;
+
+		controllerAng = commonVr->poseHandRotationAngles[1 - vr_weaponHand.GetInteger()];
+
+		viewangles[YAW] += controllerAng.yaw - commonVr->bodyMoveAng;
+		commonVr->bodyMoveAng = controllerAng.yaw;
+		commonVr->bodyYawOffset = controllerAng.yaw;
+
+	}
+	else if ( vr_movePoint.GetInteger() == 2 ) // body will follow view
+	{
+		viewangles[YAW] += commonVr->poseHmdAngles.yaw - commonVr->bodyMoveAng;
+		commonVr->bodyMoveAng = commonVr->poseHmdAngles.yaw;
+		commonVr->bodyYawOffset = commonVr->poseHmdAngles.yaw;
+	}
+
+}
+
 
 /*
 ================
@@ -1372,7 +1668,7 @@ void idUsercmdGenLocal::MakeCurrent()
 		{
 			JoystickMove();
 		}
-		
+				
 		// keyboard angle adjustment
 		AdjustAngles();
 		
@@ -1385,7 +1681,14 @@ void idUsercmdGenLocal::MakeCurrent()
 		// aim assist
 		AimAssist();
 
-		if ( vr->isWalking )
+		if ( game->isVR )
+		{
+			EvaluateVRMoveMode();
+		}
+					
+		/*
+		
+		if ( commonVr->isWalking )
 		{
 			// WIP button pressed
 			// if freelook not enabled, turn body to last view
@@ -1396,31 +1699,17 @@ void idUsercmdGenLocal::MakeCurrent()
 				//player->SnapBodyToView();
 			
 				
-				viewangles[YAW] += vr->lastHMDYaw - vr->bodyYawOffset;
+				viewangles[YAW] += commonVr->lastHMDYaw - commonVr->bodyYawOffset;
 				//newBodyAngles.Normalize180();
-
-				hydraData currentHydra = hydra_zero;
-				hydraData currentHydraOffset = hydra_zero;
-				idQuat rotQuat;
-
-				rotQuat = idAngles( 0.0f, (vr->lastHMDYaw - vr->bodyYawOffset), 0.0f ).Normalize180().ToQuat();
-
-
-				vr->bodyYawOffset = vr->lastHMDYaw;
-				//SetViewAngles( newBodyAngles );
-				//viewAngles.yaw = newBodyAngles.yaw;
-			
-				vr->HydraGetLeftOffset( currentHydra );
-				currentHydra.hydraRotationQuat *= rotQuat;
-				vr->HydraSetLeftOffset( currentHydra );
-
-				vr->HydraGetRightOffset( currentHydra );
-				currentHydra.hydraRotationQuat *= rotQuat;
-				vr->HydraSetRightOffset( currentHydra );
+				
+				commonVr->MotionControlSetRotationOffset();
+				commonVr->bodyYawOffset = commonVr->lastHMDYaw;
 
 			}
 		}
-		
+		*/
+
+
 		// check to make sure the angles haven't wrapped
 		if( viewangles[PITCH] - oldAngles[PITCH] > 90 )
 		{
@@ -1717,8 +2006,6 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 		int value;
 		if( Sys_ReturnJoystickInputEvent( i, action, value ) )
 		{
-//		common->Printf("idUsercmdGenLocal::Joystick: i = %i / action = %i / value = %i\n", i, action, value);
-
 			if( action >= J_ACTION1 && action <= J_ACTION_MAX )
 			{
 				int joyButton = K_JOY1 + ( action - J_ACTION1 );
@@ -1780,11 +2067,25 @@ void idUsercmdGenLocal::BuildCurrentUsercmd( int deviceNum )
 	Keyboard();
 	
 	// process the system joystick events
-	if( deviceNum >= 0 && in_useJoystick.GetBool() )
+	
+	// koz bfg doesnt really seem to like more than 1 controller by default,
+	// so scan thru them all here
+		 
+	if ( deviceNum >= 0 && in_useJoystick.GetBool() )
 	{
 		Joystick( deviceNum );
 	}
-	
+
+	/*
+	if ( in_useJoystick.GetBool() )
+	{
+		for ( int j = 0; j < MAX_INPUT_DEVICES; j++ )
+		{
+			Joystick( deviceNum );
+		}
+
+	}
+	*/
 	// create the usercmd
 	MakeCurrent();
 	

@@ -154,6 +154,9 @@ public:	// common physics interface
 		current = next;
 		previous = current;
 	}
+
+	//koz
+	idVec3					MotionMove( idVec3 &moveVelocity ); // bool gravity, bool stepUp, bool stepDown, bool push );
 	
 private:
 	// player physics state
@@ -201,6 +204,7 @@ private:
 private:
 	float					CmdScale( const usercmd_t& cmd ) const;
 	void					Accelerate( const idVec3& wishdir, const float wishspeed, const float accel );
+
 	bool					SlideMove( bool gravity, bool stepUp, bool stepDown, bool push );
 	void					Friction();
 	void					WaterJumpMove();

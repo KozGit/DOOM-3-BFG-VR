@@ -93,8 +93,12 @@ Run in a background thread for performance, but can also
 be called directly in the foreground thread for comparison.
 ===============
 */
+
+
 int idGameThread::Run()
 {
+	//if ( game->isVR ) commonVr->FrameStart();
+	
 	commonLocal.frameTiming.startGameTime = Sys_Microseconds();
 	
 	// debugging tool to test frame dropping behavior
@@ -184,6 +188,9 @@ idGameThread::RunGameAndDraw
 */
 gameReturn_t idGameThread::RunGameAndDraw( int numGameFrames_, idUserCmdMgr& userCmdMgr_, bool isClient_, int startGameFrame )
 {
+	
+	//if ( game->isVR ) commonVr->FrameStart();
+	
 	// this should always immediately return
 	this->WaitForThread();
 	
@@ -292,7 +299,9 @@ void idCommonLocal::Draw()
 		// when paused capture the shell render to the PDA screen texture,
 		// then draw the game frame
 		
-		if ( (vr->PDAforced || vr->PDArising) && !vr->playerDead) // koz fixme do we only want to use the PDA model in VR?
+		//koz fixme had playerdead here, can't remember why... but it was breaking the exit game selection in the pause menu, so
+		//commented out, need to test all this crap again.
+		if ( (commonVr->PDAforced || commonVr->PDArising) ) //&& !commonVr->playerDead) // koz fixme do we only want to use the PDA model in VR?
 		{
 			game->Shell_Render(); //koz render the menu
 			Dialog().Render( false );
@@ -309,10 +318,10 @@ void idCommonLocal::Draw()
 		}
 		
 		// Koz begin
-		if ( !game->isVR || vr->playerDead || ( !vr->PDAforced && !vr->PDArising ) )
+		if ( !game->isVR || commonVr->playerDead || ( !commonVr->PDAforced && !commonVr->PDArising ) )
 		{
 			game->Shell_Render(); //koz render any menus outside of game ( main menu etc )
-			//if ( game->isVR ) vr->HMDTrackStatic(); // add headtracking to menus
+			//if ( game->isVR ) commonVr->HMDTrackStatic(); // add headtracking to menus
 		}
 		//Koz end
 
@@ -368,7 +377,7 @@ void idCommonLocal::Draw()
 		}
 		else
 		{
-			if ( !vr->PDAforced && !vr->PDArising )
+			if ( !commonVr->PDAforced && !commonVr->PDArising )
 			{
 				Dialog().Render( loadGUI != NULL );
 				if ( game->Shell_IsActive() ) console->Draw( false );
@@ -410,19 +419,29 @@ void idCommonLocal::UpdateScreen( bool captureToImage, bool releaseMouse )
 		renderSystem->CaptureRenderToImage( "_currentRender", false );
 	}
 	
-	
-	
+
 
 		// this should exit right after vsync, with the GPU idle and ready to draw
 		const emptyCommand_t* cmd = renderSystem->SwapCommandBuffers( &time_frontend, &time_backend, &time_shadows, &time_gpu );
 		
 		// get the GPU busy with new commands
 		renderSystem->RenderCommandBuffers( cmd );
+
+		if ( game->isVR )
+		{
+			//static int lastTrack = Sys_Milliseconds();
+			//if ( Sys_Milliseconds() - lastTrack >9 )
+			//	{
+			//	lastTrack = Sys_Milliseconds();
+			//commonVr->HMDTrackStatic(); // koz fixme
+			//	}
+
+
+			// this will hopefully update the steamvr compositor white room
+			//renderSystem->CaptureRenderToImage( "_skyBoxSides", false );
+		}
 	
-	if ( game->isVR )
-	{
-		//vr->HMDTrackStatic(); // koz fixme
-	}
+
 	insideUpdateScreen = false;
 }
 /*
@@ -490,13 +509,17 @@ idCommonLocal::Frame
 */
 void idCommonLocal::Frame()
 {
+	
+	
 	try
 	{
 		SCOPED_PROFILE_EVENT( "Common::Frame" );
 		
 		// This is the only place this is incremented
 		idLib::frameNumber++;
-		
+				
+		if ( game->isVR ) commonVr->FrameStart();
+
 		// allow changing SIMD usage on the fly
 		if( com_forceGenericSIMD.IsModified() )
 		{
@@ -557,11 +580,13 @@ void idCommonLocal::Frame()
 		
 		// RB begin
 #if defined(USE_DOOMCLASSIC)
-		const bool pauseGame = ( !mapSpawned
+		 bool pauseGame = ( !mapSpawned
 								 || ( !IsMultiplayer()
 									  && ( Dialog().IsDialogPausing() || session->IsSystemUIShowing()
 										   || ( game && game->Shell_IsActive() ) || com_pause.GetInteger() ) ) )
 							   && !IsPlayingDoomClassic();
+
+	
 #else
 		const bool pauseGame = ( !mapSpawned
 								 || ( !IsMultiplayer()
@@ -605,8 +630,13 @@ void idCommonLocal::Frame()
 			// input latency
 			renderSystem->SwapCommandBuffers_FinishRendering( &time_frontend, &time_backend, &time_shadows, &time_gpu );
 		}
+		
+	
+		
 		frameTiming.finishSyncTime = Sys_Microseconds();
 		
+
+
 		//--------------------------------------------
 		// Determine how many game tics we are going to run,
 		// now that the previous frame is completely finished.
@@ -669,9 +699,16 @@ void idCommonLocal::Frame()
 			
 			if ( isVR )
 			{
-				//common->Printf("Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->ishellactive = %d\n",ingame,VR_GAME_PAUSED,pauseGame,game->Shell_IsActive());
-				//common->Printf("Pause diag: PDAforcetoggle = %d, PDAforced = %d, PDA rising =%d\n",PDAforcetoggle,PDAforced,PDArising);
-				if ( vr->VR_GAME_PAUSED ) // game is paused, check to exit
+				
+				/*
+				if ( pauseGame )
+				{
+					common->Printf( "Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->ishellactive = %d\n", ingame, commonVr->VR_GAME_PAUSED, pauseGame, game->Shell_IsActive() );
+					common->Printf( "Pause diag: PDAforcetoggle = %d, PDAforced = %d, PDA rising =%d\n", commonVr->PDAforcetoggle, commonVr->PDAforced, commonVr->PDArising );
+				}
+				*/
+
+				if ( commonVr->VR_GAME_PAUSED ) // game is paused, check to exit
 				{
 					if ( ingame )
 					{
@@ -679,49 +716,51 @@ void idCommonLocal::Frame()
 						{
 							if ( !PDAopenedByPause )
 							{
-								vr->VR_GAME_PAUSED = false;
-								vr->PDArising = false;
-								vr->PDAforced = false;
+								commonVr->VR_GAME_PAUSED = false;
+								commonVr->PDArising = false;
+								commonVr->PDAforced = false;
+								commonVr->PDAforcetoggle = false; //koz 11-20
 							}
-							else if ( vr->PDAforced && !vr->PDArising )
+							else if ( commonVr->PDAforced && !commonVr->PDArising )
 							{
-								common->Printf( "idCommonLocal::Frame() 1 setting PDAforceToggle true\n" );
-								vr->PDAforcetoggle = true;
+								//common->Printf( "idCommonLocal::Frame() 1 setting PDAforceToggle true\n" );
+								commonVr->PDAforcetoggle = true;
 								PDAopenedByPause = false;
-								vr->VR_GAME_PAUSED = false;
+								commonVr->VR_GAME_PAUSED = false;
 							}
 						}
 					}
 					else
 					{
-						vr->VR_GAME_PAUSED = false;
+						commonVr->VR_GAME_PAUSED = false;
 						PDAopenedByPause = false;
-						vr->PDArising = false;
-						vr->PDAforced = false;
+						commonVr->PDArising = false;
+						commonVr->PDAforced = false;
+
 					}
 				}
 				else // game is not paused, see if we need to pause it
 				{
-					if ( pauseGame && ingame && !vr->gameSaving ) // we need to pause 
+					if ( pauseGame && ingame && !commonVr->gameSaving ) // we need to pause 
 					{
 						if ( game->IsPDAOpen() && !PDAopenedByPause ) // the PDA was already opened, dont toggle it
 						{
-							vr->VR_GAME_PAUSED = true;
+							commonVr->VR_GAME_PAUSED = true;
 							PDAopenedByPause = false;
-							vr->PDAforced = false;
-							vr->PDArising = false;
+							commonVr->PDAforced = false;
+							commonVr->PDArising = false;
 						}
-						else if ( !vr->PDAforced && !vr->PDArising  ) // force a PDA toggle;
+						else if ( !commonVr->PDAforced && !commonVr->PDArising  ) // force a PDA toggle;
 						{
-							common->Printf( "idCommonLocal::Frame() 2 setting PDAforceToggle true\n" );
-							vr->PDAforcetoggle = true;
+							// koz debugcommon->Printf( "idCommonLocal::Frame() 2 setting PDAforceToggle true\n" );
+							commonVr->PDAforcetoggle = true;
 							PDAopenedByPause = true;
 						}
-						else if ( vr->PDAforced ) // pda is up, pause the game.
+						else if ( commonVr->PDAforced ) // pda is up, pause the game.
 						{
-							vr->VR_GAME_PAUSED = true;
+							commonVr->VR_GAME_PAUSED = true;
 							PDAopenedByPause = true;
-							vr->PDArising = false;
+							commonVr->PDArising = false;
 						}
 					}
 				}
@@ -759,6 +798,7 @@ void idCommonLocal::Frame()
 			{
 				// How much time to wait before running the next frame,
 				// based on com_engineHz
+
 				const int frameDelay = FRAME_TO_MSEC( gameFrame + 1 ) - FRAME_TO_MSEC( gameFrame );
 				if( gameTimeResidual < frameDelay )
 				{
@@ -839,19 +879,23 @@ void idCommonLocal::Frame()
 		//--------------------------------------------
 		
 		// get the previous usercmd for bypassed head tracking transform
-		// koz no longer need this : const usercmd_t	previousCmd = usercmdGen->GetCurrentUsercmd();
+		// usercmd_t	previousCmd = usercmdGen->GetCurrentUsercmd();
 		
 		// build a new usercmd
 		int deviceNum = session->GetSignInManager().GetMasterInputDevice();
 		usercmdGen->BuildCurrentUsercmd( deviceNum );
-		if( deviceNum == -1 )
+		
+		
+		if( deviceNum == -1 )  
 		{
-			for( int i = 0; i < MAX_INPUT_DEVICES; i++ )
+			for( int i = 0; i < MAX_INPUT_DEVICES ; i++ )
 			{
 				Sys_PollJoystickInputEvents( i );
 				Sys_EndJoystickInputEvents();
+				
 			}
 		}
+			
 		if( pauseGame )
 		{
 			usercmdGen->Clear();
@@ -905,6 +949,7 @@ void idCommonLocal::Frame()
 		// ASAP to minimize the pipeline bubble.
 		//----------------------------------------
 		frameTiming.startRenderTime = Sys_Microseconds();
+		
 		renderSystem->RenderCommandBuffers( renderCommands );
 		if( com_sleepRender.GetInteger() > 0 )
 		{

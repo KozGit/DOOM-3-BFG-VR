@@ -846,9 +846,9 @@ void idImage::CopyFramebuffer( int x, int y, int imageWidth, int imageHeight )
 	glBindTexture( ( opts.textureType == TT_CUBIC ) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, texnum );
 	
 	// Koz begin
-	if ( vr->useFBO )
+	if ( commonVr->useFBO )
 	{
-		if ( vr->VR_AAmode == VR_AA_MSAA ) // resolve the MSAA renderbuffer before copy.
+		if ( commonVr->VR_AAmode == VR_AA_MSAA ) // resolve the MSAA renderbuffer before copy.
 		{
 			glDisable( GL_SCISSOR_TEST ); // koz hack - issue with nvidia msaa, if scissor test is enabled when blitting/resolving the framebuffer the post processing is corrupt.
 			ResolveMSAA();
@@ -889,10 +889,10 @@ void idImage::CopyFramebuffer( int x, int y, int imageWidth, int imageHeight )
 	
 	backEnd.pc.c_copyFrameBuffer++;
 
-	if ( vr->useFBO )
+	if ( commonVr->useFBO )
 	{
 		globalFramebuffers.primaryFBO->Bind();
-		if ( vr->VR_AAmode == VR_AA_MSAA ) glEnable( GL_SCISSOR_TEST);// koz hack - re-enable scissor test 
+		if ( commonVr->VR_AAmode == VR_AA_MSAA ) glEnable( GL_SCISSOR_TEST);// koz hack - re-enable scissor test 
 		
 	}
 }
@@ -905,9 +905,9 @@ CopyDepthbuffer
 void idImage::CopyDepthbuffer( int x, int y, int imageWidth, int imageHeight )
 {
 	// Koz begin
-	if ( vr->useFBO )
+	if ( commonVr->useFBO )
 	{
-		if ( vr->VR_AAmode == VR_AA_MSAA )
+		if ( commonVr->VR_AAmode == VR_AA_MSAA )
 		{
 			ResolveMSAA();
 		}
@@ -930,7 +930,7 @@ void idImage::CopyDepthbuffer( int x, int y, int imageWidth, int imageHeight )
 	
 	backEnd.pc.c_copyFrameBuffer++;
 
-	if ( vr->useFBO )
+	if ( commonVr->useFBO )
 	{
 		globalFramebuffers.primaryFBO->Bind();
 	}

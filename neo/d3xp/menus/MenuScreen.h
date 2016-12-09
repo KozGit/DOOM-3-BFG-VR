@@ -1651,6 +1651,7 @@ public:
 	virtual void			ShowScreen( const mainMenuTransition_t transitionType );
 	virtual void			HideScreen( const mainMenuTransition_t transitionType );
 	
+	float					GetHudAlpha(); // koz
 	void					UpdateHealthArmor( idPlayer* player );
 	void					UpdateStamina( idPlayer* player );
 	void					UpdateLocation( idPlayer* player );
@@ -2025,19 +2026,19 @@ private:
 
 //*
 //================================================	
-//idMenuScreen_Shell_Hydra_Options
+//idMenuScreen_ShelL_TOUCH_Options
 //================================================
 //*/
-class idMenuScreen_Shell_VR_Hydra_Options : public idMenuScreen
+class idMenuScreen_Shell_VR_TOUCH_Options : public idMenuScreen
 {
 public:
 
 	/*
 	================================================
-	idMenuDataSource_VR_Hydra_Options
+	idMenuDataSource_VR_TOUCH_Options
 	================================================
 	*/
-	class idMenuDataSource_VR_Hydra_Options : public idMenuDataSource
+	class idMenuDataSource_VR_TOUCH_Options : public idMenuDataSource
 	{
 	public:
 		enum vrHydraOptions_t
@@ -2049,7 +2050,7 @@ public:
 			MAX_HYDRA_OPTION_FIELDS
 		};
 
-		idMenuDataSource_VR_Hydra_Options();
+		idMenuDataSource_VR_TOUCH_Options();
 
 		// loads data
 		virtual void				LoadData();
@@ -2075,7 +2076,7 @@ public:
 		int		originalMode;
 	};
 
-	idMenuScreen_Shell_VR_Hydra_Options() :
+	idMenuScreen_Shell_VR_TOUCH_Options() :
 		options(NULL),
 		btnBack(NULL)
 	{
@@ -2088,7 +2089,7 @@ public:
 
 private:
 	idMenuWidget_DynamicList *	options;
-	idMenuDataSource_VR_Hydra_Options	systemData;
+	idMenuDataSource_VR_TOUCH_Options	systemData;
 	idMenuWidget_Button	*		btnBack;
 
 };

@@ -1499,7 +1499,6 @@ void GLimp_PreInit()
 	// DG: not needed on this platform, so just do nothing
 }
 
-// OCULUS BEGIN
 
 /*
 ===================
@@ -1748,12 +1747,10 @@ void GLimp_SwapBuffers()
 		
 		if( WGLEW_EXT_swap_control )
 		{
-		
 			wglSwapIntervalEXT( interval );
 		}
 	}
-	
-	//if ( !game->isVR ) SwapBuffers( win32.hDC ); // koz fixme
+
 	SwapBuffers( win32.hDC );
 }
 // RB end

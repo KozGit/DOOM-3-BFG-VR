@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 
 static const char* channelNames[ ANIM_NumAnimChannels ] =
 {
-	"all", "torso", "legs", "head", "eyelids"
+	"all", "torso", "legs", "head", "eyelids", "rightHand", "leftHand"
 };
 
 /***********************************************************************
@@ -5458,7 +5458,7 @@ idAnimator::GetJointTransform>	gamex86.dll!idAnimator::ForceUpdate()  Line 4268	
 
 =====================
 */
-bool idAnimator::GetJointTransform( jointHandle_t jointHandle, int currentTime, idVec3& offset, idMat3& axis )
+bool idAnimator::GetJointTransform( jointHandle_t jointHandle, int currentTime, idVec3& offset, idMat3& axis ) 
 {
 	if( !modelDef || ( jointHandle < 0 ) || ( jointHandle >= modelDef->NumJoints() ) )
 	{

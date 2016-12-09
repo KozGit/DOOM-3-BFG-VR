@@ -101,7 +101,7 @@ void idMenuScreen::UpdateCmds()
 {
 	idSWF* const gui = menuGUI;
 	
-	common->Printf("MenuScreen UpdateCmds: gui = %s\n", gui->GetName()); // koz debug which menu we are in.
+	//koz debug common->Printf("MenuScreen UpdateCmds: gui = %s\n pdaRising = %d\n", gui->GetName(),commonVr->PDArising); // koz debug which menu we are in.
 
 	idSWFScriptObject* const shortcutKeys = gui->GetGlobal( "shortcutKeys" ).GetObject();
 	if( !verify( shortcutKeys != NULL ) )

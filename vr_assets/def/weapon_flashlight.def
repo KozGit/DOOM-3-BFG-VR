@@ -75,6 +75,13 @@ entityDef weapon_flashlight {
 	"skin_flashskin_4b"				"skins/models/weapons/flashlight_offvr/flashhands/1hsw"
 	"skin_flashskin_5b"				"skins/models/weapons/flashlight_offvr/flashhands/1h"
 	"skin_flashskin_6b"				"skins/models/weapons/flashlight_offvr/flashhands/0h"
+	
+	"skin_flashskin_7b"				"skins/models/weapons/flashlight_onminivr/flashhands/1hsw"
+	"skin_flashskin_8b"				"skins/models/weapons/flashlight_onminivr/flashhands/1h"
+	"skin_flashskin_9b"				"skins/models/weapons/flashlight_onminivr/flashhands/0h"
+	"skin_flashskin_10b"			"skins/models/weapons/flashlight_offminivr/flashhands/1hsw"
+	"skin_flashskin_11b"			"skins/models/weapons/flashlight_offminivr/flashhands/1h"
+	"skin_flashskin_12b"			"skins/models/weapons/flashlight_offminivr/flashhands/0h"
 
 
 	// MP
@@ -96,20 +103,21 @@ entityDef moveable_item_flashlight {
 }
 
 model worldmodel_flashlight {
-	mesh						models/md5/items/flashlight_world/worldflashlight.md5mesh
+	mesh						models/md5/items/flashlight_world/worldflashlight_vr.md5mesh
 
-	anim raise 					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim idle 					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim aim					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim fire					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim reload					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim noammo					models/md5/items/flashlight_world/flashlight_idle.md5anim
-	anim putaway				models/md5/items/flashlight_world/flashlight_idle.md5anim
+	anim raise 					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim idle 					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim aim					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim fire					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim reload					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim noammo					models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
+	anim putaway				models/md5/items/flashlight_world/flashlight_idle_vr.md5anim
 }
 
 model viewmodel_flashlight {
 	mesh						models/md5/items/flashlight_view/viewflashlight.md5mesh
-	offset						( -7 2 16 )
+	//offset						( -7 2 16 )
+	offset						( 0 0 0  )
 
 	anim raise					models/md5/items/flashlight_view/raise.md5anim {
 		frame	1				sound_weapon flashlight_raise

@@ -1205,9 +1205,6 @@ models/items/powerups/berserker
 }
 
 
-
-
-
 models/weapons/plasmagun/plasmagun_mflash2
 {
 	deform tube
@@ -4260,10 +4257,58 @@ vr/statwatchgui
 	description "VR stats watch gui"
 }
 
+vr/statwatchbody
+{
+        noselfShadow
+	unsmoothedTangents
+	renderbump  -size 1024 1024 -trace 0.1 -colorMap -aa 2  models/items/pda/pda_local.tga models/items/pda/pda_hi.lwo
+
+        	diffusemap	models/items/pda/pda.tga
+		{
+ 		  blend bumpmap
+          map  addnormals(models/items/pda/pda_local.tga, heightmap(models/items/pda/pda_h.tga, 7 ) )
+ 		  
+     	}
+	
+           specularmap	 models/items/pda/pda_s.tga
+}
+
+vr/statwatchguibody
+{
+	qer_editorimage	guisurfaces/guisurface.tga
+	guiSurf guis/weapons/vrstatgui.gui
+	discrete
+	description "VR stats watch gui"
+}
+
+vr/statwatchhands
+{
+        noselfShadow
+	unsmoothedTangents
+	renderbump  -size 1024 1024 -trace 0.1 -colorMap -aa 2  models/items/pda/pda_local.tga models/items/pda/pda_hi.lwo
+
+        	diffusemap	models/items/pda/pda.tga
+		{
+ 		  blend bumpmap
+          map  addnormals(models/items/pda/pda_local.tga, heightmap(models/items/pda/pda_h.tga, 7 ) )
+ 		  
+     	}
+	
+           specularmap	 models/items/pda/pda_s.tga
+}
+
+vr/statwatchguihands
+{
+	qer_editorimage	guisurfaces/guisurface.tga
+	guiSurf guis/weapons/vrstatgui.gui
+	discrete
+	description "VR stats watch gui"
+}
+
 vr/flashhand
 {
         noselfShadow
-		noShadows
+		//noShadows
 		clamp
 	renderbump  -size 1024 2048 -trace 0.1 -colorMap   models/characters/player/arm2_local.tga models/characters/player/arm1_hi.lwo
 
@@ -4304,7 +4349,7 @@ vr/leftstatwatchgui
 
 vr/leftfist
 {
-        noselfShadow
+    noselfShadow
 	noShadows
 	renderbump  -size 1024 2048 -trace 0.03 -colorMap   models/weapons/berserk/fist_local.tga models/weapons/berserk/fist_hi.lwo
 
@@ -4321,7 +4366,7 @@ vr/leftfist
 
 vr/rightfist
 {
-        noselfShadow
+    noselfShadow
 	noShadows
 	renderbump  -size 1024 2048 -trace 0.03 -colorMap   models/weapons/berserk/fist_local.tga models/weapons/berserk/fist_hi.lwo
 
@@ -4443,26 +4488,122 @@ models/mapobjects/filler/cola2vr
 	specularmap		models/mapobjects/filler/cola1_s.tga
 }
 
-models/mapobjects/filler/mkeyboardvr
+
+models/weapons/plasmagun/pl_can_ammo
+{
+	noselfshadow
+	renderbump  -size 128 256 -aa 2 models/weapons/plasmagun/pl_can_local.tga models/weapons/plasmagun/work/pl_can_hp.lwo
+	{
+		blend		bumpmap			
+		map			models/weapons/plasmagun/pl_can_local.tga
+		
+	}
+	diffusemap		models/weapons/plasmagun/pl_can_d.tga
+	specularmap		models/weapons/plasmagun/pl_can_s.tga
+}
+
+models/weapons/plasmagun/pl_can_green_ammo
+{
+	renderbump  -size 128 256 -aa 2 models/weapons/plasmagun/pl_can_local.tga models/weapons/plasmagun/work/pl_can_hp.lwo
+	translucent
+	{
+		blend		bumpmap			
+		map			models/weapons/plasmagun/pl_can_local.tga
+		
+	}
+	diffusemap		models/weapons/plasmagun/pl_can_d.tga
+	{
+		blend		add
+		map			models/weapons/plasmagun/pl_can_green.tga
+	}
+	specularmap		models/weapons/plasmagun/pl_can_s.tga
+}
+
+models/weapons/artifact/artifact_petrified
 {
 	noSelfShadow
-	
- 	//renderbump  -size 256 256 -aa 2 -colorMap  models/mapobjects/filler/mkeyboard_local.tga models/mapobjects/filler/mkeyboard_hi.lwo
-	
-	//bumpmap			models/mapobjects/filler/mkeyboard_local.tga
-	map		models/mapobjects/filler/mkeyboard.tga
-	//diffusemap		models/mapobjects/filler/mkeyboard.tga
-	//specularmap		models/mapobjects/filler/mkeyboard_s.tga
+	renderbump	-size 1024 1024 -aa 2  models/weapons/artifact/artifact_local.tga models/weapons/artifact/artifact_hi.lwo
+	unsmoothedTangents
+	diffusemap	models/weapons/artifact/artifact_petrified_d.tga
+	{
+		name	"Stage 2"
+		map	addnormals(models/weapons/artifact/artifact_local.tga, heightmap(models/weapons/artifact/artifact_petrified_h.tga, 4 ) )
+		blend	bumpmap
+	}
+	specularmap	models/weapons/artifact/artifact_petrified_s.tga
+	{
+		name	"Stage 4"
+		if	parm9
+		map	models/weapons/artifact/artifact_helltimefx.tga
+		blend	add
+		rgb	crazyblink2 [ time * .3 ]
+	}
+	{
+		name	"Stage 5"
+		if	parm10
+		map	models/weapons/artifact/artifact_berzerkfx.tga
+		blend	add
+		rgb	crazyblink2 [ time * .3 ]
+	}
+	{
+		name	"Stage 6"
+		if	parm11
+		map	models/weapons/artifact/artifact_invfx.tga
+		blend	add
+		rgb	crazyblink2 [ time * .3 ]
+	}
 }
 
-models/mapobjects/filler/mkeyboard2
+models/weapons/artifact/artifact
 {
-	noSelfShadow	
-	map		models/mapobjects/filler/mkeyboard.tga
-	//bumpmap			models/mapobjects/filler/mkeyboard_local.tga
-	//diffusemap		models/mapobjects/filler/mkeyboard2.tga
-	//specularmap		models/mapobjects/filler/mkeyboard_s.tga
+     noselfShadow
+     unsmoothedTangents
+
+		renderbump  -size 1024 1024 -aa 2  models/weapons/artifact/artifact_local.tga models/weapons/artifact/artifact_hi.lwo
+
+
+        	diffusemap  models/weapons/artifact/artifact.tga
+	{
+ 		blend bumpmap
+                map  addnormals(models/weapons/artifact/artifact_local.tga, heightmap(models/weapons/artifact/artifact_h.tga, 2 ) )
+ 		  
+     	}
+	
+            	specularmap	models/weapons/artifact/artifact_s.tga
+
+	{
+		if parm9
+		map	models/weapons/artifact/artifact_helltimefx.tga
+		blend	add
+		rgb	crazyblink2 [ time * .3 ]
+	}
+	{
+		if parm10
+		map	models/weapons/artifact/artifact_berzerkfx.tga
+		blend	add
+		rgb	crazyblink2 [ time * .3 ]
+	}
+	{
+		if parm11
+		map	models/weapons/artifact/artifact_invfx.tga
+		blend	add
+		rgb	crazyblink2 [ time * .3 ]
+	}
 }
 
+models/items/flashlight/flashlight2_mini
+{
+        noselfShadow
+		unsmoothedTangents
+		renderbump  -size 1024 1024 -colorMap -aa 2  models/items/flashlight/flashlight2_local.tga models/items/flashlight/flashlight2_hi.lwo
 
+        	diffusemap	models/items/flashlight/flashlight2.tga
+		{
+ 		    blend bumpmap
+            map  addnormals(models/items/flashlight/flashlight2_local.tga, heightmap(models/items/flashlight/flashlight2_h.tga, 2 ) )
+ 		    //
+     	}
+	
+            specularmap	 models/items/flashlight/flashlight2_s.tga
+}
 

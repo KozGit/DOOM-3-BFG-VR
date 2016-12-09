@@ -53,6 +53,21 @@ typedef struct
 	scaleOffset_t y;
 } eyeScaleOffset_t;
 
+typedef struct
+{
+	float projUp;
+	float projDown;
+	float projLeft;
+	float projRight;
+} eyeProjRaw_t;
+
+typedef struct
+{
+	int x;
+	int y;
+} resolution_t;
+
+
 typedef struct _hmdEye
 {
 
@@ -63,7 +78,6 @@ typedef struct _hmdEye
 	ovrSizei			renderTarget;
 	ovrFovPort			eyeFov;
 	ovrVector2f			UVScaleoffset[2];
-	
 } hmdEye_t;
 
 #endif

@@ -428,22 +428,22 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 	//
 	// set up projection matrix
 	//
-	
+
 	// Koz begin : changing to allow the use of Oculus FOV values instead of the game FOV.
-	float ymax, ymin, xmax, xmin, width, height = 0; 
+	float ymax, ymin, xmax, xmin, width, height = 0;
 
-	const float zNear = ( viewDef->renderView.cramZNear ) ? ( r_znear.GetFloat() * 0.25f ) : r_znear.GetFloat();
+	const float zNear = (viewDef->renderView.cramZNear) ? (r_znear.GetFloat() * 0.25f) : r_znear.GetFloat();
 
-	if ( game->isVR ) 
+	if ( game->isVR )
 	{
-		
-		int pEye = viewDef->renderView.viewEyeBuffer == -1 ? 0 : 1;
-		
-		ymax = zNear * vr->hmdEye[pEye].eyeFov.UpTan;
-		ymin = -zNear * vr->hmdEye[pEye].eyeFov.DownTan;
 
-		xmax = zNear * vr->hmdEye[pEye].eyeFov.RightTan;
-		xmin = -zNear * vr->hmdEye[pEye].eyeFov.LeftTan;
+		int pEye = viewDef->renderView.viewEyeBuffer == -1 ? 0 : 1;
+
+		ymax = zNear * commonVr->hmdEye[pEye].eyeFov.UpTan;
+		ymin = -zNear * commonVr->hmdEye[pEye].eyeFov.DownTan;
+
+		xmax = zNear * commonVr->hmdEye[pEye].eyeFov.RightTan;
+		xmin = -zNear * commonVr->hmdEye[pEye].eyeFov.LeftTan;
 	}
 	else
 	{
@@ -459,8 +459,8 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 	width = xmax - xmin;
 	height = ymax - ymin;
 
-	 int viewWidth = viewDef->viewport.x2 - viewDef->viewport.x1 + 1;
-	 int viewHeight = viewDef->viewport.y2 - viewDef->viewport.y1 + 1;
+	int viewWidth = viewDef->viewport.x2 - viewDef->viewport.x1 + 1;
+	int viewHeight = viewDef->viewport.y2 - viewDef->viewport.y1 + 1;
 
 	jitterx = jitterx * width / viewWidth;
 	jitterx += r_centerX.GetFloat();
@@ -475,12 +475,12 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 
 	viewDef->projectionMatrix[0 * 4 + 0] = 2.0f * zNear / width;
 	viewDef->projectionMatrix[1 * 4 + 0] = 0.0f;
-	viewDef->projectionMatrix[2 * 4 + 0] = ( xmax + xmin ) / width;	// normally 0
+	viewDef->projectionMatrix[2 * 4 + 0] = (xmax + xmin) / width;	// normally 0
 	viewDef->projectionMatrix[3 * 4 + 0] = 0.0f;
 
 	viewDef->projectionMatrix[0 * 4 + 1] = 0.0f;
 	viewDef->projectionMatrix[1 * 4 + 1] = 2.0f * zNear / height;
-	viewDef->projectionMatrix[2 * 4 + 1] = ( ymax + ymin ) / height;	// normally 0
+	viewDef->projectionMatrix[2 * 4 + 1] = (ymax + ymin) / height;	// normally 0
 	viewDef->projectionMatrix[3 * 4 + 1] = 0.0f;
 
 	// this is the far-plane-at-infinity formulation, and
@@ -510,15 +510,15 @@ void R_SetupProjectionMatrix2( const viewDef_t* viewDef, const float zNear, cons
 	// Koz begin : changing to allow the use of Oculus FOV values instead of the game FOV.
 	float ymax, ymin, xmax, xmin, width, height = 0;
 
-	if ( game->isVR ) 
+	if ( game->isVR )
 	{
 		int pEye = viewDef->renderView.viewEyeBuffer == -1 ? 0 : 1;
 
-		ymax = zNear * vr->hmdEye[pEye].eyeFov.UpTan;
-		ymin = -zNear * vr->hmdEye[pEye].eyeFov.DownTan;
+		ymax = zNear * commonVr->hmdEye[pEye].eyeFov.UpTan;
+		ymin = -zNear * commonVr->hmdEye[pEye].eyeFov.DownTan;
 
-		xmax = zNear * vr->hmdEye[pEye].eyeFov.RightTan;
-		xmin = -zNear * vr->hmdEye[pEye].eyeFov.LeftTan;
+		xmax = zNear * commonVr->hmdEye[pEye].eyeFov.RightTan;
+		xmin = -zNear * commonVr->hmdEye[pEye].eyeFov.LeftTan;
 	}
 	else
 	{
@@ -554,17 +554,17 @@ void R_SetupProjectionMatrix2( const viewDef_t* viewDef, const float zNear, cons
 
 	projectionMatrix[0 * 4 + 0] = 2.0f * zNear / width;
 	projectionMatrix[1 * 4 + 0] = 0.0f;
-	projectionMatrix[2 * 4 + 0] = ( xmax + xmin ) / width;	// normally 0
+	projectionMatrix[2 * 4 + 0] = (xmax + xmin) / width;	// normally 0
 	projectionMatrix[3 * 4 + 0] = 0.0f;
 
 	projectionMatrix[0 * 4 + 1] = 0.0f;
 	projectionMatrix[1 * 4 + 1] = 2.0f * zNear / height;
-	projectionMatrix[2 * 4 + 1] = ( ymax + ymin ) / height;	// normally 0
+	projectionMatrix[2 * 4 + 1] = (ymax + ymin) / height;	// normally 0
 	projectionMatrix[3 * 4 + 1] = 0.0f;
 
 	projectionMatrix[0 * 4 + 2] = 0.0f;
 	projectionMatrix[1 * 4 + 2] = 0.0f;
-	projectionMatrix[2 * 4 + 2] = -( zFar + zNear ) / depth;		// -0.999f; // adjust value to prevent imprecision issues
+	projectionMatrix[2 * 4 + 2] = -(zFar + zNear) / depth;		// -0.999f; // adjust value to prevent imprecision issues
 	projectionMatrix[3 * 4 + 2] = -2 * zFar * zNear / depth;	// -2.0f * zNear;
 
 	projectionMatrix[0 * 4 + 3] = 0.0f;
@@ -583,28 +583,28 @@ void R_SetupProjectionMatrix2( const viewDef_t* viewDef, const float zNear, cons
 void R_MatrixFullInverse( const float a[16], float r[16] )
 {
 	idMat4	am;
-	
-	for( int i = 0 ; i < 4 ; i++ )
+
+	for ( int i = 0; i < 4; i++ )
 	{
-		for( int j = 0 ; j < 4 ; j++ )
+		for ( int j = 0; j < 4; j++ )
 		{
 			am[i][j] = a[j * 4 + i];
 		}
 	}
-	
-//	idVec4 test( 100, 100, 100, 1 );
-//	idVec4	transformed, inverted;
-//	transformed = test * am;
 
-	if( !am.InverseSelf() )
+	//	idVec4 test( 100, 100, 100, 1 );
+	//	idVec4	transformed, inverted;
+	//	transformed = test * am;
+
+	if ( !am.InverseSelf() )
 	{
 		common->Error( "Invert failed" );
 	}
-//	inverted = transformed * am;
+	//	inverted = transformed * am;
 
-	for( int i = 0 ; i < 4 ; i++ )
+	for ( int i = 0; i < 4; i++ )
 	{
-		for( int j = 0 ; j < 4 ; j++ )
+		for ( int j = 0; j < 4; j++ )
 		{
 			r[j * 4 + i] = am[i][j];
 		}

@@ -7,12 +7,25 @@ guisurfs/vrstatgui
 	description "VR stats watch gui"
 }
 
+gui/weapons/statwatch/background
+{	
+	noShadows
+	twosided
+	{
+		Blend add
+		Map   guis/assets/statwatch/statbg2.tga
+		zeroclamp
+		rgb mguitable[ time *.3 ]
+	}
+} 
+
+
 // materials so hands/arms/fists/stats watch can be enabled/disabled thru skins in vr
 // overridden by skin assigned in weapon scripts to hide inactive elements
 vr/rightarm
 {
         noselfShadow
-		noShadows
+		//noShadows
 		clamp
 	renderbump  -size 1024 2048 -trace 0.1 -colorMap   models/characters/player/arm2_local.tga models/characters/player/arm1_hi.lwo
 
@@ -30,7 +43,7 @@ vr/rightarm
 vr/leftarm
 {
         noselfShadow
-		noShadows
+		//noShadows
 		clamp
 	renderbump  -size 1024 2048 -trace 0.1 -colorMap   models/characters/player/arm2_local.tga models/characters/player/arm1_hi.lwo
 
@@ -48,7 +61,7 @@ vr/leftarm
 vr/righthand
 {	
     	noSelfShadow
-		noshadows
+		//noshadows
 		
 	
         diffusemap	models/weapons/hands/hand_df.tga
@@ -65,8 +78,7 @@ vr/righthand
 vr/lefthand
 {	
     	noSelfShadow
-		noshadows
-		
+		//noshadows
 	
         diffusemap	models/weapons/hands/hand_df.tga
 
@@ -106,7 +118,7 @@ vr/statwatchgui
 vr/flashhand
 {
         noselfShadow
-		noShadows
+		//noShadows
 		clamp
 	renderbump  -size 1024 2048 -trace 0.1 -colorMap   models/characters/player/arm2_local.tga models/characters/player/arm1_hi.lwo
 
@@ -147,8 +159,8 @@ vr/leftstatwatchgui
 
 vr/leftfist
 {
-        noselfShadow
-	noShadows
+    noselfShadow
+	//noShadows
 	renderbump  -size 1024 2048 -trace 0.03 -colorMap   models/weapons/berserk/fist_local.tga models/weapons/berserk/fist_hi.lwo
 
 
@@ -164,8 +176,8 @@ vr/leftfist
 
 vr/rightfist
 {
-        noselfShadow
-	noShadows
+    noselfShadow
+	//noShadows
 	renderbump  -size 1024 2048 -trace 0.03 -colorMap   models/weapons/berserk/fist_local.tga models/weapons/berserk/fist_hi.lwo
 
 
@@ -286,24 +298,7 @@ models/mapobjects/filler/cola2vr
 	specularmap		models/mapobjects/filler/cola1_s.tga
 }
 
-models/mapobjects/filler/mkeyboardvr
-{
-	noSelfShadow
-	
- 	//renderbump  -size 256 256 -aa 2 -colorMap  models/mapobjects/filler/mkeyboard_local.tga models/mapobjects/filler/mkeyboard_hi.lwo
-	
-	//bumpmap			models/mapobjects/filler/mkeyboard_local.tga
-	map		models/mapobjects/filler/mkeyboard.tga
-	//diffusemap		models/mapobjects/filler/mkeyboard.tga
-	//specularmap		models/mapobjects/filler/mkeyboard_s.tga
-}
 
-models/mapobjects/filler/mkeyboard2
-{
-	noSelfShadow	
-	map		models/mapobjects/filler/mkeyboard.tga
-	//bumpmap			models/mapobjects/filler/mkeyboard_local.tga
-	//diffusemap		models/mapobjects/filler/mkeyboard2.tga
-	//specularmap		models/mapobjects/filler/mkeyboard_s.tga
-}
+
+
 

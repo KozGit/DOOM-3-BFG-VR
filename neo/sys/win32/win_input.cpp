@@ -35,10 +35,15 @@ If you have questions concerning this license or the applicable additional terms
 
 // Koz begin
 #include "vr\vr.h"
-#include "libs\SixenseSDK_062612\include\sixense_utils\controller_manager\controller_manager.hpp"
+
 // Koz end
 
 #define DINPUT_BUFFERSIZE           256
+
+idCVar vr_rumbleDiv( "vr_rumbleDiv", "1", CVAR_FLOAT | CVAR_ARCHIVE, "rumble divisor\n" );
+idCVar vr_rumbleSkip( "vr_rumbleSkip", "1", CVAR_FLOAT | CVAR_ARCHIVE, "frames to skip\n" );
+idCVar vr_rumbleEnable( "vr_rumbleEnable", "1", CVAR_BOOL | CVAR_ARCHIVE, "Enable VR controller rumble\n" );
+
 
 /*
 ============================================================
@@ -630,6 +635,7 @@ int Sys_ReturnKeyboardInputEvent( const int n, int& ch, bool& state )
 		// alt messages when the right-alt is pressed on non-US 102 keyboards.
 		Sys_QueEvent( SE_KEY, ch, state, 0, NULL, 0 );
 	}
+		
 	return ch;
 }
 
@@ -732,6 +738,43 @@ int Sys_PollMouseInputEvents( int mouseEvents[MAX_MOUSE_EVENTS][2] )
 
 void Sys_SetRumble( int device, int low, int hi )
 {
+	
+	static int currentFrame = 0;
+	static int val = 0;
+
+	if ( commonVr->motionControlType == MOTION_STEAMVR && vr_rumbleEnable.GetBool() && device == 5 )
+	{
+		// Steam controller has one linear actuator for haptic feedback instead of
+		// two rumble motors. Haptic feedback is based on pulse length in microseconds
+		// not freq like a standard controller.
+		// this is a stupidly crude hack to provide some basic feedback to the controller
+		// if enabled. pulse strength is hacked from the low channel
+		// pulse only sent every frameskip frames to keep the feedback from feeling
+		// like a vibration instead of a pulse.
+		int skipFrames = vr_rumbleSkip.GetInteger();
+
+		//if ( low + hi > 0 ) common->Printf( "Rumble low %d hi %d\n", low, hi );
+
+		if ( currentFrame == 0 || hi > 16384 )
+		{
+			if ( hi > 65535 ) hi = 16384;
+
+			val = currentFrame == 0 ? low : ( (hi *2 ) / skipFrames );
+
+			if ( val > 65535 ) val = 65535;
+
+			val = (( 3500 / vr_rumbleDiv.GetFloat()) * val ) / 65535;
+			
+			// dont send the controller zero values - no need to turn off pulse as already time based.
+			if ( val >= 10 ) commonVr->MotionControllerSetHaptic( vr_weaponHand.GetInteger(), val );
+		}
+
+		currentFrame++;
+		if ( currentFrame >= skipFrames ) currentFrame = 0;
+		return;
+
+	}
+		
 	return win32.g_Joystick.SetRumble( device, low, hi );
 }
 
@@ -953,34 +996,70 @@ void idJoystickWin32::PostInputEvent( int inputDeviceNum, int event, int value, 
 		PushButton( inputDeviceNum, K_JOY_TRIGGER2, ( value > range ) );
 	}
 
-	// Koz begin add hydras
-	else if ( event == J_AXIS_LEFT_HYDRA_X )
+	// Koz begin add touch
+	else if ( event == J_AXIS_LEFT_TOUCH_X )
 	{
-		PushButton( inputDeviceNum, K_HYDRA_LEFT_STICK_LEFT, (value < -range) );
-		PushButton( inputDeviceNum, K_HYDRA_LEFT_STICK_RIGHT, (value > range) );
+		PushButton( inputDeviceNum, K_TOUCH_LEFT_STICK_LEFT, (value < -range) );
+		PushButton( inputDeviceNum, K_TOUCH_LEFT_STICK_RIGHT, (value > range) );
 	}
-	else if ( event == J_AXIS_LEFT_HYDRA_Y )
+	else if ( event == J_AXIS_LEFT_TOUCH_Y )
 	{
-		PushButton( inputDeviceNum, K_HYDRA_LEFT_STICK_UP, (value < -range) );
-		PushButton( inputDeviceNum, K_HYDRA_LEFT_STICK_DOWN, (value > range) );
+		PushButton( inputDeviceNum, K_TOUCH_LEFT_STICK_UP, (value < -range) );
+		PushButton( inputDeviceNum, K_TOUCH_LEFT_STICK_DOWN, (value > range) );
 	}
-	else if ( event == J_AXIS_RIGHT_HYDRA_X )
+	else if ( event == J_AXIS_RIGHT_TOUCH_X )
 	{
-		PushButton( inputDeviceNum, K_HYDRA_RIGHT_STICK_LEFT, (value < -range) );
-		PushButton( inputDeviceNum, K_HYDRA_RIGHT_STICK_RIGHT, (value > range) );
+		PushButton( inputDeviceNum, K_TOUCH_RIGHT_STICK_LEFT, (value < -range) );
+		PushButton( inputDeviceNum, K_TOUCH_RIGHT_STICK_RIGHT, (value > range) );
 	}
-	else if ( event == J_AXIS_RIGHT_HYDRA_Y )
+	else if ( event == J_AXIS_RIGHT_TOUCH_Y )
 	{
-		PushButton( inputDeviceNum, K_HYDRA_RIGHT_STICK_UP, (value < -range) );
-		PushButton( inputDeviceNum, K_HYDRA_RIGHT_STICK_DOWN, (value > range) );
+		PushButton( inputDeviceNum, K_TOUCH_RIGHT_STICK_UP, (value < -range) );
+		PushButton( inputDeviceNum, K_TOUCH_RIGHT_STICK_DOWN, (value > range) );
 	}
-	else if ( event == J_AXIS_LEFT_HYDRA_TRIG )
+	else if ( event == J_AXIS_LEFT_TOUCH_TRIG )
 	{
-		PushButton( inputDeviceNum, K_L_HYDRATRIG, (value > range) );
+		PushButton( inputDeviceNum, K_L_TOUCHTRIG, (value > range) );
 	}
-	else if ( event == J_AXIS_RIGHT_HYDRA_TRIG )
+	else if ( event == J_AXIS_RIGHT_TOUCH_TRIG )
 	{
-		PushButton( inputDeviceNum, K_R_HYDRATRIG, (value > range) );
+		PushButton( inputDeviceNum, K_R_TOUCHTRIG, (value > range) );
+	}
+
+
+	// add SteamVR controllers
+	else if ( event == J_AXIS_LEFT_STEAMVR_X )
+	{
+		
+		//common->Printf( "Pushing button K_STEAMVR_LEFT_PAD x\n" );
+		PushButton( inputDeviceNum, K_STEAMVR_LEFT_PAD_LEFT, (value < -range) );
+		PushButton( inputDeviceNum, K_STEAMVR_LEFT_PAD_RIGHT, (value > range) );
+	}
+	else if ( event == J_AXIS_LEFT_STEAMVR_Y )
+	{
+		//common->Printf( "Pushing button K_STEAMVR_LEFT_PAD y\n" );
+		PushButton( inputDeviceNum, K_STEAMVR_LEFT_PAD_UP, (value < -range) );
+		PushButton( inputDeviceNum, K_STEAMVR_LEFT_PAD_DOWN, (value > range) );
+	}
+	else if ( event == J_AXIS_RIGHT_STEAMVR_X )
+	{
+		//common->Printf( "Pushing button K_STEAMVR_RIGHT_PAD x\n" );
+		PushButton( inputDeviceNum, K_STEAMVR_RIGHT_PAD_LEFT, (value < -range) );
+		PushButton( inputDeviceNum, K_STEAMVR_RIGHT_PAD_RIGHT, (value > range) );
+	}
+	else if ( event == J_AXIS_RIGHT_STEAMVR_Y )
+	{
+		//common->Printf( "Pushing button K_STEAMVR_RIGHT_PAD y\n" );
+		PushButton( inputDeviceNum, K_STEAMVR_RIGHT_PAD_UP, (value < -range) );
+		PushButton( inputDeviceNum, K_STEAMVR_RIGHT_PAD_DOWN, (value > range) );
+	}
+	else if ( event == J_AXIS_LEFT_STEAMVR_TRIG )
+	{
+		PushButton( inputDeviceNum, K_L_STEAMVRTRIG, (value > range) );
+	}
+	else if ( event == J_AXIS_RIGHT_STEAMVR_TRIG )
+	{
+		PushButton( inputDeviceNum, K_R_STEAMVRTRIG, (value > range) );
 	}
 	// Koz end
 
@@ -1015,182 +1094,191 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 		return numEvents;
 	}
 	
-	assert( inputDeviceNum < 4 );
-	
-//	if ( inputDeviceNum > in_joystick.GetInteger() ) {
-//		return numEvents;
-//	}
-
-	controllerState_t* cs = &controllers[ inputDeviceNum ];
-	
-	// grab the current packet under a critical section
-	XINPUT_STATE xis;
-	XINPUT_STATE old;
-	int		orBits;
+	assert( inputDeviceNum < 6 ); // koz was 4
+	if ( inputDeviceNum < 4 ) // koz normal controllers < 4
 	{
-		idScopedCriticalSection crit( mutexXis );
-		xis = cs->current;
-		old = cs->previous;
-		cs->previous = xis;
-		// fetch or'd button bits
-		orBits = cs->buttonBits;
-		cs->buttonBits = 0;
-	}
+		//	if ( inputDeviceNum > in_joystick.GetInteger() ) {
+		//		return numEvents;
+		//	}
+
+		controllerState_t* cs = &controllers[inputDeviceNum];
+
+		// grab the current packet under a critical section
+		XINPUT_STATE xis;
+		XINPUT_STATE old;
+		int		orBits;
+		{
+			idScopedCriticalSection crit( mutexXis );
+			xis = cs->current;
+			old = cs->previous;
+			cs->previous = xis;
+			// fetch or'd button bits
+			orBits = cs->buttonBits;
+			cs->buttonBits = 0;
+		}
 #if 0
-	if( XInputGetState( inputDeviceNum, &xis ) != ERROR_SUCCESS )
-	{
-		return numEvents;
-	}
+		if( XInputGetState( inputDeviceNum, &xis ) != ERROR_SUCCESS )
+		{
+			return numEvents;
+		}
 #endif
-	for( int i = 0 ; i < 32 ; i++ )
-	{
-		int	bit = 1 << i;
-		
-		if( ( ( xis.Gamepad.wButtons | old.Gamepad.wButtons ) & bit ) == 0
-				&& ( orBits & bit ) )
+		for ( int i = 0; i < 32; i++ )
 		{
-			idLib::Printf( "Dropped button press on bit %i\n", i );
-		}
-	}
-	
-	if( session->IsSystemUIShowing() )
-	{
-		// memset xis so the current input does not get latched if the UI is showing
-		memset( &xis, 0, sizeof( XINPUT_STATE ) );
-	}
-	
-	int joyRemap[16] =
-	{
-		J_DPAD_UP,		J_DPAD_DOWN,	// Up, Down
-		J_DPAD_LEFT,	J_DPAD_RIGHT,	// Left, Right
-		J_ACTION9,		J_ACTION10,		// Start, Back
-		J_ACTION7,		J_ACTION8,		// Left Stick Down, Right Stick Down
-		J_ACTION5,		J_ACTION6,		// Black, White (Left Shoulder, Right Shoulder)
-		0,				0,				// Unused
-		J_ACTION1,		J_ACTION2,		// A, B
-		J_ACTION3,		J_ACTION4,		// X, Y
-	};
-	
-	// Check the digital buttons
-	for( int i = 0; i < 16; i++ )
-	{
-		int mask = ( 1 << i );
-		if( ( xis.Gamepad.wButtons & mask ) != ( old.Gamepad.wButtons & mask ) )
-		{
-			PostInputEvent( inputDeviceNum, joyRemap[i], ( xis.Gamepad.wButtons & mask ) > 0 );
-		}
-	}
-	
-	// Check the triggers
-	if( xis.Gamepad.bLeftTrigger != old.Gamepad.bLeftTrigger )
-	{
-		PostInputEvent( inputDeviceNum, J_AXIS_LEFT_TRIG, xis.Gamepad.bLeftTrigger * 128 );
-	}
-	if( xis.Gamepad.bRightTrigger != old.Gamepad.bRightTrigger )
-	{
-		PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_TRIG, xis.Gamepad.bRightTrigger * 128 );
-	}
-	
-	if( xis.Gamepad.sThumbLX != old.Gamepad.sThumbLX )
-	{
-		PostInputEvent( inputDeviceNum, J_AXIS_LEFT_X, xis.Gamepad.sThumbLX );
-	}
-	if( xis.Gamepad.sThumbLY != old.Gamepad.sThumbLY )
-	{
-		PostInputEvent( inputDeviceNum, J_AXIS_LEFT_Y, -xis.Gamepad.sThumbLY );
-	}
-	if( xis.Gamepad.sThumbRX != old.Gamepad.sThumbRX )
-	{
-		PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_X, xis.Gamepad.sThumbRX );
-	}
-	if( xis.Gamepad.sThumbRY != old.Gamepad.sThumbRY )
-	{
-		PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_Y, -xis.Gamepad.sThumbRY );
-	}
-	
-	// Koz begin add hydras
-	if ( vr->VR_USE_HYDRA )
-	{
+			int	bit = 1 << i;
 
-		// koz check the hydras -  my god it's full of ugly. Lots of remapping. Dont ask :(
-		hydraData hydraCurrent;
-		static hydraData hydraRightOld;
-		static hydraData hydraLeftOld;
-
-		int hydraLeftRemap[10] = {
-			J_ACTION21, 0,				// Start, Unused
-			0, J_ACTION19,				// Unused, Button 3
-			J_ACTION20, J_ACTION17,		// Button 4, Button 1
-			J_ACTION18, J_ACTION22,		// Button 2, Bumper
-			J_ACTION23, 0,				// Button Joystick, Unused
-		};
-
-		int hydraRightRemap[10] = {
-			J_ACTION28, 0,				// Start, Unused
-			0, J_ACTION26,				// Unused, Button 3
-			J_ACTION27, J_ACTION24,		// Button 4, Button 1
-			J_ACTION25, J_ACTION29,		// Button 2, Bumper
-			J_ACTION30, 0,				// Button Joystick, Unused
-		};
-
-		vr->HydraGetLeft( hydraCurrent ); // begin processing left hydra
-
-		if ( hydraCurrent.trigger != hydraLeftOld.trigger )
-		{
-			PostInputEvent( inputDeviceNum, J_AXIS_LEFT_HYDRA_TRIG, hydraCurrent.trigger * 32767.0f );
-		}
-
-		if ( hydraCurrent.joystick_x != hydraLeftOld.joystick_x )
-		{
-			PostInputEvent( inputDeviceNum, J_AXIS_LEFT_HYDRA_X, hydraCurrent.joystick_x * 32767.0f );
-		}
-
-		if ( hydraCurrent.joystick_y != hydraLeftOld.joystick_y )
-		{
-			PostInputEvent( inputDeviceNum, J_AXIS_LEFT_HYDRA_Y, -hydraCurrent.joystick_y * 32767.0f );
-		}
-
-		for ( int i = 0; i < 9; i++ ) // check the left hydras buttons
-		{
-			int mask = (1 << i);
-			if ( (hydraCurrent.buttons & mask) != (hydraLeftOld.buttons & mask) )
+			if ( ((xis.Gamepad.wButtons | old.Gamepad.wButtons) & bit) == 0
+				&& (orBits & bit) )
 			{
-				PostInputEvent( inputDeviceNum, hydraLeftRemap[i], (hydraCurrent.buttons & mask) > 0 );
+				idLib::Printf( "Dropped button press on bit %i\n", i );
 			}
 		}
 
-		hydraLeftOld = hydraCurrent;
-
-		vr->HydraGetRight( hydraCurrent );	// begin processing right hydra	
-
-		if ( hydraCurrent.trigger != hydraRightOld.trigger )
+		if ( session->IsSystemUIShowing() )
 		{
-			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_HYDRA_TRIG, hydraCurrent.trigger * 32767.0f );
+			// memset xis so the current input does not get latched if the UI is showing
+			memset( &xis, 0, sizeof( XINPUT_STATE ) );
 		}
 
-		if ( hydraCurrent.joystick_x != hydraRightOld.joystick_x )
+		int joyRemap[16] =
 		{
-			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_HYDRA_X, hydraCurrent.joystick_x * 32767.0f );
-		}
+			J_DPAD_UP, J_DPAD_DOWN,	// Up, Down
+			J_DPAD_LEFT, J_DPAD_RIGHT,	// Left, Right
+			J_ACTION9, J_ACTION10,		// Start, Back
+			J_ACTION7, J_ACTION8,		// Left Stick Down, Right Stick Down
+			J_ACTION5, J_ACTION6,		// Black, White (Left Shoulder, Right Shoulder)
+			0, 0,				// Unused
+			J_ACTION1, J_ACTION2,		// A, B
+			J_ACTION3, J_ACTION4,		// X, Y
+		};
 
-		if ( hydraCurrent.joystick_y != hydraRightOld.joystick_y )
-		{
-			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_HYDRA_Y, -hydraCurrent.joystick_y * 32767.0f );
-		}
-
-		for ( int i = 0; i < 9; i++ ) // check the right hydras buttons
+		// Check the digital buttons
+		for ( int i = 0; i < 16; i++ )
 		{
 			int mask = (1 << i);
-			if ( (hydraCurrent.buttons & mask) != (hydraRightOld.buttons & mask) )
+			if ( (xis.Gamepad.wButtons & mask) != (old.Gamepad.wButtons & mask) )
 			{
-				PostInputEvent( inputDeviceNum, hydraRightRemap[i], (hydraCurrent.buttons & mask) > 0 );
+				PostInputEvent( inputDeviceNum, joyRemap[i], (xis.Gamepad.wButtons & mask) > 0 );
 			}
 		}
 
-		hydraRightOld = hydraCurrent;
-		// Koz end
-	}
+		// Check the triggers
+		if ( xis.Gamepad.bLeftTrigger != old.Gamepad.bLeftTrigger )
+		{
+			PostInputEvent( inputDeviceNum, J_AXIS_LEFT_TRIG, xis.Gamepad.bLeftTrigger * 128 );
+		}
+		if ( xis.Gamepad.bRightTrigger != old.Gamepad.bRightTrigger )
+		{
+			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_TRIG, xis.Gamepad.bRightTrigger * 128 );
+		}
 
+		if ( xis.Gamepad.sThumbLX != old.Gamepad.sThumbLX )
+		{
+			PostInputEvent( inputDeviceNum, J_AXIS_LEFT_X, xis.Gamepad.sThumbLX );
+		}
+		if ( xis.Gamepad.sThumbLY != old.Gamepad.sThumbLY )
+		{
+			PostInputEvent( inputDeviceNum, J_AXIS_LEFT_Y, -xis.Gamepad.sThumbLY );
+		}
+		if ( xis.Gamepad.sThumbRX != old.Gamepad.sThumbRX )
+		{
+			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_X, xis.Gamepad.sThumbRX );
+		}
+		if ( xis.Gamepad.sThumbRY != old.Gamepad.sThumbRY )
+		{
+			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_Y, -xis.Gamepad.sThumbRY );
+		}
+		// Koz begin add touch
+		if ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_OCULUS )
+		{
+			
+			static ovrInputState oldInputState;
+			ovrInputState    inputState;
+			
+			if ( OVR_SUCCESS( ovr_GetInputState( commonVr->hmdSession, ovrControllerType_Touch, &inputState ) ) )
+			{
+				if ( (inputState.Buttons & ovrButton_A) != (oldInputState.Buttons & ovrButton_A) )
+				{
+					common->Printf( "Posting input event for r_touch_a val : %d\n", (inputState.Buttons & ovrButton_A)  );
+					PostInputEvent( inputDeviceNum, J_ACTION24, (inputState.Buttons & ovrButton_A) );
+				}
+
+				if ( (inputState.Buttons & ovrButton_B) != (oldInputState.Buttons & ovrButton_B) )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION25, (inputState.Buttons & ovrButton_B) );
+				}
+
+				if ( (inputState.Buttons & ovrButton_Home) != (oldInputState.Buttons & ovrButton_Home) )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION26, (inputState.Buttons & ovrButton_Home) );
+				}
+
+				if ( (inputState.Buttons & ovrButton_RThumb) != (oldInputState.Buttons & ovrButton_RThumb) )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION27, (inputState.Buttons & ovrButton_RThumb) );
+				}
+
+				if ( (inputState.Touches & ovrTouch_RThumbRest) != (oldInputState.Touches & ovrTouch_RThumbRest) )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION28, (inputState.Buttons & ovrTouch_RThumbRest) );
+				}
+
+				// left touch
+				if ( (inputState.Buttons & ovrButton_X) != (oldInputState.Buttons & ovrButton_X) )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION17, (inputState.Buttons & ovrButton_X) );
+				}
+
+				if ( (inputState.Buttons & ovrButton_Y) != (oldInputState.Buttons & ovrButton_Y) )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION18, (inputState.Buttons & ovrButton_Y) );
+				}
+
+				if ( (inputState.Buttons & ovrButton_Enter) != (oldInputState.Buttons & ovrButton_Enter) )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION19, (inputState.Buttons & ovrButton_Enter) );
+				}
+
+				if ( (inputState.Buttons & ovrButton_LThumb) != (oldInputState.Buttons & ovrButton_LThumb) )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION20, (inputState.Buttons & ovrButton_LThumb) );
+				}
+
+				if ( (inputState.Touches & ovrTouch_LThumbRest) != (oldInputState.Touches & ovrTouch_LThumbRest) )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION21, (inputState.Buttons & ovrTouch_LThumbRest) );
+				}
+
+				if ( inputState.HandTrigger[ovrHand_Left] != oldInputState.HandTrigger[ovrHand_Left] )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION22, inputState.HandTrigger[ovrHand_Left] > 0.25f );
+				}
+
+				if ( inputState.IndexTrigger[ovrHand_Left] != oldInputState.IndexTrigger[ovrHand_Left] )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION23, inputState.IndexTrigger[ovrHand_Left] > 0.25f );
+				}
+
+				if ( inputState.HandTrigger[ovrHand_Right] != oldInputState.HandTrigger[ovrHand_Right] )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION29, inputState.HandTrigger[ovrHand_Right] > 0.25f );
+				}
+
+				if ( inputState.IndexTrigger[ovrHand_Right] != oldInputState.IndexTrigger[ovrHand_Right] )
+				{
+					PostInputEvent( inputDeviceNum, J_ACTION30, inputState.IndexTrigger[ovrHand_Right] > 0.25f );
+				}
+
+				PostInputEvent( inputDeviceNum, J_AXIS_LEFT_TOUCH_X, inputState.Thumbstick[ovrHand_Left].x * 32767.0f );
+				PostInputEvent( inputDeviceNum, J_AXIS_LEFT_TOUCH_Y, -inputState.Thumbstick[ovrHand_Left].y * 32767.0f );
+
+				PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_TOUCH_X, inputState.Thumbstick[ovrHand_Right].x * 32767.0f );
+				PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_TOUCH_Y, -inputState.Thumbstick[ovrHand_Right].y * 32767.0f );
+
+				oldInputState = inputState;
+
+			}
+		}
+	} 
 	return numEvents;
 }
 
@@ -1223,6 +1311,7 @@ void idJoystickWin32::PushButton( int inputDeviceNum, int key, bool value )
 	// So we don't keep sending the same SE_KEY message over and over again
 	if( buttonStates[inputDeviceNum][key] != value )
 	{
+		//common->Printf( "Button state %i set to %i\n", key, value );
 		buttonStates[inputDeviceNum][key] = value;
 		Sys_QueEvent( SE_KEY, key, value, 0, NULL, inputDeviceNum );
 	}

@@ -33,7 +33,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "vr\Vr.h" // Koz
 
-idCVar vr_screenSeparation( "vr_screenSeparation", "0", CVAR_FLOAT, "" );
 
 // _D3XP : rename all gameLocal.time to gameLocal.slow.time for merge!
 
@@ -267,54 +266,54 @@ void idPlayerView::DamageImpulse( idVec3 localKickDir, const idDict* damageDef )
 		// keep shotgun from obliterating the view
 		return;
 	}
-	
-	float dvTime = damageDef->GetFloat( "dv_time" );
-	if( dvTime )
-	{
-		if( dvFinishTime < gameLocal.fast.time )
-		{
-			dvFinishTime = gameLocal.fast.time;
-		}
-		dvFinishTime += g_dvTime.GetFloat() * dvTime;
-		// don't let it add up too much in god mode
-		if( dvFinishTime > gameLocal.fast.time + 5000 )
-		{
-			dvFinishTime = gameLocal.fast.time + 5000;
-		}
-	}
-	
-	//
-	// head angle kick
-	//
-	float kickTime = damageDef->GetFloat( "kick_time" );
-	
-	float gkicktime = g_kickTime.GetFloat();
-		if ( game->isVR && !vr_headKick.GetBool() ) gkicktime = 0.0f; // koz
-	
 
-	if( kickTime )
+	if ( !game->isVR || (game->isVR && vr_headKick.GetBool()) ) // consider doublevision a headkick and skip if disabled in VR
 	{
-		kickFinishTime = gameLocal.slow.time + gkicktime * kickTime;
-		
-		// forward / back kick will pitch view
-		kickAngles[0] = localKickDir[0];
-		
-		// side kick will yaw view
-		kickAngles[1] = localKickDir[1] * 0.5f;
-		
-		// up / down kick will pitch view
-		kickAngles[0] += localKickDir[2];
-		
-		// roll will come from  side
-		kickAngles[2] = localKickDir[1];
-		
-		float kickAmplitude = damageDef->GetFloat( "kick_amplitude" );
-		if( kickAmplitude )
+		float dvTime = damageDef->GetFloat( "dv_time" );
+		if ( dvTime )
 		{
-			kickAngles *= kickAmplitude;
+			if ( dvFinishTime < gameLocal.fast.time )
+			{
+				dvFinishTime = gameLocal.fast.time;
+			}
+			dvFinishTime += g_dvTime.GetFloat() * dvTime;
+			// don't let it add up too much in god mode
+			if ( dvFinishTime > gameLocal.fast.time + 5000 )
+			{
+				dvFinishTime = gameLocal.fast.time + 5000;
+			}
+		}
+
+		//
+		// head angle kick
+		//
+		float kickTime = damageDef->GetFloat( "kick_time" );
+		float gkicktime = g_kickTime.GetFloat();
+
+		if ( kickTime )
+		{
+			kickFinishTime = gameLocal.slow.time + gkicktime * kickTime;
+
+			// forward / back kick will pitch view
+			kickAngles[0] = localKickDir[0];
+
+			// side kick will yaw view
+			kickAngles[1] = localKickDir[1] * 0.5f;
+
+			// up / down kick will pitch view
+			kickAngles[0] += localKickDir[2];
+
+			// roll will come from  side
+			kickAngles[2] = localKickDir[1];
+
+			float kickAmplitude = damageDef->GetFloat( "kick_amplitude" );
+			if ( kickAmplitude )
+			{
+				kickAngles *= kickAmplitude;
+			}
 		}
 	}
-	
+
 	//
 	// screen blob
 	//
@@ -386,6 +385,10 @@ void idPlayerView::CalculateShake()
 	// since CurrentShakeAmplitudeForPosition() returns all the shake sounds
 	// the player can hear, it can go over 1.0 too.
 	//
+
+	//koz
+	if ( game->isVR ) shakeVolume *= vr_shakeAmplitude.GetFloat();
+
 	shakeAng[0] = gameLocal.random.CRandomFloat() * shakeVolume;
 	shakeAng[1] = gameLocal.random.CRandomFloat() * shakeVolume;
 	shakeAng[2] = gameLocal.random.CRandomFloat() * shakeVolume;
@@ -495,9 +498,9 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 	// Koz begin
 	if ( g_showHud.GetBool() && !game->isVR ) // vr hud was drawn elsewhere and copied to texture
 	{
-		vr->swfRenderMode = RENDERING_HUD;
+		commonVr->swfRenderMode = RENDERING_HUD;
 		player->DrawHUD( hudManager );
-		vr->swfRenderMode = RENDERING_NORMAL;
+		commonVr->swfRenderMode = RENDERING_NORMAL;
 	}
 	// Koz end
 
@@ -699,7 +702,7 @@ void idPlayerView::ScreenFade()
 	}
 }
 
-idCVar	stereoRender_interOccularCentimeters( "stereoRender_interOccularCentimeters", "3.0", CVAR_ARCHIVE | CVAR_RENDERER, "Distance between eyes" );
+idCVar	stereoRender_interOccularCentimeters( "stereoRender_interOccularCentimeters", "3.0", CVAR_ARCHIVE | CVAR_RENDERER, "unused see vr_manualIPD" );
 idCVar	stereoRender_convergence( "stereoRender_convergence", "6", CVAR_RENDERER, "0 = head mounted display, otherwise world units to convergence plane" );
 
 extern	idCVar stereoRender_screenSeparation;	// screen units from center to eyes
@@ -767,16 +770,35 @@ stereoDistances_t	CaclulateStereoDistances(
 	return dists;
 }
 
+
+float GetIPD()
+{
+	if ( game->isVR && !vr_manualIPDEnable.GetInteger() )
+	{ 
+		float ipd = ( fabs(commonVr->hmdEye[0].viewOffset.x)  + fabs( commonVr->hmdEye[1].viewOffset.x)) * 100.0f; // ipd in cm
+		return ipd;
+	}
+	return vr_manualIPD.GetFloat() / 10;
+}
+
 float	GetScreenSeparationForGuis()
 {
 	const stereoDistances_t dists = CaclulateStereoDistances(
-										stereoRender_interOccularCentimeters.GetFloat(),
+										//stereoRender_interOccularCentimeters.GetFloat(),
+										GetIPD(),
 										renderSystem->GetPhysicalScreenWidthInCentimeters(),
 										stereoRender_convergence.GetFloat(),
 										80.0f /* fov */ );
-										
+		
+	if ( game->isVR )
+	{
+		extern idCVar vr_guiSeparation;
+		return vr_guiSeparation.GetFloat();
+	}
+
 	return dists.screenSeparation;
 }
+
 
 /*
 ===================
@@ -795,7 +817,8 @@ void idPlayerView::EmitStereoEyeView( const int eye, idMenuHandler_HUD* hudManag
     	
     	
 	const stereoDistances_t dists = CaclulateStereoDistances(
-										stereoRender_interOccularCentimeters.GetFloat(),
+										//stereoRender_interOccularCentimeters.GetFloat(),
+										GetIPD(),
 										renderSystem->GetPhysicalScreenWidthInCentimeters(),
 										stereoRender_convergence.GetFloat(),
 										view->fov_x );
@@ -810,8 +833,8 @@ void idPlayerView::EmitStereoEyeView( const int eye, idMenuHandler_HUD* hudManag
 	// Koz begin
 	if ( game->isVR )
 	{
-		vr->lastViewOrigin = eyeView.vieworg;
-		vr->lastViewAxis = eyeView.viewaxis;
+		commonVr->lastViewOrigin = eyeView.vieworg;
+		commonVr->lastViewAxis = eyeView.viewaxis;
 	}
 	// Koz end
 	
@@ -855,23 +878,20 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 		if ( game->isVR )
 		{
 			
-			vr->lastCenterEyeAxis = view->viewaxis;
-			vr->lastCenterEyeOrigin = view->vieworg;
+			commonVr->lastCenterEyeAxis = view->viewaxis;
+			commonVr->lastCenterEyeOrigin = view->vieworg;
+			//commonVr->vrFrame++; // only place this is incremented.
+			//commonVr->PushFrame( commonVr->vrFrame, commonVr->hmdTrackingState.HeadPose.ThePose, commonVr->sensorSampleTime );
+			//commonVr->FrameStart();
+
 			
-			vr->vrFrame++; // only place this is incremented.
-			vr->PushFrame( vr->vrFrame,vr->hmdTrackingState.HeadPose.ThePose,vr->sensorSampleTime );
-
-		
-
 			//Dialog().Render( loadGUI != NULL );
 			
-			
-
-			if ( !vr->PDAforced && !vr->PDArising && !game->IsPDAOpen() ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
+			if ( !commonVr->PDAforced && !commonVr->PDArising && !game->IsPDAOpen() ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
 			{
-				vr->swfRenderMode = RENDERING_HUD;
+				commonVr->swfRenderMode = RENDERING_HUD;
 				player->DrawHUDVR( hudManager );
-				vr->swfRenderMode = RENDERING_NORMAL;
+				commonVr->swfRenderMode = RENDERING_NORMAL;
 			}
 			
 			if ( player->objectiveSystemOpen )
@@ -879,12 +899,12 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 				if ( player->pdaMenu != NULL )
 				{
 
-					if ( !vr->PDAforced && !vr->PDArising ) // dont render the PDA gui if the PDA model been forced up to display the pause menus.
+					if ( !commonVr->PDAforced && !commonVr->PDArising ) // dont render the PDA gui if the PDA model been forced up to display the pause menus.
 					{
-						vr->swfRenderMode = RENDERING_PDA;
+						commonVr->swfRenderMode = RENDERING_PDA;
 						player->pdaMenu->Update();
 						renderSystem->CaptureRenderToImage( "_pdaImage" );
-						vr->swfRenderMode = RENDERING_NORMAL;
+						commonVr->swfRenderMode = RENDERING_NORMAL;
 					}
 				}
 			}

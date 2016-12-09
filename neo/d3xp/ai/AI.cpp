@@ -4068,6 +4068,18 @@ void idAI::PlayCinematic()
 	
 	torsoAnim.animBlendFrames = 0;
 	torsoAnim.lastAnimBlendFrames = 0;
+
+	//koz begin
+	leftHandAnim.animBlendFrames = 0;
+	leftHandAnim.lastAnimBlendFrames = 0;
+
+	rightHandAnim.animBlendFrames = 0;
+	rightHandAnim.lastAnimBlendFrames = 0;
+
+	ProcessEvent( &AI_PlayAnim, ANIMCHANNEL_LEFTHAND, animname );
+	ProcessEvent( &AI_PlayAnim, ANIMCHANNEL_RIGHTHAND, animname );
+	//Koz end
+
 	ProcessEvent( &AI_PlayAnim, ANIMCHANNEL_TORSO, animname );
 	
 	// make sure our model gets updated
@@ -5302,7 +5314,7 @@ void idAI::TriggerWeaponEffects( const idVec3& muzzle )
 	{
 		return;
 	}
-	
+
 	// muzzle flash
 	// offset the shader parms so muzzle flashes show up
 	renderEntity.shaderParms[SHADERPARM_TIMEOFFSET] = -MS2SEC( gameLocal.time );

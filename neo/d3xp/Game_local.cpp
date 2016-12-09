@@ -334,7 +334,7 @@ void idGameLocal::Init()
 	// being restarted to assign the base/vr or base/vrik paths to the fs_game cvar
 	// Registering the materials decl folder here corrects the issue
 	// but should really find/fix the root cause.
-	declManager->RegisterDeclFolder( "materials",		".mtr", DECL_MATERIAL );// koz
+	//declManager->RegisterDeclFolder( "materials",		".mtr", DECL_MATERIAL );// koz
 
 	cmdSystem->AddCommand( "listModelDefs", idListDecls_f<DECL_MODELDEF>, CMD_FL_SYSTEM | CMD_FL_GAME, "lists model defs" );
 	cmdSystem->AddCommand( "printModelDefs", idPrintDecls_f<DECL_MODELDEF>, CMD_FL_SYSTEM | CMD_FL_GAME, "prints a model def", idCmdSystem::ArgCompletion_Decl<DECL_MODELDEF> );
@@ -2567,7 +2567,7 @@ void idGameLocal::RunFrame( idUserCmdMgr& cmdMgr, gameReturn_t& ret )
 	
 	player = GetLocalPlayer();
 	
-	if ( !common->IsMultiplayer() && g_stopTime.GetBool() || vr->VR_GAME_PAUSED ) // koz vr pause
+	if ( !common->IsMultiplayer() && g_stopTime.GetBool() || commonVr->VR_GAME_PAUSED ) // koz vr pause
 	{
 		// clear any debug lines from a previous frame
 		gameRenderWorld->DebugClearLines( time + 1 );
@@ -3057,8 +3057,8 @@ void idGameLocal::CalcFov( float base_fov, float& fov_x, float& fov_y ) const
 	
 	if ( game->isVR )
 	{
-		fov_x = vr->hmdFovX;
-		fov_y = vr->hmdFovY;
+		fov_x = commonVr->hmdFovX;
+		fov_y = commonVr->hmdFovY;
 		return;
 	}
 	
@@ -5772,7 +5772,9 @@ bool idGameLocal::Shell_IsActive() const
 	{
 		if ( game->isVR )
 		{
-			return common->Dialog().IsDialogActive() || shellHandler->IsActive();
+			//return common->Dialog().IsDialogActive() || shellHandler->IsActive();
+			//if ( common->Dialog().IsDialogPausing() || shellHandler->IsActive() ) return true;
+			if ( common->Dialog().IsDialogActive() || shellHandler->IsActive() ) return true;
 		}
 		else
 		{

@@ -206,7 +206,7 @@ public:
 	// Koz begin
 	GLuint		GetTexNum() const { return texnum; } // koz fixme return texnum for FBO binding
 	// Koz end
-
+	GLuint				texnum;				// gl texture binding fuckme made this public for the fucking skybox.
 private:
 	friend class idImageManager;
 	
@@ -234,7 +234,7 @@ private:
 	
 	static const GLuint TEXTURE_NOT_LOADED = 0xFFFFFFFF;
 	
-	GLuint				texnum;				// gl texture binding
+	//GLuint				texnum;				// gl texture binding // koz see above moved to public need to fix this.
 	
 	// we could derive these in subImageUpload each time if necessary
 	GLuint				internalFormat;
@@ -367,6 +367,8 @@ public:
 	// Koz begin
 	idImage*			pdaImage;						// koz rendered PDA gui will be copied here 
 	idImage*			hudImage;						// koz hud/menus will be copied here	
+	idImage*			skyBoxFront;
+	idImage*			skyBoxSides;
 	// Koz end
 	
 	//--------------------------------------------------------

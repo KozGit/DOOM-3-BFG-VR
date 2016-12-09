@@ -1285,6 +1285,14 @@ idEntity::SetSkin
 */
 void idEntity::SetSkin( const idDeclSkin* skin )
 {
+	
+	/*
+	if ( skin )
+	{
+		common->Printf( "IdEntity::SetSkin setting entity skin to %s\n", skin->GetName() );
+	}
+	*/
+	
 	renderEntity.customSkin = skin;
 	UpdateVisuals();
 }
