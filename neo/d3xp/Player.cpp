@@ -1743,6 +1743,7 @@ idPlayer::idPlayer():
 	//hudActive = true;
 	// koz end
 
+	blink = false;
 }
 
 /*
@@ -13862,6 +13863,18 @@ void idPlayer::CalculateFirstPersonView()
 		firstPersonViewAxis = firstPersonViewAxis * playerView.ShakeAxis();
 #endif
 	}
+}
+
+/*
+==================
+idPlayer::ShouldBlink
+
+Returns true if the view needs to be darkened
+==================
+*/
+bool idPlayer::ShouldBlink()
+{
+	return blink;
 }
 
 /*

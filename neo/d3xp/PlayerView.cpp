@@ -869,6 +869,7 @@ int EyeForHalfRateFrame( const int frameCount )
 idPlayerView::RenderPlayerView
 ===================
 */
+idCVar vr_blink("vr_blink", "1", CVAR_FLOAT | CVAR_ARCHIVE, "Darkens the screen when head bumps walls and objects.");
 void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 {
 	const renderView_t* view = player->GetRenderView();
@@ -915,6 +916,11 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 	else
 	{
 		SingleView( view, hudManager );
+	}
+	if( vr_blink.GetFloat() > 0.f && player->ShouldBlink() )
+	{
+		Fade(idVec4(0,0,0,vr_blink.GetFloat()), 0);
+		Fade(idVec4(0,0,0,0), 33);
 	}
 	ScreenFade();
 }
