@@ -267,7 +267,8 @@ iVr::iVr()
 	lastHMDRoll = 0.0f;
 	lastHMDViewOrigin = vec3_zero;
 	lastHMDViewAxis = mat3_identity;
-	
+	headHeightDiff = 0;
+
 	motionMoveDelta = vec3_zero;
 	motionMoveVelocity = vec3_zero;
 	leanOffset = vec3_zero;

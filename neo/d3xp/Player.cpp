@@ -13868,7 +13868,7 @@ Returns true if the view needs to be darkened
 */
 bool idPlayer::ShouldBlink()
 {
-	return blink;
+	return blink || physicsObj.headBumped;
 }
 
 /*
@@ -14058,6 +14058,8 @@ void idPlayer::CalculateRenderView()
 		commonVr->lastHMDViewAxis = axis;
 				
 		renderView->vieworg = origin;
+		if (!gameLocal.inCinematic)
+			renderView->vieworg.z += commonVr->headHeightDiff;
 		renderView->viewaxis = axis;
 		
 		/* this will calc the distance from the view origin to the ground
