@@ -88,9 +88,12 @@ idCVar ftz( "ftz", "0", CVAR_FLOAT, "" );
 extern idCVar g_demoMode;
 
 const idVec3 neckOffset(-3,0,-5);
-const int waistZ = -22.f;
+const int waistZ = -28.f;
 
-idCVar vr_debugSlots("vr_debugSlots", "0", CVAR_BOOL, "visually display slots\n" );
+idCVar vr_slotDebug("vr_slotDebug", "0", CVAR_BOOL, "slot debug visualation" );
+idCVar vr_slotMag("vr_slotMag", "0.1", CVAR_FLOAT | CVAR_ARCHIVE, "slot vibration magnitude (0 is off)");
+idCVar vr_slotDur("vr_slotDur", "8", CVAR_INTEGER | CVAR_ARCHIVE, "slot vibration duration in milliseconds");
+idCVar vr_slotDisable("vr_slotDisable", "0", CVAR_BOOL | CVAR_ARCHIVE, "slot disable");
 
 slot_t slots[SLOT_COUNT] = {
 	{ idVec3(0, 9,-8), 9.0f*9.0f },
@@ -10825,6 +10828,11 @@ void idPlayer::SetupPDASlot()
 {
 	FreePDASlot();
 
+	if( vr_slotDisable.GetBool() )
+	{
+		return;
+	}
+
 	memset( &pdaRenderEntity, 0, sizeof( pdaRenderEntity ) );
 	pdaRenderEntity.hModel = renderModelManager->FindModel( "models/items/pda/pda_world.lwo" );
 	if( pdaRenderEntity.hModel )
@@ -10863,6 +10871,10 @@ idPlayer::UpdatePDASlot
 */
 void idPlayer::UpdatePDASlot()
 {
+	if( vr_slotDisable.GetBool() )
+	{
+		return;
+	}
 	if( inventory.pdas.Num() && pdaRenderEntity.hModel )
 	{
 		pdaRenderEntity.timeGroup = timeGroup;
@@ -10904,6 +10916,10 @@ void idPlayer::SetupHolsterSlot()
 	idRenderModel* renderModel;
 
 	FreeHolsterSlot();
+	if( vr_slotDisable.GetBool() )
+	{
+		return;
+	}
 
 	// can we holster?
 	if( !(modelname = weapon->weaponDef->dict.GetString( "model" )) ||
@@ -10989,6 +11005,10 @@ idPlayer::UpdateHolsterSlot
 */
 void idPlayer::UpdateHolsterSlot()
 {
+	if( vr_slotDisable.GetBool() )
+	{
+		return;
+	}
 	if( holsterRenderEntity.hModel )
 	{
 		holsterRenderEntity.timeGroup = timeGroup;
@@ -11918,7 +11938,7 @@ void idPlayer::Think()
 	UpdatePDASlot();
 	UpdateHolsterSlot();
 
-	if( vr_debugSlots.GetBool() )
+	if( vr_slotDebug.GetBool() )
 	{
 		for( int i = 0; i < SLOT_COUNT; i++ )
 		{
@@ -14292,6 +14312,10 @@ void idPlayer::CalculateWaist()
 
 void idPlayer::CalculateLeftHand()
 {
+	if( vr_slotDisable.GetBool() )
+	{
+		return;
+	}
 	slotIndex_t oldSlot = leftHandSlot;
 	slotIndex_t slot = SLOT_NONE;
 	if ( commonVr->hasHMD )
@@ -14321,13 +14345,17 @@ void idPlayer::CalculateLeftHand()
 	}
 	if (oldSlot != slot)
 	{
-		SetControllerShake(0, 0, 0.75, 50);
+		SetControllerShake(0, 0, vr_slotMag.GetFloat(), vr_slotDur.GetInteger());
 	}
 	leftHandSlot = slot;
 }
 
 void idPlayer::CalculateRightHand()
 {
+	if( vr_slotDisable.GetBool() )
+	{
+		return;
+	}
 	slotIndex_t oldSlot = rightHandSlot;
 	slotIndex_t slot = SLOT_NONE;
 	if ( commonVr->hasHMD )
@@ -14357,7 +14385,7 @@ void idPlayer::CalculateRightHand()
 	}
 	if (oldSlot != slot)
 	{
-		SetControllerShake(0.75, 50, 0, 0);
+		SetControllerShake(vr_slotMag.GetFloat(), vr_slotDur.GetInteger(), 0, 0);
 	}
 	rightHandSlot = slot;
 }
