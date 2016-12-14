@@ -9096,10 +9096,7 @@ void idPlayer::PerformImpulse( int impulse )
 	{
 		case IMPULSE_13:
 		{
-			if( !RightImpulseSlot() )
-			{
-				Reload();
-			}
+			Reload();
 			break;
 		}
 		case IMPULSE_14:
@@ -9120,7 +9117,7 @@ void idPlayer::PerformImpulse( int impulse )
 		}
 		case IMPULSE_16:
 		{
-			if( !LeftImpulseSlot() && flashlight.IsValid() )
+			if( flashlight.IsValid() )
 			{
 				if( flashlight.GetEntity()->lightOn )
 				{
@@ -9429,8 +9426,26 @@ void idPlayer::EvaluateControls()
 			}
 		}
 	}
-	
-	if( usercmd.impulseSequence != oldImpulseSequence )
+
+	bool grabbed = false;
+	if( commonVr->grabbedLeft )
+	{
+		commonVr->grabbedLeft = false;
+		if( LeftImpulseSlot() )
+		{
+			grabbed = true;
+		}
+	}
+	if( commonVr->grabbedRight )
+	{
+		commonVr->grabbedRight = false;
+		if (RightImpulseSlot())
+		{
+			grabbed = true;
+		}
+	}
+
+	if( !grabbed && usercmd.impulseSequence != oldImpulseSequence )
 	{
 		PerformImpulse( usercmd.impulse );
 	}

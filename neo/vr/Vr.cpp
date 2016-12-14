@@ -227,6 +227,8 @@ iVr::iVr()
 	PDAforcetoggle = false;
 	PDAforced = false;
 	PDArising = false;
+	grabbedLeft = false;
+	grabbedRight = false;
 	gameSavingLoading = false;
 	showingIntroVideo = false;
 	forceLeftStick = true;	// start the PDA in the left menu.
