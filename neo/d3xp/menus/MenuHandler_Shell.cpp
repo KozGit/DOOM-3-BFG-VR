@@ -1293,7 +1293,8 @@ void idMenuHandler_Shell::UpdateBGState()
 		if( nextScreen != SHELL_AREA_PLAYSTATION && nextScreen != SHELL_AREA_SETTINGS && nextScreen != SHELL_AREA_CAMPAIGN && nextScreen != SHELL_AREA_DEV )
 		{
 			if( nextScreen != SHELL_AREA_RESOLUTION && nextScreen != SHELL_AREA_GAMEPAD && nextScreen != SHELL_AREA_DIFFICULTY && nextScreen != SHELL_AREA_SYSTEM_OPTIONS && nextScreen != SHELL_AREA_GAME_OPTIONS && nextScreen != SHELL_AREA_NEW_GAME && nextScreen != SHELL_AREA_STEREOSCOPICS &&
-					nextScreen != SHELL_AREA_CONTROLS )
+				nextScreen != SHELL_AREA_CONTROLS && nextScreen != SHELL_AREA_VR_SETTINGS && nextScreen != SHELL_AREA_VR_CHARACTER_OPTIONS && nextScreen != SHELL_AREA_VR_CONTROL_OPTIONS && nextScreen != SHELL_AREA_VR_HUD_OPTIONS && nextScreen != SHELL_AREA_VR_HUD_POSITION_OPTIONS &&
+				nextScreen != SHELL_AREA_VR_PDA_OPTIONS && nextScreen != SHELL_AREA_VR_PROFILE_OPTIONS && nextScreen != SHELL_AREA_VR_RENDERING_OPTIONS && nextScreen != SHELL_AREA_VR_UI_OPTIONS )
 			{
 				ShowSmallFrame( false );
 			}

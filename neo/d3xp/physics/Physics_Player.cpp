@@ -1526,11 +1526,11 @@ void idPhysics_Player::CheckDuck()
 		// and change the player speed to crouch speed if player has ducked enough.
 		// thought I was going to have to do a bunch of bullshit to toggle the crouch anim
 		// but turns out the walk anim with the waist IK doesn't look too terrible for now
-		// of course, I havent tested crouching everywhere in the game yet.....
+		// of course, I haven't tested crouching EVERYWHERE in the game yet.....
 
 		{
 			maxZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z;
-			common->Printf( "Maxz = %f\n", maxZ );
+			//common->Printf( "Maxz = %f\n", maxZ );
 			if ( maxZ < (pm_crouchheight.GetFloat() + 2) )
 			{
 				playerSpeed = crouchSpeed;

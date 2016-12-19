@@ -131,7 +131,8 @@ void idMenuScreen_Shell_VR_Rendering_Options::Update() {
 	if ( BindSprite( root ) ) {
 		idSWFTextInstance * heading = GetSprite()->GetScriptObject()->GetNestedText( "info", "txtHeading" );
 		if ( heading != NULL ) {
-			heading->SetText( "VR Rendering Options" );	
+			//heading->SetText( "VR Rendering Options" );	
+			heading->SetText( "SETTINGS" );
 			heading->SetStrokeInfo( true, 0.75f, 1.75f );
 		}
 
@@ -311,7 +312,7 @@ idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Rendering_Opt
 */
 bool idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Rendering_Options::IsRestartRequired() const {
 	
-	if ( originalPixelDensity != vr_pixelDensity.GetInteger() ) {
+	if ( originalPixelDensity != vr_pixelDensity.GetFloat() ) {
 		return true;
 	}
 	if ( originalMSAAlevel != r_multiSamples.GetInteger() ) {

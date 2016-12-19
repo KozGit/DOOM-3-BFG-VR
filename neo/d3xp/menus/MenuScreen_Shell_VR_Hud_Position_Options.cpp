@@ -373,7 +373,7 @@ void idMenuScreen_Shell_VR_HUD_Position_Options::idMenuDataSource_Shell_VR_HUD_P
 		case HUD_POSITION_OPTIONS_FIELD_SCALE:
 		{
 			float p = vr_hudScale.GetFloat();
-			p += adjustAmount * .1;
+			p += adjustAmount * 0.1f;
 			if ( p < 0.5f ) p = 0.5f;
 			if ( p > 5.0f ) p = 5.0f;
 			vr_hudScale.SetFloat( p );
@@ -383,7 +383,7 @@ void idMenuScreen_Shell_VR_HUD_Position_Options::idMenuDataSource_Shell_VR_HUD_P
 		case HUD_POSITION_OPTIONS_FIELD_PITCH:
 		{
 			float p = vr_hudPosAngle.GetFloat();
-			p += adjustAmount * .5;
+			p += adjustAmount * 0.5f;
 			if ( p < -100.0f ) p = -100.0f;
 			if ( p > 100 ) p = 100;
 			vr_hudPosAngle.SetFloat( p );
@@ -393,7 +393,7 @@ void idMenuScreen_Shell_VR_HUD_Position_Options::idMenuDataSource_Shell_VR_HUD_P
 		case HUD_POSITION_OPTIONS_FIELD_DISTANCE:
 		{
 			float p = vr_hudPosDis.GetFloat();
-			p += adjustAmount * .5;
+			p += adjustAmount * 0.5f;
 			if ( p < 0.0f ) p = 0.0f;
 			if ( p > 100.0f ) p = 100.0f;
 			vr_hudPosDis.SetFloat( p );
@@ -403,17 +403,17 @@ void idMenuScreen_Shell_VR_HUD_Position_Options::idMenuDataSource_Shell_VR_HUD_P
 		case HUD_POSITION_OPTIONS_FIELD_HORIZONTAL:
 		{
 			float p = vr_hudPosHor.GetFloat();
-			p += adjustAmount * .5;
+			p += adjustAmount * 0.5f;
 			if ( p < -50.0f ) p = -50.0f;
 			if ( p > 50.0f ) p = 50.0f;
-			vr_hudPosDis.SetFloat( p );
+			vr_hudPosHor.SetFloat( p );
 			break;
 		}
 
 		case HUD_POSITION_OPTIONS_FIELD_VERTICAL:
 		{
 			float p = vr_hudPosVer.GetFloat();
-			p += adjustAmount * .5;
+			p += adjustAmount * 0.5f;
 			if ( p < -70.0f ) p = -70.0f;
 			if ( p > 70.0f ) p = 70.0f;
 			vr_hudPosVer.SetFloat( p );
@@ -437,10 +437,10 @@ idSWFScriptVar idMenuScreen_Shell_VR_HUD_Position_Options::idMenuDataSource_Shel
 		return va( "%.0f", vr_tweakTalkCursor.GetFloat() );
 		
 	case HUD_POSITION_OPTIONS_FIELD_SCALE:
-		return va( "%.0f", vr_hudScale.GetFloat() );
+		return va( "%.1f", vr_hudScale.GetFloat() );
 
 	case HUD_POSITION_OPTIONS_FIELD_PITCH:
-		return va( "%.0f", vr_hudPosAngle.GetFloat() );
+		return va( "%.1f", vr_hudPosAngle.GetFloat() );
 
 	case HUD_POSITION_OPTIONS_FIELD_DISTANCE:
 		return va( "%.1f", vr_hudPosDis.GetFloat() );

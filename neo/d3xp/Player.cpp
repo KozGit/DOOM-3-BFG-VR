@@ -10695,13 +10695,7 @@ idPlayer::UpdateHeadingBeam
 */
 void idPlayer::UpdateHeadingBeam()
 {
-	//static int lastSkin = -1;
-	// update the heading beam model
 	
-	//int mode = vr_headingBeamMode.GetInteger();
-
-	//if ( mode != lastSkin ){
-	//	lastSkin = mode;
 	if ( vr_headingBeamMode.IsModified() )
 	{
 		int mode = vr_headingBeamMode.GetInteger();
@@ -10717,14 +10711,17 @@ void idPlayer::UpdateHeadingBeam()
 
 			case 1:
 				headingBeamEntity.customSkin = skinHeadingSolid;
+				headingBeamActive = true;
 				break;
 
 			case 2:
 				headingBeamEntity.customSkin = skinHeadingArrows;
+				headingBeamActive = true;
 				break;
 
 			case 3:
 				headingBeamEntity.customSkin = skinHeadingArrowsScroll;
+				headingBeamActive = true;
 				break;
 
 			default:
@@ -11145,7 +11142,7 @@ void idPlayer::Think()
 	}
 	
 	
-	static int lastWeaponHand = vr_weaponHand.GetInteger();
+	
 	static int lastCVarFlashMode = vr_flashlightMode.GetInteger();
 	static int lastFlashMode = commonVr->GetCurrentFlashMode();
 	static bool lastViewArms = vr_viewModelArms.GetBool();
@@ -11170,10 +11167,7 @@ void idPlayer::Think()
 
 			}
 		}
-		
-		
-		
-		
+				
 		
 		if ( vr_viewModelArms.GetBool() != lastViewArms )
 		{
@@ -11181,39 +11175,19 @@ void idPlayer::Think()
 			UpdatePlayerSkinsPoses();
 			
 		}
-
-		/*
-		if ( vr_showBody.GetBool() != lastShowBody ) 
+		
+		
+		if ( vr_weaponHand.IsModified()  )
 		{
-			lastShowBody = vr_showBody.GetBool();
-			
-			if ( vr_showBody.GetBool() )
-			{
-				//Carl: don't suppress drawing the player's body in 1st person if we want to see it (in VR)
-				renderEntity.suppressSurfaceInViewID = 0;
-			}
-			else
-			{
-				// supress model in non-player views, but allow it in mirrors and remote views
-				renderEntity.suppressSurfaceInViewID = entityNumber + 1;
-
-			}
-			// update the weapon and flashlight skins to keep hands in sync.
 			UpdatePlayerSkinsPoses();
-			
-		}
-		*/
+			vr_weaponHand.ClearModified();
 
-		if ( vr_weaponHand.GetInteger() != lastWeaponHand  )
-		{
-			lastWeaponHand = vr_weaponHand.GetInteger();
-			UpdatePlayerSkinsPoses();
 		}
 
-		if ( vr_flashlightMode.GetInteger() != lastFlashMode || lastCVarFlashMode != commonVr->GetCurrentFlashMode() )
+		if ( vr_flashlightMode.GetInteger() != lastCVarFlashMode || lastFlashMode != commonVr->GetCurrentFlashMode() )
 		{
-			lastFlashMode = vr_flashlightMode.GetInteger();
-			lastCVarFlashMode = commonVr->GetCurrentFlashMode();
+			lastCVarFlashMode = vr_flashlightMode.GetInteger();
+			lastFlashMode = commonVr->GetCurrentFlashMode();
 			UpdatePlayerSkinsPoses();
 		}
 	}
@@ -11323,7 +11297,7 @@ void idPlayer::Think()
 	UpdateLaserSight();
 
 	if ( game->isVR ) UpdateHeadingBeam(); // koz
-	
+
 	// Show the respawn hud message if necessary.
 	if( common->IsMultiplayer() && ( minRespawnTime != maxRespawnTime ) )
 	{
