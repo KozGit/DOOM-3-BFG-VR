@@ -105,7 +105,7 @@ void idMenuScreen_Shell_VR_HUD_Options::Initialize( idMenuHandler * data ) {
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_BUTTON_TEXT );
-	control->SetLabel( "Adjust Position" );
+	control->SetLabel( "Adjust HUD Position" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_HUD_Options::HUD_OPTIONS_FIELD_HUD_ADJUST_POSITION );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_HUD_Options::HUD_OPTIONS_FIELD_HUD_ADJUST_POSITION );
@@ -113,7 +113,7 @@ void idMenuScreen_Shell_VR_HUD_Options::Initialize( idMenuHandler * data ) {
 		
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_BUTTON_TEXT );
-	control->SetLabel( "Select Elements" );
+	control->SetLabel( "Select HUD Elements" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_HUD_Options::HUD_OPTIONS_FIELD_HUD_SELECT_ELEMENTS );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_HUD_Options::HUD_OPTIONS_FIELD_HUD_SELECT_ELEMENTS );
@@ -258,7 +258,9 @@ bool idMenuScreen_Shell_VR_HUD_Options::HandleAction( idWidgetAction & action, c
 
 		
 		case WIDGET_ACTION_PRESS_FOCUSED:
-			if ( widget->GetDataSourceFieldIndex() == idMenuDataSource_Shell_VR_HUD_Options::HUD_OPTIONS_FIELD_HUD_ADJUST_POSITION ) {
+			
+			common->Printf( "Options Focus Index = %d\n", options->GetFocusIndex() );
+			if ( options->GetFocusIndex() == 4 ) { // bullshit hard coded reference to hud position button 
 				menuData->SetNextScreen( SHELL_AREA_VR_HUD_POSITION_OPTIONS, MENU_TRANSITION_SIMPLE );
 				return true;
 			}

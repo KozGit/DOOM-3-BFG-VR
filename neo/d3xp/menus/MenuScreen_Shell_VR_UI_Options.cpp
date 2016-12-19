@@ -264,12 +264,14 @@ bool idMenuScreen_Shell_VR_UI_Options::HandleAction( idWidgetAction & action, co
 		}
 		
 		case WIDGET_ACTION_PRESS_FOCUSED:
-			if ( widget->GetDataSourceFieldIndex() == idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_HUD_OPTIONS ) {
+			
+			common->Printf( "Source Field Index = %d\n", options->GetFocusIndex() );
+			if ( options->GetFocusIndex()  == 0 ) { // bullshit hard coded ref to hud options
 				menuData->SetNextScreen( SHELL_AREA_VR_HUD_OPTIONS, MENU_TRANSITION_SIMPLE );
 				return true;
 			}
 
-			if ( widget->GetDataSourceFieldIndex() == idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_PDA_OPTIONS ) {
+			if ( options->GetFocusIndex() == 1 ) { // bullshit hard coded ref to pda options
 				menuData->SetNextScreen( SHELL_AREA_VR_PDA_OPTIONS, MENU_TRANSITION_SIMPLE );
 				return true;
 			}
