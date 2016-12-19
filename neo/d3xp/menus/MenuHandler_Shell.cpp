@@ -496,9 +496,12 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		// Koz begin VR menus
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_SETTINGS, idMenuScreen_Shell_VR_Settings, this);
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_RENDERING_OPTIONS, idMenuScreen_Shell_VR_Rendering_Options, this);
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_HMD_OPTIONS, idMenuScreen_Shell_VR_HMD_Options, this);
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_UI_OPTIONS, idMenuScreen_Shell_VR_UI_Options, this);
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_HUD_OPTIONS, idMenuScreen_Shell_VR_HUD_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_HUD_POSITION_OPTIONS, idMenuScreen_Shell_VR_HUD_Position_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_PDA_OPTIONS, idMenuScreen_Shell_VR_PDA_Options, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_CONTROL_OPTIONS, idMenuScreen_Shell_VR_Control_Options, this);
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_GAMEPLAY_OPTIONS, idMenuScreen_Shell_VR_Gameplay_Options, this);
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_CHARACTER_OPTIONS, idMenuScreen_Shell_VR_Character_Options, this);
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this);
 		// koz end
 		
@@ -532,9 +535,12 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		// Koz begin VR menus
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_SETTINGS, idMenuScreen_Shell_VR_Settings, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_RENDERING_OPTIONS, idMenuScreen_Shell_VR_Rendering_Options, this );
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_HMD_OPTIONS, idMenuScreen_Shell_VR_HMD_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_UI_OPTIONS, idMenuScreen_Shell_VR_UI_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_HUD_OPTIONS, idMenuScreen_Shell_VR_HUD_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_HUD_POSITION_OPTIONS, idMenuScreen_Shell_VR_HUD_Position_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_PDA_OPTIONS, idMenuScreen_Shell_VR_PDA_Options, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_CONTROL_OPTIONS, idMenuScreen_Shell_VR_Control_Options, this );
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_GAMEPLAY_OPTIONS, idMenuScreen_Shell_VR_Gameplay_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_CHARACTER_OPTIONS, idMenuScreen_Shell_VR_Character_Options, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this );
 		// koz end 
 

@@ -738,43 +738,14 @@ int Sys_PollMouseInputEvents( int mouseEvents[MAX_MOUSE_EVENTS][2] )
 
 void Sys_SetRumble( int device, int low, int hi )
 {
-	
-	static int currentFrame = 0;
-	static int val = 0;
-
-	if ( commonVr->motionControlType == MOTION_STEAMVR && vr_rumbleEnable.GetBool() && device == 5 )
+	//koz begin
+	if ( commonVr->VR_USE_MOTION_CONTROLS && vr_rumbleEnable.GetBool() )
 	{
-		// Steam controller has one linear actuator for haptic feedback instead of
-		// two rumble motors. Haptic feedback is based on pulse length in microseconds
-		// not freq like a standard controller.
-		// this is a stupidly crude hack to provide some basic feedback to the controller
-		// if enabled. pulse strength is hacked from the low channel
-		// pulse only sent every frameskip frames to keep the feedback from feeling
-		// like a vibration instead of a pulse.
-		int skipFrames = vr_rumbleSkip.GetInteger();
-
-		//if ( low + hi > 0 ) common->Printf( "Rumble low %d hi %d\n", low, hi );
-
-		if ( currentFrame == 0 || hi > 16384 )
-		{
-			if ( hi > 65535 ) hi = 16384;
-
-			val = currentFrame == 0 ? low : ( (hi *2 ) / skipFrames );
-
-			if ( val > 65535 ) val = 65535;
-
-			val = (( 3500 / vr_rumbleDiv.GetFloat()) * val ) / 65535;
-			
-			// dont send the controller zero values - no need to turn off pulse as already time based.
-			if ( val >= 10 ) commonVr->MotionControllerSetHaptic( vr_weaponHand.GetInteger(), val );
-		}
-
-		currentFrame++;
-		if ( currentFrame >= skipFrames ) currentFrame = 0;
+		commonVr->MotionControllerSetHaptic( low, hi );
 		return;
-
 	}
-		
+	// koz end
+
 	return win32.g_Joystick.SetRumble( device, low, hi );
 }
 

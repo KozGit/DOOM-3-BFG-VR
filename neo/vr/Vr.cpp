@@ -104,7 +104,7 @@ idCVar vr_listMonitorName( "vr_listMonitorName", "0", CVAR_BOOL | CVAR_ARCHIVE |
 idCVar vr_viewModelArms( "vr_viewModelArms", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, " Dont change this, will be removed. Display arms on view models in VR" );
 idCVar vr_disableWeaponAnimation( "vr_disableWeaponAnimation", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Disable weapon animations in VR. ( 1 = disabled )" );
 idCVar vr_headKick( "vr_headKick", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Damage can 'kick' the players view. 0 = Disabled in VR." );
-idCVar vr_showBody( "vr_showBody", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Dont change this! Will be removed shortly, modifying will cause the player to have extra hands." );
+//idCVar vr_showBody( "vr_showBody", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Dont change this! Will be removed shortly, modifying will cause the player to have extra hands." );
 idCVar vr_joystickMenuMapping( "vr_joystickMenuMapping", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, " Use alternate joy mapping\n in menus/PDA.\n 0 = D3 Standard\n 1 = VR Mode.\n(Both joys can nav menus,\n joy r/l to change\nselect area in PDA." );
 
 
@@ -168,6 +168,7 @@ idCVar vr_moveClick( "vr_moveClick", "0", CVAR_INTEGER | CVAR_ARCHIVE, " 0 = Nor
 idCVar vr_playerBodyMode( "vr_playerBodyMode", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Player body mode:\n0 = Display full body\n1 = Just Hands \n2 = Weapons only\n" );
 idCVar vr_bodyToMove( "vr_bodyToMove", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Lock body orientaion to movement direction." );
 
+idCVar vr_crouchMode( "vr_crouchMode", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Crouch Mode:\n 0 = Full motion crouch (In game matches real life)\n 1 = Crouch anim triggered by smaller movement." );
 idCVar vr_crouchTriggerDist( "vr_crouchTriggerDist", "10", CVAR_FLOAT | CVAR_ARCHIVE, " Distance ( in inches ) player must crouch in real life to toggle crouch\n" );
 // Koz end
 //===================================================================
@@ -785,6 +786,8 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 	static idVec3 lastHmdPos2 = vec3_zero;
 	static idMat3 hmdAxis = mat3_identity;
 
+	static bool	neckInitialized = false;
+	static idVec3 initialNeckPosition;
 	static idVec3 currentNeckPosition = vec3_zero;
 	static idVec3 lastNeckPosition = vec3_zero;
 
@@ -822,7 +825,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 	poseLastHmdAbsolutePosition = poseHmdAbsolutePosition;
 	
 	
-	if ( idLib::frameNumber == lastFrame && !commonVr->renderingSplash )
+	if ( idLib::frameNumber == lastFrame ) //&& !commonVr->renderingSplash )
 	{
 		//make sure to return the same values for this frame.
 		hmdAngles.roll = lastRoll;
@@ -838,6 +841,8 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 			common->Printf( "Resetting tracking yaw offset.\n Yaw = %f old offset = %f ", hmdAngles.yaw, trackingOriginYawOffset );
 			trackingOriginYawOffset = hmdAngles.yaw;
 			common->Printf( "New Tracking yaw offset %f\n", hmdAngles.yaw, trackingOriginYawOffset );
+			neckInitialized = false;
+
 			
 		}
 		//common->Printf( "Bail lastframe == idLib:: framenumber  lf %d  ilfn %d  rendersplash = %d\n", lastFrame, idLib::frameNumber, commonVr->renderingSplash );
@@ -916,6 +921,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 		common->Printf( "Resetting tracking yaw offset.\n Yaw = %f old offset = %f ", hmdAngles.yaw, trackingOriginYawOffset );
 		trackingOriginYawOffset = hmdAngles.yaw;
 		common->Printf( "New Tracking yaw offset %f\n", hmdAngles.yaw, trackingOriginYawOffset );
+		neckInitialized = false;
 
 		return;
 	}
@@ -948,7 +954,8 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 
 	currentNeckPosition = hmdPosition + hmdAxis[0] * vr_nodalX.GetFloat() /*+ hmdAxis[1] * 0.0f */ + hmdAxis[2] * vr_nodalZ.GetFloat();
 		
-	currentNeckPosition.z = pm_normalviewheight.GetFloat() - (vr_nodalZ.GetFloat() + currentNeckPosition.z);
+//	currentNeckPosition.z = pm_normalviewheight.GetFloat() - (vr_nodalZ.GetFloat() + currentNeckPosition.z);
+
 	/*
 	if ( !chestInitialized )
 	{
@@ -990,10 +997,16 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 		//gameLocal.GetLocalPlayer()->GetAnimator()->SetJointAxis( gameLocal.GetLocalPlayer()->chestPivotJoint, JOINTMOD_LOCAL, chestAngles.ToMat3() );
 	}
 	*/
-
+	if ( !neckInitialized )
+	{
+		lastNeckPosition = currentNeckPosition;
+		initialNeckPosition = currentNeckPosition;
+		neckInitialized = true;
+	}
 	
 	bodyPositionDelta = currentNeckPosition - lastNeckPosition; // use this to base movement on neck model
-	
+	bodyPositionDelta.z = currentNeckPosition.z - initialNeckPosition.z;
+
 	//bodyPositionDelta = currentChestPosition - lastChestPosition;
 	lastBodyPositionDelta = bodyPositionDelta;
 		
@@ -1003,7 +1016,8 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 	headPositionDelta = hmdPosition - currentNeckPosition; // use this to base movement on neck model
 	//headPositionDelta = hmdPosition - currentChestPosition;
 	headPositionDelta.z = hmdPosition.z;
-	bodyPositionDelta.z = 0;
+	
+	//bodyPositionDelta.z = 0;
 
 	lastBodyPositionDelta = bodyPositionDelta;
 	lastHeadPositionDelta = headPositionDelta;
@@ -1288,23 +1302,25 @@ void iVr::MotionControlGetRightHand( idVec3 &motionPosition, idQuat &motionRotat
 iVr::MotionControllSetHaptic
 ==============
 */
-void iVr::MotionControllerSetHaptic( int hand, unsigned short value )
+void iVr::MotionControllerSetHaptic( float low, float hi )
 {
-	/*
-	vr::TrackedDeviceIndex_t deviceNo;
-
-	if ( hand == HAND_RIGHT )
+	
+	float beat;
+	float enable;
+	
+	beat = fabs( low - hi ) / 65535;
+	
+	enable = ( beat > 0.0f) ? 1.0f : 0.0f;
+		
+	if ( vr_weaponHand.GetInteger() == HAND_RIGHT )
 	{
-		deviceNo = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole( vr::TrackedControllerRole_RightHand );
+		ovr_SetControllerVibration( hmdSession, ovrControllerType_RTouch, beat, enable );
 	}
 	else
 	{
-		deviceNo = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole( vr::TrackedControllerRole_LeftHand );
+		ovr_SetControllerVibration( hmdSession, ovrControllerType_LTouch, beat, enable );
 	}
 
-	m_pHMD->TriggerHapticPulse( deviceNo, 0, value );
-	return;
-	*/
 	return;
 }
 
@@ -1356,59 +1372,8 @@ void iVr::CalcAimMove( float &yawDelta, float &pitchDelta )
 	yawDelta = 0.0f;
 
 }
-void iVr::PushFrame( int vrFrame, ovrPosef pose, double sample )
-{
-	static bool inframe = false;
 
-	//	while ( inframe ) {}
 
-	inframe = true;
-
-	if ( frameCount == 2 ) {
-		common->Printf( "Trying to push frame when Framecount = 2, resetting stack" );
-		frameCount = 0;
-		frameHead = 0;
-	}
-
-	frameStack[frameHead] = vrFrame;
-	framePose[frameHead] = pose;
-	sampleTime[frameHead] = sample;
-	frameHead++;
-	frameCount++;
-	if ( frameHead > 1 ) frameHead = 0;
-
-	inframe = false;
-}
-
-void iVr::PopFrame( int &frameNum, ovrPosef &pose, double &sample )
-{
-	static bool inframe = false;
-
-	while ( inframe ) {}
-
-	inframe = true;
-
-	if ( frameCount == 0 ) {
-
-		frameTail = 0;
-		frameHead = 0;
-		frameNum = 1;
-		pose = hmdTrackingState.HeadPose.ThePose;
-		sample = sensorSampleTime;
-		inframe = false;
-		return;
-	}
-
-	frameNum = frameStack[frameTail];
-	pose = framePose[frameTail];
-	sample = sampleTime[frameTail];
-	frameTail++;
-	frameCount--;
-	if ( frameTail > 1 ) frameTail = 0;
-
-	inframe = false;
-
-}
 
 /*
 ==============

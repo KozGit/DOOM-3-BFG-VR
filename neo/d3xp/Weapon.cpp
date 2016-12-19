@@ -1044,7 +1044,7 @@ void idWeapon::InitWorldModel( const idDeclEntityDef* def )
 		if ( worldModelRenderEntity )
 		{
 			// Koz begin
-			if ( vr_showBody.GetBool() && game->isVR && !strstr(def->dict.GetString("model_world"),"flashlight"))
+			if ( game->isVR && !strstr(def->dict.GetString("model_world"),"flashlight"))
 			{
 				//koz dont show the worldmodel if the player body is shown in vr.
 				worldModelRenderEntity->suppressSurfaceInViewID = 0;
@@ -3374,7 +3374,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	
 	// in VR don't suppress drawing the player's body 
 	// also show the viewmodel
-	if ( vr_showBody.GetBool() && game->isVR ) 
+	if ( game->isVR ) 
 	{
 		
 		//show the viewmodel in all views - flashlight visibilty set in calcViewFlashPosition
@@ -3429,7 +3429,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	{
 		// deal with the third-person visible world model
 		// don't show shadows of the world model in first person
-		if ( common->IsMultiplayer() || g_showPlayerShadow.GetBool() || pm_thirdPerson.GetBool() || vr_showBody.GetBool() ) // koz fixme only in vr
+		if ( common->IsMultiplayer() || g_showPlayerShadow.GetBool() || pm_thirdPerson.GetBool() || game->isVR ) // koz fixme only in vr
 		{
 			worldModel.GetEntity()->GetRenderEntity()->suppressShadowInViewID = 0;
 		}
@@ -5561,6 +5561,29 @@ void idWeapon::Event_GetWeaponSkin()
 	
 	static idStr vrSkinName; 
 
+	// Koz fixme - need to go through all the weapon models and delete the meshes for the hands and statwatch.  Also need to delete all the skin definitions, no longer necessary.
+
+	// this has all changed.  Originally, hands were part of the weapon models, and hands and statwatch were turned on and off
+	// by changing the skin for model.  Now the hands are always drawn as part of the player body, so we no longer
+	// need all the skins.  The only skin we are using now is for the mini flashlight when mounted to the weapon.
+	
+
+	if ( isPlayerFlashlight )
+	{
+		vrSkinName = commonVr->GetCurrentFlashMode() == 2 ? "minivr/flashhands/0h" : "vr/flashhands/0h"; // mini flashlight skin for gun mount : normal flashlight skin
+	}
+	else
+	{
+		vrSkinName = "vr/weaponhands/0h";
+	}
+
+
+	//common->Printf( "idWeapon::Event_GetWeaponSkin() returning %s\n", vrSkinName.c_str() );
+	idThread::ReturnString( vrSkinName.c_str() );
+
+
+
+	/* old skin code
 	if ( isPlayerFlashlight )
 	{
 		//vrSkinName = vr_flashlightMode.GetInteger() == 2 ? "minivr/flashhands/" : "vr/flashhands/"; // mini flashlight skin for gun mount
@@ -5589,9 +5612,11 @@ void idWeapon::Event_GetWeaponSkin()
 		else vrSkinName += "0h";
 	
 	}
-	
-	//common->Printf( "idWeapon::Event_GetWeaponSkin() returning %s\n", vrSkinName.c_str() );
-	idThread::ReturnString( vrSkinName.c_str() );
+	*/
+
+
+
+
 }
 
 /*

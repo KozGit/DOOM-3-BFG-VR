@@ -200,6 +200,7 @@ entityDef player_id_base_d3le {
 	"bone_head"							"headcontrol"	// AI aim location
 	
 	"bone_neck"							"neckcontrol"
+	"bone_chest_pivot"					"Chest"
 
 	"damage_zone head"					"*loneckcontrol"
 	"damage_zone chest"					"*Waist -*loneckcontrol"

@@ -514,6 +514,10 @@ public:
 	void					ToggleHud();
 	void					UpdateNeckPose();
 	void					TrackWeaponDirection( idVec3 origin );
+	bool					IsCrouching()
+	{
+		return physicsObj.IsCrouching();
+	}
 	// Koz end
 		
 	// save games

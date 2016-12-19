@@ -1968,7 +1968,7 @@ bool idActor::UpdateAnimationControllers()
 	}
 	
 	// koz vr arm ik
-	if ( game->isVR && vr_showBody.GetBool() && armIK.IsInitialized() )
+	if ( game->isVR && armIK.IsInitialized() )
 	{
 		armIK.Evaluate();
 		success = true;

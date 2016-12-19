@@ -801,8 +801,7 @@ bool idRenderModelMD5::LoadBinaryModel( idFile* file, const ID_TIME_T sourceTime
 					common->Printf( "_pdaImage found!!\n" );
 					// Koz pda  - change material to _pdaImage instead of default 
 					// this allows rendering the PDA & swf menus to the model ingame.
-					// koz fixme just create a new model for VR and dont hack on load.
-					//	meshes[i].shader = declManager->FindMaterial( "_pdaImage" );
+					// if we find this gui, we also need to add a surface to the model, so flag.
 					isPDAmesh = true;
 				}
 			}
@@ -847,27 +846,28 @@ bool idRenderModelMD5::LoadBinaryModel( idFile* file, const ID_TIME_T sourceTime
 		}
 		
 		/* KOZ begin PDA
-			
-		Fugly hack - apply a surface to the PDA model so we can hitscan and
-		send mouse commands based on head movement. this is not working right yet.
-		
+		Hack - apply a surface to the PDA model so we can hitscan using guitrace
+		to send mouse commands based on head movement or finger poking. 
 		*/
 
 		if ( isPDAmesh )
 		{
+			
+			/*
 			{
 				common->Printf( "Load pda model\n" );
 				for ( int ti = 0; ti < meshes[i].NumVerts(); ti++ )
 				{
-					common->Printf( "Numverts %d Vert %d %f %f %f : %f %f\n", meshes[i].NumVerts(), ti, meshes[i].deformInfo->verts[ti].xyz.x,
+						common->Printf( "Numverts %d Vert %d %f %f %f : %f %f\n", meshes[i].NumVerts(), ti, meshes[i].deformInfo->verts[ti].xyz.x,
 						meshes[i].deformInfo->verts[ti].xyz.y,
 						meshes[i].deformInfo->verts[ti].xyz.z,
 						meshes[i].deformInfo->verts[ti].GetTexCoordS(),
 						meshes[i].deformInfo->verts[ti].GetTexCoordT() );
 				}
 			}
-								
-			common->Printf( "PDA model found, creating gui surface for hitscan.\n" );
+			*/
+
+			common->Printf( "PDA gui found, creating gui surface for hitscan.\n" );
 			
 			modelSurface_t  pdasurface;
 			
@@ -900,7 +900,7 @@ bool idRenderModelMD5::LoadBinaryModel( idFile* file, const ID_TIME_T sourceTime
 
 			}
 				
-
+			/*
 			{
 				common->Printf( "verify pda model\n" );
 				for ( int ti = 0; ti < pdageometry->numVerts; ti++ )
@@ -912,7 +912,7 @@ bool idRenderModelMD5::LoadBinaryModel( idFile* file, const ID_TIME_T sourceTime
 						pdageometry->verts[ti].GetTexCoordT() );
 				}
 			}
-
+			*/
 
 			pdasurface.geometry = pdageometry;
 			AddSurface( pdasurface );
@@ -1196,7 +1196,7 @@ void idRenderModelMD5::LoadModel()
 			{
 				// Koz pda  - change material to _pdaImage instead of deault 
 				// this allows rendering the PDA & swf menus to the model ingame.
-				// koz fixme just create a new model for VR and dont hack on load.
+				// if we find this gui, we also need to add a surface to the model, so flag.
 				meshes[i].shader = declManager->FindMaterial( "_pdaImage" );
 				isPDAmesh = true;
 			}
@@ -1204,6 +1204,8 @@ void idRenderModelMD5::LoadModel()
 		
 		if ( isPDAmesh )
 		{
+			
+			/*
 			{
 				common->Printf( "Load pda model\n" );
 				for ( int ti = 0; ti < meshes[i].NumVerts(); ti++ )
@@ -1215,8 +1217,9 @@ void idRenderModelMD5::LoadModel()
 						meshes[i].deformInfo->verts[ti].GetTexCoordT() );
 				}
 			}
+			*/
 
-			common->Printf( "PDA model found, creating gui surface for hitscan.\n" );
+			common->Printf( "PDA gui found, creating gui surface for hitscan.\n" );
 
 			modelSurface_t  pdasurface;
 
@@ -1250,6 +1253,7 @@ void idRenderModelMD5::LoadModel()
 			}
 
 
+			/*
 			{
 				common->Printf( "verify pda model\n" );
 				for ( int ti = 0; ti < pdageometry->numVerts; ti++ )
@@ -1261,6 +1265,7 @@ void idRenderModelMD5::LoadModel()
 						pdageometry->verts[ti].GetTexCoordT() );
 				}
 			}
+			*/
 
 			pdasurface.geometry = pdageometry;
 			AddSurface( pdasurface );

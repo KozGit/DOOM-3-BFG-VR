@@ -1942,7 +1942,7 @@ bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
 {
 	// hitting escape anywhere brings up the menu
 	
-	// hack this the hell up
+	// hack this  up
 	// not enough buttons on the steamvr controller and still want to be able to bail out of cinematics, so the PDA button will nuke a cinematic
 	if ( game->isVR )
 	{

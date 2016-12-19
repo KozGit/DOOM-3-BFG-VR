@@ -335,7 +335,7 @@ void Sys_Quit() {
 	Sys_ShutdownInput();
 	Sys_DestroyConsole();
 	
-	//commonVr->HMDShutdown();
+	commonVr->HMDShutdown();
 	ExitProcess( 0 );
 }
 

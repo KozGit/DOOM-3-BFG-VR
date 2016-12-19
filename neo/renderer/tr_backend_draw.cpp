@@ -4302,10 +4302,7 @@ void RB_DrawView( const void* data, const int stereoEye )
 
 	
 	//koz vr right before the view is drawn, update the view with the latest pos/angles from the hmd
-	//this isnt really necessary if running in single threaded mode, but if smp is enabled
-	//the game will start generating the next frame early, using old pose info, which causes 
-	//lag, which is especially noticeable when chaperone is showing the bounds;
-
+	//Thanks to Leyland for idea & implementation
 	
 	if ( game->isVR )
 	{

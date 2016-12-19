@@ -531,6 +531,7 @@ void idUsercmdGenLocal::KeyMove()
 	
 	cmd.forwardmove += idMath::ClampChar( forward );
 	cmd.rightmove += idMath::ClampChar( side );
+	
 }
 
 /*
@@ -1518,7 +1519,7 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 	static int lastMoveTime = Sys_Milliseconds();
 	
 	bool okToMove = false;
-	bool moveRequested = (abs( cmd.forwardmove ) >= 0.05 || abs( cmd.rightmove >= 0.05 ));
+	bool moveRequested = ( abs( cmd.forwardmove ) >= 0.05 || abs( cmd.rightmove ) >= 0.05 );
 
 	if ( moveRequested )
 	{
@@ -1616,7 +1617,7 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		return;
 	}
 
-	if ( vr_movePoint.GetInteger() == 1 && (abs( cmd.forwardmove ) >= .1 || abs( cmd.rightmove ) >= .1) ) // body will follow motion from move vector
+	if ( vr_movePoint.GetInteger() == 1 && ( abs( cmd.forwardmove ) >= .1 || abs( cmd.rightmove ) >= .1) ) // body will follow motion from move vector
 	{
 		static idAngles controllerAng;
 

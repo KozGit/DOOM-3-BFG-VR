@@ -29,7 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #include "../Game_local.h"
 
-const static int NUM_SYSTEM_VR_GAMEPLAY_OPTIONS = 8;
+extern idCVar vr_rumbleEnable;
+
+const static int NUM_VR_UI_OPTIONS_OPTIONS = 8;
+
 
 
 float LinearAdjust( const float input, const float currentMin, const float currentMax, const float desiredMin,  float desiredMax );
@@ -37,10 +40,10 @@ int	AdjustOption( const int currentValue, const int values[], const int numValue
 
 /*
 ========================
-idMenuScreen_Shell_VR_Gameplay_Options::Initialize
+idMenuScreen_Shell_VR_UI_Options::Initialize
 ========================
 */
-void idMenuScreen_Shell_VR_Gameplay_Options::Initialize( idMenuHandler * data ) {
+void idMenuScreen_Shell_VR_UI_Options::Initialize( idMenuHandler * data ) {
 	idMenuScreen::Initialize( data );
 
 	if ( data != NULL ) {
@@ -50,7 +53,7 @@ void idMenuScreen_Shell_VR_Gameplay_Options::Initialize( idMenuHandler * data ) 
 	SetSpritePath( "menuSystemOptions" );
 
 	options = new (TAG_SWF) idMenuWidget_DynamicList();
-	options->SetNumVisibleOptions( NUM_SYSTEM_VR_GAMEPLAY_OPTIONS );
+	options->SetNumVisibleOptions( NUM_VR_UI_OPTIONS_OPTIONS );
 	options->SetSpritePath( GetSpritePath(), "info", "options" );
 	options->SetWrappingAllowed( true );
 	options->SetControlList( true );
@@ -58,47 +61,71 @@ void idMenuScreen_Shell_VR_Gameplay_Options::Initialize( idMenuHandler * data ) 
 
 	btnBack = new (TAG_SWF) idMenuWidget_Button();
 	btnBack->Initialize( data );
-	btnBack->SetLabel( "VR OPTIONS" );
+	btnBack->SetLabel( "VR Options" ); // #str_swf_settings
 	btnBack->SetSpritePath( GetSpritePath(), "info", "btnBack" );
 	btnBack->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_GO_BACK );
 
 	AddChild( options );
 	AddChild( btnBack );
-	
+
 	idMenuWidget_ControlButton * control;
+		
+	control = new (TAG_SWF) idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_BUTTON_TEXT );
+	control->SetLabel( "HUD Options" );
+	control->SetDataSource( &systemData, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_HUD_OPTIONS );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_HUD_OPTIONS );
+	options->AddChild( control );
 	
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "PDA Scale" );// scaling value for PDA model to ease reading text in VR
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Gameplay_Options::VR_GAMEPLAY_OPTIONS_PDASCALE );
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_BUTTON_TEXT );
+	control->SetLabel( "PDA Options" );
+	control->SetDataSource( &systemData, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_PDA_OPTIONS );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Gameplay_Options::VR_GAMEPLAY_OPTIONS_PDASCALE );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_PDA_OPTIONS );
 	options->AddChild( control );
 
 	control = new (TAG_SWF) idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "PDA Location" );	
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Gameplay_Options::VR_GAMEPLAY_OPTIONS_PDALOCATION );
+	control->SetLabel( "Heading Beam" );
+	control->SetDataSource( &systemData, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_HEADING_BEAM );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Gameplay_Options::VR_GAMEPLAY_OPTIONS_PDALOCATION );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_HEADING_BEAM );
 	options->AddChild( control );
 
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Player Arms" );	
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Gameplay_Options::VR_GAMEPLAY_OPTIONS_VIEW_ARMS );
+	control->SetLabel( "Weapon Sight" );
+	control->SetDataSource( &systemData, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_WEAPON_SIGHT );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Gameplay_Options::VR_GAMEPLAY_OPTIONS_VIEW_ARMS );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_WEAPON_SIGHT );
 	options->AddChild( control );
 
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Weapon Idle Animations" );	
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Gameplay_Options::VR_GAMEPLAY_OPTIONS_WEAPON_ANIMATIONS );
+	control->SetLabel( "Sight to Surface" );
+	control->SetDataSource( &systemData, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_SIGHT_TO_SURFACE );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Gameplay_Options::VR_GAMEPLAY_OPTIONS_WEAPON_ANIMATIONS );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_SIGHT_TO_SURFACE );
 	options->AddChild( control );
-			
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "Haptic Feedback" );
+	control->SetDataSource( &systemData, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_HAPTICS );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_HAPTICS );
+	options->AddChild( control );
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "Gui Mode" );
+	control->SetDataSource( &systemData, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_GUI_MODE );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_GUI_MODE );
+	options->AddChild( control );
+	
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN_RELEASE ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_STOP_REPEATER, WIDGET_EVENT_SCROLL_DOWN_RELEASE ) );
@@ -111,10 +138,10 @@ void idMenuScreen_Shell_VR_Gameplay_Options::Initialize( idMenuHandler * data ) 
 
 /*
 ========================
-idMenuScreen_Shell_VR_Gameplay_Options::Update
+idMenuScreen_Shell_VR_UI_Options::Update
 ========================
 */
-void idMenuScreen_Shell_VR_Gameplay_Options::Update() {
+void idMenuScreen_Shell_VR_UI_Options::Update() {
 
 	if ( menuData != NULL ) {
 		idMenuWidget_CommandBar * cmdBar = menuData->GetCmdBar();
@@ -131,12 +158,12 @@ void idMenuScreen_Shell_VR_Gameplay_Options::Update() {
 			buttonInfo->action.Set( WIDGET_ACTION_PRESS_FOCUSED );
 		}		
 	}
-
+	
 	idSWFScriptObject & root = GetSWFObject()->GetRootObject();
 	if ( BindSprite( root ) ) {
 		idSWFTextInstance * heading = GetSprite()->GetScriptObject()->GetNestedText( "info", "txtHeading" );
 		if ( heading != NULL ) {
-			heading->SetText( "VR Gameplay Options" );	// FULLSCREEN
+			heading->SetText( "UI Options" );	
 			heading->SetStrokeInfo( true, 0.75f, 1.75f );
 		}
 
@@ -155,10 +182,10 @@ void idMenuScreen_Shell_VR_Gameplay_Options::Update() {
 
 /*
 ========================
-idMenuScreen_Shell_VR_Gameplay_Options::ShowScreen
+idMenuScreen_Shell_VR_UI_Options::ShowScreen
 ========================
 */
-void idMenuScreen_Shell_VR_Gameplay_Options::ShowScreen( const mainMenuTransition_t transitionType ) {
+void idMenuScreen_Shell_VR_UI_Options::ShowScreen( const mainMenuTransition_t transitionType ) {
 	
 	systemData.LoadData();
 	
@@ -167,10 +194,10 @@ void idMenuScreen_Shell_VR_Gameplay_Options::ShowScreen( const mainMenuTransitio
 
 /*
 ========================
-idMenuScreen_Shell_VR_Gameplay_Options::HideScreen
+idMenuScreen_Shell_VR_UI_Options::HideScreen
 ========================
 */
-void idMenuScreen_Shell_VR_Gameplay_Options::HideScreen( const mainMenuTransition_t transitionType ) {
+void idMenuScreen_Shell_VR_UI_Options::HideScreen( const mainMenuTransition_t transitionType ) {
 
 	if ( systemData.IsRestartRequired() ) {
 		class idSWFScriptFunction_Restart : public idSWFScriptFunction_RefCounted {
@@ -212,16 +239,16 @@ void idMenuScreen_Shell_VR_Gameplay_Options::HideScreen( const mainMenuTransitio
 
 /*
 ========================
-idMenuScreen_Shell_VR_Gameplay_Options::HandleAction h
+idMenuScreen_Shell_VR_UI_Options::HandleAction h
 ========================
 */
-bool idMenuScreen_Shell_VR_Gameplay_Options::HandleAction( idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled ) {
+bool idMenuScreen_Shell_VR_UI_Options::HandleAction( idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled ) {
 
 	if ( menuData == NULL ) {
 		return true;
 	}
 	
-	if ( menuData->ActiveScreen() != SHELL_AREA_VR_GAMEPLAY_OPTIONS ) {
+	if ( menuData->ActiveScreen() != SHELL_AREA_VR_UI_OPTIONS ) {
 		return false;
 	}
 
@@ -235,7 +262,19 @@ bool idMenuScreen_Shell_VR_Gameplay_Options::HandleAction( idWidgetAction & acti
 			}
 			return true;
 		}
-					
+		
+		case WIDGET_ACTION_PRESS_FOCUSED:
+			if ( widget->GetDataSourceFieldIndex() == idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_HUD_OPTIONS ) {
+				menuData->SetNextScreen( SHELL_AREA_VR_HUD_OPTIONS, MENU_TRANSITION_SIMPLE );
+				return true;
+			}
+
+			if ( widget->GetDataSourceFieldIndex() == idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_PDA_OPTIONS ) {
+				menuData->SetNextScreen( SHELL_AREA_VR_PDA_OPTIONS, MENU_TRANSITION_SIMPLE );
+				return true;
+			}
+			break; 
+
 		case WIDGET_ACTION_COMMAND: {
 
 			if ( options == NULL ) {
@@ -255,7 +294,7 @@ bool idMenuScreen_Shell_VR_Gameplay_Options::HandleAction( idWidgetAction & acti
 			switch ( parms[0].ToInteger() ) {
 				
 				case 1:
-				
+
 				default: {
 					systemData.AdjustField( parms[0].ToInteger(), 1 );
 					options->Update();
@@ -290,144 +329,210 @@ bool idMenuScreen_Shell_VR_Gameplay_Options::HandleAction( idWidgetAction & acti
 
 /*
 ========================
-idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options
+idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::idMenuDataSource_VR_UI_Options
 ========================
 */
-idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options() {
+idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::idMenuDataSource_VR_UI_Options() {
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::LoadData
+idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::LoadData
 ========================
 */
-void idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::LoadData() {
-	
-	originalPDAscale = vr_PDAscale.GetFloat();
-	originalPDAlocation = vr_PDAfixLocation.GetInteger();
-	originalViewArms = vr_viewModelArms.GetInteger();
-	originalWeaponAnimations = vr_disableWeaponAnimation.GetInteger();
+void idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::LoadData() {
+		
+	originalHeadingBeam = vr_headingBeamMode.GetInteger();
+	originalWeaponSight = vr_weaponSight.GetInteger();
+	originalWeaponSightSurface = vr_weaponSightToSurface.GetInteger();
+	originalHaptics = vr_rumbleEnable.GetInteger();
+	originalGuiMode = vr_guiMode.GetInteger();
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::IsRestartRequired
+idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::IsRestartRequired
 ========================
 */
-bool idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::IsRestartRequired() const {
-	
-	if ( originalViewArms != vr_viewModelArms.GetInteger() ) {
-		return true;
-	}
-	
+bool idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::IsRestartRequired() const {
 	return false;
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::CommitData
+idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::CommitData
 ========================
 */
-void idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::CommitData() {
+void idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::CommitData() {
 	cvarSystem->SetModifiedFlags( CVAR_ARCHIVE );
 }
 
+
 /*
 ========================
-idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::AdjustField
+idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::AdjustField
 ========================
 */
-void idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::AdjustField( const int fieldIndex, const int adjustAmount ) {
+void idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::AdjustField( const int fieldIndex, const int adjustAmount ) {
 	switch ( fieldIndex ) {
-		case VR_GAMEPLAY_OPTIONS_PDALOCATION: {
+		
+		
+		
+		case UI_OPTIONS_FIELD_HEADING_BEAM: {
+			static const int numValues = 4;
+			static const int values[numValues] = { 0, 1, 2, 3 };
+			vr_headingBeamMode.SetInteger( AdjustOption( vr_headingBeamMode.GetInteger(), values, numValues, adjustAmount ) );
+			break;
+		}
+		case UI_OPTIONS_FIELD_WEAPON_SIGHT: {
+			static const int numValues = 4;
+			static const int values[numValues] = { 0, 1, 2, 3 };
+			vr_weaponSight.SetInteger( AdjustOption( vr_weaponSight.GetInteger(), values, numValues, adjustAmount ) );
+			break;
+		}
+		case UI_OPTIONS_FIELD_SIGHT_TO_SURFACE: {
 			static const int numValues = 2;
 			static const int values[numValues] = { 0, 1 };
-			vr_PDAfixLocation.SetInteger( AdjustOption( vr_PDAfixLocation.GetInteger(), values, numValues, adjustAmount ) );
+			vr_weaponSightToSurface.SetInteger( AdjustOption( vr_weaponSightToSurface.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
-		
-		case VR_GAMEPLAY_OPTIONS_VIEW_ARMS: {
+		case UI_OPTIONS_FIELD_HAPTICS: {
 			static const int numValues = 2;
 			static const int values[numValues] = { 0, 1 };
-			vr_viewModelArms.SetInteger( AdjustOption( vr_viewModelArms.GetInteger(), values, numValues, adjustAmount ) );
+			vr_rumbleEnable.SetInteger( AdjustOption( vr_rumbleEnable.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
-		
-		case VR_GAMEPLAY_OPTIONS_WEAPON_ANIMATIONS: {
-			static const int numValues = 2;
-			static const int values[numValues] = { 0, 1 };
-			vr_disableWeaponAnimation.SetInteger( AdjustOption( vr_disableWeaponAnimation.GetInteger(), values, numValues, adjustAmount ) );
+		case UI_OPTIONS_FIELD_GUI_MODE: {
+			static const int numValues = 3;
+			static const int values[numValues] = { 0, 1, 2 };
+			vr_guiMode.SetInteger( AdjustOption( vr_guiMode.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
-		
-		case VR_GAMEPLAY_OPTIONS_PDASCALE: {
-			const float percent = vr_PDAscale.GetFloat();;
-			const float adjusted = percent + (float) adjustAmount * .01f;
-			const float clamped = idMath::ClampFloat( 1.0f, 5.0f, adjusted );
-			vr_PDAscale.SetFloat( clamped );
-			break;
-		}
-	
+										
 	}
 	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::GetField	
+idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::GetField	
 ========================
 */
-idSWFScriptVar idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::GetField( const int fieldIndex ) const {
-	switch ( fieldIndex ) {
-	
-		case VR_GAMEPLAY_OPTIONS_PDASCALE:
-			return va( "%.0f %%", vr_PDAscale.GetFloat() * 100 );
+idSWFScriptVar idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::GetField( const int fieldIndex ) const {
+	switch ( fieldIndex ) 
+	{
 		
-		case VR_GAMEPLAY_OPTIONS_PDALOCATION:
-			if ( vr_PDAfixLocation.GetInteger() == 0 ) {
-				return "Hand";
-			} else {
-				return "Fixed";
+		case UI_OPTIONS_FIELD_HEADING_BEAM:
+		{
+			const int hb = vr_headingBeamMode.GetInteger();
+			if ( hb == 0 )
+			{
+				return "DISABLED";
 			}
-		
-		case VR_GAMEPLAY_OPTIONS_VIEW_ARMS: {
-			if ( vr_viewModelArms.GetInteger() == 0 ) {
-				return "Hide arms";
-			} else {
-				return "View arms";
+			if ( hb == 1 )
+			{
+				return "Solid";
+			}
+			if ( hb == 2 )
+			{
+				return "Arrows";
+			}
+			if ( hb == 3 )
+			{
+				return "Scrolling Arrows";
 			}
 		}
 		
-		case VR_GAMEPLAY_OPTIONS_WEAPON_ANIMATIONS: {
-			if ( vr_disableWeaponAnimation.GetInteger() == 1 ) {
+		case UI_OPTIONS_FIELD_WEAPON_SIGHT:
+		{
+			const int ws = vr_weaponSight.GetInteger();
+			if ( ws == 0 )
+			{
+				return "Laser SIght";
+			}
+			if ( ws == 1 )
+			{
+				return "Red Dot";
+			}
+			if ( ws == 2 )
+			{
+				return "Circle Dot";
+			}
+			if ( ws == 3 )
+			{
+				return "Crosshair";
+			}
+		}
+		case UI_OPTIONS_FIELD_SIGHT_TO_SURFACE:
+			
+			if ( vr_weaponSightToSurface.GetInteger() == 0 ) {
 				return "#str_swf_disabled";
 			} else {
 				return "#str_swf_enabled";
 			}
-		}	
+		
+		case UI_OPTIONS_FIELD_HAPTICS:
+			if ( vr_rumbleEnable.GetInteger() == 0 ) {
+				return "#str_swf_disabled";
+			}
+			else {
+				return "#str_swf_enabled";
+			}
 
+		case UI_OPTIONS_FIELD_GUI_MODE:
+		{
+			const int gm = vr_guiMode.GetInteger();
+			if ( gm == 2 )
+			{
+				return "Touch Activated";
+			}
+
+			if ( gm == 1 )
+			{
+				return "Look Activated";
+			}
+
+			if ( gm == 0 )
+			{
+				return "Aim Activated";
+			}
+
+		}
 	}
 	return false;
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::IsDataChanged	
+idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::IsDataChanged	
 ========================
 */
-bool idMenuScreen_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options::IsDataChanged() const {
+bool idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::IsDataChanged() const {
+		
+	if ( originalHeadingBeam != vr_headingBeamMode.GetInteger() )
+	{
+		return true;
+	}
 	
-	if ( originalPDAscale != vr_PDAscale.GetFloat() ) {
+	if ( originalWeaponSight != vr_weaponSight.GetInteger() )
+	{
 		return true;
 	}
-	if ( originalPDAlocation != vr_PDAfixLocation.GetInteger() ) {
+
+	if ( originalWeaponSightSurface != vr_weaponSightToSurface.GetInteger() )
+	{
 		return true;
 	}
-	if ( originalViewArms != vr_viewModelArms.GetInteger() ) {
+
+	if ( originalHaptics != vr_rumbleEnable.GetInteger() )
+	{
 		return true;
 	}
-	if ( originalWeaponAnimations != vr_disableWeaponAnimation.GetInteger() ) {
+
+	if ( originalGuiMode != vr_guiMode.GetInteger() )
+	{
 		return true;
 	}
+	
 	return false;
 }

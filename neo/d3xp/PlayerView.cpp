@@ -880,13 +880,7 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 			
 			commonVr->lastCenterEyeAxis = view->viewaxis;
 			commonVr->lastCenterEyeOrigin = view->vieworg;
-			//commonVr->vrFrame++; // only place this is incremented.
-			//commonVr->PushFrame( commonVr->vrFrame, commonVr->hmdTrackingState.HeadPose.ThePose, commonVr->sensorSampleTime );
-			//commonVr->FrameStart();
-
-			
-			//Dialog().Render( loadGUI != NULL );
-			
+						
 			if ( !commonVr->PDAforced && !commonVr->PDArising && !game->IsPDAOpen() ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
 			{
 				commonVr->swfRenderMode = RENDERING_HUD;
