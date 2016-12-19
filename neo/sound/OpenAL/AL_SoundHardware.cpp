@@ -39,7 +39,7 @@ idCVar s_device( "s_device", "-1", CVAR_INTEGER | CVAR_ARCHIVE, "Which audio dev
 idCVar s_showPerfData( "s_showPerfData", "0", CVAR_BOOL, "Show XAudio2 Performance data" );
 extern idCVar s_volume_dB;
 
-
+idCVar vr_forceOculusAudio( "vr_forceOculusAudio","0", CVAR_BOOL | CVAR_ARCHIVE, "Request openAL to open audio on Rift headphones instead of default device\n" );
 /*
 ========================
 idSoundHardware_OpenAL::idSoundHardware_OpenAL
@@ -168,32 +168,9 @@ void idSoundHardware_OpenAL::Init()
 	
 	common->Printf( "Setup OpenAL device and context... " );
 	
-	if ( commonVr->hasHMD && alcIsExtensionPresent( NULL, "ALC_ENUMERATION_EXT" ) != AL_FALSE )
+	if ( commonVr->hasHMD && vr_forceOculusAudio.GetBool() && alcIsExtensionPresent( NULL, "ALC_ENUMERATION_EXT" ) != AL_FALSE )
 	{
-		/*
-		const ALCchar *devices1 = alcGetString( NULL, ALC_ALL_DEVICES_SPECIFIER ) ;
 				
-		{
-			const ALCchar *device2 = devices1, *next = devices1 + 1;
-			size_t len = 0;
-
-			common->Printf( "Devices list:\n" );
-			common->Printf( "----------\n" );
-			while ( device2 && *device2 != '\0' && next && *next != '\0' ) {
-				common->Printf( "%s\n (Length %d)\n", device2, strlen( device2 ) );
-				for ( int c = 0; c < strlen( device2 ); c++ )
-				{
-					common->Printf( "%c %d %d\n", device2[c], device2[c],c );
-				}
-				len = strlen( device2 );
-				device2 += (len + 1);
-				next += (len + 2);
-			}
-			common->Printf( "----------\n" );
-		}
-		*/
-	
-		
 		const char* list = alcGetString( NULL, ALC_ALL_DEVICES_SPECIFIER );
 		common->Printf( "Searching for Rift Audio.\nGetting openAL devices via ALC_ALL_DEVICES_SPECIFIER\n" );
 		bool riftFound = false;
@@ -210,13 +187,16 @@ void idSoundHardware_OpenAL::Init()
 				if ( strstr( list, "Rift" ) )
 				{
 					riftFound = true;
-					common->Printf( "Rift audio found, attempting to initialize openAL audio device %s\n", list );
+					common->Printf( "Rift audio found. Attempting to initialize openAL audio device %s\n", list );
+					
+					/*
 					common->Printf( "%s\n (Length %d)\n", list, strlen( list ) );
 					for ( int c = 0; c < strlen( list ); c++ )
 					{
 						common->Printf( "%c %d %d\n", list[c], list[c], c );
 					}
-										
+					*/
+
 					openalDevice = alcOpenDevice( list );
 					if ( openalDevice == NULL )
 					{

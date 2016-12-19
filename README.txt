@@ -3,15 +3,20 @@
   / / / // __ \ / __ \ / __ `__ \  /_ < / __  |/ /_   / / __  | | / // /_/ /
  / /_/ // /_/ // /_/ // / / / / /___/ // /_/ // __/  / /_/ /  | |/ // _, _/
 /_____/ \____/ \____//_/ /_/ /_//____//_____//_/     \____/   |___//_/ |_|
+
+							Fully Possessed
 ____________________________________________________________________________
 
 
-DOOM3-BFG VR Edition
-Includes support for the Oculus Rift DK2 and Razer Hydra motion controls.
+
+DOOM3-BFG VR : Fully Possessed
+Includes support for the Oculus Rift and Touch motion controls.
 
 VR Implementation /u/Samson-
 DOOM-3-BFG-VR Readme - https://github.com/KozGit/DOOM-3-BFG-VR
 
+Please note this readme has not been fully updated for the VR port yet.  See readme in binary download for more information.
+Readme will be updated with VR specific documentation shortly.
 
 DOOM-3-BFG-VR was built using the RBDOOM3-BFG port.
 RBDOOM-3-BFG Readme - https://github.com/RobertBeckebans/DOOM-3-BFG
@@ -246,8 +251,8 @@ Anyway:
    (e.g. /path/to/Doom3BFG/), it's in
 	/your/path/to/Steam/steamapps/common/DOOM 3 BFG Edition/base/
 
-4. Copy your Doom3BFGVR executable that you created in 5) or 6) and the FFmpeg DLLs to your own 
-   Doom 3 BFG directory (/path/to/Doom3BFG).
+4. Copy the Doom3BFGVR executable and the FFmpeg DLLs to your own 
+   Doom 3 BFG directory (/path/to/Doom3BFG). Copy mod assets to the BASE directory
    
    Your own Doom 3 BFG directory now should look like:
 	/path/to/Doom3BFG/
@@ -262,8 +267,19 @@ Anyway:
 	 -> swscale-2.dll
 	 ->	base/
 		 ->	classicmusic/
-		 ->	_common.crc
-		 ->	(etc)
+		 ->	_common.crc ( and the rest of the .crc and .resources files )
+		 ->	def/
+		 -> guis/
+		 -> maps/
+		 -> materials/
+		 -> models/
+		 -> particles/
+		 -> script/
+		 -> skins/
+		 -> strings/
+		 -> video/
+		 -> wad
+		 -> vr_default.cfg
 
 5. Run the game by executing the Doom3BFGVR executable.
 
@@ -332,7 +348,7 @@ We cannot fix anything if we do not know about the problems.
 
 The best way for telling us about a bug is by submitting a bug report at our GitHub bug tracker page:
 
-	https://github.com/RobertBeckebans/DOOM-3-BFG/issues?state=open
+	https://github.com/KozGit/DOOM-3-BFG-VR/issues
 
 The most important fact about this tracker is that we cannot simply forget to fix the bugs which are posted there. 
 It is also a great way to keep track of fixed stuff.

@@ -744,6 +744,19 @@ void idIK_Walk::Evaluate()
 	idMat3 hipAxis[MAX_LEGS], kneeAxis[MAX_LEGS], ankleAxis[MAX_LEGS];
 	trace_t results;
 	
+	// koz begin
+	bool isPlayer = false;
+	idPlayer *player;
+	player = gameLocal.GetLocalPlayer();
+	if ( player )
+	{
+		if ( player->entityNumber == self->entityNumber )
+		{
+			isPlayer = true;
+		}
+	}
+	// koz end
+	
 	if( !self || !gameLocal.isNewFrame )
 	{
 		return;
@@ -822,6 +835,8 @@ void idIK_Walk::Evaluate()
 		}
 	}
 	
+
+
 	const idPhysics* phys = self->GetPhysics();
 	
 	// test whether or not the character standing on the ground
@@ -884,9 +899,24 @@ void idIK_Walk::Evaluate()
 	animator->GetJointTransform( waistJoint, gameLocal.time, waistOrigin, waistAxis );
 	waistOrigin = modelOrigin + waistOrigin * modelAxis;
 	
+	
+
 	// adjust position of the waist
 	waistOffset = ( smallestShift + waistShift ) * normal;
-	
+	//koz add waist IK for crouching
+	if ( isPlayer  )
+	{
+		
+		if ( vr_crouchMode.GetInteger() == 0 || (vr_crouchMode.GetInteger() != 0 && !player->IsCrouching()) )
+		{
+			//common->Printf( "Body delta z %f\n", commonVr->poseHmdBodyPositionDelta.z );
+			if ( commonVr->poseHmdBodyPositionDelta.z < 0.0f )
+			{
+				waistOffset.z += commonVr->poseHmdBodyPositionDelta.z;
+			}
+		}
+	}
+
 	// if the waist should be at least a certain distance above the floor
 	if( minWaistFloorDist > 0.0f && waistOffset * normal < 0.0f )
 	{

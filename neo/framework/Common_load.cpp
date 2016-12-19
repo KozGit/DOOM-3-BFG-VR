@@ -770,7 +770,10 @@ void idCommonLocal::ExecuteMapChange()
 	commonVr->vrIsBackgroundSaving = false;
 	commonVr->VR_GAME_PAUSED = false;
 	commonVr->pdaToggleTime = Sys_Milliseconds();
-
+		
+	vr_headingBeamMode.SetModified();
+	vr_weaponSight.SetModified();
+	
 }
 
 /*
@@ -1360,6 +1363,12 @@ CONSOLE_COMMAND_SHIP( loadGame, "loads a game", idCmdSystem::ArgCompletion_SaveG
 {
 	console->Close();
 	commonLocal.LoadGame( ( args.Argc() > 1 ) ? args.Argv( 1 ) : "quick" );
+	
+	//koz
+	vr_headingBeamMode.SetModified();
+	vr_weaponSight.SetModified();
+	//koz end
+
 }
 
 /*
@@ -1374,7 +1383,7 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 		
 
 	// Koz begin background save in VR
-	if ( game->isVR )
+	if ( 0 && game->isVR )
 	{
 		vrBackgroundSave.StartBackgroundSave( BACKGROUND_SAVE, savename );
 		
@@ -1389,7 +1398,7 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 	}
 	// Koz end
 	
-	//commonVr->gameSaving = true;
+	commonVr->gameSaving = true;
 	if( commonLocal.SaveGame( savename ) )
 	{
 		common->Printf( "Saved: %s\n", savename );

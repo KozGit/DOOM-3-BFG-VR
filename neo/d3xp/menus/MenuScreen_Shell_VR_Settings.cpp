@@ -32,11 +32,11 @@ If you have questions concerning this license or the applicable additional terms
 const static int NUM_SETTING_OPTIONS = 8;
 
 enum settingMenuCmds_t {
-	SETTING_CMD_VR_RENDERING_OPTIONS,
-	SETTING_CMD_VR_HMD_OPTIONS,
-	SETTING_CMD_VR_PROFILE_OPTIONS,
+	SETTING_CMD_VR_CHARACTER_OPTIONS,
 	SETTING_CMD_VR_CONTROL_OPTIONS,
-	SETTING_CMD_VR_GAMEPLAY_OPTIONS,
+	SETTING_CMD_VR_UI_OPTIONS,
+	SETTING_CMD_VR_RENDERING_OPTIONS,
+	SETTING_CMD_VR_PROFILE_OPTIONS,
 };
 
 /*
@@ -57,19 +57,19 @@ void idMenuScreen_Shell_VR_Settings::Initialize( idMenuHandler * data ) {
 	idList< idList< idStr, TAG_IDLIB_LIST_MENU >, TAG_IDLIB_LIST_MENU > menuOptions;	
 	idList< idStr > option;
 
-	option.Append( "Rendering settings" );	
-	menuOptions.Append( option );
-	option.Clear();
-	option.Append( "HMD Settings" );
-	menuOptions.Append( option );
-	option.Clear();
-	option.Append( "Player Profile" );
+	option.Append( "Character Options" );	
 	menuOptions.Append( option );
 	option.Clear();
 	option.Append( "Control Options" );
 	menuOptions.Append( option );
 	option.Clear();
-	option.Append( "Gameplay Options" );
+	option.Append( "UI Options" );
+	menuOptions.Append( option );
+	option.Clear();
+	option.Append( "Rendering Options" );
+	menuOptions.Append( option );
+	option.Clear();
+	option.Append( "Profile Options" );
 	menuOptions.Append( option );
 	option.Clear();
 		
@@ -83,7 +83,7 @@ void idMenuScreen_Shell_VR_Settings::Initialize( idMenuHandler * data ) {
 	helpWidget->SetSpritePath( GetSpritePath(), "info", "helpTooltip" );
 	AddChild( helpWidget );
 
-	const char * tips[] = { "VR Rendering Options.", "Oculus Rift Settings.", "Player Settings.", "Customize VR Controls.", "VR Gameplay Options" };
+	const char * tips[] = { "Character Options.", "Control Options.", "UI Options.", "Rendering Options.", "Profile Options" };
 
 	while ( options->GetChildren().Num() < NUM_SETTING_OPTIONS ) {
 		idMenuWidget_Button * const buttonWidget = new (TAG_SWF) idMenuWidget_Button();
@@ -217,26 +217,31 @@ bool idMenuScreen_Shell_VR_Settings::HandleAction( idWidgetAction & action, cons
 		}
 		case WIDGET_ACTION_COMMAND: {
 			switch ( parms[0].ToInteger() ) {
-				case SETTING_CMD_VR_RENDERING_OPTIONS: {
-					menuData->SetNextScreen( SHELL_AREA_VR_RENDERING_OPTIONS, MENU_TRANSITION_SIMPLE );
-					break;	
+				
+				case SETTING_CMD_VR_CHARACTER_OPTIONS: {
+					menuData->SetNextScreen( SHELL_AREA_VR_CHARACTER_OPTIONS, MENU_TRANSITION_SIMPLE );
+					break;
 				}
+			
 				case SETTING_CMD_VR_CONTROL_OPTIONS: {
 					menuData->SetNextScreen( SHELL_AREA_VR_CONTROL_OPTIONS, MENU_TRANSITION_SIMPLE );
 					break;
 				}
-				case SETTING_CMD_VR_HMD_OPTIONS: {
-					menuData->SetNextScreen( SHELL_AREA_VR_HMD_OPTIONS, MENU_TRANSITION_SIMPLE );
+
+				case SETTING_CMD_VR_UI_OPTIONS: {
+					menuData->SetNextScreen( SHELL_AREA_VR_UI_OPTIONS, MENU_TRANSITION_SIMPLE );
 					break;
+				}
+
+				case SETTING_CMD_VR_RENDERING_OPTIONS: {
+					menuData->SetNextScreen( SHELL_AREA_VR_RENDERING_OPTIONS, MENU_TRANSITION_SIMPLE );
+					break;	
 				}
 				case SETTING_CMD_VR_PROFILE_OPTIONS: {
 					menuData->SetNextScreen( SHELL_AREA_VR_PROFILE_OPTIONS, MENU_TRANSITION_SIMPLE );
 					break;
 				}
-				case SETTING_CMD_VR_GAMEPLAY_OPTIONS: {
-					menuData->SetNextScreen( SHELL_AREA_VR_GAMEPLAY_OPTIONS, MENU_TRANSITION_SIMPLE );
-					break;
-				}
+				
 				
 			}
 

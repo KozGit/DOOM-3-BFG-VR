@@ -29,22 +29,18 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #include "../Game_local.h"
 
-enum settingMenuCmds_t
-{
-	SETTING_CMD_BINDINGS,
-};
+const static int NUM_SYSTEM_VR_GAMEPLAY_OPTIONS = 8;
 
-const static int NUM_SYSTEM_VR_CONTROL_OPTIONS = 8;
 
 float LinearAdjust( const float input, const float currentMin, const float currentMax, const float desiredMin,  float desiredMax );
 int	AdjustOption( const int currentValue, const int values[], const int numValues, const int adjustment );
 
 /*
 ========================
-idMenuScreen_Shell_VR_Control_Options::Initialize
+idMenuScreen_Shell_VR_Character_Options::Initialize
 ========================
 */
-void idMenuScreen_Shell_VR_Control_Options::Initialize( idMenuHandler * data ) {
+void idMenuScreen_Shell_VR_Character_Options::Initialize( idMenuHandler * data ) {
 	idMenuScreen::Initialize( data );
 
 	if ( data != NULL ) {
@@ -54,7 +50,7 @@ void idMenuScreen_Shell_VR_Control_Options::Initialize( idMenuHandler * data ) {
 	SetSpritePath( "menuSystemOptions" );
 	
 	options = new (TAG_SWF) idMenuWidget_DynamicList();
-	options->SetNumVisibleOptions( NUM_SYSTEM_VR_CONTROL_OPTIONS );
+	options->SetNumVisibleOptions( NUM_SYSTEM_VR_GAMEPLAY_OPTIONS );
 	options->SetSpritePath( GetSpritePath(), "info", "options" );
 	options->SetWrappingAllowed( true );
 	options->SetControlList( true );
@@ -68,65 +64,67 @@ void idMenuScreen_Shell_VR_Control_Options::Initialize( idMenuHandler * data ) {
 
 	AddChild( options );
 	AddChild( btnBack );
-
-	idMenuWidget_ControlButton * control;
-			
-	control = new (TAG_SWF)idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Controller Type" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CONTROLLER_TYPE );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CONTROLLER_TYPE );
-	options->AddChild( control );
-
-	control = new (TAG_SWF)idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Move Mode" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_MOVE_MODE );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_MOVE_MODE );
-	options->AddChild( control );
-
-	control = new (TAG_SWF)idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Crouch Mode" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CROUCH_MODE );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CROUCH_MODE );
-	options->AddChild( control );
-
-	control = new (TAG_SWF)idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Crouch Trig Dist" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CROUCH_TRIGGER_DIST );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CROUCH_TRIGGER_DIST );
-	options->AddChild( control );
-
-	control = new (TAG_SWF)idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Walk Speed Adj" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_WALK_SPEED_ADJUST );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_WALK_SPEED_ADJUST );
-	options->AddChild( control );
 	
-	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	idMenuWidget_ControlButton * control;
+	
+	control = new (TAG_SWF) idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Weapon Pitch" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_WEAPON_PITCH );
+	control->SetLabel( "Body Mode" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_BODY_MODE );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_WEAPON_PITCH );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_BODY_MODE );
 	options->AddChild( control );
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Flash Pitch" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH );
+	control->SetLabel( "Flashlight Mount" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_FLASH_MODE );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_FLASH_MODE );
 	options->AddChild( control );
 
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "Weapon Hand" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_WEAPON_HAND );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_WEAPON_HAND );
+	options->AddChild( control );
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "View Height" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT );
+	options->AddChild( control );
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "KnockBack" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_KNOCKBACK );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_KNOCKBACK );
+	options->AddChild( control );
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "Head Kick" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_HEADKICK );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_HEADKICK );
+	options->AddChild( control );
+
+	
+	control = new(TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_BAR );
+	control->SetLabel( "Shake Amplitude" );	// Brightness
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_SHAKE_AMPLITUDE );
+	control->SetupEvents( 2, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_SHAKE_AMPLITUDE );
+	options->AddChild( control );
+
+			
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN_RELEASE ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_STOP_REPEATER, WIDGET_EVENT_SCROLL_DOWN_RELEASE ) );
@@ -139,10 +137,10 @@ void idMenuScreen_Shell_VR_Control_Options::Initialize( idMenuHandler * data ) {
 
 /*
 ========================
-idMenuScreen_Shell_VR_Control_Options::Update
+idMenuScreen_Shell_VR_Character_Options::Update
 ========================
 */
-void idMenuScreen_Shell_VR_Control_Options::Update() {
+void idMenuScreen_Shell_VR_Character_Options::Update() {
 
 	if ( menuData != NULL ) {
 		idMenuWidget_CommandBar * cmdBar = menuData->GetCmdBar();
@@ -164,7 +162,7 @@ void idMenuScreen_Shell_VR_Control_Options::Update() {
 	if ( BindSprite( root ) ) {
 		idSWFTextInstance * heading = GetSprite()->GetScriptObject()->GetNestedText( "info", "txtHeading" );
 		if ( heading != NULL ) {
-			heading->SetText( "VR Control Options" );	
+			heading->SetText( "VR Character Options" );	
 			heading->SetStrokeInfo( true, 0.75f, 1.75f );
 		}
 
@@ -183,10 +181,10 @@ void idMenuScreen_Shell_VR_Control_Options::Update() {
 
 /*
 ========================
-idMenuScreen_Shell_VR_Control_Options::ShowScreen
+idMenuScreen_Shell_VR_Character_Options::ShowScreen
 ========================
 */
-void idMenuScreen_Shell_VR_Control_Options::ShowScreen( const mainMenuTransition_t transitionType ) {
+void idMenuScreen_Shell_VR_Character_Options::ShowScreen( const mainMenuTransition_t transitionType ) {
 	
 	systemData.LoadData();
 	
@@ -195,10 +193,10 @@ void idMenuScreen_Shell_VR_Control_Options::ShowScreen( const mainMenuTransition
 
 /*
 ========================
-idMenuScreen_Shell_VR_Control_Options::HideScreen
+idMenuScreen_Shell_VR_Character_Options::HideScreen
 ========================
 */
-void idMenuScreen_Shell_VR_Control_Options::HideScreen( const mainMenuTransition_t transitionType ) {
+void idMenuScreen_Shell_VR_Character_Options::HideScreen( const mainMenuTransition_t transitionType ) {
 
 	if ( systemData.IsRestartRequired() ) {
 		class idSWFScriptFunction_Restart : public idSWFScriptFunction_RefCounted {
@@ -240,21 +238,22 @@ void idMenuScreen_Shell_VR_Control_Options::HideScreen( const mainMenuTransition
 
 /*
 ========================
-idMenuScreen_Shell_VR_Control_Options::HandleAction h
+idMenuScreen_Shell_VR_Character_Options::HandleAction h
 ========================
 */
-bool idMenuScreen_Shell_VR_Control_Options::HandleAction( idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled ) {
+bool idMenuScreen_Shell_VR_Character_Options::HandleAction( idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled ) {
 
 	if ( menuData == NULL ) {
 		return true;
 	}
 	
-	if ( menuData->ActiveScreen() != SHELL_AREA_VR_CONTROL_OPTIONS ) {
+	if ( menuData->ActiveScreen() != SHELL_AREA_VR_CHARACTER_OPTIONS ) {
 		return false;
 	}
 
 	widgetAction_t actionType = action.GetType();
 	const idSWFParmList & parms = action.GetParms();
+
 	switch ( actionType ) {
 		case WIDGET_ACTION_GO_BACK: {
 			if ( menuData != NULL ) {
@@ -262,17 +261,7 @@ bool idMenuScreen_Shell_VR_Control_Options::HandleAction( idWidgetAction & actio
 			}
 			return true;
 		}
-
-		/*
-		case WIDGET_ACTION_PRESS_FOCUSED:
-			if ( widget->GetDataSourceFieldIndex() == idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_BINDINGS ) {
-				menuData->SetNextScreen( SHELL_AREA_KEYBOARD, MENU_TRANSITION_SIMPLE );
-				common->Printf( "Trying to transition\n" );
-				return true;
-			}
-			break; 
-		*/
-
+					
 		case WIDGET_ACTION_COMMAND: {
 
 			if ( options == NULL ) {
@@ -290,8 +279,9 @@ bool idMenuScreen_Shell_VR_Control_Options::HandleAction( idWidgetAction & actio
 			}
 
 			switch ( parms[0].ToInteger() ) {
-			case 1: 
-
+				
+				case 1:
+				
 				default: {
 					systemData.AdjustField( parms[0].ToInteger(), 1 );
 					options->Update();
@@ -326,227 +316,261 @@ bool idMenuScreen_Shell_VR_Control_Options::HandleAction( idWidgetAction & actio
 
 /*
 ========================
-idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options
+idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Gameplay_Options::idMenuDataSource_Shell_VR_Gameplay_Options
 ========================
 */
-idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options() {
+idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Character_Options() {
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::LoadData
+idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Gameplay_Options::LoadData
 ========================
 */
-void idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::LoadData() {
+void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Character_Options::LoadData() {
+	
 
-	originalControlType = vr_controllerStandard.GetInteger();
-	originalMoveMode = vr_movePoint.GetInteger();
-	originalCrouchMode = vr_crouchMode.GetInteger();
-	originalCrouchTriggerDistance = vr_crouchTriggerDist.GetFloat();
-	originalWalkSpeedAdjust = vr_walkSpeedAdjust.GetFloat();
-	originalWeaponPitch = vr_motionWeaponPitchAdj.GetFloat();
-	originalFlashPitch = vr_motionFlashPitchAdj.GetFloat();
+	originalBodyMode = vr_playerBodyMode.GetInteger();
+	originalFlashMode = vr_flashlightMode.GetInteger();
+	originalWeaponHand = vr_weaponHand.GetInteger();
+	originalViewHeight = pm_normalviewheight.GetFloat();
+	originalKnockBack = vr_knockBack.GetInteger();
+	originalShakeAmplitude = vr_shakeAmplitude.GetFloat();
+	originalHeadKick = vr_headKick.GetInteger();
 
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::IsRestartRequired
+idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Gameplay_Options::IsRestartRequired
 ========================
 */
-bool idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::IsRestartRequired() const {
+bool idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Character_Options::IsRestartRequired() const {
+		
 	return false;
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::CommitData
+idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Gameplay_Options::CommitData
 ========================
 */
-void idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::CommitData() {
+void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Character_Options::CommitData() {
 	cvarSystem->SetModifiedFlags( CVAR_ARCHIVE );
 }
 
-
 /*
 ========================
-idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::AdjustField
+idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Gameplay_Options::AdjustField
 ========================
 */
-void idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::AdjustField( const int fieldIndex, const int adjustAmount ) {
-	switch ( fieldIndex )
-	{
-
-		case CONTROL_OPTIONS_FIELD_CONTROLLER_TYPE: 
-		{
-			static const int numValues = 2;
-			static const int values[numValues] = { 0, 1 };
-			vr_controllerStandard.SetInteger( AdjustOption( vr_controllerStandard.GetInteger(), values, numValues, adjustAmount ) );
-			break;
-		}
-
-		case CONTROL_OPTIONS_FIELD_MOVE_MODE: 
+void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Character_Options::AdjustField( const int fieldIndex, const int adjustAmount ) {
+	switch ( fieldIndex ) {
+		case CHARACTER_OPTIONS_FIELD_BODY_MODE:
 		{
 			static const int numValues = 3;
 			static const int values[numValues] = { 0, 1, 2 };
-			vr_movePoint.SetInteger( AdjustOption( vr_movePoint.GetInteger(), values, numValues, adjustAmount ) );
+			vr_playerBodyMode.SetInteger( AdjustOption( vr_playerBodyMode.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
-
-		case CONTROL_OPTIONS_FIELD_CROUCH_MODE: 
+		
+		case CHARACTER_OPTIONS_FIELD_FLASH_MODE:
+		{
+			static const int numValues = 4;
+			static const int values[numValues] = { 0, 1, 2, 3 };
+			vr_flashlightMode.SetInteger( AdjustOption( vr_flashlightMode.GetInteger(), values, numValues, adjustAmount ) );
+			break;
+		}
+		
+		case CHARACTER_OPTIONS_FIELD_WEAPON_HAND:
 		{
 			static const int numValues = 2;
 			static const int values[numValues] = { 0, 1 };
-			vr_crouchMode.SetInteger( AdjustOption( vr_crouchMode.GetInteger(), values, numValues, adjustAmount ) );
+			vr_weaponHand.SetInteger( AdjustOption( vr_weaponHand.GetInteger(), values, numValues, adjustAmount ) );
+			break;
+		}
+		
+		case CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT: {
+			const float percent = pm_normalviewheight.GetFloat();;
+			const float adjusted = percent + (float) adjustAmount * .5f;
+			const float clamped = idMath::ClampFloat( 40.0f, 80.0f, adjusted );
+			pm_normalviewheight.SetFloat( clamped );
 			break;
 		}
 
-		case CONTROL_OPTIONS_FIELD_CROUCH_TRIGGER_DIST: 
+		case CHARACTER_OPTIONS_FIELD_KNOCKBACK:
 		{
-			float td = vr_crouchTriggerDist.GetFloat();
-			td += adjustAmount;
-			if ( td < 6.0f ) td = 6.0f;
-			if ( td > 70 ) td = 70;
-			vr_crouchTriggerDist.SetFloat( td );
+			static const int numValues = 2;
+			static const int values[numValues] = { 0, 1 };
+			vr_knockBack.SetInteger( AdjustOption( vr_knockBack.GetInteger(), values, numValues, adjustAmount ) );
 			break;
-
 		}
 
-		case CONTROL_OPTIONS_FIELD_WALK_SPEED_ADJUST: 
+		case CHARACTER_OPTIONS_FIELD_HEADKICK:
 		{
-			float ws = vr_walkSpeedAdjust.GetFloat();
-			ws += adjustAmount;
-			if ( ws < -100 ) ws = -100;
-			if ( ws > 150 ) ws = 150;
-			vr_walkSpeedAdjust.SetFloat( ws );
-			break;
-		}
-			
-		case CONTROL_OPTIONS_FIELD_WEAPON_PITCH: 
-		{
-			float p = vr_motionWeaponPitchAdj.GetFloat();
-			p += adjustAmount;
-			if ( p < -100 ) p = -100;
-			if ( p > 100 ) p = 100;
-			vr_motionWeaponPitchAdj.SetFloat( p );
+			static const int numValues = 2;
+			static const int values[numValues] = { 0, 1 };
+			vr_headKick.SetInteger( AdjustOption( vr_headKick.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
 
-		case CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH: 
-		{
-			float p = vr_motionFlashPitchAdj.GetFloat();
-			p += adjustAmount;
-			if ( p < -100 ) p = -100;
-			if ( p > 100 ) p = 100;
-			vr_motionFlashPitchAdj.SetFloat( p );
+		case CHARACTER_OPTIONS_FIELD_SHAKE_AMPLITUDE: {
+			const float percent = vr_shakeAmplitude.GetFloat();;
+			const float adjusted = percent + (float)adjustAmount * .01f;
+			const float clamped = idMath::ClampFloat( 0.0f, 1.0f, adjusted );
+			vr_shakeAmplitude.SetFloat( clamped );
 			break;
 		}
 
+	
 	}
 	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::GetField	
+idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Gameplay_Options::GetField	
 ========================
 */
-idSWFScriptVar idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::GetField( const int fieldIndex ) const {
+idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Character_Options::GetField( const int fieldIndex ) const {
 	switch ( fieldIndex )
 	{
+	
+		case CHARACTER_OPTIONS_FIELD_BODY_MODE:
+		{
+			const int bm = vr_playerBodyMode.GetInteger();
 
-		case CONTROL_OPTIONS_FIELD_CONTROLLER_TYPE:
-			if ( vr_controllerStandard.GetInteger() == 0 )
+			if ( bm == 0 )
 			{
-				return "Motion Controllers";
+				return "Full Body + Arms";
+			}
+
+			if ( bm == 1 )
+			{
+				return "Hands + Weaps";
+			}
+
+			if ( bm == 2 )
+			{
+				return "Weapons Only";
+			}
+		}
+			
+		
+		case CHARACTER_OPTIONS_FIELD_FLASH_MODE:
+		{
+			const int fm = vr_flashlightMode.GetInteger();
+
+			if ( fm == 0 )
+			{
+				return "Body";
+			}
+
+			if ( fm == 1 )
+			{
+				return "Head";
+			}
+
+			if ( fm == 2 )
+			{
+				return "Weapon";
+			}
+
+			if ( fm == 3 )
+			{
+				return "Hand";
+			}
+
+		}
+		
+		case CHARACTER_OPTIONS_FIELD_WEAPON_HAND:
+		{
+			if ( vr_weaponHand.GetInteger() == 0 ) 
+			{
+				return "Right Hand";
 			}
 			else
 			{
-				return "Standard Controller";
+				return "Left Hand";
 			}
-
-		case CONTROL_OPTIONS_FIELD_MOVE_MODE:
+		}
+		
+		case CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT: 
 		{
-			const int mm = vr_movePoint.GetInteger();
+			
+			return va( "%.1f", pm_normalviewheight.GetFloat() );
+		}	
 
-			if ( mm == 1 )
+		case CHARACTER_OPTIONS_FIELD_KNOCKBACK:
+		{
+			const int lev = vr_knockBack.GetBool();
+
+			if ( lev == 0 )
 			{
-				return "Off Hand = Forward";
+				return "#str_swf_disabled";
 			}
-
-			if ( mm == 2 )
+			else
 			{
-				return "Look = forward";
+				return "#str_swf_enabled";
 			}
-
-			return "Standard Stick Move";
 		}
 
-		case CONTROL_OPTIONS_FIELD_CROUCH_MODE:
-			if ( vr_crouchMode.GetInteger() == 0 )
+		case CHARACTER_OPTIONS_FIELD_HEADKICK:
+		{
+			const int lev = vr_headKick.GetBool();
+
+			if ( lev == 0 )
 			{
-				return "Full Motion Crouching";
+				return "#str_swf_disabled";
 			}
+			else
+			{
+				return "#str_swf_enabled";
+			}
+		}
 
-			return "Motion Triggered";
+		case CHARACTER_OPTIONS_FIELD_SHAKE_AMPLITUDE:
+			return LinearAdjust( vr_shakeAmplitude.GetFloat(), 0.0f, 1.0f, 0.0f, 100.0f );
 
-		case CONTROL_OPTIONS_FIELD_CROUCH_TRIGGER_DIST:
-			return va( "%.0f", vr_crouchTriggerDist.GetFloat() );
-
-		case CONTROL_OPTIONS_FIELD_WALK_SPEED_ADJUST:
-			return va( "%.0f", vr_walkSpeedAdjust.GetFloat() );
-			
-		case CONTROL_OPTIONS_FIELD_WEAPON_PITCH:
-			return va( "%.0f", vr_motionWeaponPitchAdj.GetFloat() );
-
-		case CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH:
-			return va( "%.0f", vr_motionFlashPitchAdj.GetFloat() );
 	}
 	return false;
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::IsDataChanged	
+idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Gameplay_Options::IsDataChanged	
 ========================
 */
-bool idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Options::IsDataChanged() const {
+bool idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Character_Options::IsDataChanged() const {
 	
-	
-	if ( originalControlType != vr_controllerStandard.GetInteger() )
+	if ( originalBodyMode != vr_playerBodyMode.GetInteger() )
+	{
+		return true;
+	}
+	if ( originalFlashMode != vr_flashlightMode.GetInteger() )
+	{
+		return true;
+	}
+	if ( originalWeaponHand != vr_weaponHand.GetInteger() )
+	{
+		return true;
+	}
+	if ( originalViewHeight != pm_normalviewheight.GetFloat() )
+	{
+		return true;
+	}
+	if ( originalKnockBack != vr_knockBack.GetInteger() )
+	{
+		return true;
+	}
+	if ( originalShakeAmplitude != vr_shakeAmplitude.GetFloat() )
+	{
+		return true;
+	}
+	if ( originalHeadKick != vr_headKick.GetInteger() )
 	{
 		return true;
 	}
 	
-	if ( originalMoveMode != vr_movePoint.GetInteger() )
-	{
-		return true;
-	}
-	
-	if ( originalCrouchMode != vr_crouchMode.GetInteger() )
-	{
-		return true;
-	}
-	
-	if ( originalCrouchTriggerDistance != vr_crouchTriggerDist.GetFloat() )
-	{
-		return true;
-	}
-	
-	if ( originalWalkSpeedAdjust != vr_walkSpeedAdjust.GetFloat() )
-	{
-		return true;
-	}
-		
-	if ( originalWeaponPitch != vr_motionWeaponPitchAdj.GetFloat() )
-	{
-		return true;
-	}
-	
-	if ( originalFlashPitch != vr_motionFlashPitchAdj.GetFloat() )
-	{
-		return true;
-	}
-		
 	return false;
 }

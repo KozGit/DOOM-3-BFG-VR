@@ -103,9 +103,6 @@ public:
 	
 	void				FrameStart( void );
 
-	void				PushFrame( int index, ovrPosef pose, double sampleTime );
-	void				PopFrame( int &frame, ovrPosef &pose, double &sampleTime );
-
 	void				OpenVrGetRight( idVec3 &position, idQuat &rotation );
 	void				OpenVrGetLeft( idVec3 &position, idQuat &rotation );
 		
@@ -116,7 +113,7 @@ public:
 	void				MotionControlGetRightHand( idVec3 &position, idQuat &rotation );
 	//void				MotionControlGetOpenVrController( vr::TrackedDeviceIndex_t deviceNum, idVec3 &position, idQuat &rotation );
 	void				MotionControlGetTouchController( int hand, idVec3 &position, idQuat &rotation );
-	void				MotionControllerSetHaptic( int hand, unsigned short value );
+	void				MotionControllerSetHaptic( float low, float hi );
 	
 	void				MSAAResolve( void );
 	void				FXAAResolve( idImage * leftCurrent, idImage * rightCurrent );
@@ -273,6 +270,8 @@ public:
 	idVec3				motionMoveDelta;
 	idVec3				motionMoveVelocity;
 	idVec3				leanOffset;
+	idVec3				fixedPDAMoveDelta;
+
 
 
 	float				independentWeaponYaw;
@@ -346,7 +345,7 @@ extern idCVar	vr_manualIPDEnable;
 extern idCVar	vr_manualIPD;
 extern idCVar	vr_manualHeight;
 
-extern idCVar	vr_showBody;
+//extern idCVar	vr_showBody;
 extern idCVar	vr_viewModelArms;
 extern idCVar	vr_wristStatMon;
 extern idCVar	vr_disableWeaponAnimation;
@@ -459,6 +458,7 @@ extern idCVar	vr_walkSpeedAdjust;
 extern idCVar	vr_movePoint;
 
 extern idCVar	vr_crouchTriggerDist;
+extern idCVar	vr_crouchMode;
 
 extern idCVar	vr_wipPeriodMin;
 extern idCVar	vr_wipPeriodMax;

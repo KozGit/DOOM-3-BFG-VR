@@ -29,21 +29,22 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #include "../Game_local.h"
 
-const static int NUM_VR_HMD_OPTIONS_OPTIONS = 8;
+enum settingMenuCmds_t
+{
+	SETTING_CMD_BINDINGS,
+};
 
-extern idCVar vr_pixelDensity;
-extern idCVar vr_vignette;
-extern idCVar vr_scale;
+const static int NUM_SYSTEM_VR_PDA_OPTIONS = 8;
 
 float LinearAdjust( const float input, const float currentMin, const float currentMax, const float desiredMin,  float desiredMax );
 int	AdjustOption( const int currentValue, const int values[], const int numValues, const int adjustment );
 
 /*
 ========================
-idMenuScreen_Shell_VR_HMD_Options::Initialize
+idMenuScreen_Shell_VR_PDA_Options::Initialize
 ========================
 */
-void idMenuScreen_Shell_VR_HMD_Options::Initialize( idMenuHandler * data ) {
+void idMenuScreen_Shell_VR_PDA_Options::Initialize( idMenuHandler * data ) {
 	idMenuScreen::Initialize( data );
 
 	if ( data != NULL ) {
@@ -51,9 +52,9 @@ void idMenuScreen_Shell_VR_HMD_Options::Initialize( idMenuHandler * data ) {
 	}
 
 	SetSpritePath( "menuSystemOptions" );
-
+	
 	options = new (TAG_SWF) idMenuWidget_DynamicList();
-	options->SetNumVisibleOptions( NUM_VR_HMD_OPTIONS_OPTIONS );
+	options->SetNumVisibleOptions( NUM_SYSTEM_VR_PDA_OPTIONS );
 	options->SetSpritePath( GetSpritePath(), "info", "options" );
 	options->SetWrappingAllowed( true );
 	options->SetControlList( true );
@@ -61,7 +62,7 @@ void idMenuScreen_Shell_VR_HMD_Options::Initialize( idMenuHandler * data ) {
 
 	btnBack = new (TAG_SWF) idMenuWidget_Button();
 	btnBack->Initialize( data );
-	btnBack->SetLabel( "VR Options" ); // #str_swf_settings
+	btnBack->SetLabel( "VR UI Options" );
 	btnBack->SetSpritePath( GetSpritePath(), "info", "btnBack" );
 	btnBack->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_GO_BACK );
 
@@ -69,23 +70,48 @@ void idMenuScreen_Shell_VR_HMD_Options::Initialize( idMenuHandler * data ) {
 	AddChild( btnBack );
 
 	idMenuWidget_ControlButton * control;
-		
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
+			
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Vignette" );
-	control->SetDataSource( &systemData, idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_VIGNETTE );
+	control->SetLabel( "PDA Location" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_PDA_Options::PDA_OPTIONS_FIELD_PDA_MODE );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_VIGNETTE );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_PDA_Options::PDA_OPTIONS_FIELD_PDA_MODE );
+	options->AddChild( control );
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "PDA Position Dist" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_PDA_Options::PDA_POSITION_OPTIONS_FIELD_DISTANCE );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_PDA_Options::PDA_POSITION_OPTIONS_FIELD_DISTANCE );
+	options->AddChild( control );
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "PDA Position Vert" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_PDA_Options::PDA_POSITION_OPTIONS_FIELD_VERTICAL );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_PDA_Options::PDA_POSITION_OPTIONS_FIELD_VERTICAL );
+	options->AddChild( control );
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "PDA Position Horiz" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_PDA_Options::PDA_POSITION_OPTIONS_FIELD_HORIZONTAL );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_PDA_Options::PDA_POSITION_OPTIONS_FIELD_HORIZONTAL );
+	options->AddChild( control );
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "PDA Pitch" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_PDA_Options::PDA_POSITION_OPTIONS_FIELD_PITCH );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_PDA_Options::PDA_POSITION_OPTIONS_FIELD_PITCH );
 	options->AddChild( control );
 		
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Pixel Density" );
-	control->SetDataSource( &systemData, idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_PIXEL_DENSITY );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_PIXEL_DENSITY );
-	options->AddChild( control );
-	
+
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN_RELEASE ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_STOP_REPEATER, WIDGET_EVENT_SCROLL_DOWN_RELEASE ) );
@@ -98,10 +124,10 @@ void idMenuScreen_Shell_VR_HMD_Options::Initialize( idMenuHandler * data ) {
 
 /*
 ========================
-idMenuScreen_Shell_VR_HMD_Options::Update
+idMenuScreen_Shell_VR_PDA_Options::Update
 ========================
 */
-void idMenuScreen_Shell_VR_HMD_Options::Update() {
+void idMenuScreen_Shell_VR_PDA_Options::Update() {
 
 	if ( menuData != NULL ) {
 		idMenuWidget_CommandBar * cmdBar = menuData->GetCmdBar();
@@ -118,12 +144,12 @@ void idMenuScreen_Shell_VR_HMD_Options::Update() {
 			buttonInfo->action.Set( WIDGET_ACTION_PRESS_FOCUSED );
 		}		
 	}
-	
+
 	idSWFScriptObject & root = GetSWFObject()->GetRootObject();
 	if ( BindSprite( root ) ) {
 		idSWFTextInstance * heading = GetSprite()->GetScriptObject()->GetNestedText( "info", "txtHeading" );
 		if ( heading != NULL ) {
-			heading->SetText( "HMD Settings" );	
+			heading->SetText( "VR PDA Options" );	
 			heading->SetStrokeInfo( true, 0.75f, 1.75f );
 		}
 
@@ -142,10 +168,10 @@ void idMenuScreen_Shell_VR_HMD_Options::Update() {
 
 /*
 ========================
-idMenuScreen_Shell_VR_HMD_Options::ShowScreen
+idMenuScreen_Shell_VR_PDA_Options::ShowScreen
 ========================
 */
-void idMenuScreen_Shell_VR_HMD_Options::ShowScreen( const mainMenuTransition_t transitionType ) {
+void idMenuScreen_Shell_VR_PDA_Options::ShowScreen( const mainMenuTransition_t transitionType ) {
 	
 	systemData.LoadData();
 	
@@ -154,10 +180,10 @@ void idMenuScreen_Shell_VR_HMD_Options::ShowScreen( const mainMenuTransition_t t
 
 /*
 ========================
-idMenuScreen_Shell_VR_HMD_Options::HideScreen
+idMenuScreen_Shell_VR_PDA_Options::HideScreen
 ========================
 */
-void idMenuScreen_Shell_VR_HMD_Options::HideScreen( const mainMenuTransition_t transitionType ) {
+void idMenuScreen_Shell_VR_PDA_Options::HideScreen( const mainMenuTransition_t transitionType ) {
 
 	if ( systemData.IsRestartRequired() ) {
 		class idSWFScriptFunction_Restart : public idSWFScriptFunction_RefCounted {
@@ -199,35 +225,30 @@ void idMenuScreen_Shell_VR_HMD_Options::HideScreen( const mainMenuTransition_t t
 
 /*
 ========================
-idMenuScreen_Shell_VR_HMD_Options::HandleAction h
+idMenuScreen_Shell_VR_PDA_Options::HandleAction h
 ========================
 */
-bool idMenuScreen_Shell_VR_HMD_Options::HandleAction( idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled ) {
+bool idMenuScreen_Shell_VR_PDA_Options::HandleAction( idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled ) {
 
 	if ( menuData == NULL ) {
 		return true;
 	}
 	
-	if ( menuData->ActiveScreen() != SHELL_AREA_VR_HMD_OPTIONS ) {
+	if ( menuData->ActiveScreen() != SHELL_AREA_VR_PDA_OPTIONS ) {
 		return false;
 	}
 
 	widgetAction_t actionType = action.GetType();
 	const idSWFParmList & parms = action.GetParms();
-
 	switch ( actionType ) {
 		case WIDGET_ACTION_GO_BACK: {
 			if ( menuData != NULL ) {
-				menuData->SetNextScreen( SHELL_AREA_VR_SETTINGS, MENU_TRANSITION_SIMPLE );
+				menuData->SetNextScreen( SHELL_AREA_VR_UI_OPTIONS, MENU_TRANSITION_SIMPLE );
 			}
 			return true;
 		}
-		/*case WIDGET_ACTION_ADJUST_FIELD:
-			if ( widget->GetDataSourceFieldIndex() == idMenuDataSource_VR_HMD_Options::HMD_OPTIONS_FIELD_MANUAL_IPD ) {
-				menuData->SetNextScreen( SHELL_AREA_RESOLUTION, MENU_TRANSITION_SIMPLE );
-				return true;
-			}
-			break; */
+								
+
 		case WIDGET_ACTION_COMMAND: {
 
 			if ( options == NULL ) {
@@ -245,11 +266,7 @@ bool idMenuScreen_Shell_VR_HMD_Options::HandleAction( idWidgetAction & action, c
 			}
 
 			switch ( parms[0].ToInteger() ) {
-				/*case idMenuDataSource_VR_HMD_Options::SYSTEM_FIELD_FULLSCREEN: {
-					menuData->SetNextScreen( SHELL_AREA_RESOLUTION, MENU_TRANSITION_SIMPLE );
-					return true;
-				} */
-				case 1:
+			case 1: 
 
 				default: {
 					systemData.AdjustField( parms[0].ToInteger(), 1 );
@@ -285,143 +302,169 @@ bool idMenuScreen_Shell_VR_HMD_Options::HandleAction( idWidgetAction & action, c
 
 /*
 ========================
-idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::idMenuDataSource_VR_HMD_Options
+idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options
 ========================
 */
-idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::idMenuDataSource_VR_HMD_Options() {
+idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options() {
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::LoadData
+idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::LoadData
 ========================
 */
-void idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::LoadData() {
-		
-	originalVignette = vr_vignette.GetInteger();
-	originalPixelDensity = vr_pixelDensity.GetFloat();
-}
-
-/*
-========================
-idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::IsRestartRequired
-========================
-*/
-bool idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::IsRestartRequired() const {
+void idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::LoadData() {
 	
-	if ( originalVignette != vr_vignette.GetInteger() ) {
-		return true;
-	}
-	if ( originalPixelDensity != vr_pixelDensity.GetFloat() ) {
-		return true;
-	}
+	originalPDAMode = vr_PDAfixLocation.GetInteger();
+	originalPDAPitch = vr_pdaPitch.GetFloat();
+	originalPDADist = vr_pdaPosX.GetFloat();
+	originalPDAHorizontal = vr_pdaPosY.GetFloat();
+	originalPDAVertical = vr_pdaPosZ.GetFloat();
+}
 
+/*
+========================
+idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::IsRestartRequired
+========================
+*/
+bool idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::IsRestartRequired() const {
 	return false;
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::CommitData
+idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::CommitData
 ========================
 */
-void idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::CommitData() {
+void idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::CommitData() {
 	cvarSystem->SetModifiedFlags( CVAR_ARCHIVE );
 }
 
+
 /*
 ========================
-AdjustOption
-Given a current value in an array of possible values, returns the next n value
-========================
-
-int idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::AdjustOption( int currentValue, const int values[], int numValues, int adjustment ) {
-	int index = 0;
-	for ( int i = 0; i < numValues; i++ ) {
-		if ( currentValue == values[i] ) {
-			index = i;
-			break;
-		}
-	}
-	index += adjustment;
-	while ( index < 0 ) {
-		index += numValues;
-	}
-	index %= numValues;
-	return values[index];
-}
-
-========================
-LinearAdjust
-Linearly converts a float from one scale to another
-========================
-
-float idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::LinearAdjust( float input, float currentMin, float currentMax, float desiredMin, float desiredMax ) {
-	return ( ( input - currentMin ) / ( currentMax - currentMin ) ) * ( desiredMax - desiredMin ) + desiredMin;
-}
-*/
-/*
-========================
-idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::AdjustField
+idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::AdjustField
 ========================
 */
-void idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::AdjustField( const int fieldIndex, const int adjustAmount ) {
-	switch ( fieldIndex ) {
-		
-		
-		
-		case HMD_OPTIONS_FIELD_VIGNETTE: {
+void idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::AdjustField( const int fieldIndex, const int adjustAmount ) {
+	switch ( fieldIndex )
+	{
+		case PDA_OPTIONS_FIELD_PDA_MODE:
+		{
 			static const int numValues = 2;
 			static const int values[numValues] = { 0, 1 };
-			vr_vignette.SetInteger( AdjustOption( vr_vignette.GetInteger(), values, numValues, adjustAmount ) );
-			break;
-		}
-		case HMD_OPTIONS_FIELD_PIXEL_DENSITY: {
-			const float percent = LinearAdjust(vr_pixelDensity.GetFloat(), .5f, 2.0f, 0.0f, 100.0f );
-			const float adjusted = percent + (float)adjustAmount * 5.0f;
-			const float clamped = idMath::ClampFloat( 0.0f, 100.0f, adjusted );
-			vr_pixelDensity.SetFloat( LinearAdjust( clamped, 0.0f, 100.0f, .5f, 2.0f ) );
+			vr_PDAfixLocation.SetInteger( AdjustOption( vr_PDAfixLocation.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
 		
+		case PDA_POSITION_OPTIONS_FIELD_PITCH:
+		{
+			float p = vr_pdaPitch.GetFloat();
+			p += adjustAmount * .5;
+			if ( p < -100.0f ) p = -100.0f;
+			if ( p > 100 ) p = 100;
+			vr_pdaPitch.SetFloat( p );
+			break;
+
+		}
+
+		case PDA_POSITION_OPTIONS_FIELD_DISTANCE:
+		{
+			float ws = vr_pdaPosX.GetFloat();
+			ws += adjustAmount;
+			if ( ws < 0 ) ws = 0;
+			if ( ws > 50 ) ws = 50;
+			vr_pdaPosX.SetFloat( ws );
+			break;
+		}
+
+		case PDA_POSITION_OPTIONS_FIELD_HORIZONTAL:
+		{
+			float ws = vr_pdaPosY.GetFloat();
+			ws += adjustAmount;
+			if ( ws < -30 ) ws = -30;
+			if ( ws > 30 ) ws = 30;
+			vr_pdaPosY.SetFloat( ws );
+			break;
+		}
+
+		case PDA_POSITION_OPTIONS_FIELD_VERTICAL:
+		{
+			float ws = vr_pdaPosZ.GetFloat();
+			ws += adjustAmount;
+			if ( ws < -40 ) ws = -40;
+			if ( ws > 40 ) ws = 40;
+			vr_pdaPosZ.SetFloat( ws );
+			break;
+		}
 	}
 	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::GetField	
+idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::GetField	
 ========================
 */
-idSWFScriptVar idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::GetField( const int fieldIndex ) const {
-	switch ( fieldIndex ) {
-		
-		case HMD_OPTIONS_FIELD_VIGNETTE:
-			if ( vr_vignette.GetInteger() == 0 ) {
-				return "#str_swf_disabled";
-			} else {
-				return "#str_swf_enabled";
+idSWFScriptVar idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::GetField( const int fieldIndex ) const {
+	switch ( fieldIndex )
+	{
+		case PDA_OPTIONS_FIELD_PDA_MODE:
+			if ( vr_PDAfixLocation.GetInteger() == 0 )
+			{
+				return "Hold in Hand";
 			}
-		
-		case HMD_OPTIONS_FIELD_PIXEL_DENSITY:
-			return va( "%1.2f", vr_pixelDensity.GetFloat() );
-				
+			else
+			{
+				return "Fix In Space";
+			}
+
+		case PDA_POSITION_OPTIONS_FIELD_PITCH:
+			return va( "%.0f", vr_pdaPitch.GetFloat() );
+
+		case PDA_POSITION_OPTIONS_FIELD_DISTANCE:
+			return va( "%.1f", vr_pdaPosX.GetFloat() );
+
+		case PDA_POSITION_OPTIONS_FIELD_HORIZONTAL:
+			return va( "%.1f", vr_pdaPosY.GetFloat() );
+
+		case PDA_POSITION_OPTIONS_FIELD_VERTICAL:
+			return va( "%.1f", vr_pdaPosZ.GetFloat() );
 	}
 	return false;
 }
 
 /*
 ========================
-idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::IsDataChanged	
+idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::IsDataChanged	
 ========================
 */
-bool idMenuScreen_Shell_VR_HMD_Options::idMenuDataSource_VR_HMD_Options::IsDataChanged() const {
-		
-	if ( originalVignette != vr_vignette.GetInteger() ) {
-		return true;
-	}
-	if ( originalPixelDensity != vr_pixelDensity.GetFloat() ) {
+bool idMenuScreen_Shell_VR_PDA_Options::idMenuDataSource_Shell_VR_PDA_Options::IsDataChanged() const {
+	
+	if ( originalPDAMode != vr_PDAfixLocation.GetInteger() )
+	{
 		return true;
 	}
 	
+	if ( originalPDAPitch != vr_pdaPitch.GetFloat() )
+	{
+		return true;
+	}
+	
+	if ( originalPDADist != vr_pdaPosX.GetFloat() )
+	{
+		return true;
+	}
+	
+	if ( originalPDAHorizontal != vr_pdaPosY.GetFloat() )
+	{
+		return true;
+	}
+	
+	if ( originalPDAVertical != vr_pdaPosZ.GetFloat() )
+	{
+		return true;
+	}
+		
 	return false;
 }
