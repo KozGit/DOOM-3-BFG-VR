@@ -694,10 +694,30 @@ void idCommonLocal::Frame()
 			if ( game )
 			{
 				ingame = game->IsInGame();
-				isVR = game->isVR;
+				
+				if ( game->isVR )
+				{
+					if ( commonVr->wasSaved )
+					{
+						if ( ( Sys_Milliseconds() - commonVr->lastSaveTime ) > 2000 )
+						{
+							commonVr->wasSaved = false;
+							isVR = true;
+						}
+						else
+						{
+							isVR = false;
+						}
+					}
+					else
+					{
+						isVR = true;
+					}
+				}
+				
 			}
 			
-			if ( isVR )
+			if ( isVR ) 
 			{
 				
 				/*
@@ -741,7 +761,7 @@ void idCommonLocal::Frame()
 				}
 				else // game is not paused, see if we need to pause it
 				{
-					if ( pauseGame && ingame && !commonVr->gameSaving ) // we need to pause 
+					if ( pauseGame && ingame && !commonVr->gameSaving ) 
 					{
 						if ( game->IsPDAOpen() && !PDAopenedByPause ) // the PDA was already opened, dont toggle it
 						{

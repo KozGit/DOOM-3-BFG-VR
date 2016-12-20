@@ -1035,6 +1035,11 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	ClearWipe();
 
 	commonVr->vrIsBackgroundSaving = false;
+
+	commonVr->lastSaveTime = Sys_Milliseconds();
+	commonVr->wasSaved = true;
+
+
 	return true;
 }
 

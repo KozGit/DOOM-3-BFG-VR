@@ -5564,8 +5564,8 @@ void idWeapon::Event_GetWeaponSkin()
 	// Koz fixme - need to go through all the weapon models and delete the meshes for the hands and statwatch.  Also need to delete all the skin definitions, no longer necessary.
 
 	// this has all changed.  Originally, hands were part of the weapon models, and hands and statwatch were turned on and off
-	// by changing the skin for model.  Now the hands are always drawn as part of the player body, so we no longer
-	// need all the skins.  The only skin we are using now is for the mini flashlight when mounted to the weapon.
+	// by changing the skin for model.  Now the hands are always drawn as part of the player body, so all the skins
+	// are no longer needed.  The only skin used now is for the mini flashlight when mounted to the weapon.
 	
 
 	if ( isPlayerFlashlight )
@@ -5574,48 +5574,12 @@ void idWeapon::Event_GetWeaponSkin()
 	}
 	else
 	{
-		vrSkinName = "vr/weaponhands/0h";
+		//vrSkinName = "vr/weaponhands/0h";
+		vrSkinName = "";
 	}
-
 
 	//common->Printf( "idWeapon::Event_GetWeaponSkin() returning %s\n", vrSkinName.c_str() );
 	idThread::ReturnString( vrSkinName.c_str() );
-
-
-
-	/* old skin code
-	if ( isPlayerFlashlight )
-	{
-		//vrSkinName = vr_flashlightMode.GetInteger() == 2 ? "minivr/flashhands/" : "vr/flashhands/"; // mini flashlight skin for gun mount
-		vrSkinName = commonVr->GetCurrentFlashMode() == 2 ? "minivr/flashhands/" : "vr/flashhands/"; // mini flashlight skin for gun mount
-		//if ( vr_viewModelArms.GetBool() && commonVr->VR_USE_MOTION_CONTROLS && vr_flashlightMode.GetInteger() == 3 && !vr_showBody.GetInteger() && vr_weaponHand.GetInteger() == 0 )
-		if ( vr_viewModelArms.GetBool() && commonVr->VR_USE_MOTION_CONTROLS && commonVr->GetCurrentFlashMode() == 3 && !vr_showBody.GetInteger() && vr_weaponHand.GetInteger() == 0 )
-		{
-			vrSkinName += "1h";
-			if ( vr_wristStatMon.GetInteger() == 2 ) vrSkinName += "sw";
-		}
-		else
-		{
-			vrSkinName += "0h";
-
-		}
-	}
-	else
-	{
-		vrSkinName = "vr/weaponhands/";
-				
-		if ( vr_viewModelArms.GetBool() && !vr_showBody.GetInteger() && vr_weaponHand.GetInteger() == 0 )
-		{
-			vrSkinName += commonVr->VR_USE_MOTION_CONTROLS ? "1h" : "2h";
-			vrSkinName += vr_wristStatMon.GetInteger() == 1 ? "sw" : "";
-		}
-		else vrSkinName += "0h";
-	
-	}
-	*/
-
-
-
 
 }
 

@@ -211,6 +211,9 @@ iVr::iVr()
 	gameSaving = false;
 	forceLeftStick = true;	// start the PDA in the left menu.
 	pdaToggleTime = Sys_Milliseconds();
+	lastSaveTime = Sys_Milliseconds();
+	wasSaved = false;
+
 	PDAclipModelSet = false;
 	useFBO = false;
 	VR_USE_MOTION_CONTROLS = 0;
@@ -787,7 +790,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 	static idMat3 hmdAxis = mat3_identity;
 
 	static bool	neckInitialized = false;
-	static idVec3 initialNeckPosition;
+	static idVec3 initialNeckPosition = vec3_zero;
 	static idVec3 currentNeckPosition = vec3_zero;
 	static idVec3 lastNeckPosition = vec3_zero;
 

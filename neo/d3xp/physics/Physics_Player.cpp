@@ -1521,7 +1521,7 @@ void idPhysics_Player::CheckDuck()
 	else
 	{
 
-		if ( game->isVR && vr_crouchMode.GetInteger() == 0 ) 
+		if ( current.movementType == PM_NORMAL && game->isVR && vr_crouchMode.GetInteger() == 0 )
 		// game is in full motion crouch mode, dont do anything except change the bounding box to match the height
 		// and change the player speed to crouch speed if player has ducked enough.
 		// thought I was going to have to do a bunch of bullshit to toggle the crouch anim
@@ -1530,8 +1530,10 @@ void idPhysics_Player::CheckDuck()
 
 		{
 			maxZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z;
-			//common->Printf( "Maxz = %f\n", maxZ );
-			if ( maxZ < (pm_crouchheight.GetFloat() + 2) )
+			maxZ = (int)maxZ; // if this is not cast as an int, it crashes the savegame file!!!!!!! WTF?
+			idMath::ClampFloat( pm_crouchheight.GetFloat(), pm_normalheight.GetFloat(), maxZ );
+						
+			if ( maxZ <= ( pm_crouchheight.GetFloat() + 2 ) )
 			{
 				playerSpeed = crouchSpeed;
 			}

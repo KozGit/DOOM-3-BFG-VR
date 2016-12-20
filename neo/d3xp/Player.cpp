@@ -2233,8 +2233,8 @@ void idPlayer::Init()
 	crosshairEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/weaponsight.lwo" );
 	crosshairEntity.weaponDepthHack = true;
 	skinCrosshairDot = declManager->FindSkin( "skins/vr/crosshairDot" );
-	skinCrosshairCircleDot = declManager->FindSkin( "skins/vr/crosshairCircleDot" );;
-	skinCrosshairCross = declManager->FindSkin( "skins/vr/crosshairCross" );;
+	skinCrosshairCircleDot = declManager->FindSkin( "skins/vr/crosshairCircleDot" );
+	skinCrosshairCross = declManager->FindSkin( "skins/vr/crosshairCross" );
 
 	// heading indicator for VR - point the direction the body is facing.
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
@@ -3383,17 +3383,18 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	skinHeadingArrows = declManager->FindSkin( "skins/models/headingbeamarrows" );
 	skinHeadingArrowsScroll = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
 	skinCrosshairDot = declManager->FindSkin( "skins/vr/crosshairDot" );
-	skinCrosshairCircleDot = declManager->FindSkin( "skins/vr/crosshairCircleDot" );;
-	skinCrosshairCross = declManager->FindSkin( "skins/vr/crosshairCross" );;
+	skinCrosshairCircleDot = declManager->FindSkin( "skins/vr/crosshairCircleDot" );
+	skinCrosshairCross = declManager->FindSkin( "skins/vr/crosshairCross" );
 	
-
+	const idDeclSkin* blag;
 	//koz begin
 	savefile->ReadBool( laserSightActive );
 	savefile->ReadBool( headingBeamActive );
 	savefile->ReadBool( hudActive );
 	
 	savefile->ReadInt( commonVr->currentFlashMode );
-	savefile->ReadSkin( crosshairEntity.customSkin );
+//	savefile->ReadSkin( crosshairEntity.customSkin );
+	savefile->ReadSkin( blag );
 
 	savefile->ReadBool( PDAfixed );
 	savefile->ReadVec3( PDAorigin );
@@ -11143,7 +11144,6 @@ void idPlayer::Think()
 	
 	
 	
-	static int lastCVarFlashMode = vr_flashlightMode.GetInteger();
 	static int lastFlashMode = commonVr->GetCurrentFlashMode();
 	static bool lastViewArms = vr_viewModelArms.GetBool();
 	static bool lastFists = false;
@@ -11184,9 +11184,15 @@ void idPlayer::Think()
 
 		}
 
-		if ( vr_flashlightMode.GetInteger() != lastCVarFlashMode || lastFlashMode != commonVr->GetCurrentFlashMode() )
+		if ( vr_flashlightMode.IsModified() || lastFlashMode != commonVr->GetCurrentFlashMode() )
 		{
-			lastCVarFlashMode = vr_flashlightMode.GetInteger();
+			
+			if ( vr_flashlightMode.IsModified() )
+			{
+				commonVr->currentFlashMode = vr_flashlightMode.GetInteger();
+				vr_flashlightMode.ClearModified();
+			}
+
 			lastFlashMode = commonVr->GetCurrentFlashMode();
 			UpdatePlayerSkinsPoses();
 		}
@@ -12670,8 +12676,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 						
 				origin = PDAorigin;
 				axis = PDAaxis;
-				commonVr->fixedPDAMoveDelta;
-				
+								
 			
 				//if the player has moved ( or been moved, if on an elevator or lift )
 				//move the PDA to maintain a constant relative position

@@ -139,6 +139,10 @@ public:
 	int					swfRenderMode;
 	bool				PDAclipModelSet;
 	int					pdaToggleTime;
+	int					lastSaveTime;
+	bool				wasSaved;
+
+
 	bool				forceLeftStick;
 	
 	int					currentFlashlightPosition;

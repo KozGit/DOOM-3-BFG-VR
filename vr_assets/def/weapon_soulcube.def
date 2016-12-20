@@ -83,19 +83,9 @@ entityDef weapon_soulcube {
 	"controllerShakeLowMag"		"0.9"
 	"controllerShakeLowTime"	"250"
 	
-	
-	"skin_cube_1" 				"skins/models/weapons/soulcubeidlevr/weaponhands/0h"
-	"skin_cube_2" 				"skins/models/weapons/soulcubeidlevr/weaponhands/1h"
-	"skin_cube_3" 				"skins/models/weapons/soulcubeidlevr/weaponhands/1hsw"
-	"skin_cube_4" 				"skins/models/weapons/soulcubeidlevr/weaponhands/2h"
-	"skin_cube_5" 				"skins/models/weapons/soulcubeidlevr/weaponhands/2hsw"
-	
-	"skin_cube_6" 				"skins/models/weapons/soulcubefirevr/weaponhands/0h"
-	"skin_cube_7" 				"skins/models/weapons/soulcubefirevr/weaponhands/1h"
-	"skin_cube_8" 				"skins/models/weapons/soulcubefirevr/weaponhands/1hsw"
-	"skin_cube_9" 				"skins/models/weapons/soulcubefirevr/weaponhands/2h"
-	"skin_cube_10" 				"skins/models/weapons/soulcubefirevr/weaponhands/2hsw"
-					
+	"skin_cube_idle" 				"skins/models/weapons/soulcubeidle"
+	"skin_cube_fire" 				"skins/models/weapons/soulcubefire"
+						
 }
 
 model viewmodel_soulcube_vr {

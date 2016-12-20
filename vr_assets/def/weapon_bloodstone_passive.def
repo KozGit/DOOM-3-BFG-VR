@@ -47,14 +47,14 @@ model viewmodel_bloodstone_passive_vr {
 
 	anim raise					models/md5/weapons/blood_orb_view/new/bloodorb_vr_raise.md5anim {
 		frame 1						sound_body artifact_raise
-		//frame 1						skin skins/weapons/artifact_charged.skin
-		frame 1						object_call SkinCharged
+		frame 1						skin skins/weapons/artifact_charged
+		//frame 1						object_call SkinCharged
 		frame 1						call setShaderTime
 	}
 	anim raise_petrified		models/md5/weapons/blood_orb_view/new/bloodorb_vr_raise.md5anim {
 		frame 1						sound_body artifact_raise
-		//frame 1						skin skins/weapons/artifact_petrified.skin
-		frame 1						object_call SkinPetrified
+		frame 1						skin skins/weapons/artifact_petrified
+		//frame 1						object_call SkinPetrified
 	}
 	anim putaway				models/md5/weapons/blood_orb_view/new/bloodorb_vr_putaway.md5anim
 
@@ -115,17 +115,5 @@ entityDef weapon_bloodstone_passive {
 	"snd_idleloop"				"artifact_idleloop"
 	"snd_acquire"				"sound_weapon_acquire"
 	"snd_respawn"				"sound_weapon_respawn"
-	
-		// koz skins for hands/ statswatch
-	"skin_artifact_charged_1" 				"skins/models/weapons/artifact_chargedvr/weaponhands/0h"
-	"skin_artifact_charged_2" 				"skins/models/weapons/artifact_chargedvr/weaponhands/1h"
-	"skin_artifact_charged_3" 				"skins/models/weapons/artifact_chargedvr/weaponhands/1hsw"
-	"skin_artifact_charged_4" 				"skins/models/weapons/artifact_chargedvr/weaponhands/2h"
-	"skin_artifact_charged_5" 				"skins/models/weapons/artifact_chargedvr/weaponhands/2hsw"
-
-	"skin_artifact_petrified_1" 			"skins/models/weapons/artifact_petrifiedvr/weaponhands/0h"
-	"skin_artifact_petrified_2" 			"skins/models/weapons/artifact_petrifiedvr/weaponhands/1h"
-	"skin_artifact_petrified_3" 			"skins/models/weapons/artifact_petrifiedvr/weaponhands/1hsw"
-	"skin_artifact_petrified_4" 			"skins/models/weapons/artifact_petrifiedvr/weaponhands/2h"
-	"skin_artifact_petrified_5" 			"skins/models/weapons/artifact_petrifiedvr/weaponhands/2hsw"	
+		
 }

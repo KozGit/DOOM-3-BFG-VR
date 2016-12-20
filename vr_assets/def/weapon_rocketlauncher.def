@@ -92,45 +92,7 @@ entityDef weapon_rocketlauncher {
 	"skin_4"					"skins/models/weapons/3rox.skin"
 	"skin_5"					"skins/models/weapons/4rox.skin"
 	"skin_6"					"skins/models/weapons/5rox.skin"
-	
-	// koz hand/statwatch skins
-	"skin_7"					"skins/models/weapons/0roxvr/weaponhands/0h.skin"
-	"skin_8"					"skins/models/weapons/1roxvr/weaponhands/0h.skin"
-	"skin_9"					"skins/models/weapons/2roxvr/weaponhands/0h.skin"
-	"skin_10"					"skins/models/weapons/3roxvr/weaponhands/0h.skin"
-	"skin_11"					"skins/models/weapons/4roxvr/weaponhands/0h.skin"
-	"skin_12"					"skins/models/weapons/5roxvr/weaponhands/0h.skin"
-	
-	"skin_13"					"skins/models/weapons/0roxvr/weaponhands/1h.skin"
-	"skin_14"					"skins/models/weapons/1roxvr/weaponhands/1h.skin"
-	"skin_15"					"skins/models/weapons/2roxvr/weaponhands/1h.skin"
-	"skin_16"					"skins/models/weapons/3roxvr/weaponhands/1h.skin"
-	"skin_17"					"skins/models/weapons/4roxvr/weaponhands/1h.skin"
-	"skin_18"					"skins/models/weapons/5roxvr/weaponhands/1h.skin"
-	
-	"skin_19"					"skins/models/weapons/0roxvr/weaponhands/2h.skin"
-	"skin_20"					"skins/models/weapons/1roxvr/weaponhands/2h.skin"
-	"skin_21"					"skins/models/weapons/2roxvr/weaponhands/2h.skin"
-	"skin_22"					"skins/models/weapons/3roxvr/weaponhands/2h.skin"
-	"skin_23"					"skins/models/weapons/4roxvr/weaponhands/2h.skin"
-	"skin_24"					"skins/models/weapons/5roxvr/weaponhands/2h.skin"
-	
-	"skin_25"					"skins/models/weapons/0roxvr/weaponhands/1hsw.skin"
-	"skin_26"					"skins/models/weapons/1roxvr/weaponhands/1hsw.skin"
-	"skin_27"					"skins/models/weapons/2roxvr/weaponhands/1hsw.skin"
-	"skin_28"					"skins/models/weapons/3roxvr/weaponhands/1hsw.skin"
-	"skin_29"					"skins/models/weapons/4roxvr/weaponhands/1hsw.skin"
-	"skin_30"					"skins/models/weapons/5roxvr/weaponhands/1hsw.skin"
-	
-	"skin_31"					"skins/models/weapons/0roxvr/weaponhands/2hsw.skin"
-	"skin_32"					"skins/models/weapons/1roxvr/weaponhands/2hsw.skin"
-	"skin_33"					"skins/models/weapons/2roxvr/weaponhands/2hsw.skin"
-	"skin_34"					"skins/models/weapons/3roxvr/weaponhands/2hsw.skin"
-	"skin_35"					"skins/models/weapons/4roxvr/weaponhands/2hsw.skin"
-	"skin_36"					"skins/models/weapons/5roxvr/weaponhands/2hsw.skin"
-	
-	
-	
+		
 	"skin_invisible"			"skins/rocket_invis"
 	
 	"spread"					"1"

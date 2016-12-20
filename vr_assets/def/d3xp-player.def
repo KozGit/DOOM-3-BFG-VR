@@ -459,6 +459,13 @@ entityDef player_base_d3xp_sp {
 	"skin_d3xp_player_7" 			"skins/characters/player/greenmarine_arm2/vrBody"
 	"skin_d3xp_player_8" 			"skins/characters/player/greenmarine_arm2/vrWeaponsOnly"
 	"skin_d3xp_player_9" 			"skins/characters/player/greenmarine_arm2/vrHandsOnly"
+	
+	"skinHeadingSolid_d3xp"			"skins/models/headingbeamsolid" 
+	"skinHeadingArrows_d3xp"		"skins/models/headingbeamarrows"
+	"skinHeadingArrowsScroll_d3xp"	"skins/models/headingbeamarrowsscroll" 
+	"skinCrosshairDot_d3xp"			"skins/vr/crosshairDot" 
+	"skinCrosshairCircleDot_d3xp"	"skins/vr/crosshairCircleDot" 
+	"skinCrosshairCross_d3xp"		"skins/vr/crosshairCross"
 }
 
 

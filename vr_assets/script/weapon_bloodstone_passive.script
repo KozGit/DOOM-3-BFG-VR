@@ -23,18 +23,9 @@ object weapon_bloodstone_passive : weapon_base {
 	void		Charge();
 
 	void		ExitCinematic();
-	
-				// called by the game
-	void		UpdateSkin();
-	
-				// used by anim frame commands
-	void		SkinCharged();
-	void		SkinPetrified();
 
 	boolean		charged;
 	boolean		forcecharged;
-	
-	boolean		useChargedSkin;
 };
 
 void weapon_bloodstone_passive::init() {
@@ -47,8 +38,6 @@ void weapon_bloodstone_passive::init() {
 		charged = false;
 	}
 
-	useChargedSkin = false;
-	
 	forcecharged = false;
 
 	weaponState( "Raise", 0 );
@@ -202,28 +191,3 @@ void weapon_bloodstone_passive::Charge() {
 
 	weaponState( "Idle", 4 );
 }
-
-void weapon_bloodstone_passive::UpdateSkin() {
-
-	string skinName;
-	
-	if ( !useChargedSkin ) {
-		skinName = "skins/models/weapons/artifact_petrified" + getWeaponSkin() ;
-		setSkin ( skinName );
-		
-	} else {
-		skinName = "skins/models/weapons/artifact_charged" + getWeaponSkin() ;
-		setSkin ( skinName );
-	}
-}
-
-void weapon_bloodstone_passive::SkinCharged() {
-	useChargedSkin = true;
-	UpdateSkin();
-}
-
-void weapon_bloodstone_passive::SkinPetrified() {
-	useChargedSkin = false;
-	UpdateSkin();
-}
-

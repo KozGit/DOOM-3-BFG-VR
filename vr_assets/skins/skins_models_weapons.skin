@@ -1,772 +1,7 @@
-skin vr/weaponhands/0h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
 
-
-skin vr/weaponhands/1h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin vr/weaponhands/1hsw {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin vr/weaponhands/2h {
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin vr/weaponhands/2hsw {
-}
-
-skin skins/models/weapons/0rox {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-}
-
-skin skins/models/weapons/0roxvr/weaponhands/0h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/0roxvr/weaponhands/1h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/0roxvr/weaponhands/1hsw {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/0roxvr/weaponhands/2h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/0roxvr/weaponhands/2hsw  {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-}
-
-skin skins/models/weapons/1rox {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-}
-
-skin skins/models/weapons/1roxvr/weaponhands/0h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/1roxvr/weaponhands/1h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/1roxvr/weaponhands/1hsw {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/1roxvr/weaponhands/2h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/1roxvr/weaponhands/2hsw  {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-}
-
-skin skins/models/weapons/2rox {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-}
-
-skin skins/models/weapons/2roxvr/weaponhands/0h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/2roxvr/weaponhands/1h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/2roxvr/weaponhands/1hsw {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/2roxvr/weaponhands/2h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/2roxvr/weaponhands/2hsw  {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-}
-
-skin skins/models/weapons/3rox {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-}
-
-skin skins/models/weapons/3roxvr/weaponhands/0h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/3roxvr/weaponhands/1h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/3roxvr/weaponhands/1hsw {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/3roxvr/weaponhands/2h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/3roxvr/weaponhands/2hsw  {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-}
-
-skin skins/models/weapons/4rox {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-}
-
-skin skins/models/weapons/4roxvr/weaponhands/0h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/4roxvr/weaponhands/1h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/4roxvr/weaponhands/1hsw {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/4roxvr/weaponhands/2h {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/4roxvr/weaponhands/2hsw  {
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-}
-
-skin skins/models/weapons/5rox {
-}
-
-skin skins/models/weapons/5roxvr/weaponhands/0h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/5roxvr/weaponhands/1h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/5roxvr/weaponhands/1hsw {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/5roxvr/weaponhands/2h {
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/5roxvr/weaponhands/2hsw  {
-}
-
-skin skins/models/weapons/nade {
-}
-
-skin skins/models/weapons/nadevr/weaponhands/0h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/nadevr/weaponhands/1h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/nadevr/weaponhands/1hsw {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/nadevr/weaponhands/2h {
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/nadevr/weaponhands/2hsw  {
-}
-
-
-skin skins/models/weapons/nade_invis {
-	models/weapons/grenades/grenades3 models/weapons/grenades/grenades3_invis
-	models/characters/player/arm2 models/characters/player/arm2_invis
-	models/weapons/grenades/grenades3fx models/weapons/grenades/grenades3fx_invis
-}
-
-skin skins/models/weapons/nonade {
-	models/weapons/grenades/grenades3 textures/common/nodraw
-	models/weapons/grenades/grenades3fx textures/common/nodraw
-}
-
-skin skins/models/weapons/nonadevr/weaponhands/0h {
-	models/weapons/grenades/grenades3 textures/common/nodraw
-	models/weapons/grenades/grenades3fx textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/nonadevr/weaponhands/1h {
-	models/weapons/grenades/grenades3 textures/common/nodraw
-	models/weapons/grenades/grenades3fx textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/nonadevr/weaponhands/1hsw {
-	models/weapons/grenades/grenades3 textures/common/nodraw
-	models/weapons/grenades/grenades3fx textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/nonadevr/weaponhands/2h {
-	models/weapons/grenades/grenades3 textures/common/nodraw
-	models/weapons/grenades/grenades3fx textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/nonadevr/weaponhands/2hsw  {
-	models/weapons/grenades/grenades3 textures/common/nodraw
-	models/weapons/grenades/grenades3fx textures/common/nodraw
-
-}
-
-skin skins/models/weapons/nonade_invis {
-	models/weapons/grenades/grenades3 textures/common/nodraw
-	models/weapons/grenades/grenades3fx textures/common/nodraw
-	models/characters/player/arm2 models/characters/player/arm2_invis
-}
-
-skin skins/models/weapons/soulcubefire {
-	models/weapons/soulcube/soulcube3 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx2 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx3 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx4 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx5 textures/common/nodraw
-	models/weapons/soulcube/soulknife textures/common/nodraw
-	models/weapons/soulcube/soulknife2 textures/common/nodraw
-	models/weapons/soulcube/soulknife3 textures/common/nodraw
-	models/weapons/soulcube/soulknife4 textures/common/nodraw
-}
-
-
-skin skins/models/weapons/soulcubefirevr/weaponhands/0h {
-	models/weapons/soulcube/soulcube3 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx2 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx3 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx4 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx5 textures/common/nodraw
-	models/weapons/soulcube/soulknife textures/common/nodraw
-	models/weapons/soulcube/soulknife2 textures/common/nodraw
-	models/weapons/soulcube/soulknife3 textures/common/nodraw
-	models/weapons/soulcube/soulknife4 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/soulcubefirevr/weaponhands/1h {
-	models/weapons/soulcube/soulcube3 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx2 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx3 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx4 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx5 textures/common/nodraw
-	models/weapons/soulcube/soulknife textures/common/nodraw
-	models/weapons/soulcube/soulknife2 textures/common/nodraw
-	models/weapons/soulcube/soulknife3 textures/common/nodraw
-	models/weapons/soulcube/soulknife4 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-	
-skin skins/models/weapons/soulcubefirevr/weaponhands/1hsw {
-	models/weapons/soulcube/soulcube3 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx2 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx3 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx4 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx5 textures/common/nodraw
-	models/weapons/soulcube/soulknife textures/common/nodraw
-	models/weapons/soulcube/soulknife2 textures/common/nodraw
-	models/weapons/soulcube/soulknife3 textures/common/nodraw
-	models/weapons/soulcube/soulknife4 textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/soulcubefirevr/weaponhands/2h {
-	models/weapons/soulcube/soulcube3 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx2 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx3 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx4 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx5 textures/common/nodraw
-	models/weapons/soulcube/soulknife textures/common/nodraw
-	models/weapons/soulcube/soulknife2 textures/common/nodraw
-	models/weapons/soulcube/soulknife3 textures/common/nodraw
-	models/weapons/soulcube/soulknife4 textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/soulcubefirevr/weaponhands/2hsw {
-	models/weapons/soulcube/soulcube3 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx2 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx3 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx4 textures/common/nodraw
-	models/weapons/soulcube/soulcube3fx5 textures/common/nodraw
-	models/weapons/soulcube/soulknife textures/common/nodraw
-	models/weapons/soulcube/soulknife2 textures/common/nodraw
-	models/weapons/soulcube/soulknife3 textures/common/nodraw
-	models/weapons/soulcube/soulknife4 textures/common/nodraw
-}
-
-
-
-
-skin skins/models/weapons/soulcubeidle {
-}
-
-skin skins/models/weapons/soulcubeidlevr/weaponhands/0h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/soulcubeidlevr/weaponhands/1h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/soulcubeidlevr/weaponhands/1hsw {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/soulcubeidlevr/weaponhands/2h {
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/soulcubeidlevr/weaponhands/2hsw {
-}
-
-skin skins/pistol_invis {
-	models/weapons/pistol/pistol models/weapons/pistol/pistol_invis
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/pistol/w_pistol models/weapons/pistol/w_pistol_invis
-}
-
-skin skins/fists_invis {
-	models/weapons/berserk/fist	 models/weapons/berserk/fist_invis
-}
-
-skin skins/shotgun_invis {
-	models/weapons/shotgun/shotgun2 models/weapons/shotgun/shotgun2_invis
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/shotgun/w_shotgun2 models/weapons/shotgun/w_shotgun2_invis
-	models/weapons/shell1/sshell models/weapons/shell1/sshell_invis
-}
-
-skin skins/machinegun_invis {
-	models/weapons/machinegun/machinegun models/weapons/machinegun/machinegun_invis
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/machinegun/w_machinegun models/weapons/machinegun/w_machinegun_invis
-}
-
-skin skins/chaingun_invis {
-	models/weapons/chaingun/chaingun models/weapons/chaingun/chaingun_invis
-	models/weapons/chaingun/cbar models/weapons/chaingun/cbar_invis
-	models/weapons/chaingun/barrel models/weapons/chaingun/barrel_invis
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/chaingun/w_chaingun models/weapons/chaingun/w_chaingun_invis
-}
-
-skin skins/grenade_invis {
-	models/weapons/grenades/grenades models/weapons/grenades/grenades_invis
-	models/weapons/grenades/grenades2 models/weapons/grenades/grenades2_invis
-	models/weapons/grenades/grenades3 models/weapons/grenades/grenades3_invis
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/grenades/grenades_world models/weapons/grenades/grenades_world_invis
-	models/weapons/grenades/grenades3fx models/weapons/grenades/grenades3fx_invis
-}
-
-skin skins/rocket_invis {
-	models/weapons/rocketlauncher/rocketlauncher models/weapons/rocketlauncher/rocketlauncher_invis
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
-	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
-	models/weapons/rocketlauncher/w_rocketlauncher models/weapons/rocketlauncher/w_rocketlauncher_invis
-}
-
-skin skins/plasma_invis {
-	models/weapons/plasmagun/plasmagun models/weapons/plasmagun/plasmagun_invis
-	models/weapons/plasmagun/p1 textures/common/nodraw
-	models/weapons/plasmagun/p2 textures/common/nodraw
-	models/weapons/plasmagun/p3 textures/common/nodraw
-	models/weapons/plasmagun/p1x textures/common/nodraw
-	models/weapons/plasmagun/p2x textures/common/nodraw
-	models/weapons/plasmagun/p3x textures/common/nodraw
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/plasmagun/pl_can textures/common/nodraw
-	models/weapons/plasmagun/plasmagun_world models/weapons/plasmagun/plasmagun_world_invis
-}
-
-skin skins/bfg_invis {
-	models/weapons/bfg/bfg models/weapons/bfg/bfg_invis
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/bfg/bfg_world models/weapons/bfg/bfg_world_invis
-	models/weapons/plasmagun/pl_can textures/common/nodraw
-	models/weapons/plasmagun/pl_can_green textures/common/nodraw
-}
-
-skin skins/chainsaw_invis {
-	models/characters/player/arm2 models/characters/player/arm2_invis
-	models/weapons/berserk/fist models/weapons/berserk/fist_invis
-	models/weapons/chainsaw/chainsaw models/weapons/chainsaw/chainsaw_invis
-	models/weapons/chainsaw/chain models/weapons/chainsaw/chain_invis
-	models/weapons/chainsaw/w_chainsaw models/weapons/chainsaw/w_chainsaw_invis
-}
-
-skin skins/models/weapons/flashlight_onvr/flashhands/1hsw {
-	models/items/flashlight/flashlight2_mini textures/common/nodraw 
-}
-
-skin skins/models/weapons/flashlight_onvr/flashhands/1h {
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	models/items/flashlight/flashlight2_mini textures/common/nodraw 
-}
 
 skin skins/models/weapons/flashlight_onvr/flashhands/0h {
 	vr/leftarm textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	models/items/flashlight/flashlight2_mini textures/common/nodraw 
-}
-
-
-skin skins/models/weapons/flashlight_offvr/flashhands/1hsw {
-	models/items/flashlight/flare textures/common/nodraw
-	models/items/flashlight/beam1 textures/common/nodraw
-	models/items/flashlight/flare2 textures/common/nodraw
-	models/items/flashlight/beam2 textures/common/nodraw
-	models/items/flashlight/bulb textures/common/nodraw
-	models/items/flashlight/flashlight2_mini textures/common/nodraw 
-}
-
-skin skins/models/weapons/flashlight_offvr/flashhands/1h {
-	models/items/flashlight/flare textures/common/nodraw
-	models/items/flashlight/beam1 textures/common/nodraw
-	models/items/flashlight/flare2 textures/common/nodraw
-	models/items/flashlight/beam2 textures/common/nodraw
-	models/items/flashlight/bulb textures/common/nodraw
 	vr/statwatch textures/common/nodraw
 	vr/statwatchgui textures/common/nodraw
 	models/items/flashlight/flashlight2_mini textures/common/nodraw 
@@ -784,39 +19,8 @@ skin skins/models/weapons/flashlight_offvr/flashhands/0h {
 	models/items/flashlight/flashlight2_mini textures/common/nodraw 
 }
 
-skin skins/models/weapons/flashlight_onminivr/flashhands/1hsw {
-models/items/flashlight/flashlight2 textures/common/nodraw
-}
-
-skin skins/models/weapons/flashlight_onminivr/flashhands/1h {
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	models/items/flashlight/flashlight2 textures/common/nodraw
-}
-
 skin skins/models/weapons/flashlight_onminivr/flashhands/0h {
 	vr/leftarm textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	models/items/flashlight/flashlight2 textures/common/nodraw
-}
-
-
-skin skins/models/weapons/flashlight_offminivr/flashhands/1hsw {
-	models/items/flashlight/flare textures/common/nodraw
-	models/items/flashlight/beam1 textures/common/nodraw
-	models/items/flashlight/flare2 textures/common/nodraw
-	models/items/flashlight/beam2 textures/common/nodraw
-	models/items/flashlight/bulb textures/common/nodraw
-	models/items/flashlight/flashlight2 textures/common/nodraw
-}
-
-skin skins/models/weapons/flashlight_offminivr/flashhands/1h {
-	models/items/flashlight/flare textures/common/nodraw
-	models/items/flashlight/beam1 textures/common/nodraw
-	models/items/flashlight/flare2 textures/common/nodraw
-	models/items/flashlight/beam2 textures/common/nodraw
-	models/items/flashlight/bulb textures/common/nodraw
 	vr/statwatch textures/common/nodraw
 	vr/statwatchgui textures/common/nodraw
 	models/items/flashlight/flashlight2 textures/common/nodraw
@@ -834,12 +38,137 @@ skin skins/models/weapons/flashlight_offminivr/flashhands/0h {
 	models/items/flashlight/flashlight2 textures/common/nodraw
 }
 
+
+
+
+skin skins/models/weapons/shotgunnoammo {
+	models/weapons/shell1/sshell textures/common/nodraw
+}
+
+skin skins/models/weapons/shotgunammo {
+
+}
+
+skin skins/models/weapons/plasmagunnoammo {
+	models/weapons/plasmagun/pl_can textures/common/nodraw
+	models/weapons/plasmagun/pl_can_blue textures/common/nodraw
+}
+
+skin skins/models/weapons/plasmagunammo {
+}
+
+skin skins/models/weapons/nade {
+}
+
+skin skins/models/weapons/nonade {
+	models/weapons/grenades/grenades3 textures/common/nodraw
+	models/weapons/grenades/grenades3fx textures/common/nodraw
+}
+
+skin skins/models/weapons/bfgnoammo {
+	models/weapons/plasmagun/pl_can_ammo textures/common/nodraw
+	models/weapons/plasmagun/pl_can_green_ammo textures/common/nodraw
+}
+
+skin skins/models/weapons/bfgammo {
+}
+
+skin skins/models/weapons/0rox {
+	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
+}
+
+skin skins/models/weapons/1rox {
+	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell4 textures/common/nodraw
+}
+
+skin skins/models/weapons/2rox {
+	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell3 textures/common/nodraw
+}
+
+skin skins/models/weapons/3rox {
+	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
+	models/weapons/rocketlauncher/rshell2 textures/common/nodraw
+}
+
+skin skins/models/weapons/4rox {
+	models/weapons/rocketlauncher/rshell1 textures/common/nodraw
+}
+
+skin skins/models/weapons/5rox {
+}
+
+skin skins/models/weapons/soulcubefire {
+	models/weapons/soulcube/soulcube3 textures/common/nodraw
+	models/weapons/soulcube/soulcube3fx textures/common/nodraw
+	models/weapons/soulcube/soulcube3fx2 textures/common/nodraw
+	models/weapons/soulcube/soulcube3fx3 textures/common/nodraw
+	models/weapons/soulcube/soulcube3fx4 textures/common/nodraw
+	models/weapons/soulcube/soulcube3fx5 textures/common/nodraw
+	models/weapons/soulcube/soulknife textures/common/nodraw
+	models/weapons/soulcube/soulknife2 textures/common/nodraw
+	models/weapons/soulcube/soulknife3 textures/common/nodraw
+	models/weapons/soulcube/soulknife4 textures/common/nodraw
+}
+
+skin skins/models/weapons/soulcubeidle {
+}
+
+skin skins/weapons/artifact_normal {
+	models/characters/player/arm2  models/characters/player/arm2
+}
+
+skin skins/weapons/artifact_charged {
+	models/characters/player/arm2  models/characters/player/deadarm2
+}
+
+skin skins/weapons/artifact_petrified {
+	models/characters/player/arm2		models/characters/player/arm2
+	models/weapons/artifact/artifact	models/weapons/artifact/artifact_petrified
+}
+
+skin skins/weapons/artifact3rd_petrified {
+	models/weapons/artifact/artifact3rd  models/weapons/artifact/artifact3rd_petrified
+}
+
+skin skins/weapons/artifact_petrified_fx {
+	models/weapons/artifact/artifact3rd	models/weapons/artifact/artifact_petrified_fx1
+}
+
+skin skins/weapons/artifact_3rd_normal {
+	models/weapons/artifact/artifact3rd	models/weapons/artifact/artifact3rd
+}
+
+skin skins/weapons/artifact_3rd_fx2 {
+	models/weapons/artifact/artifact3rd	models/weapons/artifact/artifact_fx2
+}
+
+skin skins/weapons/artifact_3rd_fx3 {
+	models/weapons/artifact/artifact_fx2	models/weapons/artifact/artifact_fx3
+}
+
+skin skins/weapons/artifact_fx2 {
+	models/weapons/artifact/artifact_petrified_fx1	models/weapons/artifact/artifact_petrified_fx2
+}
+
+skin skins/weapons/artifact_fx3 {
+	models/weapons/artifact/artifact_petrified_fx2	models/weapons/artifact/artifact_petrified_fx3
+}
+
 skin skins/models/headingbeamarrowsscroll{
 }
 
 skin skins/models/headingbeamarrows{
     headingBeamArrowsScroll headingBeamArrows
 }
+
 skin skins/models/headingbeamsolid{
     headingBeamArrowsScroll headingBeamSolid
 }
@@ -854,454 +183,3 @@ skin skins/vr/crosshairCircleDot{
 skin skins/vr/crosshairCross{
 	vr/weaponsight vr/weaponsightCross
 }
-
-
-skin skins/shotgunnoammo_invis {
-	models/weapons/shotgun/shotgun2 models/weapons/shotgun/shotgun2_invis
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/shotgun/w_shotgun2 models/weapons/shotgun/w_shotgun2_invis
-	models/weapons/shell1/sshell textures/common/nodraw
-}
-
-skin skins/shotgunammo_invis {
-	models/weapons/shotgun/shotgun2 models/weapons/shotgun/shotgun2_invis
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/shotgun/w_shotgun2 models/weapons/shotgun/w_shotgun2_invis
-	models/weapons/shell1/sshell models/weapons/shell1/sshell_invis
-}
-
-
-skin skins/models/weapons/shotgunnoammovr/weaponhands/0h {
-	models/weapons/shell1/sshell textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/shotgunnoammovr/weaponhands/1h {
-	models/weapons/shell1/sshell textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/shotgunnoammovr/weaponhands/1hsw {
-	models/weapons/shell1/sshell textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/shotgunnoammovr/weaponhands/2h {
-	models/weapons/shell1/sshell textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/shotgunnoammovr/weaponhands/2hsw  {
-	models/weapons/shell1/sshell textures/common/nodraw
-}
-
-skin skins/models/weapons/shotgunammovr/weaponhands/0h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/shotgunammovr/weaponhands/1h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/shotgunammovr/weaponhands/1hsw {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/shotgunammovr/weaponhands/2h {
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/shotgunammovr/weaponhands/2hsw  {
-}
-
-skin skins/plasmagunnoammo_invis {
-	models/weapons/plasmagun/plasmagun models/weapons/plasmagun/plasmagun_invis
-	models/weapons/plasmagun/p1 textures/common/nodraw
-	models/weapons/plasmagun/p2 textures/common/nodraw
-	models/weapons/plasmagun/p3 textures/common/nodraw
-	models/weapons/plasmagun/p1x textures/common/nodraw
-	models/weapons/plasmagun/p2x textures/common/nodraw
-	models/weapons/plasmagun/p3x textures/common/nodraw
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/plasmagun/pl_can textures/common/nodraw
-	models/weapons/plasmagun/pl_can_blue textures/common/nodraw
-	models/weapons/plasmagun/plasmagun_world models/weapons/plasmagun/plasmagun_world_invis
-}
-
-skin skins/plasmagunammo_invis {
-	models/weapons/plasmagun/plasmagun models/weapons/plasmagun/plasmagun_invis
-	models/weapons/plasmagun/p1 textures/common/nodraw
-	models/weapons/plasmagun/p2 textures/common/nodraw
-	models/weapons/plasmagun/p3 textures/common/nodraw
-	models/weapons/plasmagun/p1x textures/common/nodraw
-	models/weapons/plasmagun/p2x textures/common/nodraw
-	models/weapons/plasmagun/p3x textures/common/nodraw
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/plasmagun/pl_can textures/common/nodraw
-	models/weapons/plasmagun/pl_can_blue textures/common/nodraw
-	models/weapons/plasmagun/plasmagun_world models/weapons/plasmagun/plasmagun_world_invis
-}
-
-
-skin skins/models/weapons/plasmagunnoammovr/weaponhands/0h {
-	models/weapons/plasmagun/pl_can textures/common/nodraw
-	models/weapons/plasmagun/pl_can_blue textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/plasmagunnoammovr/weaponhands/1h {
-	models/weapons/plasmagun/pl_can textures/common/nodraw
-	models/weapons/plasmagun/pl_can_blue textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/plasmagunnoammovr/weaponhands/1hsw {
-	models/weapons/plasmagun/pl_can textures/common/nodraw
-	models/weapons/plasmagun/pl_can_blue textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/plasmagunnoammovr/weaponhands/2h {
-	models/weapons/plasmagun/pl_can textures/common/nodraw
-	models/weapons/plasmagun/pl_can_blue textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/plasmagunnoammovr/weaponhands/2hsw  {
-	models/weapons/plasmagun/pl_can textures/common/nodraw
-	models/weapons/plasmagun/pl_can_blue textures/common/nodraw
-}
-
-skin skins/models/weapons/plasmagunammovr/weaponhands/0h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/plasmagunammovr/weaponhands/1h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/plasmagunammovr/weaponhands/1hsw {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/plasmagunammovr/weaponhands/2h {
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/plasmagunammovr/weaponhands/2hsw  {
-}
-
-skin skins/bfgnoammo_invis {
-	models/weapons/bfg/bfg models/weapons/bfg/bfg_invis
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/bfg/bfg_world models/weapons/bfg/bfg_world_invis
-	models/weapons/plasmagun/pl_can textures/common/nodraw
-	models/weapons/plasmagun/pl_can_green textures/common/nodraw
-	models/weapons/plasmagun/pl_can_ammo textures/common/nodraw
-	models/weapons/plasmagun/pl_can_green_ammo textures/common/nodraw
-}
-
-skin skins/bfgammo_invis {
-	models/weapons/bfg/bfg models/weapons/bfg/bfg_invis
-	models/characters/player/arm2	models/characters/player/arm2_invis
-	models/weapons/bfg/bfg_world models/weapons/bfg/bfg_world_invis
-	models/weapons/plasmagun/pl_can textures/common/nodraw
-	models/weapons/plasmagun/pl_can_green textures/common/nodraw
-	models/weapons/plasmagun/pl_can_ammo textures/common/nodraw
-	models/weapons/plasmagun/pl_can_green_ammo textures/common/nodraw
-}
-
-
-skin skins/models/weapons/bfgnoammovr/weaponhands/0h {
-	models/weapons/plasmagun/pl_can_ammo textures/common/nodraw
-	models/weapons/plasmagun/pl_can_green_ammo textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/bfgnoammovr/weaponhands/1h {
-	models/weapons/plasmagun/pl_can_ammo textures/common/nodraw
-	models/weapons/plasmagun/pl_can_green_ammo textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/bfgnoammovr/weaponhands/1hsw {
-	models/weapons/plasmagun/pl_can_ammo textures/common/nodraw
-	models/weapons/plasmagun/pl_can_green_ammo textures/common/nodraw
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/bfgnoammovr/weaponhands/2h {
-	models/weapons/plasmagun/pl_can_ammo textures/common/nodraw
-	models/weapons/plasmagun/pl_can_green_ammo textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/bfgnoammovr/weaponhands/2hsw  {
-	models/weapons/plasmagun/pl_can_ammo textures/common/nodraw
-	models/weapons/plasmagun/pl_can_green_ammo textures/common/nodraw
-}
-
-skin skins/models/weapons/bfgammovr/weaponhands/0h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/bfgammovr/weaponhands/1h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/bfgammovr/weaponhands/1hsw {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/bfgammovr/weaponhands/2h {
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-}
-
-skin skins/models/weapons/bfgammovr/weaponhands/2hsw  {
-}
-
-
-
-
-
-//skin skins/models/weapons/artifact_normal {
-//	models/characters/player/arm2  models/characters/player/arm2
-//}
-
-//skin skins/models/weapons/artifact_charged {
-//models/characters/player/arm2  models/characters/player/deadarm2
-//}
-
-//skin skins/models/weapons/artifact_petrified {
-//	models/characters/player/arm2		models/characters/player/arm2
-//	models/weapons/artifact/artifact	models/weapons/artifact/artifact_petrified
-//}
-
-skin skins/models/weapons/artifact_chargedvr/weaponhands/0h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw 
-//	models/characters/player/arm2  models/characters/player/deadarm2
-}
-
-skin skins/models/weapons/artifact_chargedvr/weaponhands/1h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-	models/characters/player/arm2  models/characters/player/deadarm2
-}
-
-skin skins/models/weapons/artifact_chargedvr/weaponhands/1hsw {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-	models/characters/player/arm2  models/characters/player/deadarm2
-}
-
-skin skins/models/weapons/artifact_chargedvr/weaponhands/2h {
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-	models/characters/player/arm2  models/characters/player/deadarm2
-}
-
-skin skins/models/weapons/artifact_chargedvr/weaponhands/2hsw {
-	models/characters/player/arm2  models/characters/player/deadarm2
-}
-
-skin skins/models/weapons/artifact_petrifiedvr/weaponhands/0h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/righthand textures/common/nodraw
-	vr/rightfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw 
-//	models/weapons/artifact/artifact	models/weapons/artifact/artifact_petrified
-}
-
-skin skins/models/weapons/artifact_petrifiedvr/weaponhands/1h {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-	models/weapons/artifact/artifact	models/weapons/artifact/artifact_petrified
-}
-
-skin skins/models/weapons/artifact_petrifiedvr/weaponhands/1hsw {
-	vr/leftarm textures/common/nodraw
-	vr/lefthand textures/common/nodraw
-	vr/leftfist textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-	models/weapons/artifact/artifact	models/weapons/artifact/artifact_petrified
-}
-
-skin skins/models/weapons/artifact_petrifiedvr/weaponhands/2h {
-	vr/statwatch textures/common/nodraw
-	vr/statwatchgui textures/common/nodraw
-	vr/leftstatwatch textures/common/nodraw
-	vr/leftstatwatchgui textures/common/nodraw
-	models/weapons/artifact/artifact	models/weapons/artifact/artifact_petrified
-}
-
-skin skins/models/weapons/artifact_petrifiedvr/weaponhands/2hsw {
-		models/weapons/artifact/artifact	models/weapons/artifact/artifact_petrified
-}
-
-
-
-
-

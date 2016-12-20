@@ -74,20 +74,7 @@ entityDef weapon_handgrenade {
 	"skin_nade_invis"			"skins/models/weapons/nade_invis"
 	"skin_nonade"				"skins/models/weapons/nonade"
 	"skin_nonade_invis"			"skins/models/weapons/nonade_invis"
-	
-	// koz skins for hands/ statswatch
-	"skin_nade_1" 				"skins/models/weapons/nadevr/weaponhands/0h"
-	"skin_nade_2" 				"skins/models/weapons/nadevr/weaponhands/1h"
-	"skin_nade_3" 				"skins/models/weapons/nadevr/weaponhands/1hsw"
-	"skin_nade_4" 				"skins/models/weapons/nadevr/weaponhands/2h"
-	"skin_nade_5" 				"skins/models/weapons/nadevr/weaponhands/2hsw"
-
-	"skin_nonade_1" 				"skins/models/weapons/nonadevr/weaponhands/0h"
-	"skin_nonade_2" 				"skins/models/weapons/nonadevr/weaponhands/1h"
-	"skin_nonade_3" 				"skins/models/weapons/nonadevr/weaponhands/1hsw"
-	"skin_nonade_4" 				"skins/models/weapons/nonadevr/weaponhands/2h"
-	"skin_nonade_5" 				"skins/models/weapons/nonadevr/weaponhands/2hsw"	
-	
+		
 	"spread"					"0"
 	
 	"primed_fuse"				"3"

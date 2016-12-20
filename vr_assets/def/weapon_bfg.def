@@ -88,19 +88,9 @@ entityDef weapon_bfg {
 	"skin_bfgammo_invis" 		"skins/bfgammo_invis"
 	"skin_bfgnoammo_invis"		"skins/bfgnoammo_invis" 
 	
-	"skin_bfgammo_1" 			"skins/models/weapons/bfgammovr/weaponhands/0h"
-	"skin_bfgammo_2" 			"skins/models/weapons/bfgammovr/weaponhands/1h"
-	"skin_bfgammo_3" 			"skins/models/weapons/bfgammovr/weaponhands/1hsw"
-	"skin_bfgammo_4" 			"skins/models/weapons/bfgammovr/weaponhands/2h"
-	"skin_bfgammo_5" 			"skins/models/weapons/bfgammovr/weaponhands/2hsw"
-
-	"skin_bfgnoammo_1" 			"skins/models/weapons/bfgnoammovr/weaponhands/0h"
-	"skin_bfgnoammo_2" 			"skins/models/weapons/bfgnoammovr/weaponhands/1h"
-	"skin_bfgnoammo_3" 			"skins/models/weapons/bfgnoammovr/weaponhands/1hsw"
-	"skin_bfgnoammo_4" 			"skins/models/weapons/bfgnoammovr/weaponhands/2h"
-	"skin_bfgnoammo_5" 			"skins/models/weapons/bfgnoammovr/weaponhands/2hsw"	
-
-	
+	"skin_bfgammo" 				"skins/models/weapons/bfgammo"
+	"skin_bfgnoammo" 			"skins/models/weapons/bfgnoammo"
+			
 	"controllerShakeHighMag"	"1.0"
 	"controllerShakeHighTime"	"750"
 	"controllerShakeLowMag"		"1.0"

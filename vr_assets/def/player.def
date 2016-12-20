@@ -586,6 +586,13 @@ entityDef player_base {
 	"skin_player_8" 			"skins/characters/player/greenmarine_arm2/vrWeaponsOnly"
 	"skin_player_9" 			"skins/characters/player/greenmarine_arm2/vrHandsOnly"
 	
+	"skinHeadingSolid"			"skins/models/headingbeamsolid" 
+	"skinHeadingArrows"			"skins/models/headingbeamarrows"
+	"skinHeadingArrowsScroll"	"skins/models/headingbeamarrowsscroll" 
+	"skinCrosshairDot"			"skins/vr/crosshairDot" 
+	"skinCrosshairCircleDot"	"skins/vr/crosshairCircleDot" 
+	"skinCrosshairCross"		"skins/vr/crosshairCross"
+	
 }
 
 /***********************************************************************
