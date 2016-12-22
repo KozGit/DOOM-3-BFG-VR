@@ -134,14 +134,14 @@ public:
 	bool				PDAforcetoggle;
 	bool				PDAforced;
 	bool				PDArising;
-	bool				gameSaving;
-
+	bool				gameSavingLoading;
+	
 	int					swfRenderMode;
 	bool				PDAclipModelSet;
 	int					pdaToggleTime;
 	int					lastSaveTime;
 	bool				wasSaved;
-
+	bool				wasLoaded;
 
 	bool				forceLeftStick;
 	
@@ -149,22 +149,12 @@ public:
 
 	bool				handInGui;
 
-
 	bool				vrIsBackgroundSaving;
-
-	int					vrFrameNumber;
+		
 	int					lastPostFrame;
-
-	int					frameStack[100];
-	ovrPosef framePose[100];
-	double	sampleTime[100];
-	int					frameHead;
-	int					frameTail;
+		
 	int					frameCount;
-	
-
-
-	int					vrFrame;
+		
 	double				sensorSampleTime;
 	ovrPosef            EyeRenderPose[2];
 
@@ -281,7 +271,7 @@ public:
 	float				independentWeaponYaw;
 	float				independentWeaponPitch;
 	
-	float				playerDead;
+	bool				playerDead;
 
 	bool				isLoading;
 

@@ -245,24 +245,25 @@ bool idIK::SolveTwoArmBones( idVec3& startPos, idVec3& endPos, const idVec3& dir
 	lengthInv = idMath::InvSqrt( lengthSqr );
 	length = lengthInv * lengthSqr;
 
-	// if the start and end position are too far out or too close to each other
-
-
-	/*
-	maxLen = ( len0 + len1 ) * 1.40f;
-	if ( length > maxLen && 0 )
+	
+	//koz - if using motion controls and displaying the body, and a controller is reporting a impossible position, restrain the arm length.
+	
+	if ( 0 && game->isVR && vr_playerBodyMode.GetInteger() == 0 )
 	{
-		
-		lenDif = ( maxLen - length ) / 2.0f;
-		vec0.Normalize();
-		endPos = startPos + maxLen * vec0;
-		
-		jointPos = endPos - ( len1 - lenDif ) * vec0;
-		startPos = startPos + lenDif * vec0;
-		return false;
-	}
-	*/
+		maxLen = (len0 + len1) * 1.40f;
+		if ( length > maxLen )
+		{
 
+			lenDif = (maxLen - length) / 2.0f;
+			vec0.Normalize();
+			endPos = startPos + maxLen * vec0;
+
+			jointPos = endPos - (len1 - lenDif) * vec0;
+			startPos = startPos + lenDif * vec0;
+			return false;
+		}
+	}
+	// if the start and end position are too far out or too close to each other
 	if ( length > len0 + len1 )
 	{
 		vec0.Normalize();

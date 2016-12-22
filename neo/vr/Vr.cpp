@@ -170,6 +170,8 @@ idCVar vr_bodyToMove( "vr_bodyToMove", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE
 
 idCVar vr_crouchMode( "vr_crouchMode", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Crouch Mode:\n 0 = Full motion crouch (In game matches real life)\n 1 = Crouch anim triggered by smaller movement." );
 idCVar vr_crouchTriggerDist( "vr_crouchTriggerDist", "10", CVAR_FLOAT | CVAR_ARCHIVE, " Distance ( in inches ) player must crouch in real life to toggle crouch\n" );
+
+idCVar vr_frameCheck( "vr_frameCheck", "0", CVAR_INTEGER | CVAR_ARCHIVE, "0 = bypass frame check" );
 // Koz end
 //===================================================================
 
@@ -208,11 +210,12 @@ iVr::iVr()
 	PDAforcetoggle = false;
 	PDAforced = false;
 	PDArising = false;
-	gameSaving = false;
+	gameSavingLoading = false;
 	forceLeftStick = true;	// start the PDA in the left menu.
 	pdaToggleTime = Sys_Milliseconds();
 	lastSaveTime = Sys_Milliseconds();
 	wasSaved = false;
+	wasLoaded = false;
 
 	PDAclipModelSet = false;
 	useFBO = false;
@@ -230,7 +233,7 @@ iVr::iVr()
 
 	hmdPositionTracked = false;
 
-	vrFrameNumber = 0;
+	
 	lastPostFrame = 0;
 
 
@@ -317,11 +320,7 @@ iVr::iVr()
 	wipTotalDeltaAvg = 0.0f;
 
 	hmdFrameTime = 0;
-
-	frameStack[100] = { 0 };
-	frameHead = 0;
-	frameTail = 0;
-
+	
 	lastRead = 0;
 	currentRead = 0;
 	updateScreen = false;
@@ -816,7 +815,6 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 		headPositionDelta = vec3_zero;
 		bodyPositionDelta = vec3_zero;
 		absolutePosition = vec3_zero;
-		common->Printf( "Bail no hmd\n" );
 		return;
 	}
 
@@ -828,7 +826,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 	poseLastHmdAbsolutePosition = poseHmdAbsolutePosition;
 	
 	
-	if ( idLib::frameNumber == lastFrame ) //&& !commonVr->renderingSplash )
+	if ( vr_frameCheck.GetInteger() == 1 && idLib::frameNumber == lastFrame ) //&& !commonVr->renderingSplash )
 	{
 		//make sure to return the same values for this frame.
 		hmdAngles.roll = lastRoll;

@@ -5286,7 +5286,7 @@ void idWeapon::Event_Melee()
 {
 	idEntity*	ent;
 	trace_t		tr;
-	common->Printf( "Melee!!\n" );
+	
 	if( weaponDef == NULL )
 	{
 		gameLocal.Error( "No weaponDef on '%s'", this->GetName() );

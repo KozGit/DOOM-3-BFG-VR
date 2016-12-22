@@ -428,7 +428,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			if ( game->isVR ) 
 			{
 			
-				if ( commonVr->playerDead || (game->Shell_IsActive() && !commonVr->PDAforced && !commonVr->PDArising ) || (!commonVr->PDAforced && common->Dialog().IsDialogActive() ) ) 
+				if ( commonVr->playerDead || (game->Shell_IsActive() && !commonVr->PDAforced && !commonVr->PDAforcetoggle ) || (!commonVr->PDAforced && common->Dialog().IsDialogActive() ) ) 
 				{
 					commonVr->HMDTrackStatic();
 					

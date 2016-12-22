@@ -39,7 +39,7 @@ idCVar s_device( "s_device", "-1", CVAR_INTEGER | CVAR_ARCHIVE, "Which audio dev
 idCVar s_showPerfData( "s_showPerfData", "0", CVAR_BOOL, "Show XAudio2 Performance data" );
 extern idCVar s_volume_dB;
 
-idCVar vr_forceOculusAudio( "vr_forceOculusAudio","0", CVAR_BOOL | CVAR_ARCHIVE, "Request openAL to open audio on Rift headphones instead of default device\n" );
+idCVar vr_forceOculusAudio( "vr_forceOculusAudio","1", CVAR_BOOL | CVAR_ARCHIVE, "Request openAL to open audio on Rift headphones instead of default device\n" );
 /*
 ========================
 idSoundHardware_OpenAL::idSoundHardware_OpenAL

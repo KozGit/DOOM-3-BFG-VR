@@ -340,10 +340,10 @@ void idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 	switch ( fieldIndex ) {
 		
 		case RENDERING_OPTIONS_FIELD_PIXEL_DENSITY: {
-			const float percent = LinearAdjust( vr_pixelDensity.GetFloat(), 1.0f, 2.0f, 0.0f, 100.0f );
-			const float adjusted = percent + (float)adjustAmount * 5.0f;
-			const float clamped = idMath::ClampFloat( 0.0f, 100.0f, adjusted );
-			vr_pixelDensity.SetFloat( LinearAdjust( clamped, 0.0f, 100.0f, .5f, 2.0f ) );
+			const float pd = vr_pixelDensity.GetFloat();
+			const float adjusted = pd + (float)adjustAmount * .05;
+			const float clamped = idMath::ClampFloat( 0.8f, 2.0f, adjusted );
+			vr_pixelDensity.SetFloat( clamped );
 			break;
 		}
 												 

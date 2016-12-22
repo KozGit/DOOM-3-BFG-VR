@@ -1169,7 +1169,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 			{
 				if ( (inputState.Buttons & ovrButton_A) != (oldInputState.Buttons & ovrButton_A) )
 				{
-					common->Printf( "Posting input event for r_touch_a val : %d\n", (inputState.Buttons & ovrButton_A)  );
+					//common->Printf( "Posting input event for r_touch_a val : %d\n", (inputState.Buttons & ovrButton_A)  );
 					PostInputEvent( inputDeviceNum, J_ACTION24, (inputState.Buttons & ovrButton_A) );
 				}
 

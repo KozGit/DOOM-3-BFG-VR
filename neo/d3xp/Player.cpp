@@ -9233,6 +9233,14 @@ void idPlayer::EvaluateControls()
 			if( gameLocal.time > minRespawnTime )
 			{
 				gameLocal.sessionCommand = "died";
+				
+				if ( game->isVR )
+				{
+					common->Printf( "Player evaluate controls setting playerdead true %d\n", Sys_Milliseconds() );
+					commonVr->wasLoaded = false;
+					commonVr->playerDead = true;
+				}
+		
 			}
 		}
 	}
@@ -13136,7 +13144,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 	
 	if ( flashMode == FLASH_HAND )
 	{
-		if ( game->IsPDAOpen() || commonVr->PDArising || currentWeapon == weapon_pda || (!commonVr->VR_USE_MOTION_CONTROLS /*&& !vr_showBody.GetBool()*/) || (commonVr->handInGui && flashMode == FLASH_GUN) )
+		if ( game->IsPDAOpen() || commonVr->PDAforcetoggle || currentWeapon == weapon_pda || (!commonVr->VR_USE_MOTION_CONTROLS /*&& !vr_showBody.GetBool()*/) || (commonVr->handInGui && flashMode == FLASH_GUN) )
 		{
 			flashMode = FLASH_HEAD;
 		}
@@ -13265,9 +13273,9 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 	
 	// koz fixme this is where we set the left hand position. Yes it's a stupid place to do it move later
 	
-	if ( game->IsPDAOpen() || commonVr->PDArising || currentWeapon == weapon_pda) return; //dont dont anything with the left hand if motion controlling the PDA, only if fixed.
+	if ( game->IsPDAOpen() || commonVr->PDAforcetoggle || currentWeapon == weapon_pda) return; //dont dont anything with the left hand if motion controlling the PDA, only if fixed.
 	
-	if ( commonVr->VR_USE_MOTION_CONTROLS && ( !game->IsPDAOpen() || commonVr->PDArising || currentWeapon == weapon_pda ) )
+	if ( commonVr->VR_USE_MOTION_CONTROLS && ( !game->IsPDAOpen() || commonVr->PDAforcetoggle || currentWeapon == weapon_pda ) )
 	{
 		
 		static idVec3 motionPosition = vec3_zero;
@@ -13803,24 +13811,21 @@ void idPlayer::CalculateRenderView()
 		// koz fixme pause - handle the PDA model if game is paused
 		// really really need to move this somewhere else,
 
-		if ( commonVr->PDAforcetoggle || commonVr->PDArising )
+		if ( !commonVr->PDAforcetoggle && commonVr->PDAforced && weapon->IdentifyWeapon() != WEAPON_PDA ) // PDAforced cannot be valid if the weapon is not the PDA
 		{
-			if ( commonVr->PDAforcetoggle && Sys_Milliseconds() - commonVr->pdaToggleTime < 3000 )
-			{
-				// dont force a toggle if level just loaded to allow shell time to shutdown.
-				commonVr->PDAforcetoggle = false;
-				return;
-			}
-			
+			commonVr->PDAforced = false;
+			commonVr->VR_GAME_PAUSED = false;
+		}
+
+		if ( commonVr->PDAforcetoggle )
+		{
 			if ( !commonVr->PDAforced )
 			{
-				if ( !commonVr->PDArising )
+				if ( weapon->IdentifyWeapon() != WEAPON_PDA )
 				{
-					//common->Printf( "idPlayer::CalculateRenderView calling SelectWeapon for PDA\nPDA Forced = %i, PDA Rising = %i, PDAForceToggle = %i\n",commonVr->PDAforced,commonVr->PDArising,commonVr->PDAforcetoggle );
+					common->Printf( "idPlayer::CalculateRenderView calling SelectWeapon for PDA\nPDA Forced = %i, PDAForceToggle = %i\n",commonVr->PDAforced,commonVr->PDAforcetoggle );
 					SelectWeapon( weapon_pda, true );
-					commonVr->PDAforcetoggle = false;
-					commonVr->PDArising = true;
-
+					
 					const function_t* func;
 					func = scriptObject.GetFunction( "SetWeaponHandPose" );
 					if ( func )
@@ -13836,23 +13841,19 @@ void idPlayer::CalculateRenderView()
 				else
 				{
 									
-					if ( weapon->IdentifyWeapon() == WEAPON_PDA && weapon->status == WP_READY )
+					if ( weapon->status == WP_READY )
 					{
 						commonVr->PDAforced = true;
-						commonVr->PDArising = false;
+						commonVr->PDAforcetoggle = false;
 					}
 				}
 			}
 			else
 			{ // pda has been already been forced active, put it away.
-				if ( commonVr->PDAforcetoggle )
-				{
-					//common->Printf( "idPlayer::CalculateRenderView calling TogglePDA\n" );
-					TogglePDA();
-					commonVr->PDAforcetoggle = false;
-					commonVr->PDAforced = false;
-					commonVr->PDArising = false;
-				}
+				
+				TogglePDA();
+				commonVr->PDAforcetoggle = false;
+				commonVr->PDAforced = false;
 			}
 
 		}
@@ -14423,7 +14424,7 @@ void idPlayer::Event_GetWeaponHandState()
 	
 	int handState = 0;
 	
-	if ( commonVr->handInGui || commonVr->PDArising || currentWeapon == weapon_pda ) 
+	if ( commonVr->handInGui || commonVr->PDAforcetoggle || currentWeapon == weapon_pda ) 
 	{
 		handState = 2 ;
 	}
