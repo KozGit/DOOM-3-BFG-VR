@@ -1697,6 +1697,16 @@ bool idVideoCDItem::GiveToPlayer( idPlayer* player, unsigned int giveFlags )
 	return true;
 }
 
+// Carl: Make the video discs a quarter the normal size, and touch the desk, so they look realistic in VR.
+bool idVideoCDItem::GetPhysicsToVisualTransform(idVec3& origin, idMat3& axis)
+{
+  const float scale = 0.25f;
+  static const idVec3 offset(0, 4.0f, 0.0f);
+  axis = mat3_identity * scale;
+  origin = offset;
+  return true;
+}
+
 /*
 ===============================================================================
 
