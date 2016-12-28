@@ -253,7 +253,7 @@ if(WIN32)
 	if(CMAKE_SIZEOF_VOID_P EQUAL 4)
 		link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/openvr/lib/win32)
 	else()
-		link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/openvr/lib/win32)
+		link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/openvr/lib/win64)
 	endif()
 endif(WIN32)
 
