@@ -4299,12 +4299,11 @@ void RB_DrawView( const void* data, const int stereoEye )
 	
 	RB_ShowOverdraw();
 	
-	//koz vr right before the view is drawn, update the view with the latest pos/angles from the hmd
-	//this isnt really necessary if running in single threaded mode, but if smp is enabled
-	//the game will start generating the next frame early, using old pose info, which causes 
-	//lag, which is especially noticeable when chaperone is showing the bounds;
 
-			
+	
+	//koz vr right before the view is drawn, update the view with the latest pos/angles from the hmd
+	//Thanks to Leyland for idea & implementation
+	
 	if ( game->isVR )
 	{
 		static idVec3 hmdPosDelta = vec3_zero;
@@ -4356,9 +4355,9 @@ void RB_DrawView( const void* data, const int stereoEye )
 			vEntity = vEntity->next;
 		}
 	}
-
-	// koz end
 	
+	// koz end
+
 	// render the scene
 	RB_DrawViewInternal( cmd->viewDef, stereoEye );
 	

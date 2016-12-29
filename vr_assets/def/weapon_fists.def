@@ -56,17 +56,8 @@ entityDef weapon_fists {
 	"skin_invisible"			"skins/fists_invis"
 	
 	// koz hand skins
-	"skin_1a"					"vr/weaponhands/0h.skin"
-	"skin_2a"					"vr/weaponhands/1h.skin"
-	"skin_3a"					"vr/weaponhands/2h.skin"
-	"skin_4a"					"vr/weaponhands/1hsw.skin"
-	"skin_5a"					"vr/weaponhands/2hsw.skin"
 	
-	"flashSkin_1c"				"skins/models/weapons/flashlight_onvr/flashhands/1hsw"
-	"flashSkin_2c"				"skins/models/weapons/flashlight_onvr/flashhands/1h"
 	"flashSkin_3c"				"skins/models/weapons/flashlight_onvr/flashhands/0h"
-	"flashSkin_4c"				"skins/models/weapons/flashlight_offvr/flashhands/1hsw"
-	"flashSkin_5c"				"skins/models/weapons/flashlight_offvr/flashhands/1h"
 	"flashSkin_6c"				"skins/models/weapons/flashlight_offvr/flashhands/0h"
 	
 	

@@ -10,7 +10,7 @@
 #include "d3xp\Game_local.h"
 #include "sys\win32\win_local.h"
 #include "d3xp\physics\Clip.h"
-#include "libs\SixenseSDK_062612\include\sixense_utils\controller_manager\controller_manager.hpp"
+
 #include "..\renderer\Framebuffer.h"
 
 #define RADIANS_TO_DEGREES(rad) ((float) rad * (float) (180.0 / idMath::PI))
@@ -19,7 +19,6 @@
 
 idCVar vr_pixelDensity( "vr_pixelDensity", "1.25", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "" );
 idCVar vr_vignette( "vr_vignette", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "unused" );
-idCVar vr_FBOAAmode( "vr_FBOAAmode", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Antialiasing mode. 0 = Disabled 1 = MSAA 2= FXAA\n" );
 idCVar vr_enable( "vr_enable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable VR mode. 0 = Disabled 1 = Enabled." );
 idCVar vr_FBOscale( "vr_FBOscale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "unused" );
 idCVar vr_scale( "vr_scale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "unused" );
@@ -30,15 +29,6 @@ idCVar vr_manualHeight( "vr_manualHeight", "70", CVAR_FLOAT | CVAR_ARCHIVE | CVA
 idCVar vr_minLoadScreenTime( "vr_minLoadScreenTime", "6000", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Min time to display load screens in ms.", 0.0f, 10000.0f );
 
 idCVar vr_clipPositional( "vr_clipPositional", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Clip positional tracking movement\n. 1 = Clip 0 = No clipping.\n" );
-
-//koz cvars for hydra mods
-idCVar vr_hydraEnable( "vr_hydraEnable", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, " Enable Razer Hydra Native support. 1 = enabled, 0 = disabled." );
-idCVar vr_hydraForceDetect( "vr_hydraForceDetect", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Force hydra detection. 0 = normal detection, 1 = force detection." );
-idCVar vr_hydraOffsetForward( "vr_hydraOffsetForward", "10", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_hydraOffsetHorizontal( "vr_hydraOffsetHorizontal", "7", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_hydraOffsetVertical( "vr_hydraOffsetVertical", "-22", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_hydraPitchOffset( "vr_hydraPitchOffset", "10", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "Pitch offset for awkward hydra grip angle" );
-
 
 idCVar vr_armIKenable( "vr_armIKenable", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Enable IK on arms when using motion controls and player body is visible.\n 1 = Enabled 0 = disabled\n" );
 idCVar vr_weaponHand( "vr_weaponHand", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Which hand holds weapon.\n 0 = Right hand\n 1 = Left Hand\n", 0, 1 );
@@ -113,7 +103,7 @@ idCVar vr_listMonitorName( "vr_listMonitorName", "0", CVAR_BOOL | CVAR_ARCHIVE |
 idCVar vr_viewModelArms( "vr_viewModelArms", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, " Dont change this, will be removed. Display arms on view models in VR" );
 idCVar vr_disableWeaponAnimation( "vr_disableWeaponAnimation", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Disable weapon animations in VR. ( 1 = disabled )" );
 idCVar vr_headKick( "vr_headKick", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Damage can 'kick' the players view. 0 = Disabled in VR." );
-idCVar vr_showBody( "vr_showBody", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Dont change this! Will be removed shortly, modifying will cause the player to have extra hands." );
+//idCVar vr_showBody( "vr_showBody", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Dont change this! Will be removed shortly, modifying will cause the player to have extra hands." );
 idCVar vr_joystickMenuMapping( "vr_joystickMenuMapping", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, " Use alternate joy mapping\n in menus/PDA.\n 0 = D3 Standard\n 1 = VR Mode.\n(Both joys can nav menus,\n joy r/l to change\nselect area in PDA." );
 
 
@@ -177,6 +167,7 @@ idCVar vr_moveClick( "vr_moveClick", "0", CVAR_INTEGER | CVAR_ARCHIVE, " 0 = Nor
 idCVar vr_playerBodyMode( "vr_playerBodyMode", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Player body mode:\n0 = Display full body\n1 = Just Hands \n2 = Weapons only\n" );
 idCVar vr_bodyToMove( "vr_bodyToMove", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Lock body orientaion to movement direction." );
 
+idCVar vr_crouchMode( "vr_crouchMode", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Crouch Mode:\n 0 = Full motion crouch (In game matches real life)\n 1 = Crouch anim triggered by smaller movement." );
 idCVar vr_crouchTriggerDist( "vr_crouchTriggerDist", "10", CVAR_FLOAT | CVAR_ARCHIVE, " Distance ( in inches ) player must crouch in real life to toggle crouch\n" );
 // Koz end
 //===================================================================
@@ -216,9 +207,13 @@ iVr::iVr()
 	PDAforcetoggle = false;
 	PDAforced = false;
 	PDArising = false;
-	gameSaving = false;
+	gameSavingLoading = false;
 	forceLeftStick = true;	// start the PDA in the left menu.
 	pdaToggleTime = Sys_Milliseconds();
+	lastSaveTime = Sys_Milliseconds();
+	wasSaved = false;
+	wasLoaded = false;
+
 	PDAclipModelSet = false;
 	useFBO = false;
 	VR_USE_MOTION_CONTROLS = 0;
@@ -274,13 +269,6 @@ iVr::iVr()
 
 	hmdBodyTranslation = vec3_zero;
 
-	hydraLeftOffset = hydra_zero;		// koz base offset for left hydra 
-	hydraRightOffset = hydra_zero;		// koz base offset for right hydra 
-
-	hydraLeftIndex = 0;						// koz fixme should pull these from hydra sdk but it bails for some reason using sample code - fix later.
-	hydraRightIndex = 1;
-
-
 	VR_AAmode = 0;
 
 	independentWeaponYaw = 0;
@@ -334,70 +322,6 @@ iVr::iVr()
 	currentFlashMode = vr_flashlightMode.GetInteger();
 	renderingSplash = true;
 	
-}
-
-/*
-==============
-iVr::HydraInit
-==============
-*/
-
-void iVr::HydraInit( void )
-{
-	
-	int x = 0;
-	//VR_USE_MOTION_CONTROLS = FALSE;
-
-	if ( vr_hydraEnable.GetInteger() != 0 )
-	{
-		x = sixenseInit();
-
-		common->Printf( "\nvr_hydraEnable = %d\n", vr_hydraEnable.GetInteger() );
-		common->Printf( "Initializing Hydra.\n" );
-
-		// Koz for some reason, the rest of the init fails
-		// if we don't give sixenseInit time to settle.
-		// Not sure if its my code, my machine, or my Hydras ( poor abused things ) - previously this was not necessary.
-		Sys_Sleep( 1000 );
-
-		if ( vr_hydraForceDetect.GetBool() )
-		{
-			sixenseSetActiveBase( 0 );
-			sixenseUtils::getTheControllerManager()->setGameType( sixenseUtils::ControllerManager::ONE_PLAYER_TWO_CONTROLLER );
-			common->Printf( "Hydra detection forced.\n" );
-			x = sixenseGetNumActiveControllers();
-			common->Printf( "iVr::HydraInit : sixenseGetNumActiveControllers() reporting % controllers.\nHydra ENABLED\n\n ", x );
-			VR_USE_MOTION_CONTROLS = TRUE;
-			return;
-		}
-
-		if ( x == SIXENSE_SUCCESS )
-		{
-			common->Printf( "sixenseInit() = SIXENSE_SUCCESS\n" );
-			x = sixenseSetActiveBase( 0 );
-			if ( x == SIXENSE_SUCCESS )
-			{
-				common->Printf( "sixenseSetActiveBase( 0 ) = SIXENSE_SUCCESS\n" );
-				x = sixenseIsBaseConnected( 0 );
-				if ( x == 1 )
-				{
-					common->Printf( "sixenseIsBaseConnected( 0 ) = 1\n" );
-					x = sixenseGetNumActiveControllers();
-					if ( x > 0 )
-					{
-						common->Printf( "iVr::HydraInit : Hydra base 0 available, %d controllers active.\n", x );
-						sixenseUtils::getTheControllerManager()->setGameType( sixenseUtils::ControllerManager::ONE_PLAYER_TWO_CONTROLLER );
-						VR_USE_MOTION_CONTROLS = TRUE;
-					}
-					else
-					{
-						common->Printf( "\nError: iVr::HydraInit : sixenseGetNumActiveControllers() reported %d controllers.\nHydra DISABLED\n\n ", x );
-					}
-				}
-			}
-		}
-	}
-	common->Printf( "VR_USE_MOTION_CONTROLS = %d\n", VR_USE_MOTION_CONTROLS );
 }
 
 idMat4 ConvertSteamVRMatrixToidMat4( const vr::HmdMatrix34_t &matPose )
@@ -648,19 +572,23 @@ void iVr::HMDInitializeDistortion()
 		common->Printf( "Requested pixel density = %f \n", vr_pixelDensity.GetFloat() );
 		common->Printf( "\nWorking resolution ( default * pixelDensity ) = %i %i \n", hmdEye[0].renderTargetRes.x, hmdEye[0].renderTargetRes.y );
 
-		VR_AAmode = vr_FBOAAmode.GetInteger();
+		
 
+		VR_AAmode = r_multiSamples.GetInteger() == 0 ? VR_AA_NONE : VR_AA_MSAA;
+			
 		common->Printf( "vr_FBOAAmode %d r_multisamples %d\n", VR_AAmode, r_multiSamples.GetInteger() );
-
+				
+		/*
 		if ( VR_AAmode == VR_AA_FXAA )
-		{
-			// enable FXAA (removed, need to re-implement fxaa)
+		{// enable FXAA
+
 			VR_AAmode = VR_AA_NONE;
+
 		}
+		*/
 
 		if ( VR_AAmode == VR_AA_MSAA )
-		{
-			// enable MSAA
+		{	// enable MSAA
 			GL_CheckErrors();
 
 			common->Printf( "Creating %d x %d MSAA framebuffer\n", primaryFBOWidth, primaryFBOHeight );
@@ -735,7 +663,6 @@ void iVr::HMDInitializeDistortion()
 			hmdEye[eye].renderTargetRes.x = primaryFBOWidth;
 			hmdEye[eye].renderTargetRes.y = primaryFBOHeight;
 		}
-
 
 	}
 
@@ -829,6 +756,8 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 	static idVec3 lastHmdPos2 = vec3_zero;
 	static idMat3 hmdAxis = mat3_identity;
 
+	static bool	neckInitialized = false;
+	static idVec3 initialNeckPosition = vec3_zero;
 	static idVec3 currentNeckPosition = vec3_zero;
 	static idVec3 lastNeckPosition = vec3_zero;
 
@@ -861,6 +790,12 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 
 		return;
 	}
+
+	lastBodyYawOffset = bodyYawOffset;
+	poseLastHmdAngles = poseHmdAngles;
+	poseLastHmdHeadPositionDelta = poseHmdHeadPositionDelta;
+	poseLastHmdBodyPositionDelta = poseHmdBodyPositionDelta;
+	poseLastHmdAbsolutePosition = poseHmdAbsolutePosition;
 		
 	if ( m_rTrackedDevicePose[vr::k_unTrackedDeviceIndex_Hmd].bPoseIsValid )
 	{
@@ -902,6 +837,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 			common->Printf( "Resetting tracking yaw offset.\n Yaw = %f old offset = %f ", hmdAngles.yaw, trackingOriginYawOffset );
 			trackingOriginYawOffset = hmdAngles.yaw;
 			common->Printf( "New Tracking yaw offset %f\n", hmdAngles.yaw, trackingOriginYawOffset );
+			neckInitialized = false;
 
 			return;
 		}
@@ -934,12 +870,13 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 
 		currentNeckPosition = hmdPosition + hmdAxis[0] * vr_nodalX.GetFloat() /*+ hmdAxis[1] * 0.0f */ + hmdAxis[2] * vr_nodalZ.GetFloat();
 		
-		currentNeckPosition.z = pm_normalviewheight.GetFloat() - (vr_nodalZ.GetFloat() + currentNeckPosition.z);
-		/*
-		if ( !chestInitialized )
+//	currentNeckPosition.z = pm_normalviewheight.GetFloat() - (vr_nodalZ.GetFloat() + currentNeckPosition.z);
+
+	/*
+	if ( !chestInitialized )
+	{
+		if ( chestDefaultDefined )
 		{
-			if ( chestDefaultDefined )
-			{
 				
 				neckToChestVec = currentNeckPosition - gameLocal.GetLocalPlayer()->chestPivotDefaultPos;
 				chestLength = neckToChestVec.Length();
@@ -976,10 +913,16 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 			//gameLocal.GetLocalPlayer()->GetAnimator()->SetJointAxis( gameLocal.GetLocalPlayer()->chestPivotJoint, JOINTMOD_LOCAL, chestAngles.ToMat3() );
 		}
 		*/
-
+		if ( !neckInitialized )
+		{
+			lastNeckPosition = currentNeckPosition;
+			initialNeckPosition = currentNeckPosition;
+			neckInitialized = true;
+		}
 	
 		bodyPositionDelta = currentNeckPosition - lastNeckPosition; // use this to base movement on neck model
-	
+		bodyPositionDelta.z = currentNeckPosition.z - initialNeckPosition.z;
+
 		//bodyPositionDelta = currentChestPosition - lastChestPosition;
 		lastBodyPositionDelta = bodyPositionDelta;
 		
@@ -989,7 +932,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 		headPositionDelta = hmdPosition - currentNeckPosition; // use this to base movement on neck model
 		//headPositionDelta = hmdPosition - currentChestPosition;
 		headPositionDelta.z = hmdPosition.z;
-		bodyPositionDelta.z = 0;
+		//bodyPositionDelta.z = 0;
 
 		lastBodyPositionDelta = bodyPositionDelta;
 		lastHeadPositionDelta = headPositionDelta;
@@ -1040,284 +983,6 @@ void iVr::HMDResetTrackingOriginOffset( void )
 
 /*
 ==============
-iVr::HydraSetOffset
-==============
-*/
-
-void iVr::HydraSetOffset( void )
-{
-	static float hydraYawOffset = 0;
-	hydraData currentHydra = hydra_zero;
-	idQuat rotQuat;
-
-	rotQuat = idAngles( 0.0f, hydraYawOffset, 0.0f ).Normalize180().ToQuat();
-
-	commonVr->HydraGetLeft( currentHydra );
-	commonVr->HydraSetLeftOffset( currentHydra );
-	commonVr->HydraGetRight( currentHydra );
-	commonVr->HydraSetRightOffset( currentHydra );
-}
-
-/*
-==============
-iVr::HydraSetRotationOffset
-==============
-*/
-
-void iVr::HydraSetRotationOffset( void )
-{
-	hydraData currentHydra = hydra_zero;
-	hydraData currentHydraOffset = hydra_zero;
-	idQuat rotQuat;
-
-	rotQuat = idAngles( 0.0f, (commonVr->lastHMDYaw - commonVr->bodyYawOffset), 0.0f ).Normalize180().ToQuat();
-
-
-	commonVr->HydraGetLeftOffset( currentHydra );
-	currentHydra.hydraRotationQuat *= rotQuat;
-	commonVr->HydraSetLeftOffset( currentHydra );
-
-	commonVr->HydraGetRightOffset( currentHydra );
-	currentHydra.hydraRotationQuat *= rotQuat;
-	commonVr->HydraSetRightOffset( currentHydra );
-}
-
-/*
-==============
-iVr::HydraSetLeftOffset
-==============
-*/
-
-void iVr::HydraSetLeftOffset( hydraData hydraOffset )
-{	//koz left hydra offset will store the initial/default delta between hydra and base for reference
-	//so we can get the actual movement deltas for positional body tracking.
-	hydraLeftOffset.position = hydraOffset.position;
-	hydraLeftOffset.hydraRotationQuat = hydraOffset.hydraRotationQuat;
-
-}
-
-/*
-==============
-iVr::HydraSetRightOffset
-==============
-*/
-void iVr::HydraSetRightOffset( hydraData hydraOffset )
-{	// koz right hydra offset will store the initial/default delta between hydra and base for reference
-	// so we can get the actual deltas for proper gun positioning in relation to body.
-	hydraRightOffset.position = hydraOffset.position;
-	hydraRightOffset.hydraRotationQuat = hydraOffset.hydraRotationQuat;
-
-}
-
-/*
-==============
-iVr::HydraGetLeftOffset
-==============
-*/
-void iVr::HydraGetLeftOffset( hydraData &hydraOffset )
-{
-
-	hydraOffset.position = hydraLeftOffset.position;
-	hydraOffset.hydraRotationQuat = hydraLeftOffset.hydraRotationQuat;
-
-}
-
-/*
-==============
-iVr::HydraGetRightOffset
-==============
-*/
-void iVr::HydraGetRightOffset( hydraData &hydraOffset )
-{
-
-	hydraOffset.position = hydraRightOffset.position;
-	hydraOffset.hydraRotationQuat = hydraRightOffset.hydraRotationQuat;
-
-}
-
-/*
-==============
-iVr::HydraGetData
-==============
-*/
-void iVr::HydraGetData( int hydraIndex, hydraData &hydraData )
-{
-
-	static idQuat sixtempq;
-	static idQuat tempQuat = idQuat_zero;
-
-	sixenseAllControllerData acd;
-	sixenseSetActiveBase( 0 );
-	sixenseGetAllNewestData( &acd );
-
-	if ( sixenseIsControllerEnabled( hydraIndex ) )
-	{
-
-		sixtempq.x = acd.controllers[hydraIndex].rot_quat[2];	// koz get hydra quat and convert to id coord space
-		sixtempq.y = acd.controllers[hydraIndex].rot_quat[0];
-		sixtempq.z = -acd.controllers[hydraIndex].rot_quat[1];
-		sixtempq.w = acd.controllers[hydraIndex].rot_quat[3];
-
-		//add pitch offset to the grip angle of the hydra to make more comfortable / correct for mounting orientation
-		tempQuat = idAngles( vr_hydraPitchOffset.GetFloat(), 0.0f, 0.0f ).ToQuat();
-
-		hydraData.hydraRotationQuat = tempQuat * sixtempq;
-
-		hydraData.position.x = -acd.controllers[hydraIndex].pos[2] / 25.4f; // koz convert position (in MM) to inch (1 id unit = 1 inch). (mm/25.4 = inch)  
-		hydraData.position.y = -acd.controllers[hydraIndex].pos[0] / 25.4f;
-		hydraData.position.z = acd.controllers[hydraIndex].pos[1] / 25.4f;
-
-		hydraData.buttons = acd.controllers[hydraIndex].buttons;
-		hydraData.trigger = acd.controllers[hydraIndex].trigger;
-		hydraData.joystick_x = acd.controllers[hydraIndex].joystick_x;
-		hydraData.joystick_y = acd.controllers[hydraIndex].joystick_y;
-
-	}
-
-}
-
-/*
-==============
-iVr::HydraGetRight
-==============
-*/
-void iVr::HydraGetRight( hydraData &rightHydra )
-{
-	HydraGetData( hydraRightIndex, rightHydra );
-}
-
-/*
-==============
-iVr::HydraGetLeft
-==============
-*/
-
-void iVr::HydraGetLeft( hydraData &leftHydra )
-{
-	HydraGetData( hydraLeftIndex, leftHydra );
-}
-
-/*
-==============
-iVr::HydraGetLeftWithOffset
-==============
-*/
-
-void iVr::HydraGetLeftWithOffset( hydraData &leftOffsetHydra ) {  // will return the left hydra position with the offset subtracted
-
-	static hydraData leftCurrent = hydra_zero;
-	static hydraData leftOffset = hydra_zero;
-	static idQuat offsetAngles;
-	static idQuat currentAngles;
-	static idAngles ca;
-	static idAngles oa;
-
-	static int lastFrame = -1;
-	static hydraData lastHydraData = hydra_zero;
-	static hydraData result = hydra_zero;
-
-
-	// HydraGetLeftOffset returns a position of 0 when calibrated
-	// baseoffset vector moves this to the hand/weapon position
-
-	static idVec3 baseOffset;
-
-	if ( lastFrame == commonVr->vrFrameNumber )
-	{
-		leftOffsetHydra = lastHydraData;
-		return;
-	}
-
-	baseOffset = idVec3( vr_hydraOffsetForward.GetFloat(), vr_hydraOffsetHorizontal.GetFloat(), vr_hydraOffsetVertical.GetFloat() );
-
-	HydraGetLeftOffset( leftOffset );
-	HydraGetLeft( leftCurrent );
-
-	offsetAngles = leftOffset.hydraRotationQuat;
-	currentAngles = leftCurrent.hydraRotationQuat;
-
-	ca = currentAngles.ToAngles();
-	oa = offsetAngles.ToAngles();
-
-	leftCurrent.position -= leftOffset.position;
-	//leftCurrent.position -= commonVr->hmdBodyTranslation;
-	leftCurrent.position *= offsetAngles.ToMat3().Inverse();
-	leftCurrent.position -= commonVr->hmdBodyTranslation;
-
-	ca.yaw -= oa.yaw;
-	ca.Normalize180();
-
-	leftCurrent.hydraRotationQuat = ca.ToQuat();
-	result = leftCurrent;
-	result.position += baseOffset;
-	leftOffsetHydra = result;
-	lastHydraData = result;
-}
-
-/*
-==============
-iVr::HydraGetRightWithOffset
-==============
-*/
-
-void iVr::HydraGetRightWithOffset( hydraData &rightOffsetHydra ) { // will return the right hydra position with the offset angle and position values.
-
-	static hydraData rightCurrent = hydra_zero;
-	static hydraData rightOffset = hydra_zero;
-	static idQuat offsetAngles;
-	static idQuat currentAngles;
-	static idAngles ca;
-	static idAngles oa;
-
-	static int lastFrame = -1;
-	static hydraData lastHydraData = hydra_zero;
-
-	static idVec3 baseOffset;
-
-	if ( lastFrame == commonVr->vrFrameNumber )
-	{
-		rightOffsetHydra = lastHydraData;
-		return;
-	}
-
-	static hydraData result = hydra_zero;
-
-	lastFrame = commonVr->vrFrameNumber;
-
-	// HydraGetLeftOffset returns a position of 0 when calibrated
-	// baseoffset vector moves this to the hand/weapon position
-
-	baseOffset = idVec3( vr_hydraOffsetForward.GetFloat(), -vr_hydraOffsetHorizontal.GetFloat(), vr_hydraOffsetVertical.GetFloat() );
-
-	HydraGetRightOffset( rightOffset );
-	HydraGetRight( rightCurrent );
-
-	offsetAngles = rightOffset.hydraRotationQuat;
-	currentAngles = rightCurrent.hydraRotationQuat;
-
-	oa = offsetAngles.ToAngles();
-	ca = currentAngles.ToAngles();
-
-	rightCurrent.position -= rightOffset.position;
-	//	rightCurrent.position -= commonVr->hmdBodyTranslation;
-	rightCurrent.position *= offsetAngles.ToMat3().Inverse();
-	rightCurrent.position -= commonVr->hmdBodyTranslation;
-
-	ca.yaw -= oa.yaw;
-	ca.Normalize180();
-
-	rightCurrent.hydraRotationQuat = ca.ToQuat();
-	result = rightCurrent;
-	result.position += baseOffset;
-
-	rightOffsetHydra = result;
-
-	lastHydraData = result;
-
-}
-
-/*
-==============
 iVr::MotionControllSetRotationOffset;
 ==============
 */
@@ -1327,11 +992,14 @@ void iVr::MotionControlSetRotationOffset()
 	switch ( motionControlType )
 	{
 
+		/*
 	case  MOTION_HYDRA:
 	{
 		HydraSetRotationOffset();
 		break;
 	}
+	*/
+
 	default:
 		break;
 	}
@@ -1348,11 +1016,13 @@ void iVr::MotionControlSetOffset()
 	switch ( motionControlType )
 	{
 
+		/*
 	case  MOTION_HYDRA:
 	{
 		HydraSetOffset();
 		break;
 	}
+	*/
 	default:
 		break;
 	}
@@ -1443,6 +1113,7 @@ void iVr::MotionControlGetLeftHand( idVec3 &motionPosition, idQuat &motionRotati
 	switch ( motionControlType )
 	{
 
+		/*
 	case  MOTION_HYDRA:
 	{
 		hydraData leftHydra;
@@ -1451,6 +1122,8 @@ void iVr::MotionControlGetLeftHand( idVec3 &motionPosition, idQuat &motionRotati
 		motionRotation = leftHydra.hydraRotationQuat;
 		break;
 	}
+	*/
+
 	case MOTION_STEAMVR:
 	{
 		//vr::TrackedDeviceIndex_t deviceNo = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole( vr::TrackedControllerRole_LeftHand );
@@ -1477,6 +1150,7 @@ void iVr::MotionControlGetRightHand( idVec3 &motionPosition, idQuat &motionRotat
 	switch ( motionControlType )
 	{
 
+	/*
 	case MOTION_HYDRA:
 	{
 		hydraData rightHydra;
@@ -1485,6 +1159,7 @@ void iVr::MotionControlGetRightHand( idVec3 &motionPosition, idQuat &motionRotat
 		motionRotation = rightHydra.hydraRotationQuat;
 		break;
 	}
+	*/
 	case MOTION_STEAMVR:
 	{
 		//vr::TrackedDeviceIndex_t deviceNo = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole( vr::TrackedControllerRole_RightHand );

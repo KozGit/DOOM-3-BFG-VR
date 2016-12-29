@@ -898,6 +898,7 @@ void idCommonLocal::RenderSplash()
 
 	const emptyCommand_t* cmd = renderSystem->SwapCommandBuffers( &time_frontend, &time_backend, &time_shadows, &time_gpu );
 	renderSystem->RenderCommandBuffers( cmd );
+	
 }
 
 
@@ -1331,10 +1332,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		{
 			commonVr->HMDInitializeDistortion();
 		}
-		
-		// init the Razer Hydra
-		// koz fixme disabled fornow commonVr->HydraInit();
-					
+							
 		// Koz end
 			
 		
@@ -1498,7 +1496,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 
 				if ( numKeyEvents > 0 )
 				{
-					common->Printf( "Bailed from keyevent\n" );
+					//common->Printf( "Bailed from keyevent\n" );
 					centered++;
 				}
 
@@ -1514,14 +1512,14 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 						{
 							if ( action >= J_ACTION1 && action <= J_ACTION_MAX )// || action < J_ACTION_MAX && action < MAX_JOY_EVENT )
 							{
-								common->Printf( "Centered %d Bailed from action >= J_ACTION1 && action <= J_ACTION_MAX action %d numevents %d\n", centered ,action, numJoystickEvents );
+								//common->Printf( "Centered %d Bailed from action >= J_ACTION1 && action <= J_ACTION_MAX action %d numevents %d\n", centered ,action, numJoystickEvents );
 								centered ++ ;
 							}
 							else if ( action > J_AXIS_MIN && action < J_AXIS_MAX )
 							{
 								if ( abs( value ) > 16384 )
 								{
-									common->Printf( "Centered %d Bailed from action J_AXIS_MIN && action < J_AXIS_MAX %d %d\n", centered, action, value );
+									//common->Printf( "Centered %d Bailed from action J_AXIS_MIN && action < J_AXIS_MAX %d %d\n", centered, action, value );
 									centered ++;
 								}
 
@@ -1930,7 +1928,7 @@ bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
 {
 	// hitting escape anywhere brings up the menu
 	
-	// hack this the hell up
+	// hack this  up
 	// not enough buttons on the steamvr controller and still want to be able to bail out of cinematics, so the PDA button will nuke a cinematic
 	if ( game->isVR )
 	{

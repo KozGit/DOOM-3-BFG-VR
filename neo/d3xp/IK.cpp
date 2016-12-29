@@ -245,24 +245,25 @@ bool idIK::SolveTwoArmBones( idVec3& startPos, idVec3& endPos, const idVec3& dir
 	lengthInv = idMath::InvSqrt( lengthSqr );
 	length = lengthInv * lengthSqr;
 
-	// if the start and end position are too far out or too close to each other
-
-
-	/*
-	maxLen = ( len0 + len1 ) * 1.40f;
-	if ( length > maxLen && 0 )
+	
+	//koz - if using motion controls and displaying the body, and a controller is reporting a impossible position, restrain the arm length.
+	
+	if ( 0 && game->isVR && vr_playerBodyMode.GetInteger() == 0 )
 	{
-		
-		lenDif = ( maxLen - length ) / 2.0f;
-		vec0.Normalize();
-		endPos = startPos + maxLen * vec0;
-		
-		jointPos = endPos - ( len1 - lenDif ) * vec0;
-		startPos = startPos + lenDif * vec0;
-		return false;
-	}
-	*/
+		maxLen = (len0 + len1) * 1.40f;
+		if ( length > maxLen )
+		{
 
+			lenDif = (maxLen - length) / 2.0f;
+			vec0.Normalize();
+			endPos = startPos + maxLen * vec0;
+
+			jointPos = endPos - (len1 - lenDif) * vec0;
+			startPos = startPos + lenDif * vec0;
+			return false;
+		}
+	}
+	// if the start and end position are too far out or too close to each other
 	if ( length > len0 + len1 )
 	{
 		vec0.Normalize();
@@ -744,6 +745,21 @@ void idIK_Walk::Evaluate()
 	idMat3 hipAxis[MAX_LEGS], kneeAxis[MAX_LEGS], ankleAxis[MAX_LEGS];
 	trace_t results;
 	
+	
+	// koz begin
+	bool isPlayer = false;
+	idPlayer *player;
+	player = gameLocal.GetLocalPlayer();
+	if (  player != NULL )
+	{
+		if ( player->entityNumber == self->entityNumber )
+		{
+			isPlayer = true;
+		}
+	}
+	// koz end
+	
+
 	if( !self || !gameLocal.isNewFrame )
 	{
 		return;
@@ -822,6 +838,8 @@ void idIK_Walk::Evaluate()
 		}
 	}
 	
+
+
 	const idPhysics* phys = self->GetPhysics();
 	
 	// test whether or not the character standing on the ground
@@ -884,9 +902,24 @@ void idIK_Walk::Evaluate()
 	animator->GetJointTransform( waistJoint, gameLocal.time, waistOrigin, waistAxis );
 	waistOrigin = modelOrigin + waistOrigin * modelAxis;
 	
+	
+
 	// adjust position of the waist
 	waistOffset = ( smallestShift + waistShift ) * normal;
-	
+	//koz add waist IK for crouching
+	if ( isPlayer  )
+	{
+		
+		if ( vr_crouchMode.GetInteger() == 0 || (vr_crouchMode.GetInteger() != 0 && !player->IsCrouching()) )
+		{
+			//common->Printf( "Body delta z %f\n", commonVr->poseHmdBodyPositionDelta.z );
+			if ( commonVr->poseHmdBodyPositionDelta.z < 0.0f )
+			{
+				waistOffset.z += commonVr->poseHmdBodyPositionDelta.z;
+			}
+		}
+	}
+
 	// if the waist should be at least a certain distance above the floor
 	if( minWaistFloorDist > 0.0f && waistOffset * normal < 0.0f )
 	{

@@ -277,7 +277,7 @@ void idRenderWorldLocal::UpdateEntityDef( qhandle_t entityHandle, const renderEn
 	
 	if( !re->hModel && !re->callback )
 	{
-		//return;// koz fixme!
+		return;// koz fixme!
 
 		common->Error( "idRenderWorld::UpdateEntityDef: NULL hModel" );
 	}

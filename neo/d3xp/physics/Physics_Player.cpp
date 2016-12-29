@@ -487,19 +487,7 @@ bool idPhysics_Player::SlideMove( bool gravity, bool stepUp, bool stepDown, bool
 	bool		nearGround, stepped, pushed;
 	
 	numbumps = 4;
-	
-	/*
-	//koz begin motion movement
-	//movement vector was calc'd in player::move, was converted to a velocity 
-	//in idPhysics_Player::Evaluate
-	//add this temp velocity to move the player model the correct amount,
-	//and slidemove will calc physics for going up/down steps or plane following
-	//remove this vel after calc, so only a finite movement will be imparted, not deltav
-	if ( game->isVR && commonVr->VR_USE_MOTION_CONTROLS )
-	{
-		current.velocity += commonVr->motionMoveVelocity;
-	}
-	*/
+		
 
 	primal_velocity = current.velocity;
 		
@@ -780,15 +768,6 @@ bool idPhysics_Player::SlideMove( bool gravity, bool stepUp, bool stepDown, bool
 		current.velocity = endVelocity;
 	}
 	
-	/*
-	//koz begin - remove the motion vel we added , we want a finite movement not deltav
-	if ( game->isVR && commonVr->VR_USE_MOTION_CONTROLS )
-	{
-		current.velocity -= commonVr->motionMoveVelocity;
-		//common->Printf( "Current Velocity %s\n", current.velocity.ToString() );
-	}
-	//koz end
-	*/
 
 	// come to a dead stop when the velocity orthogonal to the gravity flipped
 	clipVelocity = current.velocity - gravityNormal * current.velocity * gravityNormal;
@@ -1541,35 +1520,76 @@ void idPhysics_Player::CheckDuck()
 	}
 	else
 	{
-		// stand up when up against a ladder
-		if( ( command.buttons & BUTTON_CROUCH ) && !ladder )
+
+		if ( current.movementType == PM_NORMAL && game->isVR && vr_crouchMode.GetInteger() == 0 )
+		// game is in full motion crouch mode, dont do anything except change the bounding box to match the height
+		// and change the player speed to crouch speed if player has ducked enough.
+		// thought I was going to have to do a bunch of bullshit to toggle the crouch anim
+		// but turns out the walk anim with the waist IK doesn't look too terrible for now
+		// of course, I haven't tested crouching EVERYWHERE in the game yet.....
+
 		{
-			// duck
-			current.movementFlags |= PMF_DUCKED;
-		}
-		else
-		{
-			// stand up if possible
-			if( current.movementFlags & PMF_DUCKED )
+			static int currentZ;
+			currentZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z;
+
+			if ( currentZ <= ( pm_crouchheight.GetFloat() + 2.0f ) ) // give a little wiggle room.
 			{
-				// try to stand up
-				end = current.origin - ( pm_normalheight.GetFloat() - pm_crouchheight.GetFloat() ) * gravityNormal;
-				gameLocal.clip.Translation( trace, current.origin, end, clipModel, clipModel->GetAxis(), clipMask, self );
-				if( trace.fraction >= 1.0f )
-				{
-					current.movementFlags &= ~PMF_DUCKED;
-				}
+				playerSpeed = crouchSpeed;
+				maxZ = pm_crouchheight.GetFloat();
+			}
+			else
+			{
+				maxZ = pm_normalheight.GetFloat();
+			}
+
+		}
+			
+		/*  this code makes the bounding box reflect the exact player height
+		{
+			maxZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z;
+			maxZ = (int)maxZ; // if this is not cast as an int, it crashes the savegame file!!!!!!! WTF?
+			idMath::ClampFloat( pm_crouchheight.GetFloat(), pm_normalheight.GetFloat(), maxZ );
+						
+			if ( maxZ <= ( pm_crouchheight.GetFloat() + 2 ) )
+			{
+				playerSpeed = crouchSpeed;
 			}
 		}
-		
-		if( current.movementFlags & PMF_DUCKED )
-		{
-			playerSpeed = crouchSpeed;
-			maxZ = pm_crouchheight.GetFloat();
-		}
+
+		*/
 		else
 		{
-			maxZ = pm_normalheight.GetFloat();
+
+			// stand up when up against a ladder
+			if ( (command.buttons & BUTTON_CROUCH) && !ladder )
+			{
+				// duck
+				current.movementFlags |= PMF_DUCKED;
+			}
+			else
+			{
+				// stand up if possible
+				if ( current.movementFlags & PMF_DUCKED )
+				{
+					// try to stand up
+					end = current.origin - (pm_normalheight.GetFloat() - pm_crouchheight.GetFloat()) * gravityNormal;
+					gameLocal.clip.Translation( trace, current.origin, end, clipModel, clipModel->GetAxis(), clipMask, self );
+					if ( trace.fraction >= 1.0f )
+					{
+						current.movementFlags &= ~PMF_DUCKED;
+					}
+				}
+			}
+
+			if ( current.movementFlags & PMF_DUCKED )
+			{
+				playerSpeed = crouchSpeed;
+				maxZ = pm_crouchheight.GetFloat();
+			}
+			else
+			{
+				maxZ = pm_normalheight.GetFloat();
+			}
 		}
 	}
 	// if the clipModel height should change

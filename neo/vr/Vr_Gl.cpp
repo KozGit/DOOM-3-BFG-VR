@@ -296,33 +296,19 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 	}
 
 	
-	//HMDGetOrientation( imuAngles, headPositionDelta, bodyPositionDelta, absolutePosition, false );
-
 	imuAngles = commonVr->poseHmdAngles;
 	headPositionDelta = commonVr->poseHmdHeadPositionDelta;
 	bodyPositionDelta = commonVr->poseHmdBodyPositionDelta;
 	absolutePosition = commonVr->poseHmdAbsolutePosition;
 	
 
-	//imuAngles = ang_zero;
-
-//	imuAngles.yaw = 180;
 	
-	//imuAngles.yaw += commonVr->trackingOriginYawOffset;
-	//imuAngles.Normalize360();
-	
-	//common->Printf( "HudRender yaw = %f\nYaw Offset = %f\n",imuAngles.yaw, commonVr->trackingOriginYawOffset );
 	imuRotation = imuAngles.ToQuat();
 
 	imuRotationGL.x = -imuRotation.y; // convert from id coord system to gl 
 	imuRotationGL.y = imuRotation.z;
 	imuRotationGL.z = -imuRotation.x;
 	imuRotationGL.w = imuRotation.w;
-
-	//imuRotationGL.x = imuRotation.y; // convert from id coord system to gl 
-	//imuRotationGL.y = imuRotation.z;
-	//imuRotationGL.z = imuRotation.x;
-	//imuRotationGL.w = imuRotation.w;
 
 
 	//idCVar vr_transz( "vr_transz", "-1.5", CVAR_RENDERER | CVAR_FLOAT | CVAR_ARCHIVE, "test z trans" );
@@ -351,14 +337,10 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 		if ( globalFramebuffers.primaryFBO->IsMSAA() )
 		{
 			globalFramebuffers.resolveFBO->Bind();
-			//GL_ViewportAndScissor( 0, 0, globalFramebuffers.resolveFBO->GetWidth(), globalFramebuffers.resolveFBO->GetHeight() );
-
-
 		}
 		else
 		{
 			globalFramebuffers.primaryFBO->Bind();
-			//GL_ViewportAndScissor( 0, 0, globalFramebuffers.primaryFBO->GetWidth(), globalFramebuffers.primaryFBO->GetHeight() );
 		}
 	}
 	else
@@ -368,16 +350,11 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 		sourceOffset = 0;
 		destWidth = renderSystem->GetWidth();
 		destHeight = renderSystem->GetHeight();
-		//GL_ViewportAndScissor( 0, 0, renderSystem->GetWidth(), renderSystem->GetHeight() );
 	}
 
 	glClearColor( 0, 0, 0, 0 );
-	
 	GL_SelectTexture( 0 );
-
-	// We just want to do a quad pass - so make sure we disable any texgen and
-	// set the texture matrix to the identity so we don't get anomalies from 
-	// any stale uniform data being present from a previous draw call
+	
 	const float texS[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
 	const float texT[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 	renderProgManager.SetRenderParm( RENDERPARM_TEXTUREMATRIX_S, texS );
@@ -398,39 +375,12 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 
 		if ( index )  {
 			image1->Bind();
-
-			//	drawWidth = destWidth * (1 - abs( hmdEye[index].projection.x.offset ));
-			//	sourceOffset = (drawWidth - destWidth);
-			//	common->Printf( "Eye %d drawwidth %d sourceOffset %d\n", index, drawWidth, sourceOffset );
-			//	GL_ViewportAndScissor( sourceOffset, 0, drawWidth, destHeight );
-
-
 		}
 		else {
 			image0->Bind();
-
-			//	drawWidth = destWidth * (1 - abs( hmdEye[index].projection.x.offset ));
-			//	sourceOffset = 0; (destWidth - drawWidth);
-			//	common->Printf( "Eye %d drawwidth %d sourceOffset %d\n", index, drawWidth, sourceOffset );
-			//	GL_ViewportAndScissor( sourceOffset, 0, drawWidth, destHeight );
-
 		}
 
-		// copy the perspective matrix for this eye
-		idMat4 eyeProj;
 
-		/*
-		if ( index == 0 )
-		{
-			eyeProj = m_mat4ProjectionLeft;
-		}
-		else
-		{
-			eyeProj = m_mat4ProjectionRight;
-			//memcpy( proj, hmdEye[index].projectionRift, sizeof( float ) * 16 );
-		}
-		eyeProj = eyeProj.TransposeSelf();
-		*/
 
 		
 		float idx = 1.0f / (commonVr->hmdEye[index].projection.projRight - commonVr->hmdEye[index].projection.projLeft);
@@ -461,51 +411,14 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 		proj[2][3] = -1.0f;
 		proj[3][3] = 0.0f;
 
-
-		/*
-		proj[0][0] = eyeProj[0][0];
-		proj[0][1] = eyeProj[1][0];
-		proj[0][2] = eyeProj[2][0];
-		proj[0][3] = eyeProj[3][0];
-		proj[1][0] = eyeProj[0][1];
-		proj[1][1] = eyeProj[1][1];
-		proj[1][2] = eyeProj[2][1];
-		proj[1][3] = eyeProj[3][1];
-		proj[2][0] = eyeProj[0][2];
-		proj[2][1] = eyeProj[1][2];
-		proj[2][2] = eyeProj[2][2];
-		proj[2][3] = eyeProj[3][2];
-		proj[3][0] = eyeProj[0][3];
-		proj[3][1] = eyeProj[1][3];
-		proj[3][2] = eyeProj[2][3];
-		proj[3][3] = eyeProj[3][3];
-		*/
 				
-		//proj[0][2] = hmdEye[index].projection.x.offset;// . 0.0f; // center
-
-		// move the camera for this eye.
-		//VR_TranslationMatrix( -hmdEye[index].viewOffset[0], hmdEye[index].viewOffset[1], hmdEye[index].viewOffset[2], eye );
 		VR_TranslationMatrix( 0.0f, 0.0f, 0.0f, eye );
 
-		//common->Printf("-vo0 %f v01 %f vo2 %f\n", hmdEye[index].viewOffset[0], hmdEye[index].viewOffset[1], hmdEye[index].viewOffset[2]);
-		//idMat3 transMat = idVec3(-hmdEye[index].viewOffset[0], hmdEye[index].viewOffset[1], hmdEye[index].viewOffset[2]).ToMat3;
-		//float viewOffset = (6.5f / 20.0f);
-		//VR_TranslationMatrix((-1 + index * 2) * -viewOffset, 0, 0, temp);
-		/*	if (vr_autoipd->value)
-		{
-		TranslationMatrix(-vrState.renderParams[index].viewOffset[0], vrState.renderParams[index].viewOffset[1], vrState.renderParams[index].viewOffset[2], temp);
-		} else {
-		float viewOffset = (vr_ipd->value / 2000.0);
-		TranslationMatrix((-1 + index * 2) * -viewOffset, 0, 0, temp);
-		}
-		*/
 
 		VR_MatrixMultiply( trans, rot, result );
 		VR_MatrixMultiply( eye, result, result );
 		VR_MatrixMultiply( result, proj, result );
-
-		//memcpy( glMatrix, result, sizeof(float) * 16 );
-
+		
 		glMatrix[0] = result[0][0];
 		glMatrix[1] = result[1][0];
 		glMatrix[2] = result[2][0];
@@ -523,10 +436,6 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 		glMatrix[14] = result[2][3];
 		glMatrix[15] = result[3][3];
 
-
-
-		//glUniformMatrix4fv( mvpmat, 1, GL_FALSE, (GLfloat*) glMatrix );
-
 		renderProgManager.SetRenderParms( RENDERPARM_MVPMATRIX_X, glMatrix, 4 );
 		renderProgManager.CommitUniforms();
 
@@ -535,20 +444,13 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 
 		hmdEyeImage[index]->Bind();
 
-		//drawWidth = destWidth * (1 - abs( hmdEye[index].projection.x.offset ));
-		//sourceOffset = (drawWidth - destWidth);
-		//common->Printf( "Eye %d drawwidth %d sourceOffset %d\n", index, drawWidth, sourceOffset );
-		//	GL_ViewportAndScissor( sourceOffset, 0, drawWidth, destHeight );
-
-		//glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, hmdEyeImage[ index ]->GetUploadWidth(), hmdEyeImage[ index ]->GetUploadHeight(), 0 );
 		glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, hmdEyeImage[index]->GetUploadWidth(), hmdEyeImage[index]->GetUploadHeight(), 0 );
 
 	}
 	renderProgManager.Unbind();
 
 	globalFramebuffers.primaryFBO->Bind();
-
-	//GL_ViewportAndScissor( 0, 0, destWidth, destHeight );
+	
 }
 
 

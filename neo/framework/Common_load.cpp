@@ -232,9 +232,7 @@ void idCommonLocal::UnloadMap()
 	StopPlayingRenderDemo();
 	
 	commonVr->PDAforcetoggle = false;
-	commonVr->PDArising = false;
 	commonVr->PDAforced = false;
-	commonVr->playerDead = false;
 	commonVr->vrIsBackgroundSaving = false;
 	commonVr->VR_GAME_PAUSED = false;
 
@@ -763,13 +761,18 @@ void idCommonLocal::ExecuteMapChange()
 	// Issue a render at the very end of the load process to update soundTime before the first frame
 	soundSystem->Render();
 
+	// koz
 	commonVr->PDAforcetoggle = false;
-	commonVr->PDArising = false;
 	commonVr->PDAforced = false;
-	commonVr->playerDead = false;
 	commonVr->vrIsBackgroundSaving = false;
 	commonVr->VR_GAME_PAUSED = false;
 	commonVr->pdaToggleTime = Sys_Milliseconds();
+	commonVr->wasLoaded = true;
+		
+	vr_headingBeamMode.SetModified();
+	vr_weaponSight.SetModified();
+	// koz end
+
 
 }
 
@@ -859,7 +862,7 @@ void idCommonLocal::UpdateLevelLoadPacifier()
 			}
 			txtVal->SetStrokeInfo( true, 1.75f, 0.75f );
 		}
-		UpdateScreen( false ); // koz
+		if ( !game->isVR ) 	UpdateScreen( false ); // koz
 		if( autoswapsRunning )
 		{
 			renderSystem->BeginAutomaticBackgroundSwaps( icon );
@@ -1032,6 +1035,10 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	ClearWipe();
 
 	commonVr->vrIsBackgroundSaving = false;
+
+	commonVr->lastSaveTime = Sys_Milliseconds();
+	commonVr->wasSaved = true;
+	
 	return true;
 }
 
@@ -1046,10 +1053,8 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	// koz fixme do this right.
 	// Make sure the pda is in a valid state on game load.
 	commonVr->PDAforced = false;
-	commonVr->PDArising = false;
 	commonVr->PDAforcetoggle = false;
 	commonVr->VR_GAME_PAUSED = false; 
-	commonVr->playerDead = false;
 	commonVr->VR_GAME_PAUSED = false;
 	commonVr->pdaToggleTime = Sys_Milliseconds() + 1000;
 	// Koz end
@@ -1360,6 +1365,12 @@ CONSOLE_COMMAND_SHIP( loadGame, "loads a game", idCmdSystem::ArgCompletion_SaveG
 {
 	console->Close();
 	commonLocal.LoadGame( ( args.Argc() > 1 ) ? args.Argv( 1 ) : "quick" );
+	
+	//koz
+	vr_headingBeamMode.SetModified();
+	vr_weaponSight.SetModified();
+	//koz end
+
 }
 
 /*
@@ -1389,12 +1400,14 @@ CONSOLE_COMMAND_SHIP( saveGame, "saves a game", NULL )
 	}
 	// Koz end
 	
-	//commonVr->gameSaving = true;
+	commonVr->gameSavingLoading = true;
+	commonVr->VR_GAME_PAUSED = true;
 	if( commonLocal.SaveGame( savename ) )
 	{
 		common->Printf( "Saved: %s\n", savename );
 	}
-	commonVr->gameSaving = false;
+	commonVr->gameSavingLoading = false;
+	commonVr->VR_GAME_PAUSED = false;
 
 }
 

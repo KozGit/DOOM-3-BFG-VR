@@ -69,20 +69,11 @@ entityDef weapon_flashlight {
 	"snd_acquire"				"flashlight_pickup"
 	
 	// koz hand skins
-	"skin_flashskin_1b"				"skins/models/weapons/flashlight_onvr/flashhands/1hsw"
-	"skin_flashskin_2b"				"skins/models/weapons/flashlight_onvr/flashhands/1h"
-	"skin_flashskin_3b"				"skins/models/weapons/flashlight_onvr/flashhands/0h"
-	"skin_flashskin_4b"				"skins/models/weapons/flashlight_offvr/flashhands/1hsw"
-	"skin_flashskin_5b"				"skins/models/weapons/flashlight_offvr/flashhands/1h"
-	"skin_flashskin_6b"				"skins/models/weapons/flashlight_offvr/flashhands/0h"
 	
-	"skin_flashskin_7b"				"skins/models/weapons/flashlight_onminivr/flashhands/1hsw"
-	"skin_flashskin_8b"				"skins/models/weapons/flashlight_onminivr/flashhands/1h"
+	"skin_flashskin_3b"				"skins/models/weapons/flashlight_onvr/flashhands/0h"
+	"skin_flashskin_6b"				"skins/models/weapons/flashlight_offvr/flashhands/0h"
 	"skin_flashskin_9b"				"skins/models/weapons/flashlight_onminivr/flashhands/0h"
-	"skin_flashskin_10b"			"skins/models/weapons/flashlight_offminivr/flashhands/1hsw"
-	"skin_flashskin_11b"			"skins/models/weapons/flashlight_offminivr/flashhands/1h"
 	"skin_flashskin_12b"			"skins/models/weapons/flashlight_offminivr/flashhands/0h"
-
 
 	// MP
 	"skin_on"					"skins/models/weapons/flashlight_on"

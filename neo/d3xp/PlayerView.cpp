@@ -879,10 +879,8 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 			
 			commonVr->lastCenterEyeAxis = view->viewaxis;
 			commonVr->lastCenterEyeOrigin = view->vieworg;
-			
-			//Dialog().Render( loadGUI != NULL );
-			
-			if ( !commonVr->PDAforced && !commonVr->PDArising && !game->IsPDAOpen() ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
+						
+			if ( !commonVr->PDAforced && !commonVr->PDAforcetoggle && !game->IsPDAOpen() ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
 			{
 				commonVr->swfRenderMode = RENDERING_HUD;
 				player->DrawHUDVR( hudManager );
@@ -894,7 +892,7 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 				if ( player->pdaMenu != NULL )
 				{
 
-					if ( !commonVr->PDAforced && !commonVr->PDArising ) // dont render the PDA gui if the PDA model been forced up to display the pause menus.
+					if ( !commonVr->PDAforced && !commonVr->PDAforcetoggle ) // dont render the PDA gui if the PDA model been forced up to display the pause menus.
 					{
 						commonVr->swfRenderMode = RENDERING_PDA;
 						player->pdaMenu->Update();
@@ -2066,7 +2064,7 @@ void FullscreenFXManager::Process( const renderView_t* view )
 		// do the actual drawing
 		if( drawIt ) // koz fix me had temp made this always false, cant remember what I was testing now, make sure nothing is broken.
 		{
-			common->Printf( "Process FullscreenFX %s\n", pfx->GetName().c_str() );
+			//common->Printf( "Process FullscreenFX %s\n", pfx->GetName().c_str() );
 			atLeastOneFX = true;
 			
 			// we need to dump to _currentRender

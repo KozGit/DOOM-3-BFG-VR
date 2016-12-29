@@ -514,6 +514,10 @@ public:
 	void					ToggleHud();
 	void					UpdateNeckPose();
 	void					TrackWeaponDirection( idVec3 origin );
+	bool					IsCrouching()
+	{
+		return physicsObj.IsCrouching();
+	}
 	// Koz end
 		
 	// save games
@@ -599,7 +603,7 @@ public:
 	void					SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQuat rotation, bool isFlashlight = false );
 
 	// Koz begin
-	void					CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flashOffset ); // koz aim the flashlight with the hydra
+	void					CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flashOffset ); // koz aim the flashlight with motion controls
 	// Koz end
 
 	idVec3					GetEyePosition() const;

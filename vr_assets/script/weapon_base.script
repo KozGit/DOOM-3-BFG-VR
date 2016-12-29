@@ -99,9 +99,9 @@ void weapon_base::UpdateSkin() {
 	if ( isInvisible() ) {
 		setSkin( getKey( "skin_invisible" ) );
 	} else {
-		skinName = getWeaponSkin() + ".skin";
-		//setSkin( getWeaponSkin() );
-		setSkin ( skinName );
+		//skinName = getWeaponSkin() + ".skin";
+		setSkin( getWeaponSkin() );
+		//setSkin ( skinName );
 	}
 }
 

@@ -97,7 +97,8 @@ be called directly in the foreground thread for comparison.
 
 int idGameThread::Run()
 {
-
+	//if ( game->isVR ) commonVr->FrameStart();
+	
 	commonLocal.frameTiming.startGameTime = Sys_Microseconds();
 	
 	// debugging tool to test frame dropping behavior
@@ -188,7 +189,7 @@ idGameThread::RunGameAndDraw
 gameReturn_t idGameThread::RunGameAndDraw( int numGameFrames_, idUserCmdMgr& userCmdMgr_, bool isClient_, int startGameFrame )
 {
 	
-	if ( game->isVR ) commonVr->FrameStart();
+	//if ( game->isVR ) commonVr->FrameStart();
 	
 	// this should always immediately return
 	this->WaitForThread();
@@ -300,7 +301,7 @@ void idCommonLocal::Draw()
 		
 		//koz fixme had playerdead here, can't remember why... but it was breaking the exit game selection in the pause menu, so
 		//commented out, need to test all this crap again.
-		if ( (commonVr->PDAforced || commonVr->PDArising) ) //&& !commonVr->playerDead) // koz fixme do we only want to use the PDA model in VR?
+		if ( commonVr->PDAforced || commonVr->PDAforcetoggle ) //&& !commonVr->playerDead) // koz fixme do we only want to use the PDA model in VR?
 		{
 			game->Shell_Render(); //koz render the menu
 			Dialog().Render( false );
@@ -317,10 +318,9 @@ void idCommonLocal::Draw()
 		}
 		
 		// Koz begin
-		if ( !game->isVR || commonVr->playerDead || ( !commonVr->PDAforced && !commonVr->PDArising ) )
+		if ( ( !game->isVR || commonVr->playerDead ) || ( !commonVr->PDAforced && !commonVr->PDAforcetoggle )  )
 		{
 			game->Shell_Render(); //koz render any menus outside of game ( main menu etc )
-			//if ( game->isVR ) commonVr->HMDTrackStatic(); // add headtracking to menus
 		}
 		//Koz end
 
@@ -376,7 +376,7 @@ void idCommonLocal::Draw()
 		}
 		else
 		{
-			if ( !commonVr->PDAforced && !commonVr->PDArising )
+			if ( !commonVr->PDAforced && !commonVr->PDAforcetoggle )
 			{
 				Dialog().Render( loadGUI != NULL );
 				if ( game->Shell_IsActive() ) console->Draw( false );
@@ -517,6 +517,7 @@ void idCommonLocal::Frame()
 		// This is the only place this is incremented
 		idLib::frameNumber++;
 				
+		//if ( game->isVR ) commonVr->FrameStart();
 
 		// allow changing SIMD usage on the fly
 		if( com_forceGenericSIMD.IsModified() )
@@ -685,84 +686,74 @@ void idCommonLocal::Frame()
 			// will be stopped just as if the g_stoptime cvar was set.
 
 			bool ingame = false;
-			bool isVR = false;
-			static bool PDAopenedByPause = false;
-			
+							
 			// warning: this may be the worst code written since the dawn of humanity.
 			if ( game )
 			{
 				ingame = game->IsInGame();
-				isVR = game->isVR;
 			}
 			
-			if ( isVR )
+			if ( game->isVR )
 			{
-				
-				/*
-				if ( pauseGame )
-				{
-					common->Printf( "Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->ishellactive = %d\n", ingame, commonVr->VR_GAME_PAUSED, pauseGame, game->Shell_IsActive() );
-					common->Printf( "Pause diag: PDAforcetoggle = %d, PDAforced = %d, PDA rising =%d\n", commonVr->PDAforcetoggle, commonVr->PDAforced, commonVr->PDArising );
-				}
-				*/
+				static bool ing, shellact, vrpause, pauseG, forcet, pdaf, savlo, playerd, wasl = false;
 
-				if ( commonVr->VR_GAME_PAUSED ) // game is paused, check to exit
+				if ( playerd != commonVr->playerDead || wasl != commonVr->wasLoaded || ingame != ing || shellact != game->Shell_IsActive() || vrpause != commonVr->VR_GAME_PAUSED || pauseG != pauseGame || forcet != commonVr->PDAforcetoggle || pdaf != commonVr->PDAforced || savlo != commonVr->gameSavingLoading )
 				{
-					if ( ingame )
+					ing = ingame;
+					shellact = game->Shell_IsActive();
+					vrpause = commonVr->VR_GAME_PAUSED;
+					pauseG = pauseGame;
+					forcet = commonVr->PDAforcetoggle;
+					pdaf = commonVr->PDAforced;
+					savlo = commonVr->gameSavingLoading;
+					playerd = commonVr->playerDead;
+					wasl = commonVr->wasLoaded;
+
+					//common->Printf( "Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->isShellactive = %d playerdead = %d\n", ingame, commonVr->VR_GAME_PAUSED, pauseGame, game->Shell_IsActive(), commonVr->playerDead );
+					//common->Printf( "Pause diag: PDAforcetoggle = %d, PDAforced = %d, savingLoading = %d, wasloaded = %d\n", commonVr->PDAforcetoggle, commonVr->PDAforced, commonVr->gameSavingLoading, commonVr->wasLoaded );
+				}
+				
+				if ( ( commonVr->VR_GAME_PAUSED || commonVr->PDAforced ) && !common->Dialog().IsDialogActive() && !game->Shell_IsActive() )
+				{
+					// the pda has been forced up, but there is no active shell or dialog.
+					// force everything closed.
+					//common->Printf( "Pause 1 setting forcetoggle\n" );
+					commonVr->PDAforcetoggle = true; // tell the pda check code to force it down.
+					commonVr->VR_GAME_PAUSED = false;
+				}
+				else if ( ( ingame && pauseGame && ( game->Shell_IsActive() /* || Dialog().IsDialogActive() */ ) )  && ( !commonVr->PDAforced && !commonVr->gameSavingLoading ) )
+				{
+					if ( commonVr->playerDead && commonVr->wasLoaded )
 					{
-						if ( !pauseGame )
+						game->Shell_Show( false );
+											
+						if ( !game->Shell_IsActive() )
 						{
-							if ( !PDAopenedByPause )
-							{
-								commonVr->VR_GAME_PAUSED = false;
-								commonVr->PDArising = false;
-								commonVr->PDAforced = false;
-								commonVr->PDAforcetoggle = false; //koz 11-20
-							}
-							else if ( commonVr->PDAforced && !commonVr->PDArising )
-							{
-								//common->Printf( "idCommonLocal::Frame() 1 setting PDAforceToggle true\n" );
-								commonVr->PDAforcetoggle = true;
-								PDAopenedByPause = false;
-								commonVr->VR_GAME_PAUSED = false;
-							}
+							commonVr->playerDead = false;
+							commonVr->wasLoaded = false;
+							commonVr->PDAforced = false;
+							commonVr->PDAforcetoggle = false;
+							commonVr->VR_GAME_PAUSED = false;
 						}
 					}
 					else
 					{
-						commonVr->VR_GAME_PAUSED = false;
-						PDAopenedByPause = false;
-						commonVr->PDArising = false;
-						commonVr->PDAforced = false;
-
-					}
-				}
-				else // game is not paused, see if we need to pause it
-				{
-					if ( pauseGame && ingame && !commonVr->gameSaving ) // we need to pause 
-					{
-						if ( game->IsPDAOpen() && !PDAopenedByPause ) // the PDA was already opened, dont toggle it
+						if ( !commonVr->playerDead )
 						{
-							commonVr->VR_GAME_PAUSED = true;
-							PDAopenedByPause = false;
-							commonVr->PDAforced = false;
-							commonVr->PDArising = false;
-						}
-						else if ( !commonVr->PDAforced && !commonVr->PDArising  ) // force a PDA toggle;
-						{
-							// koz debugcommon->Printf( "idCommonLocal::Frame() 2 setting PDAforceToggle true\n" );
+							//common->Printf( "Pause 2 setting forcetoggle\n" );
 							commonVr->PDAforcetoggle = true;
-							PDAopenedByPause = true;
-						}
-						else if ( commonVr->PDAforced ) // pda is up, pause the game.
-						{
-							commonVr->VR_GAME_PAUSED = true;
-							PDAopenedByPause = true;
-							commonVr->PDArising = false;
 						}
 					}
+
 				}
+				else if ( ( ingame && pauseGame && ( game->Shell_IsActive() /* || Dialog().IsDialogActive() */ ) ) && ( commonVr->PDAforced && !commonVr->VR_GAME_PAUSED ) )
+				{
+					commonVr->VR_GAME_PAUSED = true;
+				}
+				
+			
 			}
+			
 			// Koz end			
 
 			if ( pauseGame && !ingame ) // koz added !ingame

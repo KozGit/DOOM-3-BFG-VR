@@ -404,7 +404,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Profile_Options::idMenuDataSource_Shell_VR_
 			return va( "%.2f MM", commonVr->openVrIPD );
 
 		case VR_OCULUS_HEIGHT:
-			return va( "%.1f In, ( %.2f M )", commonVr->openVrHeight, ( commonVr->openVrHeight * .0254) );
+			return va( "%.1f In, ( %.2f M )", commonVr->openVrHeight, (commonVr->openVrHeight * .0254) );
 		
 		case VR_PROFILE_IPD:
 			return va( "%.1f MM", vr_manualIPD.GetFloat() );

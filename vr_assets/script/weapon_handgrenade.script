@@ -243,7 +243,7 @@ void weapon_handgrenade::UpdateSkin() {
 		if ( isInvisible() ) {
 			setSkin( skin_nonade_invis );
 		} else {
-			skinName = "skins/models/weapons/nonade" + getWeaponSkin() ;
+			skinName = "skins/models/weapons/nonade" ;
 			//setSkin( skin_nonade );
 			setSkin ( skinName );
 		}
@@ -252,7 +252,7 @@ void weapon_handgrenade::UpdateSkin() {
 			setSkin( skin_nade_invis );
 		} else {
 			//setSkin( skin_nade );
-			skinName = "skins/models/weapons/nade" + getWeaponSkin() ;
+			skinName = "skins/models/weapons/nade" ;
 			//setSkin( skin_nonade );
 			setSkin ( skinName );
 		}

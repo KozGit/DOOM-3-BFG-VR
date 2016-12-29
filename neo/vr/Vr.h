@@ -30,7 +30,6 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "vr_hmd.h"
-#include "vr_sixense.h"
 #include "..\renderer\Framebuffer.h"
 #include "..\libs\OpenVR\headers\openvr.h"
 
@@ -46,7 +45,8 @@ typedef enum
 {
 	MOTION_NONE,
 	MOTION_HYDRA,
-	MOTION_STEAMVR
+	MOTION_STEAMVR,
+	MOTION_OCULUS
 } vr_motionControl_t;
 
 typedef enum 
@@ -100,18 +100,6 @@ public:
 	
 	void				FrameStart( void );
 
-	void				HydraInit( void );
-	void				HydraSetRotationOffset( void );
-	void				HydraSetOffset( void );
-	void				HydraSetLeftOffset( hydraData hydraOffset );
-	void				HydraSetRightOffset( hydraData hydraOffset );
-	void				HydraGetLeftOffset( hydraData &hydraOffset );
-	void				HydraGetRightOffset( hydraData &hydraOffset );
-	void				HydraGetLeft( hydraData &leftHydra );
-	void				HydraGetRight( hydraData &rightHydra );
-	void				HydraGetLeftWithOffset( hydraData &leftOffsetHydra );
-	void				HydraGetRightWithOffset( hydraData &rightOffsetHydra );
-
 	void				OpenVrGetRight( idVec3 &position, idQuat &rotation );
 	void				OpenVrGetLeft( idVec3 &position, idQuat &rotation );
 
@@ -143,11 +131,15 @@ public:
 	bool				PDAforcetoggle;
 	bool				PDAforced;
 	bool				PDArising;
-	bool				gameSaving;
-
+	bool				gameSavingLoading;
+	
 	int					swfRenderMode;
 	bool				PDAclipModelSet;
 	int					pdaToggleTime;
+	int					lastSaveTime;
+	bool				wasSaved;
+	bool				wasLoaded;
+
 	bool				forceLeftStick;
 	
 	int					currentFlashlightPosition;
@@ -263,12 +255,14 @@ public:
 	idVec3				motionMoveDelta;
 	idVec3				motionMoveVelocity;
 	idVec3				leanOffset;
+	idVec3				fixedPDAMoveDelta;
+
 
 
 	float				independentWeaponYaw;
 	float				independentWeaponPitch;
 	
-	float				playerDead;
+	bool				playerDead;
 
 	bool				isLoading;
 
@@ -321,13 +315,6 @@ public:
 	//---------------------------
 private:
 	
-	void				HydraGetData( int hydraIndex, hydraData &hydraData );
-	
-	int					hydraLeftIndex ;						
-	int					hydraRightIndex ;
-	
-	hydraData			hydraLeftOffset;
-	hydraData			hydraRightOffset;
 
 	
 };
@@ -335,10 +322,6 @@ private:
 #endif
 
 //koz g_gun cvars allow tweaking of gun position when aiming with hydra
-extern idCVar	vr_hydraOffsetForward;
-extern idCVar	vr_hydraOffsetHorizontal;
-extern idCVar	vr_hydraOffsetVertical;
-extern idCVar	vr_hydraPitchOffset;
 
 extern idCVar	vr_vignette;
 extern idCVar	vr_scale;
@@ -347,14 +330,12 @@ extern idCVar	vr_manualIPDEnable;
 extern idCVar	vr_manualIPD;
 extern idCVar	vr_manualHeight;
 
-extern idCVar	vr_showBody;
+//extern idCVar	vr_showBody;
 extern idCVar	vr_viewModelArms;
 extern idCVar	vr_wristStatMon;
 extern idCVar	vr_disableWeaponAnimation;
 extern idCVar	vr_headKick;
 
-extern idCVar	vr_hydraEnable;
-extern idCVar	vr_hydraForceDetect;
 
 extern idCVar	vr_armIKenable;
 extern idCVar	vr_weaponHand;
@@ -416,7 +397,7 @@ extern idCVar	vr_listMonitorName;
 
 extern idCVar	vr_enable;
 extern idCVar	vr_FBOscale;
-extern idCVar	vr_hydraEnable;
+
 extern idCVar	vr_joystickMenuMapping;
 
 extern idCVar	vr_trackingPredictionUserDefined;
@@ -460,6 +441,7 @@ extern idCVar	vr_walkSpeedAdjust;
 extern idCVar	vr_movePoint;
 
 extern idCVar	vr_crouchTriggerDist;
+extern idCVar	vr_crouchMode;
 
 extern idCVar	vr_wipPeriodMin;
 extern idCVar	vr_wipPeriodMax;

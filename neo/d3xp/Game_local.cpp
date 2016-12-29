@@ -5772,8 +5772,6 @@ bool idGameLocal::Shell_IsActive() const
 	{
 		if ( game->isVR )
 		{
-			//return common->Dialog().IsDialogActive() || shellHandler->IsActive();
-			//if ( common->Dialog().IsDialogPausing() || shellHandler->IsActive() ) return true;
 			if ( common->Dialog().IsDialogActive() || shellHandler->IsActive() ) return true;
 		}
 		else

@@ -31,10 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 const static int NUM_VR_RENDERING_OPTIONS = 8;
 
-extern idCVar vr_enable;
-extern idCVar vr_FBOscale;
+extern idCVar vr_pixelDensity;
+extern idCVar vr_3dgui;
 extern idCVar r_multiSamples;
-extern idCVar vr_FBOAAmode;
 
 
 float LinearAdjust( const float input, const float currentMin, const float currentMax, const float desiredMin,  float desiredMax );
@@ -69,40 +68,32 @@ void idMenuScreen_Shell_VR_Rendering_Options::Initialize( idMenuHandler * data )
 
 	AddChild( options );
 	AddChild( btnBack );
-
+	
 	idMenuWidget_ControlButton * control;
 	control = new (TAG_SWF) idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Enable VR" ); // Enable VR mode
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::VR_OPTIONS_FIELD_ENABLE_VR );
+	control->SetLabel( "Pixel Density" ); // Enable VR mode
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_PIXEL_DENSITY );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::VR_OPTIONS_FIELD_ENABLE_VR );
-	options->AddChild( control );
-
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_BAR );
-	control->SetLabel( "FBO size %" );// % value to increase/decrease FBO size (for downscaling/antialiasing)
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::VR_OPTIONS_FIELD_FBO_SIZE );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::VR_OPTIONS_FIELD_FBO_SIZE );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_PIXEL_DENSITY );
 	options->AddChild( control );
 
 	control = new (TAG_SWF) idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "#str_04128" ); // Antialiasing
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::VR_OPTIONS_FIELD_ANTIALIASINGTYPE );
+	control->SetLabel( "MSAA level" );// % value to increase/decrease FBO size (for downscaling/antialiasing)
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_MSAALEVEL );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::VR_OPTIONS_FIELD_ANTIALIASINGTYPE );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_MSAALEVEL );
 	options->AddChild( control );
 
 	control = new (TAG_SWF) idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "MSAA Level" );// # of MSAA samples if enabled
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::VR_OPTIONS_FIELD_MSAALEVEL );
+	control->SetLabel( "3D Guis" ); // Antialiasing
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_3DGUIS );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::VR_OPTIONS_FIELD_MSAALEVEL );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_3DGUIS );
 	options->AddChild( control );
-	
+		
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN_RELEASE ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_STOP_REPEATER, WIDGET_EVENT_SCROLL_DOWN_RELEASE ) );
@@ -140,7 +131,8 @@ void idMenuScreen_Shell_VR_Rendering_Options::Update() {
 	if ( BindSprite( root ) ) {
 		idSWFTextInstance * heading = GetSprite()->GetScriptObject()->GetNestedText( "info", "txtHeading" );
 		if ( heading != NULL ) {
-			heading->SetText( "VR Rendering Options" );	
+			//heading->SetText( "VR Rendering Options" );	
+			heading->SetText( "SETTINGS" );
 			heading->SetStrokeInfo( true, 0.75f, 1.75f );
 		}
 
@@ -307,10 +299,8 @@ idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Rendering_Opt
 */
 void idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Rendering_Options::LoadData() {
 	
-	
-	originalEnableVR = vr_enable.GetInteger();
-	originalFBOsize = vr_FBOscale.GetFloat();
-	originalAntialiasingType = vr_FBOAAmode.GetInteger();
+	originalPixelDensity = vr_pixelDensity.GetFloat();
+	original3DGuis = vr_3dgui.GetBool();
 	originalMSAAlevel = r_multiSamples.GetInteger();
 			
 }
@@ -322,10 +312,10 @@ idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Rendering_Opt
 */
 bool idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Rendering_Options::IsRestartRequired() const {
 	
-	if ( originalAntialiasingType != vr_FBOAAmode.GetInteger() ) {
+	if ( originalPixelDensity != vr_pixelDensity.GetFloat() ) {
 		return true;
 	}
-	if ( originalMSAAlevel != r_multiSamples.GetInteger() && vr_FBOAAmode.GetInteger() == VR_AA_MSAA ) {
+	if ( originalMSAAlevel != r_multiSamples.GetInteger() ) {
 		return true;
 	}
 	
@@ -349,32 +339,25 @@ idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Rendering_Opt
 void idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Rendering_Options::AdjustField( const int fieldIndex, const int adjustAmount ) {
 	switch ( fieldIndex ) {
 		
-		case VR_OPTIONS_FIELD_ENABLE_VR: {
-			static const int numValues = 2;
-			static const int values[numValues] = { 0, 1 };
-			vr_enable.SetInteger( AdjustOption(vr_enable.GetInteger(), values, numValues, adjustAmount ) );
+		case RENDERING_OPTIONS_FIELD_PIXEL_DENSITY: {
+			const float pd = vr_pixelDensity.GetFloat();
+			const float adjusted = pd + (float)adjustAmount * .05;
+			const float clamped = idMath::ClampFloat( 0.8f, 2.0f, adjusted );
+			vr_pixelDensity.SetFloat( clamped );
 			break;
 		}
-		
-		case VR_OPTIONS_FIELD_ANTIALIASINGTYPE: {
-			static const int numValues = 3;
-			static const int values[numValues] = { 0, 1, 2 };
-			vr_FBOAAmode.SetInteger( AdjustOption(vr_FBOAAmode.GetInteger(), values, numValues, adjustAmount ) );
-			break;
-		}
-										 
-		case VR_OPTIONS_FIELD_MSAALEVEL: {
+												 
+		case RENDERING_OPTIONS_FIELD_MSAALEVEL: {
 			static const int numValues = 5;
 			static const int values[numValues] = { 0, 2, 4, 8 };
 			r_multiSamples.SetInteger( AdjustOption( r_multiSamples.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
 		
-		case VR_OPTIONS_FIELD_FBO_SIZE: {
-			const float percent = LinearAdjust( vr_FBOscale.GetFloat(), 0.8f, 4.0f, 0.0f, 100.0f );
-			const float adjusted = percent + (float)adjustAmount * 2.0f;// koz added multiplier
-			const float clamped = idMath::ClampFloat( 0.0f, 100.0f, adjusted );
-			vr_FBOscale.SetFloat( LinearAdjust( clamped, 0.0f, 100.0f, 0.8f, 4.0f ) );
+		case RENDERING_OPTIONS_FIELD_3DGUIS: {
+			static const int numValues = 2;
+			static const int values[numValues] = { 0, 1 };
+			vr_3dgui.SetInteger( AdjustOption( vr_3dgui.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
 	}
@@ -388,10 +371,10 @@ idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Rendering_Opt
 */
 idSWFScriptVar idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Rendering_Options::GetField( const int fieldIndex ) const {
 	switch ( fieldIndex ) {
-		case VR_OPTIONS_FIELD_ENABLE_VR: {
-			const int VRenabled = vr_enable.GetInteger();
+		case RENDERING_OPTIONS_FIELD_3DGUIS: {
+			const int guis = vr_3dgui.GetInteger();
 			
-			if ( VRenabled == 0 ) {
+			if ( guis == 0 ) {
 				return "#str_swf_disabled";
 			} else {
 				return "#str_swf_enabled";
@@ -399,24 +382,24 @@ idSWFScriptVar idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_V
 			
 		}
 						
-		case VR_OPTIONS_FIELD_FBO_SIZE: { 
+		case RENDERING_OPTIONS_FIELD_PIXEL_DENSITY: { 
 			
-			 float result =  LinearAdjust( vr_FBOscale.GetFloat(), 0.8f, 4.0f, 0.0f, 100.0f );
-			return result;
+			return va( "%1.2f", vr_pixelDensity.GetFloat() );
+			
 		}
-		case VR_OPTIONS_FIELD_ANTIALIASINGTYPE:
-			if ( vr_FBOAAmode.GetInteger() == VR_AA_FXAA ) {
-				return "FXAA";
-			} else if ( vr_FBOAAmode.GetInteger() == VR_AA_MSAA ) {
-				return "MSAA";
-			} else {
+		
+		case RENDERING_OPTIONS_FIELD_MSAALEVEL:
+			
+			const int lev = r_multiSamples.GetInteger();
+
+			if ( lev == 0 )
+			{
 				return "#str_swf_disabled";
 			}
-		
-		case VR_OPTIONS_FIELD_MSAALEVEL:
-			
-			return va( "%dx", r_multiSamples.GetInteger() );
-		
+			else
+			{
+				return va( "%dx", r_multiSamples.GetInteger() );
+			}
 		
 	}
 	return false;
@@ -428,16 +411,15 @@ idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Rendering_Opt
 ========================
 */
 bool idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Rendering_Options::IsDataChanged() const {
-	if ( originalEnableVR != vr_enable.GetInteger() ) {
-		return true;
-	}
 	
-	if ( originalFBOsize != vr_FBOscale.GetFloat() ) {
+	if ( originalPixelDensity != vr_pixelDensity.GetInteger() ) {
 		return true;
 	}
-	if ( originalAntialiasingType != vr_FBOAAmode.GetInteger() ) {
+		
+	if ( original3DGuis != vr_3dgui.GetInteger() ) {
 		return true;
 	}
+
 	if ( originalMSAAlevel != r_multiSamples.GetInteger() ) {
 		return true;
 	}

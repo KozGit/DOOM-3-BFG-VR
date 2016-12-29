@@ -58,18 +58,9 @@ entityDef weapon_flashlight_new {
 	"skin_off_invis"			"skins/models/weapons/flashlight_off_invis_new"
 	
 	// koz hand skins
-	"skin_flashskin_1a"				"skins/models/weapons/flashlight_onvr/flashhands/1hsw"
-	"skin_flashskin_2a"				"skins/models/weapons/flashlight_onvr/flashhands/1h"
 	"skin_flashskin_3a"				"skins/models/weapons/flashlight_onvr/flashhands/0h"
-	"skin_flashskin_4a"				"skins/models/weapons/flashlight_offvr/flashhands/1hsw"
-	"skin_flashskin_5a"				"skins/models/weapons/flashlight_offvr/flashhands/1h"
 	"skin_flashskin_6a"				"skins/models/weapons/flashlight_offvr/flashhands/0h"
-	
-	"skin_flashskin_7a"				"skins/models/weapons/flashlight_onminivr/flashhands/1hsw"
-	"skin_flashskin_8a"				"skins/models/weapons/flashlight_onminivr/flashhands/1h"
 	"skin_flashskin_9a"				"skins/models/weapons/flashlight_onminivr/flashhands/0h"
-	"skin_flashskin_10a"			"skins/models/weapons/flashlight_offminivr/flashhands/1hsw"
-	"skin_flashskin_11a"			"skins/models/weapons/flashlight_offminivr/flashhands/1h"
 	"skin_flashskin_12a"			"skins/models/weapons/flashlight_offminivr/flashhands/0h"
 
 	"start_off"					"1"

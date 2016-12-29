@@ -60,7 +60,7 @@ model viewmodel_bloodstone_active3_vr {
 	anim putaway				models/md5/weapons/blood_orb_view/bloodorb_vr_putaway_3.md5anim
 }
 
-entityDef weapon_bloodstone_active1_vr {
+entityDef weapon_bloodstone_active1 {
 	"editor_color"				".3 .3 1"
 	"editor_mins"				"-16 -16 0"
 	"editor_maxs"				"16 16 32"

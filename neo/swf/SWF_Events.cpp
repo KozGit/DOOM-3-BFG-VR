@@ -255,7 +255,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 
 		/*	koz PDA - if the user is in VR, and the PDA menu is up,
 		he can use head tracking to controll the mouse in the
-		PDA menus.  We need to check for hydra buttons/triggers as
+		PDA menus.  We need to check for hydra/steamvr buttons/triggers as
 		well as mouse clicks so the user can actually select
 		something with the hydras.
 		Update - I'm an idiot, and the user might not have a hydra,
@@ -267,14 +267,10 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 			
 		if (  event->evValue == K_MOUSE1
 				|| ( commonVr->scanningPDA && (
-				   event->evValue == K_L_HYDRATRIG 	// koz hydra left trigger
-				|| event->evValue == K_R_HYDRATRIG 	// koz hydra right trigger
-				//||	event->evValue == K_JOY17 		// koz hydra left button 1
-				//||	event->evValue == K_JOY24 		// koz hydra right button 1
+				   event->evValue == K_L_TOUCHTRIG 	// koz hydra left trigger
+				|| event->evValue == K_R_TOUCHTRIG 	// koz hydra right trigger
 				|| event->evValue == K_JOY_TRIGGER1
 				|| event->evValue == K_JOY_TRIGGER2
-				//||	event->evValue == K_JOY2 
-				//||	event->evValue == K_JOY1
 				|| event->evValue == K_L_STEAMVRTRIG
 				|| event->evValue == K_R_STEAMVRTRIG 
 				|| event->evValue == K_JOY37 // button for steam trig
@@ -385,10 +381,10 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 												K_JOY_STICK2_DOWN, K_JOY_STICK1_DOWN,
 												K_JOY_STICK2_LEFT, K_JOY_STICK1_LEFT,
 												K_JOY_STICK2_RIGHT, K_JOY_STICK1_RIGHT,
-												K_HYDRA_RIGHT_STICK_UP, K_HYDRA_LEFT_STICK_UP,
-												K_HYDRA_RIGHT_STICK_DOWN, K_HYDRA_LEFT_STICK_DOWN,
-												K_HYDRA_RIGHT_STICK_LEFT, K_HYDRA_LEFT_STICK_LEFT,
-												K_HYDRA_RIGHT_STICK_RIGHT, K_HYDRA_LEFT_STICK_RIGHT,
+												K_TOUCH_RIGHT_STICK_UP, K_TOUCH_LEFT_STICK_UP,
+												K_TOUCH_RIGHT_STICK_DOWN, K_TOUCH_LEFT_STICK_DOWN,
+												K_TOUCH_RIGHT_STICK_LEFT, K_TOUCH_LEFT_STICK_LEFT,
+												K_TOUCH_RIGHT_STICK_RIGHT, K_TOUCH_LEFT_STICK_RIGHT,
 												K_STEAMVR_RIGHT_PAD_UP, K_STEAMVR_LEFT_PAD_UP,
 												K_STEAMVR_RIGHT_PAD_DOWN, K_STEAMVR_LEFT_PAD_DOWN,
 												K_STEAMVR_RIGHT_PAD_LEFT, K_STEAMVR_LEFT_PAD_LEFT,
@@ -431,8 +427,8 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 
 				if ( !commonVr->forceLeftStick ) 
 				{
-					if ( keyValue == K_HYDRA_RIGHT_STICK_LEFT ||
-						keyValue == K_HYDRA_LEFT_STICK_LEFT ||
+					if ( keyValue == K_TOUCH_RIGHT_STICK_LEFT ||
+						keyValue == K_TOUCH_LEFT_STICK_LEFT ||
 						keyValue == K_JOY_STICK1_LEFT ||
 						keyValue == K_JOY_STICK2_LEFT ||
 						keyValue == K_STEAMVR_RIGHT_PAD_LEFT ||
@@ -443,8 +439,8 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				}
 				else 
 				{
-					if ( keyValue == K_HYDRA_RIGHT_STICK_RIGHT ||
-						keyValue == K_HYDRA_LEFT_STICK_RIGHT ||
+					if ( keyValue == K_TOUCH_RIGHT_STICK_RIGHT ||
+						keyValue == K_TOUCH_LEFT_STICK_RIGHT ||
 						keyValue == K_JOY_STICK1_RIGHT ||
 						keyValue == K_JOY_STICK2_RIGHT ||
 						keyValue == K_STEAMVR_RIGHT_PAD_RIGHT ||

@@ -766,29 +766,31 @@ idSWFScriptVar idSWF::idSWFScriptFunction_shortcutKeys_clear::Call( idSWFScriptO
 	to allow single stick navigation of PDA menus.
 	============================*/
 
-	object->Set( "HYDRA_LEFT_STICK_UP", "STICK1_UP" );
-	object->Set( "HYDRA_LEFT_STICK_DOWN", "STICK1_DOWN" );
-	object->Set( "HYDRA_LEFT_STICK_LEFT", "STICK1_LEFT" );
-	object->Set( "HYDRA_LEFT_STICK_RIGHT", "STICK1_RIGHT" );
+	object->Set( "TOUCH_LEFT_STICK_UP", "STICK1_UP" );
+	object->Set( "TOUCH_LEFT_STICK_DOWN", "STICK1_DOWN" );
+	object->Set( "TOUCH_LEFT_STICK_LEFT", "STICK1_LEFT" );
+	object->Set( "TOUCH_LEFT_STICK_RIGHT", "STICK1_RIGHT" );
 
-	object->Set( "HYDRA_RIGHT_STICK_UP", "STICK2_UP" );
-	object->Set( "HYDRA_RIGHT_STICK_DOWN", "STICK2_DOWN" );
-	object->Set( "HYDRA_RIGHT_STICK_LEFT", "STICK2_LEFT" );
-	object->Set( "HYDRA_RIGHT_STICK_RIGHT", "STICK2_RIGHT" );
+	object->Set( "TOUCH_RIGHT_STICK_UP", "STICK2_UP" );
+	object->Set( "TOUCH_RIGHT_STICK_DOWN", "STICK2_DOWN" );
+	object->Set( "TOUCH_RIGHT_STICK_LEFT", "STICK2_LEFT" );
+	object->Set( "TOUCH_RIGHT_STICK_RIGHT", "STICK2_RIGHT" );
 
-	object->Set( "JOY17", "ENTER" );		// Left hydra button 1
-	object->Set( "JOY18", "BACKSPACE" );	// Left hydra button 2
-	object->Set( "JOY19", "LB" );			// Left hydra  button 3 = left bumper PDA nav
-	object->Set( "JOY20", "RB" );			// Left hydra  button 4 = right bumper PDA nav
-	object->Set( "JOY22", "LB" );			// Left hydra bumper
-	object->Set( "L_HYDRATRIG", "ENTER" );	// Left hydra trigger
+	object->Set( "JOY17", "ENTER" );		// Left touch button 1
+	object->Set( "JOY18", "BACKSPACE" );	// Left touch button 2
+	object->Set( "JOY20", "LB" );			// Left touch  button 3 = left bumper PDA nav
+	object->Set( "JOY19", "RB" );			// Left touch  button 4 = right bumper PDA nav
+	object->Set( "JOY22", "LB" );			// Left touch bumper
+	//object->Set( "L_TOUCHTRIG", "ENTER" );	// Left touch trigger
+	object->Set( "JOY23", "ENTER" );	// Left touch trigger
 
-	object->Set( "JOY24", "ENTER" );		// Right hydra button 1
-	object->Set( "JOY25", "BACKSPACE" );	// Right hydra button 2
-	object->Set( "JOY26", "LB" );			// Right hydra  button 3 = left bumper PDA nav
-	object->Set( "JOY27", "RB" );			// Right hydra  button 4 = right bumper PDA nav
-	object->Set( "JOY29", "RB" );			// Right hydra bumper
-	object->Set( "L_HYDRATRIG", "ENTER" );	// Left hydra trigger
+	object->Set( "JOY24", "ENTER" );		// Right touch button 1
+	object->Set( "JOY25", "BACKSPACE" );	// Right touch button 2
+	object->Set( "JOY26", "LB" );			// Right touch  button 3 = left bumper PDA nav
+	object->Set( "JOY27", "RB" );			// Right touch  button 4 = right bumper PDA nav
+	object->Set( "JOY29", "RB" );			// Right touch bumper
+	//object->Set( "L_TOUCHTRIG", "ENTER" );	// Left touch trigger
+	object->Set( "JOY30", "ENTER" );		// Left touch trigger
 	// Koz end hydras
 
 	// Koz add SteamVR controller aliases

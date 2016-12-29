@@ -421,7 +421,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			glScissor( 0, 720, 1280, 30 );
 			glClear( GL_COLOR_BUFFER_BIT );
 			break;
-		
+		default:		
 		
 		case STEREO3D_HMD:
 			
@@ -431,7 +431,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			if ( game->isVR ) 
 			{
 			
-				if ( commonVr->playerDead || (game->Shell_IsActive() && !commonVr->PDAforced && !commonVr->PDArising ) || (!commonVr->PDAforced && common->Dialog().IsDialogActive() ) ) 
+				if ( commonVr->playerDead || (game->Shell_IsActive() && !commonVr->PDAforced && !commonVr->PDAforcetoggle ) || (!commonVr->PDAforced && common->Dialog().IsDialogActive() ) ) 
 				{
 					commonVr->HMDTrackStatic();
 					
@@ -447,7 +447,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			break;
 			//Koz end		
 		
-		default:
+		
 		case STEREO3D_SIDE_BY_SIDE:
 			
 		// a non-warped side-by-side-uncompressed (dual input cable) is rendered

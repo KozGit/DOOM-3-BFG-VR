@@ -200,6 +200,7 @@ entityDef player_id_base_d3le {
 	"bone_head"							"headcontrol"	// AI aim location
 	
 	"bone_neck"							"neckcontrol"
+	"bone_chest_pivot"					"Chest"
 
 	"damage_zone head"					"*loneckcontrol"
 	"damage_zone chest"					"*Waist -*loneckcontrol"
@@ -448,6 +449,13 @@ entityDef player_base_d3le_sp {
 	"skin_d3le_player_7" 			"skins/characters/player/greenmarine_arm2/vrBody"
 	"skin_d3le_player_8" 			"skins/characters/player/greenmarine_arm2/vrWeaponsOnly"
 	"skin_d3le_player_9" 			"skins/characters/player/greenmarine_arm2/vrHandsOnly"
+	
+	"skinHeadingSolid_d3le"			"skins/models/headingbeamsolid" 
+	"skinHeadingArrows_d3le"		"skins/models/headingbeamarrows"
+	"skinHeadingArrowsScroll_d3le"	"skins/models/headingbeamarrowsscroll" 
+	"skinCrosshairDot_d3le"			"skins/vr/crosshairDot" 
+	"skinCrosshairCircleDot_d3le"	"skins/vr/crosshairCircleDot" 
+	"skinCrosshairCross_d3le"		"skins/vr/crosshairCross"
 }
 
 

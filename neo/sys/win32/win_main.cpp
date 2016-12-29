@@ -50,7 +50,6 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../renderer/tr_local.h"
 
 // Koz begin
-#include "libs\SixenseSDK_062612\include\sixense.h"
 #include "vr\Vr.h"
 // Koz end
 
@@ -335,8 +334,7 @@ void Sys_Quit() {
 	timeEndPeriod( 1 );
 	Sys_ShutdownInput();
 	Sys_DestroyConsole();
-	sixenseExit(); // Koz fixme move this! also shutdown the HMD!
-	//commonVr->HMDShutdown();
+	commonVr->HMDShutdown();
 	ExitProcess( 0 );
 }
 

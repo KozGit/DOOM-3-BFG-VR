@@ -336,7 +336,7 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 				return true;
 			}
 			*/
-			if ( sev->evValue >= K_HYDRA_LEFT_STICK_UP && sev->evValue <= K_STEAMVR_RIGHT_PAD_RIGHT )
+			if ( sev->evValue >= K_TOUCH_LEFT_STICK_UP && sev->evValue <= K_STEAMVR_RIGHT_PAD_RIGHT )
 			{
 				//koz check why dis I disable remapping this?
 				//return true;
@@ -344,7 +344,7 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 			if( sev->evValue == K_ESCAPE )
 			{
 				
-				common->Printf( "idMenuHandlerShell handlegui event k_escape\n" ); // koz debug
+				//common->Printf( "idMenuHandlerShell handlegui event k_escape\n" ); // koz debug
 				waitForBinding = false;
 				
 				idMenuScreen_Shell_Bindings* bindScreen = dynamic_cast< idMenuScreen_Shell_Bindings* >( menuScreens[ SHELL_AREA_KEYBOARD ] );
@@ -496,9 +496,12 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		// Koz begin VR menus
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_SETTINGS, idMenuScreen_Shell_VR_Settings, this);
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_RENDERING_OPTIONS, idMenuScreen_Shell_VR_Rendering_Options, this);
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_HMD_OPTIONS, idMenuScreen_Shell_VR_HMD_Options, this);
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_UI_OPTIONS, idMenuScreen_Shell_VR_UI_Options, this);
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_HUD_OPTIONS, idMenuScreen_Shell_VR_HUD_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_HUD_POSITION_OPTIONS, idMenuScreen_Shell_VR_HUD_Position_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_PDA_OPTIONS, idMenuScreen_Shell_VR_PDA_Options, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_CONTROL_OPTIONS, idMenuScreen_Shell_VR_Control_Options, this);
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_GAMEPLAY_OPTIONS, idMenuScreen_Shell_VR_Gameplay_Options, this);
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_CHARACTER_OPTIONS, idMenuScreen_Shell_VR_Character_Options, this);
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this);
 		// koz end
 		
@@ -532,9 +535,12 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		// Koz begin VR menus
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_SETTINGS, idMenuScreen_Shell_VR_Settings, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_RENDERING_OPTIONS, idMenuScreen_Shell_VR_Rendering_Options, this );
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_HMD_OPTIONS, idMenuScreen_Shell_VR_HMD_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_UI_OPTIONS, idMenuScreen_Shell_VR_UI_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_HUD_OPTIONS, idMenuScreen_Shell_VR_HUD_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_HUD_POSITION_OPTIONS, idMenuScreen_Shell_VR_HUD_Position_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_PDA_OPTIONS, idMenuScreen_Shell_VR_PDA_Options, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_CONTROL_OPTIONS, idMenuScreen_Shell_VR_Control_Options, this );
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_GAMEPLAY_OPTIONS, idMenuScreen_Shell_VR_Gameplay_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_CHARACTER_OPTIONS, idMenuScreen_Shell_VR_Character_Options, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this );
 		// koz end 
 
@@ -1287,7 +1293,8 @@ void idMenuHandler_Shell::UpdateBGState()
 		if( nextScreen != SHELL_AREA_PLAYSTATION && nextScreen != SHELL_AREA_SETTINGS && nextScreen != SHELL_AREA_CAMPAIGN && nextScreen != SHELL_AREA_DEV )
 		{
 			if( nextScreen != SHELL_AREA_RESOLUTION && nextScreen != SHELL_AREA_GAMEPAD && nextScreen != SHELL_AREA_DIFFICULTY && nextScreen != SHELL_AREA_SYSTEM_OPTIONS && nextScreen != SHELL_AREA_GAME_OPTIONS && nextScreen != SHELL_AREA_NEW_GAME && nextScreen != SHELL_AREA_STEREOSCOPICS &&
-					nextScreen != SHELL_AREA_CONTROLS )
+				nextScreen != SHELL_AREA_CONTROLS && nextScreen != SHELL_AREA_VR_SETTINGS && nextScreen != SHELL_AREA_VR_CHARACTER_OPTIONS && nextScreen != SHELL_AREA_VR_CONTROL_OPTIONS && nextScreen != SHELL_AREA_VR_HUD_OPTIONS && nextScreen != SHELL_AREA_VR_HUD_POSITION_OPTIONS &&
+				nextScreen != SHELL_AREA_VR_PDA_OPTIONS && nextScreen != SHELL_AREA_VR_PROFILE_OPTIONS && nextScreen != SHELL_AREA_VR_RENDERING_OPTIONS && nextScreen != SHELL_AREA_VR_UI_OPTIONS )
 			{
 				ShowSmallFrame( false );
 			}

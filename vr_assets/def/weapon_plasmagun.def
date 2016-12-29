@@ -103,22 +103,12 @@ entityDef weapon_plasmagun {
 	"skin_invisible"			"skins/plasma_invis"
 	
 	"spread"					"0"
-
-	// koz skins for hands/ statswatch
+	
 	"skin_plasmagunammo_invis" 			"skins/plasmagunammo_invis"
 	"skin_plasmagunnoammo_invis"		"skins/plasmagunnoammo_invis" 
-	
-	"skin_plasmagunammo_1" 				"skins/models/weapons/plasmagunammovr/weaponhands/0h"
-	"skin_plasmagunammo_2" 				"skins/models/weapons/plasmagunammovr/weaponhands/1h"
-	"skin_plasmagunammo_3" 				"skins/models/weapons/plasmagunammovr/weaponhands/1hsw"
-	"skin_plasmagunammo_4" 				"skins/models/weapons/plasmagunammovr/weaponhands/2h"
-	"skin_plasmagunammo_5" 				"skins/models/weapons/plasmagunammovr/weaponhands/2hsw"
-
-	"skin_plasmagunnoammo_1" 			"skins/models/weapons/plasmagunnoammovr/weaponhands/0h"
-	"skin_plasmagunnoammo_2" 			"skins/models/weapons/plasmagunnoammovr/weaponhands/1h"
-	"skin_plasmagunnoammo_3" 			"skins/models/weapons/plasmagunnoammovr/weaponhands/1hsw"
-	"skin_plasmagunnoammo_4" 			"skins/models/weapons/plasmagunnoammovr/weaponhands/2h"
-	"skin_plasmagunnoammo_5" 			"skins/models/weapons/plasmagunnoammovr/weaponhands/2hsw"	
+		
+	"skin_plasmagunammo" 				"skins/models/weapons/plasmagunammo"
+	"skin_plasmagunnoammo" 				"skins/models/weapons/plasmagunnoammo"
 	
 	"controllerShakeHighMag"	"0.7"
 	"controllerShakeHighTime"	"25"
