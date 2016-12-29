@@ -19,7 +19,6 @@
 
 idCVar vr_pixelDensity( "vr_pixelDensity", "1.25", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "" );
 idCVar vr_vignette( "vr_vignette", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "unused" );
-idCVar vr_FBOAAmode( "vr_FBOAAmode", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_RENDERER, "Antialiasing mode. 0 = Disabled 1 = MSAA 2= FXAA\n" );
 idCVar vr_enable( "vr_enable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable VR mode. 0 = Disabled 1 = Enabled." );
 idCVar vr_FBOscale( "vr_FBOscale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_RENDERER, "unused" );
 idCVar vr_scale( "vr_scale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "unused" );
@@ -525,20 +524,21 @@ void iVr::HMDInitializeDistortion()
 			if ( !fboCreated )
 			{ // create the FBOs if needed.
 
-				VR_AAmode = vr_FBOAAmode.GetInteger();
-
+				VR_AAmode = r_multiSamples.GetInteger() == 0 ? VR_AA_NONE : VR_AA_MSAA;
+			
 				common->Printf( "vr_FBOAAmode %d r_multisamples %d\n", VR_AAmode, r_multiSamples.GetInteger() );
-				//if ( VR_AAmode == VR_AA_MSAA && r_multiSamples.GetInteger() == 0 ) VR_AAmode = VR_AA_NONE;
-
+				
+				/*
 				if ( VR_AAmode == VR_AA_FXAA )
 				{// enable FXAA
 
 					VR_AAmode = VR_AA_NONE;
 
 				}
+				*/
 
 				if ( VR_AAmode == VR_AA_MSAA )
-				{// enable MSAA
+				{	// enable MSAA
 					GL_CheckErrors();
 
 					common->Printf( "Creating %d x %d MSAA framebuffer\n", rendertarget.w, rendertarget.h );

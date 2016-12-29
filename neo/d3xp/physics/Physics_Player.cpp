@@ -1529,6 +1529,23 @@ void idPhysics_Player::CheckDuck()
 		// of course, I haven't tested crouching EVERYWHERE in the game yet.....
 
 		{
+			static int currentZ;
+			currentZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z;
+
+			if ( currentZ <= ( pm_crouchheight.GetFloat() + 2.0f ) ) // give a little wiggle room.
+			{
+				playerSpeed = crouchSpeed;
+				maxZ = pm_crouchheight.GetFloat();
+			}
+			else
+			{
+				maxZ = pm_normalheight.GetFloat();
+			}
+
+		}
+			
+		/*  this code makes the bounding box reflect the exact player height
+		{
 			maxZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z;
 			maxZ = (int)maxZ; // if this is not cast as an int, it crashes the savegame file!!!!!!! WTF?
 			idMath::ClampFloat( pm_crouchheight.GetFloat(), pm_normalheight.GetFloat(), maxZ );
@@ -1538,6 +1555,8 @@ void idPhysics_Player::CheckDuck()
 				playerSpeed = crouchSpeed;
 			}
 		}
+
+		*/
 		else
 		{
 

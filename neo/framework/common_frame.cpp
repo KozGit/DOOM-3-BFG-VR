@@ -709,15 +709,15 @@ void idCommonLocal::Frame()
 					playerd = commonVr->playerDead;
 					wasl = commonVr->wasLoaded;
 
-					common->Printf( "Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->isShellactive = %d playerdead = %d\n", ingame, commonVr->VR_GAME_PAUSED, pauseGame, game->Shell_IsActive(), commonVr->playerDead );
-					common->Printf( "Pause diag: PDAforcetoggle = %d, PDAforced = %d, savingLoading = %d, wasloaded = %d\n", commonVr->PDAforcetoggle, commonVr->PDAforced, commonVr->gameSavingLoading, commonVr->wasLoaded );
+					//common->Printf( "Pause diag: ingame = %d, VR_GAME_PAUSED = %d, pausegame = %d, game->isShellactive = %d playerdead = %d\n", ingame, commonVr->VR_GAME_PAUSED, pauseGame, game->Shell_IsActive(), commonVr->playerDead );
+					//common->Printf( "Pause diag: PDAforcetoggle = %d, PDAforced = %d, savingLoading = %d, wasloaded = %d\n", commonVr->PDAforcetoggle, commonVr->PDAforced, commonVr->gameSavingLoading, commonVr->wasLoaded );
 				}
 				
 				if ( ( commonVr->VR_GAME_PAUSED || commonVr->PDAforced ) && !common->Dialog().IsDialogActive() && !game->Shell_IsActive() )
 				{
 					// the pda has been forced up, but there is no active shell or dialog.
 					// force everything closed.
-					common->Printf( "Pause 1 setting forcetoggle\n" );
+					//common->Printf( "Pause 1 setting forcetoggle\n" );
 					commonVr->PDAforcetoggle = true; // tell the pda check code to force it down.
 					commonVr->VR_GAME_PAUSED = false;
 				}
@@ -740,7 +740,7 @@ void idCommonLocal::Frame()
 					{
 						if ( !commonVr->playerDead )
 						{
-							common->Printf( "Pause 2 setting forcetoggle\n" );
+							//common->Printf( "Pause 2 setting forcetoggle\n" );
 							commonVr->PDAforcetoggle = true;
 						}
 					}
