@@ -402,7 +402,8 @@ extern idCVar	vr_hudNewItems;
 extern idCVar	vr_hudFlashlight;
 extern idCVar	vr_hudLowHealth;
 
-extern idCVar	vr_tweakTalkCursor; 
+extern idCVar	vr_tweakTalkCursor;
+extern idCVar	vr_talkMode;
 
 extern idCVar	vr_listMonitorName;
 
