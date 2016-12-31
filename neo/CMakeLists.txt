@@ -1259,12 +1259,12 @@ if(MSVC)
 	
 	if(CMAKE_CL_64)
 		link_directories(
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/Win32/Release/VS2013
 				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/x64/VS2013
 				${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/lib/x64/release_dll)
 		
 		set(LibOVR_LIBRARIES
-			libovr64.lib
-			libovr64d.lib
+			libovr.lib
 			ws2_32.lib)
 		
 		set(SixenseSDK_062312_LIBRARIES
@@ -1275,12 +1275,12 @@ if(MSVC)
 			
 	else()
 		link_directories(
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/Win32/Release/VS2013
 				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Win32/VS2013
 				${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/lib/win32/release_dll)
 		
 			set(LibOVR_LIBRARIES
 			libovr.lib
-			libovrd.lib
 			ws2_32.lib)
 		
 		set(SixenseSDK_062312_LIBRARIES
