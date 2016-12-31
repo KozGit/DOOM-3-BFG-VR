@@ -473,6 +473,8 @@ extern idCVar	vr_moveClick;
 extern idCVar	vr_playerBodyMode;
 extern idCVar	vr_bodyToMove;
 
+extern idCVar	vr_stereoMirror;
+
 extern iVr* commonVr;
 
 

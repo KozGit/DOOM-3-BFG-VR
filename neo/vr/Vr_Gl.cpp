@@ -547,14 +547,30 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 			//common->Warning( "Vr_GL.cpp HMDRender : Failed to submit oculus layer. (result %d) \n", result );
 		}
 		
-				
-		// Blit mirror texture to back buffer
-		glBindFramebuffer( GL_READ_FRAMEBUFFER, oculusMirrorFboId );
-		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+		if ( vr_stereoMirror.GetBool() == true )
+		{
+			// Blit mirror texture to back buffer
+			glBindFramebuffer( GL_READ_FRAMEBUFFER, oculusMirrorFboId );
+			glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 
-		glBlitFramebuffer( 0, mirrorH, mirrorW, 0, 0, 0, mirrorW, mirrorH, GL_COLOR_BUFFER_BIT, GL_NEAREST );
-		glBindFramebuffer( GL_READ_FRAMEBUFFER, 0 );
-		
+			glBlitFramebuffer( 0, mirrorH, mirrorW, 0, 0, 0, mirrorW, mirrorH, GL_COLOR_BUFFER_BIT, GL_NEAREST );
+			glBindFramebuffer( GL_READ_FRAMEBUFFER, 0 );
+		}
+		else
+		{
+			renderProgManager.BindShader_PostProcess(); // pass thru shader
+			glBindFramebuffer( GL_FRAMEBUFFER, 0 ); // bind the default framebuffer
+			glDrawBuffer( GL_BACK );
+			backEnd.glState.currentFramebuffer = NULL;
+			
+			// draw the left eye texture.				
+			glViewport( 0, 0, commonVr->hmdWidth / 4, commonVr->hmdHeight / 2 );
+			GL_SelectTexture( 0 );
+			leftCurrent->Bind();
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
+			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface ); // draw it
+		}
 
 		// koz hack
 		// for some reason, vsync will not disable unless wglSwapIntervalEXT( 0 )

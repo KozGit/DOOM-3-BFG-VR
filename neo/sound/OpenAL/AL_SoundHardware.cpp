@@ -39,7 +39,7 @@ idCVar s_device( "s_device", "-1", CVAR_INTEGER | CVAR_ARCHIVE, "Which audio dev
 idCVar s_showPerfData( "s_showPerfData", "0", CVAR_BOOL, "Show XAudio2 Performance data" );
 extern idCVar s_volume_dB;
 
-idCVar vr_forceOculusAudio( "vr_forceOculusAudio","1", CVAR_BOOL | CVAR_ARCHIVE, "Request openAL to open audio on Rift headphones instead of default device\n" );
+extern idCVar vr_forceOculusAudio; 
 /*
 ========================
 idSoundHardware_OpenAL::idSoundHardware_OpenAL
@@ -65,6 +65,9 @@ idSoundHardware_OpenAL::idSoundHardware_OpenAL()
 
 void idSoundHardware_OpenAL::PrintDeviceList( const char* list )
 {
+	
+	int devNum = 0;
+
 	if( !list || *list == '\0' )
 	{
 		idLib::Printf( "    !!! none !!!\n" );
@@ -73,7 +76,7 @@ void idSoundHardware_OpenAL::PrintDeviceList( const char* list )
 	{
 		do
 		{
-			idLib::Printf( "    %s\n", list );
+			idLib::Printf( "%d:    %s\n", devNum++,list );
 			list += strlen( list ) + 1;
 		}
 		while( *list != '\0' );
@@ -141,20 +144,41 @@ void listDevices_f( const idCmdArgs& args )
 	//idLib::Printf("Available capture devices:\n");
 	//printDeviceList(alcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER));
 	
-	if( alcIsExtensionPresent( NULL, "ALC_ENUMERATE_ALL_EXT" ) != AL_FALSE )
+	if ( vr_forceOculusAudio.GetBool() == true )
 	{
-		idLib::Printf( "Default playback device: %s\n", alcGetString( NULL, ALC_DEFAULT_ALL_DEVICES_SPECIFIER ) );
+		common->Printf( "\nCurrent mode: auto detect Rift Audio.\n ( vr_forceOculusAudio = 1 ) \n\n" );
 	}
 	else
 	{
-		idLib::Printf( "Default playback device: %s\n",  alcGetString( NULL, ALC_DEFAULT_DEVICE_SPECIFIER ) );
+		if ( s_device.GetInteger() == -1 )
+		{
+			common->Printf( "\nCurrently mode: use default audio device.\n ( s_device = -1, vr_forceOculusAudio = 0 )\n\n" );
+		}
+		else
+		{
+			common->Printf( "\nCurrently mode: use audio device number %d\n ( s_device = %d, vr_forceOculusAudio = 0  )\n\n", s_device.GetInteger(), s_device.GetInteger() );
+		}
+	}
+
+	if( alcIsExtensionPresent( NULL, "ALC_ENUMERATE_ALL_EXT" ) != AL_FALSE )
+	{
+		idLib::Printf( "Default playback device:\n %s\n", alcGetString( NULL, ALC_DEFAULT_ALL_DEVICES_SPECIFIER ) );
+	}
+	else
+	{
+		idLib::Printf( "Default playback device:\n %s\n",  alcGetString( NULL, ALC_DEFAULT_DEVICE_SPECIFIER ) );
 	}
 	
-	//idLib::Printf("Default capture device: %s\n", alcGetString(NULL, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER));
-	
+	idLib::Printf( "Use showDeviceInfo to see extended info for current audio device.\n" );
+}
+
+void showDeviceInfo_f( const idCmdArgs& args )
+{
+	idLib::Printf( "Audio device info:\n" );
+
 	idSoundHardware_OpenAL::PrintALCInfo( NULL );
-	
-	idSoundHardware_OpenAL::PrintALCInfo( ( ALCdevice* )soundSystem->GetOpenALDevice() );
+
+	idSoundHardware_OpenAL::PrintALCInfo( (ALCdevice*)soundSystem->GetOpenALDevice() );
 }
 
 /*
@@ -164,9 +188,10 @@ idSoundHardware_OpenAL::Init
 */
 void idSoundHardware_OpenAL::Init()
 {
-	cmdSystem->AddCommand( "listDevices", listDevices_f, 0, "Lists the connected sound devices", NULL );
+	cmdSystem->AddCommand( "listDevices", listDevices_f, 0, "Lists the connected sound devices\n", NULL );
+	cmdSystem->AddCommand( "showDeviceInfo", showDeviceInfo_f, 0, "Shows info for current sound device.\n", NULL );
 	
-	common->Printf( "Setup OpenAL device and context... " );
+	common->Printf( "Setup OpenAL device and context...\n " );
 	
 	if ( commonVr->hasHMD && vr_forceOculusAudio.GetBool() && alcIsExtensionPresent( NULL, "ALC_ENUMERATION_EXT" ) != AL_FALSE )
 	{
@@ -198,21 +223,61 @@ void idSoundHardware_OpenAL::Init()
 					*/
 
 					openalDevice = alcOpenDevice( list );
-					if ( openalDevice == NULL )
-					{
-						openalDevice = alcOpenDevice( NULL );
-						
-					}
+					
 				}
 				list += strlen( list ) + 1;
 			} while ( !riftFound &&  (*list != '\0')  );
+
+			if ( openalDevice == NULL || riftFound == false )
+			{
+				common->Printf( "Rift audio not found or failed to open. Attempting to initialize default openAL audio device. \n" );
+				openalDevice = alcOpenDevice( NULL );
+			}
 		}
 	}
-	else
+	else if ( s_device.GetInteger() == -1 || alcIsExtensionPresent( NULL, "ALC_ENUMERATION_EXT" ) == AL_FALSE )
+	// use the default sound device if specified or if enum extenstion not present.
 	{
 		openalDevice = alcOpenDevice( NULL );
 	}
+	else
+	{
+		// s_device contains the dev # of the desired sound device, and enum extension is present. 
+		// get a list of sound devices, and try to open the index in the list matching s_device
+		int desiredDev = s_device.GetInteger();
+		int currentDev = 0;
+		bool found = false;
+		const char* list = alcGetString( NULL, ALC_ALL_DEVICES_SPECIFIER );
+		
+		if ( !list || *list == '\0' )
+		{
+			common->Printf( "Sound device (s_device) specified as %d , but unable to obtain device list.\n Attempting to open default sound device.\n" );
+			openalDevice = alcOpenDevice( NULL );
+		}
+		else
+		{
+			do
+			{
+				if ( currentDev == desiredDev )
+				{
+					found = true;
+					common->Printf( "Attempting to initialize openAL audio device # %d: %s\n", currentDev, list );
+					openalDevice = alcOpenDevice( list );
+				}
+				list += strlen( list ) + 1;
+				currentDev++;
+			} while ( !found && (*list != '\0') );
 
+			if ( openalDevice == NULL || found == false )
+			{
+				common->Printf( "Audio device # %d specified but failed to open.\nAttempting to initialize default openAL audio device. \n", desiredDev );
+				openalDevice = alcOpenDevice( NULL );
+			}
+		}
+	}
+
+
+	// something should have been initialized by now, if not, bail.
 	if ( openalDevice == NULL )
 	{
 		common->FatalError( "idSoundHardware_OpenAL::Init: alcOpenDevice() failed\n" );

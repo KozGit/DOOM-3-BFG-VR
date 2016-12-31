@@ -1190,7 +1190,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 				if ( (inputState.Touches & ovrTouch_RThumbRest) != (oldInputState.Touches & ovrTouch_RThumbRest) )
 				{
-					PostInputEvent( inputDeviceNum, J_ACTION28, (inputState.Buttons & ovrTouch_RThumbRest) );
+					PostInputEvent( inputDeviceNum, J_ACTION28, (inputState.Touches & ovrTouch_RThumbRest) );
 				}
 
 				// left touch
@@ -1216,7 +1216,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 				if ( (inputState.Touches & ovrTouch_LThumbRest) != (oldInputState.Touches & ovrTouch_LThumbRest) )
 				{
-					PostInputEvent( inputDeviceNum, J_ACTION21, (inputState.Buttons & ovrTouch_LThumbRest) );
+					PostInputEvent( inputDeviceNum, J_ACTION21, (inputState.Touches & ovrTouch_LThumbRest) );
 				}
 
 				if ( inputState.HandTrigger[ovrHand_Left] != oldInputState.HandTrigger[ovrHand_Left] )
