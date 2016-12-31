@@ -7,6 +7,7 @@
 #undef _vsnprintf		
 
 #include "vr.h"
+#include "Voice.h"
 #include "d3xp\Game_local.h"
 #include "sys\win32\win_local.h"
 #include "d3xp\physics\Clip.h"
@@ -181,6 +182,8 @@ int fboHeight;
 iVr vrCom;
 iVr* commonVr = &vrCom;
 
+iVoice voice;
+
 /*
 ====================
 R_MakeFBOImage
@@ -343,6 +346,9 @@ iVr::HMDInit
 
 void iVr::HMDInit( void )
 {
+	common->Printf("VoiceInit().\n");
+	voice.VoiceInit();
+
 	hasHMD = false;
 	hasOculusRift = false;
 	game->isVR = false;

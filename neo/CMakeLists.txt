@@ -1280,7 +1280,6 @@ if(MSVC)
 		
 			set(LibOVR_LIBRARIES
 			libovr.lib
-			libovrd.lib
 			ws2_32.lib)
 		
 		set(SixenseSDK_062312_LIBRARIES
@@ -1448,6 +1447,7 @@ if(MSVC)
         ${GLEW_LIBRARY}
 		${SixenseSDK_062312_LIBRARIES}
 		${LibOVR_LIBRARIES}
+		sapi.lib
 		)
 		
 	#CMAKE_BINARY_DIR
