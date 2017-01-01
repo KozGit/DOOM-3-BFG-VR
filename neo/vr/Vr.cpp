@@ -183,6 +183,7 @@ iVr vrCom;
 iVr* commonVr = &vrCom;
 
 iVoice voice;
+iVoice* commonVoice = &voice;
 
 /*
 ====================
@@ -346,9 +347,6 @@ iVr::HMDInit
 
 void iVr::HMDInit( void )
 {
-	common->Printf("VoiceInit().\n");
-	voice.VoiceInit();
-
 	hasHMD = false;
 	hasOculusRift = false;
 	game->isVR = false;

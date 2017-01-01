@@ -68,6 +68,7 @@ static bindInfo_t keyboardBinds[] =
 	{ "Next Flashlight Mode", "_impulse39" },	// KOZ NEXT FLASH MODE 
 	{ "Toggle Heading Beam", "_impulse37" },	// KOZ TOGGLE HEADING BEAM
 	{ "Walk in Place", "_impulse38" },			// KOZ Walk In Place
+	{ "Talk", "_talk" },			// Carl Talk to NPC
 	{ "#str_swf_action_use", "_use" },			// USE
 	{ "#str_02116", "_lookUp" },				// LOOK UP
 	{ "#str_02117", "_lookDown" },				// LOOK DOWN

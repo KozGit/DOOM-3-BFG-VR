@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "..\LibOVR\Include\OVR_CAPI.h"
 #include "..\LibOVR\Include\OVR_CAPI_GL.h"
 #include "vr_hmd.h"
+#include "Voice.h"
 #include "..\renderer\Framebuffer.h"
 #include "..\LibOVR\Include\OVR_CAPI_Audio.h"
 
@@ -475,5 +476,5 @@ extern idCVar	vr_playerBodyMode;
 extern idCVar	vr_bodyToMove;
 
 extern iVr* commonVr;
-
+extern iVoice* commonVoice;
 

@@ -1335,7 +1335,9 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 							
 		// Koz end
 			
-		
+
+		commonVoice->VoiceInit();
+
 		if ( game->isVR )
 		{
 			

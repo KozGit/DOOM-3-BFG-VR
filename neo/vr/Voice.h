@@ -38,8 +38,10 @@ public:
 
 	iVoice();
 
-	void				VoiceInit(void);
-	void				VoiceShutdown(void);
+	void		VoiceInit(void);
+	void		VoiceShutdown(void);
+	void		Say(VERIFY_FORMAT_STRING const char* fmt, ...);
+	void		Event(WPARAM wParam, LPARAM lParam);
 
 	//---------------------------
 private:

@@ -143,6 +143,7 @@ userCmdString_t	userCmdStrings[] =
 	{ "_zoom",			UB_ZOOM },
 	{ "_showScores",	UB_SHOWSCORES },
 	{ "_use",			UB_USE },
+	{ "_talk",		UB_TALK },
 	
 	{ "_impulse0",		UB_IMPULSE0 },
 	{ "_impulse1",		UB_IMPULSE1 },
@@ -1452,6 +1453,12 @@ void idUsercmdGenLocal::CmdButtons()
 		cmd.buttons |= BUTTON_USE;
 	}
 	
+	// check the use button
+	if ( ButtonState( UB_TALK ) )
+	{
+		cmd.buttons |= BUTTON_CHATTING;
+	}
+
 	// check the run button
 
 	if ( !game->isVR || game->isVR && vr_moveClick.GetInteger() <= 2 ) // koz, do normal run if moveClick = 0
