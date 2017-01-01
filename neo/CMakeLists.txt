@@ -1282,7 +1282,7 @@ if(MSVC)
 	
 	if(CMAKE_CL_64)
 		link_directories(
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/Win32/Release/VS2013
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/x64/Release/VS2013
 				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/x64/VS2013
 				${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/lib/x64/release_dll)
 		
