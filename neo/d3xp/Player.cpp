@@ -6386,6 +6386,10 @@ void idPlayer::Weapon_NPC()
 	if ( isDown && !wasDown )
 	{
 		buttonMask |= BUTTON_ATTACK;
+		focusCharacter->ListenTo( this );
+	}
+	else if ( wasDown && !isDown )
+	{
 		focusCharacter->TalkTo( this );
 	}
 }

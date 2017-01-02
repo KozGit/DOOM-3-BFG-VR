@@ -52,6 +52,8 @@ void StoppedTalking()
 
 bool iVoice::GetTalkButton()
 {
+	return in_phrase;
+#if 0
 	static int count = 0;
 	if (spoke)
 	{
@@ -64,6 +66,7 @@ bool iVoice::GetTalkButton()
 		return true;
 	}
 	return false;
+#endif
 }
 
 void iVoice::Event(WPARAM wParam, LPARAM lParam)
