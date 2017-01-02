@@ -2060,6 +2060,7 @@ public:
 			CONTROL_OPTIONS_FIELD_WALK_SPEED_ADJUST,
 			CONTROL_OPTIONS_FIELD_WEAPON_PITCH,
 			CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH,
+			CONTROL_OPTIONS_FIELD_TALK_MODE,
 			MAX_CONTROL_OPTION_FIELDS
 		};
 
@@ -2090,6 +2091,7 @@ public:
 		float	originalWalkSpeedAdjust;
 		float	originalWeaponPitch;
 		float	originalFlashPitch;
+		int		originalTalkMode;
 
 	};
 

@@ -6376,11 +6376,20 @@ void idPlayer::Weapon_NPC()
 	StopFiring();
 	weapon.GetEntity()->LowerWeapon();
 	
-	bool wasDown = ( oldButtons & ( BUTTON_ATTACK | BUTTON_USE ) ) != 0;
-	bool isDown = ( usercmd.buttons & ( BUTTON_ATTACK | BUTTON_USE ) ) != 0;
-	if( isDown && !wasDown )
+	int talkButtons = 0;
+	if (vr_talkMode.GetInteger() < 2)
+		talkButtons |= BUTTON_ATTACK | BUTTON_USE;
+	if (vr_talkMode.GetInteger() > 0)
+		talkButtons |= BUTTON_CHATTING;
+	bool wasDown = ( oldButtons & talkButtons ) != 0;
+	bool isDown = ( usercmd.buttons & talkButtons ) != 0;
+	if ( isDown && !wasDown )
 	{
 		buttonMask |= BUTTON_ATTACK;
+		focusCharacter->ListenTo( this );
+	}
+	else if ( wasDown && !isDown )
+	{
 		focusCharacter->TalkTo( this );
 	}
 }

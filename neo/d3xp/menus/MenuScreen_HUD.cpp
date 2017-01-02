@@ -900,7 +900,7 @@ void idMenuScreen_HUD::UpdateCursorState()
 				// play roll on
 				if( talkCursor )
 				{
-					talkCursor->SetVisible( true );
+					talkCursor->SetVisible( vr_talkMode.GetInteger() < 3 );
 					talkCursor->PlayFrame( 2 );
 					
 					idSWFSpriteInstance* topBacking = talkCursor->GetScriptObject()->GetNestedSprite( "backing", "topBar" );
@@ -914,7 +914,7 @@ void idMenuScreen_HUD::UpdateCursorState()
 					if( txtAction )
 					{
 					
-						if( !in_useJoystick.GetBool() )
+						if (!in_useJoystick.GetBool() && vr_talkMode.GetInteger() < 2)
 						{
 							txtAction->tooltip = true;
 							keyBindings_t bind = idKeyInput::KeyBindingsFromBinding( "_use", true );
@@ -941,7 +941,8 @@ void idMenuScreen_HUD::UpdateCursorState()
 						}
 						txtAction->SetStrokeInfo( true, 0.75f, 1.5f );
 						float actionLength = txtAction->GetTextLength();
-						
+						txtAction->visible = vr_talkMode.GetInteger() < 2;
+
 						if( topBacking )
 						{
 							if( !cursorAction.IsEmpty() )
@@ -952,6 +953,7 @@ void idMenuScreen_HUD::UpdateCursorState()
 							{
 								topBacking->SetXPos( -75.0f );
 							}
+							topBacking->SetVisible(vr_talkMode.GetInteger() < 2);
 						}
 					}
 					
@@ -971,12 +973,13 @@ void idMenuScreen_HUD::UpdateCursorState()
 							{
 								bottomBacking->SetXPos( -75.0f );
 							}
+							bottomBacking->SetVisible(vr_talkMode.GetInteger() < 2);
 						}
 					}
 					
 					if( txtPrompt )
 					{
-						if( in_useJoystick.GetBool() )
+						if( in_useJoystick.GetBool() && vr_talkMode.GetInteger() < 2)
 						{
 							txtPrompt->tooltip = true;
 							txtPrompt->SetText( "_use" );
@@ -986,6 +989,7 @@ void idMenuScreen_HUD::UpdateCursorState()
 							txtPrompt->tooltip = false;
 							txtPrompt->SetText( "" );
 						}
+						txtPrompt->visible = vr_talkMode.GetInteger() < 2;
 					}
 				}
 				cursorState = CURSOR_TALK;

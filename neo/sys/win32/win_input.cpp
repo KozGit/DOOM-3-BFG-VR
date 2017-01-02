@@ -934,6 +934,10 @@ void idJoystickWin32::PostInputEvent( int inputDeviceNum, int event, int value, 
 	{
 		PushButton( inputDeviceNum, K_JOY1 + ( event - J_ACTION1 ), value != 0 );
 	}
+	else if( event == J_TALK )
+	{
+		PushButton( inputDeviceNum, K_TALK, value != 0 );
+	}
 	else if( event == J_AXIS_LEFT_X )
 	{
 		PushButton( inputDeviceNum, K_JOY_STICK1_LEFT, ( value < -range ) );
@@ -1157,6 +1161,17 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 		if ( xis.Gamepad.sThumbRY != old.Gamepad.sThumbRY )
 		{
 			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_Y, -xis.Gamepad.sThumbRY );
+		}
+		// Carl add talk
+		if (vr_talkMode.GetInteger() > 0)
+		{
+			static bool oldTalk = false;
+			bool talk = commonVoice->GetTalkButton();
+			if (talk != oldTalk)
+			{
+				PostInputEvent(inputDeviceNum, J_TALK, talk);
+				oldTalk = talk;
+			}
 		}
 		// Koz begin add touch
 		if ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_OCULUS )

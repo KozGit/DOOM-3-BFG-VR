@@ -175,6 +175,9 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 	int key;
 	switch( uMsg )
 	{
+		case WM_USER:
+			commonVoice->Event(wParam, lParam);
+			break;
 		case WM_WINDOWPOSCHANGED:
 			if( R_IsInitialized() )
 			{

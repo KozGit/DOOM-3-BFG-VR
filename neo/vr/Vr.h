@@ -32,6 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "..\LibOVR\Include\OVR_CAPI.h"
 #include "..\LibOVR\Include\OVR_CAPI_GL.h"
 #include "vr_hmd.h"
+#include "Voice.h"
 #include "..\renderer\Framebuffer.h"
 #include "..\LibOVR\Include\OVR_CAPI_Audio.h"
 
@@ -402,7 +403,8 @@ extern idCVar	vr_hudNewItems;
 extern idCVar	vr_hudFlashlight;
 extern idCVar	vr_hudLowHealth;
 
-extern idCVar	vr_tweakTalkCursor; 
+extern idCVar	vr_tweakTalkCursor;
+extern idCVar	vr_talkMode;
 
 extern idCVar	vr_listMonitorName;
 
@@ -476,5 +478,5 @@ extern idCVar	vr_bodyToMove;
 extern idCVar	vr_stereoMirror;
 
 extern iVr* commonVr;
-
+extern iVoice* commonVoice;
 
