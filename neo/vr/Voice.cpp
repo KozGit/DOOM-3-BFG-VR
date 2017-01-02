@@ -8,10 +8,12 @@
 
 #include "Voice.h"
 #include <sapi.h>
+#include <sphelper.h>
 #include "sys\win32\win_local.h"
 
 ISpVoice * pVoice = NULL;
 ISpRecognizer *pRecognizer = NULL;
+ISpObjectToken *pObjectToken = NULL;
 ISpRecoContext *pReco = NULL;
 ISpRecoGrammar *pGrammar = NULL;
 
@@ -200,11 +202,19 @@ void iVoice::VoiceInit(void)
 		common->Printf("\nISpVoice failed.\n");
 		pVoice = NULL;
 	}
-	hr = CoCreateInstance(CLSID_SpSharedRecognizer, NULL, CLSCTX_ALL, IID_ISpRecognizer, (void **)&pRecognizer);
+	hr = CoCreateInstance(CLSID_SpInprocRecognizer, NULL, CLSCTX_ALL, IID_ISpRecognizer, (void **)&pRecognizer);
 	if (SUCCEEDED(hr))
 	{
 		//Say("Recognizer created.");
-		//pRecognizer->SetInput();
+		// Get the default audio input token.
+		hr = SpGetDefaultTokenFromCategoryId(SPCAT_AUDIOIN, &pObjectToken);
+
+		if (SUCCEEDED(hr))
+		{
+			// Set the audio input to our token.
+			hr = pRecognizer->SetInput(pObjectToken, TRUE);
+		}
+
 		hr = pRecognizer->CreateRecoContext(&pReco);
 		if (SUCCEEDED(hr))
 		{
