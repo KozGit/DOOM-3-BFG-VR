@@ -451,6 +451,9 @@ void idPlayerProfile::ExecConfig( bool save, bool forceDefault )
 		cmdSystem->AppendCommandText( "exec vr.cfg\n" );
 	}
 
+	// Carl talking should always be bound to _talk
+	cmdSystem->AppendCommandText("bind TALK _talk\n");
+
 	cmdSystem->ExecuteCommandBuffer();
 	
 	if( !save )

@@ -227,6 +227,8 @@ enum sys_jEvents
 	J_DPAD_LEFT,
 	J_DPAD_RIGHT,
 	
+	J_TALK,
+
 	MAX_JOY_EVENT
 };
 
@@ -481,6 +483,8 @@ enum keyNum_t
 	K_JOY_DPAD_DOWN,
 	K_JOY_DPAD_LEFT,
 	K_JOY_DPAD_RIGHT,
+
+	K_TALK,
 
 	//------------------------
 	// K_MOUSE enums must be contiguous (no char codes in the middle)

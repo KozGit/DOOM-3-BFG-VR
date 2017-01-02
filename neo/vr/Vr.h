@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "vr_hmd.h"
+#include "Voice.h"
 #include "..\renderer\Framebuffer.h"
 #include "..\libs\OpenVR\headers\openvr.h"
 
@@ -391,7 +392,8 @@ extern idCVar	vr_hudNewItems;
 extern idCVar	vr_hudFlashlight;
 extern idCVar	vr_hudLowHealth;
 
-extern idCVar	vr_tweakTalkCursor; 
+extern idCVar	vr_tweakTalkCursor;
+extern idCVar	vr_talkMode;
 
 extern idCVar	vr_listMonitorName;
 
@@ -463,5 +465,5 @@ extern idCVar	vr_playerBodyMode;
 extern idCVar	vr_bodyToMove;
 
 extern iVr* commonVr;
-
+extern iVoice* commonVoice;
 

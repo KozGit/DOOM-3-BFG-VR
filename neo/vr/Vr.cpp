@@ -7,6 +7,7 @@
 #undef _vsnprintf		
 
 #include "vr.h"
+#include "Voice.h"
 #include "d3xp\Game_local.h"
 #include "sys\win32\win_local.h"
 #include "d3xp\physics\Clip.h"
@@ -93,6 +94,7 @@ idCVar vr_hudNewItems( "vr_hudNewItems", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHI
 idCVar vr_hudFlashlight( "vr_hudFlashlight", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show flashlight in Hud." );
 idCVar vr_hudLowHealth( "vr_hudLowHealth", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, " 0 = Disable, otherwise force hud if heath below this value." );
 
+idCVar vr_talkMode("vr_talkMode", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Talk to NPC 0 = buttons, 1 = buttons or voice, 2 = voice only, 3 = voice no cursor", 0, 3);
 idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "25", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Tweak talk cursor y pos in VR. % val", 0, 99 );
 
 idCVar vr_wristStatMon( "vr_wristStatMon", "1", CVAR_INTEGER | CVAR_ARCHIVE, "Use wrist status monitor. 0 = Disable 1 = Right Wrist 2 = Left Wrist " );
@@ -177,6 +179,9 @@ int fboHeight;
 
 iVr vrCom;
 iVr* commonVr = &vrCom;
+
+iVoice voice;
+iVoice* commonVoice = &voice;
 
 /*
 ====================
