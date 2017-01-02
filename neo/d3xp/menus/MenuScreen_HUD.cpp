@@ -900,7 +900,7 @@ void idMenuScreen_HUD::UpdateCursorState()
 				// play roll on
 				if( talkCursor )
 				{
-					talkCursor->SetVisible( true );
+					talkCursor->SetVisible( vr_talkMode.GetInteger() < 3 );
 					talkCursor->PlayFrame( 2 );
 					
 					idSWFSpriteInstance* topBacking = talkCursor->GetScriptObject()->GetNestedSprite( "backing", "topBar" );
