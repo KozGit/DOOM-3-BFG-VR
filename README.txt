@@ -3,15 +3,20 @@
   / / / // __ \ / __ \ / __ `__ \  /_ < / __  |/ /_   / / __  | | / // /_/ /
  / /_/ // /_/ // /_/ // / / / / /___/ // /_/ // __/  / /_/ /  | |/ // _, _/
 /_____/ \____/ \____//_/ /_/ /_//____//_____//_/     \____/   |___//_/ |_|
+
+							Fully Possessed
 ____________________________________________________________________________
 
 
-DOOM3-BFG VR Edition
-Includes support for the Oculus Rift DK2 and Razer Hydra motion controls.
+
+DOOM3-BFG VR : Fully Possessed
+Includes support for the HTC Vive and motion controls.
 
 VR Implementation /u/Samson-
 DOOM-3-BFG-VR Readme - https://github.com/KozGit/DOOM-3-BFG-VR
 
+Please note this readme has not been fully updated for the VR port yet.  See readme in binary download for more information.
+Readme will be updated with VR specific documentation shortly.
 
 DOOM-3-BFG-VR was built using the RBDOOM3-BFG port.
 RBDOOM-3-BFG Readme - https://github.com/RobertBeckebans/DOOM-3-BFG
@@ -157,18 +162,33 @@ __________________________________________________________
 2. Download the DirectX SDK (June 2010) here:
 	http://www.microsoft.com/en-us/download/details.aspx?id=6812
 
-3. Download and install the latest CMake.
+3. Download and install the latest CMake, saying YES to adding CMake to your path.
 
 4. Generate the VC13 projects using CMake by doubleclicking a matching configuration .bat file in the neo/ folder.
 
-5. Use the VC13 solution to compile what you need:
+5. Start Steam, go to Library > Tools. Right-click Sixense SDK for the Razer Hydra, click "Install Game...". Once installed, go to C:\Program Files (x86)\Steam\steamapps\common\Sixense SDK. Copy the SixenseSDK folder to DOOM-3-BFG/neo/libs. Rename it to SixenseSDK_062612.
+
+6. Go to https://developer.oculus.com/downloads/pc/1.9.0/Oculus_SDK_for_Windows/ then download and extract it somewhere. Copy the LibOVR folder to DOOM-3-BFG/neo/libs
+
+7. Clone the OpenVR git repository in another folder: https://github.com/ValveSoftware/openvr.git
+	Do a hard reset in git (from the log in TortoiseGit) to the v1.0.3 version
+	Copy the openvr folder to DOOM-3-BFG/neo/libs
+
+8. Use the VC13 solution to compile what you need:
 	DOOM-3-BFG/build/Doom3BFGVR.sln
 	
-6. Download ffmpeg-20140405-git-ec8789a-win32-shared.7z from ffmpeg.zeranoe.com/builds/win32/shared
+9. Download ffmpeg-20140405-git-ec8789a-win32-shared.7z from ffmpeg.zeranoe.com/builds/win32/shared/2014
 
-7. Extract the FFmpeg DLLs to your current build directory under DOOM-3-BFG/build/
+10. Extract the FFmpeg DLLs to your current build directory under DOOM-3-BFG/build/
 
+11. Copy DOOM-3-BFG\neo\libs\openvr\bin\win32\openvr_api.dll
+	or
+	DOOM-3-BFG\neo\libs\openvr\bin\win64\openvr_api.dll
+	to your current build directory
 
+12. In Visual Studio, right click project Doom3BFGVR, click Properties. Set Configuration to All Configurations. Choose Debugging, set Command Arguments to:
+	+set fs_basepath "C:\Program Files (x86)\Steam\steamapps\common\DOOM 3 BFG Edition"
+	or wherever you installed Doom 3 BFG edition
 __________________________________
 
 6) COMPILING ON GNU/LINUX
@@ -246,12 +266,13 @@ Anyway:
    (e.g. /path/to/Doom3BFG/), it's in
 	/your/path/to/Steam/steamapps/common/DOOM 3 BFG Edition/base/
 
-4. Copy your Doom3BFGVR executable that you created in 5) or 6) and the FFmpeg DLLs to your own 
-   Doom 3 BFG directory (/path/to/Doom3BFG).
+4. Copy the Doom3BFGVR executable and the FFmpeg DLLs to your own 
+   Doom 3 BFG directory (/path/to/Doom3BFG). Copy mod assets to the BASE directory
    
    Your own Doom 3 BFG directory now should look like:
 	/path/to/Doom3BFG/
 	 ->	Doom3BFGVR (or Doom3BFGVR.exe on Windows)
+	 -> openvr_api.dll
 	 -> avcodec-55.dll
 	 -> avdevice-55.dll
 	 -> avfilter-4.dll
@@ -262,8 +283,19 @@ Anyway:
 	 -> swscale-2.dll
 	 ->	base/
 		 ->	classicmusic/
-		 ->	_common.crc
-		 ->	(etc)
+		 ->	_common.crc ( and the rest of the .crc and .resources files )
+		 ->	def/
+		 -> guis/
+		 -> maps/
+		 -> materials/
+		 -> models/
+		 -> particles/
+		 -> script/
+		 -> skins/
+		 -> strings/
+		 -> video/
+		 -> wad
+		 -> vr_default.cfg
 
 5. Run the game by executing the Doom3BFGVR executable.
 
@@ -332,7 +364,7 @@ We cannot fix anything if we do not know about the problems.
 
 The best way for telling us about a bug is by submitting a bug report at our GitHub bug tracker page:
 
-	https://github.com/RobertBeckebans/DOOM-3-BFG/issues?state=open
+	https://github.com/KozGit/DOOM-3-BFG-VR/issues
 
 The most important fact about this tracker is that we cannot simply forget to fix the bugs which are posted there. 
 It is also a great way to keep track of fixed stuff.

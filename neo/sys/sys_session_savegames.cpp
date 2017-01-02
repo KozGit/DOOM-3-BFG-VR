@@ -356,7 +356,7 @@ saveGameHandle_t idSessionLocal::LoadGameSync( const char* name, saveFileEntryLi
 {
 	idSaveLoadParms& parms = processorLoadFiles->GetParmsNonConst();
 	saveGameHandle_t handle = 0;
-	
+			
 	{
 		// Put in a local block so everything will go in the global heap before the map change, but the heap is
 		// automatically popped out on early return or exception
@@ -434,7 +434,6 @@ saveGameHandle_t idSessionLocal::LoadGameSync( const char* name, saveFileEntryLi
 	}
 	
 	common->OnLoadFilesCompleted( parms );
-	
 	return handle;
 }
 
