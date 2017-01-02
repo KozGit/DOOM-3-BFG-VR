@@ -2028,6 +2028,11 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 				int joyButton = K_JOY_DPAD_UP + ( action - J_DPAD_UP );
 				Key( joyButton, ( value != 0 ) );
 			}
+			else if (action == J_TALK)
+			{
+				int joyButton = K_TALK;
+				Key(joyButton, (value != 0));
+			}
 			else
 			{
 				assert( !"Unknown joystick event" );

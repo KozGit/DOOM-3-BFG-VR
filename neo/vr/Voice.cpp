@@ -31,7 +31,7 @@ iVoice::iVoice()
 {
 }
 
-bool in_phrase = false;
+bool in_phrase = false, spoke = false;
 
 void MadeASound()
 {
@@ -45,7 +45,23 @@ void StartedTalking()
 
 void StoppedTalking()
 {
+	spoke = true;
+}
 
+bool iVoice::GetTalkButton()
+{
+	static int count = 0;
+	if (spoke)
+	{
+		count = 20;
+		spoke = false;
+	}
+	if (count > 0)
+	{
+		--count;
+		return true;
+	}
+	return false;
 }
 
 void iVoice::Event(WPARAM wParam, LPARAM lParam)
@@ -64,27 +80,27 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 			case SPEI_SOUND_START:
 				in_phrase = false;
 				MadeASound();
-				common->Printf("$ Sound start\n");
+				//common->Printf("$ Sound start\n");
 				break;
 			case SPEI_SOUND_END:
 				if (in_phrase)
 					StoppedTalking();
-				common->Printf("$ Sound end\n");
+				//common->Printf("$ Sound end\n");
 				in_phrase = false;
 				break;
 			case SPEI_PHRASE_START:
 				in_phrase = true;
 				StartedTalking();
-				common->Printf("$ phrase start\n");
+				//common->Printf("$ phrase start\n");
 				break;
 			case SPEI_RECOGNITION:
-				common->Printf("$ Recognition\n");
+				//common->Printf("$ Recognition\n");
 				recoResult = reinterpret_cast<ISpRecoResult*>(event.lParam);
 				if (recoResult)
 				{
 					wchar_t* text;
 					hr = recoResult->GetText(SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL);
-					voice.Say("You said %S.", text);
+					//voice.Say("You said %S.", text);
 
 					CoTaskMemFree(text);
 				}
@@ -94,13 +110,13 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 				if (!in_phrase)
 					StartedTalking();
 				in_phrase = true;
-				common->Printf("$ Hypothesis\n");
+				//common->Printf("$ Hypothesis\n");
 				recoResult = reinterpret_cast<ISpRecoResult*>(event.lParam);
 				if (recoResult)
 				{
 					wchar_t* text;
 					hr = recoResult->GetText(SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL);
-					voice.Say("Maybe %S.", text);
+					//voice.Say("Maybe %S.", text);
 
 					CoTaskMemFree(text);
 				}
@@ -115,19 +131,19 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 				common->Printf("$ property string change\n");
 				break;
 			case SPEI_FALSE_RECOGNITION:
-				common->Printf("$ False Recognition\n");
+				//common->Printf("$ False Recognition\n");
 				recoResult = reinterpret_cast<ISpRecoResult*>(event.lParam);
 				if (recoResult)
 				{
 					wchar_t* text;
 					hr = recoResult->GetText(SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL);
-					voice.Say("You did not say that.", text);
+					//voice.Say("You did not say that.");
 					CoTaskMemFree(text);
 				}
 				in_phrase = false;
 				break;
 			case SPEI_INTERFERENCE:
-				common->Printf("$ Interference\n");
+				//common->Printf("$ Interference\n");
 				break;
 			case SPEI_REQUEST_UI:
 				common->Printf("$ Request UI\n");
@@ -144,11 +160,11 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 				common->Printf("$ Start SR Stream\n");
 				break;
 			case SPEI_RECO_OTHER_CONTEXT:
-				common->Printf("$ Reco Other Context\n");
+				//common->Printf("$ Reco Other Context\n");
 				in_phrase = false;
 				break;
 			case SPEI_SR_AUDIO_LEVEL:
-				common->Printf("$ SR Audio Level\n");
+				//common->Printf("$ SR Audio Level\n");
 				break;
 			case SPEI_SR_RETAINEDAUDIO:
 				common->Printf("$ SR Retained Audio\n");
@@ -177,7 +193,7 @@ void iVoice::VoiceInit(void)
 	if (SUCCEEDED(hr))
 	{
 		common->Printf("\nISpVoice succeeded.\n");
-		hr = pVoice->Speak(L"Hello world", 0, NULL);
+		//hr = pVoice->Speak(L"Hello world", 0, NULL);
 	}
 	else
 	{
@@ -187,46 +203,46 @@ void iVoice::VoiceInit(void)
 	hr = CoCreateInstance(CLSID_SpSharedRecognizer, NULL, CLSCTX_ALL, IID_ISpRecognizer, (void **)&pRecognizer);
 	if (SUCCEEDED(hr))
 	{
-		Say("Recognizer created.");
+		//Say("Recognizer created.");
 		//pRecognizer->SetInput();
 		hr = pRecognizer->CreateRecoContext(&pReco);
 		if (SUCCEEDED(hr))
 		{
-			Say("Context created.");
+			//Say("Context created.");
 			hr = pReco->Pause(0);
 			hr = pReco->CreateGrammar(1, &pGrammar);
 			if (SUCCEEDED(hr))
 			{
-				Say("Grammar created.");
+				//Say("Grammar created.");
 				SPSTATEHANDLE rule;
 				pGrammar->GetRule(L"word", 0, SPRAF_TopLevel | SPRAF_Active, true, &rule);
 				pGrammar->AddWordTransition(rule, NULL, L"hello", L" ", SPWT_LEXICAL, 1.0f, NULL);
 				pGrammar->AddWordTransition(rule, NULL, L"goodbye", L" ", SPWT_LEXICAL, 1.0f, NULL);
 				hr = pGrammar->Commit(NULL);
-				if (SUCCEEDED(hr))
-					Say("Compiled.");
+				//if (SUCCEEDED(hr))
+				//	Say("Compiled.");
 
 				//hr = pReco->SetNotifyWindowMessage(win32.hWnd, WM_USER, 0, 0);
 				hr = pReco->SetNotifyCallbackFunction(SpeechCallback, 0, 0);
-				if (SUCCEEDED(hr))
-					Say("Callback created.");
+				//if (SUCCEEDED(hr))
+				//	Say("Callback created.");
 				ULONGLONG interest;
 				interest = SPFEI_ALL_SR_EVENTS;
 				hr = pReco->SetInterest(interest, interest);
-				if (SUCCEEDED(hr))
-					Say("Interested.");
+				//if (SUCCEEDED(hr))
+				//	Say("Interested.");
 				hr = pGrammar->SetRuleState(L"word", NULL, SPRS_ACTIVE);
-				if (SUCCEEDED(hr))
-					Say("Listening.");
+				//if (SUCCEEDED(hr))
+				//	Say("Listening.");
 				hr = pReco->Resume(0);
-				if (SUCCEEDED(hr))
-					Say("Resumed.");
+				//if (SUCCEEDED(hr))
+				//	Say("Resumed.");
 			}
 		}
 	}
 	else
 	{
-		Say("Recognizer failed.");
+		//Say("Recognizer failed.");
 	}
 }
 
