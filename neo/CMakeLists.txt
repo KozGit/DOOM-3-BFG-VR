@@ -1472,6 +1472,7 @@ if(MSVC)
         ${OPENVR_LIBRARY}
 		${SixenseSDK_062312_LIBRARIES}
 		${LibOVR_LIBRARIES}
+		sapi.lib
 		)
 		
 	#CMAKE_BINARY_DIR

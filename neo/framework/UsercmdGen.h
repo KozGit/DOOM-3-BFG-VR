@@ -163,6 +163,7 @@ typedef enum
 	UB_ZOOM,
 	UB_SHOWSCORES,
 	UB_USE,
+	UB_TALK,
 	
 	UB_IMPULSE0,
 	UB_IMPULSE1,

@@ -282,6 +282,7 @@ public:
 	void					Spawn();
 	void					HeardSound( idEntity* ent, const char* action );
 	idActor*					GetEnemy() const;
+	void					ListenTo( idEntity* ent );
 	void					TalkTo( idActor* actor );
 	talkState_t				GetTalkState() const;
 	

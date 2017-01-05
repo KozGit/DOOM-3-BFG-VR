@@ -4191,6 +4191,16 @@ void idAI::EnemyDead()
 
 /*
 =====================
+idAI::ListenTo
+=====================
+*/
+void idAI::ListenTo( idEntity* ent )
+{
+	Event_LookAtEntity(ent, 1.0f);
+}
+
+/*
+=====================
 idAI::TalkTo
 =====================
 */
