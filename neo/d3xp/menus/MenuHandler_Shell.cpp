@@ -344,7 +344,7 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 			if( sev->evValue == K_ESCAPE )
 			{
 				
-				common->Printf( "idMenuHandlerShell handlegui event k_escape\n" ); // koz debug
+				//common->Printf( "idMenuHandlerShell handlegui event k_escape\n" ); // koz debug
 				waitForBinding = false;
 				
 				idMenuScreen_Shell_Bindings* bindScreen = dynamic_cast< idMenuScreen_Shell_Bindings* >( menuScreens[ SHELL_AREA_KEYBOARD ] );

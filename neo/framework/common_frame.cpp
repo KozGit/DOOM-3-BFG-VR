@@ -517,7 +517,7 @@ void idCommonLocal::Frame()
 		// This is the only place this is incremented
 		idLib::frameNumber++;
 				
-		if ( game->isVR ) commonVr->FrameStart();
+		if ( game->isVR && commonVr->hasOculusRift ) commonVr->FrameStart();
 
 		// allow changing SIMD usage on the fly
 		if( com_forceGenericSIMD.IsModified() )
@@ -875,13 +875,15 @@ void idCommonLocal::Frame()
 		usercmdGen->BuildCurrentUsercmd( deviceNum );
 		
 		
-		if( deviceNum == -1 )  
+		if( deviceNum == -1 || !commonVr->hasOculusRift )  
 		{
 			for( int i = 0; i < MAX_INPUT_DEVICES ; i++ )
 			{
 				Sys_PollJoystickInputEvents( i );
 				Sys_EndJoystickInputEvents();
-				
+				// Carl: openvr only ???
+				if ( !commonVr->hasOculusRift )
+					usercmdGen->BuildCurrentUsercmd( deviceNum );
 			}
 		}
 			
