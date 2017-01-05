@@ -1288,7 +1288,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec autoexec.cfg\n" );
 		
 		// Koz begin
-		if ( commonVr->hasOculusRift )
+		if ( commonVr->hasHMD )
 		{
 			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_default.cfg\n" );
 		}
@@ -1328,7 +1328,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 
 		// Koz begin
 		// initialize the HMD
-		if ( commonVr->hasOculusRift )
+		if ( commonVr->hasHMD )
 		{
 			commonVr->HMDInitializeDistortion();
 		}
@@ -1477,9 +1477,12 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 			
 			if ( game->isVR )
 			{
-				commonVr->FrameStart();
-				idLib::frameNumber++;
-				commonVr->HMDTrackStatic();
+				if ( commonVr->hasOculusRift )
+				{
+					commonVr->FrameStart();
+					idLib::frameNumber++;
+					commonVr->HMDTrackStatic();
+				}
 			}
 			else
 			{
@@ -1498,9 +1501,12 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 			while ( centered < 6 )
 			{
 				RenderSplash();
-				commonVr->FrameStart();
-				idLib::frameNumber++;
-				commonVr->HMDTrackStatic();
+				if ( commonVr->hasOculusRift )
+				{
+					commonVr->FrameStart();
+					idLib::frameNumber++;
+					commonVr->HMDTrackStatic();
+				}
 
 				Sys_GenerateEvents();
 
@@ -1512,7 +1518,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 
 				if ( numKeyEvents > 0 )
 				{
-					common->Printf( "Bailed from keyevent\n" );
+					//common->Printf( "Bailed from keyevent\n" );
 					centered++;
 				}
 
@@ -1528,14 +1534,14 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 						{
 							if ( action >= J_ACTION1 && action <= J_ACTION_MAX )// || action < J_ACTION_MAX && action < MAX_JOY_EVENT )
 							{
-								common->Printf( "Centered %d Bailed from action >= J_ACTION1 && action <= J_ACTION_MAX action %d numevents %d\n", centered ,action, numJoystickEvents );
+								//common->Printf( "Centered %d Bailed from action >= J_ACTION1 && action <= J_ACTION_MAX action %d numevents %d\n", centered ,action, numJoystickEvents );
 								centered ++ ;
 							}
 							else if ( action > J_AXIS_MIN && action < J_AXIS_MAX )
 							{
 								if ( abs( value ) > 16384 )
 								{
-									common->Printf( "Centered %d Bailed from action J_AXIS_MIN && action < J_AXIS_MAX %d %d\n", centered, action, value );
+									//common->Printf( "Centered %d Bailed from action J_AXIS_MIN && action < J_AXIS_MAX %d %d\n", centered, action, value );
 									centered ++;
 								}
 
