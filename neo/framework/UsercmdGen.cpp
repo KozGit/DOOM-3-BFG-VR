@@ -2028,9 +2028,9 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 				int joyButton = K_JOY_DPAD_UP + ( action - J_DPAD_UP );
 				Key( joyButton, ( value != 0 ) );
 			}
-			else if (action == J_TALK)
+			else if (action >= J_TALK && action <= J_SAY_MAX)
 			{
-				int joyButton = K_TALK;
+				int joyButton = K_TALK + (action - J_TALK);
 				Key(joyButton, (value != 0));
 			}
 			else

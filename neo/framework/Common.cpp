@@ -1299,6 +1299,30 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		}
 
 		// Koz end
+		// Carl talking should always be bound to _talk
+		cmdSystem->AppendCommandText("bind TALK _talk\n");
+		cmdSystem->AppendCommandText("bind SAY_PAUSE _impulse40\n");
+		//cmdSystem->AppendCommandText("bind SAY_RESUME _impulse40\n");
+		cmdSystem->AppendCommandText("bind SAY_EXIT _impulse40\n");
+		cmdSystem->AppendCommandText("bind SAY_MENU _impulse40\n");
+		//	cmdSystem->AppendCommandText("bind SAY_CANCEL _impulse\n");
+		cmdSystem->AppendCommandText("bind SAY_RELOAD _impulse13\n");
+		cmdSystem->AppendCommandText("bind SAY_PDA _impulse19\n");
+		cmdSystem->AppendCommandText("bind SAY_FIST _impulse1\n");
+		cmdSystem->AppendCommandText("bind SAY_CHAINSAW _impulse27\n");
+		cmdSystem->AppendCommandText("bind SAY_FLASHLIGHT _impulse16\n");
+		cmdSystem->AppendCommandText("bind SAY_GRABBER _impulse26\n");
+		cmdSystem->AppendCommandText("bind SAY_PISTOL _impulse2\n");
+		cmdSystem->AppendCommandText("bind SAY_SHOTGUN _impulse4\n");
+		cmdSystem->AppendCommandText("bind SAY_SUPER_SHOTGUN _impulse11\n");
+		cmdSystem->AppendCommandText("bind SAY_MACHINE_GUN _impulse5\n");
+		cmdSystem->AppendCommandText("bind SAY_CHAIN_GUN _impulse6\n");
+		cmdSystem->AppendCommandText("bind SAY_ROCKET_LAUNCHER _impulse9\n");
+		cmdSystem->AppendCommandText("bind SAY_GRENADES _impulse7\n");
+		cmdSystem->AppendCommandText("bind SAY_PLASMA_GUN _impulse8\n");
+		cmdSystem->AppendCommandText("bind SAY_BFG _impulse10\n");
+		cmdSystem->AppendCommandText("bind SAY_SOUL_CUBE _impulse12\n");
+		cmdSystem->AppendCommandText("bind SAY_ARTIFACT _impulse12\n");
 
 
 		// run cfg execution
@@ -1966,7 +1990,7 @@ bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
 	
 	if ( game && game->IsInGame() )
 	{
-		if ( event->evType == SE_KEY && event->evValue2 == 1 && (event->evValue == K_ESCAPE || event->evValue == K_JOY9  ) )
+		if ( event->evType == SE_KEY && event->evValue2 == 1 && (event->evValue == K_ESCAPE || event->evValue == K_JOY9 || event->evValue == K_SAY_CANCEL || event->evValue == K_SAY_RESUME ) )
 		{
 			if( game->CheckInCinematic() == true )
 			{
@@ -1974,7 +1998,7 @@ bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
 			}
 			else
 			{
-				if( !game->Shell_IsActive() )
+				if ( !game->Shell_IsActive() && event->evValue != K_SAY_CANCEL && event->evValue != K_SAY_RESUME )
 				{
 				
 					// menus / etc

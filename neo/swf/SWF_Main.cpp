@@ -822,6 +822,10 @@ idSWFScriptVar idSWF::idSWFScriptFunction_shortcutKeys_clear::Call( idSWFScriptO
 	//object->Set( "JOY29", "RB" );			// Right hydra bumper
 	object->Set( "R_STEAMVRTRIG", "ENTER" );	// right SteamVR trigger
 	// Koz end steamvr
+	// Carl voice commands
+	//object->Set( "SAY_", "ENTER" );
+	object->Set( "SAY_CANCEL", "BACKSPACE" );
+
 	object->Set( "K_R_STEAMVRTRIG", "ENTER" );
 	object->Set( "K_L_STEAMVRTRIG", "ENTER" );
 	object->Set( "KP_ENTER", "ENTER" );

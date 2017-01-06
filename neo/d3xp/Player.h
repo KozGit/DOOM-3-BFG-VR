@@ -671,7 +671,7 @@ public:
 	{
 		previousWeapon = num;
 	}
-	void					SelectWeapon( int num, bool force );
+	void					SelectWeapon( int num, bool force, bool specific = false );
 	void					DropWeapon( bool died ) ;
 	void					StealWeapon( idPlayer* player );
 	void					AddProjectilesFired( int count );
