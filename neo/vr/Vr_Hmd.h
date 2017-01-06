@@ -71,11 +71,13 @@ typedef struct
 typedef struct _hmdEye
 {
 
-	float				projectionRift[16];
+	float				projectionHmd[16];
 	idVec3				viewOffset;
-	eyeScaleOffset_t	projection;
+	eyeProjRaw_t		projectionOpenVR;
+	eyeScaleOffset_t	projectionOculus;
 	ovrEyeRenderDesc	eyeRenderDesc;
 	ovrSizei			renderTarget;
+	resolution_t		renderTargetRes;
 	ovrFovPort			eyeFov;
 	ovrVector2f			UVScaleoffset[2];
 } hmdEye_t;

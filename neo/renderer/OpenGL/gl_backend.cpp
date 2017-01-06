@@ -145,7 +145,10 @@ const void GL_BlockingSwapBuffers()
 
 	GLimp_SwapBuffers();
 
-	
+	if ( game->isVR && !commonVr->hasOculusRift )
+	{
+		commonVr->FrameStart();
+	}
 	
 	const int beforeFence = Sys_Milliseconds();
 	if ( r_showSwapBuffers.GetBool() && beforeFence - beforeSwap > 1 )

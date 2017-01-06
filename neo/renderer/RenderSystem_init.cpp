@@ -630,20 +630,26 @@ void R_SetNewMode( const bool fullInit )
 		// Koz
 		// Create a window for the Oculus mirror texture
 
-		if ( commonVr->hasHMD && commonVr->hasOculusRift && vr_enable.GetBool() )
+		if ( commonVr->hasHMD && vr_enable.GetBool() )
 		{
 			r_fullscreen.SetInteger( 0 ); // force a windowed mode
 			
-			if ( vr_stereoMirror.GetBool() )
+			if ( commonVr->hasOculusRift )
 			{
-				r_windowWidth.SetInteger( commonVr->hmdDesc.Resolution.w / 2 );
-			}
-			else
-			{
-				r_windowWidth.SetInteger( commonVr->hmdDesc.Resolution.w / 4 );
-			}
+				if ( vr_stereoMirror.GetBool() )
+				{
+					r_windowWidth.SetInteger( commonVr->hmdDesc.Resolution.w / 2 );
+				}
+				else
+				{
+					r_windowWidth.SetInteger( commonVr->hmdDesc.Resolution.w / 4 );
+				}
 
-			r_windowHeight.SetInteger( commonVr->hmdDesc.Resolution.h / 2 );
+				r_windowHeight.SetInteger( commonVr->hmdDesc.Resolution.h / 2 );
+			} else {
+				r_windowWidth.SetInteger( commonVr->hmdWidth / 2 );
+				r_windowHeight.SetInteger( commonVr->hmdHeight / 2 );
+			}
 			r_swapInterval.SetInteger( 0 ); // force Vsync off for hmd.
 						
 			parms.x = r_windowX.GetInteger();

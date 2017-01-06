@@ -334,7 +334,6 @@ void Sys_Quit() {
 	timeEndPeriod( 1 );
 	Sys_ShutdownInput();
 	Sys_DestroyConsole();
-	
 	commonVr->HMDShutdown();
 	ExitProcess( 0 );
 }

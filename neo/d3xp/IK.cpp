@@ -745,12 +745,11 @@ void idIK_Walk::Evaluate()
 	idMat3 hipAxis[MAX_LEGS], kneeAxis[MAX_LEGS], ankleAxis[MAX_LEGS];
 	trace_t results;
 	
-	
 	// koz begin
 	bool isPlayer = false;
 	idPlayer *player;
 	player = gameLocal.GetLocalPlayer();
-	if (  player != NULL )
+	if ( player )
 	{
 		if ( player->entityNumber == self->entityNumber )
 		{
@@ -759,7 +758,6 @@ void idIK_Walk::Evaluate()
 	}
 	// koz end
 	
-
 	if( !self || !gameLocal.isNewFrame )
 	{
 		return;

@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "Voice.h"
 #include "..\renderer\Framebuffer.h"
 #include "..\LibOVR\Include\OVR_CAPI_Audio.h"
-
+#include "..\libs\OpenVR\headers\openvr.h"
 
 
 #ifndef __VR_H__
@@ -92,6 +92,8 @@ public:
 	
 	iVr();
 	
+	bool				OculusInit( void );
+	bool				OpenVRInit( void );
 	void				HMDInit( void );
 	void				HMDShutdown( void );
 	void				HMDInitializeDistortion( void );
@@ -106,15 +108,16 @@ public:
 
 	void				OpenVrGetRight( idVec3 &position, idQuat &rotation );
 	void				OpenVrGetLeft( idVec3 &position, idQuat &rotation );
-		
+	
 	void				MotionControlSetRotationOffset();
 	void				MotionControlSetOffset();
 	void				MotionControlGetHand( int hand, idVec3 &position, idQuat &rotation );
 	void				MotionControlGetLeftHand( idVec3 &position, idQuat &rotation );
 	void				MotionControlGetRightHand( idVec3 &position, idQuat &rotation );
-	//void				MotionControlGetOpenVrController( vr::TrackedDeviceIndex_t deviceNum, idVec3 &position, idQuat &rotation );
+	void				MotionControlGetOpenVrController( vr::TrackedDeviceIndex_t deviceNum, idVec3 &position, idQuat &rotation );
 	void				MotionControlGetTouchController( int hand, idVec3 &position, idQuat &rotation );
-	void				MotionControllerSetHaptic( float low, float hi );
+	void				MotionControllerSetHapticOculus( float low, float hi );
+	void				MotionControllerSetHapticOpenVR( int hand, unsigned short value );
 	
 	void				MSAAResolve( void );
 	void				FXAAResolve( idImage * leftCurrent, idImage * rightCurrent );
@@ -152,6 +155,7 @@ public:
 
 	bool				vrIsBackgroundSaving;
 		
+	int					vrFrameNumber;
 	int					lastPostFrame;
 		
 	int					frameCount;
@@ -181,8 +185,8 @@ public:
 	
 	float				angles[3];
 	
-	int					hmdWidth;
-	int					hmdHeight;
+	uint32_t			hmdWidth;
+	uint32_t			hmdHeight;
 	int					hmdHz;
 	
 	bool				useFBO;
@@ -202,10 +206,29 @@ public:
 
 	ovrHmdDesc			hmdDesc;
 
-			
+	bool				m_bDebugOpenGL;
+	bool				m_bVerbose;
+	bool				m_bPerf;
+	bool				m_bVblank;
+	bool				m_bGlFinishHack;
+
+	vr::IVRSystem			*m_pHMD;
+	vr::IVRCompositor		*m_pCompositor;
+	vr::IVRRenderModels		*m_pRenderModels;
+	vr::TrackedDevicePose_t	m_rTrackedDevicePose[vr::k_unMaxTrackedDeviceCount];
+	vr::TrackedDevicePose_t	m1_rTrackedDevicePose[vr::k_unMaxTrackedDeviceCount];
+
+	vr::VRControllerState_t pControllerStateL;
+	vr::VRControllerState_t pControllerStateR;
+	vr::TrackedDeviceIndex_t leftControllerDeviceNo;
+	vr::TrackedDeviceIndex_t rightControllerDeviceNo;
+		
 	idStr				m_strDriver;
 	idStr				m_strDisplay;
 	
+	char				m_rDevClassChar[vr::k_unMaxTrackedDeviceCount];
+	idMat4				m_rmat4DevicePose[vr::k_unMaxTrackedDeviceCount];
+	bool				m_rbShowTrackedDevice[vr::k_unMaxTrackedDeviceCount];
 
 
 	idMat4				m_mat4ProjectionLeft;
@@ -223,8 +246,9 @@ public:
 	hmdEye_t			hmdEye[2];
 	
 	
-	float				oculusIPD;
-	float				oculusHeight;
+	float				officialIPD;
+	float				officialHeight;
+	
 	float				manualIPD;
 	float				manualHeight;
 

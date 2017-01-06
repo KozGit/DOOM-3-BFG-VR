@@ -37,7 +37,7 @@ static const int MAX_PLAYERS			= 8;
 static const int MAX_REDUNDANT_CMDS	= 3;
 
 static const int MAX_LOCAL_PLAYERS		= 2;
-static const int MAX_INPUT_DEVICES		= 4; // koz  fixme
+static const int MAX_INPUT_DEVICES		= 6; // koz  fixme was 4, added hydra , steamvr controller polled separately koz fix this
 
 enum matchFlags_t
 {
