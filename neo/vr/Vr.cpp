@@ -1836,3 +1836,17 @@ void iVr::NextFlashMode()
 	if ( currentFlashMode >= FLASH_MAX ) currentFlashMode = 0;
 }
 
+bool iVr::ShouldQuit()
+{
+	if (hasOculusRift)
+	{
+		ovrSessionStatus ss;
+		ovrResult result = ovr_GetSessionStatus(hmdSession, &ss);
+		if (ss.ShouldQuit)
+			return true;
+		if (ss.ShouldRecenter)
+			ovr_RecenterTrackingOrigin(hmdSession);
+	}
+	return false;
+}
+

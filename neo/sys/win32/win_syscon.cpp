@@ -461,8 +461,9 @@ void Sys_DestroyConsole()
 {
 	if( s_wcd.hWnd )
 	{
-		ShowWindow( s_wcd.hWnd, SW_HIDE );
-		CloseWindow( s_wcd.hWnd );
+		// Carl: these hang forever, so I had to comment them out
+		//ShowWindow( s_wcd.hWnd, SW_HIDE );
+		//CloseWindow( s_wcd.hWnd );
 		DestroyWindow( s_wcd.hWnd );
 		s_wcd.hWnd = 0;
 	}

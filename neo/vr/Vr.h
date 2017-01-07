@@ -127,7 +127,8 @@ public:
 
 	int					GetCurrentFlashMode();
 	void				NextFlashMode();
-		
+
+	bool				ShouldQuit();
 
 	//------------------
 
