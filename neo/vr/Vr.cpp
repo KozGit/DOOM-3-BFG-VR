@@ -434,6 +434,11 @@ bool iVr::OculusInit( void )
 
 
 	common->Printf( "ovr_Initialize was successful.\n" );
+
+	ovr_IdentifyClient( "EngineName: id Tech 4\n"
+		"EngineVersion: 1.0.3\n"
+		"EngineEditor: false" );
+
 	result = ovr_Create( &hmdSession, &ovrLuid );
 
 	if ( OVR_FAILURE( result ) )
