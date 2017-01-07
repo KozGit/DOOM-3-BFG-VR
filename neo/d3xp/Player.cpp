@@ -6360,6 +6360,8 @@ void idPlayer::Weapon_Combat()
 	{
 		inventory.SetClipAmmoForWeapon( currentWeapon, weapon.GetEntity()->AmmoInClip() );
 	}
+
+	commonVr->ForceChaperone( idealWeapon == weapon_handgrenade );
 }
 
 /*
@@ -6465,6 +6467,8 @@ void idPlayer::Weapon_GUI()
 		
 	}
 	
+	commonVr->ForceChaperone(false);
+
 	// disable click prediction for the GUIs. handy to check the state sync does the right thing
 	if( common->IsClient() && !net_clientPredictGUI.GetBool() )
 	{
