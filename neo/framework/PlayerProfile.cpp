@@ -452,6 +452,7 @@ void idPlayerProfile::ExecConfig( bool save, bool forceDefault )
 	}
 
 	// Carl talking should always be bound to _talk
+	cmdSystem->AppendCommandText("bind JOY25 _impulse42\n");
 	cmdSystem->AppendCommandText("bind TALK _talk\n");
 
 	cmdSystem->ExecuteCommandBuffer();

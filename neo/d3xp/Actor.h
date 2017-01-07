@@ -219,6 +219,10 @@ public:
 protected:
 	friend class			idAnimState;
 	
+	// Carl: navigation (originally in AI.h)
+	idAAS* 					aas;
+	int						travelFlags;
+
 	float					fovDot;				// cos( fovDegrees )
 	idVec3					eyeOffset;			// offset of eye relative to physics origin
 	idVec3					modelOffset;		// offset of visual model relative to the physics origin

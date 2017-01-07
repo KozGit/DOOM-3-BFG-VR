@@ -1511,6 +1511,8 @@ idPlayer::idPlayer():
 	serverOverridePositionTime( 0 ),
 	clientFireCount( 0 )
 {
+	aas = NULL;
+	travelFlags = TFL_WALK | TFL_AIR | TFL_CROUCH | TFL_WALKOFFLEDGE | TFL_BARRIERJUMP | TFL_JUMP | TFL_LADDER | TFL_WATERJUMP | TFL_ELEVATOR | TFL_SPECIAL;
 
 	noclip					= false;
 	godmode					= false;
@@ -2293,6 +2295,8 @@ void idPlayer::Spawn()
 	physicsObj.SetContents( CONTENTS_BODY );
 	physicsObj.SetClipMask( MASK_PLAYERSOLID );
 	SetPhysics( &physicsObj );
+
+	SetAAS();
 	InitAASLocation();
 	
 	skin = renderEntity.customSkin;
@@ -3124,7 +3128,16 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		savefile->ReadInt( aasLocation[ i ].areaNum );
 		savefile->ReadVec3( aasLocation[ i ].pos );
 	}
-	
+
+	// Set the AAS if the character has the correct gravity vector
+	//idVec3 gravity = spawnArgs.GetVector("gravityDir", "0 0 -1");
+	//gravity *= g_gravity.GetFloat();
+	//if (gravity == gameLocal.GetGravity())
+	//{
+		SetAAS();
+	//}
+
+
 	savefile->ReadInt( bobFoot );
 	savefile->ReadFloat( bobFrac );
 	savefile->ReadFloat( bobfracsin );
@@ -9142,9 +9155,19 @@ void idPlayer::PerformImpulse( int impulse )
 				void Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
 				Sys_QueEvent( SE_KEY, K_ESCAPE, 1, 0, NULL, 0 );
 			}
+			break;
 		}
 		// Koz end
-		
+		// Carl: Teleport
+		case IMPULSE_42:
+		{
+			// teleport
+			if (aimValidForTeleport)
+				Teleport(aimPoint, viewAngles, NULL);
+			common->Printf("AimPointPitch=%f", aimPointPitch);
+			break;
+		}
+
 	}
 }
 
@@ -9505,6 +9528,44 @@ void idPlayer::AdjustBodyAngles()
 	animator.CurrentAnim( ANIMCHANNEL_LEGS )->SetSyncedAnimWeight( 2, upBlend );
 }
 
+/* Carl
+=====================
+idPlayer::SetAAS
+=====================
+*/
+void idPlayer::SetAAS()
+{
+	idStr use_aas;
+
+	spawnArgs.GetString("use_aas", NULL, use_aas);
+	gameLocal.Printf("Player AAS: use_aas = %s\n", use_aas.c_str());
+	aas = gameLocal.GetAAS(use_aas);
+	if (!aas)
+		aas = gameLocal.GetAAS("aas48");
+	if (aas)
+	{
+		const idAASSettings* settings = aas->GetSettings();
+		if (settings)
+		{
+			/*
+			if (!ValidForBounds(settings, physicsObj.GetBounds()))
+			{
+				gameLocal.Error("%s cannot use use_aas %s\n", name.c_str(), use_aas.c_str());
+			}
+			*/
+			float height = settings->maxStepHeight;
+			gameLocal.Printf("Player AAS: AAS step height = %f, player step height = %f\n", height, physicsObj.GetMaxStepHeight());
+			// physicsObj.SetMaxStepHeight(height);
+			return;
+		}
+		else
+		{
+			aas = NULL;
+		}
+	}
+	gameLocal.Printf("WARNING: Player %s has no AAS file\n", name.c_str());
+}
+
 /*
 ==============
 idPlayer::InitAASLocation
@@ -9537,6 +9598,21 @@ void idPlayer::InitAASLocation()
 			bounds[1] = size;
 			
 			aasLocation[ i ].areaNum = aas->PointReachableAreaNum( origin, bounds, AREA_REACHABLE_WALK );
+			const idAASSettings* settings = aas->GetSettings();
+			if (settings)
+			{
+				settings->allowFlyReachabilities;
+				size = aas->GetSettings()->boundingBoxes[0][1];
+				gameLocal.Printf("AAS %d: %s: fly=%d, swim=%d, step=%f, barrier=%f, fall=%f, water=%f; %f x %f x %f\n", i, settings->fileExtension.c_str(),
+					settings->allowFlyReachabilities, settings->allowSwimReachabilities,
+					settings->maxStepHeight, settings->maxBarrierHeight, settings->maxFallHeight, settings->maxWaterJumpHeight,
+					size.x, size.y, size.z);
+				bounds = this->physicsObj.GetBounds();
+				size = bounds[1];
+				gameLocal.Printf("Player: %s, step=%f, jump=%f, crouch=%f; %f x %f x %f\n", name.c_str(),
+					pm_stepsize.GetFloat(), pm_jumpheight.GetFloat(), pm_crouchheight.GetFloat(),
+					size.x, size.y, size.z);
+			}
 		}
 	}
 }
@@ -9606,6 +9682,83 @@ void idPlayer::GetAASLocation( idAAS* aas, idVec3& pos, int& areaNum ) const
 	
 	areaNum = 0;
 	pos = physicsObj.GetOrigin();
+}
+
+/* Carl: Teleport
+=====================
+idPlayer::PointReachableAreaNum
+=====================
+*/
+int idPlayer::PointReachableAreaNum(const idVec3& pos, const float boundsScale) const
+{
+	int areaNum;
+	idVec3 size;
+	idBounds bounds;
+
+	if (!aas)
+	{
+		return 0;
+	}
+
+	size = aas->GetSettings()->boundingBoxes[0][1] * boundsScale;
+	bounds[0] = -size;
+	size.z = 32.0f;
+	bounds[1] = size;
+
+	areaNum = aas->PointReachableAreaNum(pos, bounds, AREA_REACHABLE_WALK);
+
+	return areaNum;
+}
+
+/*
+=====================
+idPlayer::PathToGoal
+=====================
+*/
+bool idPlayer::PathToGoal(aasPath_t& path, int areaNum, const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin) const
+{
+	idVec3 org;
+	idVec3 goal;
+
+	if (!aas)
+	{
+		return false;
+	}
+
+	org = origin;
+	aas->PushPointIntoAreaNum(areaNum, org);
+	if (!areaNum)
+	{
+		return false;
+	}
+
+	goal = goalOrigin;
+	aas->PushPointIntoAreaNum(goalAreaNum, goal);
+	if (!goalAreaNum)
+	{
+		return false;
+	}
+
+	return aas->WalkPathToGoal(path, areaNum, org, goalAreaNum, goal, travelFlags);
+}
+
+/* Carl: Teleport
+================
+idPlayer::CanReachPosition
+================
+*/
+bool idPlayer::CanReachPosition(const idVec3& pos)
+{
+	aasPath_t	path;
+	int			toAreaNum;
+	int			areaNum;
+
+	toAreaNum = PointReachableAreaNum(pos);
+	areaNum = PointReachableAreaNum(physicsObj.GetOrigin());
+	if (!toAreaNum || !PathToGoal(path, areaNum, physicsObj.GetOrigin(), toAreaNum, pos))
+		return false;
+	else
+		return true;
 }
 
 /*
@@ -10659,17 +10812,17 @@ void idPlayer::UpdateLaserSight()
 	muzscale = 1 + beamLength / 100;
 	crosshairEntity.axis = muzzleAxis * muzscale;
 
-	if ( gameLocal.clip.TracePoint( traceResults, start, end, MASK_SHOT_RENDERMODEL, this ) )
+	static idAngles surfaceAngle = ang_zero;
+	if (gameLocal.clip.TracePoint(traceResults, start, end, MASK_SHOT_RENDERMODEL, this))
 	{
 		beamLength *= traceResults.fraction;
 		muzscale = 1 + beamLength / 100;
 
-		if ( vr_weaponSightToSurface.GetBool() )
+		if (true || vr_weaponSightToSurface.GetBool())
 		{
 
 			// fake it till you make it. there must be a better way. Too bad my brain is broken.
 
-			static idAngles surfaceAngle = ang_zero;
 			static idAngles muzzleAngle = ang_zero;
 			static idAngles diffAngle = ang_zero;
 			static float rollDiff = 0.0f;
@@ -10697,7 +10850,28 @@ void idPlayer::UpdateLaserSight()
 	}
 
 	crosshairEntity.origin = start + muzzleAxis[0] * beamLength;
-	
+
+	// Carl: teleport
+	aimPoint = crosshairEntity.origin;
+	aimPointPitch = surfaceAngle.pitch;
+	bool aimValid = CanReachPosition(aimPoint);
+	// 45 degrees is maximum slope you can walk up
+	bool pitchValid = aimPointPitch >= 45; // -90 = ceiling, 0 = wall, 90 = floor
+	aimValidForTeleport = aimValid && pitchValid;
+
+	if ( aimValidForTeleport )
+	{
+		crosshairEntity.customSkin = skinCrosshairCircleDot;
+	}
+	else if ( pitchValid )
+	{
+		crosshairEntity.customSkin = skinCrosshairCross;
+	}
+	else
+	{
+		crosshairEntity.customSkin = skinCrosshairDot;
+	}
+
 	if ( IsGameStereoRendered() && crosshairHandle == -1 )
 	{
 		crosshairHandle = gameRenderWorld->AddEntityDef( &crosshairEntity );

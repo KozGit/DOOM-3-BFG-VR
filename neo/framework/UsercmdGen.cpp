@@ -190,7 +190,7 @@ userCmdString_t	userCmdStrings[] =
 	{ "_impulse40", UB_IMPULSE40 }, // new impulse for system menu;
 	{ "_impulse41", UB_IMPULSE41 }, // new impulse for click to move;
 	// koz end
-	
+	{ "_impulse42", UB_IMPULSE42 }, // Carl: new impulse for teleport
 
 		
 	{ NULL,				UB_NONE },
