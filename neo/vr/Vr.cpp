@@ -1855,3 +1855,15 @@ bool iVr::ShouldQuit()
 	return false;
 }
 
+void iVr::ForceChaperone(bool force)
+{
+	if (hasOculusRift)
+	{
+		ovr_RequestBoundaryVisible(hmdSession, force);
+	}
+	else if (hasHMD)
+	{
+		vr::VRChaperone()->ForceBoundsVisible(force);
+	}
+}
+

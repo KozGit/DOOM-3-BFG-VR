@@ -129,6 +129,7 @@ public:
 	void				NextFlashMode();
 
 	bool				ShouldQuit();
+	void				ForceChaperone(bool force);
 
 	//------------------
 
@@ -215,6 +216,7 @@ public:
 
 	vr::IVRSystem			*m_pHMD;
 	vr::IVRCompositor		*m_pCompositor;
+	vr::IVRChaperone		*m_pChaperone;
 	vr::IVRRenderModels		*m_pRenderModels;
 	vr::TrackedDevicePose_t	m_rTrackedDevicePose[vr::k_unMaxTrackedDeviceCount];
 	vr::TrackedDevicePose_t	m1_rTrackedDevicePose[vr::k_unMaxTrackedDeviceCount];
