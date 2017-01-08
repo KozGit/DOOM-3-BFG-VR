@@ -619,7 +619,7 @@ flashes the player view with the given color
 void idPlayerView::Flash( idVec4 color, int time )
 {
 	Fade( idVec4( 0.0f, 0.0f, 0.0f, 0.0f ), time );
-	fadeFromColor = colorWhite;
+	fadeFromColor = color;
 }
 
 /*

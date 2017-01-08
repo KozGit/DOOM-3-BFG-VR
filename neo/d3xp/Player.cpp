@@ -1513,6 +1513,8 @@ idPlayer::idPlayer():
 {
 	aas = NULL;
 	travelFlags = TFL_WALK | TFL_AIR | TFL_CROUCH | TFL_WALKOFFLEDGE | TFL_BARRIERJUMP | TFL_JUMP | TFL_LADDER | TFL_WATERJUMP | TFL_ELEVATOR | TFL_SPECIAL;
+	aimValidForTeleport = false;
+	aimPointPitch = 0.0f;
 
 	noclip					= false;
 	godmode					= false;
@@ -9163,7 +9165,10 @@ void idPlayer::PerformImpulse( int impulse )
 		{
 			// teleport
 			if (aimValidForTeleport)
+			{
+				playerView.Flash( colorBlack, 140 );
 				Teleport(aimPoint, viewAngles, NULL);
+			}
 			common->Printf("AimPointPitch=%f", aimPointPitch);
 			break;
 		}
