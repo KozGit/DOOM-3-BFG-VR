@@ -299,8 +299,10 @@ private:
 	void					SyncAnimChannels( int channel, int syncToChannel, int blendFrames );
 	void					FinishSetup();
 	void					SetupHead();
+public:
 	void					PlayFootStepSound();
 	
+private:
 	void					Event_EnableEyeFocus();
 	void					Event_DisableEyeFocus();
 	void					Event_Footstep();

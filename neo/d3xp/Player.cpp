@@ -9168,6 +9168,7 @@ void idPlayer::PerformImpulse( int impulse )
 			{
 				playerView.Flash( colorBlack, 140 );
 				Teleport(aimPoint, viewAngles, NULL);
+				PlayFootStepSound();
 			}
 			common->Printf("AimPointPitch=%f", aimPointPitch);
 			break;
