@@ -329,6 +329,7 @@ public:
 	idAngles			poseHmdAngles;
 	idVec3				poseHmdHeadPositionDelta;
 	idVec3				poseHmdBodyPositionDelta;
+	idVec3				remainingMoveHmdBodyPositionDelta;
 	idVec3				poseHmdAbsolutePosition;
 
 	idVec3				poseHandPos[2];
