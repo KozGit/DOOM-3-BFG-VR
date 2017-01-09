@@ -9170,7 +9170,6 @@ void idPlayer::PerformImpulse( int impulse )
 				Teleport(aimPoint, viewAngles, NULL);
 				PlayFootStepSound();
 			}
-			common->Printf("AimPointPitch=%f", aimPointPitch);
 			break;
 		}
 
