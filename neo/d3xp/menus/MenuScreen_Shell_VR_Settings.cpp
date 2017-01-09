@@ -33,6 +33,7 @@ const static int NUM_SETTING_OPTIONS = 8;
 
 enum settingMenuCmds_t {
 	SETTING_CMD_VR_CHARACTER_OPTIONS,
+	SETTING_CMD_VR_SAFETY_PROTOCOLS,
 	SETTING_CMD_VR_CONTROL_OPTIONS,
 	SETTING_CMD_VR_UI_OPTIONS,
 	SETTING_CMD_VR_RENDERING_OPTIONS,
@@ -60,6 +61,9 @@ void idMenuScreen_Shell_VR_Settings::Initialize( idMenuHandler * data ) {
 	option.Append( "Character Options" );	
 	menuOptions.Append( option );
 	option.Clear();
+	option.Append( "Comfort & Safety Protocols" );
+	menuOptions.Append( option );
+	option.Clear();
 	option.Append( "Control Options" );
 	menuOptions.Append( option );
 	option.Clear();
@@ -83,7 +87,7 @@ void idMenuScreen_Shell_VR_Settings::Initialize( idMenuHandler * data ) {
 	helpWidget->SetSpritePath( GetSpritePath(), "info", "helpTooltip" );
 	AddChild( helpWidget );
 
-	const char * tips[] = { "Character Options.", "Control Options.", "UI Options.", "Rendering Options.", "Profile Options" };
+	const char * tips[] = { "Character Options.", "Comfort & Safety Protocols.", "Control Options.", "UI Options.", "Rendering Options.", "Profile Options" };
 
 	while ( options->GetChildren().Num() < NUM_SETTING_OPTIONS ) {
 		idMenuWidget_Button * const buttonWidget = new (TAG_SWF) idMenuWidget_Button();
@@ -223,6 +227,11 @@ bool idMenuScreen_Shell_VR_Settings::HandleAction( idWidgetAction & action, cons
 					break;
 				}
 			
+				case SETTING_CMD_VR_SAFETY_PROTOCOLS: {
+					menuData->SetNextScreen( SHELL_AREA_VR_SAFETY_PROTOCOLS, MENU_TRANSITION_SIMPLE );
+					break;
+				}
+
 				case SETTING_CMD_VR_CONTROL_OPTIONS: {
 					menuData->SetNextScreen( SHELL_AREA_VR_CONTROL_OPTIONS, MENU_TRANSITION_SIMPLE );
 					break;
