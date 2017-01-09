@@ -1860,8 +1860,11 @@ bool iVr::ShouldQuit()
 	return false;
 }
 
-void iVr::ForceChaperone(bool force)
+void iVr::ForceChaperone(int which, bool force)
 {
+	static bool chaperones[2] = {};
+	chaperones[which] = force;
+	force = chaperones[0] || chaperones[1];
 	if (hasOculusRift)
 	{
 		ovr_RequestBoundaryVisible(hmdSession, force);

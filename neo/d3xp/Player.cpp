@@ -6361,7 +6361,14 @@ void idPlayer::Weapon_Combat()
 		inventory.SetClipAmmoForWeapon( currentWeapon, weapon.GetEntity()->AmmoInClip() );
 	}
 
-	commonVr->ForceChaperone( idealWeapon == weapon_handgrenade );
+	int c = vr_chaperone.GetInteger();
+	bool force;
+	if ( !weaponEnabled || spectating || gameLocal.inCinematic || health < 0 || hiddenWeapon || currentWeapon < 0 )
+		force = c >= 4;
+	else
+		force = ( c >= 4 ) || ( c >= 1 && currentWeapon == weapon_handgrenade )
+		|| ( c >= 2 && ( currentWeapon == weapon_chainsaw || currentWeapon == weapon_fists ) );
+	commonVr->ForceChaperone( 0, force );
 }
 
 /*
@@ -6467,7 +6474,7 @@ void idPlayer::Weapon_GUI()
 		
 	}
 	
-	commonVr->ForceChaperone(false);
+	commonVr->ForceChaperone( 0, vr_chaperone.GetInteger() >= 4 );
 
 	// disable click prediction for the GUIs. handy to check the state sync does the right thing
 	if( common->IsClient() && !net_clientPredictGUI.GetBool() )
@@ -10013,15 +10020,15 @@ void idPlayer::Move()
 		int fix = vr_motionSickness.GetInteger();
 		if (fix == 3 || fix == 4)
 			playerView.Flash( colorBlack, 200 );
-		//if (fix == 1 || fix == 4 || fix == 7)
-		//	commonVr->ForceChaperone( true );
+		if (fix == 1 || fix == 4 || fix == 7)
+			commonVr->ForceChaperone( 1, true );
 	}
 	else
 	{
 		// no artificial locomotion
 		int fix = vr_motionSickness.GetInteger();
-		//if ( fix == 1 || fix == 4 || fix == 7 )
-		//	commonVr->ForceChaperone( false );
+		if ( fix == 1 || fix == 4 || fix == 7 )
+			commonVr->ForceChaperone( 1, false );
 	}
 
 	if( EyeHeight() != newEyeOffset )

@@ -130,7 +130,7 @@ public:
 		
 
 	bool				ShouldQuit();
-	void				ForceChaperone(bool force);
+	void				ForceChaperone(int which, bool force);
 
 	//------------------
 
