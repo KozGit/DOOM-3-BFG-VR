@@ -430,6 +430,7 @@ extern idCVar	vr_hudLowHealth;
 
 extern idCVar	vr_tweakTalkCursor;
 extern idCVar	vr_talkMode;
+extern idCVar	vr_voiceCommands;
 
 extern idCVar	vr_listMonitorName;
 
