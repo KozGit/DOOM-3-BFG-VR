@@ -13334,7 +13334,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 		
 		if ( flashMode == FLASH_HAND   )
 		{
-			//common->Printf( "Flash originoffset = %s\n", originOffset.ToString() );
+			//common->Printf( "Flashlight originoffset = %s\n", originOffset.ToString() );
 			origin = viewOrigin;
 			origin -= originOffset * viewAxis;
 			
@@ -14510,7 +14510,7 @@ void idPlayer::Event_GetFlashState()
 {
 	static int flashon;
 	flashon = flashlight.GetEntity()->lightOn  ? 1 : 0 ;
-	// koz debug common->Printf( "Returning flash state = %d\n",flashon );
+	// koz debug common->Printf( "Returning flashlight state = %d\n",flashon );
 	idThread::ReturnInt( flashon );
 }
 

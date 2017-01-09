@@ -113,7 +113,7 @@ void idMenuScreen_Shell_VR_Control_Options::Initialize( idMenuHandler * data ) {
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Flash Pitch" );
+	control->SetLabel( "Flashlight Pitch" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH );

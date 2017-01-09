@@ -186,7 +186,7 @@ userCmdString_t	userCmdStrings[] =
 	{ "_impulse36", UB_IMPULSE36 }, // new impulse for hud toggle;
 	{ "_impulse37", UB_IMPULSE37 }, // new impulse for headingbeam toggle;
 	{ "_impulse38", UB_IMPULSE38 }, // new impulse for walk in place
-	{ "_impulse39", UB_IMPULSE39 }, // new impulse for next flash mode;
+	{ "_impulse39", UB_IMPULSE39 }, // new impulse for next flashlight mode;
 	{ "_impulse40", UB_IMPULSE40 }, // new impulse for system menu;
 	{ "_impulse41", UB_IMPULSE41 }, // new impulse for click to move;
 	// koz end
