@@ -451,8 +451,9 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 
 		case SAFETY_PROTOCOLS_FIELD_MOTION_SICKNESS:
 		{
-			static const int numValues = 8;
-			static const int values[numValues] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+			static const int numValues = 4;
+			// 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Third Person, 6 = Particles, 7 = Particles & Chaperone"
+			static const int values[numValues] = { 0, 1, 3, 4 };
 			vr_motionSickness.SetInteger(AdjustOption(vr_motionSickness.GetInteger(), values, numValues, adjustAmount));
 			break;
 		}
