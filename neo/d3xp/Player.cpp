@@ -5959,7 +5959,7 @@ void idPlayer::PrevWeapon()
 idPlayer::SelectWeapon
 ===============
 */
-void idPlayer::SelectWeapon( int num, bool force )
+void idPlayer::SelectWeapon( int num, bool force, bool specific )
 {
 	const char* weap;
 	
@@ -5994,7 +5994,7 @@ void idPlayer::SelectWeapon( int num, bool force )
 	
 	//Is the weapon a toggle weapon
 	WeaponToggle_t* weaponToggle;
-	if( weaponToggles.Get( va( "weapontoggle%d", num ), &weaponToggle ) )
+	if( !specific && weaponToggles.Get( va( "weapontoggle%d", num ), &weaponToggle ) )
 	{
 	
 		int weaponToggleIndex = 0;
@@ -8951,11 +8951,19 @@ idPlayer::PerformImpulse
 void idPlayer::PerformImpulse( int impulse )
 {
 	bool isIntroMap = ( idStr::FindText( gameLocal.GetMapFileName(), "mars_city1" ) >= 0 );
-	
+
 	// Normal 1 - 0 Keys.
-	if( impulse >= IMPULSE_0 && impulse <= IMPULSE_12 && !isIntroMap )
+	if ( impulse >= IMPULSE_0 && impulse <= IMPULSE_12 && !isIntroMap )
 	{
-		SelectWeapon( impulse, false );
+		// Carl: impulse 1, 4, and 11 were unused, so I'm using them for specific versions of weapons
+		if (impulse == 1)
+			SelectWeapon( weapon_fists, false, true ); // not chainsaw or grabber
+		else if (impulse == 4)
+			SelectWeapon( weapon_shotgun, false, true );
+		else if (impulse == 11)
+			SelectWeapon( weapon_shotgun_double, false, true );
+		else
+			SelectWeapon( impulse, false );
 		return;
 	}
 	
@@ -9091,10 +9099,16 @@ void idPlayer::PerformImpulse( int impulse )
 			}
 			break;
 		}
+		// Carl specific grabber weapon
+		case IMPULSE_26:
+		{
+			SelectWeapon( weapon_grabber, false, true );
+			break;
+		}
 		//Hack so the chainsaw will work in MP
 		case IMPULSE_27:
 		{
-			SelectWeapon( 18, false );
+			SelectWeapon( weapon_chainsaw, false, true );
 			break;
 		}
 

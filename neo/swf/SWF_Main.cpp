@@ -757,10 +757,10 @@ idSWFScriptVar idSWF::idSWFScriptFunction_shortcutKeys_clear::Call( idSWFScriptO
 	// Koz begin
 
 	/*============================
-	Hydra - add shortcuts
-	Map sticks on both hydras to "STICK1" & "STICK2",
-	button 1 & trigger on both hydras to "ENTER", and
-	button 2 & bumper on both hydras to "BACKSPACE"
+	Motion Controls - add shortcuts
+	Map sticks on motion controls to "STICK1" & "STICK2",
+	buttonsto "ENTER", "BACKSPACE" and
+	"RB" + "LB" ( bumpers on normal gamepad)
 	so SWF menus can be navigated with either hand.
 	In PDA menus, menu navigation has been altered in SWF_Events.cpp
 	to allow single stick navigation of PDA menus.
@@ -776,12 +776,11 @@ idSWFScriptVar idSWF::idSWFScriptFunction_shortcutKeys_clear::Call( idSWFScriptO
 	object->Set( "TOUCH_RIGHT_STICK_LEFT", "STICK2_LEFT" );
 	object->Set( "TOUCH_RIGHT_STICK_RIGHT", "STICK2_RIGHT" );
 
-	object->Set( "JOY17", "ENTER" );		// Left touch button 1
-	object->Set( "JOY18", "BACKSPACE" );	// Left touch button 2
+	object->Set( "JOY17", "ENTER" );		// Left touch button X
+	object->Set( "JOY18", "BACKSPACE" );	// Left touch button Y
 	object->Set( "JOY20", "LB" );			// Left touch  button 3 = left bumper PDA nav
 	object->Set( "JOY19", "RB" );			// Left touch  button 4 = right bumper PDA nav
 	object->Set( "JOY22", "LB" );			// Left touch bumper
-	//object->Set( "L_TOUCHTRIG", "ENTER" );	// Left touch trigger
 	object->Set( "JOY23", "ENTER" );	// Left touch trigger
 
 	object->Set( "JOY24", "ENTER" );		// Right touch button 1
@@ -789,47 +788,43 @@ idSWFScriptVar idSWF::idSWFScriptFunction_shortcutKeys_clear::Call( idSWFScriptO
 	object->Set( "JOY26", "LB" );			// Right touch  button 3 = left bumper PDA nav
 	object->Set( "JOY27", "RB" );			// Right touch  button 4 = right bumper PDA nav
 	object->Set( "JOY29", "RB" );			// Right touch bumper
-	//object->Set( "L_TOUCHTRIG", "ENTER" );	// Left touch trigger
-	object->Set( "JOY30", "ENTER" );		// Left touch trigger
-	// Koz end hydras
-
+	object->Set( "JOY30", "ENTER" );		// Right touch trigger
+	// Koz end touch
+	
 	// Koz add SteamVR controller aliases
 	object->Set( "JOY33", "ENTER" );		// Left openvr trig
 	object->Set( "JOY32", "BACKSPACE" );	// Left openvr grip
+	object->Set( "JOY31", "LB" );			// Left openvr app = left bumper PDA nav
+	object->Set( "JOY34", "RB" );			// Left openvr pad = right bumper PDA nav
 	object->Set( "STEAMVR_LEFT_PAD_UP", "STICK1_UP" );
 	object->Set( "STEAMVR_LEFT_PAD_DOWN", "STICK1_DOWN" );
 	object->Set( "STEAMVR_LEFT_PAD_LEFT", "STICK1_LEFT" );
 	object->Set( "STEAMVR_LEFT_PAD_RIGHT", "STICK1_RIGHT" );
 
-	object->Set( "JOY37", "ENTER" );		// right openvr trig
-	object->Set( "JOY36", "BACKSPACE" );	// right openvr grip
+	object->Set( "JOY37", "ENTER" );		// Right openvr trig
+	object->Set( "JOY36", "BACKSPACE" );	// Right openvr grip
+	object->Set( "JOY35", "LB" );			// Right openvr app = left bumper PDA nav
+	object->Set( "JOY38", "RB" );			// Right openvr pad = right bumper PDA nav
 	object->Set( "STEAMVR_RIGHT_PAD_UP", "STICK2_UP" );
 	object->Set( "STEAMVR_RIGHT_PAD_DOWN", "STICK2_DOWN" );
 	object->Set( "STEAMVR_RIGHT_PAD_LEFT", "STICK2_LEFT" );
 	object->Set( "STEAMVR_RIGHT_PAD_RIGHT", "STICK2_RIGHT" );
-
-	//object->Set( "JOY17", "ENTER" );		// Left hydra button 1
-	//object->Set( "JOY18", "BACKSPACE" );	// Left hydra button 2
-	//object->Set( "JOY19", "LB" );			// Left hydra  button 3 = left bumper PDA nav
-	//object->Set( "JOY20", "RB" );			// Left hydra  button 4 = right bumper PDA nav
-	//object->Set( "JOY22", "LB" );			// Left hydra bumper
+		
 	object->Set( "L_STEAMVRTRIG", "ENTER" );	// Left steamVR trigger
-
-	//object->Set( "JOY24", "ENTER" );		// Right hydra button 1
-	//object->Set( "JOY25", "BACKSPACE" );	// Right hydra button 2
-	//object->Set( "JOY26", "LB" );			// Right hydra  button 3 = left bumper PDA nav
-	//object->Set( "JOY27", "RB" );			// Right hydra  button 4 = right bumper PDA nav
-	//object->Set( "JOY29", "RB" );			// Right hydra bumper
 	object->Set( "R_STEAMVRTRIG", "ENTER" );	// right SteamVR trigger
-	// Koz end steamvr
 	object->Set( "K_R_STEAMVRTRIG", "ENTER" );
 	object->Set( "K_L_STEAMVRTRIG", "ENTER" );
+	// Koz end steamvr
+
+  // Carl voice commands
+	//object->Set( "SAY_", "ENTER" );
+	object->Set( "SAY_CANCEL", "BACKSPACE" );
+  
 	object->Set( "KP_ENTER", "ENTER" );
 	object->Set( "MWHEELDOWN", "MWHEEL_DOWN" );
 	object->Set( "MWHEELUP", "MWHEEL_UP" );
 	object->Set( "K_TAB", "TAB" );
-	
-	
+		
 	// FIXME: I'm an RTARD and didn't realize the keys all have "ARROW" after them
 	object->Set( "LEFTARROW", "LEFT" );
 	object->Set( "RIGHTARROW", "RIGHT" );

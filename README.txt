@@ -166,27 +166,25 @@ __________________________________________________________
 
 4. Generate the VC13 projects using CMake by doubleclicking a matching configuration .bat file in the neo/ folder.
 
-5. Start Steam, go to Library > Tools. Right-click Sixense SDK for the Razer Hydra, click "Install Game...". Once installed, go to C:\Program Files (x86)\Steam\steamapps\common\Sixense SDK. Copy the SixenseSDK folder to DOOM-3-BFG/neo/libs. Rename it to SixenseSDK_062612.
+5. Go to https://developer.oculus.com/downloads/pc/1.9.0/Oculus_SDK_for_Windows/ then download and extract it somewhere. Copy the LibOVR folder to DOOM-3-BFG/neo/libs
 
-6. Go to https://developer.oculus.com/downloads/pc/1.9.0/Oculus_SDK_for_Windows/ then download and extract it somewhere. Copy the LibOVR folder to DOOM-3-BFG/neo/libs
-
-7. Clone the OpenVR git repository in another folder: https://github.com/ValveSoftware/openvr.git
-	Do a hard reset in git (from the log in TortoiseGit) to the v1.0.3 version
+6. Clone the OpenVR git repository in another folder: https://github.com/ValveSoftware/openvr
+	Do a hard reset in git (from the log in TortoiseGit) to the v1.0.5 version
 	Copy the openvr folder to DOOM-3-BFG/neo/libs
 
-8. Use the VC13 solution to compile what you need:
+7. Use the VC13 solution to compile what you need:
 	DOOM-3-BFG/build/Doom3BFGVR.sln
 	
-9. Download ffmpeg-20140405-git-ec8789a-win32-shared.7z from ffmpeg.zeranoe.com/builds/win32/shared/2014
+8. Download ffmpeg-20140405-git-ec8789a-win32-shared.7z from ffmpeg.zeranoe.com/builds/win32/shared/2014
 
-10. Extract the FFmpeg DLLs to your current build directory under DOOM-3-BFG/build/
+9. Extract the FFmpeg DLLs to your current build directory under DOOM-3-BFG/build/
 
-11. Copy DOOM-3-BFG\neo\libs\openvr\bin\win32\openvr_api.dll
+10. Copy DOOM-3-BFG\neo\libs\openvr\bin\win32\openvr_api.dll
 	or
 	DOOM-3-BFG\neo\libs\openvr\bin\win64\openvr_api.dll
 	to your current build directory
 
-12. In Visual Studio, right click project Doom3BFGVR, click Properties. Set Configuration to All Configurations. Choose Debugging, set Command Arguments to:
+11. In Visual Studio, right click project Doom3BFGVR, click Properties. Set Configuration to All Configurations. Choose Debugging, set Command Arguments to:
 	+set fs_basepath "C:\Program Files (x86)\Steam\steamapps\common\DOOM 3 BFG Edition"
 	or wherever you installed Doom 3 BFG edition
 __________________________________
