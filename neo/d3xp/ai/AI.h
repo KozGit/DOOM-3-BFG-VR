@@ -308,8 +308,6 @@ public:
 	
 protected:
 	// navigation
-	idAAS* 					aas;
-	int						travelFlags;
 	
 	idMoveState				move;
 	idMoveState				savedMove;

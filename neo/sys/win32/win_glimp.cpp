@@ -1706,7 +1706,8 @@ void GLimp_Shutdown()
 	if( win32.hWnd )
 	{
 		common->Printf( "...destroying window\n" );
-		ShowWindow( win32.hWnd, SW_HIDE );
+		// Carl: this hangs forever, so I had to comment it out
+		//ShowWindow( win32.hWnd, SW_HIDE );
 		DestroyWindow( win32.hWnd );
 		win32.hWnd = NULL;
 	}

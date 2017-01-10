@@ -641,9 +641,9 @@ private:
 	idList<idAAS*>			aasList;				// area system
 	
 	idMenuHandler_Shell* 	shellHandler;
-	
+public:	
 	idStrList				aasNames;
-	
+private:
 	idEntityPtr<idActor>	lastAIAlertEntity;
 	int						lastAIAlertTime;
 	

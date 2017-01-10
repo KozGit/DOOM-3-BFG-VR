@@ -442,6 +442,11 @@ bool iVr::OculusInit( void )
 
 
 	common->Printf( "ovr_Initialize was successful.\n" );
+
+	ovr_IdentifyClient( "EngineName: id Tech 4\n"
+		"EngineVersion: 1.0.3\n"
+		"EngineEditor: false" );
+
 	result = ovr_Create( &hmdSession, &ovrLuid );
 
 	if ( OVR_FAILURE( result ) )
@@ -1821,5 +1826,31 @@ void iVr::NextFlashMode()
 {
 	currentFlashMode++;
 	if ( currentFlashMode >= FLASH_MAX ) currentFlashMode = 0;
+}
+
+bool iVr::ShouldQuit()
+{
+	if (hasOculusRift)
+	{
+		ovrSessionStatus ss;
+		ovrResult result = ovr_GetSessionStatus(hmdSession, &ss);
+		if (ss.ShouldQuit)
+			return true;
+		if (ss.ShouldRecenter)
+			ovr_RecenterTrackingOrigin(hmdSession);
+	}
+	return false;
+}
+
+void iVr::ForceChaperone(bool force)
+{
+	if (hasOculusRift)
+	{
+		ovr_RequestBoundaryVisible(hmdSession, force);
+	}
+	else if (hasHMD)
+	{
+		vr::VRChaperone()->ForceBoundsVisible(force);
+	}
 }
 

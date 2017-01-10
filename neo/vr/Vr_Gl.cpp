@@ -586,11 +586,18 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		
 			//common->Printf( "Frame Submitting frame # %d\n", idLib::frameNumber );
 			ovrResult result = ovr_SubmitFrame( hmdSession, idLib::frameNumber , &viewScaleDesc, &layers, 1 );
-			if ( result != ovrSuccess )
+			if (result == ovrSuccess_NotVisible)
 			{
-				//common->Warning( "Vr_GL.cpp HMDRender : Failed to submit oculus layer. (result %d) \n", result );
 			}
-		
+			else if (result == ovrError_DisplayLost)
+			{
+				common->Warning( "Vr_GL.cpp HMDRender : Display Lost when submitting oculus layer.\n" );
+			}
+			else if (OVR_FAILURE(result))
+			{
+				common->Warning( "Vr_GL.cpp HMDRender : Failed to submit oculus layer. (result %d) \n", result );
+			}
+
 			if ( vr_stereoMirror.GetBool() == true )
 			{
 				// Blit mirror texture to back buffer

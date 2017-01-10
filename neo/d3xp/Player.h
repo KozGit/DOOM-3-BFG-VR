@@ -308,6 +308,9 @@ public:
 	const idDeclSkin*		skinCrosshairDot;
 	const idDeclSkin*		skinCrosshairCircleDot;
 	const idDeclSkin*		skinCrosshairCross;
+	idVec3 aimPoint; // Carl: used for teleporting
+	float aimPointPitch;
+	bool aimValidForTeleport;
 	
 	bool					PDAfixed; // koz has the PDA been fixed in space?
 	idVec3					PDAorigin; // koz 
@@ -565,7 +568,12 @@ public:
 	
 	virtual bool			Collide( const trace_t& collision, const idVec3& velocity );
 	
-	virtual void			GetAASLocation( idAAS* aas, idVec3& pos, int& areaNum ) const;
+	// Carl : Teleporting
+	int						PointReachableAreaNum(const idVec3& pos, const float boundsScale = 2.0f) const;
+	bool					PathToGoal(aasPath_t& path, int areaNum, const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin) const;
+	bool					CanReachPosition(const idVec3& pos);
+
+	virtual void			GetAASLocation(idAAS* aas, idVec3& pos, int& areaNum) const;
 	virtual void			GetAIAimTargets( const idVec3& lastSightPos, idVec3& headPos, idVec3& chestPos );
 	virtual void			DamageFeedback( idEntity* victim, idEntity* inflictor, int& damage );
 	void					CalcDamagePoints( idEntity* inflictor, idEntity* attacker, const idDict* damageDef,
@@ -1050,6 +1058,7 @@ private:
 	void					SnapBodyToView(); // koz align body to current view;
 	void					OrientHMDBody(); // koz reset hmd/body orientations
 
+	void					SetAAS();
 	void					InitAASLocation();
 	void					SetAASLocation();
 	void					Move();

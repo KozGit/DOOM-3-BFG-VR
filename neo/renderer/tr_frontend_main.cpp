@@ -267,7 +267,8 @@ static void R_SortDrawSurfs( drawSurf_t** drawSurfs, const int numDrawSurfs )
 	for( int i = 0; i < numDrawSurfs; i++ )
 	{
 		float sort = SS_POST_PROCESS - drawSurfs[i]->sort;
-		assert( sort >= 0.0f );
+		//Carl: This assertion is no longer true, because we're adding 1000 to some sort values
+		//assert( sort >= 0.0f );
 		
 		uint64 dist = 0;
 		if( drawSurfs[i]->frontEndGeo != NULL )
