@@ -130,6 +130,9 @@ public:
 	bool				ShouldQuit();
 	void				ForceChaperone(bool force);
 
+	bool				ShouldQuit();
+	void				ForceChaperone(int which, bool force);
+
 	//------------------
 
 	int					currentFlashMode;
@@ -430,6 +433,7 @@ extern idCVar	vr_hudLowHealth;
 
 extern idCVar	vr_tweakTalkCursor;
 extern idCVar	vr_talkMode;
+extern idCVar	vr_voiceCommands;
 
 extern idCVar	vr_listMonitorName;
 
@@ -501,6 +505,11 @@ extern idCVar	vr_playerBodyMode;
 extern idCVar	vr_bodyToMove;
 
 extern idCVar	vr_stereoMirror;
+
+extern idCVar	vr_teleport;
+extern idCVar	vr_motionSickness;
+extern idCVar	vr_chaperone;
+extern idCVar	vr_chaperoneColor;
 
 extern iVr* commonVr;
 extern iVoice* commonVoice;

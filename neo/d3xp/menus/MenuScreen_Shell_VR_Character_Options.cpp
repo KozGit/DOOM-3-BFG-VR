@@ -99,31 +99,6 @@ void idMenuScreen_Shell_VR_Character_Options::Initialize( idMenuHandler * data )
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT );
 	options->AddChild( control );
 
-	control = new (TAG_SWF)idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "KnockBack" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_KNOCKBACK );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_KNOCKBACK );
-	options->AddChild( control );
-
-	control = new (TAG_SWF)idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Head Kick" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_HEADKICK );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_HEADKICK );
-	options->AddChild( control );
-
-	
-	control = new(TAG_SWF)idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_BAR );
-	control->SetLabel( "Shake Amplitude" );	// Brightness
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_SHAKE_AMPLITUDE );
-	control->SetupEvents( 2, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_SHAKE_AMPLITUDE );
-	options->AddChild( control );
-
 			
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
@@ -334,9 +309,6 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	originalFlashMode = vr_flashlightMode.GetInteger();
 	originalWeaponHand = vr_weaponHand.GetInteger();
 	originalViewHeight = pm_normalviewheight.GetFloat();
-	originalKnockBack = vr_knockBack.GetInteger();
-	originalShakeAmplitude = vr_shakeAmplitude.GetFloat();
-	originalHeadKick = vr_headKick.GetInteger();
 
 }
 
@@ -397,31 +369,6 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 			pm_normalviewheight.SetFloat( clamped );
 			break;
 		}
-
-		case CHARACTER_OPTIONS_FIELD_KNOCKBACK:
-		{
-			static const int numValues = 2;
-			static const int values[numValues] = { 0, 1 };
-			vr_knockBack.SetInteger( AdjustOption( vr_knockBack.GetInteger(), values, numValues, adjustAmount ) );
-			break;
-		}
-
-		case CHARACTER_OPTIONS_FIELD_HEADKICK:
-		{
-			static const int numValues = 2;
-			static const int values[numValues] = { 0, 1 };
-			vr_headKick.SetInteger( AdjustOption( vr_headKick.GetInteger(), values, numValues, adjustAmount ) );
-			break;
-		}
-
-		case CHARACTER_OPTIONS_FIELD_SHAKE_AMPLITUDE: {
-			const float percent = vr_shakeAmplitude.GetFloat();;
-			const float adjusted = percent + (float)adjustAmount * .01f;
-			const float clamped = idMath::ClampFloat( 0.0f, 1.0f, adjusted );
-			vr_shakeAmplitude.SetFloat( clamped );
-			break;
-		}
-
 	
 	}
 	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
@@ -501,37 +448,6 @@ idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_V
 			return va( "%.1f", pm_normalviewheight.GetFloat() );
 		}	
 
-		case CHARACTER_OPTIONS_FIELD_KNOCKBACK:
-		{
-			const int lev = vr_knockBack.GetBool();
-
-			if ( lev == 0 )
-			{
-				return "#str_swf_disabled";
-			}
-			else
-			{
-				return "#str_swf_enabled";
-			}
-		}
-
-		case CHARACTER_OPTIONS_FIELD_HEADKICK:
-		{
-			const int lev = vr_headKick.GetBool();
-
-			if ( lev == 0 )
-			{
-				return "#str_swf_disabled";
-			}
-			else
-			{
-				return "#str_swf_enabled";
-			}
-		}
-
-		case CHARACTER_OPTIONS_FIELD_SHAKE_AMPLITUDE:
-			return LinearAdjust( vr_shakeAmplitude.GetFloat(), 0.0f, 1.0f, 0.0f, 100.0f );
-
 	}
 	return false;
 }
@@ -556,18 +472,6 @@ bool idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 		return true;
 	}
 	if ( originalViewHeight != pm_normalviewheight.GetFloat() )
-	{
-		return true;
-	}
-	if ( originalKnockBack != vr_knockBack.GetInteger() )
-	{
-		return true;
-	}
-	if ( originalShakeAmplitude != vr_shakeAmplitude.GetFloat() )
-	{
-		return true;
-	}
-	if ( originalHeadKick != vr_headKick.GetInteger() )
 	{
 		return true;
 	}

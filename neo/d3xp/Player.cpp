@@ -6376,7 +6376,16 @@ void idPlayer::Weapon_Combat()
 		inventory.SetClipAmmoForWeapon( currentWeapon, weapon.GetEntity()->AmmoInClip() );
 	}
 
-	commonVr->ForceChaperone( idealWeapon == weapon_handgrenade );
+
+	int c = vr_chaperone.GetInteger();
+	bool force;
+	if ( !weaponEnabled || spectating || gameLocal.inCinematic || health < 0 || hiddenWeapon || currentWeapon < 0 )
+		force = c >= 4;
+	else
+		force = ( c >= 4 ) || ( c >= 1 && currentWeapon == weapon_handgrenade )
+		|| ( c >= 2 && ( currentWeapon == weapon_chainsaw || currentWeapon == weapon_fists ) );
+	
+  commonVr->ForceChaperone( 0, force );
 }
 
 /*
@@ -6482,7 +6491,7 @@ void idPlayer::Weapon_GUI()
 		
 	}
 	
-	commonVr->ForceChaperone(false);
+	commonVr->ForceChaperone( 0, vr_chaperone.GetInteger() >= 4 );
 
 	// disable click prediction for the GUIs. handy to check the state sync does the right thing
 	if( common->IsClient() && !net_clientPredictGUI.GetBool() )
@@ -10128,8 +10137,12 @@ void idPlayer::Move()
 	
 	// FIXME: physics gets disabled somehow
 	BecomeActive( TH_PHYSICS );
+
+	// Carl: check if we're experiencing artificial locomotion
+	idVec3 before = physicsObj.GetOrigin();
 	RunPhysics();
-	
+	idVec3 after = physicsObj.GetOrigin();
+
 	// update our last valid AAS location for the AI
 	SetAASLocation();
 	
@@ -10171,7 +10184,27 @@ void idPlayer::Move()
 	{
 		newEyeOffset = pm_normalviewheight.GetFloat();
 	}
-	
+
+	float distance = ((after - before) - commonVr->motionMoveDelta).LengthSqr();
+	float crouchDistance = newEyeOffset - EyeHeight();
+	distance += crouchDistance * crouchDistance;
+	if (distance > 0.005f) {
+		// artificial locomotion
+		// 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Third Person, 6 = Particles, 7 = Particles & Chaperone
+		int fix = vr_motionSickness.GetInteger();
+		if (fix == 3 || fix == 4)
+			playerView.Flash( colorBlack, 200 );
+		if (fix == 1 || fix == 4 || fix == 7)
+			commonVr->ForceChaperone( 1, true );
+	}
+	else
+	{
+		// no artificial locomotion
+		int fix = vr_motionSickness.GetInteger();
+		if ( fix == 1 || fix == 4 || fix == 7 )
+			commonVr->ForceChaperone( 1, false );
+	}
+
 	if( EyeHeight() != newEyeOffset )
 	{
 		if( spectating )
@@ -13531,7 +13564,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 		
 		if ( flashMode == FLASH_HAND   )
 		{
-			//common->Printf( "Flash originoffset = %s\n", originOffset.ToString() );
+			//common->Printf( "Flashlight originoffset = %s\n", originOffset.ToString() );
 			origin = viewOrigin;
 			origin -= originOffset * viewAxis;
 			
@@ -13754,7 +13787,11 @@ void idPlayer::GetViewPosVR( idVec3 &origin, idMat3 &axis ) const {
 	
 	eyeHeightAboveRotationPoint = 5;
 	
-	origin = GetEyePosition() + viewBob;
+	origin = GetEyePosition(); // +viewBob;
+	// Carl: No view bobbing unless knockback is enabled. This isn't strictly a knockback, but close enough.
+	// This is the bounce when you land after jumping
+	if (vr_knockBack.GetBool())
+		origin += viewBob;
 	angles = viewAngles; // NO VIEW KICKING  +playerView.AngleOffset();
 	axis = angles.ToMat3();// *physicsObj.GetGravityAxis();
 
@@ -14707,7 +14744,7 @@ void idPlayer::Event_GetFlashState()
 {
 	static int flashon;
 	flashon = flashlight.GetEntity()->lightOn  ? 1 : 0 ;
-	// koz debug common->Printf( "Returning flash state = %d\n",flashon );
+	// koz debug common->Printf( "Returning flashlight state = %d\n",flashon );
 	idThread::ReturnInt( flashon );
 }
 
