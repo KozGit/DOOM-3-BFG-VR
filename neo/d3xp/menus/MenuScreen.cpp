@@ -261,7 +261,7 @@ void idMenuScreen::UpdateCmds()
 			btnTabNext->Set( "onPress", new( TAG_SWF ) WrapWidgetSWFEvent( this, WIDGET_EVENT_TAB_NEXT, 0 ) );
 			
 			//shortcutKeys->Set( "JOY6", btnTabNext );
-			shortcutKeys->Set( "RB", btnTabNext );// Koz was JOY6, use alias instead to allow menu nav with hydra. 
+			shortcutKeys->Set( "RB", btnTabNext );// Koz was JOY6, use alias instead to allow menu nav with motion controls 
 
 			if( btnTabNext->GetSprite() != NULL && menuData != NULL )
 			{
@@ -277,7 +277,7 @@ void idMenuScreen::UpdateCmds()
 			btnTabPrev->Set( "onPress", new( TAG_SWF ) WrapWidgetSWFEvent( this, WIDGET_EVENT_TAB_PREV, 0 ) );
 			
 			//shortcutKeys->Set( "JOY5", btnTabPrev );
-			shortcutKeys->Set( "LB", btnTabPrev ); // Koz was JOY5, use alias instead to allow menu nav with hydra.
+			shortcutKeys->Set( "LB", btnTabPrev ); // Koz was JOY5, use alias instead to allow menu nav with motion controls 
 
 			if( btnTabPrev->GetSprite() != NULL && menuData != NULL )
 			{

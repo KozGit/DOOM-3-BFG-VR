@@ -1277,39 +1277,25 @@ if(MSVC)
 	#endif()
 	
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/include)
-	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/include)
-	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/include/sixense_utils)
-	
+			
 	if(CMAKE_CL_64)
 		link_directories(
 				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/x64/Release/VS2013
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/x64/VS2013
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/lib/x64/release_dll)
-		
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/x64/VS2013)
+						
 		set(LibOVR_LIBRARIES
 			libovr.lib
 			ws2_32.lib)
-		
-		set(SixenseSDK_062312_LIBRARIES
-			sixense_utils_x64.lib
-			sixense_x64.lib)
-			
-			
-			
+					
 	else()
 		link_directories(
 				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/Win32/Release/VS2013
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Win32/VS2013
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/lib/win32/release_dll)
-		
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Win32/VS2013)
+					
 			set(LibOVR_LIBRARIES
 			libovr.lib
 			ws2_32.lib)
 		
-		set(SixenseSDK_062312_LIBRARIES
-			sixense_utils.lib
-			sixense.lib)
-
 	endif()
 		
 	if(OPENAL)
@@ -1534,7 +1520,6 @@ if(MSVC)
         ${JPEG_LIBRARY}
         ${GLEW_LIBRARY}
         ${OPENVR_LIBRARY}
-		${SixenseSDK_062312_LIBRARIES}
 		${LibOVR_LIBRARIES}
 		sapi.lib
 		)

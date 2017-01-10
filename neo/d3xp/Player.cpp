@@ -1511,6 +1511,10 @@ idPlayer::idPlayer():
 	serverOverridePositionTime( 0 ),
 	clientFireCount( 0 )
 {
+	aas = NULL;
+	travelFlags = TFL_WALK | TFL_AIR | TFL_CROUCH | TFL_WALKOFFLEDGE | TFL_BARRIERJUMP | TFL_JUMP | TFL_LADDER | TFL_WATERJUMP | TFL_ELEVATOR | TFL_SPECIAL;
+	aimValidForTeleport = false;
+	aimPointPitch = 0.0f;
 
 	noclip					= false;
 	godmode					= false;
@@ -2293,6 +2297,8 @@ void idPlayer::Spawn()
 	physicsObj.SetContents( CONTENTS_BODY );
 	physicsObj.SetClipMask( MASK_PLAYERSOLID );
 	SetPhysics( &physicsObj );
+
+	SetAAS();
 	InitAASLocation();
 	
 	skin = renderEntity.customSkin;
@@ -3124,7 +3130,16 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		savefile->ReadInt( aasLocation[ i ].areaNum );
 		savefile->ReadVec3( aasLocation[ i ].pos );
 	}
-	
+
+	// Set the AAS if the character has the correct gravity vector
+	//idVec3 gravity = spawnArgs.GetVector("gravityDir", "0 0 -1");
+	//gravity *= g_gravity.GetFloat();
+	//if (gravity == gameLocal.GetGravity())
+	//{
+		SetAAS();
+	//}
+
+
 	savefile->ReadInt( bobFoot );
 	savefile->ReadFloat( bobFrac );
 	savefile->ReadFloat( bobfracsin );
@@ -5944,7 +5959,7 @@ void idPlayer::PrevWeapon()
 idPlayer::SelectWeapon
 ===============
 */
-void idPlayer::SelectWeapon( int num, bool force )
+void idPlayer::SelectWeapon( int num, bool force, bool specific )
 {
 	const char* weap;
 	
@@ -5979,7 +5994,7 @@ void idPlayer::SelectWeapon( int num, bool force )
 	
 	//Is the weapon a toggle weapon
 	WeaponToggle_t* weaponToggle;
-	if( weaponToggles.Get( va( "weapontoggle%d", num ), &weaponToggle ) )
+	if( !specific && weaponToggles.Get( va( "weapontoggle%d", num ), &weaponToggle ) )
 	{
 	
 		int weaponToggleIndex = 0;
@@ -6360,6 +6375,17 @@ void idPlayer::Weapon_Combat()
 	{
 		inventory.SetClipAmmoForWeapon( currentWeapon, weapon.GetEntity()->AmmoInClip() );
 	}
+
+
+	int c = vr_chaperone.GetInteger();
+	bool force;
+	if ( !weaponEnabled || spectating || gameLocal.inCinematic || health < 0 || hiddenWeapon || currentWeapon < 0 )
+		force = c >= 4;
+	else
+		force = ( c >= 4 ) || ( c >= 1 && currentWeapon == weapon_handgrenade )
+		|| ( c >= 2 && ( currentWeapon == weapon_chainsaw || currentWeapon == weapon_fists ) );
+	
+  commonVr->ForceChaperone( 0, force );
 }
 
 /*
@@ -6465,6 +6491,8 @@ void idPlayer::Weapon_GUI()
 		
 	}
 	
+	commonVr->ForceChaperone( 0, vr_chaperone.GetInteger() >= 4 );
+
 	// disable click prediction for the GUIs. handy to check the state sync does the right thing
 	if( common->IsClient() && !net_clientPredictGUI.GetBool() )
 	{
@@ -8932,11 +8960,19 @@ idPlayer::PerformImpulse
 void idPlayer::PerformImpulse( int impulse )
 {
 	bool isIntroMap = ( idStr::FindText( gameLocal.GetMapFileName(), "mars_city1" ) >= 0 );
-	
+
 	// Normal 1 - 0 Keys.
-	if( impulse >= IMPULSE_0 && impulse <= IMPULSE_12 && !isIntroMap )
+	if ( impulse >= IMPULSE_0 && impulse <= IMPULSE_12 && !isIntroMap )
 	{
-		SelectWeapon( impulse, false );
+		// Carl: impulse 1, 4, and 11 were unused, so I'm using them for specific versions of weapons
+		if (impulse == 1)
+			SelectWeapon( weapon_fists, false, true ); // not chainsaw or grabber
+		else if (impulse == 4)
+			SelectWeapon( weapon_shotgun, false, true );
+		else if (impulse == 11)
+			SelectWeapon( weapon_shotgun_double, false, true );
+		else
+			SelectWeapon( impulse, false );
 		return;
 	}
 	
@@ -9072,10 +9108,16 @@ void idPlayer::PerformImpulse( int impulse )
 			}
 			break;
 		}
+		// Carl specific grabber weapon
+		case IMPULSE_26:
+		{
+			SelectWeapon( weapon_grabber, false, true );
+			break;
+		}
 		//Hack so the chainsaw will work in MP
 		case IMPULSE_27:
 		{
-			SelectWeapon( 18, false );
+			SelectWeapon( weapon_chainsaw, false, true );
 			break;
 		}
 
@@ -9138,9 +9180,22 @@ void idPlayer::PerformImpulse( int impulse )
 				void Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
 				Sys_QueEvent( SE_KEY, K_ESCAPE, 1, 0, NULL, 0 );
 			}
+			break;
 		}
 		// Koz end
-		
+		// Carl: Teleport
+		case IMPULSE_42:
+		{
+			// teleport
+			if (aimValidForTeleport)
+			{
+				playerView.Flash( colorBlack, 140 );
+				Teleport(aimPoint, viewAngles, NULL);
+				PlayFootStepSound();
+			}
+			break;
+		}
+
 	}
 }
 
@@ -9501,6 +9556,44 @@ void idPlayer::AdjustBodyAngles()
 	animator.CurrentAnim( ANIMCHANNEL_LEGS )->SetSyncedAnimWeight( 2, upBlend );
 }
 
+/* Carl
+=====================
+idPlayer::SetAAS
+=====================
+*/
+void idPlayer::SetAAS()
+{
+	idStr use_aas;
+
+	spawnArgs.GetString("use_aas", NULL, use_aas);
+	gameLocal.Printf("Player AAS: use_aas = %s\n", use_aas.c_str());
+	aas = gameLocal.GetAAS(use_aas);
+	if (!aas)
+		aas = gameLocal.GetAAS("aas48");
+	if (aas)
+	{
+		const idAASSettings* settings = aas->GetSettings();
+		if (settings)
+		{
+			/*
+			if (!ValidForBounds(settings, physicsObj.GetBounds()))
+			{
+				gameLocal.Error("%s cannot use use_aas %s\n", name.c_str(), use_aas.c_str());
+			}
+			*/
+			float height = settings->maxStepHeight;
+			gameLocal.Printf("Player AAS: AAS step height = %f, player step height = %f\n", height, physicsObj.GetMaxStepHeight());
+			// physicsObj.SetMaxStepHeight(height);
+			return;
+		}
+		else
+		{
+			aas = NULL;
+		}
+	}
+	gameLocal.Printf("WARNING: Player %s has no AAS file\n", name.c_str());
+}
+
 /*
 ==============
 idPlayer::InitAASLocation
@@ -9533,6 +9626,21 @@ void idPlayer::InitAASLocation()
 			bounds[1] = size;
 			
 			aasLocation[ i ].areaNum = aas->PointReachableAreaNum( origin, bounds, AREA_REACHABLE_WALK );
+			const idAASSettings* settings = aas->GetSettings();
+			if (settings)
+			{
+				settings->allowFlyReachabilities;
+				size = aas->GetSettings()->boundingBoxes[0][1];
+				gameLocal.Printf("AAS %d: %s: fly=%d, swim=%d, step=%f, barrier=%f, fall=%f, water=%f; %f x %f x %f\n", i, settings->fileExtension.c_str(),
+					settings->allowFlyReachabilities, settings->allowSwimReachabilities,
+					settings->maxStepHeight, settings->maxBarrierHeight, settings->maxFallHeight, settings->maxWaterJumpHeight,
+					size.x, size.y, size.z);
+				bounds = this->physicsObj.GetBounds();
+				size = bounds[1];
+				gameLocal.Printf("Player: %s, step=%f, jump=%f, crouch=%f; %f x %f x %f\n", name.c_str(),
+					pm_stepsize.GetFloat(), pm_jumpheight.GetFloat(), pm_crouchheight.GetFloat(),
+					size.x, size.y, size.z);
+			}
 		}
 	}
 }
@@ -9602,6 +9710,83 @@ void idPlayer::GetAASLocation( idAAS* aas, idVec3& pos, int& areaNum ) const
 	
 	areaNum = 0;
 	pos = physicsObj.GetOrigin();
+}
+
+/* Carl: Teleport
+=====================
+idPlayer::PointReachableAreaNum
+=====================
+*/
+int idPlayer::PointReachableAreaNum(const idVec3& pos, const float boundsScale) const
+{
+	int areaNum;
+	idVec3 size;
+	idBounds bounds;
+
+	if (!aas)
+	{
+		return 0;
+	}
+
+	size = aas->GetSettings()->boundingBoxes[0][1] * boundsScale;
+	bounds[0] = -size;
+	size.z = 32.0f;
+	bounds[1] = size;
+
+	areaNum = aas->PointReachableAreaNum(pos, bounds, AREA_REACHABLE_WALK);
+
+	return areaNum;
+}
+
+/*
+=====================
+idPlayer::PathToGoal
+=====================
+*/
+bool idPlayer::PathToGoal(aasPath_t& path, int areaNum, const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin) const
+{
+	idVec3 org;
+	idVec3 goal;
+
+	if (!aas)
+	{
+		return false;
+	}
+
+	org = origin;
+	aas->PushPointIntoAreaNum(areaNum, org);
+	if (!areaNum)
+	{
+		return false;
+	}
+
+	goal = goalOrigin;
+	aas->PushPointIntoAreaNum(goalAreaNum, goal);
+	if (!goalAreaNum)
+	{
+		return false;
+	}
+
+	return aas->WalkPathToGoal(path, areaNum, org, goalAreaNum, goal, travelFlags);
+}
+
+/* Carl: Teleport
+================
+idPlayer::CanReachPosition
+================
+*/
+bool idPlayer::CanReachPosition(const idVec3& pos)
+{
+	aasPath_t	path;
+	int			toAreaNum;
+	int			areaNum;
+
+	toAreaNum = PointReachableAreaNum(pos);
+	areaNum = PointReachableAreaNum(physicsObj.GetOrigin());
+	if (!toAreaNum || !PathToGoal(path, areaNum, physicsObj.GetOrigin(), toAreaNum, pos))
+		return false;
+	else
+		return true;
 }
 
 /*
@@ -9866,7 +10051,8 @@ void idPlayer::Move()
 				idMat3 bodyAx = idAngles( bodyAng.pitch, bodyAng.yaw - commonVr->bodyYawOffset, bodyAng.roll ).Normalize180().ToMat3();
 			
 				
-				newBodyOrigin = bodyOrigin + bodyAx[0] * commonVr->poseHmdBodyPositionDelta.x + bodyAx[1] * commonVr->poseHmdBodyPositionDelta.y;
+				newBodyOrigin = bodyOrigin + bodyAx[0] * commonVr->remainingMoveHmdBodyPositionDelta.x + bodyAx[1] * commonVr->remainingMoveHmdBodyPositionDelta.y;
+				commonVr->remainingMoveHmdBodyPositionDelta.x = commonVr->remainingMoveHmdBodyPositionDelta.y = 0;
 				//newBodyOrigin.z = 0.0f;
 			
 				commonVr->motionMoveDelta = newBodyOrigin - bodyOrigin;
@@ -9951,8 +10137,12 @@ void idPlayer::Move()
 	
 	// FIXME: physics gets disabled somehow
 	BecomeActive( TH_PHYSICS );
+
+	// Carl: check if we're experiencing artificial locomotion
+	idVec3 before = physicsObj.GetOrigin();
 	RunPhysics();
-	
+	idVec3 after = physicsObj.GetOrigin();
+
 	// update our last valid AAS location for the AI
 	SetAASLocation();
 	
@@ -9994,7 +10184,27 @@ void idPlayer::Move()
 	{
 		newEyeOffset = pm_normalviewheight.GetFloat();
 	}
-	
+
+	float distance = ((after - before) - commonVr->motionMoveDelta).LengthSqr();
+	float crouchDistance = newEyeOffset - EyeHeight();
+	distance += crouchDistance * crouchDistance;
+	if (distance > 0.005f) {
+		// artificial locomotion
+		// 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Third Person, 6 = Particles, 7 = Particles & Chaperone
+		int fix = vr_motionSickness.GetInteger();
+		if (fix == 3 || fix == 4)
+			playerView.Flash( colorBlack, 200 );
+		if (fix == 1 || fix == 4 || fix == 7)
+			commonVr->ForceChaperone( 1, true );
+	}
+	else
+	{
+		// no artificial locomotion
+		int fix = vr_motionSickness.GetInteger();
+		if ( fix == 1 || fix == 4 || fix == 7 )
+			commonVr->ForceChaperone( 1, false );
+	}
+
 	if( EyeHeight() != newEyeOffset )
 	{
 		if( spectating )
@@ -10655,17 +10865,17 @@ void idPlayer::UpdateLaserSight()
 	muzscale = 1 + beamLength / 100;
 	crosshairEntity.axis = muzzleAxis * muzscale;
 
-	if ( gameLocal.clip.TracePoint( traceResults, start, end, MASK_SHOT_RENDERMODEL, this ) )
+	static idAngles surfaceAngle = ang_zero;
+	if (gameLocal.clip.TracePoint(traceResults, start, end, MASK_SHOT_RENDERMODEL, this))
 	{
 		beamLength *= traceResults.fraction;
 		muzscale = 1 + beamLength / 100;
 
-		if ( vr_weaponSightToSurface.GetBool() )
+		if (true || vr_weaponSightToSurface.GetBool())
 		{
 
 			// fake it till you make it. there must be a better way. Too bad my brain is broken.
 
-			static idAngles surfaceAngle = ang_zero;
 			static idAngles muzzleAngle = ang_zero;
 			static idAngles diffAngle = ang_zero;
 			static float rollDiff = 0.0f;
@@ -10693,7 +10903,28 @@ void idPlayer::UpdateLaserSight()
 	}
 
 	crosshairEntity.origin = start + muzzleAxis[0] * beamLength;
-	
+
+	// Carl: teleport
+	aimPoint = crosshairEntity.origin;
+	aimPointPitch = surfaceAngle.pitch;
+	bool aimValid = CanReachPosition(aimPoint);
+	// 45 degrees is maximum slope you can walk up
+	bool pitchValid = aimPointPitch >= 45; // -90 = ceiling, 0 = wall, 90 = floor
+	aimValidForTeleport = aimValid && pitchValid;
+
+	if ( aimValidForTeleport )
+	{
+		crosshairEntity.customSkin = skinCrosshairCircleDot;
+	}
+	else if ( pitchValid )
+	{
+		crosshairEntity.customSkin = skinCrosshairCross;
+	}
+	else
+	{
+		crosshairEntity.customSkin = skinCrosshairDot;
+	}
+
 	if ( IsGameStereoRendered() && crosshairHandle == -1 )
 	{
 		crosshairHandle = gameRenderWorld->AddEntityDef( &crosshairEntity );
@@ -13333,7 +13564,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 		
 		if ( flashMode == FLASH_HAND   )
 		{
-			//common->Printf( "Flash originoffset = %s\n", originOffset.ToString() );
+			//common->Printf( "Flashlight originoffset = %s\n", originOffset.ToString() );
 			origin = viewOrigin;
 			origin -= originOffset * viewAxis;
 			
@@ -13556,7 +13787,11 @@ void idPlayer::GetViewPosVR( idVec3 &origin, idMat3 &axis ) const {
 	
 	eyeHeightAboveRotationPoint = 5;
 	
-	origin = GetEyePosition() + viewBob;
+	origin = GetEyePosition(); // +viewBob;
+	// Carl: No view bobbing unless knockback is enabled. This isn't strictly a knockback, but close enough.
+	// This is the bounce when you land after jumping
+	if (vr_knockBack.GetBool())
+		origin += viewBob;
 	angles = viewAngles; // NO VIEW KICKING  +playerView.AngleOffset();
 	axis = angles.ToMat3();// *physicsObj.GetGravityAxis();
 
@@ -14509,7 +14744,7 @@ void idPlayer::Event_GetFlashState()
 {
 	static int flashon;
 	flashon = flashlight.GetEntity()->lightOn  ? 1 : 0 ;
-	// koz debug common->Printf( "Returning flash state = %d\n",flashon );
+	// koz debug common->Printf( "Returning flashlight state = %d\n",flashon );
 	idThread::ReturnInt( flashon );
 }
 

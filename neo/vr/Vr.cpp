@@ -38,8 +38,6 @@ idCVar vr_weaponHand( "vr_weaponHand", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_G
 
 idCVar vr_flashlightMode( "vr_flashlightMode", "3", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Flashlight mount.\n0 = Body\n1 = Head\n2 = Gun\n3= Hand ( if motion controls available.)" );
 
-//tweak flash position when aiming with hydra
-
 idCVar vr_flashlightBodyPosX( "vr_flashlightBodyPosX", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight vertical offset for body mount." );
 idCVar vr_flashlightBodyPosY( "vr_flashlightBodyPosY", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight horizontal offset for body mount." );
 idCVar vr_flashlightBodyPosZ( "vr_flashlightBodyPosZ", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight forward offset for body mount." );
@@ -51,7 +49,6 @@ idCVar vr_flashlightHelmetPosZ( "vr_flashlightHelmetPosZ", "-20", CVAR_FLOAT | C
 idCVar vr_offHandPosX( "vr_offHandPosX", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "X position for off hand when not using motion controls." );
 idCVar vr_offHandPosY( "vr_offHandPosY", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Y position for off hand when not using motion controls." );
 idCVar vr_offHandPosZ( "vr_offHandPosZ", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Z position for off hand when not using motion controls." );
-
 
 idCVar vr_forward_keyhole( "vr_forward_keyhole", "11.25", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Forward movement keyhole in deg. If view is inside body direction +/- this value, forward movement is in view direction, not body direction" );
 
@@ -94,7 +91,9 @@ idCVar vr_hudNewItems( "vr_hudNewItems", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHI
 idCVar vr_hudFlashlight( "vr_hudFlashlight", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show flashlight in Hud." );
 idCVar vr_hudLowHealth( "vr_hudLowHealth", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, " 0 = Disable, otherwise force hud if heath below this value." );
 
-idCVar vr_talkMode("vr_talkMode", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Talk to NPC 0 = buttons, 1 = buttons or voice, 2 = voice only, 3 = voice no cursor", 0, 3);
+idCVar vr_voiceCommands( "vr_voiceCommands", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Enable voice commands. 0 = none, 1 = menus, 2 = menus and weapons", 0, 2 );
+idCVar vr_talkWakeMonsters( "vr_talkWakeMonsters", "1", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Talking wakes monsters. 0 = no, 1 = yes", 0, 1 );
+idCVar vr_talkMode( "vr_talkMode", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Talk to NPC 0 = buttons, 1 = buttons or voice, 2 = voice only, 3 = voice no cursor", 0, 3 );
 idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "25", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Tweak talk cursor y pos in VR. % val", 0, 99 );
 
 idCVar vr_wristStatMon( "vr_wristStatMon", "1", CVAR_INTEGER | CVAR_ARCHIVE, "Use wrist status monitor. 0 = Disable 1 = Right Wrist 2 = Left Wrist " );
@@ -123,7 +122,7 @@ idCVar	vr_weaponSight( "vr_weaponSight", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Weap
 idCVar	vr_weaponSightToSurface( "vr_weaponSightToSurface", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Map sight to surface. 0 = Disabled 1 = Enabled\n" );
 
 idCVar	vr_motionWeaponPitchAdj( "vr_motionWeaponPitchAdj", "40", CVAR_FLOAT | CVAR_ARCHIVE, "Weapon controller pitch adjust" );
-idCVar	vr_motionFlashPitchAdj( "vr_motionFlashPitchAdj", "40", CVAR_FLOAT | CVAR_ARCHIVE, "Flash controller pitch adjust" );
+idCVar	vr_motionFlashPitchAdj( "vr_motionFlashPitchAdj", "40", CVAR_FLOAT | CVAR_ARCHIVE, "Flashlight controller pitch adjust" );
 
 idCVar	vr_nodalX( "vr_nodalX", "-3", CVAR_FLOAT | CVAR_ARCHIVE, "Forward offset from eyes to neck" );
 idCVar	vr_nodalZ( "vr_nodalZ", "-6", CVAR_FLOAT | CVAR_ARCHIVE, "Vertical offset from neck to eye height" );
@@ -176,7 +175,15 @@ idCVar vr_frameCheck( "vr_frameCheck", "0", CVAR_INTEGER | CVAR_ARCHIVE, "0 = by
 
 idCVar vr_forceOculusAudio( "vr_forceOculusAudio", "1", CVAR_BOOL | CVAR_ARCHIVE, "Request openAL to search for Rift headphones instead of default device\nFails to default device if rift not found." );
 idCVar vr_stereoMirror( "vr_stereoMirror", "1", CVAR_BOOL | CVAR_ARCHIVE, "Render mirror window with stereo views. 0 = Mono , 1 = Stereo Warped" );
+
+idCVar vr_APISelect( "vr_APISelect", "0", CVAR_INTEGER | CVAR_ARCHIVE, "VR API Select:\n 0 = Autodetect ( Oculus Native then OpenVR ) ,\n 1 = Oculus Native Only\n 2 = OpenVR only\n" );
 // Koz end
+// Carl
+idCVar vr_teleport( "vr_teleport", "1", CVAR_INTEGER | CVAR_ARCHIVE, "Player can teleport at will. 0 = disabled, 1 = like walking, 2 = like teleporting", 0, 2 );
+idCVar vr_motionSickness( "vr_motionSickness", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Motion sickness prevention mode. 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Third Person, 6 = Particles, 7 = Particles & Chaperone", 0, 7 );
+idCVar vr_chaperone( "vr_chaperone", "2", CVAR_INTEGER | CVAR_ARCHIVE, "Chaperone/Guardian mode. 0 = when near, 1 = when throwing, 2 = when melee, 3 = when dodging, 4 = always", 0, 4 );
+idCVar vr_chaperoneColor( "vr_chaperoneColor", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Chaperone colour. 0 = default, 1 = black, 2 = grey, 3 = white, 4 = red, 5 = green, 6 = blue, 7 = yellow, 8 = cyan, 9 = magenta, 10 = purple", 0, 10 );
+
 //===================================================================
 
 int fboWidth;
@@ -383,8 +390,8 @@ idMat4 GetHMDMatrixProjectionEye( vr::Hmd_Eye nEye )
 
 	float m_fNearClip = 0.1f;
 	float m_fFarClip = 30.0f;
-
-	vr::HmdMatrix44_t mat = commonVr->m_pHMD->GetProjectionMatrix( nEye, m_fNearClip, m_fFarClip, vr::API_OpenGL );
+	
+	vr::HmdMatrix44_t mat = commonVr->m_pHMD->GetProjectionMatrix( nEye, m_fNearClip, m_fFarClip ); // , vr::API_OpenGL );
 
 	return idMat4(
 		mat.m[0][0], mat.m[1][0], mat.m[2][0], mat.m[3][0],
@@ -422,6 +429,15 @@ iVr::OculusInit
 
 bool iVr::OculusInit( void )
 {
+	
+	if ( vr_APISelect.GetInteger() == 2 ) // only use OpenVr;
+	{
+		common->Printf( "OculusInit: vr_vrAPISelect set to only use OpenVR API. Returning false." );
+		hasOculusRift = false;
+		return false;
+	}
+	
+	
 	hasOculusRift = false;
 	// Oculus HMD Initialization
 	ovrResult result = ovr_Initialize( nullptr );
@@ -434,6 +450,11 @@ bool iVr::OculusInit( void )
 
 
 	common->Printf( "ovr_Initialize was successful.\n" );
+
+	ovr_IdentifyClient( "EngineName: id Tech 4\n"
+		"EngineVersion: 1.0.3\n"
+		"EngineEditor: false" );
+
 	result = ovr_Create( &hmdSession, &ovrLuid );
 
 	if ( OVR_FAILURE( result ) )
@@ -506,6 +527,16 @@ iVr::OpenVRInit
 
 bool iVr::OpenVRInit(void)
 {
+	
+	if ( vr_APISelect.GetInteger() == 1 ) // Only use Oculus API
+	{
+		common->Printf( "OpenVRInit: vr_vrAPISelect set to only use Oculus API. Returning false." );
+		return false;
+	}
+	
+	
+	
+	
 	if (!vr::VR_IsHmdPresent())
 	{
 		common->Printf("No OpenVR HMD detected.\n");
@@ -1030,7 +1061,7 @@ void iVr::HMDInitializeDistortion()
 		for ( int i = 0; i < 6; i++ )
 		{
 			textures[i].handle = (unsigned int*)globalImages->skyBoxSides->texnum;
-			textures[i].eType = vr::API_OpenGL;
+			textures[i].eType = vr::TextureType_OpenGL;
 			textures[i].eColorSpace = vr::ColorSpace_Auto;
 		}
 
@@ -1430,15 +1461,7 @@ void iVr::MotionControlSetRotationOffset()
 	/*
 	switch ( motionControlType )
 	{
-
 	
-	case  MOTION_HYDRA:
-	{
-		HydraSetRotationOffset();
-		break;
-	}
-	
-
 	default:
 		break;
 	}
@@ -1456,12 +1479,6 @@ void iVr::MotionControlSetOffset()
 	switch ( motionControlType )
 	{
 
-		
-		case  MOTION_HYDRA:
-	
-			HydraSetOffset();
-			break;
-	
 		default:
 			break;
 	}
@@ -1589,35 +1606,26 @@ void iVr::MotionControlGetLeftHand( idVec3 &motionPosition, idQuat &motionRotati
 	switch ( motionControlType )
 	{
 
-		/*
-	case  MOTION_HYDRA:
-	{
-		hydraData leftHydra;
-		commonVr->HydraGetLeftWithOffset( leftHydra );
-		motionPosition = leftHydra.position;
-		motionRotation = leftHydra.hydraRotationQuat;
-		break;
-	}
-	*/
+		case MOTION_STEAMVR:
+		{
+			//vr::TrackedDeviceIndex_t deviceNo = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole( vr::TrackedControllerRole_LeftHand );
+			//MotionControlGetOpenVrController( deviceNo, motionPosition, motionRotation );
+			MotionControlGetOpenVrController( leftControllerDeviceNo, motionPosition, motionRotation );
 
-	case MOTION_STEAMVR:
-	{
-		//vr::TrackedDeviceIndex_t deviceNo = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole( vr::TrackedControllerRole_LeftHand );
-		//MotionControlGetOpenVrController( deviceNo, motionPosition, motionRotation );
-		MotionControlGetOpenVrController( leftControllerDeviceNo, motionPosition, motionRotation );
+			//motionPosition += idVec3( vr_vcx.GetFloat(), vr_vcy.GetFloat(), vr_vcz.GetFloat() ) * motionRotation;
 
-		//motionPosition += idVec3( vr_vcx.GetFloat(), vr_vcy.GetFloat(), vr_vcz.GetFloat() ) * motionRotation;
+			break;
+		}
+		
+		case MOTION_OCULUS:
+		{
 
-		break;
-	}
-	case MOTION_OCULUS:
-	{
-
-		MotionControlGetTouchController(1, motionPosition, motionRotation);
-		break;
-	}
-	default:
-		break;
+			MotionControlGetTouchController(1, motionPosition, motionRotation);
+			break;
+		}
+		
+		default:
+			break;
 	}
 }
 
@@ -1631,34 +1639,26 @@ void iVr::MotionControlGetRightHand( idVec3 &motionPosition, idQuat &motionRotat
 	static idAngles angles = ang_zero;
 	switch ( motionControlType )
 	{
+			
+		case MOTION_STEAMVR:
+		{
+			//vr::TrackedDeviceIndex_t deviceNo = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole( vr::TrackedControllerRole_RightHand );
+			//MotionControlGetOpenVrController( deviceNo, motionPosition, motionRotation );
+			MotionControlGetOpenVrController( rightControllerDeviceNo, motionPosition, motionRotation );
 
-	/*
-	case MOTION_HYDRA:
-	{
-		hydraData rightHydra;
-		commonVr->HydraGetRightWithOffset( rightHydra );
-		motionPosition = rightHydra.position;
-		motionRotation = rightHydra.hydraRotationQuat;
-		break;
-	}
-	*/
-	case MOTION_STEAMVR:
-	{
-		//vr::TrackedDeviceIndex_t deviceNo = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole( vr::TrackedControllerRole_RightHand );
-		//MotionControlGetOpenVrController( deviceNo, motionPosition, motionRotation );
-		MotionControlGetOpenVrController( rightControllerDeviceNo, motionPosition, motionRotation );
+			//motionPosition += idVec3( vr_vcx.GetFloat(), vr_vcy.GetFloat(), vr_vcz.GetFloat() ) * motionRotation;
+			break;
+		}
+		
+		case MOTION_OCULUS:
+		{
 
-		//motionPosition += idVec3( vr_vcx.GetFloat(), vr_vcy.GetFloat(), vr_vcz.GetFloat() ) * motionRotation;
-		break;
-	}
-	case MOTION_OCULUS:
-	{
-
-		MotionControlGetTouchController(0, motionPosition, motionRotation);
-		break;
-	}
-	default:
-		break;
+			MotionControlGetTouchController(0, motionPosition, motionRotation);
+			break;
+		}
+		
+		default:
+			break;
 	}
 }
 
@@ -1772,6 +1772,7 @@ void iVr::FrameStart( void )
 	if ( hasOculusRift )
 	{
 		HMDGetOrientation( poseHmdAngles, poseHmdHeadPositionDelta, poseHmdBodyPositionDelta, poseHmdAbsolutePosition, false );
+		remainingMoveHmdBodyPositionDelta = poseHmdBodyPositionDelta;
 		return;
 	}
 
@@ -1803,6 +1804,7 @@ void iVr::FrameStart( void )
 
 
 	HMDGetOrientation( poseHmdAngles, poseHmdHeadPositionDelta, poseHmdBodyPositionDelta, poseHmdAbsolutePosition, false );
+	remainingMoveHmdBodyPositionDelta = poseHmdBodyPositionDelta;
 	
 	for ( int i = 0; i < 2; i++ )
 	{
@@ -1834,5 +1836,40 @@ void iVr::NextFlashMode()
 {
 	currentFlashMode++;
 	if ( currentFlashMode >= FLASH_MAX ) currentFlashMode = 0;
+}
+
+bool iVr::ShouldQuit()
+{
+	if (hasOculusRift)
+	{
+		ovrSessionStatus ss;
+		ovrResult result = ovr_GetSessionStatus(hmdSession, &ss);
+		if (ss.ShouldQuit)
+			return true;
+		if (ss.ShouldRecenter)
+			ovr_RecenterTrackingOrigin(hmdSession);
+	}
+	return false;
+}
+
+/*
+void iVr::ForceChaperone(int which, bool force)
+{
+	static bool chaperones[2] = {};
+	chaperones[which] = force;
+	force = chaperones[0] || chaperones[1];
+=======
+*/
+void iVr::ForceChaperone(bool force)
+{
+
+	if (hasOculusRift)
+	{
+		ovr_RequestBoundaryVisible(hmdSession, force);
+	}
+	else if (hasHMD)
+	{
+		vr::VRChaperone()->ForceBoundsVisible(force);
+	}
 }
 

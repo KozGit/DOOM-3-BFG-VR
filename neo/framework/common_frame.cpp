@@ -254,6 +254,9 @@ idCommonLocal::Draw
 */
 void idCommonLocal::Draw()
 {
+	if (commonVr->ShouldQuit())
+		Quit();
+
 	// debugging tool to test frame dropping behavior
 	if( com_sleepDraw.GetInteger() )
 	{

@@ -206,7 +206,9 @@ void G_PerformImpulse( const int impulse, ticcmd_t* cmd ) {
 	} else if( impulse == IMPULSE_14 ) {
 		cmd->buttons |= BT_CHANGE; 
 		cmd->nextPrevWeapon = 2 ; 
-	}  
+	} else if (impulse == IMPULSE_13) { // Carl reload (touch button A) -> use
+		cmd->buttons |= BT_USE;
+	}
 
 }
 
@@ -351,8 +353,43 @@ void G_BuildTiccmd (ticcmd_t* cmd, idUserCmdMgr * userCmdMgr, int newTics )
 				}
 			}
 
+			if (usercmdGen->KeyState(K_SAY_FIST) || usercmdGen->KeyState(K_SAY_CHAINSAW))
+			{
+				cmd->buttons |= BT_CHANGE;
+				cmd->buttons |= 0 << BT_WEAPONSHIFT;
+			}
+			else if (usercmdGen->KeyState(K_SAY_PISTOL))
+			{
+				cmd->buttons |= BT_CHANGE;
+				cmd->buttons |= 1 << BT_WEAPONSHIFT;
+			}
+			else if (usercmdGen->KeyState(K_SAY_SHOTGUN) || usercmdGen->KeyState(K_SAY_SUPER_SHOTGUN))
+			{
+				cmd->buttons |= BT_CHANGE;
+				cmd->buttons |= 2 << BT_WEAPONSHIFT;
+			}
+			else if (usercmdGen->KeyState(K_SAY_CHAIN_GUN))
+			{
+				cmd->buttons |= BT_CHANGE;
+				cmd->buttons |= 3 << BT_WEAPONSHIFT;
+			}
+			else if (usercmdGen->KeyState(K_SAY_ROCKET_LAUNCHER))
+			{
+				cmd->buttons |= BT_CHANGE;
+				cmd->buttons |= 4 << BT_WEAPONSHIFT;
+			}
+			else if (usercmdGen->KeyState(K_SAY_PLASMA_GUN))
+			{
+				cmd->buttons |= BT_CHANGE;
+				cmd->buttons |= 5 << BT_WEAPONSHIFT;
+			}
+			else if (usercmdGen->KeyState(K_SAY_BFG))
+			{
+				cmd->buttons |= BT_CHANGE;
+				cmd->buttons |= 6 << BT_WEAPONSHIFT;
+			}
 
-			if ( curTech5Command.buttons & BUTTON_USE || curTech5Command.buttons & BUTTON_JUMP ) {
+			if ( curTech5Command.buttons & BUTTON_USE || curTech5Command.buttons & BUTTON_JUMP || usercmdGen->KeyState(K_JOY23) ) {
 				cmd->buttons |= BT_USE;
 			}
 
@@ -1210,6 +1247,7 @@ void G_DoCompleted (void)
 			if ( ::g->gamemission == doom2 ) {
 				switch(::g->gamemap)
 				{
+					case  2: ::g->wminfo.next = 32; break; //Fix Doom 3 BFG Edition, MAP02 secret exit to MAP33 Betray
 					case 15: ::g->wminfo.next = 30; break;
 					case 31: ::g->wminfo.next = 31; break;
 				}
@@ -1225,6 +1263,7 @@ void G_DoCompleted (void)
 				{
 					case 31:
 					case 32: ::g->wminfo.next = 15; break;
+					case 33: ::g->wminfo.next =  2; break; //Fix Doom 3 BFG Edition, MAP33 Betray exit back to MAP03
 					default: ::g->wminfo.next = ::g->gamemap;
 				}
 			}

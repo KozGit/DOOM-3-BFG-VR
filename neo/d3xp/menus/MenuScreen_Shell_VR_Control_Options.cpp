@@ -105,14 +105,6 @@ void idMenuScreen_Shell_VR_Control_Options::Initialize( idMenuHandler * data ) {
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Walk Speed Adj" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_WALK_SPEED_ADJUST );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_WALK_SPEED_ADJUST );
-	options->AddChild( control );
-	
-	control = new (TAG_SWF)idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "Weapon Pitch" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_WEAPON_PITCH );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
@@ -121,7 +113,7 @@ void idMenuScreen_Shell_VR_Control_Options::Initialize( idMenuHandler * data ) {
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Flash Pitch" );
+	control->SetLabel( "Flashlight Pitch" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH );
@@ -130,10 +122,18 @@ void idMenuScreen_Shell_VR_Control_Options::Initialize( idMenuHandler * data ) {
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "Talk Mode" );
-	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_TALK_MODE);
-	control->SetupEvents(DEFAULT_REPEAT_TIME, options->GetChildren().Num());
-	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_TALK_MODE);
-	options->AddChild(control);
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_TALK_MODE );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_TALK_MODE );
+	options->AddChild( control );
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "Voice Commands" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_VOICE_COMMANDS );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_VOICE_COMMANDS );
+	options->AddChild( control );
 
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
@@ -351,10 +351,10 @@ void idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Op
 	originalMoveMode = vr_movePoint.GetInteger();
 	originalCrouchMode = vr_crouchMode.GetInteger();
 	originalCrouchTriggerDistance = vr_crouchTriggerDist.GetFloat();
-	originalWalkSpeedAdjust = vr_walkSpeedAdjust.GetFloat();
 	originalWeaponPitch = vr_motionWeaponPitchAdj.GetFloat();
 	originalFlashPitch = vr_motionFlashPitchAdj.GetFloat();
 	originalTalkMode = vr_talkMode.GetInteger();
+	originalVoiceCommands = vr_voiceCommands.GetInteger();
 
 }
 
@@ -421,16 +421,6 @@ void idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Op
 
 		}
 
-		case CONTROL_OPTIONS_FIELD_WALK_SPEED_ADJUST: 
-		{
-			float ws = vr_walkSpeedAdjust.GetFloat();
-			ws += adjustAmount;
-			if ( ws < -100 ) ws = -100;
-			if ( ws > 150 ) ws = 150;
-			vr_walkSpeedAdjust.SetFloat( ws );
-			break;
-		}
-			
 		case CONTROL_OPTIONS_FIELD_WEAPON_PITCH: 
 		{
 			float p = vr_motionWeaponPitchAdj.GetFloat();
@@ -455,7 +445,15 @@ void idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Op
 		{
 			static const int numValues = 4;
 			static const int values[numValues] = { 0, 1, 2, 3 };
-			vr_talkMode.SetInteger(AdjustOption(vr_talkMode.GetInteger(), values, numValues, adjustAmount));
+			vr_talkMode.SetInteger( AdjustOption( vr_talkMode.GetInteger(), values, numValues, adjustAmount ) );
+			break;
+		}
+
+		case CONTROL_OPTIONS_FIELD_VOICE_COMMANDS:
+		{
+			static const int numValues = 3;
+			static const int values[numValues] = { 0, 1, 2 };
+			vr_voiceCommands.SetInteger( AdjustOption( vr_voiceCommands.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
 
@@ -510,9 +508,6 @@ idSWFScriptVar idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_
 		case CONTROL_OPTIONS_FIELD_CROUCH_TRIGGER_DIST:
 			return va( "%.0f", vr_crouchTriggerDist.GetFloat() );
 
-		case CONTROL_OPTIONS_FIELD_WALK_SPEED_ADJUST:
-			return va( "%.0f", vr_walkSpeedAdjust.GetFloat() );
-			
 		case CONTROL_OPTIONS_FIELD_WEAPON_PITCH:
 			return va( "%.0f", vr_motionWeaponPitchAdj.GetFloat() );
 
@@ -520,6 +515,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_
 			return va( "%.0f", vr_motionFlashPitchAdj.GetFloat() );
 
 		case CONTROL_OPTIONS_FIELD_TALK_MODE:
+		{
 			int tm = vr_talkMode.GetInteger();
 			if (tm <= 0)
 				return "Buttons Only";
@@ -529,6 +525,18 @@ idSWFScriptVar idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_
 				return "Voice, No Cursor";
 			else
 				return "Buttons or Voice";
+		}
+
+		case CONTROL_OPTIONS_FIELD_VOICE_COMMANDS:
+		{
+			int vc = vr_voiceCommands.GetInteger();
+			if ( vc <= 0 )
+				return "Disabled";
+			else if ( vc == 1 )
+				return "Menus Only";
+			else
+				return "Menus and Weapons";
+		}
 	}
 	return false;
 }
@@ -561,11 +569,6 @@ bool idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Op
 		return true;
 	}
 	
-	if ( originalWalkSpeedAdjust != vr_walkSpeedAdjust.GetFloat() )
-	{
-		return true;
-	}
-		
 	if ( originalWeaponPitch != vr_motionWeaponPitchAdj.GetFloat() )
 	{
 		return true;
@@ -576,7 +579,12 @@ bool idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Op
 		return true;
 	}
 		
-	if (originalTalkMode != vr_talkMode.GetInteger())
+	if ( originalTalkMode != vr_talkMode.GetInteger() )
+	{
+		return true;
+	}
+		
+	if ( originalVoiceCommands != vr_voiceCommands.GetInteger() )
 	{
 		return true;
 	}

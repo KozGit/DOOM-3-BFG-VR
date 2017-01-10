@@ -973,9 +973,9 @@ void idJoystickWin32::PostInputEvent( int inputDeviceNum, int event, int value, 
 	{
 		PushButton( inputDeviceNum, K_JOY1 + ( event - J_ACTION1 ), value != 0 );
 	}
-	else if( event == J_TALK )
+	else if( ( event >= J_TALK ) && ( event <= J_SAY_MAX ) )
 	{
-		PushButton( inputDeviceNum, K_TALK, value != 0 );
+		PushButton( inputDeviceNum, K_TALK + ( event - J_TALK ), value != 0 );
 	}
 	else if( event == J_AXIS_LEFT_X )
 	{
@@ -1108,7 +1108,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 		return numEvents;
 	}
 	
-	assert( inputDeviceNum < 6 ); // koz was 4
+	assert( inputDeviceNum < 4 )
 	if ( inputDeviceNum < 4 ) // koz normal controllers < 4
 	{
 		//	if ( inputDeviceNum > in_joystick.GetInteger() ) {
@@ -1212,12 +1212,22 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 				oldTalk = talk;
 			}
 		}
+		static bool oldSay[J_SAY_MAX - J_SAY_MIN + 1] = {};
+		for (int i = J_SAY_MIN; i <= J_SAY_MAX; ++i)
+		{
+			bool say = commonVoice->GetSayButton(i);
+			if (say != oldSay[i- J_SAY_MIN])
+			{
+				PostInputEvent(inputDeviceNum, i, say);
+				oldSay[i - J_SAY_MIN] = say;
+			}
+		}
 		
 
 		//----------------------------------
 		// Koz begin add SteamVR left and right controllers
 		//	common->Printf( "Before Checking steam controllers svr = %d devno = %d\n", (int) (commonVr->motionControlType == MOTION_STEAMVR), inputDeviceNum );
-		if ( commonVr->motionControlType == MOTION_STEAMVR ) //&& inputDeviceNum == 5 )
+		if ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_STEAMVR ) 
 		{
 
 			//common->Printf( "Checking steam controllerstime %d\n",  Sys_Milliseconds() );
@@ -1240,10 +1250,10 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 
 			vr::VRControllerState_t& currentStateL = commonVr->pControllerStateL;
-			lGood = commonVr->m_pHMD->GetControllerState( commonVr->leftControllerDeviceNo, &currentStateL );
+			lGood = commonVr->m_pHMD->GetControllerState( commonVr->leftControllerDeviceNo, &currentStateL, sizeof( vr::VRControllerState_t ) );
 
 			vr::VRControllerState_t& currentStateR = commonVr->pControllerStateR;
-			rGood = commonVr->m_pHMD->GetControllerState( commonVr->rightControllerDeviceNo, &currentStateR );
+			rGood = commonVr->m_pHMD->GetControllerState( commonVr->rightControllerDeviceNo, &currentStateR, sizeof( vr::VRControllerState_t ) );
 
 			if ( currentStateL.unPacketNum != lastPacketL && lGood )
 			{

@@ -65,7 +65,7 @@ static bindInfo_t keyboardBinds[] =
 	{ "System Menu (ESC)", "_impulse40" },		// System Menu (escape)
 	{ "Toggle Lasersight", "_impulse33" },		// KOZ TOGGLE LASERSIGHT
 	{ "Toggle HUD", "_impulse36" },				// KOZ TOGGLE HUD
-	{ "Next Flashlight Mode", "_impulse39" },	// KOZ NEXT FLASH MODE 
+	{ "Next Flashlight Mode", "_impulse39" },	// KOZ NEXT FLASHLIGHT MODE 
 	{ "Toggle Heading Beam", "_impulse37" },	// KOZ TOGGLE HEADING BEAM
 	{ "Walk in Place", "_impulse38" },			// KOZ Walk In Place
 	{ "Talk", "_talk" },			// Carl Talk to NPC

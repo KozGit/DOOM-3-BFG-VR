@@ -447,13 +447,54 @@ void idPlayerProfile::ExecConfig( bool save, bool forceDefault )
 	
 	if ( game->isVR )
 	{
-		cmdSystem->AppendCommandText( "exec vr_default.cfg\n" );
-		cmdSystem->AppendCommandText( "exec vr.cfg\n" );
+		//cmdSystem->AppendCommandText( "exec vr_default.cfg\n" );
+		//cmdSystem->AppendCommandText( "exec vr.cfg\n" );
+
+		if ( commonVr->hasOculusRift )
+		{
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_oculus_default.cfg\n" );
+		}
+		else if ( commonVr->hasHMD )
+		{
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_openvr_default.cfg\n" );
+		}
+
+		if ( commonVr->hasOculusRift )
+		{
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_oculus.cfg\n" );
+		}
+		else if ( commonVr->hasHMD )
+		{
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_openvr.cfg\n" );
+		}
+		
 	}
 
 	// Carl talking should always be bound to _talk
+	cmdSystem->AppendCommandText("bind JOY25 _impulse42\n");
 	cmdSystem->AppendCommandText("bind TALK _talk\n");
-
+	cmdSystem->AppendCommandText("bind SAY_PAUSE _impulse40\n");
+	//cmdSystem->AppendCommandText("bind SAY_RESUME _impulse40\n");
+	cmdSystem->AppendCommandText("bind SAY_EXIT _impulse40\n");
+	cmdSystem->AppendCommandText("bind SAY_MENU _impulse40\n");
+	//	cmdSystem->AppendCommandText("bind SAY_CANCEL _impulse\n");
+	cmdSystem->AppendCommandText("bind SAY_RELOAD _impulse13\n");
+	cmdSystem->AppendCommandText("bind SAY_PDA _impulse19\n");
+	cmdSystem->AppendCommandText("bind SAY_FIST _impulse1\n");
+	cmdSystem->AppendCommandText("bind SAY_CHAINSAW _impulse27\n");
+	cmdSystem->AppendCommandText("bind SAY_FLASHLIGHT _impulse16\n");
+	cmdSystem->AppendCommandText("bind SAY_GRABBER _impulse26\n");
+	cmdSystem->AppendCommandText("bind SAY_PISTOL _impulse2\n");
+	cmdSystem->AppendCommandText("bind SAY_SHOTGUN _impulse4\n");
+	cmdSystem->AppendCommandText("bind SAY_SUPER_SHOTGUN _impulse11\n");
+	cmdSystem->AppendCommandText("bind SAY_MACHINE_GUN _impulse5\n");
+	cmdSystem->AppendCommandText("bind SAY_CHAIN_GUN _impulse6\n");
+	cmdSystem->AppendCommandText("bind SAY_ROCKET_LAUNCHER _impulse9\n");
+	cmdSystem->AppendCommandText("bind SAY_GRENADES _impulse7\n");
+	cmdSystem->AppendCommandText("bind SAY_PLASMA_GUN _impulse8\n");
+	cmdSystem->AppendCommandText("bind SAY_BFG _impulse10\n");
+	cmdSystem->AppendCommandText("bind SAY_SOUL_CUBE _impulse12\n");
+	cmdSystem->AppendCommandText("bind SAY_ARTIFACT _impulse12\n");
 	cmdSystem->ExecuteCommandBuffer();
 	
 	if( !save )

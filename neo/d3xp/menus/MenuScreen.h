@@ -2057,10 +2057,10 @@ public:
 			CONTROL_OPTIONS_FIELD_MOVE_MODE,
 			CONTROL_OPTIONS_FIELD_CROUCH_MODE,
 			CONTROL_OPTIONS_FIELD_CROUCH_TRIGGER_DIST,
-			CONTROL_OPTIONS_FIELD_WALK_SPEED_ADJUST,
 			CONTROL_OPTIONS_FIELD_WEAPON_PITCH,
 			CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH,
 			CONTROL_OPTIONS_FIELD_TALK_MODE,
+			CONTROL_OPTIONS_FIELD_VOICE_COMMANDS,
 			MAX_CONTROL_OPTION_FIELDS
 		};
 
@@ -2088,10 +2088,10 @@ public:
 		int		originalMoveMode;
 		int		originalCrouchMode;
 		float	originalCrouchTriggerDistance;
-		float	originalWalkSpeedAdjust;
 		float	originalWeaponPitch;
 		float	originalFlashPitch;
 		int		originalTalkMode;
+		int		originalVoiceCommands;
 
 	};
 
@@ -2137,9 +2137,6 @@ public:
 			CHARACTER_OPTIONS_FIELD_FLASH_MODE,
 			CHARACTER_OPTIONS_FIELD_WEAPON_HAND,
 			CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT,
-			CHARACTER_OPTIONS_FIELD_KNOCKBACK,
-			CHARACTER_OPTIONS_FIELD_HEADKICK,
-			CHARACTER_OPTIONS_FIELD_SHAKE_AMPLITUDE,
 			MAX_CHARACTER_OPTION_FIELDS
 		};
 
@@ -2167,9 +2164,6 @@ public:
 		int		originalFlashMode;
 		int		originalWeaponHand;
 		float	originalViewHeight;
-		float	originalKnockBack;
-		int		originalShakeAmplitude;
-		float	originalHeadKick;
 	};
 
 	idMenuScreen_Shell_VR_Character_Options() :
@@ -2190,6 +2184,84 @@ private:
 
 };
 
+
+//*
+//================================================	
+//idMenuScreen_Shell_VR_Safety_Protocols
+//================================================
+//*/
+class idMenuScreen_Shell_VR_Safety_Protocols : public idMenuScreen
+{
+public:
+
+	/*
+	================================================
+	idMenuDataSource_Shell_VR_Safety_Protocols
+	================================================
+	*/
+	class idMenuDataSource_Shell_VR_Safety_Protocols : public idMenuDataSource
+	{
+	public:
+		enum vrSafetyProtocols_t
+		{
+			SAFETY_PROTOCOLS_FIELD_TELEPORTATION,
+			SAFETY_PROTOCOLS_FIELD_SNAP_TURNS,
+			SAFETY_PROTOCOLS_FIELD_WALK_SPEED_ADJUST,
+			SAFETY_PROTOCOLS_FIELD_MOTION_SICKNESS,
+			SAFETY_PROTOCOLS_FIELD_CHAPERONE,
+			SAFETY_PROTOCOLS_FIELD_KNOCKBACK,
+			SAFETY_PROTOCOLS_FIELD_HEADKICK,
+			SAFETY_PROTOCOLS_FIELD_SHAKE_AMPLITUDE,
+			MAX_SAFETY_PROTOCOLS_FIELDS
+		};
+
+		idMenuDataSource_Shell_VR_Safety_Protocols();
+
+		// loads data
+		virtual void				LoadData();
+
+		// submits data
+		virtual void				CommitData();
+
+		// says whether something changed with the data
+		virtual bool				IsDataChanged() const;
+
+		// retrieves a particular field for reading
+		virtual idSWFScriptVar		GetField(const int fieldIndex) const;
+
+		// updates a particular field value
+		virtual void				AdjustField(const int fieldIndex, const int adjustAmount);
+
+		bool						IsRestartRequired() const;
+
+	private:
+		int	originalChaperone;
+		int	originalTeleport;
+		int	originalMotionSickness;
+		float	originalWalkSpeedAdjust;
+		float originalComfortDelta;
+		float	originalKnockBack;
+		float	originalHeadKick;
+		int		originalShakeAmplitude;
+	};
+
+	idMenuScreen_Shell_VR_Safety_Protocols() :
+		options(NULL),
+		btnBack(NULL)
+	{
+	}
+	virtual void				Initialize(idMenuHandler * data);
+	virtual void				Update();
+	virtual void				ShowScreen(const mainMenuTransition_t transitionType);
+	virtual void				HideScreen(const mainMenuTransition_t transitionType);
+	virtual bool				HandleAction(idWidgetAction & action, const idWidgetEvent & event, idMenuWidget * widget, bool forceHandled = false);
+
+private:
+	idMenuWidget_DynamicList *	options;
+	idMenuDataSource_Shell_VR_Safety_Protocols	systemData;
+	idMenuWidget_Button	*		btnBack;
+
+};
 
 
 //*

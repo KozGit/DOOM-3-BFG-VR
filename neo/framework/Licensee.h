@@ -35,11 +35,11 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-#define GAME_NAME						"DOOM 3: BFG VR Edition"		// appears on window titles and errors
+#define GAME_NAME						"DOOM 3 BFG VR: Fully Possessed"		// appears on window titles and errors
 
 // RB: changed home folder so we don't break the savegame of the original game
 // Koz: changed to indicate VR version of game.
-#define SAVE_PATH						"\\id Software\\DOOM 3 BFG VR"
+#define SAVE_PATH						"\\id Software\\DOOM 3 BFG VR Fully Possessed"
 
 #define ENGINE_VERSION					"DOOM 3 BFG VR 1.0.3"	// printed in console
 // RB end
