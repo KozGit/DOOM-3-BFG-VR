@@ -1212,14 +1212,18 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 				oldTalk = talk;
 			}
 		}
-		static bool oldSay[J_SAY_MAX - J_SAY_MIN + 1] = {};
-		for (int i = J_SAY_MIN; i <= J_SAY_MAX; ++i)
+		if (vr_voiceCommands.GetInteger() > 0)
 		{
-			bool say = commonVoice->GetSayButton(i);
-			if (say != oldSay[i- J_SAY_MIN])
+			static bool oldSay[J_SAY_MAX - J_SAY_MIN + 1] = {};
+			int max = vr_voiceCommands.GetInteger() >= 2 ? J_SAY_MAX : J_SAY_PDA;
+			for (int i = J_SAY_MIN; i <= J_SAY_MAX; ++i)
 			{
-				PostInputEvent(inputDeviceNum, i, say);
-				oldSay[i - J_SAY_MIN] = say;
+				bool say = commonVoice->GetSayButton(i) && (i <= max);
+				if (say != oldSay[i - J_SAY_MIN])
+				{
+					PostInputEvent(inputDeviceNum, i, say);
+					oldSay[i - J_SAY_MIN] = say;
+				}
 			}
 		}
 		
