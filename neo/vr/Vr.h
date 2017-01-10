@@ -128,9 +128,6 @@ public:
 	void				NextFlashMode();
 
 	bool				ShouldQuit();
-	void				ForceChaperone(bool force);
-
-	bool				ShouldQuit();
 	void				ForceChaperone(int which, bool force);
 
 	//------------------
