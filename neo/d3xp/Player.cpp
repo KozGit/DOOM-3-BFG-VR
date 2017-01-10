@@ -10042,7 +10042,8 @@ void idPlayer::Move()
 				idMat3 bodyAx = idAngles( bodyAng.pitch, bodyAng.yaw - commonVr->bodyYawOffset, bodyAng.roll ).Normalize180().ToMat3();
 			
 				
-				newBodyOrigin = bodyOrigin + bodyAx[0] * commonVr->poseHmdBodyPositionDelta.x + bodyAx[1] * commonVr->poseHmdBodyPositionDelta.y;
+				newBodyOrigin = bodyOrigin + bodyAx[0] * commonVr->remainingMoveHmdBodyPositionDelta.x + bodyAx[1] * commonVr->remainingMoveHmdBodyPositionDelta.y;
+				commonVr->remainingMoveHmdBodyPositionDelta.x = commonVr->remainingMoveHmdBodyPositionDelta.y = 0;
 				//newBodyOrigin.z = 0.0f;
 			
 				commonVr->motionMoveDelta = newBodyOrigin - bodyOrigin;

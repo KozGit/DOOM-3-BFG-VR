@@ -1764,6 +1764,7 @@ void iVr::FrameStart( void )
 	if ( hasOculusRift )
 	{
 		HMDGetOrientation( poseHmdAngles, poseHmdHeadPositionDelta, poseHmdBodyPositionDelta, poseHmdAbsolutePosition, false );
+		remainingMoveHmdBodyPositionDelta = poseHmdBodyPositionDelta;
 		return;
 	}
 
@@ -1795,6 +1796,7 @@ void iVr::FrameStart( void )
 
 
 	HMDGetOrientation( poseHmdAngles, poseHmdHeadPositionDelta, poseHmdBodyPositionDelta, poseHmdAbsolutePosition, false );
+	remainingMoveHmdBodyPositionDelta = poseHmdBodyPositionDelta;
 	
 	for ( int i = 0; i < 2; i++ )
 	{
