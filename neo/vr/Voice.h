@@ -41,12 +41,16 @@ public:
 	void		VoiceInit(void);
 	void		VoiceShutdown(void);
 	void		Say(VERIFY_FORMAT_STRING const char* fmt, ...);
+	void		HearWord(const char *w);
+	void		HearWord(const wchar_t *w);
 	void		Event(WPARAM wParam, LPARAM lParam);
 	bool		GetTalkButton();
+	bool		GetSayButton(int j);
 
 	//---------------------------
 private:
-
+	void		AddWord(const char* word);
+	void		AddWord(const wchar_t* word);
 };
 
 

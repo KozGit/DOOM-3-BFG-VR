@@ -816,6 +816,10 @@ idSWFScriptVar idSWF::idSWFScriptFunction_shortcutKeys_clear::Call( idSWFScriptO
 	object->Set( "K_L_STEAMVRTRIG", "ENTER" );
 	// Koz end steamvr
 
+  // Carl voice commands
+	//object->Set( "SAY_", "ENTER" );
+	object->Set( "SAY_CANCEL", "BACKSPACE" );
+  
 	object->Set( "KP_ENTER", "ENTER" );
 	object->Set( "MWHEELDOWN", "MWHEEL_DOWN" );
 	object->Set( "MWHEELUP", "MWHEEL_UP" );

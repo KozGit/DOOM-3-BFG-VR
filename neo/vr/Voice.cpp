@@ -5,6 +5,9 @@
 #undef strncmp
 #undef vsnprintf
 #undef _vsnprintf
+#undef StrCmpN
+#undef StrCmpNI
+#undef StrCmpI
 
 #include "Voice.h"
 #include <sapi.h>
@@ -16,8 +19,39 @@ ISpRecognizer *pRecognizer = NULL;
 ISpObjectToken *pObjectToken = NULL;
 ISpRecoContext *pReco = NULL;
 ISpRecoGrammar *pGrammar = NULL;
+SPSTATEHANDLE rule = NULL;
 
 extern iVoice voice;
+
+const char* words[] = {
+	"what can I say",
+	"consecution", "start listening",
+	"consentient", "stop listening",
+	"pause game", "computer, freeze program",
+	"resume game", "unpause game", "computer, resume program", "computer, play program", "computer, run program", "computer, continue program",
+	"exit game", "computer, end program", "computer, exit", "computer, program complete", "computer, cancel program",
+	"hey", "talk", "hello", "goodbye", "greets", "hey dickwad",
+	"menu",
+	"cancel",
+	"reload",
+	"PDA", "personal data assistant",
+	"fist", "fists", "hands",
+	"chainsaw", "beaver tooth", "mixom beaver tooth",
+	"flashlight", "torch",
+	"grabber", "ionized plasma levitator", "IPL unit", "gravity gun",
+	"pistol",
+	"shotgun", "pump action shotgun", "single barreled shotgun",
+	"super shotgun", "double barreled shotgun", "combat shotgun"
+	"machine gun", "MG 88 Enforcer",
+	"chain gun", "UAC Weapons division mach 2 chain gun", "saw",
+	"rocket launcher",
+	"grenades", "grenade",
+	"plasma gun", "plasma rifle",
+	"BFG 9000", "BFG", "bio force gun", "big fucking gun",
+	"soul cube",
+	"the artifact", "artifact", "heart of hell", "blood stone",
+};
+
 
 void __stdcall SpeechCallback(WPARAM wParam, LPARAM lParam)
 {
@@ -33,7 +67,8 @@ iVoice::iVoice()
 {
 }
 
-bool in_phrase = false, spoke = false;
+static bool in_phrase = false, spoke = false, listening = true;
+static bool heard[J_SAY_MAX - J_SAY_MIN + 1] = {};
 
 void MadeASound()
 {
@@ -67,6 +102,161 @@ bool iVoice::GetTalkButton()
 	}
 	return false;
 #endif
+}
+
+bool iVoice::GetSayButton(int j)
+{
+	bool result = heard[j - J_SAY_MIN];
+	heard[j - J_SAY_MIN] = false;
+	return result;
+}
+
+void iVoice::HearWord(const char *w)
+{
+#define ifw(s) if (!strcmp(w, s))
+#define ifw2(s1, s2) if (!strcmp(w, s1) || !strcmp(w, s2))
+#define ifw3(s1, s2, s3) if (!strcmp(w, s1) || !strcmp(w, s2) || !strcmp(w, s3))
+#define ifw4(s1, s2, s3, s4) if (!strcmp(w, s1) || !strcmp(w, s2) || !strcmp(w, s3) || !strcmp(w, s4))
+#define ifw5(s1, s2, s3, s4, s5) if (!strcmp(w, s1) || !strcmp(w, s2) || !strcmp(w, s3) || !strcmp(w, s4) || !strcmp(w, s5))
+#define ifw6(s1, s2, s3, s4, s5, s6) if (!strcmp(w, s1) || !strcmp(w, s2) || !strcmp(w, s3) || !strcmp(w, s4) || !strcmp(w, s5) || !strcmp(w, s6))
+#define elw(s) else ifw(s)
+#define elw2(s1, s2) else ifw2(s1, s2)
+#define elw3(s1, s2, s3) else ifw3(s1, s2, s3)
+#define elw4(s1, s2, s3, s4) else ifw4(s1, s2, s3, s4)
+#define elw5(s1, s2, s3, s4, s5) else ifw5(s1, s2, s3, s4, s5)
+#define elw6(s1, s2, s3, s4, s5, s6) else ifw6(s1, s2, s3, s4, s5, s6)
+
+	ifw("what can I say") {
+		if (!listening)
+		{
+			Say("what can I say, start listening, consekyution");
+		}
+		else
+		{
+			for (int i = 0; i < sizeof(words) / sizeof(words[0]); ++i)
+			{
+				Say("%s,", words[i]);
+			}
+		}
+	}
+	else ifw2("consecution", "start listening") {
+		if (!listening)
+		{
+			listening = true;
+			Say("Stopped listening.");
+		}
+	}
+	else if (listening)
+	{
+		ifw2("consentient", "stop listening") {
+			listening = false;
+			Say("Stopped listening.");
+		}
+		elw2("pause game", "computer, freeze program") {
+			heard[J_SAY_PAUSE - J_SAY_MIN] = true;
+			//Say("Paused.");
+		}
+		elw6("resume game", "unpause game", "computer, resume program", "computer, play program", "computer, run program", "computer, continue program") {
+			heard[J_SAY_RESUME - J_SAY_MIN] = true;
+			//Say("Unpaused.");
+		}
+		elw5("exit game", "computer, end program", "computer, exit", "computer, program complete", "computer, cancel program") {
+			heard[J_SAY_EXIT - J_SAY_MIN] = true;
+			//Say("Exiting.");
+		}
+		elw6("hey", "talk", "hello", "goodbye", "greets", "hey dickwad") {
+			//Say("Greets.");
+		}
+		elw2("menu", "main menu") {
+			heard[J_SAY_MENU - J_SAY_MIN] = true;
+			//Say("Menu.");
+		}
+		elw("cancel") {
+			heard[J_SAY_CANCEL - J_SAY_MIN] = true;
+			//Say("Cancelling.");
+		}
+		elw("reload") {
+			heard[J_SAY_RELOAD - J_SAY_MIN] = true;
+			//Say("Reloading.");
+		}
+		elw2("PDA", "personal data assistant") {
+			heard[J_SAY_PDA - J_SAY_MIN] = true;
+			//Say("PDA.");
+		}
+		elw3("fist", "fists", "hands") {
+			heard[J_SAY_FIST - J_SAY_MIN] = true;
+			//Say("fist.");
+		}
+		elw3("chainsaw", "beaver tooth", "mixom beaver tooth") {
+			heard[J_SAY_CHAINSAW - J_SAY_MIN] = true;
+			//Say("chainsaw.");
+		}
+		elw2("flashlight", "torch") {
+			heard[J_SAY_FLASHLIGHT - J_SAY_MIN] = true;
+			//Say("flashlight.");
+		}
+		elw4("grabber", "ionized plasma levitator", "IPL unit", "gravity gun") {
+			heard[J_SAY_GRABBER - J_SAY_MIN] = true;
+			//Say("grabber.");
+		}
+		elw("pistol") {
+			heard[J_SAY_PISTOL - J_SAY_MIN] = true;
+			//Say("Pistol.");
+		}
+		elw3("shotgun", "pump action shotgun", "single barreled shotgun") {
+			heard[J_SAY_SHOTGUN - J_SAY_MIN] = true;
+			//Say("Shotgun.");
+		}
+		elw3("super shotgun", "double barreled shotgun", "combat shotgun") {
+			heard[J_SAY_SUPER_SHOTGUN - J_SAY_MIN] = true;
+			//Say("Super shotgun.");
+		}
+		elw2("machine gun", "MG 88 Enforcer") {
+			heard[J_SAY_MACHINE_GUN - J_SAY_MIN] = true;
+			//Say("Machine gun.");
+		}
+		elw4("chain gun", "mach 2 chain gun", "UAC Weapons division mach 2 chain gun", "saw") {
+			heard[J_SAY_CHAIN_GUN - J_SAY_MIN] = true;
+			//Say("Chain gun.");
+		}
+		elw("rocket launcher") {
+			heard[J_SAY_ROCKET_LAUNCHER - J_SAY_MIN] = true;
+			//Say("rocket launcher.");
+		}
+		elw2("grenades", "grenade") {
+			heard[J_SAY_GRENADES - J_SAY_MIN] = true;
+			//Say("Grenades.");
+		}
+		elw2("plasma gun", "plasma rifle") {
+			heard[J_SAY_PLASMA_GUN - J_SAY_MIN] = true;
+			//Say("Plasma gun.");
+		}
+		elw4("BFG 9000", "BFG", "bio force gun", "big fucking gun") {
+			heard[J_SAY_BFG - J_SAY_MIN] = true;
+			//Say("BFG 9000.");
+		}
+		elw("soul cube") {
+			heard[J_SAY_SOUL_CUBE - J_SAY_MIN] = true;
+			//Say("soul cube.");
+		}
+		elw4("the artifact", "artifact", "heart of hell", "blood stone") {
+			heard[J_SAY_ARTIFACT - J_SAY_MIN] = true;
+			//Say("the artifact.");
+		}
+		else
+		{
+			//Say("Hear Word is missing %s", w);
+		}
+	}
+
+#undef ifw
+}
+
+void iVoice::HearWord(const wchar_t *w)
+{
+	char buffer[1024];
+	WideCharToMultiByte(CP_ACP, 0, w, -1, buffer, sizeof(buffer) / sizeof(buffer[0]),"'", NULL);
+	HearWord(buffer);
 }
 
 void iVoice::Event(WPARAM wParam, LPARAM lParam)
@@ -106,6 +296,7 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 					wchar_t* text;
 					hr = recoResult->GetText(SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL);
 					//voice.Say("You said %S.", text);
+					HearWord(text);
 
 					CoTaskMemFree(text);
 				}
@@ -184,6 +375,18 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 	}
 }
 
+void iVoice::AddWord(const char* word)
+{
+	wchar_t wbuffer[1024];
+	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, word, -1, wbuffer, sizeof(wbuffer) / sizeof(wbuffer[0]));
+	pGrammar->AddWordTransition(rule, NULL, wbuffer, L" ", SPWT_LEXICAL, 1.0f, NULL);
+}
+
+void iVoice::AddWord(const wchar_t* word)
+{
+	pGrammar->AddWordTransition(rule, NULL, word, L" ", SPWT_LEXICAL, 1.0f, NULL);
+}
+
 
 /*
 ==============
@@ -197,6 +400,7 @@ void iVoice::VoiceInit(void)
 	HRESULT hr = CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void **)&pVoice);
 	if (SUCCEEDED(hr))
 	{
+		pVoice->SetRate(8);
 		common->Printf("\nISpVoice succeeded.\n");
 		//hr = pVoice->Speak(L"Hello world", 0, NULL);
 	}
@@ -227,10 +431,12 @@ void iVoice::VoiceInit(void)
 			if (SUCCEEDED(hr))
 			{
 				//Say("Grammar created.");
-				SPSTATEHANDLE rule;
 				pGrammar->GetRule(L"word", 0, SPRAF_TopLevel | SPRAF_Active, true, &rule);
-				pGrammar->AddWordTransition(rule, NULL, L"hello", L" ", SPWT_LEXICAL, 1.0f, NULL);
-				pGrammar->AddWordTransition(rule, NULL, L"goodbye", L" ", SPWT_LEXICAL, 1.0f, NULL);
+				for (int i = 0; i < sizeof(words) / sizeof(words[0]); ++i)
+				{
+					AddWord(words[i]);
+				}
+
 				hr = pGrammar->Commit(NULL);
 				//if (SUCCEEDED(hr))
 				//	Say("Compiled.");

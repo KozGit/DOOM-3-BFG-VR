@@ -973,9 +973,9 @@ void idJoystickWin32::PostInputEvent( int inputDeviceNum, int event, int value, 
 	{
 		PushButton( inputDeviceNum, K_JOY1 + ( event - J_ACTION1 ), value != 0 );
 	}
-	else if( event == J_TALK )
+	else if( ( event >= J_TALK ) && ( event <= J_SAY_MAX ) )
 	{
-		PushButton( inputDeviceNum, K_TALK, value != 0 );
+		PushButton( inputDeviceNum, K_TALK + ( event - J_TALK ), value != 0 );
 	}
 	else if( event == J_AXIS_LEFT_X )
 	{
@@ -1210,6 +1210,16 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 			{
 				PostInputEvent(inputDeviceNum, J_TALK, talk);
 				oldTalk = talk;
+			}
+		}
+		static bool oldSay[J_SAY_MAX - J_SAY_MIN + 1] = {};
+		for (int i = J_SAY_MIN; i <= J_SAY_MAX; ++i)
+		{
+			bool say = commonVoice->GetSayButton(i);
+			if (say != oldSay[i- J_SAY_MIN])
+			{
+				PostInputEvent(inputDeviceNum, i, say);
+				oldSay[i - J_SAY_MIN] = say;
 			}
 		}
 		
