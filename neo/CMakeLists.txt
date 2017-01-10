@@ -1450,23 +1450,6 @@ if(MSVC)
 		#		POST_BUILD
 		#		COMMAND ${CMAKE_COMMAND} -E copy
 		#		${CMAKE_CURRENT_SOURCE_DIR}/libs/openvr/bin/win32/openvr_api.pdb ${CMAKE_CURRENT_BINARY_DIR}/RelWithDebInfo)
-		# copy Razer Hydra dlls
-		add_custom_command(TARGET Doom3BFGVR
-				POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/bin/win32/release_dll/sixense.dll ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
-		add_custom_command(TARGET Doom3BFGVR
-				POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/bin/win32/release_dll/sixense_utils.dll ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
-		# add_custom_command(TARGET Doom3BFGVR
-		#		POST_BUILD
-		#		COMMAND ${CMAKE_COMMAND} -E copy
-		#		${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/bin/win32/release_dll/sixense.pdb ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-		# add_custom_command(TARGET Doom3BFGVR
-		#		POST_BUILD
-		#		COMMAND ${CMAKE_COMMAND} -E copy
-		#		${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/bin/win32/release_dll/sixense.pdb ${CMAKE_CURRENT_BINARY_DIR}/RelWithDebInfo)
 	else()
 		# copy OpenVR dlls
 		add_custom_command(TARGET Doom3BFGVR
@@ -1481,23 +1464,6 @@ if(MSVC)
 		#		POST_BUILD
 		#		COMMAND ${CMAKE_COMMAND} -E copy
 		#		${CMAKE_CURRENT_SOURCE_DIR}/libs/openvr/bin/win64/openvr_api.pdb ${CMAKE_CURRENT_BINARY_DIR}/RelWithDebInfo)
-		# copy Razer Hydra dlls
-		add_custom_command(TARGET Doom3BFGVR
-				POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/bin/x64/release_dll/sixense.dll ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
-		add_custom_command(TARGET Doom3BFGVR
-				POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/bin/x64/release_dll/sixense_utils.dll ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR})
-		# add_custom_command(TARGET Doom3BFGVR
-		#		POST_BUILD
-		#		COMMAND ${CMAKE_COMMAND} -E copy
-		#		${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/bin/x64/release_dll/sixense.pdb ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-		# add_custom_command(TARGET Doom3BFGVR
-		#		POST_BUILD
-		#		COMMAND ${CMAKE_COMMAND} -E copy
-		#		${CMAKE_CURRENT_SOURCE_DIR}/libs/SixenseSDK_062612/bin/x64/release_dll/sixense.pdb ${CMAKE_CURRENT_BINARY_DIR}/RelWithDebInfo)
 	endif()
 		
 	add_dependencies(Doom3BFGVR idlib)
