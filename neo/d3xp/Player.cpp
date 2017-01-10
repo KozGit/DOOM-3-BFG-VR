@@ -13505,7 +13505,10 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 				// adjustAng += owner->GetViewBobAngles();
 				axis = adjustAng.ToMat3() * axis;
 				flashlight->GetRenderEntity()->allowSurfaceInViewID = -1;
-				flashlight->GetRenderEntity()->suppressShadowInViewID = 0;
+				// Carl: This fixes the flashlight shadow in Mars City 1.
+				// I could check if ( spectating || !weaponEnabled || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
+				// but I don't think an armor-mounted light should ever cast a flashlight-shaped shadow
+				flashlight->GetRenderEntity()->suppressShadowInViewID = entityNumber + 1;
 				setLeftHand = true;
 			}
 	}
