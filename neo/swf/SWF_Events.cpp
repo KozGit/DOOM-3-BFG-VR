@@ -255,10 +255,10 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 
 		/*	koz PDA - if the user is in VR, and the PDA menu is up,
 		he can use head tracking to controll the mouse in the
-		PDA menus.  We need to check for hydra/steamvr buttons/triggers as
+		PDA menus.  We need to check for touch/steamvr buttons/triggers as
 		well as mouse clicks so the user can actually select
-		something with the hydras.
-		Update - I'm an idiot, and the user might not have a hydra,
+		something with the motion controls
+		Update - I'm an idiot, and the user might not have motion controls,
 		and still want to select something with a controller,
 		so add some controller buttons too.
 		*/
@@ -267,8 +267,8 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 			
 		if (  event->evValue == K_MOUSE1
 				|| ( commonVr->scanningPDA && (
-				   event->evValue == K_L_TOUCHTRIG 	// koz hydra left trigger
-				|| event->evValue == K_R_TOUCHTRIG 	// koz hydra right trigger
+				   event->evValue == K_L_TOUCHTRIG 	
+				|| event->evValue == K_R_TOUCHTRIG 	
 				|| event->evValue == K_JOY_TRIGGER1
 				|| event->evValue == K_JOY_TRIGGER2
 				|| event->evValue == K_L_STEAMVRTRIG
@@ -358,7 +358,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				}
 			}
 
-			//return false; // koz fixme hydra this was just a return, but let hydra key events fall through
+			//return false; // koz fixme this was just a return, but let motion control key events fall through
 
 		}
 
@@ -366,7 +366,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 		/* ==================================
 		koz some serious ugly here.  By default, the PDA menu uses both joysticks for
 		navigation - left stick for user info and right stick to select an item from a submenu.
-		I don't think this works well with the hydras, or when using a gun style controller
+		I don't think this works well with the motion controls, or when using a gun style controller
 		like the top shot elite. I'm implementing a hack here so the user can A: use either
 		joystick for menu navigation and B: 'switch' which list in the PDA is being navigated
 		by moving the stick left or right.  This will be handled here, by intercepting the
@@ -390,7 +390,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 												K_STEAMVR_RIGHT_PAD_LEFT, K_STEAMVR_LEFT_PAD_LEFT,
 												K_STEAMVR_RIGHT_PAD_RIGHT, K_STEAMVR_LEFT_PAD_RIGHT
 
-											}; // will map right stick and right hydra stick to left sticks for nav 
+											}; // will map right sticks to left sticks for nav 
 
 
 		const int rightStick = 0;
