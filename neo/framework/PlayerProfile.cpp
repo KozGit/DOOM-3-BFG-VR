@@ -447,8 +447,27 @@ void idPlayerProfile::ExecConfig( bool save, bool forceDefault )
 	
 	if ( game->isVR )
 	{
-		cmdSystem->AppendCommandText( "exec vr_default.cfg\n" );
-		cmdSystem->AppendCommandText( "exec vr.cfg\n" );
+		//cmdSystem->AppendCommandText( "exec vr_default.cfg\n" );
+		//cmdSystem->AppendCommandText( "exec vr.cfg\n" );
+
+		if ( commonVr->hasOculusRift )
+		{
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_oculus_default.cfg\n" );
+		}
+		else if ( commonVr->hasHMD )
+		{
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_openvr_default.cfg\n" );
+		}
+
+		if ( commonVr->hasOculusRift )
+		{
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_oculus.cfg\n" );
+		}
+		else if ( commonVr->hasHMD )
+		{
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_openvr.cfg\n" );
+		}
+		
 	}
 
 	// Carl talking should always be bound to _talk

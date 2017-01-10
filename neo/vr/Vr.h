@@ -48,7 +48,6 @@ If you have questions concerning this license or the applicable additional terms
 typedef enum
 {
 	MOTION_NONE,
-	MOTION_HYDRA,
 	MOTION_STEAMVR,
 	MOTION_OCULUS
 } vr_motionControl_t;
@@ -220,6 +219,7 @@ public:
 
 	vr::VRControllerState_t pControllerStateL;
 	vr::VRControllerState_t pControllerStateR;
+	
 	vr::TrackedDeviceIndex_t leftControllerDeviceNo;
 	vr::TrackedDeviceIndex_t rightControllerDeviceNo;
 		
@@ -355,8 +355,6 @@ private:
 
 #endif
 
-//koz g_gun cvars allow tweaking of gun position when aiming with hydra
-
 extern idCVar	vr_vignette;
 extern idCVar	vr_scale;
 extern idCVar	vr_useOculusProfile;
@@ -364,7 +362,6 @@ extern idCVar	vr_manualIPDEnable;
 extern idCVar	vr_manualIPD;
 extern idCVar	vr_manualHeight;
 
-//extern idCVar	vr_showBody;
 extern idCVar	vr_viewModelArms;
 extern idCVar	vr_wristStatMon;
 extern idCVar	vr_disableWeaponAnimation;

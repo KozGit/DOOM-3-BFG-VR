@@ -435,7 +435,14 @@ void idCommonLocal::WriteConfiguration()
 	// Koz begin
 	if ( game->isVR ) 
 	{
-		WriteConfigToFile( "vr.cfg" );
+		if ( commonVr->hasOculusRift )
+		{
+			WriteConfigToFile( "vr_oculus.cfg" );
+		}
+		else
+		{
+			WriteConfigToFile( "vr_openvr.cfg" );
+		}
 	}
 	else
 	// Koz end
@@ -1288,14 +1295,26 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec autoexec.cfg\n" );
 		
 		// Koz begin
-		if ( commonVr->hasHMD )
+		if ( commonVr->hasOculusRift )
 		{
-			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_default.cfg\n" );
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_oculus_default.cfg\n" );
 		}
+		else if ( commonVr->hasHMD )
+		{
+			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_openvr_default.cfg\n" );
+		}
+
 
 		if ( !SafeMode() && !g_demoMode.GetBool() )
 		{
-			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr.cfg\n" );
+			if ( commonVr->hasOculusRift )
+			{
+				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_oculus.cfg\n" );
+			}
+			else if ( commonVr->hasHMD )
+			{
+				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_openvr.cfg\n" );
+			}
 		}
 
 		// Koz end

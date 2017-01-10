@@ -1254,7 +1254,7 @@ idUsercmdGenLocal::JoystickMove2
 void idUsercmdGenLocal::JoystickMove2()
 {
 	// Koz - joystick handling changed to allow all axes to be mapped to any movement/look control independently,
-	// including the hydras.  No need for stick swapping or inversion - just remap.
+	// including touch/openvr.  No need for stick swapping or inversion - just remap.
 
 	// koz const bool invertLook =			in_invertLook.GetBool(); dont need anymore remap instead.
 
@@ -1318,13 +1318,12 @@ void idUsercmdGenLocal::JoystickMove2()
 	HandleJoystickAxis( K_JOY_TRIGGER1, joystickAxis[AXIS_LEFT_TRIG], triggerThreshold, true );
 	HandleJoystickAxis( K_JOY_TRIGGER2, joystickAxis[AXIS_RIGHT_TRIG], triggerThreshold, true );
 
-	// Koz hydra -------------------do this again with the touch
+	// Koz vr input -------------------do this again with the touch
 
 	if ( commonVr->motionControlType == MOTION_OCULUS ) 
 	{
 		comfortTurn = 0.0;
-		static bool lastComfortHydra = false;
-
+		
 		mappedMove = vec2_zero;
 		mappedLook = vec2_zero;
 
@@ -2028,10 +2027,10 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 				int joyButton = K_JOY_DPAD_UP + ( action - J_DPAD_UP );
 				Key( joyButton, ( value != 0 ) );
 			}
-			else if (action >= J_TALK && action <= J_SAY_MAX)
+			else if ( action >= J_TALK && action <= J_SAY_MAX )
 			{
 				int joyButton = K_TALK + (action - J_TALK);
-				Key(joyButton, (value != 0));
+				Key( joyButton, (value != 0) );
 			}
 			else
 			{

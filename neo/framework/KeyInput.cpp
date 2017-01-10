@@ -235,7 +235,7 @@ keyname_t keynames[] =
 	NAMEKEY( JOY15, "#str_07076" ),
 	NAMEKEY( JOY16, "#str_07077" ),
 		
-	//Koz :  begin add hydra defs 
+	//Koz :  begin add touch defs 
 	NAMEKEY( JOY17, "L_TOUCHX" ),
 	NAMEKEY( JOY18, "L_TOUCHY" ),
 	NAMEKEY( JOY19, "L_TOUCHM" ),
