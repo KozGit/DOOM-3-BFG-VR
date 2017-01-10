@@ -179,12 +179,7 @@ __________________________________________________________
 
 9. Extract the FFmpeg DLLs to your current build directory under DOOM-3-BFG/build/
 
-10. Copy DOOM-3-BFG\neo\libs\openvr\bin\win32\openvr_api.dll
-	or
-	DOOM-3-BFG\neo\libs\openvr\bin\win64\openvr_api.dll
-	to your current build directory
-
-11. In Visual Studio, right click project Doom3BFGVR, click Properties. Set Configuration to All Configurations. Choose Debugging, set Command Arguments to:
+10. In Visual Studio, right click project Doom3BFGVR, click Properties. Set Configuration to All Configurations. Choose Debugging, set Command Arguments to:
 	+set fs_basepath "C:\Program Files (x86)\Steam\steamapps\common\DOOM 3 BFG Edition"
 	or wherever you installed Doom 3 BFG edition
 __________________________________
