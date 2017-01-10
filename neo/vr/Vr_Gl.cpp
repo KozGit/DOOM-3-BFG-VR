@@ -586,11 +586,18 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		
 			//common->Printf( "Frame Submitting frame # %d\n", idLib::frameNumber );
 			ovrResult result = ovr_SubmitFrame( hmdSession, idLib::frameNumber , &viewScaleDesc, &layers, 1 );
-			if ( result != ovrSuccess )
+			if (result == ovrSuccess_NotVisible)
 			{
-				//common->Warning( "Vr_GL.cpp HMDRender : Failed to submit oculus layer. (result %d) \n", result );
 			}
-		
+			else if (result == ovrError_DisplayLost)
+			{
+				common->Warning( "Vr_GL.cpp HMDRender : Display Lost when submitting oculus layer.\n" );
+			}
+			else if (OVR_FAILURE(result))
+			{
+				common->Warning( "Vr_GL.cpp HMDRender : Failed to submit oculus layer. (result %d) \n", result );
+			}
+
 			if ( vr_stereoMirror.GetBool() == true )
 			{
 				// Blit mirror texture to back buffer
@@ -665,11 +672,11 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		}
 
 	}
-	else
+	else // openVR
 	{
-		vr::Texture_t leftEyeTexture = { (void*)leftCurrent->GetTexNum(), vr::API_OpenGL, vr::ColorSpace_Gamma };
+		vr::Texture_t leftEyeTexture = { (void*)leftCurrent->GetTexNum(), vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 		vr::VRCompositor()->Submit( vr::Eye_Left, &leftEyeTexture );
-		vr::Texture_t rightEyeTexture = { (void*)rightCurrent->GetTexNum(), vr::API_OpenGL, vr::ColorSpace_Gamma };
+		vr::Texture_t rightEyeTexture = { (void*)rightCurrent->GetTexNum(), vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 		vr::VRCompositor()->Submit( vr::Eye_Right, &rightEyeTexture );
 		
 		wglSwapIntervalEXT( 0 ); //

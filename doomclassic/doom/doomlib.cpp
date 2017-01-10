@@ -277,6 +277,20 @@ void DoomLib::InitControlRemap() {
 	classicRemap[K_JOY_DPAD_RIGHT] = K_RIGHTARROW ;	
 	classicRemap[K_JOY1] = K_ENTER;
 
+	classicRemap[K_JOY17] = K_TAB;
+	classicRemap[K_JOY18] = K_TAB;
+	classicRemap[K_JOY19] = K_ESCAPE;
+	classicRemap[K_JOY24] = K_ENTER;
+	classicRemap[K_JOY25] = K_BACKSPACE;
+	classicRemap[K_TOUCH_LEFT_STICK_UP] = K_UPARROW;
+	classicRemap[K_TOUCH_LEFT_STICK_DOWN] = K_DOWNARROW;
+	classicRemap[K_TOUCH_LEFT_STICK_LEFT] = K_LEFTARROW;
+	classicRemap[K_TOUCH_LEFT_STICK_RIGHT] = K_RIGHTARROW;
+
+	classicRemap[K_SAY_CANCEL] = K_BACKSPACE;
+	classicRemap[K_SAY_RESUME] = K_BACKSPACE;
+	classicRemap[K_SAY_PAUSE] = K_ESCAPE;
+	classicRemap[K_SAY_PDA] = K_TAB;
 
 }
 
@@ -286,7 +300,7 @@ keyNum_t DoomLib::RemapControl( keyNum_t key ) {
 		return key;
 	} else {
 
-		if( ::g->menuactive && key == K_JOY2 ) {
+		if( ::g->menuactive && ( key == K_JOY2 || key == K_JOY18 ) ) {
 			return K_BACKSPACE;
 		}
 

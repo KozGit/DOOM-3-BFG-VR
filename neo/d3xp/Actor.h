@@ -219,6 +219,10 @@ public:
 protected:
 	friend class			idAnimState;
 	
+	// Carl: navigation (originally in AI.h)
+	idAAS* 					aas;
+	int						travelFlags;
+
 	float					fovDot;				// cos( fovDegrees )
 	idVec3					eyeOffset;			// offset of eye relative to physics origin
 	idVec3					modelOffset;		// offset of visual model relative to the physics origin
@@ -295,8 +299,10 @@ private:
 	void					SyncAnimChannels( int channel, int syncToChannel, int blendFrames );
 	void					FinishSetup();
 	void					SetupHead();
+public:
 	void					PlayFootStepSound();
 	
+private:
 	void					Event_EnableEyeFocus();
 	void					Event_DisableEyeFocus();
 	void					Event_Footstep();

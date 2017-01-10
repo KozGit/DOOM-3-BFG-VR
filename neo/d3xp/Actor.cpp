@@ -463,6 +463,9 @@ idActor::idActor
 */
 idActor::idActor()
 {
+	aas = NULL;
+	travelFlags = TFL_WALK | TFL_AIR;
+
 	viewAxis.Identity();
 	
 	scriptThread		= NULL;		// initialized by ConstructScriptObject, which is called by idEntity::Spawn
