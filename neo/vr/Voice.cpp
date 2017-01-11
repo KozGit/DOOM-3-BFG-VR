@@ -36,18 +36,18 @@ const char* words[] = {
 	"reload",
 	"PDA", "personal data assistant",
 	"fist", "fists", "hands",
-	"chainsaw", "beaver tooth", "mixom beaver tooth",
+	"chainsaw", "beaver tooth", "beaver tooth chainsaw", "mixom beaver tooth", "mixom beaver tooth chainsaw",
 	"flashlight", "torch",
 	"grabber", "ionized plasma levitator", "IPL unit", "gravity gun",
 	"pistol",
 	"shotgun", "pump action shotgun", "single barreled shotgun",
-	"super shotgun", "double barreled shotgun", "combat shotgun"
-	"machine gun", "MG 88 Enforcer",
-	"chain gun", "UAC Weapons division mach 2 chain gun", "saw",
+	"super shotgun", "double barreled shotgun", "combat shotgun",
+	"machine gun", "enforcer", "M G 88", "M G 88 enforcer", "M G",
+	"chain gun", "mach 2 chain gun", "UAC Weapons division mach 2 chain gun", "saw", "mini gun", "gatling gun",
 	"rocket launcher",
 	"grenades", "grenade",
 	"plasma gun", "plasma rifle",
-	"BFG 9000", "BFG", "bio force gun", "big fucking gun",
+	"BFG 9000", "BFG", "bio force gun", "big fucking gun", "big fragging gun", "big freaking gun",
 	"soul cube",
 	"the artifact", "artifact", "heart of hell", "blood stone",
 };
@@ -111,7 +111,7 @@ bool iVoice::GetSayButton(int j)
 	return result;
 }
 
-void iVoice::HearWord(const char *w)
+void iVoice::HearWord(const char *w, int confidence)
 {
 #define ifw(s) if (!strcmp(w, s))
 #define ifw2(s1, s2) if (!strcmp(w, s1) || !strcmp(w, s2))
@@ -146,7 +146,7 @@ void iVoice::HearWord(const char *w)
 			Say("Stopped listening.");
 		}
 	}
-	else if (listening)
+	else if (listening && confidence >= SP_NORMAL_CONFIDENCE)
 	{
 		ifw2("consentient", "stop listening") {
 			listening = false;
@@ -187,7 +187,7 @@ void iVoice::HearWord(const char *w)
 			heard[J_SAY_FIST - J_SAY_MIN] = true;
 			//Say("fist.");
 		}
-		elw3("chainsaw", "beaver tooth", "mixom beaver tooth") {
+		elw5("chainsaw", "beaver tooth", "beaver tooth chainsaw", "mixom beaver tooth", "mixom beaver tooth chainsaw") {
 			heard[J_SAY_CHAINSAW - J_SAY_MIN] = true;
 			//Say("chainsaw.");
 		}
@@ -211,11 +211,11 @@ void iVoice::HearWord(const char *w)
 			heard[J_SAY_SUPER_SHOTGUN - J_SAY_MIN] = true;
 			//Say("Super shotgun.");
 		}
-		elw2("machine gun", "MG 88 Enforcer") {
+		elw5("machine gun", "enforcer", "M G 88", "M G 88 enforcer", "M G") {
 			heard[J_SAY_MACHINE_GUN - J_SAY_MIN] = true;
 			//Say("Machine gun.");
 		}
-		elw4("chain gun", "mach 2 chain gun", "UAC Weapons division mach 2 chain gun", "saw") {
+		elw6("chain gun", "mach 2 chain gun", "UAC Weapons division mach 2 chain gun", "saw", "mini gun", "gatling gun") {
 			heard[J_SAY_CHAIN_GUN - J_SAY_MIN] = true;
 			//Say("Chain gun.");
 		}
@@ -231,7 +231,7 @@ void iVoice::HearWord(const char *w)
 			heard[J_SAY_PLASMA_GUN - J_SAY_MIN] = true;
 			//Say("Plasma gun.");
 		}
-		elw4("BFG 9000", "BFG", "bio force gun", "big fucking gun") {
+		elw6("BFG 9000", "BFG", "bio force gun", "big fucking gun", "big fragging gun", "big freaking gun") {
 			heard[J_SAY_BFG - J_SAY_MIN] = true;
 			//Say("BFG 9000.");
 		}
@@ -252,11 +252,11 @@ void iVoice::HearWord(const char *w)
 #undef ifw
 }
 
-void iVoice::HearWord(const wchar_t *w)
+void iVoice::HearWord(const wchar_t *w, int confidence)
 {
 	char buffer[1024];
 	WideCharToMultiByte(CP_ACP, 0, w, -1, buffer, sizeof(buffer) / sizeof(buffer[0]),"'", NULL);
-	HearWord(buffer);
+	HearWord(buffer, confidence);
 }
 
 void iVoice::Event(WPARAM wParam, LPARAM lParam)
@@ -294,11 +294,19 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 				if (recoResult)
 				{
 					wchar_t* text;
+					SPPHRASE* pPhrase = NULL;
+					hr = recoResult->GetPhrase(&pPhrase);
+					int confidence = 0;
+					if SUCCEEDED(hr) {
+						confidence = pPhrase->Rule.Confidence; // -1, 0, or 1
+					}
+					const char* confidences[3] = { "low", "medium", "high" };
 					hr = recoResult->GetText(SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL);
-					//voice.Say("You said %S.", text);
-					HearWord(text);
+					//voice.Say("%s: You said %S.", confidences[confidence + 1], text);
+					HearWord(text, confidence);
 
 					CoTaskMemFree(text);
+					CoTaskMemFree(pPhrase);
 				}
 				in_phrase = false;
 				break;
