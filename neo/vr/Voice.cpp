@@ -127,29 +127,41 @@ void iVoice::HearWord(const char *w, int confidence)
 #define elw6(s1, s2, s3, s4, s5, s6) else ifw6(s1, s2, s3, s4, s5, s6)
 
 	ifw("what can I say") {
+		Speed(4);
+		if (vr_talkMode.GetInteger() > 0)
+			Say("You can say anything to NPC's.");
 		if (!listening)
 		{
-			Say("what can I say, start listening, consekyution");
+			Say("You can say: what can I say, or start listening.");
 		}
 		else
 		{
-			for (int i = 0; i < sizeof(words) / sizeof(words[0]); ++i)
-			{
-				Say("%s,", words[i]);
-			}
+			if (vr_voiceCommands.GetInteger() > 2)
+				Say("You can use voice commands, weapon names, or holodeck commands.");
+			else if (vr_voiceCommands.GetInteger() == 1)
+				Say("You can use voice commands or holodeck commands.");
+			Speed(6);
+			Say("You can say: What can I say, stop listening, start listening.");
+			Speed(7);
+			if (vr_voiceCommands.GetInteger() >= 1)
+				Say("pause game, resume game, exit game, menu, cancel, PDA.");
+			if (vr_voiceCommands.GetInteger() >= 2)
+				Say("reload, flashlight, fists, chainsaw, grabber, pistol, shotgun, super shotgun, machine gun, chain gun, rocket launcher, grenades, plasma gun, BFG 9000, soul cube, the artifact.");
 		}
 	}
 	else ifw2("consecution", "start listening") {
 		if (!listening)
 		{
 			listening = true;
-			Say("Stopped listening.");
+			Speed(5);
+			Say("Started listening.");
 		}
 	}
 	else if (listening && confidence >= SP_NORMAL_CONFIDENCE)
 	{
 		ifw2("consentient", "stop listening") {
 			listening = false;
+			Speed(5);
 			Say("Stopped listening.");
 		}
 		elw2("pause game", "computer, freeze program") {
@@ -408,7 +420,7 @@ void iVoice::VoiceInit(void)
 	HRESULT hr = CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void **)&pVoice);
 	if (SUCCEEDED(hr))
 	{
-		pVoice->SetRate(8);
+		Speed(7);
 		common->Printf("\nISpVoice succeeded.\n");
 		//hr = pVoice->Speak(L"Hello world", 0, NULL);
 	}
@@ -487,6 +499,12 @@ void iVoice::VoiceShutdown(void)
 		pVoice->Release();
 		pVoice = NULL;
 	}
+}
+
+// speed must be -10 to 10
+void iVoice::Speed(int talkingSpeed)
+{
+	pVoice->SetRate(talkingSpeed);
 }
 
 void iVoice::Say(VERIFY_FORMAT_STRING const char* fmt, ...)

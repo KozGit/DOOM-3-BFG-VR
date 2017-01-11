@@ -40,6 +40,7 @@ public:
 
 	void		VoiceInit(void);
 	void		VoiceShutdown(void);
+	void		Speed(int talkingSpeed);
 	void		Say(VERIFY_FORMAT_STRING const char* fmt, ...);
 	void		HearWord(const char *w, int confidence);
 	void		HearWord(const wchar_t *w, int confidence);
