@@ -433,7 +433,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			
 				if ( commonVr->playerDead || (game->Shell_IsActive() && !commonVr->PDAforced && !commonVr->PDAforcetoggle ) || (!commonVr->PDAforced && common->Dialog().IsDialogActive() ) ) 
 				{
-					commonVr->HMDTrackStatic();
+					commonVr->HMDTrackStatic( !commonVr->showingIntroVideo && session->GetState() != idSession::LOADING );
 					
 				}
 				else

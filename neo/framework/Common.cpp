@@ -1279,6 +1279,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		
 		// Koz
 		commonVr->HMDInit(); // Koz init the HMD.
+		commonVr->showingIntroVideo = true;
 				
 		// exec the startup scripts
 		cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec default.cfg\n" );
@@ -1524,7 +1525,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 				{
 					commonVr->FrameStart();
 					idLib::frameNumber++;
-					commonVr->HMDTrackStatic();
+					commonVr->HMDTrackStatic( false );
 				}
 			}
 			else
@@ -1548,7 +1549,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 				{
 					commonVr->FrameStart();
 					idLib::frameNumber++;
-					commonVr->HMDTrackStatic();
+					commonVr->HMDTrackStatic( false );
 				}
 
 				Sys_GenerateEvents();
