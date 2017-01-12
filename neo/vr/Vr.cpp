@@ -180,7 +180,7 @@ idCVar vr_APISelect( "vr_APISelect", "0", CVAR_INTEGER | CVAR_ARCHIVE, "VR API S
 // Koz end
 // Carl
 idCVar vr_teleport( "vr_teleport", "1", CVAR_INTEGER | CVAR_ARCHIVE, "Player can teleport at will. 0 = disabled, 1 = like walking, 2 = like teleporting", 0, 2 );
-idCVar vr_motionSickness( "vr_motionSickness", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Motion sickness prevention mode. 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Third Person, 6 = Particles, 7 = Particles & Chaperone", 0, 7 );
+idCVar vr_motionSickness( "vr_motionSickness", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Motion sickness prevention aids. 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Third Person, 6 = Particles, 7 = Particles & Chaperone", 0, 7 );
 idCVar vr_chaperone( "vr_chaperone", "2", CVAR_INTEGER | CVAR_ARCHIVE, "Chaperone/Guardian mode. 0 = when near, 1 = when throwing, 2 = when melee, 3 = when dodging, 4 = always", 0, 4 );
 idCVar vr_chaperoneColor( "vr_chaperoneColor", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Chaperone colour. 0 = default, 1 = black, 2 = grey, 3 = white, 4 = red, 5 = green, 6 = blue, 7 = yellow, 8 = cyan, 9 = magenta, 10 = purple", 0, 10 );
 
@@ -1852,16 +1852,12 @@ bool iVr::ShouldQuit()
 	return false;
 }
 
-/*
+
 void iVr::ForceChaperone(int which, bool force)
 {
 	static bool chaperones[2] = {};
 	chaperones[which] = force;
 	force = chaperones[0] || chaperones[1];
-=======
-*/
-void iVr::ForceChaperone(bool force)
-{
 
 	if (hasOculusRift)
 	{

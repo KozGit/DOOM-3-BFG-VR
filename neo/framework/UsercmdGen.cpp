@@ -1378,7 +1378,7 @@ void idUsercmdGenLocal::JoystickMove2()
 		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_STEAMVR_X );
 		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_STEAMVR_Y );
 
-		//if ( comfortTurn != 0.0 && !lastComfortSteamVr )
+		//common->Printf( "Openvr mappedmove x %f y %f mappedLook x %f y %f : time %d\n", mappedMove.x, mappedMove.y, mappedLook.x, mappedLook.y, Sys_Milliseconds() );
 		if ( comfortTurn != 0.0 && ( Sys_Milliseconds() - lastComfortTimeSteamVr >= vr_comfortRepeat.GetInteger()) )
 		{
 			viewangles[YAW] += comfortTurn;
@@ -1390,6 +1390,7 @@ void idUsercmdGenLocal::JoystickMove2()
 		{
 			leftMapped = JoypadFunction( mappedMove, 1.0f, threshold, range, shape, mergedThreshold );
 			rightMapped = JoypadFunction( mappedLook, aimAssist, threshold, range, shape, mergedThreshold );
+			//common->Printf( "Openvr leftMapped x %f y %f rightMapped x %f y %f : time %d\n", leftMapped.x, leftMapped.y, rightMapped.x, rightMapped.y, Sys_Milliseconds() );
 		}
 		
 		CircleToSquare( leftMapped.x, leftMapped.y );
@@ -1483,13 +1484,9 @@ void idUsercmdGenLocal::CmdButtons()
 	{
 		cmd.buttons |= BUTTON_CROUCH;
 	}
-
 	
-	//koz begin crouch in game by crouching in real life
-	
-	//commonVr->HMDGetOrientation( hmdAng, headDelta, bodyDelta, absolute, false );
-
-	if ( commonVr->poseHmdHeadPositionDelta.z < -vr_crouchTriggerDist.GetFloat() ) cmd.buttons |= BUTTON_CROUCH;
+	//koz begin crouch trigger
+	if ( commonVr->poseHmdHeadPositionDelta.z < -vr_crouchTriggerDist.GetFloat() && vr_crouchMode.GetInteger() == 1 ) cmd.buttons |= BUTTON_CROUCH;
 	
 }
 

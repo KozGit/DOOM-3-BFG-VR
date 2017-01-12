@@ -773,7 +773,6 @@ void idCommonLocal::ExecuteMapChange()
 	vr_weaponSight.SetModified();
 	// koz end
 
-
 }
 
 /*

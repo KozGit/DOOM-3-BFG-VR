@@ -792,19 +792,19 @@ idSWFScriptVar idSWF::idSWFScriptFunction_shortcutKeys_clear::Call( idSWFScriptO
 	// Koz end touch
 	
 	// Koz add SteamVR controller aliases
-	object->Set( "JOY33", "ENTER" );		// Left openvr trig
-	object->Set( "JOY32", "BACKSPACE" );	// Left openvr grip
-	object->Set( "JOY31", "LB" );			// Left openvr app = left bumper PDA nav
-	object->Set( "JOY34", "RB" );			// Left openvr pad = right bumper PDA nav
+	object->Set( "JOY40", "ENTER" );		// Left openvr trig
+	object->Set( "JOY33", "BACKSPACE" );	// Left openvr grip
+	object->Set( "JOY32", "LB" );			// Left openvr app = left bumper PDA nav
+	object->Set( "JOY39", "RB" );			// Left openvr pad = right bumper PDA nav
 	object->Set( "STEAMVR_LEFT_PAD_UP", "STICK1_UP" );
 	object->Set( "STEAMVR_LEFT_PAD_DOWN", "STICK1_DOWN" );
 	object->Set( "STEAMVR_LEFT_PAD_LEFT", "STICK1_LEFT" );
 	object->Set( "STEAMVR_LEFT_PAD_RIGHT", "STICK1_RIGHT" );
 
-	object->Set( "JOY37", "ENTER" );		// Right openvr trig
-	object->Set( "JOY36", "BACKSPACE" );	// Right openvr grip
-	object->Set( "JOY35", "LB" );			// Right openvr app = left bumper PDA nav
-	object->Set( "JOY38", "RB" );			// Right openvr pad = right bumper PDA nav
+	object->Set( "JOY58", "ENTER" );		// Right openvr trig
+	object->Set( "JOY51", "BACKSPACE" );	// Right openvr grip
+	object->Set( "JOY50", "LB" );			// Right openvr app = left bumper PDA nav
+	object->Set( "JOY57", "RB" );			// Right openvr pad = right bumper PDA nav
 	object->Set( "STEAMVR_RIGHT_PAD_UP", "STICK2_UP" );
 	object->Set( "STEAMVR_RIGHT_PAD_DOWN", "STICK2_DOWN" );
 	object->Set( "STEAMVR_RIGHT_PAD_LEFT", "STICK2_LEFT" );

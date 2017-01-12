@@ -143,7 +143,7 @@ void iVoice::HearWord(const char *w)
 		if (!listening)
 		{
 			listening = true;
-			Say("Stopped listening.");
+			Say("Started listening.");
 		}
 	}
 	else if (listening)
