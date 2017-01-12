@@ -8294,7 +8294,10 @@ void idPlayer::BobCycle( const idVec3& pushVelocity )
 	deltaTime = gameLocal.time - stepUpTime;
 	if( deltaTime < STEPUP_TIME )
 	{
-		viewBob += gravity * ( stepUpDelta * ( STEPUP_TIME - deltaTime ) / STEPUP_TIME );
+		if ( game->isVR )
+			viewBob += gravity * vr_stepSmooth.GetFloat() * ( stepUpDelta * ( STEPUP_TIME - deltaTime ) / STEPUP_TIME );
+		else
+			viewBob += gravity * ( stepUpDelta * ( STEPUP_TIME - deltaTime ) / STEPUP_TIME );
 	}
 	
 	// add bob height after any movement smoothing
@@ -8310,13 +8313,19 @@ void idPlayer::BobCycle( const idVec3& pushVelocity )
 	if( delta < LAND_DEFLECT_TIME )
 	{
 		f = delta / LAND_DEFLECT_TIME;
-		viewBob -= gravity * ( landChange * f );
+		if ( game->isVR )
+			viewBob -= gravity * vr_jumpBounce.GetFloat() * ( landChange * f );
+		else
+			viewBob -= gravity * ( landChange * f );
 	}
 	else if( delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME )
 	{
 		delta -= LAND_DEFLECT_TIME;
 		f = 1.0 - ( delta / LAND_RETURN_TIME );
-		viewBob -= gravity * ( landChange * f );
+		if ( game->isVR )
+			viewBob -= gravity * vr_jumpBounce.GetFloat() * ( landChange * f );
+		else
+			viewBob -= gravity * ( landChange * f );
 	}
 }
 

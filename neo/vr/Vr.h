@@ -474,6 +474,8 @@ extern idCVar	vr_offHandPosZ;
 extern idCVar	vr_padDeadzone;
 extern idCVar	vr_padToButtonThreshold;
 extern idCVar	vr_knockBack;
+extern idCVar	vr_jumpBounce;
+extern idCVar	vr_stepSmooth;
 
 extern idCVar	vr_mountedWeaponController;
 extern idCVar	vr_walkSpeedAdjust;
