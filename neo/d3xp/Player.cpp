@@ -10195,26 +10195,6 @@ void idPlayer::Move()
 		newEyeOffset = pm_normalviewheight.GetFloat();
 	}
 
-	float distance = ((after - before) - commonVr->motionMoveDelta).LengthSqr();
-	float crouchDistance = newEyeOffset - EyeHeight();
-	distance += crouchDistance * crouchDistance;
-	if (distance > 0.005f) {
-		// artificial locomotion
-		// 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Third Person, 6 = Particles, 7 = Particles & Chaperone
-		int fix = vr_motionSickness.GetInteger();
-		if (fix == 3 || fix == 4)
-			playerView.Flash( colorBlack, 200 );
-		if (fix == 1 || fix == 4 || fix == 7)
-			commonVr->ForceChaperone( 1, true );
-	}
-	else
-	{
-		// no artificial locomotion
-		int fix = vr_motionSickness.GetInteger();
-		if ( fix == 1 || fix == 4 || fix == 7 )
-			commonVr->ForceChaperone( 1, false );
-	}
-
 	if( EyeHeight() != newEyeOffset )
 	{
 		if( spectating )
@@ -10292,6 +10272,11 @@ void idPlayer::Move()
 	}
 	
 	BobCycle( pushVelocity );
+	// Carl: Motion sickness detection
+	float distance = ((after - before) - commonVr->motionMoveDelta).LengthSqr();
+	float crouchDistance = newEyeOffset - EyeHeight();
+	distance += crouchDistance * crouchDistance + viewBob.LengthSqr();
+	blink = (distance > 0.005f);
 	CrashLand( oldOrigin, oldVelocity );
 }
 

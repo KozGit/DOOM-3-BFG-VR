@@ -917,10 +917,15 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 	{
 		SingleView( view, hudManager );
 	}
-	if( vr_blink.GetFloat() > 0.f && player->ShouldBlink() )
+
+	// Carl: Motion sickness aids for artificial locomotion
+	// 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Third Person, 6 = Particles, 7 = Particles & Chaperone
+	int fix = vr_motionSickness.GetInteger();
+	commonVr->ForceChaperone( 1, player->ShouldBlink() && ( fix == 1 || fix == 4 || fix == 7 ) );
+	if( vr_blink.GetFloat() > 0.f && player->ShouldBlink() && (fix == 3 || fix == 4) )
 	{
 		Fade(idVec4(0,0,0,vr_blink.GetFloat()), 0);
-		Fade(idVec4(0,0,0,0), 33);
+		Fade(idVec4(0,0,0,0), 200);
 	}
 	ScreenFade();
 }
