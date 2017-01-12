@@ -9189,9 +9189,18 @@ void idPlayer::PerformImpulse( int impulse )
 			// teleport
 			if (aimValidForTeleport)
 			{
-				playerView.Flash( colorBlack, 140 );
-				Teleport(aimPoint, viewAngles, NULL);
-				PlayFootStepSound();
+				aimValidForTeleport = false;
+				int t = vr_teleport.GetInteger();
+				if (t > 0)
+				{
+					if (t == 1)
+						playerView.Flash(colorBlack, 140);
+					else
+						playerView.Flash(colorWhite, 140);
+					Teleport(aimPoint, viewAngles, NULL);
+					if (t == 1)
+						PlayFootStepSound();
+				}
 			}
 			break;
 		}
@@ -10805,7 +10814,10 @@ void idPlayer::UpdateLaserSight()
 		
 	//int mode = vr_weaponSight.GetInteger();
 	//if ( mode != lastCrosshairMode )
-	
+
+	if ( vr_teleport.GetInteger() > 0 && vr_weaponSight.GetInteger() == 0 )
+		vr_weaponSight.SetInteger( 1 );
+
 	if ( vr_weaponSight.IsModified() )
 	{
 		
@@ -10871,7 +10883,7 @@ void idPlayer::UpdateLaserSight()
 		beamLength *= traceResults.fraction;
 		muzscale = 1 + beamLength / 100;
 
-		if (true || vr_weaponSightToSurface.GetBool())
+		if ( vr_teleport.GetInteger() > 0 || vr_weaponSightToSurface.GetBool() )
 		{
 
 			// fake it till you make it. there must be a better way. Too bad my brain is broken.
@@ -10907,9 +10919,9 @@ void idPlayer::UpdateLaserSight()
 	// Carl: teleport
 	aimPoint = crosshairEntity.origin;
 	aimPointPitch = surfaceAngle.pitch;
-	bool aimValid = CanReachPosition(aimPoint);
+	bool aimValid = (vr_teleport.GetInteger() > 0) && CanReachPosition(aimPoint);
 	// 45 degrees is maximum slope you can walk up
-	bool pitchValid = aimPointPitch >= 45; // -90 = ceiling, 0 = wall, 90 = floor
+	bool pitchValid = (vr_teleport.GetInteger() > 0) && aimPointPitch >= 45; // -90 = ceiling, 0 = wall, 90 = floor
 	aimValidForTeleport = aimValid && pitchValid;
 
 	if ( aimValidForTeleport )
@@ -10920,7 +10932,7 @@ void idPlayer::UpdateLaserSight()
 	{
 		crosshairEntity.customSkin = skinCrosshairCross;
 	}
-	else
+	else if ( vr_teleport.GetInteger() > 0 )
 	{
 		crosshairEntity.customSkin = skinCrosshairDot;
 	}

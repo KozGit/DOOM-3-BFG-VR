@@ -36,18 +36,18 @@ const char* words[] = {
 	"reload",
 	"PDA", "personal data assistant",
 	"fist", "fists", "hands",
-	"chainsaw", "beaver tooth", "mixom beaver tooth",
+	"chainsaw", "beaver tooth", "beaver tooth chainsaw", "mixom beaver tooth", "mixom beaver tooth chainsaw",
 	"flashlight", "torch",
 	"grabber", "ionized plasma levitator", "IPL unit", "gravity gun",
 	"pistol",
 	"shotgun", "pump action shotgun", "single barreled shotgun",
-	"super shotgun", "double barreled shotgun", "combat shotgun"
-	"machine gun", "MG 88 Enforcer",
-	"chain gun", "UAC Weapons division mach 2 chain gun", "saw",
+	"super shotgun", "double barreled shotgun", "combat shotgun",
+	"machine gun", "enforcer", "M G 88", "M G 88 enforcer", "M G",
+	"chain gun", "mach 2 chain gun", "UAC Weapons division mach 2 chain gun", "saw", "mini gun", "gatling gun",
 	"rocket launcher",
 	"grenades", "grenade",
 	"plasma gun", "plasma rifle",
-	"BFG 9000", "BFG", "bio force gun", "big fucking gun",
+	"BFG 9000", "BFG", "bio force gun", "big fucking gun", "big fragging gun", "big freaking gun",
 	"soul cube",
 	"the artifact", "artifact", "heart of hell", "blood stone",
 };
@@ -111,7 +111,7 @@ bool iVoice::GetSayButton(int j)
 	return result;
 }
 
-void iVoice::HearWord(const char *w)
+void iVoice::HearWord(const char *w, int confidence)
 {
 #define ifw(s) if (!strcmp(w, s))
 #define ifw2(s1, s2) if (!strcmp(w, s1) || !strcmp(w, s2))
@@ -127,29 +127,41 @@ void iVoice::HearWord(const char *w)
 #define elw6(s1, s2, s3, s4, s5, s6) else ifw6(s1, s2, s3, s4, s5, s6)
 
 	ifw("what can I say") {
+		Speed(4);
+		if (vr_talkMode.GetInteger() > 0)
+			Say("You can say anything to NPC's.");
 		if (!listening)
 		{
-			Say("what can I say, start listening, consekyution");
+			Say("You can say: what can I say, or start listening.");
 		}
 		else
 		{
-			for (int i = 0; i < sizeof(words) / sizeof(words[0]); ++i)
-			{
-				Say("%s,", words[i]);
-			}
+			if (vr_voiceCommands.GetInteger() > 2)
+				Say("You can use voice commands, weapon names, or holodeck commands.");
+			else if (vr_voiceCommands.GetInteger() == 1)
+				Say("You can use voice commands or holodeck commands.");
+			Speed(6);
+			Say("You can say: What can I say, stop listening, start listening.");
+			Speed(7);
+			if (vr_voiceCommands.GetInteger() >= 1)
+				Say("pause game, resume game, exit game, menu, cancel, PDA.");
+			if (vr_voiceCommands.GetInteger() >= 2)
+				Say("reload, flashlight, fists, chainsaw, grabber, pistol, shotgun, super shotgun, machine gun, chain gun, rocket launcher, grenades, plasma gun, BFG 9000, soul cube, the artifact.");
 		}
 	}
 	else ifw2("consecution", "start listening") {
 		if (!listening)
 		{
 			listening = true;
+			Speed(5);
 			Say("Started listening.");
 		}
 	}
-	else if (listening)
+	else if (listening && confidence >= SP_NORMAL_CONFIDENCE)
 	{
 		ifw2("consentient", "stop listening") {
 			listening = false;
+			Speed(5);
 			Say("Stopped listening.");
 		}
 		elw2("pause game", "computer, freeze program") {
@@ -187,7 +199,7 @@ void iVoice::HearWord(const char *w)
 			heard[J_SAY_FIST - J_SAY_MIN] = true;
 			//Say("fist.");
 		}
-		elw3("chainsaw", "beaver tooth", "mixom beaver tooth") {
+		elw5("chainsaw", "beaver tooth", "beaver tooth chainsaw", "mixom beaver tooth", "mixom beaver tooth chainsaw") {
 			heard[J_SAY_CHAINSAW - J_SAY_MIN] = true;
 			//Say("chainsaw.");
 		}
@@ -211,11 +223,11 @@ void iVoice::HearWord(const char *w)
 			heard[J_SAY_SUPER_SHOTGUN - J_SAY_MIN] = true;
 			//Say("Super shotgun.");
 		}
-		elw2("machine gun", "MG 88 Enforcer") {
+		elw5("machine gun", "enforcer", "M G 88", "M G 88 enforcer", "M G") {
 			heard[J_SAY_MACHINE_GUN - J_SAY_MIN] = true;
 			//Say("Machine gun.");
 		}
-		elw4("chain gun", "mach 2 chain gun", "UAC Weapons division mach 2 chain gun", "saw") {
+		elw6("chain gun", "mach 2 chain gun", "UAC Weapons division mach 2 chain gun", "saw", "mini gun", "gatling gun") {
 			heard[J_SAY_CHAIN_GUN - J_SAY_MIN] = true;
 			//Say("Chain gun.");
 		}
@@ -231,7 +243,7 @@ void iVoice::HearWord(const char *w)
 			heard[J_SAY_PLASMA_GUN - J_SAY_MIN] = true;
 			//Say("Plasma gun.");
 		}
-		elw4("BFG 9000", "BFG", "bio force gun", "big fucking gun") {
+		elw6("BFG 9000", "BFG", "bio force gun", "big fucking gun", "big fragging gun", "big freaking gun") {
 			heard[J_SAY_BFG - J_SAY_MIN] = true;
 			//Say("BFG 9000.");
 		}
@@ -252,11 +264,11 @@ void iVoice::HearWord(const char *w)
 #undef ifw
 }
 
-void iVoice::HearWord(const wchar_t *w)
+void iVoice::HearWord(const wchar_t *w, int confidence)
 {
 	char buffer[1024];
 	WideCharToMultiByte(CP_ACP, 0, w, -1, buffer, sizeof(buffer) / sizeof(buffer[0]),"'", NULL);
-	HearWord(buffer);
+	HearWord(buffer, confidence);
 }
 
 void iVoice::Event(WPARAM wParam, LPARAM lParam)
@@ -294,11 +306,19 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 				if (recoResult)
 				{
 					wchar_t* text;
+					SPPHRASE* pPhrase = NULL;
+					hr = recoResult->GetPhrase(&pPhrase);
+					int confidence = 0;
+					if SUCCEEDED(hr) {
+						confidence = pPhrase->Rule.Confidence; // -1, 0, or 1
+					}
+					const char* confidences[3] = { "low", "medium", "high" };
 					hr = recoResult->GetText(SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL);
-					//voice.Say("You said %S.", text);
-					HearWord(text);
+					//voice.Say("%s: You said %S.", confidences[confidence + 1], text);
+					HearWord(text, confidence);
 
 					CoTaskMemFree(text);
+					CoTaskMemFree(pPhrase);
 				}
 				in_phrase = false;
 				break;
@@ -400,7 +420,7 @@ void iVoice::VoiceInit(void)
 	HRESULT hr = CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void **)&pVoice);
 	if (SUCCEEDED(hr))
 	{
-		pVoice->SetRate(8);
+		Speed(7);
 		common->Printf("\nISpVoice succeeded.\n");
 		//hr = pVoice->Speak(L"Hello world", 0, NULL);
 	}
@@ -479,6 +499,12 @@ void iVoice::VoiceShutdown(void)
 		pVoice->Release();
 		pVoice = NULL;
 	}
+}
+
+// speed must be -10 to 10
+void iVoice::Speed(int talkingSpeed)
+{
+	pVoice->SetRate(talkingSpeed);
 }
 
 void iVoice::Say(VERIFY_FORMAT_STRING const char* fmt, ...)

@@ -1450,7 +1450,7 @@ if(MSVC)
 		#		POST_BUILD
 		#		COMMAND ${CMAKE_COMMAND} -E copy
 		#		${CMAKE_CURRENT_SOURCE_DIR}/libs/openvr/bin/win32/openvr_api.pdb ${CMAKE_CURRENT_BINARY_DIR}/RelWithDebInfo)
-		
+
 	else()
 		# copy OpenVR dlls
 		add_custom_command(TARGET Doom3BFGVR
@@ -1465,7 +1465,7 @@ if(MSVC)
 		#		POST_BUILD
 		#		COMMAND ${CMAKE_COMMAND} -E copy
 		#		${CMAKE_CURRENT_SOURCE_DIR}/libs/openvr/bin/win64/openvr_api.pdb ${CMAKE_CURRENT_BINARY_DIR}/RelWithDebInfo)
-		
+
 	endif()
 		
 	add_dependencies(Doom3BFGVR idlib)

@@ -1227,19 +1227,21 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 						oldTalk = talk;
 					}
 				}
-
-				static bool oldSay[J_SAY_MAX - J_SAY_MIN + 1] = {};
-				for ( int i = J_SAY_MIN; i <= J_SAY_MAX; ++i )
-				{
-					bool say = commonVoice->GetSayButton( i );
-					if ( say != oldSay[i - J_SAY_MIN] )
-					{
-						common->Printf( "Posting say input event\n %d %d",i,say );
-						PostInputEvent( inputDeviceNum, i, say );
-						oldSay[i - J_SAY_MIN] = say;
-					}
-				}
-
+        
+        if (vr_voiceCommands.GetInteger() > 0)
+		    {
+				  static bool oldSay[J_SAY_MAX - J_SAY_MIN + 1] = {};
+				  for ( int i = J_SAY_MIN; i <= J_SAY_MAX; ++i )
+				  {
+					  bool say = commonVoice->GetSayButton( i );
+					  if ( say != oldSay[i - J_SAY_MIN] )
+					  {
+						  common->Printf( "Posting say input event\n %d %d",i,say );
+						  PostInputEvent( inputDeviceNum, i, say );
+						  oldSay[i - J_SAY_MIN] = say;
+					  }
+				  }
+        }
 
 				//=============================
 				// Koz begin add SteamVR controllers

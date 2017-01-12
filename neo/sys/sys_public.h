@@ -266,8 +266,8 @@ enum sys_jEvents
 	J_SAY_EXIT,
 	J_SAY_MENU,
 	J_SAY_CANCEL,
-	J_SAY_RELOAD,
 	J_SAY_PDA,
+	J_SAY_RELOAD,
 	J_SAY_FIST,
 	J_SAY_CHAINSAW,
 	J_SAY_FLASHLIGHT,
@@ -624,9 +624,7 @@ enum keyNum_t
 	K_MWHEELDOWN,
 	K_MWHEELUP,
 
-	
-
-	K_LAST_KEY
+  K_LAST_KEY
 };
 
 struct sysEvent_t
