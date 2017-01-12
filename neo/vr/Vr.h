@@ -99,7 +99,8 @@ public:
 	void				HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idVec3 &bodyPositionDelta, idVec3 &absolutePosition, bool resetTrackingOffset );
 	void				HMDGetOrientationAbsolute( idAngles &hmdAngles, idVec3 &positoin );
 	void				HMDRender( idImage *leftCurrent, idImage *rightCurrent );
-	void				HMDTrackStatic();
+	bool				HMDRenderQuad( idImage *leftCurrent, idImage *rightCurrent );
+	void				HMDTrackStatic( bool is3D );
 	void				HUDRender( idImage *image0, idImage *image1 );
 	void				HMDResetTrackingOriginOffset();
 	
@@ -140,6 +141,7 @@ public:
 	bool				PDAforced;
 	bool				PDArising;
 	bool				gameSavingLoading;
+	bool				showingIntroVideo;
 	
 	int					swfRenderMode;
 	bool				PDAclipModelSet;

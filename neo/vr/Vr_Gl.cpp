@@ -703,6 +703,194 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 	}
 }
 
+/* Carl
+====================
+iVr::HMDRenderQuad
+
+Draw the pre rendered eye textures as a worldspace quad.
+quad textures: idImage leftCurrent, rightCurrent
+====================
+*/
+
+bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
+{
+	using namespace OVR;
+
+	static int FBOW;
+	static int FBOH;
+
+	wglSwapIntervalEXT(0);
+
+
+	// final eye textures now in finalEyeImage[0,1]				
+
+	if (hasOculusRift)
+	{
+		static ovrLayerHeader	*layers = &oculusLayer.Header;
+		static ovrPosef			eyeRenderPose[2];
+		static ovrVector3f		viewOffset[2] = { hmdEye[0].eyeRenderDesc.HmdToEyeOffset, hmdEye[1].eyeRenderDesc.HmdToEyeOffset };
+		static ovrViewScaleDesc viewScaleDesc;
+
+		if (commonVr->useFBO) // if using FBOs, bind them, otherwise bind the default frame buffer.
+		{
+
+			FBOW = globalFramebuffers.primaryFBO->GetWidth();
+			FBOH = globalFramebuffers.primaryFBO->GetHeight();
+		}
+		else
+		{
+			FBOW = renderSystem->GetNativeWidth();
+			FBOH = renderSystem->GetNativeHeight();
+			glBindFramebuffer(GL_FRAMEBUFFER, 0); // bind the default framebuffer if necessary
+			glDrawBuffer(GL_BACK);
+			backEnd.glState.currentFramebuffer = NULL;
+		}
+
+		renderProgManager.BindShader_PostProcess(); // pass thru shader
+
+		if (1) //!vr_skipOvr.GetBool() )
+		{
+			wglSwapIntervalEXT(0);
+
+			GLuint curTexId;
+			int curIndex;
+
+			ovr_GetTextureSwapChainCurrentIndex(hmdSession, oculusSwapChain[0], &curIndex);
+			ovr_GetTextureSwapChainBufferGL(hmdSession, oculusSwapChain[0], curIndex, &curTexId);
+
+
+			glBindFramebuffer(GL_FRAMEBUFFER, oculusFboId);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, curTexId, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ocululsDepthTexID, 0);
+
+			glViewport(0, 0, FBOW, FBOH);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			// koz GL_CheckErrors();
+
+			// draw the left eye texture.				
+			GL_SelectTexture(0);
+			leftCurrent->Bind();
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+			RB_DrawElementsWithCounters(&backEnd.unitSquareSurface); // draw it
+
+
+			// right eye		
+
+			ovr_GetTextureSwapChainCurrentIndex(hmdSession, oculusSwapChain[1], &curIndex);
+			ovr_GetTextureSwapChainBufferGL(hmdSession, oculusSwapChain[1], curIndex, &curTexId);
+
+
+			glBindFramebuffer(GL_FRAMEBUFFER, oculusFboId);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, curTexId, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ocululsDepthTexID, 0);
+			glClearColor(0, 0, 0, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			// draw the right eye texture
+			glViewport(0, 0, FBOW, FBOH);
+			GL_SelectTexture(0);
+			rightCurrent->Bind();
+
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+			RB_DrawElementsWithCounters(&backEnd.unitSquareSurface); // draw it
+
+			renderProgManager.Unbind();
+
+			// Submit frame with one layer we have.
+
+			ovr_CommitTextureSwapChain(hmdSession, oculusSwapChain[0]);
+			ovr_CommitTextureSwapChain(hmdSession, oculusSwapChain[1]);
+
+			// Submit frame/layer to oculus compositor
+			glBindFramebuffer(GL_FRAMEBUFFER, oculusFboId);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
+
+			ovr_CalcEyePoses(commonVr->hmdTrackingState.HeadPose.ThePose, viewOffset, eyeRenderPose);
+
+			ovrLayerQuad lg;
+			lg.Header.Type = ovrLayerType_Quad;
+			lg.Header.Flags = oculusLayer.Header.Flags;
+			lg.ColorTexture = oculusSwapChain[0];
+			lg.Viewport = oculusLayer.Viewport[0];
+			lg.QuadSize.x = 3.0f; // metres
+			lg.QuadSize.y = lg.QuadSize.x * 3.0f / 4.0f; // metres
+			lg.QuadPoseCenter.Position.x = 0; // metres
+			lg.QuadPoseCenter.Position.y = 0; // metres
+			lg.QuadPoseCenter.Position.z = -1.5f; // metres (negative means in front of us)
+			lg.QuadPoseCenter.Orientation.w = 1;
+			lg.QuadPoseCenter.Orientation.x = 0;
+			lg.QuadPoseCenter.Orientation.y = 0;
+			lg.QuadPoseCenter.Orientation.z = 0;
+			
+			ovrLayerHeader* LayerList[1];
+			LayerList[0] = &lg.Header;
+			//common->Printf( "Frame Submitting 2D frame # %d\n", idLib::frameNumber );
+			ovrResult result = ovr_SubmitFrame(hmdSession, idLib::frameNumber, NULL, LayerList, 1);
+			if (result == ovrSuccess_NotVisible)
+			{
+			}
+			else if (result == ovrError_DisplayLost)
+			{
+				common->Warning("Vr_GL.cpp HMDRender : Display Lost when submitting oculus layer.\n");
+			}
+			else if (OVR_FAILURE(result))
+			{
+				common->Warning("Vr_GL.cpp HMDRender : Failed to submit oculus layer. (result %d) \n", result);
+			}
+
+			if (vr_stereoMirror.GetBool() == true)
+			{
+				// Blit mirror texture to back buffer
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, oculusMirrorFboId);
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+				glBlitFramebuffer(0, mirrorH, mirrorW, 0, 0, 0, mirrorW, mirrorH, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+			}
+			else
+			{
+				renderProgManager.BindShader_PostProcess(); // pass thru shader
+				glBindFramebuffer(GL_FRAMEBUFFER, 0); // bind the default framebuffer
+				glDrawBuffer(GL_BACK);
+				backEnd.glState.currentFramebuffer = NULL;
+
+				// draw the left eye texture.				
+				glViewport(0, 0, commonVr->hmdWidth / 4, commonVr->hmdHeight / 2);
+				GL_SelectTexture(0);
+				leftCurrent->Bind();
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+				RB_DrawElementsWithCounters(&backEnd.unitSquareSurface); // draw it
+			}
+
+			// koz hack
+			// for some reason, vsync will not disable unless wglSwapIntervalEXT( 0 )
+			// is called at least once after ovr_SubmitFrame is called.
+			// (at least on the two Nvidia cards I have to test with.)
+			// this only seems to be the case when rendering to FBOs instead
+			// of the default framebuffer.
+			// if anyone has any ideas why this is, please tell!
+
+			static int swapset = 0;
+			if (swapset == 0)
+			{
+				//swapset = 1;
+				wglSwapIntervalEXT(0);
+			}
+
+			globalFramebuffers.primaryFBO->Bind();
+		}
+		return true;
+	}
+	else // openVR
+	{
+		return false;
+	}
+}
+
 /*
 ====================
 iVr::HMDTrackStatic()
@@ -711,7 +899,7 @@ last fullscreen texture then force a buffer swap.
 ====================
 */
 
-void iVr::HMDTrackStatic()
+void iVr::HMDTrackStatic( bool is3D )
 {
 	
 	
@@ -726,10 +914,13 @@ void iVr::HMDTrackStatic()
 		}
 
 
-		commonVr->hmdCurrentRender[0]->CopyFramebuffer( renderSystem->GetWidth(), renderSystem->GetHeight(), renderSystem->GetWidth(), renderSystem->GetHeight() );
-		commonVr->hmdCurrentRender[1]->CopyFramebuffer( renderSystem->GetWidth(), renderSystem->GetHeight(), renderSystem->GetWidth(), renderSystem->GetHeight() );
-		HUDRender( commonVr->hmdCurrentRender[0], commonVr->hmdCurrentRender[1] );
-		HMDRender( hmdEyeImage[0], hmdEyeImage[1] );
+		if ( is3D || !HMDRenderQuad( commonVr->hmdCurrentRender[0], commonVr->hmdCurrentRender[1] ) )
+		{
+			commonVr->hmdCurrentRender[0]->CopyFramebuffer(renderSystem->GetWidth(), renderSystem->GetHeight(), renderSystem->GetWidth(), renderSystem->GetHeight());
+			commonVr->hmdCurrentRender[1]->CopyFramebuffer(renderSystem->GetWidth(), renderSystem->GetHeight(), renderSystem->GetWidth(), renderSystem->GetHeight());
+			HUDRender(commonVr->hmdCurrentRender[0], commonVr->hmdCurrentRender[1]);
+			HMDRender( hmdEyeImage[0], hmdEyeImage[1] );
+		}
 				
 	}
 }
