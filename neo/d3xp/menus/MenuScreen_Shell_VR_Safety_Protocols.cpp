@@ -109,7 +109,7 @@ void idMenuScreen_Shell_VR_Safety_Protocols::Initialize( idMenuHandler * data ) 
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "KnockBack" );
+	control->SetLabel( "KnockBack & Head Kick" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_KNOCKBACK );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_KNOCKBACK );
@@ -117,10 +117,10 @@ void idMenuScreen_Shell_VR_Safety_Protocols::Initialize( idMenuHandler * data ) 
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Head Kick" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_HEADKICK );
+	control->SetLabel( "Step Smooth & Jump Bounce" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_HEADBOB );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_HEADKICK );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_HEADBOB );
 	options->AddChild( control );
 
 	
@@ -170,7 +170,7 @@ void idMenuScreen_Shell_VR_Safety_Protocols::Update() {
 	if ( BindSprite( root ) ) {
 		idSWFTextInstance * heading = GetSprite()->GetScriptObject()->GetNestedText( "info", "txtHeading" );
 		if ( heading != NULL ) {
-			heading->SetText( "VR Comfort+Safety Options" );
+			heading->SetText( "VR Comfort + Safety" );
 			heading->SetStrokeInfo( true, 0.75f, 1.75f );
 		}
 
@@ -345,6 +345,8 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 	originalKnockBack = vr_knockBack.GetInteger();
 	originalShakeAmplitude = vr_shakeAmplitude.GetFloat();
 	originalHeadKick = vr_headKick.GetInteger();
+	originalStepSmooth = vr_stepSmooth.GetFloat();
+	originalJumpBounce = vr_jumpBounce.GetFloat();
 
 }
 
@@ -468,17 +470,23 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 
 		case SAFETY_PROTOCOLS_FIELD_KNOCKBACK:
 		{
-			static const int numValues = 2;
-			static const int values[numValues] = { 0, 1 };
-			vr_knockBack.SetInteger( AdjustOption( vr_knockBack.GetInteger(), values, numValues, adjustAmount ) );
+			static const int numValues = 4;
+			static const int values[numValues] = { 0, 1, 2, 3 };
+			int value = vr_knockBack.GetInteger() + ( vr_headKick.GetInteger() << 1 );
+			value = AdjustOption( value, values, numValues, adjustAmount );
+			vr_knockBack.SetInteger( value & 1 );
+			vr_headKick.SetInteger( value >> 1 );
 			break;
 		}
 
-		case SAFETY_PROTOCOLS_FIELD_HEADKICK:
+		case SAFETY_PROTOCOLS_FIELD_HEADBOB:
 		{
-			static const int numValues = 2;
-			static const int values[numValues] = { 0, 1 };
-			vr_headKick.SetInteger( AdjustOption( vr_headKick.GetInteger(), values, numValues, adjustAmount ) );
+			static const int numValues = 4;
+			static const int values[numValues] = { 0, 1, 2, 3 };
+			int value = ((vr_stepSmooth.GetFloat() > 0) ? 1 : 0) | ((vr_jumpBounce.GetFloat() > 0) ? 2 : 0);
+			value = AdjustOption( value, values, numValues, adjustAmount );
+			vr_stepSmooth.SetInteger( value & 1 );
+			vr_jumpBounce.SetInteger( value >> 1 );
 			break;
 		}
 
@@ -547,30 +555,26 @@ idSWFScriptVar idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR
 
 		case SAFETY_PROTOCOLS_FIELD_KNOCKBACK:
 		{
-			const int lev = vr_knockBack.GetBool();
-
-			if ( lev == 0 )
-			{
+			if ( !vr_knockBack.GetBool() && !vr_headKick.GetBool() )
 				return "#str_swf_disabled";
-			}
-			else
-			{
+			else if ( vr_knockBack.GetBool() && vr_headKick.GetBool() )
 				return "#str_swf_enabled";
-			}
+			else if ( vr_knockBack.GetBool() )
+				return "KnockBack only";
+			else if ( vr_headKick.GetBool() )
+				return "HeadKick only";
 		}
 
-		case SAFETY_PROTOCOLS_FIELD_HEADKICK:
+		case SAFETY_PROTOCOLS_FIELD_HEADBOB:
 		{
-			const int lev = vr_headKick.GetBool();
-
-			if ( lev == 0 )
-			{
+			if ( !vr_stepSmooth.GetFloat() && !vr_jumpBounce.GetFloat() )
 				return "#str_swf_disabled";
-			}
-			else
-			{
+			else if ( vr_stepSmooth.GetFloat() && vr_jumpBounce.GetFloat() )
 				return "#str_swf_enabled";
-			}
+			else if ( vr_stepSmooth.GetFloat() )
+				return "Step Smooth only";
+			else if ( vr_jumpBounce.GetFloat() )
+				return "Jump Bounce only";
 		}
 
 		case SAFETY_PROTOCOLS_FIELD_SHAKE_AMPLITUDE:
@@ -615,6 +619,14 @@ bool idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 	{
 		return true;
 	}
-	
+	if (originalStepSmooth != vr_stepSmooth.GetFloat())
+	{
+		return true;
+	}
+	if (originalJumpBounce != vr_jumpBounce.GetFloat())
+	{
+		return true;
+	}
+
 	return false;
 }
