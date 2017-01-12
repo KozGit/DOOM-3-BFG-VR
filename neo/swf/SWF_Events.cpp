@@ -273,8 +273,8 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				|| event->evValue == K_JOY_TRIGGER2
 				|| event->evValue == K_L_STEAMVRTRIG
 				|| event->evValue == K_R_STEAMVRTRIG 
-				|| event->evValue == K_JOY37 // button for steam trig
-				|| event->evValue == K_JOY33// button for steam trig
+				|| event->evValue == K_JOY40 // button for steam trig
+				|| event->evValue == K_JOY58// button for steam trig
 				))
 			)
 		{

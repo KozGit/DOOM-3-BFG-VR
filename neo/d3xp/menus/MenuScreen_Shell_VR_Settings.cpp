@@ -61,7 +61,7 @@ void idMenuScreen_Shell_VR_Settings::Initialize( idMenuHandler * data ) {
 	option.Append( "Character Options" );	
 	menuOptions.Append( option );
 	option.Clear();
-	option.Append( "Comfort & Safety Protocols" );
+	option.Append( "Comfort+Safety Options" );
 	menuOptions.Append( option );
 	option.Clear();
 	option.Append( "Control Options" );
@@ -87,7 +87,7 @@ void idMenuScreen_Shell_VR_Settings::Initialize( idMenuHandler * data ) {
 	helpWidget->SetSpritePath( GetSpritePath(), "info", "helpTooltip" );
 	AddChild( helpWidget );
 
-	const char * tips[] = { "Character Options.", "Comfort & Safety Protocols.", "Control Options.", "UI Options.", "Rendering Options.", "Profile Options" };
+	const char * tips[] = { "Character Options.", "Comfort & Safety Options.", "Control Options.", "UI Options.", "Rendering Options.", "Profile Options" };
 
 	while ( options->GetChildren().Num() < NUM_SETTING_OPTIONS ) {
 		idMenuWidget_Button * const buttonWidget = new (TAG_SWF) idMenuWidget_Button();

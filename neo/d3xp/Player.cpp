@@ -13805,8 +13805,13 @@ void idPlayer::GetViewPosVR( idVec3 &origin, idMat3 &axis ) const {
 	origin = GetEyePosition(); // +viewBob;
 	// Carl: No view bobbing unless knockback is enabled. This isn't strictly a knockback, but close enough.
 	// This is the bounce when you land after jumping
-	if (vr_knockBack.GetBool())
-		origin += viewBob;
+
+	// re-enabling this until a better method is implemented, as headbob is how vertical smoothing is implemented when going over stairs/bumps
+	// bobbing can be disabled via the walkbob and runbob cvars until a better method devised.
+	// if (vr_knockBack.GetBool()) 
+
+
+	origin += viewBob;
 	angles = viewAngles; // NO VIEW KICKING  +playerView.AngleOffset();
 	axis = angles.ToMat3();// *physicsObj.GetGravityAxis();
 

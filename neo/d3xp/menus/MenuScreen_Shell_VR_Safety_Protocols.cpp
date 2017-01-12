@@ -93,7 +93,7 @@ void idMenuScreen_Shell_VR_Safety_Protocols::Initialize( idMenuHandler * data ) 
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Motion Sickness Fix" );
+	control->SetLabel( "Motion Sickness Aid" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_MOTION_SICKNESS );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_MOTION_SICKNESS );
@@ -170,7 +170,7 @@ void idMenuScreen_Shell_VR_Safety_Protocols::Update() {
 	if ( BindSprite( root ) ) {
 		idSWFTextInstance * heading = GetSprite()->GetScriptObject()->GetNestedText( "info", "txtHeading" );
 		if ( heading != NULL ) {
-			heading->SetText( "VR Comfort & Safety Protocols" );
+			heading->SetText( "VR Comfort+Safety Options" );
 			heading->SetStrokeInfo( true, 0.75f, 1.75f );
 		}
 
