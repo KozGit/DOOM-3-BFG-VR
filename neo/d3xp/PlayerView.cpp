@@ -922,10 +922,22 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 	// 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Third Person, 6 = Particles, 7 = Particles & Chaperone
 	int fix = vr_motionSickness.GetInteger();
 	commonVr->ForceChaperone( 1, player->ShouldBlink() && ( fix == 1 || fix == 4 || fix == 7 ) );
-	if( vr_blink.GetFloat() > 0.f && player->ShouldBlink() && (fix == 3 || fix == 4) )
+	if( vr_blink.GetFloat() > 0.f && player->ShouldBlink() && ( fix == 3 || fix == 4 ) && !commonVr->VR_GAME_PAUSED )
 	{
-		Fade(idVec4(0,0,0,vr_blink.GetFloat()), 0);
-		Fade(idVec4(0,0,0,0), 200);
+		static int next_strobe_time = 0;
+		int t = vr_strobeTime.GetInteger();
+		if ( !next_strobe_time )
+			next_strobe_time = gameLocal.realClientTime + t; // ms
+		if ( gameLocal.realClientTime >= next_strobe_time && t )
+		{
+			Fade(idVec4(0, 0, 0, 0), 0);
+			next_strobe_time = gameLocal.realClientTime + t; // ms
+		}
+		else
+		{
+			Fade(idVec4(0, 0, 0, vr_blink.GetFloat()), 0);
+			Fade(idVec4(0, 0, 0, 0), 200);
+		}
 	}
 	ScreenFade();
 }

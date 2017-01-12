@@ -509,6 +509,7 @@ extern idCVar	vr_stereoMirror;
 
 extern idCVar	vr_teleport;
 extern idCVar	vr_motionSickness;
+extern idCVar	vr_strobeTime;
 extern idCVar	vr_chaperone;
 extern idCVar	vr_chaperoneColor;
 
