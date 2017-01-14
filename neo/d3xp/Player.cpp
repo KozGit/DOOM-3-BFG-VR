@@ -9587,6 +9587,10 @@ void idPlayer::SetAAS()
 	spawnArgs.GetString("use_aas", NULL, use_aas);
 	gameLocal.Printf("Player AAS: use_aas = %s\n", use_aas.c_str());
 	aas = gameLocal.GetAAS(use_aas);
+	// Carl: use our own custom generated AAS specifically for player movement (teleporting).
+	if (!aas)
+		aas = gameLocal.GetAAS("aas_player");
+	// Every map has aas48, used for zombies and imps. It's close enough to player.
 	if (!aas)
 		aas = gameLocal.GetAAS("aas48");
 	if (aas)
@@ -9601,8 +9605,7 @@ void idPlayer::SetAAS()
 			}
 			*/
 			float height = settings->maxStepHeight;
-			gameLocal.Printf("Player AAS: AAS step height = %f, player step height = %f\n", height, physicsObj.GetMaxStepHeight());
-			// physicsObj.SetMaxStepHeight(height);
+			gameLocal.Printf("Player AAS = %s: AAS step height = %f, player step height = %f\n", settings->fileExtension.c_str(), height, pm_stepsize.GetFloat());
 			return;
 		}
 		else
