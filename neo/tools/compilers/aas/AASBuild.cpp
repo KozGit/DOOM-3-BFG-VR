@@ -33,6 +33,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #define BFL_PATCH		0x1000
 
+idCVar aas_buildPlayerOnly( "aas_buildPlayerOnly", "1", CVAR_GAME | CVAR_BOOL, "" );
+
 //===============================================================
 //
 //	idAASBuild
@@ -1021,22 +1023,25 @@ void RunAAS_f( const idCmdArgs& args )
 	const idKeyValue* kv = dict->MatchPrefix( "type" );
 	while( kv != NULL )
 	{
-		const idDict* settingsDict = gameEdit->FindEntityDefDict( kv->GetValue(), false );
-		if( !settingsDict )
+		if ( !aas_buildPlayerOnly.GetBool() || kv->GetValue().Icmp("aas_player") == 0 )
 		{
-			common->Warning( "Unable to find '%s' in def/aas.def", kv->GetValue().c_str() );
-		}
-		else
-		{
-			settings.FromDict( kv->GetValue(), settingsDict );
-			i = ParseOptions( args, settings );
-			mapName = args.Argv( i );
-			mapName.BackSlashesToSlashes();
-			if( mapName.Icmpn( "maps/", 4 ) != 0 )
+			const idDict* settingsDict = gameEdit->FindEntityDefDict(kv->GetValue(), false);
+			if( !settingsDict )
 			{
-				mapName = "maps/" + mapName;
+				common->Warning( "Unable to find '%s' in def/aas.def", kv->GetValue().c_str() );
 			}
-			aas.Build( mapName, &settings );
+			else
+			{
+				settings.FromDict( kv->GetValue(), settingsDict );
+				i = ParseOptions( args, settings );
+				mapName = args.Argv( i );
+				mapName.BackSlashesToSlashes();
+				if( mapName.Icmpn( "maps/", 4 ) != 0 )
+				{
+					mapName = "maps/" + mapName;
+				}
+				aas.Build( mapName, &settings );
+			}
 		}
 		
 		kv = dict->MatchPrefix( "type", kv );
@@ -1092,15 +1097,18 @@ void RunAASDir_f( const idCmdArgs& args )
 		const idKeyValue* kv = dict->MatchPrefix( "type" );
 		while( kv != NULL )
 		{
-			const idDict* settingsDict = gameEdit->FindEntityDefDict( kv->GetValue(), false );
-			if( !settingsDict )
+			if ( !aas_buildPlayerOnly.GetBool() || kv->GetValue().Icmp("aas_player") == 0 )
 			{
-				common->Warning( "Unable to find '%s' in def/aas.def", kv->GetValue().c_str() );
-			}
-			else
-			{
-				settings.FromDict( kv->GetValue(), settingsDict );
-				aas.Build( idStr( "maps/" ) + args.Argv( 1 ) + "/" + mapFiles->GetFile( i ), &settings );
+				const idDict* settingsDict = gameEdit->FindEntityDefDict(kv->GetValue(), false);
+				if( !settingsDict )
+				{
+					common->Warning( "Unable to find '%s' in def/aas.def", kv->GetValue().c_str() );
+				}
+				else
+				{
+						settings.FromDict( kv->GetValue(), settingsDict );
+						aas.Build( idStr( "maps/" ) + args.Argv( 1 ) + "/" + mapFiles->GetFile( i ), &settings );
+				}
 			}
 			
 			kv = dict->MatchPrefix( "type", kv );
