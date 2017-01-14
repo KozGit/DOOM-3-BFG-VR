@@ -2140,18 +2140,18 @@ void idBrushBSP::UpdateTreeAfterMerge_r( idBrushBSPNode* node, const idBounds& b
 		node->children[1] = newNode;
 	}
 	
-	switch( bounds.PlaneSide( node->plane, 2.0f ) )
+	//switch( bounds.PlaneSide( node->plane, 2.0f ) )
 	{
-		case PLANESIDE_FRONT:
-			UpdateTreeAfterMerge_r( node->children[0], bounds, oldNode, newNode );
-			break;
-		case PLANESIDE_BACK:
+		//case PLANESIDE_FRONT:
+		//	UpdateTreeAfterMerge_r( node->children[0], bounds, oldNode, newNode );
+		//	break;
+		//case PLANESIDE_BACK:
+		//	UpdateTreeAfterMerge_r( node->children[1], bounds, oldNode, newNode );
+		//	break;
+		//default:
+			UpdateTreeAfterMerge_r( node->children[0], bounds, oldNode, newNode ); // Crashes here if you uncomment switch statement (because we aren't replacing some deleted nodes)
 			UpdateTreeAfterMerge_r( node->children[1], bounds, oldNode, newNode );
-			break;
-		default:
-			UpdateTreeAfterMerge_r( node->children[0], bounds, oldNode, newNode );
-			UpdateTreeAfterMerge_r( node->children[1], bounds, oldNode, newNode );
-			break;
+		//	break;
 	}
 }
 

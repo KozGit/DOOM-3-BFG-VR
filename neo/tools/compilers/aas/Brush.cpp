@@ -327,7 +327,7 @@ void idBrush::BoundBrush( const idBrush* original )
 			bm->WriteBrush( original );
 			delete bm;
 		}
-		common->Error( "idBrush::BoundBrush: brush %d on entity %d without windings", primitiveNum, entityNum );
+		common->Warning( "idBrush::BoundBrush: brush %d on entity %d without windings", primitiveNum, entityNum );
 	}
 	
 	for( i = 0; i < 3; i++ )
@@ -340,7 +340,7 @@ void idBrush::BoundBrush( const idBrush* original )
 				bm->WriteBrush( original );
 				delete bm;
 			}
-			common->Error( "idBrush::BoundBrush: brush %d on entity %d is unbounded", primitiveNum, entityNum );
+			common->Warning( "idBrush::BoundBrush: brush %d on entity %d is unbounded", primitiveNum, entityNum );
 		}
 	}
 }
