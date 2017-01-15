@@ -22,7 +22,7 @@ entityDef aas_player {
 	"allowFlyReachabilities"	"1"
 	"fileExtension"				"aas_player"
 	"gravity"					"0 0 -1050"
-	"maxStepHeight"				"16"
+	"maxStepHeight"				"18"
 	"maxBarrierHeight"			"48"
 	"maxWaterJumpHeight"		"20"
 	"maxFallHeight"				"128"
