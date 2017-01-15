@@ -648,14 +648,20 @@ bool idAASSettings::ValidEntity( const char* classname ) const
 	
 	if( playerFlood )
 	{
-		if( !strcmp( classname, "info_player_start" ) || !strcmp( classname , "info_player_deathmatch" ) || !strcmp( classname, "func_teleporter" ) )
+		// Carl: recognise some more items that imply player can go there.
+		if( !strcmp( classname, "info_player_start" ) || !strcmp( classname , "info_player_deathmatch" ) || !strcmp( classname, "func_teleporter" )
+			|| !strcmp( classname, "info_player_teleport" ) || !strcmp( classname, "item_aircannister" ) || !strcmp( classname, "weapon_shotgun" ) || !strcmp( classname, "item_medkit_small" )
+			|| !strcmp( classname, "item_medkit" ) || !strcmp( classname, "item_armor_security" ) || !strcmp( classname, "item_armor_shard" ) || !strcmp( classname, "item_pda" )
+			|| !strcmp( classname, "ammo_bullets_small" ) || !strcmp( classname, "ammo_shells_small" ) || !strcmp( classname, "ammo_shells_large" ) || !strcmp( classname, "ammo_clip_small" )
+			|| !strcmp( classname, "ammo_cells_small" ) || !strcmp( classname, "weapon_pistol" ) || !strcmp( classname, "weapon_machinegun" ) 
+			)
 		{
 			return true;
 		}
 	}
 	
 	const idDeclEntityDef* decl = static_cast<const idDeclEntityDef*>( declManager->FindType( DECL_ENTITYDEF, classname, false ) );
-	if( ( decl != NULL ) && decl->dict.GetString( "use_aas", NULL, use_aas ) && !fileExtension.Icmp( use_aas ) )
+	if( ( decl != NULL ) && decl->dict.GetString( "use_aas", NULL, use_aas ) && ( playerFlood || !fileExtension.Icmp( use_aas ) ) )
 	{
 		if( decl->dict.GetVector( "mins", NULL, bounds[0] ) )
 		{
@@ -667,14 +673,16 @@ bool idAASSettings::ValidEntity( const char* classname ) const
 			bounds[ 1 ].Set( size.x * 0.5f, size.y * 0.5f, size.z );
 		}
 		
-		if( !ValidForBounds( bounds ) )
+		// Carl: Anywhere a monster AAS can go, a player can go too. Without this, half the level is considered impossible to reach.
+		if( !( playerFlood || ValidForBounds( bounds ) ) )
 		{
-			common->Error( "%s cannot use %s\n", classname, fileExtension.c_str() );
+			common->Warning( "%s cannot use %s\n", classname, fileExtension.c_str() );
 		}
 		
 		return true;
 	}
 	
+	//common->Printf( "%s\n", classname );
 	return false;
 }
 
