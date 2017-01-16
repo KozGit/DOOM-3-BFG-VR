@@ -1515,6 +1515,8 @@ idPlayer::idPlayer():
 	travelFlags = TFL_WALK | TFL_AIR | TFL_CROUCH | TFL_WALKOFFLEDGE | TFL_BARRIERJUMP | TFL_JUMP | TFL_LADDER | TFL_WATERJUMP | TFL_ELEVATOR | TFL_SPECIAL;
 	aimValidForTeleport = false;
 	aimPointPitch = 0.0f;
+	aimPoint = vec3_zero;
+	teleportPoint = vec3_zero;
 
 	noclip					= false;
 	godmode					= false;
@@ -9207,7 +9209,7 @@ void idPlayer::PerformImpulse( int impulse )
 						playerView.Flash(colorBlack, 140);
 					else
 						playerView.Flash(colorWhite, 140);
-					Teleport(aimPoint, viewAngles, NULL);
+					Teleport(teleportPoint, viewAngles, NULL);
 					if (t == 1)
 						PlayFootStepSound();
 				}
@@ -9776,6 +9778,13 @@ bool idPlayer::PathToGoal(aasPath_t& path, int areaNum, const idVec3& origin, in
 	}
 
 	org = origin;
+
+	if (ai_debugMove.GetBool())
+	{
+		aas->DrawArea( areaNum );
+		aas->DrawArea( goalAreaNum );
+	}
+
 	aas->PushPointIntoAreaNum(areaNum, org);
 	if (!areaNum)
 	{
@@ -9789,7 +9798,11 @@ bool idPlayer::PathToGoal(aasPath_t& path, int areaNum, const idVec3& origin, in
 		return false;
 	}
 
-	return aas->WalkPathToGoal(path, areaNum, org, goalAreaNum, goal, travelFlags);
+	if (ai_debugMove.GetBool())
+	{
+		aas->ShowWalkPath(org, goalAreaNum, goal, travelFlags);
+	}
+	return aas->WalkPathToGoal( path, areaNum, org, goalAreaNum, goal, travelFlags );
 }
 
 /* Carl: Teleport
@@ -9797,13 +9810,15 @@ bool idPlayer::PathToGoal(aasPath_t& path, int areaNum, const idVec3& origin, in
 idPlayer::CanReachPosition
 ================
 */
-bool idPlayer::CanReachPosition(const idVec3& pos)
+bool idPlayer::CanReachPosition( const idVec3& pos, idVec3& betterPos )
 {
 	aasPath_t	path;
 	int			toAreaNum;
 	int			areaNum;
 
 	toAreaNum = PointReachableAreaNum(pos);
+	betterPos = pos;
+	aas->PushPointIntoAreaNum( toAreaNum, betterPos );
 	areaNum = PointReachableAreaNum(physicsObj.GetOrigin());
 	if (!toAreaNum || !PathToGoal(path, areaNum, physicsObj.GetOrigin(), toAreaNum, pos))
 		return false;
@@ -10921,17 +10936,19 @@ void idPlayer::UpdateLaserSight()
 	// Carl: teleport
 	aimPoint = crosshairEntity.origin;
 	aimPointPitch = surfaceAngle.pitch;
-	bool aimValid = (vr_teleport.GetInteger() > 0) && CanReachPosition(aimPoint);
+	bool aimValid = (vr_teleport.GetInteger() > 0) && CanReachPosition(aimPoint, teleportPoint);
 	// 45 degrees is maximum slope you can walk up
 	bool pitchValid = (vr_teleport.GetInteger() > 0) && aimPointPitch >= 45 && !aimActor; // -90 = ceiling, 0 = wall, 90 = floor
 	aimValidForTeleport = aimValid && ( aimLadder || pitchValid );
 
 	if ( aimValidForTeleport )
 	{
+		crosshairEntity.origin = teleportPoint;
 		crosshairEntity.customSkin = skinCrosshairCircleDot;
 	}
 	else if ( aimLadder || pitchValid )
 	{
+		crosshairEntity.origin = teleportPoint;
 		crosshairEntity.customSkin = skinCrosshairCross;
 	}
 	else if ( vr_teleport.GetInteger() > 0 )

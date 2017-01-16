@@ -275,7 +275,7 @@ void idAASLocal::ShowArea( const idVec3& origin ) const
 idAASLocal::ShowWalkPath
 ============
 */
-void idAASLocal::ShowWalkPath( const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin ) const
+void idAASLocal::ShowWalkPath( const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin, int travelFlags ) const
 {
 	int i, areaNum, curAreaNum, travelTime;
 	idReachability* reach;
@@ -295,7 +295,7 @@ void idAASLocal::ShowWalkPath( const idVec3& origin, int goalAreaNum, const idVe
 	for( i = 0; i < 100; i++ )
 	{
 	
-		if( !RouteToGoalArea( curAreaNum, org, goalAreaNum, TFL_WALK | TFL_AIR, travelTime, &reach ) )
+		if( !RouteToGoalArea( curAreaNum, org, goalAreaNum, travelFlags, travelTime, &reach ) )
 		{
 			break;
 		}
@@ -317,7 +317,7 @@ void idAASLocal::ShowWalkPath( const idVec3& origin, int goalAreaNum, const idVe
 		org = reach->end;
 	}
 	
-	if( WalkPathToGoal( path, areaNum, origin, goalAreaNum, goalOrigin, TFL_WALK | TFL_AIR ) )
+	if( WalkPathToGoal( path, areaNum, origin, goalAreaNum, goalOrigin, travelFlags ) )
 	{
 		gameRenderWorld->DebugArrow( colorBlue, origin, path.moveGoal, 2 );
 	}

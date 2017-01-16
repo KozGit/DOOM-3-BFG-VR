@@ -308,7 +308,7 @@ public:
 	const idDeclSkin*		skinCrosshairDot;
 	const idDeclSkin*		skinCrosshairCircleDot;
 	const idDeclSkin*		skinCrosshairCross;
-	idVec3 aimPoint; // Carl: used for teleporting
+	idVec3 aimPoint, teleportPoint; // Carl: used for teleporting
 	float aimPointPitch;
 	bool aimValidForTeleport;
 	
@@ -571,7 +571,7 @@ public:
 	// Carl : Teleporting
 	int						PointReachableAreaNum(const idVec3& pos, const float boundsScale = 2.0f) const;
 	bool					PathToGoal(aasPath_t& path, int areaNum, const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin) const;
-	bool					CanReachPosition(const idVec3& pos);
+	bool					CanReachPosition( const idVec3& pos, idVec3& betterPos );
 
 	virtual void			GetAASLocation(idAAS* aas, idVec3& pos, int& areaNum) const;
 	virtual void			GetAIAimTargets( const idVec3& lastSightPos, idVec3& headPos, idVec3& chestPos );

@@ -119,7 +119,7 @@ public:
 	virtual bool				WalkPathValid( int areaNum, const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin, int travelFlags, idVec3& endPos, int& endAreaNum ) const;
 	virtual bool				FlyPathToGoal( aasPath_t& path, int areaNum, const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin, int travelFlags ) const;
 	virtual bool				FlyPathValid( int areaNum, const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin, int travelFlags, idVec3& endPos, int& endAreaNum ) const;
-	virtual void				ShowWalkPath( const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin ) const;
+	virtual void				ShowWalkPath( const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin, int travelFlags = TFL_WALK | TFL_AIR ) const;
 	virtual void				ShowFlyPath( const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin ) const;
 	virtual bool				FindNearestGoal( aasGoal_t& goal, int areaNum, const idVec3 origin, const idVec3& target, int travelFlags, aasObstacle_t* obstacles, int numObstacles, idAASCallback& callback ) const;
 	
@@ -178,7 +178,9 @@ private:	// pathing
 private:	// debug
 	const idBounds& 			DefaultSearchBounds() const;
 	void						DrawCone( const idVec3& origin, const idVec3& dir, float radius, const idVec4& color ) const;
-	void						DrawArea( int areaNum ) const;
+public:
+	virtual void				DrawArea( int areaNum ) const;
+private:
 	void						DrawFace( int faceNum, bool side ) const;
 	void						DrawEdge( int edgeNum, bool arrow ) const;
 	void						DrawReachability( const idReachability* reach ) const;
