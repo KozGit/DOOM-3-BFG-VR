@@ -346,8 +346,10 @@ idAASBuild::ContentsForAAS
 int idAASBuild::ContentsForAAS( int contents )
 {
 	int c;
-	
-	if( contents & ( CONTENTS_SOLID | CONTENTS_AAS_SOLID | CONTENTS_MONSTERCLIP ) )
+	int solid = CONTENTS_SOLID | CONTENTS_AAS_SOLID | CONTENTS_MONSTERCLIP;
+	if ( aasSettings && aasSettings->playerFlood )
+		solid = CONTENTS_SOLID | CONTENTS_AAS_SOLID | CONTENTS_PLAYERCLIP;
+	if( contents & ( solid ) )
 	{
 		return AREACONTENTS_SOLID;
 	}

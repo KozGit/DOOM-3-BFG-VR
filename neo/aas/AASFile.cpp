@@ -648,10 +648,10 @@ bool idAASSettings::ValidEntity( const char* classname ) const
 	
 	if( playerFlood )
 	{
-		// Carl: recognise some more items that imply player can go there.
+		// Carl: recognise some more items that imply player can go there. item_pda now causes mc_underground build to fail because it thinks it's outside.
 		if( !strcmp( classname, "info_player_start" ) || !strcmp( classname , "info_player_deathmatch" ) || !strcmp( classname, "func_teleporter" )
 			|| !strcmp( classname, "info_player_teleport" ) || !strcmp( classname, "item_aircannister" ) || !strcmp( classname, "weapon_shotgun" ) || !strcmp( classname, "item_medkit_small" )
-			|| !strcmp( classname, "item_medkit" ) || !strcmp( classname, "item_armor_security" ) || !strcmp( classname, "item_armor_shard" ) || !strcmp( classname, "item_pda" )
+			|| !strcmp( classname, "item_medkit" ) || !strcmp( classname, "item_armor_security" ) || !strcmp( classname, "item_armor_shard" ) //|| !strcmp( classname, "item_pda" )
 			|| !strcmp( classname, "ammo_bullets_small" ) || !strcmp( classname, "ammo_shells_small" ) || !strcmp( classname, "ammo_shells_large" ) || !strcmp( classname, "ammo_clip_small" )
 			|| !strcmp( classname, "ammo_cells_small" ) || !strcmp( classname, "weapon_pistol" ) || !strcmp( classname, "weapon_machinegun" ) 
 			)
