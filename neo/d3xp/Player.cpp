@@ -10875,6 +10875,7 @@ void idPlayer::UpdateLaserSight()
 	muzscale = 1 + beamLength / 100;
 	crosshairEntity.axis = muzzleAxis * muzscale;
 
+	bool aimLadder = false, aimActor = false;
 	static idAngles surfaceAngle = ang_zero;
 	if (gameLocal.clip.TracePoint(traceResults, start, end, MASK_SHOT_RENDERMODEL, this))
 	{
@@ -10883,6 +10884,9 @@ void idPlayer::UpdateLaserSight()
 
 		if ( vr_teleport.GetInteger() > 0 || vr_weaponSightToSurface.GetBool() )
 		{
+			aimLadder = traceResults.c.material && ( traceResults.c.material->GetSurfaceFlags() & SURF_LADDER );
+			idEntity* aimEntity = gameLocal.GetTraceEntity(traceResults);
+			aimActor = ( aimEntity != NULL && aimEntity->IsType(idActor::Type) && aimEntity->health > 0 );
 
 			// fake it till you make it. there must be a better way. Too bad my brain is broken.
 
@@ -10919,14 +10923,14 @@ void idPlayer::UpdateLaserSight()
 	aimPointPitch = surfaceAngle.pitch;
 	bool aimValid = (vr_teleport.GetInteger() > 0) && CanReachPosition(aimPoint);
 	// 45 degrees is maximum slope you can walk up
-	bool pitchValid = (vr_teleport.GetInteger() > 0) && aimPointPitch >= 45; // -90 = ceiling, 0 = wall, 90 = floor
-	aimValidForTeleport = aimValid && pitchValid;
+	bool pitchValid = (vr_teleport.GetInteger() > 0) && aimPointPitch >= 45 && !aimActor; // -90 = ceiling, 0 = wall, 90 = floor
+	aimValidForTeleport = aimValid && ( aimLadder || pitchValid );
 
 	if ( aimValidForTeleport )
 	{
 		crosshairEntity.customSkin = skinCrosshairCircleDot;
 	}
-	else if ( pitchValid )
+	else if ( aimLadder || pitchValid )
 	{
 		crosshairEntity.customSkin = skinCrosshairCross;
 	}
