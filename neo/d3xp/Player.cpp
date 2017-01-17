@@ -9209,7 +9209,7 @@ void idPlayer::PerformImpulse( int impulse )
 						playerView.Flash(colorBlack, 140);
 					else
 						playerView.Flash(colorWhite, 140);
-					Teleport(teleportPoint, viewAngles, NULL);
+					TeleportPath( teleportPoint );
 					if (t == 1)
 						PlayFootStepSound();
 				}
@@ -12585,6 +12585,86 @@ void idPlayer::Teleport( const idVec3& origin, const idAngles& angles, idEntity*
 	{
 		StopHelltime();
 	}
+}
+
+/* Carl: TouchTriggers() at every point along straight line from start to end
+====================
+idPlayer::TeleportPathSegment
+====================
+*/
+void idPlayer::TeleportPathSegment( const idVec3& start, const idVec3& end )
+{
+	idVec3 total = end - start;
+	float length = total.Length();
+	if ( length >= 0.1f )
+	{
+		const float stepSize = 8.0f;
+		int steps = (int)(length / stepSize);
+		if (steps <= 0) steps = 1;
+		idVec3 step = total / steps;
+		idVec3 pos = start;
+		for (int i = 0; i < steps; i++)
+		{
+			physicsObj.SetOrigin( pos );
+			TouchTriggers();
+			pos += step;
+		}
+		// we don't call TouchTriggers after the final step because it's either
+		// the start of the next path segment, or the teleport destination
+	}
+}
+
+/* Carl: TouchTriggers() at every point in a pathfinding walk from the player's position to target, then teleport to target.
+   It does so even if there is no path, or the current position and/or target aren't valid.
+====================
+idPlayer::TeleportPath
+====================
+*/
+void idPlayer::TeleportPath( const idVec3& target )
+{
+	aasPath_t	path;
+	int	originAreaNum, toAreaNum;
+	idVec3 origin = physicsObj.GetOrigin();
+	idVec3 toPoint = target;
+	// Find path start and end areas and points
+	originAreaNum = PointReachableAreaNum( origin );
+	if ( aas )
+		aas->PushPointIntoAreaNum( originAreaNum, origin );
+	toAreaNum = PointReachableAreaNum( toPoint );
+	if ( aas )
+		aas->PushPointIntoAreaNum( toAreaNum, toPoint );
+	// if there's no path, just go in a straight light (or should we just teleport straight there?)
+	if ( !aas || !originAreaNum || !toAreaNum || !aas->WalkPathToGoal( path, originAreaNum, origin, toAreaNum, toPoint, travelFlags ) )
+	{
+		TeleportPathSegment( physicsObj.GetOrigin(), target );
+	}
+	else
+	{
+		// move from actual position to start of path
+		TeleportPathSegment( physicsObj.GetOrigin(), origin );
+		idVec3 currentPos = origin;
+		int currentArea = originAreaNum;
+		// Move along path
+		while ( currentArea && currentArea != toAreaNum )
+		{
+			TeleportPathSegment( currentPos, path.moveGoal );
+			currentPos = path.moveGoal;
+			currentArea = path.moveAreaNum;
+			// Find next path segment. Sometimes it tells us to go to the current location and gets stuck in a loop, so check for that.
+			// TODO: Work out why it gets stuck in a loop, and fix it. Currently we just go in a straight line from stuck point to destination.
+			if ( !aas->WalkPathToGoal( path, currentArea, currentPos, toAreaNum, toPoint, travelFlags ) || ( path.moveAreaNum == currentArea && path.moveGoal == currentPos ) )
+			{
+				path.moveGoal = toPoint;
+				path.moveAreaNum = toAreaNum;
+			}
+		}
+		// Is this needed? Doesn't hurt.
+		TeleportPathSegment( currentPos, toPoint );
+		// move from end of path to actual target
+		TeleportPathSegment( toPoint, target );
+	}
+	// Actually teleport
+	Teleport( target, viewAngles, NULL );
 }
 
 /*
