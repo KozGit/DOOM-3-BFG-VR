@@ -9195,27 +9195,6 @@ void idPlayer::PerformImpulse( int impulse )
 			break;
 		}
 		// Koz end
-		// Carl: Teleport
-		case IMPULSE_42:
-		{
-			// teleport
-			if (aimValidForTeleport)
-			{
-				aimValidForTeleport = false;
-				int t = vr_teleport.GetInteger();
-				if (t > 0)
-				{
-					if (t == 1)
-						playerView.Flash(colorBlack, 140);
-					else
-						playerView.Flash(colorWhite, 140);
-					TeleportPath( teleportPoint );
-					if (t == 1)
-						PlayFootStepSound();
-				}
-			}
-			break;
-		}
 
 	}
 }
@@ -9335,6 +9314,34 @@ void idPlayer::EvaluateControls()
 		PerformImpulse( usercmd.impulse );
 	}
 	
+	// if we released the teleport button
+	static int oldTeleportState = false;
+	bool doTeleport;
+	if( vr_teleport.GetInteger() == 1 )
+		doTeleport = common->ButtonState( UB_TELEPORT ) && !oldTeleportState;
+	else
+		doTeleport = oldTeleportState && !common->ButtonState( UB_TELEPORT );
+	oldTeleportState = common->ButtonState( UB_TELEPORT );
+	if( doTeleport )
+	{
+		// teleport
+		if ( aimValidForTeleport )
+		{
+			aimValidForTeleport = false;
+			int t = vr_teleport.GetInteger();
+			if( t > 0 )
+			{
+				//if ( t == 1 )
+					playerView.Flash( colorBlack, 140 );
+				//else
+				//	playerView.Flash( colorWhite, 140 );
+				TeleportPath( teleportPoint );
+				//if ( t == 1 )
+					PlayFootStepSound();
+			}
+		}
+	}
+
 	if( forceScoreBoard )
 	{
 		gameLocal.mpGame.SetScoreboardActive( true );
@@ -10726,7 +10733,12 @@ void idPlayer::UpdateLaserSight()
 	{
 		return;
 	}
-	
+
+	// Carl: teleport
+	static bool oldTeleport = false;
+	bool showTeleport = vr_teleport.GetInteger() == 1 || ( vr_teleport.GetInteger() > 0 && common->ButtonState( UB_TELEPORT ) );
+	showTeleport = showTeleport && !AI_DEAD && !gameLocal.inCinematic && !game->IsPDAOpen();
+
 	// check if lasersight should be hidden
 	if ( !IsGameStereoRendered() ||
 		!laserSightActive ||							// koz allow user to toggle lasersight.
@@ -10741,10 +10753,10 @@ void idPlayer::UpdateLaserSight()
 		!weapon->GetMuzzlePositionWithHacks( muzzleOrigin, muzzleAxis ) ) // no lasersight for fists,grenades,soulcube etc
 
 	{
-		hideSight = true;
+		hideSight = !showTeleport;
 	}
 	
-	if ( vr_weaponSight.GetInteger() == 0 ) // using the lasersight
+	if ( vr_weaponSight.GetInteger() == 0 && !showTeleport ) // using the lasersight
 	{
 		// common->Printf( "Using lasersight  hidesight = %i\n", hideSight );
 		
@@ -10828,10 +10840,10 @@ void idPlayer::UpdateLaserSight()
 	//int mode = vr_weaponSight.GetInteger();
 	//if ( mode != lastCrosshairMode )
 
-	if ( vr_teleport.GetInteger() > 0 && vr_weaponSight.GetInteger() == 0 )
+	if ( vr_teleport.GetInteger() == 1 && vr_weaponSight.GetInteger() == 0 )
 		vr_weaponSight.SetInteger( 1 );
 
-	if ( vr_weaponSight.IsModified() )
+	if ( vr_weaponSight.IsModified() || ( oldTeleport && !showTeleport) )
 	{
 		
 		//lastCrosshairMode = mode;
@@ -10897,7 +10909,7 @@ void idPlayer::UpdateLaserSight()
 		beamLength *= traceResults.fraction;
 		muzscale = 1 + beamLength / 100;
 
-		if ( vr_teleport.GetInteger() > 0 || vr_weaponSightToSurface.GetBool() )
+		if ( showTeleport || vr_weaponSightToSurface.GetBool() )
 		{
 			aimLadder = traceResults.c.material && ( traceResults.c.material->GetSurfaceFlags() & SURF_LADDER );
 			idEntity* aimEntity = gameLocal.GetTraceEntity(traceResults);
@@ -10934,27 +10946,39 @@ void idPlayer::UpdateLaserSight()
 	crosshairEntity.origin = start + muzzleAxis[0] * beamLength;
 
 	// Carl: teleport
-	aimPoint = crosshairEntity.origin;
-	aimPointPitch = surfaceAngle.pitch;
-	bool aimValid = (vr_teleport.GetInteger() > 0) && CanReachPosition(aimPoint, teleportPoint);
-	// 45 degrees is maximum slope you can walk up
-	bool pitchValid = (vr_teleport.GetInteger() > 0) && aimPointPitch >= 45 && !aimActor; // -90 = ceiling, 0 = wall, 90 = floor
-	aimValidForTeleport = aimValid && ( aimLadder || pitchValid );
+	if (showTeleport)
+	{
+		aimPoint = crosshairEntity.origin;
+		aimPointPitch = surfaceAngle.pitch;
+		bool aimValid = CanReachPosition(aimPoint, teleportPoint);
+		// 45 degrees is maximum slope you can walk up
+		bool pitchValid = aimPointPitch >= 45 && !aimActor; // -90 = ceiling, 0 = wall, 90 = floor
+		aimValidForTeleport = aimValid && (aimLadder || pitchValid);
 
-	if ( aimValidForTeleport )
-	{
-		crosshairEntity.origin = teleportPoint;
-		crosshairEntity.customSkin = skinCrosshairCircleDot;
+		if ( aimValidForTeleport )
+		{
+			crosshairEntity.origin = teleportPoint;
+			crosshairEntity.customSkin = skinCrosshairCircleDot;
+		}
+		else if ( aimLadder || pitchValid )
+		{
+			crosshairEntity.origin = teleportPoint;
+			crosshairEntity.customSkin = skinCrosshairCross;
+		}
+		else if ( vr_teleport.GetInteger() == 1 )
+		{
+			crosshairEntity.customSkin = skinCrosshairDot;
+		}
+		else
+		{
+			crosshairEntity.customSkin = skinCrosshairCross;
+		}
 	}
-	else if ( aimLadder || pitchValid )
+	else
 	{
-		crosshairEntity.origin = teleportPoint;
-		crosshairEntity.customSkin = skinCrosshairCross;
+		aimValidForTeleport = false;
 	}
-	else if ( vr_teleport.GetInteger() > 0 )
-	{
-		crosshairEntity.customSkin = skinCrosshairDot;
-	}
+	oldTeleport = showTeleport;
 
 	if ( IsGameStereoRendered() && crosshairHandle == -1 )
 	{

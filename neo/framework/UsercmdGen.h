@@ -89,7 +89,6 @@ const int IMPULSE_38			= 38;			// walk in place
 const int IMPULSE_39			= 39;			// freelook
 const int IMPULSE_40			= 40;			// system menu
 //koz end
-const int IMPULSE_42			= 42;			// Carl: Teleport
 
 class usercmd_t
 {
@@ -166,6 +165,7 @@ typedef enum
 	UB_SHOWSCORES,
 	UB_USE,
 	UB_TALK,
+	UB_TELEPORT,
 	
 	UB_IMPULSE0,
 	UB_IMPULSE1,
@@ -212,7 +212,6 @@ typedef enum
 	UB_IMPULSE40, // system menu
 	UB_IMPULSE41, // click to move
 	// Koz end
-	UB_IMPULSE42, // Carl: Teleport
 
 	UB_MAX_BUTTONS
 } usercmdButton_t;
