@@ -663,8 +663,67 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		// Maybe I should redefine the camera animation files to 
 		// provide more coherent camera transitions in cutscenes?
 
-		view->viewaxis = camFrame2[0].q.ToMat3();
-		view->vieworg = camFrame2[0].t + offset;
+		idEntity* ent = NULL;
+		static idEntity* hiddenEnt = NULL;
+		switch (vr_flickCharacter.GetInteger())
+		{
+		case FLICK_BETRUGER:
+			ent = gameLocal.FindEntity("marscity_cinematic_betruger_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("marscity_cinematic_betruger_speech");
+			if (!ent)
+				ent = gameLocal.FindEntity("maledict_intro_cinematic_1");
+			break;
+		case FLICK_TOWER:
+			ent = gameLocal.FindEntity("marscity_sec_window_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("erebus1_intro_scientist_1");
+			break;
+		case FLICK_SWANN:
+			ent = gameLocal.FindEntity("marscity_cinematic_swann_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("marscity_cinematic_swann_speech");
+			if (!ent)
+				ent = gameLocal.FindEntity("admin_overhear_swann_1");
+			break;
+		case FLICK_CAMPBELL:
+			ent = gameLocal.FindEntity("marscity_cinematic_campbell_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("marscity_cinematic_campbell_2");
+			if (!ent)
+				ent = gameLocal.FindEntity("admin_overhear_campbell_3");
+			break;
+		case FLICK_RECEPTION:
+			ent = gameLocal.FindEntity("marscity_receptionist_full");
+			break;
+		case FLICK_KELLY:
+			ent = gameLocal.FindEntity("marscity_cinematic_sarge_1");
+			break;
+		case FLICK_MCNEIL:
+			ent = gameLocal.FindEntity("erebus1_intro_mcneil_1");
+			break;
+		}
+		if (ent && (ent == hiddenEnt || !ent->IsHidden()))
+		{
+			if (ent->GetPhysics()->IsType(idPhysics_Actor::Type))
+			{
+				idActor* actor = static_cast<idActor*>(ent);
+				actor->GetViewPos(view->vieworg, view->viewaxis);
+				if ((view->vieworg - actor->GetPhysics()->GetOrigin()).z <= 32)
+					view->vieworg.z += pm_normalviewheight.GetFloat();
+			}
+			else
+			{
+				view->viewaxis = ent->GetPhysics()->GetAxis();
+				view->vieworg = ent->GetPhysics()->GetOrigin();
+			}
+			hiddenEnt = ent;			ent->Hide();
+		}
+		else
+		{
+			view->viewaxis = camFrame2[0].q.ToMat3();
+			view->vieworg = camFrame2[0].t + offset;
+		}
 
 		// remove camera pitch & roll, this is uncomfortable in VR.
 
