@@ -35,14 +35,21 @@ If you have questions concerning this license or the applicable additional terms
 typedef enum
 {
 	FLICK_NONE = 0,
-	FLICK_BETRUGER = 1,
-	FLICK_SWAN = 2,
-	FLICK_CAMPBELL = 3,
-	FLICK_DARKSTAR = 4,
-	FLICK_TOWER = 5,
-	FLICK_RECEPTION = 6,
-	FLICK_KELLY = 7,
-	FLICK_MCNEIL = 8
+	FLICK_BETRUGER = 1,	 // Dr. Malcom Betruger
+	FLICK_SWANN = 2,     // Councillor Elliot Swann
+	FLICK_CAMPBELL = 3,  // Swann's bodyguard, Jack Campbell
+	FLICK_DARKSTAR = 4,  // Darkstar pilot
+	FLICK_TOWER = 5,     // Air traffic controller
+	FLICK_RECEPTION = 6, // Receptionist who gives you the PDA
+	FLICK_KELLY = 7,     // Sergeant Thomas Kelly
+	FLICK_BROOKS = 8,		 // Mars Sec underground who gives you equipment
+	FLICK_MARK_RYAN = 8, // Guarding airlock to decommissioned comm facility
+	FLICK_ISHII = 9,     // Jonathon Ishii in decomissioned com facility
+	FLICK_ROLAND = 10,   // Roland, hiding in the ceiling in Mars City
+	FLICK_MCNEIL = 11,   // Dr. Elizabeth McNeil from Resurrection of Evil
+	FLICK_MARINE_PDA = 12, // Marine with PDA at start of RoE
+	FLICK_MARINE_TORCH = 13, // Marine with Torch (and possibly others) at start of RoE
+	FLICK_POINT = 14,    // Marine with explosives at start of RoE
 };
 
 bool FlickSync_Voice( const char* entity, const char* animation, const char* lineName );
