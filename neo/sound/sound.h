@@ -104,6 +104,7 @@ public:
 	virtual const soundShaderParms_t* GetParms() const;
 	virtual int				GetNumSounds() const;
 	virtual const char* 	GetSound( int index ) const;
+	virtual uint32 GetLength() const;
 	
 private:
 	friend class idSoundWorldLocal;

@@ -710,14 +710,25 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 				idActor* actor = static_cast<idActor*>(ent);
 				actor->GetViewPos(view->vieworg, view->viewaxis);
 				if ((view->vieworg - actor->GetPhysics()->GetOrigin()).z <= 32)
-					view->vieworg.z += pm_normalviewheight.GetFloat();
+					view->vieworg.z = actor->GetPhysics()->GetOrigin().z + pm_normalviewheight.GetFloat();
+				idEntity* head = actor->GetHeadEntity();
+				if (head)
+				{
+					//head->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1; //view->viewID;
+					head->GetRenderEntity()->allowSurfaceInViewID = 666;
+				}
+				if ( vr_playerBodyMode.GetInteger() > 0 )
+				{
+					//actor->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1; //view->viewID;
+					actor->GetRenderEntity()->allowSurfaceInViewID = 666;
+				}
 			}
 			else
 			{
 				view->viewaxis = ent->GetPhysics()->GetAxis();
 				view->vieworg = ent->GetPhysics()->GetOrigin();
 			}
-			hiddenEnt = ent;			ent->Hide();
+			hiddenEnt = ent;			//ent->Hide();
 		}
 		else
 		{

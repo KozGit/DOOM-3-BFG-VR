@@ -7,6 +7,13 @@
 
 idCVar vr_flickCharacter( "vr_flickCharacter", "0", CVAR_INTEGER | CVAR_ARCHIVE, "FlickSync character. 0 = none, 1 = Betruger, 2 = Swan, 3 = Campbell, 4 = DarkStar, 5 = Tower, 6 = Reception, 7 = Kelly, 8 = Brooks, 9 = Mark Ryan, 10 = Ishii, 11 = Roland, 12 = McNeil, 13 = Marine w PDA, 14 = Marine w Torch, 15 = Point", 0, 15 );
 
+// Note: use the console command "teleport trigger_once_8" to skip to the Betruger meeting, and "teleport trigger_once_40" for Sergeant Kelly
+
+int FlickSync_Score = 0;
+int FlickSync_CueCards = 0;
+int FlickSync_CorrectInARow = 0;
+int FlickSync_FailsInARow = 0;
+
 typedef struct
 {
 	int character;
@@ -18,6 +25,22 @@ typedef struct
 	const char* shader;
 	const char* text;
 } spoken_line_t;
+
+typedef struct
+{
+	uint64 startTime;
+	uint32 length;
+	int confidence;
+	const char* shader;
+	char text[1024];
+} timed_spoken_line_t;
+
+#define MAX_HEARD_LINES 3
+timed_spoken_line_t linesHeard[MAX_HEARD_LINES] = {};
+int firstLineHeard = 0, lastLineHeard = -1;
+
+timed_spoken_line_t waitingLine = {};
+bool hasWaitingLine = false;
 
 static const character_map_t entityArray[] = {
 // Mars City Intro
@@ -90,20 +113,20 @@ static const character_map_t shaderArray[] = {
 
 static const spoken_line_t lineArray[] = {
 	// Mars City Intro
-	{ "", "Incoming transport detected." },
-	{ "", "Mars approach, Darkstar with you, zero seven zero, 63, passing through 38 thousand." },
-	{ "", "Roger, Darkstar. Descend to 2 thousand, set speed, contact ground on 2 6 9 7 2." },
-	{ "", "Roger that, Tower." },
+	{ NULL, "Incoming transport detected." },
+	{ NULL, "Mars approach, Darkstar with you, zero seven zero, 63, passing through 38 thousand." },
+	{ NULL, "Roger, Darkstar. Descend to 2 thousand, set speed, contact ground on 2 6 9 7 2." },
+	{ NULL, "Roger that, Tower." },
 	{ "marscity_cin_marine1_1", "We have them on radar, sir. They'll be landing in a few moments." },
-	{ "marscity_cin_bertruger1_1", "Excellent. See that councillor Swann is sent directly to me." },
+	{ "marscity_cin_bertruger1_1", "Excellent. See that councillor Swan is sent directly to me." },
 	{ "marscity_cin_marine1_2", "Here, sir." },
-	{ "", "Tower. Darkstar on final." },
-	{ "", "We've got you, Darkstar, you are set for lockdown. Welcome back." },
+	{ NULL, "Tower. Darkstar on final." },
+	{ NULL, "We've got you, Darkstar, you are set for lockdown. Welcome back." },
 	{ "marscity_cin_swann1_1", "I can't believe it's come to this. I didn't want to come here." },
 	{ "marscity_cin_campbell1_1", "He left you no choice." },
 	{ "marscity_cin_swann1_2", "True, but this is the last time. I'm tired of running damage control every time he makes a mess." },
 	{ "marscity_cin_campbell1_2", "Right. You're the control. And if that fails, I'm the damage." },
-	{ "marscity_cin_swann1_3", "If that's what it takes. Betruger is going to start doing things our way." },
+	{ "marscity_cin_swann1_3", "If that's what it takes. Betroogger is going to start doing things our way." },
 	{ "marscity_cin_campbell1_3", "Whatever you say, councillor." },
 	// Mars City Reception
 	{ "marscity_receptionist_trigger_1", "Welcome to Mars." },
@@ -120,10 +143,10 @@ static const spoken_line_t lineArray[] = {
 	{ "marscity_speech_bertruger1", "Oh really? Do I need to remind you of the groundbreaking work that we're doing here?" },
 	{ "marscity_speech_swann2", "No. But I've been authorized by the board to look at everything." },
 	{ "marscity_speech_bertruger2", "The board authorized you? Hmm. The board doesn't know the first thing about science. All they want is something to make them more money. Some product. Don't worry, they'll get their product." },
-	{ "marscity_speech_swann3", "After how many accidents? Tell me, Doctor Betruger. Why are so many workers spooked, complaining, requesting transfers off Mars?" },
+	{ "marscity_speech_swann3", "After how many accidents? Tell me, Doctor Betroogger. Why are so many workers spooked, complaining, requesting transfers off Mars?" },
 	{ "marscity_speech_bertruger3", "They simply can't handle life here. They're exhausted and overworked. If I had a larger, more competent staff, and bigger budget, even these few accidents could have been avoided." },
-	{ "marscity_speech_swann4", "I'm afraid you'll get nothing more until my report is filed with the board. I will need full access, Doctor Betruger, Delta included. I won't have any difficulties doing that, will I?" },
-	{ "marscity_speech_bertruger4", "Only if you get lost, Swann. Just stay out of my way. Amazing things will happen here soon. You just wait." },
+	{ "marscity_speech_swann4", "I'm afraid you'll get nothing more until my report is filed with the board. I will need full access, Doctor Betroogger, Delta included. I won't have any difficulties doing that, will I?" },
+	{ "marscity_speech_bertruger4", "Only if you get lost, Swan. Just stay out of my way. Amazing things will happen here soon. You just wait." },
 	{ "marscity_speech_swann5", "Let's go." },
 	// Mars City Sergeant Kelly
 	{ "snd_sargecin1", "Took your sweet time, Marine. Now, here's the situation." },
@@ -133,22 +156,22 @@ static const spoken_line_t lineArray[] = {
 	{ "snd_sargecin5", "I programmed this sentry to guide you to the maintenance elevator. I hope you follow the sentry better than you've followed orders so far." },
 	{ "snd_sargecin6", "You can pick up some gear at the security checkpoint at the bottom of the elevator." },
 	{ "snd_sargecin7", "Oh, and when you find him, just bring him back. Do not hurt him. Now move out." },
-	{ "", "When you complete your mission, report back here. Move out." },
-	{ "", "You've got a mission to accomplish. Start moving, Marine." },
-	{ "", "Are you deaf, Marine? When I say move out, you'd better move." },
+	{ NULL, "When you complete your mission, report back here. Move out." },
+	{ NULL, "You've got a mission to accomplish. Start moving, Marine." },
+	{ NULL, "Are you deaf, Marine? When I say move out, you'd better move." },
 	// { "marscity_sarge_cough", "Ahem" },
 
 	// Mars City Underground Security
 	//Voice underground_window_security_1_head: talk_trigger:
-	{ "snd_window1", "" },
+	{ "snd_window1", NULL },
 	//Voice underground_window_security_1_head: window_b:
-	{ "snd_window2", "" },
+	{ "snd_window2", NULL },
 	//Voice underground_window_security_1_head: window_c:
-	{ "snd_window3", "" },
+	{ "snd_window3", NULL },
 	//Voice underground_window_security_1_head: window_k:
-	{ "snd_window11", "" },
+	{ "snd_window11", NULL },
 	//Voice underground_window_security_1_head: window_d:
-	{ "snd_window4", "" },
+	{ "snd_window4", NULL },
 	//Voice underground_window_security_1: window_e:
 	{ "brooks05radiocheck", "Mars Sec radio check. Excellent. Good signal." },
 	//Voice underground_window_security_1: window_f:
@@ -164,53 +187,53 @@ static const spoken_line_t lineArray[] = {
 	{ "snd_talk_trigger", "Your suit's got plenty of oxygen." },
 
 	//Voice underground_crazy_sci_1: crazy_a:
-	{ "snd_crazy1", "" },
+	{ "snd_crazy1", NULL },
 	//Voice underground_crazy_sci_1: crazy_a:
-	{ "snd_crazy1", "" },
+	{ "snd_crazy1", NULL },
 	//Voice underground_crazy_sci_1: crazy_a:
-	{ "snd_crazy1", "" },
+	{ "snd_crazy1", NULL },
 	//Voice underground_crazy_sci_1: crazy_c:
-	{ "snd_crazy2", "" },
+	{ "snd_crazy2", NULL },
 	//Voice underground_crazy_sci_1: crazy_c:
-	{ "snd_crazy2", "" },
+	{ "snd_crazy2", NULL },
 	//Voice underground_crazy_sci_1: crazy_c:
-	{ "snd_crazy2", "" },
+	{ "snd_crazy2", NULL },
 	//Voice underground_crazy_sci_1: crazy_c:
-	{ "snd_crazy3", "" },
+	{ "snd_crazy3", NULL },
 	//Voice underground_crazy_sci_1: crazy_c:
-	{ "snd_crazy3", "" },
+	{ "snd_crazy3", NULL },
 	//Voice underground_crazy_sci_1: crazy_c:
-	{ "snd_crazy3", "" },
+	{ "snd_crazy3", NULL },
 	//Voice underground_crazy_sci_1: crazy_c:
-	{ "snd_crazy4", "" },
+	{ "snd_crazy4", NULL },
 	//Voice underground_crazy_sci_1: crazy_c:
-	{ "snd_crazy4", "" },
+	{ "snd_crazy4", NULL },
 	//Voice underground_crazy_sci_1: crazy_c:
-	{ "snd_crazy4", "" },
+	{ "snd_crazy4", NULL },
 	//Voice underground_crazy_sci_1: crazy_c:
-	{ "snd_crazy5", "" },
+	{ "snd_crazy5", NULL },
 	//Voice underground_crazy_sci_1: crazy_c:
-	{ "snd_crazy5", "" },
+	{ "snd_crazy5", NULL },
 	//Voice underground_crazy_sci_1: crazy_c:
-	{ "snd_crazy5", "" },
+	{ "snd_crazy5", NULL },
 	//Voice2 underground_crazy_zombie_1: backup:
 	{ "jonathan_aya", "ay ah" },
 	//Voice monster_zsec_shotgun_2: windowstart:
-	//{ "monster_zombie_security_melee", "" },
+	//{ "monster_zombie_security_melee", NULL },
 	//Voice2 underground_crazy_zombie_1: backup:
 	{ "jonathan_lord_help_us", "Lord help us." },
 	//Voice2 underground_invasion_chestskull_2: floorskull:
-	//{ "mc_skull_shriek", "" },
+	//{ "mc_skull_shriek", NULL },
 	//Voice underground_invasion_chestskull_2: floorskull:
-	//{ "mc_skull_passby", "" },
+	//{ "mc_skull_passby", NULL },
 	//Voice underground_crazy_zombie_1: transform:
 	{ "jonathan_huh", "huh?" },
 	//Voice2 underground_crazy_zombie_1: transform:
 	{ "jonathan_no", "no" },
 	//Voice underground_invasion_chestskull_1: transform:
-	//{ "mc_skull_passby", "" },
+	//{ "mc_skull_passby", NULL },
 	//Voice2 underground_crazy_zombie_1_head: transform:
-	//{ "mc_leatherface", "" },
+	//{ "mc_leatherface", NULL },
 		//Voice underground_crazy_zombie_1_head: transform:
 	{ "zombiesting", "roar" },
 
@@ -223,15 +246,15 @@ static const spoken_line_t lineArray[] = {
 	//Voice admin_overhear_swann_1: overhear_b:
 	{ "admin_swann_the_situation", "The situation is out of control." },
 	//Voice admin_overhear_swann_1: overhear_b:
-	{ "admin_betruger_its_not_out_of_control", "It's not out of control, Swann. You are. I'll manage this, and you and your flunky will be taking control of nothing. Do you understand?" },
+	{ "admin_betruger_its_not_out_of_control", "It's not out of control, Swan. You are. I'll manage this, and you and your flunky will be taking control of nothing. Do you understand?" },
 	//Voice admin_overhear_swann_1: overhear_c:
-	{ "admin_swann_yes_bertruger", "Yes, Betruger." },
+	{ "admin_swann_yes_bertruger", "Yes, Betroogger." },
 	//Voice2 admin_overhear_swann_1: overhear_c:
-	//{ "swann_screen_off", "" },
+	//{ "swann_screen_off", NULL },
 	//Voice admin_overhear_swann_1: overhear_c:
 	{ "admin_swann_i_understand", "I think I do understand." },
 	//Voice2 admin_overhear_campbell_3: overhear3:
-	//{ "bfgcase_unlock", "" },
+	//{ "bfgcase_unlock", NULL },
 	//Voice admin_overhear_campbell_3: overhear3:
 	{ "admin_campbell_planb", "OK. Plan B." },
 
@@ -358,6 +381,67 @@ static const spoken_line_t lineArray[] = {
 */
 
 
+void FlickSync_ScoreFail()
+{
+	FlickSync_Score -= 10; // Chapter 11 says you lose points, but doesn't say how many.
+	FlickSync_CorrectInARow = 0;
+	FlickSync_FailsInARow++;
+	if (FlickSync_FailsInARow == 2)
+		commonVoice->Say("Final warning");
+	else if (FlickSync_FailsInARow == 3)
+		commonVoice->Say("Game Over");
+	else
+		commonVoice->Say("Miss");
+}
+
+void FlickSync_ScoreLine(int confidence, uint64 ourStartTime, uint64 realStartTime, uint32 ourLength, uint32 realLength)
+{
+	const int64 seconds = 10000000;
+	int64 startDelay = (int64)(ourStartTime - realStartTime);
+	int64 endDelay = (int64)(ourStartTime - realStartTime) + (int32)(ourLength - realLength);
+	float speed = (float)ourLength / (float)realLength;
+
+	FlickSync_Score += 100; // specified in Chapter 11
+	FlickSync_CorrectInARow++; // specified in Chapter 11
+	FlickSync_FailsInARow = 0;
+	if (FlickSync_CorrectInARow >= 7 && FlickSync_CueCards < 5) // specified in Chapter 11
+	{
+		FlickSync_CueCards++;
+		FlickSync_CorrectInARow = 0;
+	}
+	common->Printf("FlickSync score = %d, %d correct in a row, %d cue cards\n", FlickSync_Score, FlickSync_CorrectInARow, FlickSync_CueCards);
+
+	if (startDelay < -2 * seconds && endDelay < -2 * seconds)
+	{
+		// Early!
+		commonVoice->Say("Early!");
+		if (confidence < 0)
+			commonVoice->Say("Unclear.");
+		else if (confidence > 0)
+			commonVoice->Say("Clear.");
+	}
+	else if (startDelay > 2 * seconds && endDelay > 2 * seconds)
+	{
+		// Late!
+		commonVoice->Say("Late!");
+		if (confidence < 0)
+			commonVoice->Say("Unclear.");
+		else if (confidence > 0)
+			commonVoice->Say("Clear.");
+	}
+	else
+	{
+		// Good!
+		if (confidence < 0)
+			commonVoice->Say("Unclear!");
+		else if (confidence > 0)
+			commonVoice->Say("Great!");
+		else
+			commonVoice->Say("Good!");
+	}
+
+}
+
 int EntityToCharacter( const char* entity, const char* lineName )
 {
 	// Some lines come from the same entity, but are different characters. Check these exceptions first.
@@ -376,9 +460,179 @@ int EntityToCharacter( const char* entity, const char* lineName )
 	return FLICK_NONE;
 }
 
-// return true if the game is allowed to play this line, or false if the user is going to say it.
-bool FlickSync_Voice( const char* entity, const char* animation, const char* lineName )
+const char* FlickSync_LineNameToLine(const char* shader)
 {
-	int character = EntityToCharacter( entity, lineName );
-	return character != vr_flickCharacter.GetInteger();
+	if (!shader)
+		return NULL;
+	for (int i = 0; i < sizeof(lineArray) / sizeof(*lineArray); i++)
+	{
+		if (lineArray[i].shader && idStr::Cmp(shader, lineArray[i].shader) == 0)
+			return lineArray[i].text;
+	}
+	return NULL;
 }
+
+int FlickSync_AlreadyHeardLine(const char* line)
+{
+	// if heard line list is empty
+	if (lastLineHeard < 0)
+		return -1;
+
+	// search backwards through circular buffer for line
+	for (int i = lastLineHeard; true; i = (i - 1 + MAX_HEARD_LINES) % MAX_HEARD_LINES)
+	{
+		if (idStr::Cmp(line, linesHeard[i].text) == 0)
+			return i;
+		if (i == firstLineHeard)
+			break;
+	}
+
+	return -1;
+}
+
+bool FlickSync_WaitingOnLineThatIsLate(const char* lineName, uint64 startTime)
+{
+	if (!hasWaitingLine)
+		return false;
+	// if they're asking us to wait for the same line we're already waiting for, ignore it.
+	if (idStr::Cmp(waitingLine.shader, lineName) == 0)
+		return false;
+	// if the new line is supposed to start before our line is finished, then no need to wait
+	if (startTime < (waitingLine.startTime + waitingLine.length))
+		return false;
+	return true;
+}
+
+void FlickSync_PauseCutscene()
+{
+
+}
+
+void FlickSync_ResumeCutscene()
+{
+
+}
+
+// return true if the game is allowed to play this line, or false if the user is going to say it.
+// length is in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
+bool FlickSync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length )
+{
+	SYSTEMTIME systime;
+	GetSystemTime(&systime);
+	// startTime is also in FileTime
+	uint64 startTime = 0;
+	SystemTimeToFileTime(&systime, (LPFILETIME)&startTime);
+
+	int character = EntityToCharacter(entity, lineName);
+
+	// I don't know why, but sometimes this function is called 3 times for the same line.
+	static const char* previousLineName = "";
+	if (idStr::Cmp(lineName, previousLineName) == 0)
+		return character != vr_flickCharacter.GetInteger();
+	previousLineName = lineName;
+
+	if (FlickSync_WaitingOnLineThatIsLate(lineName, startTime))
+	{
+		//commonVoice->Say("pausing to wait for %s", waitingLine.text);
+		// pause cutscene until we hear the line we are waiting for
+		FlickSync_PauseCutscene();
+	}
+
+	if (character != vr_flickCharacter.GetInteger())
+	{
+		// this is a different character speaking
+		return true;
+	}
+
+	if (FlickSync_WaitingOnLineThatIsLate(lineName, startTime))
+	{
+		FlickSync_ScoreFail();
+	}
+
+	const char *line = FlickSync_LineNameToLine(lineName);
+
+	int index;
+	if ((index = FlickSync_AlreadyHeardLine(line)) > 0)
+	{
+		//commonVoice->Say("Already heard %s", line);
+		// score it based on timing
+		FlickSync_ScoreLine(linesHeard[index].confidence, linesHeard[index].startTime, startTime, linesHeard[index].length, length);
+		//   clear any older lines than this line from list of heard lines
+		if (lastLineHeard == firstLineHeard)
+			lastLineHeard = -1;
+		else
+			firstLineHeard = (lastLineHeard + 1) % MAX_HEARD_LINES;
+	}
+	else
+	{
+		//commonVoice->Say("Wait for %s", line);
+		//   set waiting line to this line
+		idStr::Copynz(waitingLine.text, line, 1024);
+		waitingLine.length = length;
+		waitingLine.startTime = startTime;
+		waitingLine.shader = lineName;
+		hasWaitingLine = true;
+	}
+	return false;
+}
+
+void FlickSync_AddVoiceLines()
+{
+	for (int i = 0; i < sizeof(lineArray) / sizeof(*lineArray); i++)
+	{
+		if (lineArray[i].text)
+			commonVoice->AddFlickSyncLine(lineArray[i].text);
+	}
+}
+
+// startTime & length are in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
+void FlickSync_HearLine( const char* line, int confidence, uint64 startTime, uint32 length )
+{
+	if( !startTime )
+	{
+		SYSTEMTIME systime;
+		uint64 filetime;
+		GetSystemTime( &systime );
+		SystemTimeToFileTime( &systime, (LPFILETIME)&filetime );
+		startTime = filetime - length;
+	}
+	const char* confidences[3] = { "low", "medium", "high" };
+	//commonVoice->Say("%s: %s", confidences[confidence + 1], line);
+
+	// if we are waiting for this line
+	if (hasWaitingLine && idStr::Cmp(waitingLine.text, line) == 0)
+	{
+		//commonVoice->Say("That's what we were waiting to hear.");
+		// score it based on timing
+		FlickSync_ScoreLine(confidence, startTime, waitingLine.startTime, length, waitingLine.length);
+		// if we were waiting on a line that is late, unpause cutscene
+		hasWaitingLine = false;
+		FlickSync_ResumeCutscene();
+	}
+	// if we spoke before they requested the line
+	else
+	{
+		if (hasWaitingLine)
+		{
+			//commonVoice->Say("Sorry, was waiting to hear %s.", waitingLine.text);
+		}
+		else
+		{
+			//commonVoice->Say("Add to heard list %s.", line);
+		}
+
+		// add this line to list of heard lines
+		int index = (lastLineHeard + 1) % MAX_HEARD_LINES;
+		if (lastLineHeard < 0)
+			firstLineHeard = 0;
+		else if (index == firstLineHeard)
+			firstLineHeard++;
+		idStr::Copynz(linesHeard[index].text, line, 1024);
+		linesHeard[index].length = length;
+		linesHeard[index].startTime = startTime;
+		linesHeard[index].confidence = confidence;
+		//linesHeard[index].shader = NULL;
+		lastLineHeard = index;
+	}
+}
+

@@ -52,7 +52,9 @@ typedef enum
 	FLICK_POINT = 14,    // Marine with explosives at start of RoE
 };
 
-bool FlickSync_Voice( const char* entity, const char* animation, const char* lineName );
+bool FlickSync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length );
+void FlickSync_AddVoiceLines();
+void FlickSync_HearLine( const char* line, int confidence, uint64 startTime, uint32 length );
 
 extern idCVar vr_flickCharacter;
 

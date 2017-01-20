@@ -1008,7 +1008,7 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					if( !command.soundShader )
 					{
 						common->Printf(" //Voice %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.string->c_str() );
-						if( FlickSync_Voice( ent->name.c_str(), FullName(), command.string->c_str() ) )
+						if( FlickSync_Voice( ent->name.c_str(), FullName(), command.string->c_str(), 0 ) )
 						{
 							if( !ent->StartSound( command.string->c_str(), SND_CHANNEL_VOICE, 0, false, NULL ) )
 							{
@@ -1020,7 +1020,7 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					else
 					{
 						common->Printf( "//Voice %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.soundShader->base->GetName() );
-						if( FlickSync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName() ) )
+						if( FlickSync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName(), command.soundShader->GetLength() * 10000 ) )
 							ent->StartSoundShader( command.soundShader, SND_CHANNEL_VOICE, 0, false, NULL );
 					}
 					break;
@@ -1030,7 +1030,7 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					if( !command.soundShader )
 					{
 						common->Printf(" //Voice2 %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.string->c_str() );
-						if( FlickSync_Voice( ent->name.c_str(), FullName(), command.string->c_str() ) )
+						if( FlickSync_Voice( ent->name.c_str(), FullName(), command.string->c_str(), 0 ) )
 						{
 							if( !ent->StartSound( command.string->c_str(), SND_CHANNEL_VOICE2, 0, false, NULL ) )
 							{
@@ -1042,7 +1042,7 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					else
 					{
 						common->Printf( "//Voice2 %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.soundShader->base->GetName() );
-						if( FlickSync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName() ) )
+						if( FlickSync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName(), command.soundShader->GetLength() * 10000 ) )
 							ent->StartSoundShader( command.soundShader, SND_CHANNEL_VOICE2, 0, false, NULL );
 					}
 					break;
