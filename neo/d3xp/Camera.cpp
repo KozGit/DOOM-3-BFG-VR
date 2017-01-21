@@ -699,8 +699,22 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		case FLICK_KELLY:
 			ent = gameLocal.FindEntity("marscity_cinematic_sarge_1");
 			break;
+		case FLICK_ISHII:
+			ent = gameLocal.FindEntity("underground_crazy_sci_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("underground_crazy_zombie_1");
+			break;
 		case FLICK_MCNEIL:
 			ent = gameLocal.FindEntity("erebus1_intro_mcneil_1");
+			break;
+		case FLICK_MARINE_PDA:
+			ent = gameLocal.FindEntity("erebus1_intro_marine1_1");
+			break;
+		case FLICK_MARINE_TORCH:
+			ent = gameLocal.FindEntity("erebus1_intro_marine2_1");
+			break;
+		case FLICK_POINT:
+			ent = gameLocal.FindEntity("erebus1_intro_detonate_1");
 			break;
 		}
 		if (ent && (ent == hiddenEnt || !ent->IsHidden()))
@@ -717,7 +731,7 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 					//head->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1; //view->viewID;
 					head->GetRenderEntity()->allowSurfaceInViewID = 666;
 				}
-				if ( vr_playerBodyMode.GetInteger() > 0 )
+				if ( vr_playerBodyMode.GetInteger() > 0 || !head )
 				{
 					//actor->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1; //view->viewID;
 					actor->GetRenderEntity()->allowSurfaceInViewID = 666;

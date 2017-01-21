@@ -164,7 +164,10 @@ void idMenuScreen_Shell_Singleplayer::ShowScreen( const mainMenuTransition_t tra
 		option.Clear();
 		option.Append( "#str_01867" );	// load game
 		menuOptions.Append( option );
-		
+		option.Clear();
+		option.Append("Flicksync");	// flicksync
+		menuOptions.Append(option);
+
 		int index = 0;
 		idMenuWidget_Button* buttonWidget = dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( index ) );
 		if( buttonWidget != NULL )
@@ -193,7 +196,10 @@ void idMenuScreen_Shell_Singleplayer::ShowScreen( const mainMenuTransition_t tra
 		option.Clear();
 		option.Append( "#str_01867" );	// load game
 		menuOptions.Append( option );
-		
+		option.Clear();
+		option.Append("Flicksync");	// flicksync
+		menuOptions.Append(option);
+
 		if( options != NULL )
 		{
 			int index = 0;
@@ -347,6 +353,10 @@ bool idMenuScreen_Shell_Singleplayer::HandleAction( idWidgetAction& action, cons
 				{
 					menuData->SetNextScreen( SHELL_AREA_LOAD, MENU_TRANSITION_SIMPLE );
 				}
+				else if (selectionIndex == 3)
+				{
+					menuData->SetNextScreen(SHELL_AREA_VR_FLICKSYNC, MENU_TRANSITION_SIMPLE);
+				}
 			}
 			else
 			{
@@ -357,6 +367,10 @@ bool idMenuScreen_Shell_Singleplayer::HandleAction( idWidgetAction& action, cons
 				else if( selectionIndex == 1 )
 				{
 					menuData->SetNextScreen( SHELL_AREA_LOAD, MENU_TRANSITION_SIMPLE );
+				}
+				else if (selectionIndex == 2)
+				{
+					menuData->SetNextScreen(SHELL_AREA_VR_FLICKSYNC, MENU_TRANSITION_SIMPLE);
 				}
 			}
 			
