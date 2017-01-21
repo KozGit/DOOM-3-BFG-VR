@@ -77,7 +77,7 @@ void idMenuScreen_Shell_VR_Flicksync::Initialize( idMenuHandler* data )
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType(OPTION_BUTTON_TEXT);
-	control->SetLabel("New Game");
+	control->SetLabel("Play");
 	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Flicksync::FLICKSYNC_FIELD_NEWGAME);
 	control->SetupEvents(DEFAULT_REPEAT_TIME, options->GetChildren().Num());
 	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Flicksync::FLICKSYNC_FIELD_NEWGAME);
@@ -239,34 +239,50 @@ bool idMenuScreen_Shell_VR_Flicksync::HandleAction( idWidgetAction& action, cons
 			}
 
 			switch ( selectionIndex ) {
-				
 			  case idMenuDataSource_Shell_VR_Flicksync::FLICKSYNC_FIELD_NEWGAME:
 				{
-					class idSWFScriptFunction_NewGame : public idSWFScriptFunction_RefCounted
+					switch (vr_flickCharacter.GetInteger())
 					{
-					public:
-						idSWFScriptFunction_NewGame( idMenuHandler* _menuData, bool _accept )
-						{
-							menuData = _menuData;
-							accept = _accept;
-						}
-						idSWFScriptVar Call( idSWFScriptObject* thisObject, const idSWFParmList& parms )
-						{
-							common->Dialog().ClearDialog( GDM_DELETE_AUTOSAVE );
-							if( accept )
-							{
-								menuData->SetNextScreen( SHELL_AREA_NEW_GAME, MENU_TRANSITION_SIMPLE );
-							}
-							return idSWFScriptVar();
-						}
-					private:
-						idMenuHandler* menuData;
-						bool accept;
-					};
-					common->Dialog().AddDialog( GDM_DELETE_AUTOSAVE, DIALOG_ACCEPT_CANCEL, new idSWFScriptFunction_NewGame( menuData, true ), new idSWFScriptFunction_NewGame( menuData, false ), true );
+						case FLICK_RECEPTION:
+							cmdSystem->AppendCommandText("devmap game/mars_city1\n");
+							cmdSystem->AppendCommandText("teleport tim_func_door_70\n");
+							break;
+						case FLICK_KELLY:
+							cmdSystem->AppendCommandText("devmap game/mars_city1\n");
+							cmdSystem->AppendCommandText("teleport trigger_once_40\n");
+							break;
+						case FLICK_BROOKS:
+							cmdSystem->AppendCommandText("devmap game/mc_underground\n");
+							break;
+						case FLICK_MARK_RYAN:
+							cmdSystem->AppendCommandText("devmap game/mc_underground\n");
+							cmdSystem->AppendCommandText("teleport trigger_once_93\n");
+							break;
+						case FLICK_ISHII:
+							cmdSystem->AppendCommandText("devmap game/mc_underground\n");
+							cmdSystem->AppendCommandText("teleport trigger_once_120\n");
+							break;
+						case FLICK_ROLAND:
+							cmdSystem->AppendCommandText("devmap game/mars_city2\n");
+							break;
+						case FLICK_MCNEIL:
+						case FLICK_MARINE_PDA:
+						case FLICK_MARINE_TORCH:
+						case FLICK_POINT:
+							cmdSystem->AppendCommandText("devmap game/erebus1\n");
+							break;
+						case FLICK_NONE:
+						case FLICK_DARKSTAR:
+						case FLICK_TOWER:
+						case FLICK_BETRUGER:
+						case FLICK_SWANN:
+						case FLICK_CAMPBELL:
+						default:
+							cmdSystem->AppendCommandText("devmap game/mars_city1\n");
+							break;
+					}
+					break;
 				}
-
-				
 				default: {
 					systemData.AdjustField( selectionIndex , 1);
 					options->Update();
