@@ -505,6 +505,7 @@ public:
 	void					Think();
 	
 	void					UpdateLaserSight();
+	bool					GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3& axis );
 
 	// Koz begin
 	void					UpdatePlayerSkinsPoses();

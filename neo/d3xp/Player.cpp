@@ -10705,6 +10705,56 @@ bool idPlayer::HandleGuiEvents( const sysEvent_t* ev )
 	return handled;
 }
 
+// Carl:
+#define TP_HAND_RIGHT 2
+#define TP_HAND_LEFT 3
+#define TP_HAND_HEAD 4
+bool idPlayer::GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3& axis )
+{
+	// In Multiplayer, weapon might not have been spawned yet.
+	if (weapon.GetEntity() == NULL || hand == TP_HAND_HEAD)
+	{
+		origin = commonVr->lastViewOrigin; // koz fixme set the origin and axis to the players view
+		axis = commonVr->lastViewAxis;
+		return false;
+	}
+	weapon_t currentWeap = weapon->IdentifyWeapon();
+	// Carl: weapon hand
+	if ( hand == 1 || hand == TP_HAND_RIGHT + vr_weaponHand.GetInteger() )
+	{
+		switch ( currentWeap )
+		{
+			case WEAPON_NONE:
+			case WEAPON_FISTS:
+			case WEAPON_SOULCUBE:
+			case WEAPON_PDA:
+			case WEAPON_HANDGRENADE:
+				origin = weapon->viewWeaponOrigin; // koz fixme set the origin and axis to the weapon default
+				axis = weapon->viewWeaponAxis;
+				return false;
+				break;
+
+			default:
+				return weapon->GetMuzzlePositionWithHacks( origin, axis ); 
+				break;
+		}
+	}
+	// Carl: flashlight hand
+	else if ( commonVr->GetCurrentFlashMode() == FLASH_HAND && weaponEnabled && !spectating && !gameLocal.world->spawnArgs.GetBool("no_Weapons") && !game->IsPDAOpen() && !commonVr->PDAforcetoggle && currentWeapon != weapon_pda )
+	{
+		weapon_t currentWeapon = flashlight->IdentifyWeapon();
+		CalculateViewFlashPos( origin, axis, flashOffsets[ int( currentWeapon ) ] );
+		return false;
+	}
+	// Carl: todo empty non-weapon hand (currently using head instead)
+	else
+	{
+		origin = commonVr->lastViewOrigin; // koz fixme set the origin and axis to the players view
+		axis = commonVr->lastViewAxis;
+		return false;
+	}
+}
+
 /*
 ==============
 idPlayer::UpdateLaserSight
@@ -10750,10 +10800,14 @@ void idPlayer::UpdateLaserSight()
 		gameLocal.inCinematic ||
 		game->IsPDAOpen() ||							// koz - turn off laser sight if using pda.
 		weapon.GetEntity()->GetGrabberState() >= 2 ||	// koz turn off laser sight if grabber is dragging an entity
-		!weapon->GetMuzzlePositionWithHacks( muzzleOrigin, muzzleAxis ) ) // no lasersight for fists,grenades,soulcube etc
+		showTeleport || !weapon->GetMuzzlePositionWithHacks(muzzleOrigin, muzzleAxis)) // no lasersight for fists,grenades,soulcube etc
 
 	{
 		hideSight = !showTeleport;
+	}
+	if (showTeleport)
+	{
+		GetHandOrHeadPositionWithHacks( vr_teleport.GetInteger(), muzzleOrigin, muzzleAxis );
 	}
 	
 	if ( vr_weaponSight.GetInteger() == 0 && !showTeleport ) // using the lasersight
