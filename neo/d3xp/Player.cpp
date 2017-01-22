@@ -6383,7 +6383,7 @@ void idPlayer::Weapon_Combat()
 		force = c >= 4;
 	else
 		force = ( c >= 4 ) || ( c >= 1 && currentWeapon == weapon_handgrenade )
-		|| ( c >= 2 && ( currentWeapon == weapon_chainsaw || currentWeapon == weapon_fists ) );
+		|| ( c >= 2 && ( currentWeapon == weapon_chainsaw || currentWeapon == weapon_fists || currentWeapon == weapon_grabber ) );
 	
   commonVr->ForceChaperone( 0, force );
 }
@@ -8964,13 +8964,13 @@ void idPlayer::PerformImpulse( int impulse )
 	// Normal 1 - 0 Keys.
 	if ( impulse >= IMPULSE_0 && impulse <= IMPULSE_12 && !isIntroMap )
 	{
-		// Carl: impulse 1, 4, and 11 were unused, so I'm using them for specific versions of weapons
+		// Carl: impulse 1, 4, and 11 were unbound, so I'm using them for specific versions of weapons
 		if (impulse == 1)
-			SelectWeapon( weapon_fists, false, true ); // not chainsaw or grabber
+			SelectWeapon( weapon_grabber, false, true ); // not chainsaw or fists (was originally chainsaw/grabber)
 		else if (impulse == 4)
-			SelectWeapon( weapon_shotgun, false, true );
+			SelectWeapon( weapon_shotgun_double, false, true ); // double barreled (this was already the super shotgun)
 		else if (impulse == 11)
-			SelectWeapon( weapon_shotgun_double, false, true );
+			SelectWeapon( weapon_shotgun, false, true ); // single barreled (this was empty before)
 		else
 			SelectWeapon( impulse, false );
 		return;
@@ -9108,10 +9108,10 @@ void idPlayer::PerformImpulse( int impulse )
 			}
 			break;
 		}
-		// Carl specific grabber weapon
+		// Carl specific fists weapon
 		case IMPULSE_26:
 		{
-			SelectWeapon( weapon_grabber, false, true );
+			SelectWeapon( weapon_fists, false, true );
 			break;
 		}
 		//Hack so the chainsaw will work in MP
