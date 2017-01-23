@@ -10292,6 +10292,38 @@ void idPlayer::Move()
 	distance += crouchDistance * crouchDistance + viewBob.LengthSqr();
 	blink = (distance > 0.005f);
 	CrashLand( oldOrigin, oldVelocity );
+
+	// Handling vr_comfortMode
+	const int comfortMode = vr_motionSickness.GetInteger();
+	//"	0 off | 2 = tunnel | 5 = tunnel + chaperone | 6 slow mo | 7 slow mo + chaperone | 8 tunnel + slow mo | 9 = tunnel + slow mo + chaperone
+	if (comfortMode < 2) 
+	{
+		return;
+	}
+
+	float speed = physicsObj.GetLinearVelocity().LengthFast();
+	if ((comfortMode == 2) || (comfortMode == 5) || (comfortMode == 8) || (comfortMode == 9))
+	{
+		if (speed == 0 && !blink)
+		{
+			this->playerView.EnableVrComfortVision(false);
+		}
+		else
+		{
+			this->playerView.EnableVrComfortVision(true);
+		}
+	}
+
+	if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9))
+	{
+		extern idCVar timescale;
+		float speedFactor = ((pm_runspeed.GetFloat() - speed) / pm_runspeed.GetFloat());
+		if (speedFactor < 0)
+		{
+			speedFactor = 0;
+		}
+		timescale.SetFloat(0.5 + 0.5*speedFactor);
+	}
 }
 
 /*

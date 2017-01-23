@@ -54,6 +54,7 @@ idPlayerView::idPlayerView()
 	bloodSprayMaterial = declManager->FindMaterial( "textures/decals/bloodspray" );
 	bfgMaterial = declManager->FindMaterial( "textures/decals/bfgvision" );
 	bfgVision = false;
+	vrComfortVision = false;
 	dvFinishTime = 0;
 	kickFinishTime = 0;
 	kickAngles.Zero();
@@ -588,7 +589,54 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 			renderSystem->SetColor4( 1.0f, 1.0f, 1.0f, 1.0f );
 			renderSystem->DrawStretchPic( 0.0f, 0.0f, renderSystem->GetVirtualWidth(), renderSystem->GetVirtualHeight(), 0.0f, 0.0f, 1.0f, 1.0f, bfgMaterial );
 		}
-		
+
+		if (vrComfortVision) {
+			float extend = -0.5f * 0.0f * renderSystem->GetVirtualWidth(); // glConfig.openVRScreenSeparation
+			float offset = -extend * view->viewEyeBuffer;
+
+			renderSystem->SetColor4(0, 0, 0, 255);
+
+			int width = renderSystem->GetVirtualWidth();
+			int height = renderSystem->GetVirtualHeight();
+			int blockwidth = width * 4;
+			int blockheight = height * 4;
+
+			renderSystem->DrawStretchPic(
+				offset - extend - blockwidth, -blockheight,
+				blockwidth + extend * 2, blockheight,
+				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
+			renderSystem->DrawStretchPic(
+				offset - extend, -blockheight,
+				width, blockheight + height / 3.0,
+				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
+			renderSystem->DrawStretchPic(
+				offset - extend + width, -blockheight,
+				blockwidth + extend * 2, blockheight,
+				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
+
+			renderSystem->DrawStretchPic(
+				offset - extend - blockwidth, 0,
+				blockwidth + extend * 2 + width / 3.0, height,
+				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
+			renderSystem->DrawStretchPic(
+				offset - extend + width - width / 3.0, 0,
+				blockwidth + extend * 2 + width / 3.0, height,
+				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
+
+			renderSystem->DrawStretchPic(
+				offset - extend - blockwidth, height,
+				blockwidth + extend * 2, blockheight,
+				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
+			renderSystem->DrawStretchPic(
+				offset - extend, height - height / 3.0,
+				width + extend * 2, blockheight + height / 3.0,
+				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
+			renderSystem->DrawStretchPic(
+				offset - extend + width, height,
+				blockwidth + extend * 2, blockheight,
+				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
+			renderSystem->SetGLState(0); // JACK: unsure if this is required?
+		}
 	}
 	
 	// test a single material drawn over everything
@@ -919,9 +967,9 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 	}
 
 	// Carl: Motion sickness aids for artificial locomotion
-	// 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Third Person, 6 = Particles, 7 = Particles & Chaperone
+	// 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Reduce FOV & Chaperone, 6 = Slow Mo, 7 = Slow Mo & Chaperone, 8 = Slow Mo & Reduce FOV, 9 = Slow Mo, Chaperone, Reduce FOV, 10 = Third Person, 11 = Particles, 12 = Particles & Chaperone
 	int fix = vr_motionSickness.GetInteger();
-	commonVr->ForceChaperone( 1, player->ShouldBlink() && ( fix == 1 || fix == 4 || fix == 7 ) );
+	commonVr->ForceChaperone( 1, player->ShouldBlink() && ( fix == 1 || fix == 4 || fix == 5 || fix == 7 || fix == 9 ) );
 	if( vr_blink.GetFloat() > 0.f && player->ShouldBlink() && ( fix == 3 || fix == 4 ) && !commonVr->VR_GAME_PAUSED )
 	{
 		static int next_strobe_time = 0;

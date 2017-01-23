@@ -441,7 +441,13 @@ public:
 	{
 		bfgVision = b;
 	};
-	
+
+	// for VR comfort vision
+	void				EnableVrComfortVision(bool b)
+	{
+		vrComfortVision = b;
+	};
+
 private:
 	void				SingleView( const renderView_t* view, idMenuHandler_HUD* hudManager );
 	void				ScreenFade();
@@ -456,7 +462,8 @@ public:
 	int					kickFinishTime;		// view kick will be stopped at this time
 	idAngles			kickAngles;
 	
-	bool				bfgVision;			//
+	bool				bfgVision;			
+	bool				vrComfortVision;	//  "tunnel" to improve vrComfort
 	
 	const idMaterial* 	tunnelMaterial;		// health tunnel vision
 	const idMaterial* 	armorMaterial;		// armor damage view effect
