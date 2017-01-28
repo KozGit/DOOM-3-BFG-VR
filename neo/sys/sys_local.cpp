@@ -333,10 +333,6 @@ const char* Sys_DefaultLanguage()
 		{
 			sys_lang.SetString( ID_LANG_JAPANESE );
 		}
-		else if( currentLangList.Find( ID_LANG_ENGLISH ) )
-		{
-			sys_lang.SetString( ID_LANG_ENGLISH );
-		}
 		else if( currentLangList.Find( ID_LANG_FRENCH ) )
 		{
 			sys_lang.SetString( ID_LANG_FRENCH );
@@ -352,6 +348,10 @@ const char* Sys_DefaultLanguage()
 		else if( currentLangList.Find( ID_LANG_SPANISH ) )
 		{
 			sys_lang.SetString( ID_LANG_GERMAN );
+		}
+		else if (currentLangList.Find(ID_LANG_ENGLISH))
+		{
+			sys_lang.SetString(ID_LANG_ENGLISH);
 		}
 		else
 		{
