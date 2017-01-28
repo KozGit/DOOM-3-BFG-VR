@@ -810,7 +810,7 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 
 			ovr_CalcEyePoses(commonVr->hmdTrackingState.HeadPose.ThePose, viewOffset, eyeRenderPose);
 
-			ovrLayerQuad lg;
+			ovrLayerQuad lg, lg2;
 			lg.Header.Type = ovrLayerType_Quad;
 			lg.Header.Flags = oculusLayer.Header.Flags;
 			lg.ColorTexture = oculusSwapChain[0];
@@ -825,10 +825,17 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 			lg.QuadPoseCenter.Orientation.y = 0;
 			lg.QuadPoseCenter.Orientation.z = 0;
 			
-			ovrLayerHeader* LayerList[1];
+			// draw another one behind us
+			lg2 = lg;
+			lg2.QuadPoseCenter.Orientation.w = 0;
+			lg2.QuadPoseCenter.Orientation.y = 1;
+			lg2.QuadPoseCenter.Position.z = -lg.QuadPoseCenter.Position.z;
+
+			ovrLayerHeader* LayerList[2];
 			LayerList[0] = &lg.Header;
+			LayerList[1] = &lg2.Header;
 			//common->Printf( "Frame Submitting 2D frame # %d\n", idLib::frameNumber );
-			ovrResult result = ovr_SubmitFrame(hmdSession, idLib::frameNumber, NULL, LayerList, 1);
+			ovrResult result = ovr_SubmitFrame(hmdSession, idLib::frameNumber, NULL, LayerList, 2);
 			if (result == ovrSuccess_NotVisible)
 			{
 			}
