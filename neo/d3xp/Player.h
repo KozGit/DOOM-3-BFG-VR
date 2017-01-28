@@ -587,7 +587,7 @@ public:
 	
 	// use exitEntityNum to specify a teleport with private camera view and delayed exit
 	virtual void			Teleport( const idVec3& origin, const idAngles& angles, idEntity* destination );
-	virtual void			TeleportPathSegment( const idVec3& start, const idVec3& end );
+	virtual bool			TeleportPathSegment( const idVec3& start, const idVec3& end, idVec3& lastPos );
 	virtual void			TeleportPath( const idVec3& target );
 
 	void					Kill( bool delayRespawn, bool nodamage );

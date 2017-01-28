@@ -12670,7 +12670,7 @@ void idPlayer::Teleport( const idVec3& origin, const idAngles& angles, idEntity*
 idPlayer::TeleportPathSegment
 ====================
 */
-void idPlayer::TeleportPathSegment( const idVec3& start, const idVec3& end )
+bool idPlayer::TeleportPathSegment( const idVec3& start, const idVec3& end, idVec3& lastPos )
 {
 	idVec3 total = end - start;
 	float length = total.Length();
@@ -12683,13 +12683,94 @@ void idPlayer::TeleportPathSegment( const idVec3& start, const idVec3& end )
 		idVec3 pos = start;
 		for (int i = 0; i < steps; i++)
 		{
-			physicsObj.SetOrigin( pos );
-			TouchTriggers();
+			bool blocked = false;
+			physicsObj.SetOrigin(pos);
+			// Like TouchTriggers() but also checks for locked doors
+			{
+				int				i, numClipModels;
+				idClipModel* 	cm;
+				idClipModel* 	clipModels[MAX_GENTITIES];
+				idEntity* 		ent;
+				trace_t			trace;
+
+				memset(&trace, 0, sizeof(trace));
+				trace.endpos = pos;
+				trace.endAxis = GetPhysics()->GetAxis();
+
+				numClipModels = gameLocal.clip.ClipModelsTouchingBounds(GetPhysics()->GetAbsBounds(), CONTENTS_TRIGGER | CONTENTS_SOLID, clipModels, MAX_GENTITIES);
+
+				for (i = 0; i < numClipModels; i++)
+				{
+					cm = clipModels[i];
+
+					// don't touch it if we're the owner
+					if (cm->GetOwner() == this)
+					{
+						continue;
+					}
+
+					ent = cm->GetEntity();
+
+					if (!blocked && ent->IsType(idDoor::Type))
+					{
+						idDoor *door = (idDoor *)ent;
+						if (door->IsLocked())
+						{
+							// check if we're moving toward the door
+							idVec3 away = door->GetPhysics()->GetOrigin() - pos;
+							away.z = 0;
+							float dist = away.Length();
+							if (dist < 60.0f)
+							{
+								away /= dist;
+								idVec3 my_dir = step;
+								my_dir.Normalize();
+								float angle = idMath::ACos(away * my_dir);
+								if (angle < DEG2RAD(45) || (angle < DEG2RAD(90) && dist < 20))
+									blocked = true;
+								if (blocked)
+								{
+									// Trigger the door to make the locked sound, if we're not close enough to happen naturally
+									if (dist > 30)
+									{
+										physicsObj.SetOrigin(pos + (away * (dist - 30)));
+										TouchTriggers();
+									}
+								}
+							}
+						}
+					}
+
+					if (!ent->RespondsTo(EV_Touch) && !ent->HasSignal(SIG_TOUCH))
+					{
+						continue;
+					}
+
+					if (!GetPhysics()->ClipContents(cm))
+					{
+						continue;
+					}
+
+					SetTimeState ts(ent->timeGroup);
+
+					trace.c.contents = cm->GetContents();
+					trace.c.entityNum = cm->GetEntity()->entityNumber;
+					trace.c.id = cm->GetId();
+
+					ent->Signal(SIG_TOUCH);
+					ent->ProcessEvent(&EV_Touch, this, &trace);
+				}
+			}
+
+			if (blocked)
+				return false;
+			lastPos = pos;
 			pos += step;
 		}
 		// we don't call TouchTriggers after the final step because it's either
 		// the start of the next path segment, or the teleport destination
 	}
+	return true;
 }
 
 /* Carl: TouchTriggers() at every point in a pathfinding walk from the player's position to target, then teleport to target.
@@ -12704,6 +12785,8 @@ void idPlayer::TeleportPath( const idVec3& target )
 	int	originAreaNum, toAreaNum;
 	idVec3 origin = physicsObj.GetOrigin();
 	idVec3 toPoint = target;
+	idVec3 lastPos = origin;
+	bool blocked = false;
 	// Find path start and end areas and points
 	originAreaNum = PointReachableAreaNum( origin );
 	if ( aas )
@@ -12714,18 +12797,22 @@ void idPlayer::TeleportPath( const idVec3& target )
 	// if there's no path, just go in a straight light (or should we just teleport straight there?)
 	if ( !aas || !originAreaNum || !toAreaNum || !aas->WalkPathToGoal( path, originAreaNum, origin, toAreaNum, toPoint, travelFlags ) )
 	{
-		TeleportPathSegment( physicsObj.GetOrigin(), target );
+		blocked = !TeleportPathSegment( physicsObj.GetOrigin(), target, lastPos );
 	}
 	else
 	{
 		// move from actual position to start of path
-		TeleportPathSegment( physicsObj.GetOrigin(), origin );
+		blocked = !TeleportPathSegment( physicsObj.GetOrigin(), origin, lastPos );
 		idVec3 currentPos = origin;
 		int currentArea = originAreaNum;
 		// Move along path
-		while ( currentArea && currentArea != toAreaNum )
+		while ( !blocked && currentArea && currentArea != toAreaNum )
 		{
-			TeleportPathSegment( currentPos, path.moveGoal );
+			if (!TeleportPathSegment(currentPos, path.moveGoal, lastPos))
+			{
+				blocked = true;
+				break;
+			}
 			currentPos = path.moveGoal;
 			currentArea = path.moveAreaNum;
 			// Find next path segment. Sometimes it tells us to go to the current location and gets stuck in a loop, so check for that.
@@ -12737,12 +12824,59 @@ void idPlayer::TeleportPath( const idVec3& target )
 			}
 		}
 		// Is this needed? Doesn't hurt.
-		TeleportPathSegment( currentPos, toPoint );
+		blocked = blocked || !TeleportPathSegment( currentPos, toPoint, lastPos );
 		// move from end of path to actual target
-		TeleportPathSegment( toPoint, target );
+		blocked = blocked || !TeleportPathSegment(toPoint, target, lastPos);
+	}
+
+	if (!blocked)
+	{
+		lastPos = target;
+		// Check we didn't teleport inside a door that's not open.
+		// It's OK to teleport THROUGH a closed but unlocked door, but we can't end up inside it.
+		int				i, numClipModels;
+		idClipModel* 	cm;
+		idClipModel* 	clipModels[MAX_GENTITIES];
+		idEntity* 		ent;
+		trace_t			trace;
+
+		memset(&trace, 0, sizeof(trace));
+		trace.endpos = target;
+		trace.endAxis = GetPhysics()->GetAxis();
+
+		numClipModels = gameLocal.clip.ClipModelsTouchingBounds(GetPhysics()->GetAbsBounds(), CONTENTS_SOLID, clipModels, MAX_GENTITIES);
+
+		for (i = 0; i < numClipModels; i++)
+		{
+			cm = clipModels[i];
+
+			// don't touch it if we're the owner
+			if (cm->GetOwner() == this)
+				continue;
+
+			ent = cm->GetEntity();
+
+			if (!blocked && ent->IsType(idDoor::Type))
+			{
+				idDoor *door = (idDoor *)ent;
+				// A door that is in the process of opening falsely registers as open.
+				// But we can rely on the fact that we're touching it, to know it's still partly closed.
+				//if ( !door->IsOpen() )
+				{
+					idVec3 away = door->GetPhysics()->GetOrigin() - target;
+					away.z = 0;
+					float dist = away.Length();
+					if (dist < 50.0f)
+					{
+						away /= dist;
+						lastPos = target + (away * (dist - 50));
+					}
+				}
+			}
+		}
 	}
 	// Actually teleport
-	Teleport( target, viewAngles, NULL );
+	Teleport(lastPos, viewAngles, NULL);
 }
 
 /*
