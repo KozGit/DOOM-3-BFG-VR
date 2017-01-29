@@ -9825,6 +9825,8 @@ bool idPlayer::CanReachPosition( const idVec3& pos, idVec3& betterPos )
 
 	toAreaNum = PointReachableAreaNum(pos);
 	betterPos = pos;
+	if (!aas)
+		return false;
 	aas->PushPointIntoAreaNum( toAreaNum, betterPos );
 	areaNum = PointReachableAreaNum(physicsObj.GetOrigin());
 	if (!toAreaNum || !PathToGoal(path, areaNum, physicsObj.GetOrigin(), toAreaNum, pos))
