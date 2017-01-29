@@ -670,9 +670,13 @@ bool idAASSettings::ValidEntity( const char* classname ) const
 			|| !strcmp(classname, "ammo_bullets_large_mp") || !strcmp(classname, "ammo_shells_large_mp") || !strcmp(classname, "ammo_cells_large_mp") || !strcmp(classname, "ammo_clip_large_mp")
 			|| !strcmp(classname, "ammo_bullets_small_mp") || !strcmp(classname, "ammo_shells_small_mp") || !strcmp(classname, "ammo_cells_small_mp") || !strcmp(classname, "ammo_clip_small_mp")
 			|| !strcmp(classname, "ammo_rockets_large_mp") || !strcmp(classname, "ammo_rockets_small_mp") || !strcmp(classname, "ammo_belt_small_mp") || !strcmp(classname, "ammo_grenade_small_mp")
+			|| !strcmp(classname, "moveable_item_medkit") || !strcmp(classname, "moveable_item_medkit_small") || !strcmp(classname, "moveable_item_armor_security") || !strcmp(classname, "moveable_item_armor_shard")
+			|| !strcmp(classname, "moveable_ammo_bullets_large") || !strcmp(classname, "moveable_ammo_shells_large") || !strcmp(classname, "moveable_ammo_cells_large") || !strcmp(classname, "moveable_ammo_clip_large")
+			|| !strcmp(classname, "moveable_ammo_bullets_small") || !strcmp(classname, "moveable_ammo_shells_small") || !strcmp(classname, "moveable_ammo_cells_small") || !strcmp(classname, "moveable_ammo_clip_small")
+			|| !strcmp(classname, "moveable_ammo_rockets_large") || !strcmp(classname, "moveable_ammo_rockets_small") || !strcmp(classname, "moveable_ammo_belt_small") || !strcmp(classname, "moveable_ammo_grenade_small")
 			|| !strcmp(classname, "powerup_megahealth") || !strcmp(classname, "powerup_beserk") || !strcmp(classname, "powerup_adrenaline")
 			|| !strcmp(classname, "powerup_invisibility") || !strcmp(classname, "powerup_invulnerability")
-			|| !strcmp(classname, "item_key_yellow") || !strcmp(classname, "item_generic")
+			|| !strcmp(classname, "item_key_yellow") || !strcmp(classname, "item_generic") || !strcmp(classname, "ammo_bloodstone_small")
 			)
 		{
 			return true;
