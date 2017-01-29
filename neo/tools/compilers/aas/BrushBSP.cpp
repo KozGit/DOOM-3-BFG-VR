@@ -1712,7 +1712,8 @@ bool idBrushBSP::FloodFromEntities( const idMapFile* mapFile, int contents, cons
 	idVec3 origin;
 	idMapEntity* mapEnt;
 	idStr classname;
-	
+	const char*	cl;
+
 	inside = false;
 	outside->occupied = 0;
 	
@@ -1727,7 +1728,13 @@ bool idBrushBSP::FloodFromEntities( const idMapFile* mapFile, int contents, cons
 			continue;
 		}
 		
-		if( !mapEnt->epairs.GetString( "classname", "", classname ) )
+		// any entity can have "noFlood" set to skip it
+		if (mapEnt->epairs.GetString("noFlood", "", &cl))
+		{
+			continue;
+		}
+		
+		if (!mapEnt->epairs.GetString("classname", "", classname))
 		{
 			continue;
 		}

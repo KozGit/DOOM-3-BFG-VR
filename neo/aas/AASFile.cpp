@@ -646,14 +646,33 @@ bool idAASSettings::ValidEntity( const char* classname ) const
 	idVec3			size;
 	idBounds		bounds;
 	
-	if( playerFlood )
+	if (playerFlood)
 	{
 		// Carl: recognise some more items that imply player can go there. item_pda now causes mc_underground build to fail because it thinks it's outside.
-		if( !strcmp( classname, "info_player_start" ) || !strcmp( classname , "info_player_deathmatch" ) || !strcmp( classname, "func_teleporter" )
-			|| !strcmp( classname, "info_player_teleport" ) || !strcmp( classname, "item_aircannister" ) || !strcmp( classname, "weapon_shotgun" ) || !strcmp( classname, "item_medkit_small" )
-			|| !strcmp( classname, "item_medkit" ) || !strcmp( classname, "item_armor_security" ) || !strcmp( classname, "item_armor_shard" ) //|| !strcmp( classname, "item_pda" )
-			|| !strcmp( classname, "ammo_bullets_small" ) || !strcmp( classname, "ammo_shells_small" ) || !strcmp( classname, "ammo_shells_large" ) || !strcmp( classname, "ammo_clip_small" )
-			|| !strcmp( classname, "ammo_cells_small" ) || !strcmp( classname, "weapon_pistol" ) || !strcmp( classname, "weapon_machinegun" ) 
+		if (!strcmp(classname, "info_player_start") || !strcmp(classname, "info_player_deathmatch") || !strcmp(classname, "func_teleporter")
+			|| !strcmp(classname, "info_player_teleport") || !strcmp(classname, "item_aircannister") || !strcmp(classname, "item_pda") || !strcmp(classname, "item_videocd")
+			|| !strcmp(classname, "weapon_pistol") || !strcmp(classname, "weapon_shotgun") || !strcmp(classname, "weapon_shotgun_double")
+			|| !strcmp(classname, "weapon_machinegun") || !strcmp(classname, "weapon_chaingun") || !strcmp(classname, "weapon_plasmagun")
+			|| !strcmp(classname, "weapon_rocketlauncher") || !strcmp(classname, "weapon_handgrenade") || !strcmp(classname, "weapon_bfg")
+			|| !strcmp(classname, "weapon_soulcube") || !strcmp(classname, "weapon_chainsaw") || !strcmp(classname, "weapon_grabber") || !strcmp(classname, "weapon_flashlight")
+			|| !strcmp(classname, "item_medkit") || !strcmp(classname, "item_medkit_small") || !strcmp(classname, "item_backpack") || !strcmp(classname, "item_envirosuit")
+			|| !strcmp(classname, "item_keycard_generic") || !strcmp(classname, "item_backpack") || !strcmp(classname, "item_grabbercd") || !strcmp(classname, "item_artifact_tablet")
+			|| !strcmp(classname, "item_armor_security") || !strcmp(classname, "item_armor_shard") || !strcmp(classname, "ammo_bfg_small")
+			|| !strcmp(classname, "ammo_bullets_large") || !strcmp(classname, "ammo_shells_large") || !strcmp(classname, "ammo_cells_large") || !strcmp(classname, "ammo_clip_large")
+			|| !strcmp(classname, "ammo_bullets_small") || !strcmp(classname, "ammo_shells_small") || !strcmp(classname, "ammo_cells_small") || !strcmp(classname, "ammo_clip_small")
+			|| !strcmp(classname, "ammo_rockets_large") || !strcmp(classname, "ammo_rockets_small") || !strcmp(classname, "ammo_belt_small") || !strcmp(classname, "ammo_grenade_small")
+			|| !strcmp(classname, "weapon_pistol_mp") || !strcmp(classname, "weapon_shotgun_mp") || !strcmp(classname, "weapon_shotgun_double_mp")
+			|| !strcmp(classname, "weapon_machinegun_mp") || !strcmp(classname, "weapon_chaingun_mp") || !strcmp(classname, "weapon_plasmagun_mp")
+			|| !strcmp(classname, "weapon_rocketlauncher_mp") || !strcmp(classname, "weapon_handgrenade_mp") || !strcmp(classname, "weapon_bfg_mp")
+			|| !strcmp(classname, "weapon_soulcube_mp") || !strcmp(classname, "weapon_chainsaw_mp") || !strcmp(classname, "weapon_grabber_mp") || !strcmp(classname, "weapon_flashlight_mp")
+			|| !strcmp(classname, "item_medkit_mp") || !strcmp(classname, "item_medkit_small_mp") || !strcmp(classname, "item_backpack_mp")
+			|| !strcmp(classname, "item_armor_security_mp") || !strcmp(classname, "item_armor_shard_mp") || !strcmp(classname, "ammo_bfg_small")
+			|| !strcmp(classname, "ammo_bullets_large_mp") || !strcmp(classname, "ammo_shells_large_mp") || !strcmp(classname, "ammo_cells_large_mp") || !strcmp(classname, "ammo_clip_large_mp")
+			|| !strcmp(classname, "ammo_bullets_small_mp") || !strcmp(classname, "ammo_shells_small_mp") || !strcmp(classname, "ammo_cells_small_mp") || !strcmp(classname, "ammo_clip_small_mp")
+			|| !strcmp(classname, "ammo_rockets_large_mp") || !strcmp(classname, "ammo_rockets_small_mp") || !strcmp(classname, "ammo_belt_small_mp") || !strcmp(classname, "ammo_grenade_small_mp")
+			|| !strcmp(classname, "powerup_megahealth") || !strcmp(classname, "powerup_beserk") || !strcmp(classname, "powerup_adrenaline")
+			|| !strcmp(classname, "powerup_invisibility") || !strcmp(classname, "powerup_invulnerability")
+			|| !strcmp(classname, "item_key_yellow") || !strcmp(classname, "item_generic")
 			)
 		{
 			return true;
