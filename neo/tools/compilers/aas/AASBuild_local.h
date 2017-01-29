@@ -96,7 +96,11 @@ private:
 	idBrushMap* 			ledgeMap;
 	
 private:	// map loading
+	idRenderModel*	ReadBinaryModel( idFile* fileIn, ID_TIME_T minFileTime );
+	void					SkipBinaryAreaPortals( idFile* file );
+	void					ReadBinaryNodes( idFile* file );
 	void					ParseProcNodes( idLexer* src );
+	bool					LoadBProcBSP( const char* name, ID_TIME_T minFileTime );
 	bool					LoadProcBSP( const char* name, ID_TIME_T minFileTime );
 	void					DeleteProcBSP();
 	bool					ChoppedAwayByProcBSP( int nodeNum, idFixedWinding* w, const idVec3& normal, const idVec3& origin, const float radius );

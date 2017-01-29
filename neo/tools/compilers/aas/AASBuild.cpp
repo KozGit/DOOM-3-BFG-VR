@@ -124,79 +124,213 @@ void idAASBuild::ParseProcNodes( idLexer* src )
 	src->ExpectTokenString( "}" );
 }
 
+
+/*
+================
+idAASBuild::ReadBinaryShadowModel
+================
+*/
+idRenderModel* idAASBuild::ReadBinaryModel(idFile* fileIn, ID_TIME_T minFileTime)
+{
+	idStrStatic< MAX_OSPATH > name;
+	fileIn->ReadString( name );
+	idRenderModel* model = renderModelManager->AllocModel();
+	model->InitEmpty( name );
+	if ( model->LoadBinaryModel( fileIn, minFileTime ) )
+	{
+		return model;
+	}
+	return NULL;
+}
+
+/*
+================
+idAASBuild::SkipBinaryAreaPortals
+================
+*/
+void idAASBuild::SkipBinaryAreaPortals(idFile* file)
+{
+	int numPortalAreas = 0, numInterAreaPortals = 0;
+	file->ReadBig(numPortalAreas);
+	file->ReadBig(numInterAreaPortals);
+
+	for (int i = 0; i < numInterAreaPortals; i++)
+	{
+		int32		numPoints, temp;
+
+		file->ReadBig(numPoints);
+		file->ReadBig(temp);
+		file->ReadBig(temp);
+		for (int j = 0; j < numPoints; j++)
+		{
+			file->ReadBig(temp);
+			file->ReadBig(temp);
+			file->ReadBig(temp);
+		}
+	}
+}
+
+/*
+================
+idAASBuild::ReadBinaryNodes
+================
+*/
+void idAASBuild::ReadBinaryNodes(idFile* file)
+{
+	file->ReadBig(idAASBuild::numProcNodes);
+	idAASBuild::procNodes = (aasProcNode_t*)Mem_ClearedAlloc(idAASBuild::numProcNodes * sizeof(aasProcNode_t), TAG_TOOLS);
+	for (int i = 0; i < idAASBuild::numProcNodes; i++)
+	{
+		aasProcNode_t* node;
+
+		node = &(idAASBuild::procNodes[i]);
+
+		file->ReadBig(node->plane.ToFloatPtr()[0]);
+		file->ReadBig(node->plane.ToFloatPtr()[1]);
+		file->ReadBig(node->plane.ToFloatPtr()[2]);
+		file->ReadBig(node->plane.ToFloatPtr()[3]);
+		file->ReadBig(node->children[0]);
+		file->ReadBig(node->children[1]);
+	}
+}
+
+/*
+================
+idAASBuild::LoadBProcBSP
+================
+*/
+bool idAASBuild::LoadBProcBSP( const char* name, ID_TIME_T minFileTime )
+{
+	// check for generated file
+	idStrStatic< MAX_OSPATH > generatedFileName = name;
+	generatedFileName.Insert("generated/", 0);
+	generatedFileName.SetFileExtension("bproc");
+
+	// see if we have a generated version of this
+	static const byte BPROC_VERSION = 1;
+	static const unsigned int BPROC_MAGIC = ('P' << 24) | ('R' << 16) | ('O' << 8) | BPROC_VERSION;
+	idFileLocal file(fileSystem->OpenFileReadMemory(generatedFileName));
+	if (file != NULL)
+	{
+		int numEntries = 0;
+		int magic = 0;
+		file->ReadBig(magic);
+		if (magic == BPROC_MAGIC)
+		{
+			idStr					mapName;
+			ID_TIME_T				mapTimeStamp;
+			file->ReadBig( numEntries );
+			file->ReadString( mapName );
+			file->ReadBig( mapTimeStamp );
+			for (int i = 0; i < numEntries; i++)
+			{
+				idStrStatic< MAX_OSPATH > type;
+				file->ReadString(type);
+				type.ToLower();
+				if (type == "model" || type == "shadowmodel")
+				{
+					// read it, then delete it, because we don't know how many bytes to skip
+					idRenderModel* lastModel = ReadBinaryModel( file, mapTimeStamp );
+					if (lastModel == NULL)
+						return false;
+					delete lastModel;
+				}
+				else if (type == "interareaportals")
+				{
+					// we're not interested in this, so skip over it
+					SkipBinaryAreaPortals(file);
+				}
+				else if (type == "nodes")
+				{
+					// this is the only thing we want
+					ReadBinaryNodes(file);
+					return true;
+				}
+				else
+				{
+					idLib::Error("AASBuildProc: Binary proc file failed, unexpected type %s\n", type.c_str());
+				}
+			}
+		}
+	}
+	return false;
+}
+
 /*
 ================
 idAASBuild::LoadProcBSP
 ================
 */
-bool idAASBuild::LoadProcBSP( const char* name, ID_TIME_T minFileTime )
+bool idAASBuild::LoadProcBSP(const char* name, ID_TIME_T minFileTime)
 {
 	idStr fileName;
 	idToken token;
 	idLexer* src;
-	
+
 	// load it
 	fileName = name;
-	fileName.SetFileExtension( PROC_FILE_EXT );
+	fileName.SetFileExtension(PROC_FILE_EXT);
 	src = new idLexer( fileName, LEXFL_NOSTRINGCONCAT | LEXFL_NODOLLARPRECOMPILE );
-	if( !src->IsLoaded() )
+	if ( !src->IsLoaded() )
 	{
+		delete src;
+		if ( LoadBProcBSP( name, minFileTime ) )
+			return true;
 		common->Warning( "idAASBuild::LoadProcBSP: couldn't load %s", fileName.c_str() );
-		delete src;
 		return false;
 	}
-	
+
 	// if the file is too old
-	if( src->GetFileTime() < minFileTime )
+	if ( src->GetFileTime() < minFileTime )
 	{
 		delete src;
 		return false;
 	}
-	
-	if( !src->ReadToken( &token ) || token.Icmp( PROC_FILE_ID ) )
+
+	if ( !src->ReadToken(&token) || token.Icmp(PROC_FILE_ID) )
 	{
 		common->Warning( "idAASBuild::LoadProcBSP: bad id '%s' instead of '%s'", token.c_str(), PROC_FILE_ID );
 		delete src;
 		return false;
 	}
-	
+
 	// parse the file
-	while( 1 )
+	while ( 1 )
 	{
-		if( !src->ReadToken( &token ) )
+		if ( !src->ReadToken( &token ) )
 		{
 			break;
 		}
-		
-		if( token == "model" )
+
+		if (token == "model")
 		{
 			src->SkipBracedSection();
 			continue;
 		}
-		
-		if( token == "shadowModel" )
+
+		if (token == "shadowModel")
 		{
 			src->SkipBracedSection();
 			continue;
 		}
-		
-		if( token == "interAreaPortals" )
+
+		if (token == "interAreaPortals")
 		{
 			src->SkipBracedSection();
 			continue;
 		}
-		
-		if( token == "nodes" )
+
+		if (token == "nodes")
 		{
 			idAASBuild::ParseProcNodes( src );
 			break;
 		}
-		
+
 		src->Error( "idAASBuild::LoadProcBSP: bad token \"%s\"", token.c_str() );
 	}
-	
+
 	delete src;
-	
+
 	return true;
 }
 
