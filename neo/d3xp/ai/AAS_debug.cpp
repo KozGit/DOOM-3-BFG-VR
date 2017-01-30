@@ -69,10 +69,16 @@ idAASLocal::DrawReachability
 void idAASLocal::DrawReachability( const idReachability* reach ) const
 {
 	gameRenderWorld->DebugArrow( colorCyan, reach->start, reach->end, 2 );
+
+	float height = reach->end.z - reach->start.z;
 	
 	if( gameLocal.GetLocalPlayer() )
 	{
-		gameRenderWorld->DrawText( va( "%d", reach->edgeNum ), ( reach->start + reach->end ) * 0.5f, 0.1f, colorWhite, gameLocal.GetLocalPlayer()->viewAxis );
+		//gameRenderWorld->DrawText( va( "%d", reach->edgeNum ), ( reach->start + reach->end ) * 0.5f, 0.1f, colorWhite, gameLocal.GetLocalPlayer()->viewAxis );
+		if (fabs(height) > 1)
+		{
+			//gameRenderWorld->DrawText(va("%0.1f\"", height), (reach->start + reach->end) * 0.5f + idVec3(0, 0, 4), 0.1f, colorCyan, gameLocal.GetLocalPlayer()->viewAxis);
+		}
 	}
 	
 	switch( reach->travelType )
@@ -117,7 +123,7 @@ void idAASLocal::DrawEdge( int edgeNum, bool arrow ) const
 	
 	if( gameLocal.GetLocalPlayer() )
 	{
-		gameRenderWorld->DrawText( va( "%d", edgeNum ), ( file->GetVertex( edge->vertexNum[0] ) + file->GetVertex( edge->vertexNum[1] ) ) * 0.5f + idVec3( 0, 0, 4 ), 0.1f, colorRed, gameLocal.GetLocalPlayer()->viewAxis );
+		//gameRenderWorld->DrawText( va( "%d", edgeNum ), ( file->GetVertex( edge->vertexNum[0] ) + file->GetVertex( edge->vertexNum[1] ) ) * 0.5f + idVec3( 0, 0, 4 ), 0.1f, colorRed, gameLocal.GetLocalPlayer()->viewAxis );
 	}
 }
 
@@ -159,6 +165,15 @@ void idAASLocal::DrawFace( int faceNum, bool side ) const
 		end = mid + 5.0f * file->GetPlane( file->GetFace( faceNum ).planeNum ).Normal();
 	}
 	gameRenderWorld->DebugArrow( colorGreen, mid, end, 1 );
+
+	// Carl: Show height difference to player position
+	idPlayer * player;
+	if (player = gameLocal.GetLocalPlayer())
+	{
+		end = player->GetPhysics()->GetOrigin() - idVec3(0, 0, CM_CLIP_EPSILON);
+		gameRenderWorld->DrawText(va("%0.1f\"", mid.z - end.z), (mid * 0.75 + end * 0.25) + idVec3(0, 0, 4), 0.2f, colorYellow, gameLocal.GetLocalPlayer()->viewAxis);
+	}
+
 }
 
 /*
@@ -305,8 +320,31 @@ void idAASLocal::ShowWalkPath( const idVec3& origin, int goalAreaNum, const idVe
 			break;
 		}
 		
-		gameRenderWorld->DebugArrow( colorGreen, org, reach->start, 2 );
-		DrawReachability( reach );
+		idVec4 color = colorGreen;
+		idPlayer * player;
+		if (player = gameLocal.GetLocalPlayer())
+		{
+			if (reach->travelType & TFL_BARRIERJUMP)
+				color = colorOrange;
+			else if (reach->travelType & TFL_CROUCH)
+				color = colorMagenta;
+			else if (reach->travelType & TFL_WALKOFFLEDGE)
+				color = colorPurple;
+			else if (reach->travelType & TFL_SPECIAL)
+				color = colorRed;
+			else if (reach->travelType & TFL_INVALID)
+				color = colorPink;
+			if (i == 0)
+			{
+				gameRenderWorld->DrawText(va("%d %x", travelTime, reach->travelType), (goalOrigin * 0.4 + origin * 0.6) + idVec3(0, 0, 4), 0.2f, color, player->viewAxis);
+				gameRenderWorld->DrawText(va("%d %d %x", travelTime, reach->travelTime, reach->travelType), (org + reach->start) * 0.5 + idVec3(0, 0, 4), 0.1f, color, player->viewAxis);
+			}
+			else
+				gameRenderWorld->DrawText(va("%d %d %x", travelTime, reach->travelTime, reach->travelType), (org + reach->start) * 0.5 + idVec3(0, 0, 4), 0.1f, color, player->viewAxis);
+		}
+
+		gameRenderWorld->DebugArrow( color, org, reach->start, 2 );
+		DrawReachability(reach);
 		
 		if( reach->toAreaNum == goalAreaNum )
 		{

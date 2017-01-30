@@ -23,14 +23,14 @@ entityDef aas_player {
 	"fileExtension"				"aas_player"
 	"gravity"					"0 0 -1050"
 	"maxStepHeight"				"18"
-	"maxBarrierHeight"			"48"
+	"maxBarrierHeight"			"50"
 	"maxWaterJumpHeight"		"20"
-	"maxFallHeight"				"128"
+	"maxFallHeight"				"140"
 	"minFloorCos"				"0.6999999881"
 	"tt_barrierJump"			"100"
 	"tt_startCrouching"			"100"
 	"tt_waterJump"				"100"
-	"tt_startWalkOffLedge"		"100"
+	"tt_startWalkOffLedge"		"10"
 }
 
 //
