@@ -768,6 +768,7 @@ void idCommonLocal::ExecuteMapChange()
 	commonVr->VR_GAME_PAUSED = false;
 	commonVr->pdaToggleTime = Sys_Milliseconds();
 	commonVr->wasLoaded = true;
+	commonVr->playerDead = false;
 		
 	vr_headingBeamMode.SetModified();
 	vr_weaponSight.SetModified();
