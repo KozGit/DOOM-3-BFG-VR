@@ -9846,7 +9846,8 @@ bool idPlayer::CanReachPosition( const idVec3& pos, idVec3& betterPos )
 	aas->PushPointIntoAreaNum(areaNum, origin);
 	idReachability* reach = NULL;
 	int travelTime;
-	return aas->RouteToGoalArea(areaNum, origin, toAreaNum, travelFlags, travelTime, &reach) && reach && (travelTime <= vr_teleportMaxTravel.GetInteger());
+	return aas->RouteToGoalArea(areaNum, origin, toAreaNum, travelFlags, travelTime, &reach) && reach && (travelTime <= vr_teleportMaxTravel.GetInteger())
+		&& CheckTeleportPath(betterPos);
 }
 
 /*
@@ -12810,7 +12811,7 @@ void idPlayer::TeleportPath( const idVec3& target )
 	toAreaNum = PointReachableAreaNum( toPoint );
 	if ( aas )
 		aas->PushPointIntoAreaNum( toAreaNum, toPoint );
-	// if there's no path, just go in a straight light (or should we just teleport straight there?)
+	// if there's no path, just go in a straight line (or should we just teleport straight there?)
 	if ( !aas || !originAreaNum || !toAreaNum || !aas->WalkPathToGoal( path, originAreaNum, origin, toAreaNum, toPoint, travelFlags ) )
 	{
 		blocked = !TeleportPathSegment( physicsObj.GetOrigin(), target, lastPos );
@@ -12893,6 +12894,153 @@ void idPlayer::TeleportPath( const idVec3& target )
 	}
 	// Actually teleport
 	Teleport(lastPos, viewAngles, NULL);
+}
+
+bool idPlayer::CheckTeleportPathSegment(const idVec3& start, const idVec3& end, idVec3& lastPos)
+{
+	idVec3 total = end - start;
+	float length = total.Length();
+	if (length >= 0.1f)
+	{
+		const float stepSize = 8.0f;
+		int steps = (int)(length / stepSize);
+		if (steps <= 0) steps = 1;
+		idVec3 step = total / steps;
+		idVec3 pos = start;
+		for (int i = 0; i < steps; i++)
+		{
+			physicsObj.SetOrigin(pos);
+			// Check for doors
+			{
+				int				i, numClipModels;
+				idClipModel* 	cm;
+				idClipModel* 	clipModels[MAX_GENTITIES];
+				idEntity* 		ent;
+				trace_t			trace;
+
+				memset(&trace, 0, sizeof(trace));
+				trace.endpos = pos;
+				trace.endAxis = GetPhysics()->GetAxis();
+
+				numClipModels = gameLocal.clip.ClipModelsTouchingBounds(GetPhysics()->GetAbsBounds(), CONTENTS_SOLID, clipModels, MAX_GENTITIES);
+
+				for (i = 0; i < numClipModels; i++)
+				{
+					cm = clipModels[i];
+
+					// don't touch it if we're the owner
+					if (cm->GetOwner() == this)
+					{
+						continue;
+					}
+
+					ent = cm->GetEntity();
+
+					if (ent->IsType(idDoor::Type))
+					{
+						idDoor *door = (idDoor *)ent;
+						if (door->IsLocked() || (!vr_teleportThroughDoors.GetBool() && (cm->GetContents() & CONTENTS_SOLID)))
+						{
+							// check if we're moving toward the door
+							idVec3 away = door->GetPhysics()->GetOrigin() - pos;
+							away.z = 0;
+							float dist = away.Length();
+							if (dist < 60.0f)
+							{
+								away /= dist;
+								idVec3 my_dir = step;
+								my_dir.Normalize();
+								float angle = idMath::ACos(away * my_dir);
+								if (angle < DEG2RAD(45) || (angle < DEG2RAD(90) && dist < 20))
+									return false;
+							}
+						}
+					}
+				}
+			}
+
+			lastPos = pos;
+			pos += step;
+		}
+	}
+	return true;
+}
+
+/* Carl: Check if we are trying to teleport through a locked or closed door
+====================
+idPlayer::CheckTeleportPath
+====================
+*/
+bool idPlayer::CheckTeleportPath(const idVec3& target)
+{
+	aasPath_t	path;
+	int	originAreaNum, toAreaNum;
+	idVec3 origin = physicsObj.GetOrigin();
+	idVec3 trueOrigin = origin;
+	idVec3 toPoint = target;
+	idVec3 lastPos = origin;
+	bool blocked = false;
+	// Find path start and end areas and points
+	originAreaNum = PointReachableAreaNum(origin);
+	if (aas)
+		aas->PushPointIntoAreaNum(originAreaNum, origin);
+	toAreaNum = PointReachableAreaNum(toPoint);
+	if (aas)
+		aas->PushPointIntoAreaNum(toAreaNum, toPoint);
+	// if there's no path, just go in a straight line
+	if (!aas || !originAreaNum || !toAreaNum || !aas->WalkPathToGoal(path, originAreaNum, origin, toAreaNum, toPoint, travelFlags))
+	{
+		if (!CheckTeleportPathSegment(physicsObj.GetOrigin(), target, lastPos))
+		{
+			physicsObj.SetOrigin(trueOrigin);
+			return false;
+		}
+	}
+	else
+	{
+		// move from actual position to start of path
+		if (!CheckTeleportPathSegment(trueOrigin, origin, lastPos))
+		{
+			physicsObj.SetOrigin(trueOrigin);
+			return false;
+		}
+		idVec3 currentPos = origin;
+		int currentArea = originAreaNum;
+		// Move along path
+		while (currentArea && currentArea != toAreaNum)
+		{
+			if (!CheckTeleportPathSegment(currentPos, path.moveGoal, lastPos))
+			{
+				physicsObj.SetOrigin(trueOrigin);
+				return false;
+			}
+
+			currentPos = path.moveGoal;
+			currentArea = path.moveAreaNum;
+			// Find next path segment. Sometimes it tells us to go to the current location and gets stuck in a loop, so check for that.
+			// TODO: Work out why it gets stuck in a loop, and fix it. Currently we just go in a straight line from stuck point to destination.
+			if (!aas->WalkPathToGoal(path, currentArea, currentPos, toAreaNum, toPoint, travelFlags) || (path.moveAreaNum == currentArea && path.moveGoal == currentPos))
+			{
+				path.moveGoal = toPoint;
+				path.moveAreaNum = toAreaNum;
+			}
+		}
+		// Is this needed? Doesn't hurt.
+		if (!CheckTeleportPathSegment(currentPos, toPoint, lastPos))
+		{
+			physicsObj.SetOrigin(trueOrigin);
+			return false;
+		}
+		// move from end of path to actual target
+		if (!CheckTeleportPathSegment(toPoint, target, lastPos))
+		{
+			physicsObj.SetOrigin(trueOrigin);
+			return false;
+		}
+	}
+
+	physicsObj.SetOrigin(trueOrigin);
+	return true;
 }
 
 /*

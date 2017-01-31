@@ -589,6 +589,8 @@ public:
 	virtual void			Teleport( const idVec3& origin, const idAngles& angles, idEntity* destination );
 	virtual bool			TeleportPathSegment( const idVec3& start, const idVec3& end, idVec3& lastPos );
 	virtual void			TeleportPath( const idVec3& target );
+	virtual bool			CheckTeleportPathSegment(const idVec3& start, const idVec3& end, idVec3& lastPos);
+	virtual bool			CheckTeleportPath(const idVec3& target);
 
 	void					Kill( bool delayRespawn, bool nodamage );
 	virtual void			Killed( idEntity* inflictor, idEntity* attacker, int damage, const idVec3& dir, int location );
