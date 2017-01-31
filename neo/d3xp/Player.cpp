@@ -12730,7 +12730,7 @@ bool idPlayer::TeleportPathSegment( const idVec3& start, const idVec3& end, idVe
 					if (!blocked && ent->IsType(idDoor::Type))
 					{
 						idDoor *door = (idDoor *)ent;
-						if (door->IsLocked())
+						if (door->IsLocked() || ( !vr_teleportThroughDoors.GetBool() && (cm->GetContents() & CONTENTS_SOLID) ))
 						{
 							// check if we're moving toward the door
 							idVec3 away = door->GetPhysics()->GetOrigin() - pos;
@@ -12744,7 +12744,7 @@ bool idPlayer::TeleportPathSegment( const idVec3& start, const idVec3& end, idVe
 								float angle = idMath::ACos(away * my_dir);
 								if (angle < DEG2RAD(45) || (angle < DEG2RAD(90) && dist < 20))
 									blocked = true;
-								if (blocked)
+								if (blocked && door->IsLocked())
 								{
 									// Trigger the door to make the locked sound, if we're not close enough to happen naturally
 									if (dist > 30)
