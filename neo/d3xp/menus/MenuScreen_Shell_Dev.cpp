@@ -147,14 +147,14 @@ void idMenuScreen_Shell_Dev::SetupDevOptions()
 	devOptions.Append( devOption_t( "game/mp/d3dm3", "DM Frag Chamber" ) );
 	devOptions.Append( devOption_t( "game/mp/d3dm4", "DM The Edge 2" ) );
 	devOptions.Append( devOption_t( "game/mp/d3dm5", "DM Lights Out" ) );
-	devOptions.Append( devOption_t( "game/mp/d3xpdm1", "RoE DM 1" ) );
-	devOptions.Append( devOption_t( "game/mp/d3xpdm2", "RoE DM 2" ) );
-	devOptions.Append( devOption_t( "game/mp/d3xpdm3", "RoE DM 3" ) );
-	devOptions.Append( devOption_t( "game/mp/d3xpdm4", "RoE DM 4" ) );
-	devOptions.Append( devOption_t( "game/mp/d3ctf1", "CTF 1" ) );
-	devOptions.Append( devOption_t( "game/mp/d3ctf2", "CTF 2" ) );
-	devOptions.Append( devOption_t( "game/mp/d3ctf3", "CTF 3" ) );
-	devOptions.Append( devOption_t( "game/mp/d3ctf4", "CTF 4" ) );
+	devOptions.Append( devOption_t( "game/mp/d3xpdm1", "RoE Excavation" ) );
+	devOptions.Append( devOption_t( "game/mp/d3xpdm2", "RoE HellPlay" ) );
+	devOptions.Append( devOption_t( "game/mp/d3xpdm3", "RoE Hellhole" ) );
+	devOptions.Append( devOption_t( "game/mp/d3xpdm4", "RoE Eclipse" ) );
+	devOptions.Append( devOption_t( "game/mp/d3ctf1", "CTF HollowXings" ) );
+	devOptions.Append( devOption_t( "game/mp/d3ctf2", "CTF PumpStation" ) );
+	devOptions.Append( devOption_t( "game/mp/d3ctf3", "CTF Power-Up Lab" ) );
+	devOptions.Append( devOption_t( "game/mp/d3ctf4", "CTF Bio-Sec HQ" ) );
 		
 	idList< idList< idStr, TAG_IDLIB_LIST_MENU >, TAG_IDLIB_LIST_MENU > menuOptions;
 	
