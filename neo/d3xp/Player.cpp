@@ -9822,17 +9822,31 @@ bool idPlayer::CanReachPosition( const idVec3& pos, idVec3& betterPos )
 	aasPath_t	path;
 	int			toAreaNum;
 	int			areaNum;
+	idVec3 origin;
 
 	toAreaNum = PointReachableAreaNum(pos);
 	betterPos = pos;
 	if (!aas)
-		return false;
-	aas->PushPointIntoAreaNum( toAreaNum, betterPos );
-	areaNum = PointReachableAreaNum(physicsObj.GetOrigin());
-	if (!toAreaNum || !PathToGoal(path, areaNum, physicsObj.GetOrigin(), toAreaNum, pos))
-		return false;
-	else
 		return true;
+	aas->PushPointIntoAreaNum( toAreaNum, betterPos );
+	origin = physicsObj.GetOrigin();
+	areaNum = PointReachableAreaNum(origin);
+	if (ai_debugMove.GetBool())
+	{
+		aas->DrawArea(areaNum);
+		aas->DrawArea(toAreaNum);
+	}
+	if (!toAreaNum)
+		return false;
+	if (ai_debugMove.GetBool())
+		aas->ShowWalkPath(origin, toAreaNum, betterPos, travelFlags);
+	if (areaNum == toAreaNum)
+		return true;
+
+	aas->PushPointIntoAreaNum(areaNum, origin);
+	idReachability* reach = NULL;
+	int travelTime;
+	return aas->RouteToGoalArea(areaNum, origin, toAreaNum, travelFlags, travelTime, &reach) && reach && (travelTime <= vr_teleportMaxTravel.GetInteger());
 }
 
 /*

@@ -141,10 +141,21 @@ void idMenuScreen_Shell_Dev::SetupDevOptions()
 	devOptions.Append( devOption_t( "game/le_exis2", "Exis 2" ) );
 	devOptions.Append( devOption_t( "game/le_hell", "Hell" ) );
 	devOptions.Append( devOption_t( "game/le_hell_post", "Hell Post" ) );
-	devOptions.Append( devOption_t( NULL, "-Test Maps-" ) );
-	devOptions.Append( devOption_t( "game/pdas", "PDAs" ) );
-	devOptions.Append( devOption_t( "testmaps/test_box", "Box" ) );
-	
+	devOptions.Append( devOption_t( NULL, "-Multiplayer Maps-" ) );
+	devOptions.Append( devOption_t( "game/mp/d3dm1", "DM Tomiko Reactor" ) );
+	devOptions.Append( devOption_t( "game/mp/d3dm2", "DM Delta Labs" ) );
+	devOptions.Append( devOption_t( "game/mp/d3dm3", "DM Frag Chamber" ) );
+	devOptions.Append( devOption_t( "game/mp/d3dm4", "DM The Edge 2" ) );
+	devOptions.Append( devOption_t( "game/mp/d3dm5", "DM Lights Out" ) );
+	devOptions.Append( devOption_t( "game/mp/d3xpdm1", "RoE DM 1" ) );
+	devOptions.Append( devOption_t( "game/mp/d3xpdm2", "RoE DM 2" ) );
+	devOptions.Append( devOption_t( "game/mp/d3xpdm3", "RoE DM 3" ) );
+	devOptions.Append( devOption_t( "game/mp/d3xpdm4", "RoE DM 4" ) );
+	devOptions.Append( devOption_t( "game/mp/d3ctf1", "CTF 1" ) );
+	devOptions.Append( devOption_t( "game/mp/d3ctf2", "CTF 2" ) );
+	devOptions.Append( devOption_t( "game/mp/d3ctf3", "CTF 3" ) );
+	devOptions.Append( devOption_t( "game/mp/d3ctf4", "CTF 4" ) );
+		
 	idList< idList< idStr, TAG_IDLIB_LIST_MENU >, TAG_IDLIB_LIST_MENU > menuOptions;
 	
 	for( int i = 0; i < devOptions.Num(); ++i )
