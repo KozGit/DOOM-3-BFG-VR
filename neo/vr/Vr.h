@@ -183,6 +183,7 @@ public:
 	float				lastHMDRoll;
 	idVec3				lastHMDViewOrigin;
 	idMat3				lastHMDViewAxis;
+	idVec3				uncrouchedHMDViewOrigin;
 	float				headHeightDiff;
 			
 	bool				isWalking;

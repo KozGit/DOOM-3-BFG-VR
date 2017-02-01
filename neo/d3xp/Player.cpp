@@ -10188,6 +10188,8 @@ void idPlayer::Move()
 					newEyeOffset += vr_crouchTriggerDist.GetFloat();
 				}
 			}
+			else
+				newEyeOffset = pm_normalviewheight.GetFloat();
 		}
 		else
 		{
@@ -10204,7 +10206,8 @@ void idPlayer::Move()
 		newEyeOffset = pm_normalviewheight.GetFloat();
 	}
 
-	if( EyeHeight() != newEyeOffset )
+	float oldEyeOffset = EyeHeight();
+	if( oldEyeOffset != newEyeOffset )
 	{
 		if( spectating )
 		{
@@ -10283,7 +10286,9 @@ void idPlayer::Move()
 	BobCycle( pushVelocity );
 	// Carl: Motion sickness detection
 	float distance = ((after - before) - commonVr->motionMoveDelta).LengthSqr();
-	float crouchDistance = newEyeOffset - EyeHeight();
+	static float oldHeadHeightDiff = 0;
+	float crouchDistance = EyeHeight() + commonVr->headHeightDiff - oldEyeOffset - oldHeadHeightDiff;
+	oldHeadHeightDiff = commonVr->headHeightDiff;
 	distance += crouchDistance * crouchDistance + viewBob.LengthSqr();
 	blink = (distance > 0.005f);
 	CrashLand( oldOrigin, oldVelocity );
@@ -13722,7 +13727,7 @@ idVec3 idPlayer::GetEyePosition() const
 	{
 		org = GetPhysics()->GetOrigin();
 	}
-	return org +(GetPhysics()->GetGravityNormal() * -eyeOffset.z);
+	return org + (GetPhysics()->GetGravityNormal() * -eyeOffset.z) + idVec3(0, 0, commonVr->headHeightDiff);
 }
 
 /*
@@ -13868,7 +13873,7 @@ Returns true if the view needs to be darkened
 */
 bool idPlayer::ShouldBlink()
 {
-	return blink || physicsObj.headBumped;
+	return blink;
 }
 
 /*
@@ -14056,10 +14061,10 @@ void idPlayer::CalculateRenderView()
 				
 		commonVr->lastHMDViewOrigin = origin;
 		commonVr->lastHMDViewAxis = axis;
+		commonVr->uncrouchedHMDViewOrigin = origin;
+		commonVr->uncrouchedHMDViewOrigin.z -= commonVr->headHeightDiff;
 				
 		renderView->vieworg = origin;
-		if (!gameLocal.inCinematic)
-			renderView->vieworg.z += commonVr->headHeightDiff;
 		renderView->viewaxis = axis;
 		
 		/* this will calc the distance from the view origin to the ground

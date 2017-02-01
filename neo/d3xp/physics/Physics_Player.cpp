@@ -751,7 +751,7 @@ bool idPhysics_Player::SlideMove( bool gravity, bool stepUp, bool stepDown, bool
 
 	// Leyland
 	blink = false;
-	idVec3 headOrigin = commonVr->lastHMDViewOrigin - current.origin;
+	idVec3 headOrigin = commonVr->uncrouchedHMDViewOrigin - current.origin;
 	headOrigin.z = 0.f;
 
 	static const float headBodyLimit = 11.f;
@@ -765,7 +765,7 @@ bool idPhysics_Player::SlideMove( bool gravity, bool stepUp, bool stepDown, bool
 	// see if we can raise our head high enough
 	start = end = current.origin;
 	start.z += 20.f;
-	end.z = commonVr->lastHMDViewOrigin.z;
+	end.z = commonVr->uncrouchedHMDViewOrigin.z;
 	gameLocal.clip.TraceBounds( trace, start, end, bounds, clipMask, self );
 	commonVr->headHeightDiff = trace.endpos.z - end.z;
 
@@ -800,7 +800,7 @@ bool idPhysics_Player::SlideMove( bool gravity, bool stepUp, bool stepDown, bool
 	{
 		// see if we can make it there
 		start = current.origin;
-		start.z = commonVr->lastHMDViewOrigin.z + commonVr->headHeightDiff;
+		start.z = commonVr->uncrouchedHMDViewOrigin.z + commonVr->headHeightDiff;
 		end = headOrigin + start;
 		gameLocal.clip.TraceBounds( trace, start, end, bounds, clipMask, self );
 
@@ -1592,36 +1592,21 @@ void idPhysics_Player::CheckDuck()
 		// thought I was going to have to do a bunch of bullshit to toggle the crouch anim
 		// but turns out the walk anim with the waist IK doesn't look too terrible for now
 		// of course, I haven't tested crouching EVERYWHERE in the game yet.....
-
+		//  this code makes the bounding box reflect the exact player height
 		{
-			static int currentZ;
-			currentZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z;
+			maxZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z + commonVr->headHeightDiff;
+			idMath::ClampFloat(pm_crouchheight.GetFloat(), pm_normalheight.GetFloat(), maxZ);
+			maxZ = (int)maxZ; // if this is not cast as an int, it crashes the savegame file!!!!!!! WTF?
 
-			if ( currentZ <= ( pm_crouchheight.GetFloat() + 2.0f ) ) // give a little wiggle room.
+			current.movementFlags &= ~PMF_DUCKED;
+			if (maxZ <= (pm_crouchheight.GetFloat() + 2))
 			{
 				playerSpeed = crouchSpeed;
-				maxZ = pm_crouchheight.GetFloat();
+				if (!ladder)
+					current.movementFlags |= PMF_DUCKED;
 			}
-			else
-			{
-				maxZ = pm_normalheight.GetFloat();
-			}
-
 		}
 			
-		/*  this code makes the bounding box reflect the exact player height
-		{
-			maxZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z;
-			maxZ = (int)maxZ; // if this is not cast as an int, it crashes the savegame file!!!!!!! WTF?
-			idMath::ClampFloat( pm_crouchheight.GetFloat(), pm_normalheight.GetFloat(), maxZ );
-						
-			if ( maxZ <= ( pm_crouchheight.GetFloat() + 2 ) )
-			{
-				playerSpeed = crouchSpeed;
-			}
-		}
-
-		*/
 		else
 		{
 
