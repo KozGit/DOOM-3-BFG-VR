@@ -10928,7 +10928,6 @@ void idPlayer::SetupHolsterSlot()
 	}
 
 	const char * modelname;
-	const char * viewmodelname;
 	idRenderModel* renderModel;
 
 	FreeHolsterSlot();
@@ -10949,6 +10948,7 @@ void idPlayer::SetupHolsterSlot()
 		{
 			SelectWeapon(holsteredWeapon, false);
 			holsteredWeapon = weapon_fists;
+			memset(&holsterRenderEntity, 0, sizeof(holsterRenderEntity));
 		}
 		return;
 	}
@@ -10966,9 +10966,6 @@ void idPlayer::SetupHolsterSlot()
 	holsteredWeapon = previousWeapon;
 
 	memset( &holsterRenderEntity, 0, sizeof( holsterRenderEntity ) );
-
-	if (holsteredWeapon == weapon_fists)
-		return;
 
 	holsterRenderEntity.hModel = renderModel;
 	if( holsterRenderEntity.hModel )
