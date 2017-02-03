@@ -10898,7 +10898,7 @@ void idPlayer::UpdatePDASlot()
 
 		idMat3 pdaAxis = pdaAngle1.ToMat3() * pdaAngle2.ToMat3() * pdaAngle3.ToMat3();
 
-		pdaRenderEntity.axis = pdaAxis * waistAxis;
+		pdaRenderEntity.axis = pdaAxis * waistAxis * 0.6;
 		pdaRenderEntity.origin = waistOrigin + slots[SLOT_LEFT_HIP].origin * waistAxis;
 
 		pdaRenderEntity.allowSurfaceInViewID = entityNumber + 1;
@@ -10928,6 +10928,7 @@ void idPlayer::SetupHolsterSlot()
 	}
 
 	const char * modelname;
+	const char * viewmodelname;
 	idRenderModel* renderModel;
 
 	FreeHolsterSlot();
@@ -10954,17 +10955,21 @@ void idPlayer::SetupHolsterSlot()
 
 	// we can holster! so unholster or change weapons
 	int previousWeapon = currentWeapon;
-	if( holsteredWeapon == weapon_fists )
-	{
-		NextWeapon();
-	}
-	else
+	//if( holsteredWeapon == weapon_fists )
+	//{
+	//	NextWeapon();
+	//}
+	//else
 	{
 		SelectWeapon(holsteredWeapon, false);
 	}
 	holsteredWeapon = previousWeapon;
 
 	memset( &holsterRenderEntity, 0, sizeof( holsterRenderEntity ) );
+
+	if (holsteredWeapon == weapon_fists)
+		return;
+
 	holsterRenderEntity.hModel = renderModel;
 	if( holsterRenderEntity.hModel )
 	{
@@ -10982,7 +10987,7 @@ void idPlayer::SetupHolsterSlot()
 
 	if( strcmp(modelname, "models/weapons/pistol/w_pistol.lwo") == 0 )
 	{
-		holsterAxis = idAngles(90, 0, 0).ToMat3();
+		holsterAxis = idAngles(90, 0, 0).ToMat3() * 0.75f;
 	}
 	else if( strcmp(modelname, "models/weapons/shotgun/w_shotgun2.lwo") == 0 ||
 		strcmp(modelname, "models/weapons/bfg/bfg_world.lwo") == 0)
@@ -10992,6 +10997,22 @@ void idPlayer::SetupHolsterSlot()
 	else if( strcmp(modelname, "models/weapons/grabber/grabber_world.ase") == 0 )
 	{
 		holsterAxis = idAngles(-90, 180, 0).ToMat3() * 0.5f;
+	}
+	else if (strcmp(modelname, "models/weapons/machinegun/w_machinegun.lwo") == 0)
+	{
+		holsterAxis = idAngles(0, 90, 90).ToMat3() * 0.75f;
+	}
+	else if (strcmp(modelname, "models/weapons/plasmagun/plasmagun_world.lwo") == 0)
+	{
+		holsterAxis = idAngles(0, 90, 90).ToMat3() * 0.75f;
+	}
+	else if (strcmp(modelname, "models/weapons/chainsaw/w_chainsaw.lwo") == 0)
+	{
+		holsterAxis = idAngles(0, 90, 90).ToMat3() * 0.9f;
+	}
+	else if (strcmp(modelname, "models/weapons/chaingun/w_chaingun.lwo") == 0)
+	{
+		holsterAxis = idAngles(0, 90, 90).ToMat3() * 0.9f;
 	}
 	else
 	{
