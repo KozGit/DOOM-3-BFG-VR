@@ -544,7 +544,7 @@ public:
 	void					FreePDASlot();
 	void					UpdatePDASlot();
 
-	void					SetupHolsterSlot();
+	void					SetupHolsterSlot( int stashed = -1 );
 	void					FreeHolsterSlot();
 	void					UpdateHolsterSlot();
 

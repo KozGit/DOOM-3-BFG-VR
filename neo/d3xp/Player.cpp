@@ -5672,8 +5672,9 @@ void idPlayer::GivePDA( const idDeclPDA* pda, const char* securityItem, bool tog
 					else
 					{
 						common->Printf( "idPlayer::GivePDA calling Select Weapon for PDA\n" );
-						SelectWeapon( weapon_pda, true );
 						SetupPDASlot( false );
+						SetupHolsterSlot( false );
+						SelectWeapon(weapon_pda, true);
 					}
 				}
 			}
@@ -5809,7 +5810,8 @@ bool idPlayer::OtherHandImpulseSlot()
 			else if( weapon_pda >= 0 )
 			{
 				SetupPDASlot( false );
-				SelectWeapon(weapon_pda, true);
+				SetupHolsterSlot( false );
+				SelectWeapon( weapon_pda, true );
 			}
 		}
 	}
@@ -5817,7 +5819,26 @@ bool idPlayer::OtherHandImpulseSlot()
 	{
 		SwapWeaponHand();
 		// Holster the PDA we are holding on the other side
-		if( !common->IsMultiplayer() )
+		if( commonVr->PDAforced )
+		{
+			PerformImpulse( 40 );
+		}
+		else if( !common->IsMultiplayer() && objectiveSystemOpen )
+		{
+			if (previousWeapon == weapon_fists)
+				previousWeapon = holsteredWeapon;
+			TogglePDA();
+		}
+		else
+			// pick up whatever weapon we have holstered, and magically holster our current weapon
+			SetupHolsterSlot();
+		return true;
+	}
+	if ( otherHandSlot == SLOT_WEAPON_BACK_BOTTOM )
+	{
+		SwapWeaponHand();
+		// Holster the PDA we are holding on the other side
+		if (!common->IsMultiplayer())
 		{
 			// we don't have a PDA, so toggle the menu instead
 			if ( commonVr->PDAforced )
@@ -5829,8 +5850,26 @@ bool idPlayer::OtherHandImpulseSlot()
 				TogglePDA();
 			}
 		}
-		// pick up whatever weapon we have holstered, and magically holster our current weapon
-		SetupHolsterSlot();
+		PrevWeapon();
+		return true;
+	}
+	if ( otherHandSlot == SLOT_WEAPON_BACK_TOP )
+	{
+		SwapWeaponHand();
+		// Holster the PDA we are holding on the other side
+		if (!common->IsMultiplayer())
+		{
+			// we don't have a PDA, so toggle the menu instead
+			if ( commonVr->PDAforced )
+			{
+				PerformImpulse(40);
+			}
+			else if ( objectiveSystemOpen )
+			{
+				TogglePDA();
+			}
+		}
+		NextWeapon();
 		return true;
 	}
 	return false;
@@ -5844,24 +5883,35 @@ bool idPlayer::WeaponHandImpulseSlot()
 	}
 	if( weaponHandSlot == SLOT_WEAPON_HIP )
 	{
-		SetupHolsterSlot();
+		if (objectiveSystemOpen)
+		{
+			if ( previousWeapon == weapon_fists )
+				previousWeapon = holsteredWeapon;
+			TogglePDA();
+		}
+		else
+			SetupHolsterSlot();
 		return true;
 	}
 	if( weaponHandSlot == SLOT_WEAPON_BACK_BOTTOM )
 	{
+		if (objectiveSystemOpen)
+			TogglePDA();
 		PrevWeapon();
 		return true;
 	}
 	if( weaponHandSlot == SLOT_WEAPON_BACK_TOP )
 	{
+		if (objectiveSystemOpen)
+			TogglePDA();
 		NextWeapon();
 		return true;
 	}
 	if ( weaponHandSlot == SLOT_PDA_HIP )
 	{
 		SwapWeaponHand();
-		// if we're holding a gun (not a pointer finger) then holster the gun
-		if ( !commonVr->PDAforced && !objectiveSystemOpen )
+		// if we're holding a gun (not a pointer finger or fist) then holster the gun
+		if ( !commonVr->PDAforced && !objectiveSystemOpen && currentWeapon != weapon_fists )
 			SetupHolsterSlot();
 		// pick up PDA in our weapon hand, or pick up the torch if our hand is a pointer finger
 		if (!common->IsMultiplayer())
@@ -5878,6 +5928,7 @@ bool idPlayer::WeaponHandImpulseSlot()
 			else if( weapon_pda >= 0 )
 			{
 				SetupPDASlot( false );
+				SetupHolsterSlot( false );
 				SelectWeapon( weapon_pda, true );
 			}
 		}
@@ -8959,6 +9010,7 @@ void idPlayer::TogglePDA()
 	if( pdaMenu != NULL )
 	{
 		SetupPDASlot( objectiveSystemOpen );
+		SetupHolsterSlot( objectiveSystemOpen );
 		objectiveSystemOpen = !objectiveSystemOpen;
 		pdaMenu->ActivateMenu( objectiveSystemOpen );
 		
@@ -9203,8 +9255,9 @@ void idPlayer::PerformImpulse( int impulse )
 						
 						common->Printf( "idPlayer::PerformImpulse  calling Select Weapon for PDA\n" );
 						commonVr->pdaToggleTime = Sys_Milliseconds();
-						SelectWeapon( weapon_pda, true );
 						SetupPDASlot( false );
+						SetupHolsterSlot( false );
+						SelectWeapon(weapon_pda, true);
 					}
 #if !defined(ID_RETAIL) && !defined(ID_RETAIL_INTERNAL)
 				}
@@ -11000,11 +11053,20 @@ void idPlayer::UpdatePDASlot()
 /*
 ==============
 idPlayer::SetupHolsterSlot
+
+stashed: -1 = switch weapons, 1 = empty holster of stashed weapon, 0 = stash current weapon in holster but don't switch
 ==============
 */
-void idPlayer::SetupHolsterSlot()
+void idPlayer::SetupHolsterSlot( int stashed )
 {
-	if( !weapon.GetEntity()->IsReady() )
+	// if there's nothing to stash because we were already using fists or PDA
+	if ( stashed == 0 && (currentWeapon == weapon_pda || currentWeapon == weapon_fists) )
+		return;
+	// if we were using fists before activating pda, we didn't stash anything in our holster, so don't unstash anything
+	if ( stashed == 1 && previousWeapon == weapon_fists )
+		return;
+	// if we want to read or switch the current weapon but it's not ready
+	if( !weapon.GetEntity()->IsReady() && stashed != 1 )
 	{
 		return;
 	}
@@ -11018,17 +11080,24 @@ void idPlayer::SetupHolsterSlot()
 		return;
 	}
 
+	if ( stashed == 1 )
+		modelname = NULL;
+	else
+		modelname = weapon->weaponDef->dict.GetString("model");
+
 	// can we holster?
-	if( !(modelname = weapon->weaponDef->dict.GetString( "model" )) ||
+	if( !modelname ||
 		strcmp(modelname, "models/weapons/soulcube/w_soulcube.lwo") == 0 ||
 		strcmp(modelname, "_DEFAULT") == 0 ||
 		strcmp(modelname, "models/items/grenade_ammo/grenade.lwo") == 0 ||
+		strcmp(modelname, "models/items/pda/pda_world.lwo") == 0 ||
 		!(renderModel = renderModelManager->FindModel( modelname )) )
 	{
 		// can't holster, just unholster
 		if( holsteredWeapon != weapon_fists )
 		{
-			SelectWeapon(holsteredWeapon, false);
+			if ( stashed < 0 )
+				SelectWeapon(holsteredWeapon, false);
 			holsteredWeapon = weapon_fists;
 			memset(&holsterRenderEntity, 0, sizeof(holsterRenderEntity));
 		}
@@ -11036,16 +11105,14 @@ void idPlayer::SetupHolsterSlot()
 	}
 
 	// we can holster! so unholster or change weapons
-	int previousWeapon = currentWeapon;
-	//if( holsteredWeapon == weapon_fists )
-	//{
-	//	NextWeapon();
-	//}
-	//else
+	if (stashed < 0)
 	{
+		int previousWeapon = currentWeapon;
 		SelectWeapon(holsteredWeapon, false);
+		holsteredWeapon = previousWeapon;
 	}
-	holsteredWeapon = previousWeapon;
+	else
+		holsteredWeapon = currentWeapon;
 
 	memset( &holsterRenderEntity, 0, sizeof( holsterRenderEntity ) );
 
@@ -14759,12 +14826,14 @@ void idPlayer::CalculateRenderView()
 			commonVr->VR_GAME_PAUSED = false;
 			idPlayer* player = gameLocal.GetLocalPlayer();
 			player->SetupPDASlot( true );
+			player->SetupHolsterSlot( true );
 		}
 
 		if ( commonVr->PDAforcetoggle )
 		{
 			idPlayer* player = gameLocal.GetLocalPlayer();
 			player->SetupPDASlot( commonVr->PDAforced );
+			player->SetupHolsterSlot( commonVr->PDAforced );
 			if (!commonVr->PDAforced)
 			{
 				if ( weapon->IdentifyWeapon() != WEAPON_PDA )
