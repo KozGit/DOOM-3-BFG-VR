@@ -198,6 +198,33 @@ iVr* commonVr = &vrCom;
 iVoice voice;
 iVoice* commonVoice = &voice;
 
+void SwapBinding(int Old, int New)
+{
+	idStr s = idKeyInput::GetBinding(New);
+	idKeyInput::SetBinding(New, idKeyInput::GetBinding(Old));
+	idKeyInput::SetBinding(Old, s.c_str());
+}
+
+void SwapWeaponHand()
+{
+	vr_weaponHand.SetInteger(1 - vr_weaponHand.GetInteger());
+
+	// swap motion controller bindings to other hand
+	for (int k = K_JOY17; k <= K_JOY18; k++)
+		SwapBinding(k, k + 7);
+	// JOY19 is the Touch menu button, which only exists on the left hand
+	for (int k = K_JOY20; k <= K_JOY23; k++)
+		SwapBinding(k, k + 7);
+	for (int k = K_JOY31; k <= K_JOY48; k++)
+		SwapBinding(k, k + 18);
+	for (int k = K_TOUCH_LEFT_STICK_UP; k <= K_TOUCH_LEFT_STICK_RIGHT; k++)
+		SwapBinding(k, k + 4);
+	SwapBinding(K_L_TOUCHTRIG, K_R_TOUCHTRIG);
+	for (int k = K_STEAMVR_LEFT_PAD_UP; k <= K_STEAMVR_LEFT_PAD_RIGHT; k++)
+		SwapBinding(k, k + 4);
+	SwapBinding(K_L_STEAMVRTRIG, K_R_STEAMVRTRIG);
+}
+
 /*
 ====================
 R_MakeFBOImage

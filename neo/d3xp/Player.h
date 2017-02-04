@@ -262,10 +262,10 @@ typedef struct
 enum slotIndex_t
 {
 	SLOT_NONE = -1,
-	SLOT_LEFT_HIP,
-	SLOT_RIGHT_HIP,
-	SLOT_RIGHT_BACK_BOTTOM,
-	SLOT_RIGHT_BACK_TOP,
+	SLOT_PDA_HIP,
+	SLOT_WEAPON_HIP,
+	SLOT_WEAPON_BACK_BOTTOM,
+	SLOT_WEAPON_BACK_TOP,
 	SLOT_COUNT
 };
 
@@ -507,11 +507,11 @@ public:
 	
 	idVec3					leftHandOrigin;
 	idMat3					leftHandAxis;
-	slotIndex_t				leftHandSlot;
+	slotIndex_t				otherHandSlot;
 
 	idVec3					rightHandOrigin;
 	idMat3					rightHandAxis;
-	slotIndex_t				rightHandSlot;
+	slotIndex_t				weaponHandSlot;
 
 	idVec3					waistOrigin;
 	idMat3					waistAxis;
@@ -720,8 +720,8 @@ public:
 	bool					PowerUpActive( int powerup ) const;
 	float					PowerUpModifier( int type );
 	
-	bool					LeftImpulseSlot();
-	bool					RightImpulseSlot();
+	bool					OtherHandImpulseSlot();
+	bool					WeaponHandImpulseSlot();
 	
 	int						SlotForWeapon( const char* weaponName );
 	void					Reload();

@@ -5787,13 +5787,13 @@ void idPlayer::GiveItem( const char* itemname )
 	gameLocal.SpawnEntityDef( args );
 }
 
-bool idPlayer::LeftImpulseSlot()
+bool idPlayer::OtherHandImpulseSlot()
 {
 	if( !commonVr->hasHMD )
 	{
 		return false;
 	}
-	if( leftHandSlot == SLOT_LEFT_HIP )
+	if( otherHandSlot == SLOT_PDA_HIP )
 	{
 		if( !common->IsMultiplayer() )
 		{
@@ -5812,30 +5812,75 @@ bool idPlayer::LeftImpulseSlot()
 				SelectWeapon(weapon_pda, true);
 			}
 		}
+	}
+	if ( otherHandSlot == SLOT_WEAPON_HIP )
+	{
+		SwapWeaponHand();
+		// Holster the PDA we are holding on the other side
+		if( !common->IsMultiplayer() )
+		{
+			// we don't have a PDA, so toggle the menu instead
+			if ( commonVr->PDAforced )
+			{
+				PerformImpulse( 40 );
+			}
+			else if( objectiveSystemOpen )
+			{
+				TogglePDA();
+			}
+		}
+		// pick up whatever weapon we have holstered, and magically holster our current weapon
+		SetupHolsterSlot();
 		return true;
 	}
 	return false;
 }
 
-bool idPlayer::RightImpulseSlot()
+bool idPlayer::WeaponHandImpulseSlot()
 {
 	if( !commonVr->hasHMD )
 	{
 		return false;
 	}
-	if( rightHandSlot == SLOT_RIGHT_HIP )
+	if( weaponHandSlot == SLOT_WEAPON_HIP )
 	{
 		SetupHolsterSlot();
 		return true;
 	}
-	if( rightHandSlot == SLOT_RIGHT_BACK_BOTTOM )
+	if( weaponHandSlot == SLOT_WEAPON_BACK_BOTTOM )
 	{
 		PrevWeapon();
 		return true;
 	}
-	if( rightHandSlot == SLOT_RIGHT_BACK_TOP )
+	if( weaponHandSlot == SLOT_WEAPON_BACK_TOP )
 	{
 		NextWeapon();
+		return true;
+	}
+	if ( weaponHandSlot == SLOT_PDA_HIP )
+	{
+		SwapWeaponHand();
+		// if we're holding a gun (not a pointer finger) then holster the gun
+		if ( !commonVr->PDAforced && !objectiveSystemOpen )
+			SetupHolsterSlot();
+		// pick up PDA in our weapon hand, or pick up the torch if our hand is a pointer finger
+		if (!common->IsMultiplayer())
+		{
+			// we don't have a PDA, so toggle the menu instead
+			if ( commonVr->PDAforced || inventory.pdas.Num() == 0 )
+			{
+				PerformImpulse( 40 );
+			}
+			else if( objectiveSystemOpen )
+			{
+				TogglePDA();
+			}
+			else if( weapon_pda >= 0 )
+			{
+				SetupPDASlot( false );
+				SelectWeapon( weapon_pda, true );
+			}
+		}
 		return true;
 	}
 	return false;
@@ -9439,7 +9484,7 @@ void idPlayer::EvaluateControls()
 	if( commonVr->grabbedLeft )
 	{
 		commonVr->grabbedLeft = false;
-		if( LeftImpulseSlot() )
+		if( (vr_weaponHand.GetInteger()==0 && OtherHandImpulseSlot()) || (vr_weaponHand.GetInteger()==1 && WeaponHandImpulseSlot()) )
 		{
 			grabbed = true;
 		}
@@ -9447,7 +9492,7 @@ void idPlayer::EvaluateControls()
 	if( commonVr->grabbedRight )
 	{
 		commonVr->grabbedRight = false;
-		if (RightImpulseSlot())
+		if( (vr_weaponHand.GetInteger()==1 && OtherHandImpulseSlot()) || (vr_weaponHand.GetInteger()==0 && WeaponHandImpulseSlot()) )
 		{
 			grabbed = true;
 		}
@@ -10933,7 +10978,10 @@ void idPlayer::UpdatePDASlot()
 		pdaRenderEntity.entityNum = ENTITYNUM_NONE;
 
 		pdaRenderEntity.axis = pdaHolsterAxis * waistAxis;
-		pdaRenderEntity.origin = waistOrigin + slots[SLOT_LEFT_HIP].origin * waistAxis;
+		idVec3 slotOrigin = slots[SLOT_PDA_HIP].origin;
+		if (vr_weaponHand.GetInteger())
+			slotOrigin.y *= -1.0f;
+		pdaRenderEntity.origin = waistOrigin + slotOrigin * waistAxis;
 
 		pdaRenderEntity.allowSurfaceInViewID = entityNumber + 1;
 		pdaRenderEntity.weaponDepthHack = g_useWeaponDepthHack.GetBool();
@@ -11085,7 +11133,10 @@ void idPlayer::UpdateHolsterSlot()
 		holsterRenderEntity.entityNum = ENTITYNUM_NONE;
 
 		holsterRenderEntity.axis = holsterAxis * waistAxis;
-		holsterRenderEntity.origin = waistOrigin + (slots[SLOT_RIGHT_HIP].origin + idVec3(-6, 0, 0 )) * waistAxis;
+		idVec3 slotOrigin = slots[SLOT_WEAPON_HIP].origin + idVec3(-6, 0, 0);
+		if (vr_weaponHand.GetInteger())
+			slotOrigin.y *= -1.0f;
+		holsterRenderEntity.origin = waistOrigin + slotOrigin * waistAxis;
 
 		holsterRenderEntity.allowSurfaceInViewID = entityNumber + 1;
 		holsterRenderEntity.weaponDepthHack = g_useWeaponDepthHack.GetBool();
@@ -14381,7 +14432,11 @@ void idPlayer::CalculateWaist()
 
 void idPlayer::CalculateLeftHand()
 {
-	slotIndex_t oldSlot = leftHandSlot;
+	slotIndex_t oldSlot;
+	if (vr_weaponHand.GetInteger() == 0)
+		oldSlot = otherHandSlot;
+	else
+		oldSlot = weaponHandSlot;
 	slotIndex_t slot = SLOT_NONE;
 	if ( commonVr->hasHMD )
 	{
@@ -14397,7 +14452,10 @@ void idPlayer::CalculateLeftHand()
 		{
 			for( int i = 0; i < SLOT_COUNT; i++ )
 			{
-				idVec3 origin = waistOrigin + slots[i].origin * waistAxis;
+				idVec3 slotOrigin = slots[i].origin;
+				if ( vr_weaponHand.GetInteger() )
+					slotOrigin.y *= -1.0f;
+				idVec3 origin = waistOrigin + slotOrigin * waistAxis;
 				if( (leftHandOrigin - origin).LengthSqr() < slots[i].radiusSq )
 				{
 					slot = (slotIndex_t)i;
@@ -14415,12 +14473,19 @@ void idPlayer::CalculateLeftHand()
 	{
 		SetControllerShake(0, 0, vr_slotMag.GetFloat(), vr_slotDur.GetInteger());
 	}
-	leftHandSlot = slot;
+	if (vr_weaponHand.GetInteger() == 0)
+		otherHandSlot = slot;
+	else
+		weaponHandSlot = slot;
 }
 
 void idPlayer::CalculateRightHand()
 {
-	slotIndex_t oldSlot = rightHandSlot;
+	slotIndex_t oldSlot;
+	if (vr_weaponHand.GetInteger() == 0)
+		oldSlot = weaponHandSlot;
+	else
+		oldSlot = otherHandSlot;
 	slotIndex_t slot = SLOT_NONE;
 	if ( commonVr->hasHMD )
 	{
@@ -14436,7 +14501,10 @@ void idPlayer::CalculateRightHand()
 		{
 			for( int i = 0; i < SLOT_COUNT; i++ )
 			{
-				idVec3 origin = waistOrigin + slots[i].origin * waistAxis;
+				idVec3 slotOrigin = slots[i].origin;
+				if (vr_weaponHand.GetInteger())
+					slotOrigin.y *= -1.0f;
+				idVec3 origin = waistOrigin + slotOrigin * waistAxis;
 				if( (rightHandOrigin - origin).LengthSqr() < slots[i].radiusSq )
 				{
 					slot = (slotIndex_t)i;
@@ -14454,7 +14522,10 @@ void idPlayer::CalculateRightHand()
 	{
 		SetControllerShake(vr_slotMag.GetFloat(), vr_slotDur.GetInteger(), 0, 0);
 	}
-	rightHandSlot = slot;
+	if (vr_weaponHand.GetInteger() == 0)
+		weaponHandSlot = slot;
+	else
+		otherHandSlot = slot;
 }
 
 /*

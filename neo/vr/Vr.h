@@ -83,6 +83,8 @@ typedef enum
 	FLASH_MAX,
 } vr_flashlight_mode_t;
 
+void SwapWeaponHand();
+
 class idClipModel;
 
 class iVr
