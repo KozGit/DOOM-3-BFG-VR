@@ -187,6 +187,8 @@ idCVar vr_strobeTime( "vr_strobeTime", "500", CVAR_INTEGER | CVAR_ARCHIVE, "Time
 idCVar vr_chaperone( "vr_chaperone", "2", CVAR_INTEGER | CVAR_ARCHIVE, "Chaperone/Guardian mode. 0 = when near, 1 = when throwing, 2 = when melee, 3 = when dodging, 4 = always", 0, 4 );
 idCVar vr_chaperoneColor( "vr_chaperoneColor", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Chaperone colour. 0 = default, 1 = black, 2 = grey, 3 = white, 4 = red, 5 = green, 6 = blue, 7 = yellow, 8 = cyan, 9 = magenta, 10 = purple", 0, 10 );
 
+idCVar vr_handSwapsAnalogs( "vr_handSwapsAnalogs", "1", CVAR_BOOL | CVAR_ARCHIVE, "Should swapping the weapon hand affect analog controls (stick or touchpad) or just buttons/triggers? 0 = only swap buttons, 1 = swap all controls" );
+
 //===================================================================
 
 int fboWidth;
@@ -217,12 +219,15 @@ void SwapWeaponHand()
 		SwapBinding(k, k + 7);
 	for (int k = K_JOY31; k <= K_JOY48; k++)
 		SwapBinding(k, k + 18);
-	for (int k = K_TOUCH_LEFT_STICK_UP; k <= K_TOUCH_LEFT_STICK_RIGHT; k++)
-		SwapBinding(k, k + 4);
 	SwapBinding(K_L_TOUCHTRIG, K_R_TOUCHTRIG);
-	for (int k = K_STEAMVR_LEFT_PAD_UP; k <= K_STEAMVR_LEFT_PAD_RIGHT; k++)
-		SwapBinding(k, k + 4);
 	SwapBinding(K_L_STEAMVRTRIG, K_R_STEAMVRTRIG);
+	if (vr_handSwapsAnalogs.GetBool())
+	{
+		for (int k = K_TOUCH_LEFT_STICK_UP; k <= K_TOUCH_LEFT_STICK_RIGHT; k++)
+			SwapBinding(k, k + 4);
+		for (int k = K_STEAMVR_LEFT_PAD_UP; k <= K_STEAMVR_LEFT_PAD_RIGHT; k++)
+			SwapBinding(k, k + 4);
+	}
 }
 
 /*

@@ -524,6 +524,8 @@ extern idCVar vr_slotMag;
 extern idCVar vr_slotDur;
 extern idCVar vr_slotDisable;
 
+extern idCVar vr_handSwapsAnalogs;
+
 extern iVr* commonVr;
 extern iVoice* commonVoice;
 

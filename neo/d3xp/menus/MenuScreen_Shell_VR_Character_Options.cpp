@@ -366,7 +366,9 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 		{
 			static const int numValues = 2;
 			static const int values[numValues] = { 0, 1 };
-			vr_weaponHand.SetInteger( AdjustOption( vr_weaponHand.GetInteger(), values, numValues, adjustAmount ) );
+			int new_hand = AdjustOption( vr_weaponHand.GetInteger(), values, numValues, adjustAmount );
+			if ( new_hand != vr_weaponHand.GetInteger() )
+				SwapWeaponHand();
 			break;
 		}
 		
