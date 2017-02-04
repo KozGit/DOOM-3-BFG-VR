@@ -2252,7 +2252,7 @@ void idPlayer::Init()
 	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
 
-	SetupPDASlot();
+	SetupPDASlot( true );
 	holsteredWeapon = weapon_fists;
 
 	// Koz begin
@@ -3352,7 +3352,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
 
-	SetupPDASlot();
+	SetupPDASlot( true );
 	holsteredWeapon = weapon_fists;
 	
 	for( int i = 0; i < MAX_PLAYER_PDA; i++ )
@@ -5673,7 +5673,7 @@ void idPlayer::GivePDA( const idDeclPDA* pda, const char* securityItem, bool tog
 					{
 						common->Printf( "idPlayer::GivePDA calling Select Weapon for PDA\n" );
 						SelectWeapon( weapon_pda, true );
-						
+						SetupPDASlot( false );
 					}
 				}
 			}
@@ -5797,14 +5797,18 @@ bool idPlayer::LeftImpulseSlot()
 	{
 		if( !common->IsMultiplayer() )
 		{
-			if( objectiveSystemOpen )
+			// we don't have a PDA, so toggle the menu instead
+			if ( commonVr->PDAforced || inventory.pdas.Num() == 0 )
 			{
-				SetupPDASlot();
+				PerformImpulse( 40 );
+			}
+			else if( objectiveSystemOpen )
+			{
 				TogglePDA();
 			}
 			else if( weapon_pda >= 0 )
 			{
-				SetupPDASlot();
+				SetupPDASlot( false );
 				SelectWeapon(weapon_pda, true);
 			}
 		}
@@ -6177,7 +6181,7 @@ void idPlayer::SelectWeapon( int num, bool force, bool specific )
 			
 			if ( game->isVR )
 			{
-				GivePDA( NULL, NULL, false ); // hack to allow the player to change system settings in the mars city level before the PDA is given by the receptionist.
+				//GivePDA( NULL, NULL, false ); // hack to allow the player to change system settings in the mars city level before the PDA is given by the receptionist.
 				idealWeapon = num;
 			}
 			else
@@ -8898,7 +8902,7 @@ void idPlayer::TogglePDA()
 		if ( game->isVR )
 		{
 			// koz : hack to allow the player to change system settings in the mars city level before the PDA is given by the receptionist.
-			GivePDA( NULL, NULL, false ); 
+			//GivePDA( NULL, NULL, false ); 
 		}
 		else
 		{
@@ -8909,6 +8913,7 @@ void idPlayer::TogglePDA()
 	
 	if( pdaMenu != NULL )
 	{
+		SetupPDASlot( objectiveSystemOpen );
 		objectiveSystemOpen = !objectiveSystemOpen;
 		pdaMenu->ActivateMenu( objectiveSystemOpen );
 		
@@ -9148,12 +9153,13 @@ void idPlayer::PerformImpulse( int impulse )
 						common->Printf( "idPlayer::PerformImpulse calling TogglePDA\n" );
 						TogglePDA();
 					}
-					else if( weapon_pda >= 0 )
+					else if( weapon_pda >= 0 && inventory.pdas.Num() )
 					{
 						
 						common->Printf( "idPlayer::PerformImpulse  calling Select Weapon for PDA\n" );
 						commonVr->pdaToggleTime = Sys_Milliseconds();
 						SelectWeapon( weapon_pda, true );
+						SetupPDASlot( false );
 					}
 #if !defined(ID_RETAIL) && !defined(ID_RETAIL_INTERNAL)
 				}
@@ -10841,7 +10847,7 @@ bool idPlayer::HandleGuiEvents( const sysEvent_t* ev )
 idPlayer::SetupPDASlot
 ==============
 */
-void idPlayer::SetupPDASlot()
+void idPlayer::SetupPDASlot( bool holsterPDA )
 {
 	const char * modelname;
 	idRenderModel* renderModel;
@@ -10853,13 +10859,10 @@ void idPlayer::SetupPDASlot()
 		return;
 	}
 
-	static bool first_time = true;
-
-	if ( objectiveSystemOpen || first_time )
+	if ( holsterPDA )
 	{
 		// we will holster the PDA
 		modelname = "models/items/pda/pda_world.lwo";
-		first_time = false;
 		pdaHolsterAxis = (pdaAngle1.ToMat3() * pdaAngle2.ToMat3() * pdaAngle3.ToMat3()) * 0.6f;
 	}
 	else
@@ -10923,7 +10926,7 @@ void idPlayer::UpdatePDASlot()
 	{
 		return;
 	}
-	if( inventory.pdas.Num() && pdaRenderEntity.hModel )
+	if( pdaRenderEntity.hModel ) // && inventory.pdas.Num()
 	{
 		pdaRenderEntity.timeGroup = timeGroup;
 
@@ -14683,11 +14686,15 @@ void idPlayer::CalculateRenderView()
 		{
 			commonVr->PDAforced = false;
 			commonVr->VR_GAME_PAUSED = false;
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			player->SetupPDASlot( true );
 		}
 
 		if ( commonVr->PDAforcetoggle )
 		{
-			if ( !commonVr->PDAforced )
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			player->SetupPDASlot( commonVr->PDAforced );
+			if (!commonVr->PDAforced)
 			{
 				if ( weapon->IdentifyWeapon() != WEAPON_PDA )
 				{

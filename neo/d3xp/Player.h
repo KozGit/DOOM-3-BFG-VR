@@ -540,7 +540,7 @@ public:
 	void					Spawn();
 	void					Think();
 	
-	void					SetupPDASlot();
+	void					SetupPDASlot( bool holsterPDA );
 	void					FreePDASlot();
 	void					UpdatePDASlot();
 
