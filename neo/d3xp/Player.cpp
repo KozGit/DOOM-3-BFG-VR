@@ -100,6 +100,8 @@ slot_t slots[SLOT_COUNT] = {
 	{ idVec3(0,-9,-4), 9.0f*9.0f },
 	{ idVec3(-9,-4, 4), 9.0f*9.0f },
 	{ idVec3(-9,-4,-waistZ - neckOffset.z), 9.0f*9.0f },
+	{ idVec3(4, 8, -waistZ + 2), 9.0f*9.0f },
+	{ idVec3(-neckOffset.x, 0, -waistZ - neckOffset.z + 7), 9.0f*9.0f },
 };
 
 idAngles pdaAngle1(0,-90,0);
@@ -5814,8 +5816,27 @@ bool idPlayer::OtherHandImpulseSlot()
 				SelectWeapon( weapon_pda, true );
 			}
 		}
+		return true;
 	}
-	if ( otherHandSlot == SLOT_WEAPON_HIP )
+	if( otherHandSlot == SLOT_FLASHLIGHT_HEAD && !commonVr->PDAforced && !objectiveSystemOpen )
+	{
+		// swap flashlight between head and hand
+		if (vr_flashlightMode.GetInteger() == FLASH_HEAD)
+			vr_flashlightMode.SetInteger(FLASH_HAND);
+		else if (vr_flashlightMode.GetInteger() == FLASH_HAND)
+			vr_flashlightMode.SetInteger(FLASH_HEAD);
+		return true;
+	}
+	if( otherHandSlot == SLOT_FLASHLIGHT_SHOULDER && !commonVr->PDAforced && !objectiveSystemOpen )
+	{
+		// swap flashlight between body and hand
+		if (vr_flashlightMode.GetInteger() == FLASH_BODY)
+			vr_flashlightMode.SetInteger(FLASH_HAND);
+		else if (vr_flashlightMode.GetInteger() == FLASH_HAND)
+			vr_flashlightMode.SetInteger(FLASH_BODY);
+		return true;
+	}
+	if (otherHandSlot == SLOT_WEAPON_HIP)
 	{
 		SwapWeaponHand();
 		// Holster the PDA we are holding on the other side
@@ -5932,6 +5953,20 @@ bool idPlayer::WeaponHandImpulseSlot()
 				SelectWeapon( weapon_pda, true );
 			}
 		}
+		return true;
+	}
+	if (weaponHandSlot == SLOT_FLASHLIGHT_HEAD && vr_flashlightMode.GetInteger() == FLASH_HEAD && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen)
+	{
+		SwapWeaponHand();
+		// swap flashlight between head and hand
+		vr_flashlightMode.SetInteger( FLASH_HAND );
+		return true;
+	}
+	if (weaponHandSlot == SLOT_FLASHLIGHT_SHOULDER && vr_flashlightMode.GetInteger() == FLASH_BODY && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen)
+	{
+		SwapWeaponHand();
+		// swap flashlight between head and hand
+		vr_flashlightMode.SetInteger( FLASH_HAND );
 		return true;
 	}
 	return false;
@@ -11200,7 +11235,7 @@ void idPlayer::UpdateHolsterSlot()
 		holsterRenderEntity.entityNum = ENTITYNUM_NONE;
 
 		holsterRenderEntity.axis = holsterAxis * waistAxis;
-		idVec3 slotOrigin = slots[SLOT_WEAPON_HIP].origin + idVec3(-6, 0, 0);
+		idVec3 slotOrigin = slots[SLOT_WEAPON_HIP].origin + idVec3(-5, 0, 0);
 		if (vr_weaponHand.GetInteger())
 			slotOrigin.y *= -1.0f;
 		holsterRenderEntity.origin = waistOrigin + slotOrigin * waistAxis;
@@ -12129,7 +12164,10 @@ void idPlayer::Think()
 	{
 		for( int i = 0; i < SLOT_COUNT; i++ )
 		{
-			idVec3 origin = waistOrigin + slots[i].origin * waistAxis;
+			idVec3 slotOrigin = slots[i].origin;
+			if ( vr_weaponHand.GetInteger() && i != SLOT_FLASHLIGHT_SHOULDER )
+				slotOrigin.y *= -1;
+			idVec3 origin = waistOrigin + slotOrigin * waistAxis;
 			idSphere tempSphere( origin, sqrtf(slots[i].radiusSq) );
 			gameRenderWorld->DebugSphere( colorWhite, tempSphere, 18, true );
 		}
@@ -14520,8 +14558,8 @@ void idPlayer::CalculateLeftHand()
 			for( int i = 0; i < SLOT_COUNT; i++ )
 			{
 				idVec3 slotOrigin = slots[i].origin;
-				if ( vr_weaponHand.GetInteger() )
-					slotOrigin.y *= -1.0f;
+				if ( vr_weaponHand.GetInteger() && i != SLOT_FLASHLIGHT_SHOULDER )
+					slotOrigin.y *= -1;
 				idVec3 origin = waistOrigin + slotOrigin * waistAxis;
 				if( (leftHandOrigin - origin).LengthSqr() < slots[i].radiusSq )
 				{
@@ -14569,8 +14607,8 @@ void idPlayer::CalculateRightHand()
 			for( int i = 0; i < SLOT_COUNT; i++ )
 			{
 				idVec3 slotOrigin = slots[i].origin;
-				if (vr_weaponHand.GetInteger())
-					slotOrigin.y *= -1.0f;
+				if ( vr_weaponHand.GetInteger() && i != SLOT_FLASHLIGHT_SHOULDER )
+					slotOrigin.y *= -1;
 				idVec3 origin = waistOrigin + slotOrigin * waistAxis;
 				if( (rightHandOrigin - origin).LengthSqr() < slots[i].radiusSq )
 				{
