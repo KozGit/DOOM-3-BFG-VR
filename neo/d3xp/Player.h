@@ -316,7 +316,8 @@ public:
 	
 	renderEntity_t			pdaRenderEntity;					// used to present a model to the renderer
 	qhandle_t				pdaModelDefHandle;					// handle to static renderer model
-	
+	idMat3					pdaHolsterAxis;
+
 	renderEntity_t			holsterRenderEntity;					// used to present a model to the renderer
 	qhandle_t				holsterModelDefHandle;					// handle to static renderer model
 	idMat3					holsterAxis;

@@ -5799,11 +5799,13 @@ bool idPlayer::LeftImpulseSlot()
 		{
 			if( objectiveSystemOpen )
 			{
+				SetupPDASlot();
 				TogglePDA();
 			}
 			else if( weapon_pda >= 0 )
 			{
-				SelectWeapon( weapon_pda, true );
+				SetupPDASlot();
+				SelectWeapon(weapon_pda, true);
 			}
 		}
 		return true;
@@ -10841,6 +10843,9 @@ idPlayer::SetupPDASlot
 */
 void idPlayer::SetupPDASlot()
 {
+	const char * modelname;
+	idRenderModel* renderModel;
+
 	FreePDASlot();
 
 	if( vr_slotDisable.GetBool() )
@@ -10848,9 +10853,37 @@ void idPlayer::SetupPDASlot()
 		return;
 	}
 
+	static bool first_time = true;
+
+	if ( objectiveSystemOpen || first_time )
+	{
+		// we will holster the PDA
+		modelname = "models/items/pda/pda_world.lwo";
+		first_time = false;
+		pdaHolsterAxis = (pdaAngle1.ToMat3() * pdaAngle2.ToMat3() * pdaAngle3.ToMat3()) * 0.6f;
+	}
+	else
+	{
+		// we will holster the flashlight if carrying it
+		if ( vr_flashlightMode.GetInteger() == 3 && flashlight.GetEntity()->IsLinked() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
+		{
+			modelname = flashlight->weaponDef->dict.GetString("model");
+			pdaHolsterAxis = idAngles(0, 90, 90).ToMat3();
+		}
+		else modelname = "";
+	}
+
 	memset( &pdaRenderEntity, 0, sizeof( pdaRenderEntity ) );
-	pdaRenderEntity.hModel = renderModelManager->FindModel( "models/items/pda/pda_world.lwo" );
-	if( pdaRenderEntity.hModel )
+
+	// can we holster?
+	if ( !(renderModel = renderModelManager->FindModel(modelname)) )
+	{
+		// can't holster, just unholster
+		return;
+	}
+
+	pdaRenderEntity.hModel = renderModel;
+	if (pdaRenderEntity.hModel)
 	{
 		pdaRenderEntity.hModel->Reset();
 		pdaRenderEntity.bounds = pdaRenderEntity.hModel->Bounds( &pdaRenderEntity );
@@ -10896,9 +10929,7 @@ void idPlayer::UpdatePDASlot()
 
 		pdaRenderEntity.entityNum = ENTITYNUM_NONE;
 
-		idMat3 pdaAxis = pdaAngle1.ToMat3() * pdaAngle2.ToMat3() * pdaAngle3.ToMat3();
-
-		pdaRenderEntity.axis = pdaAxis * waistAxis * 0.6;
+		pdaRenderEntity.axis = pdaHolsterAxis * waistAxis;
 		pdaRenderEntity.origin = waistOrigin + slots[SLOT_LEFT_HIP].origin * waistAxis;
 
 		pdaRenderEntity.allowSurfaceInViewID = entityNumber + 1;
