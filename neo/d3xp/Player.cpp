@@ -96,8 +96,8 @@ idCVar vr_slotDur("vr_slotDur", "18", CVAR_INTEGER | CVAR_ARCHIVE, "slot vibrati
 idCVar vr_slotDisable("vr_slotDisable", "0", CVAR_BOOL | CVAR_ARCHIVE, "slot disable");
 
 slot_t slots[SLOT_COUNT] = {
-	{ idVec3(0, 9,-4), 9.0f*9.0f },
-	{ idVec3(0,-9,-4), 9.0f*9.0f },
+	{ idVec3(0, 10,-4), 9.0f*9.0f },
+	{ idVec3(0,-10,-4), 9.0f*9.0f },
 	{ idVec3(-9,-4, 4), 9.0f*9.0f },
 	{ idVec3(-9,-4,-waistZ - neckOffset.z), 9.0f*9.0f },
 	{ idVec3(4, 8, -waistZ + 2), 9.0f*9.0f },
@@ -5818,22 +5818,32 @@ bool idPlayer::OtherHandImpulseSlot()
 		}
 		return true;
 	}
-	if( otherHandSlot == SLOT_FLASHLIGHT_HEAD && !commonVr->PDAforced && !objectiveSystemOpen )
+	if( otherHandSlot == SLOT_FLASHLIGHT_HEAD && !commonVr->PDAforced && !objectiveSystemOpen
+		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons") )
 	{
 		// swap flashlight between head and hand
 		if (vr_flashlightMode.GetInteger() == FLASH_HEAD)
+		{
 			vr_flashlightMode.SetInteger(FLASH_HAND);
+		}
 		else if (vr_flashlightMode.GetInteger() == FLASH_HAND)
+		{
 			vr_flashlightMode.SetInteger(FLASH_HEAD);
+		}
 		return true;
 	}
-	if( otherHandSlot == SLOT_FLASHLIGHT_SHOULDER && !commonVr->PDAforced && !objectiveSystemOpen )
+	if( otherHandSlot == SLOT_FLASHLIGHT_SHOULDER && !commonVr->PDAforced && !objectiveSystemOpen
+		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons") )
 	{
 		// swap flashlight between body and hand
 		if (vr_flashlightMode.GetInteger() == FLASH_BODY)
+		{
 			vr_flashlightMode.SetInteger(FLASH_HAND);
+		}
 		else if (vr_flashlightMode.GetInteger() == FLASH_HAND)
+		{
 			vr_flashlightMode.SetInteger(FLASH_BODY);
+		}
 		return true;
 	}
 	if (otherHandSlot == SLOT_WEAPON_HIP)
@@ -5955,14 +5965,16 @@ bool idPlayer::WeaponHandImpulseSlot()
 		}
 		return true;
 	}
-	if (weaponHandSlot == SLOT_FLASHLIGHT_HEAD && vr_flashlightMode.GetInteger() == FLASH_HEAD && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen)
+	if (weaponHandSlot == SLOT_FLASHLIGHT_HEAD && vr_flashlightMode.GetInteger() == FLASH_HEAD && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen
+		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons"))
 	{
 		SwapWeaponHand();
 		// swap flashlight between head and hand
 		vr_flashlightMode.SetInteger( FLASH_HAND );
 		return true;
 	}
-	if (weaponHandSlot == SLOT_FLASHLIGHT_SHOULDER && vr_flashlightMode.GetInteger() == FLASH_BODY && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen)
+	if (weaponHandSlot == SLOT_FLASHLIGHT_SHOULDER && vr_flashlightMode.GetInteger() == FLASH_BODY && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen
+		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons"))
 	{
 		SwapWeaponHand();
 		// swap flashlight between head and hand
