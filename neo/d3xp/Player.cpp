@@ -9574,6 +9574,10 @@ void idPlayer::EvaluateControls()
 					common->Printf( "Player evaluate controls setting playerdead true %d\n", Sys_Milliseconds() );
 					commonVr->wasLoaded = false;
 					commonVr->playerDead = true;
+					extern idCVar timescale;
+					int comfortMode = vr_motionSickness.GetInteger();
+					if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9))
+						timescale.SetFloat(1);
 				}
 		
 			}
@@ -10564,6 +10568,12 @@ void idPlayer::Move()
 	CrashLand( oldOrigin, oldVelocity );
 
 	// Handling vr_comfortMode
+	extern idCVar timescale;
+	if (vr_motionSickness.IsModified())
+	{
+		timescale.SetFloat(1);
+		vr_motionSickness.ClearModified();
+	}
 	const int comfortMode = vr_motionSickness.GetInteger();
 	//"	0 off | 2 = tunnel | 5 = tunnel + chaperone | 6 slow mo | 7 slow mo + chaperone | 8 tunnel + slow mo | 9 = tunnel + slow mo + chaperone
 	if (comfortMode < 2) 
@@ -10586,7 +10596,6 @@ void idPlayer::Move()
 
 	if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9))
 	{
-		extern idCVar timescale;
 		float speedFactor = ((pm_runspeed.GetFloat() - speed) / pm_runspeed.GetFloat());
 		if (speedFactor < 0)
 		{

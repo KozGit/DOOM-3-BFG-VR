@@ -895,6 +895,10 @@ void idCommonLocal::Frame()
 		
 		if( pauseGame )
 		{
+			extern idCVar timescale;
+			int comfortMode = vr_motionSickness.GetInteger();
+			if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9))
+				timescale.SetFloat(1);
 			usercmdGen->Clear();
 		}
 		
