@@ -1,6 +1,7 @@
 #pragma hdrstop
 
 #include"precompiled.h"
+#include "d3xp/Game_local.h"
 
 #undef strncmp
 #undef vsnprintf
@@ -78,12 +79,22 @@ void MadeASound()
 
 void StartedTalking()
 {
-
+	idPlayer* player = gameLocal.GetLocalPlayer();
+	if( player != NULL && player->hudManager && (vr_flickCharacter.GetInteger() || vr_voiceCommands.GetInteger() || vr_talkMode.GetInteger()) )
+	{
+		player->hudManager->SetRadioMessage( true );
+	}
 }
 
 void StoppedTalking()
 {
 	spoke = true;
+
+	idPlayer* player = gameLocal.GetLocalPlayer();
+	if( player != NULL && player->hudManager && (vr_flickCharacter.GetInteger() || vr_voiceCommands.GetInteger() || vr_talkMode.GetInteger()) )
+	{
+		player->hudManager->SetRadioMessage( false );
+	}
 }
 
 bool iVoice::GetTalkButton()

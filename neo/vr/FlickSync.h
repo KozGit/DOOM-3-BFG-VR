@@ -58,4 +58,9 @@ void FlickSync_HearLine( const char* line, int confidence, uint64 startTime, uin
 
 extern idCVar vr_flickCharacter;
 
+extern int FlickSync_Score;
+extern int FlickSync_CueCards;
+extern int FlickSync_CorrectInARow;
+extern int FlickSync_FailsInARow;
+
 #endif

@@ -663,6 +663,7 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		// Maybe I should redefine the camera animation files to 
 		// provide more coherent camera transitions in cutscenes?
 
+		// Flicksync camera
 		idEntity* ent = NULL;
 		static idEntity* hiddenEnt = NULL;
 		switch (vr_flickCharacter.GetInteger())
