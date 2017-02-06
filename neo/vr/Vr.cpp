@@ -225,7 +225,7 @@ iVr::iVr()
 	PDAforced = false;
 	PDArising = false;
 	gameSavingLoading = false;
-	showingIntroVideo = false;
+	showingIntroVideo = true;
 	forceLeftStick = true;	// start the PDA in the left menu.
 	pdaToggleTime = Sys_Milliseconds();
 	lastSaveTime = Sys_Milliseconds();

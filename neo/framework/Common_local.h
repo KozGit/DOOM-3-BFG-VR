@@ -315,7 +315,8 @@ public:
 	frameTiming_t		mainFrameTiming;
 
 	bool				insideExecuteMapChange;	// Enable Pacifier Updates // koz moved to public
-	
+	bool				insideUpdateScreen;		// true while inside ::UpdateScreen()
+
 public:	// These are public because they are called directly by static functions in this file
 
 	const char* GetCurrentMapName()
@@ -405,8 +406,6 @@ private:
 	mapSpawnData_t		mapSpawnData;
 	idStr				currentMapName;			// for checking reload on same level
 	bool				mapSpawned;				// cleared on Stop()
-	
-	bool				insideUpdateScreen;		// true while inside ::UpdateScreen()
 	
 	idUserCmdMgr		userCmdMgr;
 	
