@@ -13019,7 +13019,7 @@ bool idPlayer::CheckTeleportPath(const idVec3& target)
 			currentArea = path.moveAreaNum;
 			// Find next path segment. Sometimes it tells us to go to the current location and gets stuck in a loop, so check for that.
 			// TODO: Work out why it gets stuck in a loop, and fix it. Currently we just go in a straight line from stuck point to destination.
-			if (!aas->WalkPathToGoal(path, currentArea, currentPos, toAreaNum, toPoint, travelFlags) || (path.moveAreaNum == currentArea && path.moveGoal == currentPos))
+			if (!aas->WalkPathToGoal(path, currentArea, currentPos, toAreaNum, toPoint, travelFlags) || (path.moveAreaNum == currentArea /* && path.moveGoal == currentPos */))
 			{
 				path.moveGoal = toPoint;
 				path.moveAreaNum = toAreaNum;
