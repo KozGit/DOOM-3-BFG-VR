@@ -11007,7 +11007,7 @@ void idPlayer::UpdateLaserSight()
 	muzscale = 1 + beamLength / 100;
 	crosshairEntity.axis = muzzleAxis * muzscale;
 
-	bool aimLadder = false, aimActor = false;
+	bool aimLadder = false, aimActor = false, aimElevator = false;
 	static idAngles surfaceAngle = ang_zero;
 	if (gameLocal.clip.TracePoint(traceResults, start, end, MASK_SHOT_RENDERMODEL, this))
 	{
@@ -11018,7 +11018,20 @@ void idPlayer::UpdateLaserSight()
 		{
 			aimLadder = traceResults.c.material && ( traceResults.c.material->GetSurfaceFlags() & SURF_LADDER );
 			idEntity* aimEntity = gameLocal.GetTraceEntity(traceResults);
-			aimActor = ( aimEntity != NULL && aimEntity->IsType(idActor::Type) && aimEntity->health > 0 );
+			if (aimEntity)
+			{
+				if (aimEntity->IsType(idActor::Type))
+					aimActor = aimEntity->health > 0;
+				else if (aimEntity->IsType(idStaticEntity::Type))
+				{
+					renderEntity_t *rend = aimEntity->GetRenderEntity();
+					if (rend)
+					{
+						idRenderModel *model = rend->hModel;
+						aimElevator = (model && idStr::Cmp(model->Name(), "models/mapobjects/elevators/elevator.lwo") == 0);
+					}
+				}
+			}
 
 			// fake it till you make it. there must be a better way. Too bad my brain is broken.
 
@@ -11055,10 +11068,13 @@ void idPlayer::UpdateLaserSight()
 	{
 		aimPoint = crosshairEntity.origin;
 		aimPointPitch = surfaceAngle.pitch;
-		bool aimValid = CanReachPosition(aimPoint, teleportPoint);
+		// if the elevator is moving up, we don't want to fall through the floor
+		if (aimElevator)
+			teleportPoint = aimPoint = aimPoint + idVec3(0, 0, 10);
 		// 45 degrees is maximum slope you can walk up
-		bool pitchValid = aimPointPitch >= 45 && !aimActor; // -90 = ceiling, 0 = wall, 90 = floor
-		aimValidForTeleport = aimValid && (aimLadder || pitchValid);
+		bool pitchValid = (aimPointPitch >= 45 && !aimActor) || aimLadder; // -90 = ceiling, 0 = wall, 90 = floor
+		// can always teleport into nearby elevator, otherwise we need to check
+		aimValidForTeleport = pitchValid && (aimElevator && beamLength <= 300) || CanReachPosition(aimPoint, teleportPoint);
 
 		if ( aimValidForTeleport )
 		{
@@ -11066,7 +11082,7 @@ void idPlayer::UpdateLaserSight()
 			//crosshairEntity.origin = aimPoint;
 			crosshairEntity.customSkin = skinCrosshairCircleDot;
 		}
-		else if ( aimLadder || pitchValid )
+		else if ( pitchValid )
 		{
 			crosshairEntity.origin = teleportPoint;
 			crosshairEntity.customSkin = skinCrosshairCross;
