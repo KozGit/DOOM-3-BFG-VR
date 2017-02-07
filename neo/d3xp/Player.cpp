@@ -9839,6 +9839,9 @@ bool idPlayer::CanReachPosition( const idVec3& pos, idVec3& betterPos )
 	{
 		floorPos.z -= 1000;
 		aas->PushPointIntoAreaNum(toAreaNum, floorPos);
+		// sloped floors will change x or y, not just z, wrecking our algorithm
+		if (floorPos.x != betterPos.x || floorPos.y != betterPos.y)
+			floorPos = betterPos;
 		// AAS areas have a valid floor (except for stairs), but not a valid ceiling
 		// if it's stairs, or our point is higher, then use our point
 		if (floorPos.z - pos.z < pm_stepsize.GetFloat() + 2 )
