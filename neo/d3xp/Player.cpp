@@ -9826,11 +9826,40 @@ bool idPlayer::CanReachPosition( const idVec3& pos, idVec3& betterPos )
 
 	toAreaNum = PointReachableAreaNum(pos);
 	betterPos = pos;
-	if (!aas)
-		return true;
-	aas->PushPointIntoAreaNum( toAreaNum, betterPos );
+	if (aas)
+		aas->PushPointIntoAreaNum( toAreaNum, betterPos );
+
+	idVec3 floorPos = betterPos;
+
 	origin = physicsObj.GetOrigin();
 	areaNum = PointReachableAreaNum(origin);
+
+	// check relative to the AAS area's official floor
+	if (aas)
+	{
+		floorPos.z -= 1000;
+		aas->PushPointIntoAreaNum(toAreaNum, floorPos);
+		// AAS areas have a valid floor (except for stairs), but not a valid ceiling
+		// if it's stairs, or our point is higher, then use our point
+		if (floorPos.z - pos.z < pm_stepsize.GetFloat() + 2 )
+			betterPos.z = pos.z;
+		// but if our point is too much lower than the AAS floor, use the AAS floor
+	}
+	// if in the same area, check relative to our feet
+	if (toAreaNum == areaNum)
+	{
+		floorPos.z = origin.z;
+	}
+	float height = pos.z - floorPos.z;
+
+	// if it's higher off the floor than we can jump, or lower than we can fall, then give up now
+	if (height > pm_jumpheight.GetFloat() + 2 || height < -140)
+		return false;
+
+	// if there's no AAS, we can teleport anywhere horizontal we can see, as long as it's height is within jumping or falling height
+	if (!aas)
+		return true;
+
 	if (ai_debugMove.GetBool())
 	{
 		aas->DrawArea(areaNum);
@@ -9846,8 +9875,10 @@ bool idPlayer::CanReachPosition( const idVec3& pos, idVec3& betterPos )
 	aas->PushPointIntoAreaNum(areaNum, origin);
 	idReachability* reach = NULL;
 	int travelTime;
-	return aas->RouteToGoalArea(areaNum, origin, toAreaNum, travelFlags, travelTime, &reach) && reach && (travelTime <= vr_teleportMaxTravel.GetInteger())
-		&& CheckTeleportPath(betterPos);
+
+	bool result = aas->RouteToGoalArea(areaNum, origin, toAreaNum, travelFlags, travelTime, &reach) && reach && (travelTime <= vr_teleportMaxTravel.GetInteger())
+		&& CheckTeleportPath(betterPos, toAreaNum);
+	return result;
 }
 
 /*
@@ -11029,6 +11060,7 @@ void idPlayer::UpdateLaserSight()
 		if ( aimValidForTeleport )
 		{
 			crosshairEntity.origin = teleportPoint;
+			//crosshairEntity.origin = aimPoint;
 			crosshairEntity.customSkin = skinCrosshairCircleDot;
 		}
 		else if ( aimLadder || pitchValid )
@@ -12902,7 +12934,7 @@ bool idPlayer::CheckTeleportPathSegment(const idVec3& start, const idVec3& end, 
 	float length = total.Length();
 	if (length >= 0.1f)
 	{
-		const float stepSize = 8.0f;
+		const float stepSize = 15.0f; // We have a radius of 16, so this should catch everything
 		int steps = (int)(length / stepSize);
 		if (steps <= 0) steps = 1;
 		idVec3 step = total / steps;
@@ -12936,6 +12968,7 @@ bool idPlayer::CheckTeleportPathSegment(const idVec3& start, const idVec3& end, 
 
 					ent = cm->GetEntity();
 
+					// check if it's a closed or locked door 
 					if (ent->IsType(idDoor::Type))
 					{
 						idDoor *door = (idDoor *)ent;
@@ -12956,6 +12989,42 @@ bool idPlayer::CheckTeleportPathSegment(const idVec3& start, const idVec3& end, 
 							}
 						}
 					}
+					// Check if it's a glass window. func_static with textures/glass/glass2
+					else if (ent->IsType(idStaticEntity::Type))
+					{
+						renderEntity_t *rent = ent->GetRenderEntity();
+						if (rent)
+						{
+							const idMaterial *mat = rent->customShader;
+							if (!mat)
+								mat = rent->referenceShader;
+							if (!mat && rent->hModel)
+							{
+								for (int i = 0; i < rent->hModel->NumSurfaces(); i++)
+									if (rent->hModel->Surface(i)->shader)
+									{
+										mat = rent->hModel->Surface(i)->shader;
+										break;
+									}
+							}
+							if (mat)
+							{
+								const char* name = mat->GetName();
+								// trying to teleport through glass: textures/glass/glass2 or textures/glass/glass1
+								if (name && idStr::Cmpn(name, "textures/glass/glass", 20) == 0)
+									return false;
+								//else if (name)
+								//	common->Printf("teleporting through \"%s\"\n", name);
+								//else
+								//	common->Printf("teleporting through NULL\n");
+							}
+							else if (ent->name)
+							{
+								//common->Printf("teleporting through entity %s", ent->name);
+							}
+							
+						}
+					}
 				}
 			}
 
@@ -12971,10 +13040,10 @@ bool idPlayer::CheckTeleportPathSegment(const idVec3& start, const idVec3& end, 
 idPlayer::CheckTeleportPath
 ====================
 */
-bool idPlayer::CheckTeleportPath(const idVec3& target)
+bool idPlayer::CheckTeleportPath(const idVec3& target, int toAreaNum)
 {
 	aasPath_t	path;
-	int	originAreaNum, toAreaNum;
+	int	originAreaNum;
 	idVec3 origin = physicsObj.GetOrigin();
 	idVec3 trueOrigin = origin;
 	idVec3 toPoint = target;
@@ -12984,7 +13053,8 @@ bool idPlayer::CheckTeleportPath(const idVec3& target)
 	originAreaNum = PointReachableAreaNum(origin);
 	if (aas)
 		aas->PushPointIntoAreaNum(originAreaNum, origin);
-	toAreaNum = PointReachableAreaNum(toPoint);
+	if (!toAreaNum)
+		toAreaNum = PointReachableAreaNum(toPoint);
 	if (aas)
 		aas->PushPointIntoAreaNum(toAreaNum, toPoint);
 	// if there's no path, just go in a straight line
