@@ -11022,7 +11022,9 @@ void idPlayer::UpdateLaserSight()
 			{
 				if (aimEntity->IsType(idActor::Type))
 					aimActor = aimEntity->health > 0;
-				else if (aimEntity->IsType(idStaticEntity::Type))
+				else if (aimEntity->IsType(idElevator::Type))
+					aimElevator = true;
+				else if (aimEntity->IsType(idStaticEntity::Type) || aimEntity->IsType(idLight::Type))
 				{
 					renderEntity_t *rend = aimEntity->GetRenderEntity();
 					if (rend)
@@ -11074,7 +11076,7 @@ void idPlayer::UpdateLaserSight()
 		// 45 degrees is maximum slope you can walk up
 		bool pitchValid = (aimPointPitch >= 45 && !aimActor) || aimLadder; // -90 = ceiling, 0 = wall, 90 = floor
 		// can always teleport into nearby elevator, otherwise we need to check
-		aimValidForTeleport = pitchValid && (aimElevator && beamLength <= 300) || CanReachPosition(aimPoint, teleportPoint);
+		aimValidForTeleport = pitchValid && ((aimElevator && beamLength <= 300) || CanReachPosition(aimPoint, teleportPoint));
 
 		if ( aimValidForTeleport )
 		{
