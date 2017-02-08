@@ -106,6 +106,29 @@ idCVar ftz( "ftz", "0", CVAR_FLOAT, "" );
 
 extern idCVar g_demoMode;
 
+const idVec3 neckOffset(-3,0,-6);
+const int waistZ = -22.f;
+
+idCVar vr_slotDebug("vr_slotDebug", "0", CVAR_BOOL, "slot debug visualation" );
+idCVar vr_slotMag("vr_slotMag", "0.1", CVAR_FLOAT | CVAR_ARCHIVE, "slot vibration magnitude (0 is off)");
+idCVar vr_slotDur("vr_slotDur", "18", CVAR_INTEGER | CVAR_ARCHIVE, "slot vibration duration in milliseconds");
+idCVar vr_slotDisable("vr_slotDisable", "0", CVAR_BOOL | CVAR_ARCHIVE, "slot disable");
+
+slot_t slots[SLOT_COUNT] = {
+	{ idVec3(0, 10,-4), 9.0f*9.0f },
+	{ idVec3(0,-10,-4), 9.0f*9.0f },
+	{ idVec3(-9,-4, 4), 9.0f*9.0f },
+	{ idVec3(-9,-4,-waistZ - neckOffset.z), 9.0f*9.0f },
+	{ idVec3(4, 8, -waistZ + 2), 9.0f*9.0f },
+	{ idVec3(-neckOffset.x, 0, -waistZ - neckOffset.z + 7), 9.0f*9.0f },
+};
+
+idAngles pdaAngle1(0,-90,0);
+idAngles pdaAngle2(0,0,76.5);
+idAngles pdaAngle3(0,0,0);
+
+extern idCVar g_useWeaponDepthHack;
+
 
 
 /*
@@ -1564,6 +1587,12 @@ idPlayer::idPlayer():
 	laserSightHandle	= -1;
 	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
 	
+	pdaModelDefHandle = -1;
+	memset( &pdaRenderEntity, 0, sizeof( pdaRenderEntity ) );
+	
+	holsterModelDefHandle = -1;
+	memset( &holsterRenderEntity, 0, sizeof( holsterRenderEntity ) );
+
 	// koz begin
 	headingBeamHandle = -1;
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
@@ -2247,6 +2276,9 @@ void idPlayer::Init()
 	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
 
+	SetupPDASlot( true );
+	holsteredWeapon = weapon_fists;
+
 	// Koz begin
 	
 	// model to place hud in 3d space
@@ -2642,6 +2674,9 @@ Release any resources used by the player.
 */
 idPlayer::~idPlayer()
 {
+	FreePDASlot();
+	FreeHolsterSlot();
+
 	delete weapon.GetEntity();
 	weapon = NULL;
 	
@@ -3385,7 +3420,17 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	savefile->ReadInt( playedTimeResidual );
 	
 	aimAssist.Init( this );
-		
+	
+	laserSightHandle = -1;
+	
+	// re-init the laser model
+	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
+	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
+	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
+
+	SetupPDASlot( true );
+	holsteredWeapon = weapon_fists;
+	
 	for( int i = 0; i < MAX_PLAYER_PDA; i++ )
 	{
 		savefile->ReadBool( pdaHasBeenRead[i] );
@@ -5732,8 +5777,9 @@ void idPlayer::GivePDA( const idDeclPDA* pda, const char* securityItem, bool tog
 					else
 					{
 						common->Printf( "idPlayer::GivePDA calling Select Weapon for PDA\n" );
-						SelectWeapon( weapon_pda, true );
-						
+						SetupPDASlot( false );
+						SetupHolsterSlot( false );
+						SelectWeapon(weapon_pda, true);
 					}
 				}
 			}
@@ -5845,6 +5891,200 @@ void idPlayer::GiveItem( const char* itemname )
 	args.Set( "classname", itemname );
 	args.Set( "owner", name.c_str() );
 	gameLocal.SpawnEntityDef( args );
+}
+
+bool idPlayer::OtherHandImpulseSlot()
+{
+	if( !commonVr->hasHMD )
+	{
+		return false;
+	}
+	if( otherHandSlot == SLOT_PDA_HIP )
+	{
+		if( !common->IsMultiplayer() )
+		{
+			// we don't have a PDA, so toggle the menu instead
+			if ( commonVr->PDAforced || inventory.pdas.Num() == 0 )
+			{
+				PerformImpulse( 40 );
+			}
+			else if( objectiveSystemOpen )
+			{
+				TogglePDA();
+			}
+			else if( weapon_pda >= 0 )
+			{
+				SetupPDASlot( false );
+				SetupHolsterSlot( false );
+				SelectWeapon( weapon_pda, true );
+			}
+		}
+		return true;
+	}
+	if( otherHandSlot == SLOT_FLASHLIGHT_HEAD && !commonVr->PDAforced && !objectiveSystemOpen
+		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons") )
+	{
+		// swap flashlight between head and hand
+		if (vr_flashlightMode.GetInteger() == FLASH_HEAD)
+		{
+			vr_flashlightMode.SetInteger(FLASH_HAND);
+		}
+		else if (vr_flashlightMode.GetInteger() == FLASH_HAND)
+		{
+			vr_flashlightMode.SetInteger(FLASH_HEAD);
+		}
+		return true;
+	}
+	if( otherHandSlot == SLOT_FLASHLIGHT_SHOULDER && !commonVr->PDAforced && !objectiveSystemOpen
+		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons") )
+	{
+		// swap flashlight between body and hand
+		if (vr_flashlightMode.GetInteger() == FLASH_BODY)
+		{
+			vr_flashlightMode.SetInteger(FLASH_HAND);
+		}
+		else if (vr_flashlightMode.GetInteger() == FLASH_HAND)
+		{
+			vr_flashlightMode.SetInteger(FLASH_BODY);
+		}
+		return true;
+	}
+	if (otherHandSlot == SLOT_WEAPON_HIP)
+	{
+		SwapWeaponHand();
+		// Holster the PDA we are holding on the other side
+		if( commonVr->PDAforced )
+		{
+			PerformImpulse( 40 );
+		}
+		else if( !common->IsMultiplayer() && objectiveSystemOpen )
+		{
+			if (previousWeapon == weapon_fists)
+				previousWeapon = holsteredWeapon;
+			TogglePDA();
+		}
+		else
+			// pick up whatever weapon we have holstered, and magically holster our current weapon
+			SetupHolsterSlot();
+		return true;
+	}
+	if ( otherHandSlot == SLOT_WEAPON_BACK_BOTTOM )
+	{
+		SwapWeaponHand();
+		// Holster the PDA we are holding on the other side
+		if (!common->IsMultiplayer())
+		{
+			// we don't have a PDA, so toggle the menu instead
+			if ( commonVr->PDAforced )
+			{
+				PerformImpulse( 40 );
+			}
+			else if( objectiveSystemOpen )
+			{
+				TogglePDA();
+			}
+		}
+		PrevWeapon();
+		return true;
+	}
+	if ( otherHandSlot == SLOT_WEAPON_BACK_TOP )
+	{
+		SwapWeaponHand();
+		// Holster the PDA we are holding on the other side
+		if (!common->IsMultiplayer())
+		{
+			// we don't have a PDA, so toggle the menu instead
+			if ( commonVr->PDAforced )
+			{
+				PerformImpulse(40);
+			}
+			else if ( objectiveSystemOpen )
+			{
+				TogglePDA();
+			}
+		}
+		NextWeapon();
+		return true;
+	}
+	return false;
+}
+
+bool idPlayer::WeaponHandImpulseSlot()
+{
+	if( !commonVr->hasHMD )
+	{
+		return false;
+	}
+	if( weaponHandSlot == SLOT_WEAPON_HIP )
+	{
+		if (objectiveSystemOpen)
+		{
+			if ( previousWeapon == weapon_fists )
+				previousWeapon = holsteredWeapon;
+			TogglePDA();
+		}
+		else
+			SetupHolsterSlot();
+		return true;
+	}
+	if( weaponHandSlot == SLOT_WEAPON_BACK_BOTTOM )
+	{
+		if (objectiveSystemOpen)
+			TogglePDA();
+		PrevWeapon();
+		return true;
+	}
+	if( weaponHandSlot == SLOT_WEAPON_BACK_TOP )
+	{
+		if (objectiveSystemOpen)
+			TogglePDA();
+		NextWeapon();
+		return true;
+	}
+	if ( weaponHandSlot == SLOT_PDA_HIP )
+	{
+		SwapWeaponHand();
+		// if we're holding a gun (not a pointer finger or fist) then holster the gun
+		if ( !commonVr->PDAforced && !objectiveSystemOpen && currentWeapon != weapon_fists )
+			SetupHolsterSlot();
+		// pick up PDA in our weapon hand, or pick up the torch if our hand is a pointer finger
+		if (!common->IsMultiplayer())
+		{
+			// we don't have a PDA, so toggle the menu instead
+			if ( commonVr->PDAforced || inventory.pdas.Num() == 0 )
+			{
+				PerformImpulse( 40 );
+			}
+			else if( objectiveSystemOpen )
+			{
+				TogglePDA();
+			}
+			else if( weapon_pda >= 0 )
+			{
+				SetupPDASlot( false );
+				SetupHolsterSlot( false );
+				SelectWeapon( weapon_pda, true );
+			}
+		}
+		return true;
+	}
+	if (weaponHandSlot == SLOT_FLASHLIGHT_HEAD && vr_flashlightMode.GetInteger() == FLASH_HEAD && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen
+		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons"))
+	{
+		SwapWeaponHand();
+		// swap flashlight between head and hand
+		vr_flashlightMode.SetInteger( FLASH_HAND );
+		return true;
+	}
+	if (weaponHandSlot == SLOT_FLASHLIGHT_SHOULDER && vr_flashlightMode.GetInteger() == FLASH_BODY && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen
+		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons"))
+	{
+		SwapWeaponHand();
+		// swap flashlight between head and hand
+		vr_flashlightMode.SetInteger( FLASH_HAND );
+		return true;
+	}
+	return false;
 }
 
 /*
@@ -5975,6 +6215,10 @@ void idPlayer::NextWeapon()
 		{
 			continue;
 		}
+		if( w == holsteredWeapon && holsteredWeapon != weapon_fists )
+		{
+			continue;
+		}
 		const char* weap = spawnArgs.GetString( va( "def_weapon%d", w ) );
 		if( !spawnArgs.GetBool( va( "weapon%d_cycle", w ) ) )
 		{
@@ -6032,6 +6276,10 @@ void idPlayer::PrevWeapon()
 			break;
 		}
 		if( ( inventory.weapons & ( 1 << w ) ) == 0 )
+		{
+			continue;
+		}
+		if( w == holsteredWeapon && holsteredWeapon != weapon_fists )
 		{
 			continue;
 		}
@@ -6179,7 +6427,7 @@ void idPlayer::SelectWeapon( int num, bool force, bool specific )
 			
 			if ( game->isVR )
 			{
-				GivePDA( NULL, NULL, false ); // hack to allow the player to change system settings in the mars city level before the PDA is given by the receptionist.
+				//GivePDA( NULL, NULL, false ); // hack to allow the player to change system settings in the mars city level before the PDA is given by the receptionist.
 				idealWeapon = num;
 			}
 			else
@@ -8900,7 +9148,7 @@ void idPlayer::TogglePDA()
 		if ( game->isVR )
 		{
 			// koz : hack to allow the player to change system settings in the mars city level before the PDA is given by the receptionist.
-			GivePDA( NULL, NULL, false ); 
+			//GivePDA( NULL, NULL, false ); 
 		}
 		else
 		{
@@ -8911,6 +9159,8 @@ void idPlayer::TogglePDA()
 	
 	if( pdaMenu != NULL )
 	{
+		SetupPDASlot( objectiveSystemOpen );
+		SetupHolsterSlot( objectiveSystemOpen );
 		objectiveSystemOpen = !objectiveSystemOpen;
 		pdaMenu->ActivateMenu( objectiveSystemOpen );
 		
@@ -9150,12 +9400,14 @@ void idPlayer::PerformImpulse( int impulse )
 						common->Printf( "idPlayer::PerformImpulse calling TogglePDA\n" );
 						TogglePDA();
 					}
-					else if( weapon_pda >= 0 )
+					else if( weapon_pda >= 0 && inventory.pdas.Num() )
 					{
 						
 						common->Printf( "idPlayer::PerformImpulse  calling Select Weapon for PDA\n" );
 						commonVr->pdaToggleTime = Sys_Milliseconds();
-						SelectWeapon( weapon_pda, true );
+						SetupPDASlot( false );
+						SetupHolsterSlot( false );
+						SelectWeapon(weapon_pda, true);
 					}
 #if !defined(ID_RETAIL) && !defined(ID_RETAIL_INTERNAL)
 				}
@@ -9426,13 +9678,35 @@ void idPlayer::EvaluateControls()
 					common->Printf( "Player evaluate controls setting playerdead true %d\n", Sys_Milliseconds() );
 					commonVr->wasLoaded = false;
 					commonVr->playerDead = true;
+					extern idCVar timescale;
+					int comfortMode = vr_motionSickness.GetInteger();
+					if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9))
+						timescale.SetFloat(1);
 				}
 		
 			}
 		}
 	}
-	
-	if( usercmd.impulseSequence != oldImpulseSequence )
+
+	bool grabbed = false;
+	if( commonVr->grabbedLeft )
+	{
+		commonVr->grabbedLeft = false;
+		if( (vr_weaponHand.GetInteger()==0 && OtherHandImpulseSlot()) || (vr_weaponHand.GetInteger()==1 && WeaponHandImpulseSlot()) )
+		{
+			grabbed = true;
+		}
+	}
+	if( commonVr->grabbedRight )
+	{
+		commonVr->grabbedRight = false;
+		if( (vr_weaponHand.GetInteger()==1 && OtherHandImpulseSlot()) || (vr_weaponHand.GetInteger()==0 && WeaponHandImpulseSlot()) )
+		{
+			grabbed = true;
+		}
+	}
+
+	if( !grabbed && usercmd.impulseSequence != oldImpulseSequence )
 	{
 		PerformImpulse( usercmd.impulse );
 	}
@@ -10387,6 +10661,8 @@ void idPlayer::Move()
 					newEyeOffset += vr_crouchTriggerDist.GetFloat();
 				}
 			}
+			else
+				newEyeOffset = pm_normalviewheight.GetFloat();
 		}
 		else
 		{
@@ -10403,7 +10679,8 @@ void idPlayer::Move()
 		newEyeOffset = pm_normalviewheight.GetFloat();
 	}
 
-	if( EyeHeight() != newEyeOffset )
+	float oldEyeOffset = EyeHeight();
+	if( oldEyeOffset != newEyeOffset )
 	{
 		if( spectating )
 		{
@@ -10482,10 +10759,49 @@ void idPlayer::Move()
 	BobCycle( pushVelocity );
 	// Carl: Motion sickness detection
 	float distance = ((after - before) - commonVr->motionMoveDelta).LengthSqr();
-	float crouchDistance = newEyeOffset - EyeHeight();
+	static float oldHeadHeightDiff = 0;
+	float crouchDistance = EyeHeight() + commonVr->headHeightDiff - oldEyeOffset - oldHeadHeightDiff;
+	oldHeadHeightDiff = commonVr->headHeightDiff;
 	distance += crouchDistance * crouchDistance + viewBob.LengthSqr();
 	blink = (distance > 0.005f);
 	CrashLand( oldOrigin, oldVelocity );
+
+	// Handling vr_comfortMode
+	extern idCVar timescale;
+	if (vr_motionSickness.IsModified())
+	{
+		timescale.SetFloat(1);
+		vr_motionSickness.ClearModified();
+	}
+	const int comfortMode = vr_motionSickness.GetInteger();
+	//"	0 off | 2 = tunnel | 5 = tunnel + chaperone | 6 slow mo | 7 slow mo + chaperone | 8 tunnel + slow mo | 9 = tunnel + slow mo + chaperone
+	if (comfortMode < 2) 
+	{
+		return;
+	}
+
+	float speed = physicsObj.GetLinearVelocity().LengthFast();
+	if ((comfortMode == 2) || (comfortMode == 5) || (comfortMode == 8) || (comfortMode == 9))
+	{
+		if (speed == 0 && !blink)
+		{
+			this->playerView.EnableVrComfortVision(false);
+		}
+		else
+		{
+			this->playerView.EnableVrComfortVision(true);
+		}
+	}
+
+	if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9))
+	{
+		float speedFactor = ((pm_runspeed.GetFloat() - speed) / pm_runspeed.GetFloat());
+		if (speedFactor < 0)
+		{
+			speedFactor = 0;
+		}
+		timescale.SetFloat(0.5 + 0.5*speedFactor);
+	}
 }
 
 /*
@@ -10926,6 +11242,285 @@ bool idPlayer::GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3&
 		origin = commonVr->lastViewOrigin; // koz fixme set the origin and axis to the players view
 		axis = commonVr->lastViewAxis;
 		return false;
+	}
+}
+
+/*
+==============
+idPlayer::SetupPDASlot
+==============
+*/
+void idPlayer::SetupPDASlot( bool holsterPDA )
+{
+	const char * modelname;
+	idRenderModel* renderModel;
+
+	FreePDASlot();
+
+	if( vr_slotDisable.GetBool() )
+	{
+		return;
+	}
+
+	if ( holsterPDA )
+	{
+		// we will holster the PDA
+		modelname = "models/items/pda/pda_world.lwo";
+		pdaHolsterAxis = (pdaAngle1.ToMat3() * pdaAngle2.ToMat3() * pdaAngle3.ToMat3()) * 0.6f;
+	}
+	else
+	{
+		// we will holster the flashlight if carrying it
+		if ( vr_flashlightMode.GetInteger() == 3 && flashlight.GetEntity()->IsLinked() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
+		{
+			modelname = flashlight->weaponDef->dict.GetString("model");
+			pdaHolsterAxis = idAngles(0, 90, 90).ToMat3();
+		}
+		else modelname = "";
+	}
+
+	memset( &pdaRenderEntity, 0, sizeof( pdaRenderEntity ) );
+
+	// can we holster?
+	if ( !(renderModel = renderModelManager->FindModel(modelname)) )
+	{
+		// can't holster, just unholster
+		return;
+	}
+
+	pdaRenderEntity.hModel = renderModel;
+	if (pdaRenderEntity.hModel)
+	{
+		pdaRenderEntity.hModel->Reset();
+		pdaRenderEntity.bounds = pdaRenderEntity.hModel->Bounds( &pdaRenderEntity );
+	}
+	pdaRenderEntity.shaderParms[ SHADERPARM_RED ]	= 1.0f;
+	pdaRenderEntity.shaderParms[ SHADERPARM_GREEN ] = 1.0f;
+	pdaRenderEntity.shaderParms[ SHADERPARM_BLUE ]	= 1.0f;
+	pdaRenderEntity.shaderParms[3] = 1.0f;
+	pdaRenderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] = 0.0f;
+	pdaRenderEntity.shaderParms[5] = 0.0f;
+	pdaRenderEntity.shaderParms[6] = 0.0f;
+	pdaRenderEntity.shaderParms[7] = 0.0f;
+}
+
+/*
+==============
+idPlayer::FreePDASlot
+==============
+*/
+void idPlayer::FreePDASlot()
+{
+	if( pdaModelDefHandle != -1 )
+	{
+		gameRenderWorld->FreeEntityDef( pdaModelDefHandle );
+		pdaModelDefHandle = -1;
+	}
+}
+
+/*
+==============
+idPlayer::UpdatePDASlot
+==============
+*/
+void idPlayer::UpdatePDASlot()
+{
+	if( vr_slotDisable.GetBool() )
+	{
+		return;
+	}
+	if( pdaRenderEntity.hModel ) // && inventory.pdas.Num()
+	{
+		pdaRenderEntity.timeGroup = timeGroup;
+
+		pdaRenderEntity.entityNum = ENTITYNUM_NONE;
+
+		pdaRenderEntity.axis = pdaHolsterAxis * waistAxis;
+		idVec3 slotOrigin = slots[SLOT_PDA_HIP].origin;
+		if (vr_weaponHand.GetInteger())
+			slotOrigin.y *= -1.0f;
+		pdaRenderEntity.origin = waistOrigin + slotOrigin * waistAxis;
+
+		pdaRenderEntity.allowSurfaceInViewID = entityNumber + 1;
+		pdaRenderEntity.weaponDepthHack = g_useWeaponDepthHack.GetBool();
+
+		if( pdaModelDefHandle == -1 )
+		{
+			pdaModelDefHandle = gameRenderWorld->AddEntityDef( &pdaRenderEntity );
+		}
+		else
+		{
+			gameRenderWorld->UpdateEntityDef( pdaModelDefHandle, &pdaRenderEntity );
+		}
+	}
+}
+
+/*
+==============
+idPlayer::SetupHolsterSlot
+
+stashed: -1 = switch weapons, 1 = empty holster of stashed weapon, 0 = stash current weapon in holster but don't switch
+==============
+*/
+void idPlayer::SetupHolsterSlot( int stashed )
+{
+	// if there's nothing to stash because we were already using fists or PDA
+	if ( stashed == 0 && (currentWeapon == weapon_pda || currentWeapon == weapon_fists) )
+		return;
+	// if we were using fists before activating pda, we didn't stash anything in our holster, so don't unstash anything
+	if ( stashed == 1 && previousWeapon == weapon_fists )
+		return;
+	// if we want to read or switch the current weapon but it's not ready
+	if( !weapon.GetEntity()->IsReady() && stashed != 1 )
+	{
+		return;
+	}
+
+	const char * modelname;
+	idRenderModel* renderModel;
+
+	FreeHolsterSlot();
+	if( vr_slotDisable.GetBool() )
+	{
+		return;
+	}
+
+	if ( stashed == 1 )
+		modelname = NULL;
+	else
+		modelname = weapon->weaponDef->dict.GetString("model");
+
+	// can we holster?
+	if( !modelname ||
+		strcmp(modelname, "models/weapons/soulcube/w_soulcube.lwo") == 0 ||
+		strcmp(modelname, "_DEFAULT") == 0 ||
+		strcmp(modelname, "models/items/grenade_ammo/grenade.lwo") == 0 ||
+		strcmp(modelname, "models/items/pda/pda_world.lwo") == 0 ||
+		!(renderModel = renderModelManager->FindModel( modelname )) )
+	{
+		// can't holster, just unholster
+		if( holsteredWeapon != weapon_fists )
+		{
+			if ( stashed < 0 )
+				SelectWeapon(holsteredWeapon, false);
+			holsteredWeapon = weapon_fists;
+			memset(&holsterRenderEntity, 0, sizeof(holsterRenderEntity));
+		}
+		return;
+	}
+
+	// we can holster! so unholster or change weapons
+	if (stashed < 0)
+	{
+		int previousWeapon = currentWeapon;
+		SelectWeapon(holsteredWeapon, false);
+		holsteredWeapon = previousWeapon;
+	}
+	else
+		holsteredWeapon = currentWeapon;
+
+	memset( &holsterRenderEntity, 0, sizeof( holsterRenderEntity ) );
+
+	holsterRenderEntity.hModel = renderModel;
+	if( holsterRenderEntity.hModel )
+	{
+		holsterRenderEntity.hModel->Reset();
+		holsterRenderEntity.bounds = holsterRenderEntity.hModel->Bounds( &holsterRenderEntity );
+	}
+	holsterRenderEntity.shaderParms[ SHADERPARM_RED ]	= 1.0f;
+	holsterRenderEntity.shaderParms[ SHADERPARM_GREEN ] = 1.0f;
+	holsterRenderEntity.shaderParms[ SHADERPARM_BLUE ]	= 1.0f;
+	holsterRenderEntity.shaderParms[3] = 1.0f;
+	holsterRenderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] = 0.0f;
+	holsterRenderEntity.shaderParms[5] = 0.0f;
+	holsterRenderEntity.shaderParms[6] = 0.0f;
+	holsterRenderEntity.shaderParms[7] = 0.0f;
+
+	if( strcmp(modelname, "models/weapons/pistol/w_pistol.lwo") == 0 )
+	{
+		holsterAxis = idAngles(90, 0, 0).ToMat3() * 0.75f;
+	}
+	else if( strcmp(modelname, "models/weapons/shotgun/w_shotgun2.lwo") == 0 ||
+		strcmp(modelname, "models/weapons/bfg/bfg_world.lwo") == 0)
+	{
+		holsterAxis = idAngles(0, -90, -90).ToMat3();
+	}
+	else if( strcmp(modelname, "models/weapons/grabber/grabber_world.ase") == 0 )
+	{
+		holsterAxis = idAngles(-90, 180, 0).ToMat3() * 0.5f;
+	}
+	else if (strcmp(modelname, "models/weapons/machinegun/w_machinegun.lwo") == 0)
+	{
+		holsterAxis = idAngles(0, 90, 90).ToMat3() * 0.75f;
+	}
+	else if (strcmp(modelname, "models/weapons/plasmagun/plasmagun_world.lwo") == 0)
+	{
+		holsterAxis = idAngles(0, 90, 90).ToMat3() * 0.75f;
+	}
+	else if (strcmp(modelname, "models/weapons/chainsaw/w_chainsaw.lwo") == 0)
+	{
+		holsterAxis = idAngles(0, 90, 90).ToMat3() * 0.9f;
+	}
+	else if (strcmp(modelname, "models/weapons/chaingun/w_chaingun.lwo") == 0)
+	{
+		holsterAxis = idAngles(0, 90, 90).ToMat3() * 0.9f;
+	}
+	else
+	{
+		holsterAxis = idAngles(0, 90, 90).ToMat3();
+	}
+}
+
+/*
+==============
+idPlayer::FreeHolsterSlot
+==============
+*/
+void idPlayer::FreeHolsterSlot()
+{
+	if( holsterModelDefHandle != -1 )
+	{
+		gameRenderWorld->FreeEntityDef( holsterModelDefHandle );
+		holsterModelDefHandle = -1;
+	}
+}
+
+/*
+==============
+idPlayer::UpdateHolsterSlot
+==============
+*/
+void idPlayer::UpdateHolsterSlot()
+{
+	if( vr_slotDisable.GetBool() )
+	{
+		FreeHolsterSlot();
+		holsteredWeapon = weapon_fists;
+		return;
+	}
+	if( holsterRenderEntity.hModel )
+	{
+		holsterRenderEntity.timeGroup = timeGroup;
+
+		holsterRenderEntity.entityNum = ENTITYNUM_NONE;
+
+		holsterRenderEntity.axis = holsterAxis * waistAxis;
+		idVec3 slotOrigin = slots[SLOT_WEAPON_HIP].origin + idVec3(-5, 0, 0);
+		if (vr_weaponHand.GetInteger())
+			slotOrigin.y *= -1.0f;
+		holsterRenderEntity.origin = waistOrigin + slotOrigin * waistAxis;
+
+		holsterRenderEntity.allowSurfaceInViewID = entityNumber + 1;
+		holsterRenderEntity.weaponDepthHack = g_useWeaponDepthHack.GetBool();
+
+		if( holsterModelDefHandle == -1 )
+		{
+			holsterModelDefHandle = gameRenderWorld->AddEntityDef( &holsterRenderEntity );
+		}
+		else
+		{
+			gameRenderWorld->UpdateEntityDef( holsterModelDefHandle, &holsterRenderEntity );
+		}
 	}
 }
 
@@ -12293,6 +12888,21 @@ void idPlayer::Think()
 		// Update voice groups to match in case something changed
 		session->SetVoiceGroupsToTeams();
 	}
+	UpdatePDASlot();
+	UpdateHolsterSlot();
+
+	if( vr_slotDebug.GetBool() )
+	{
+		for( int i = 0; i < SLOT_COUNT; i++ )
+		{
+			idVec3 slotOrigin = slots[i].origin;
+			if ( vr_weaponHand.GetInteger() && i != SLOT_FLASHLIGHT_SHOULDER )
+				slotOrigin.y *= -1;
+			idVec3 origin = waistOrigin + slotOrigin * waistAxis;
+			idSphere tempSphere( origin, sqrtf(slots[i].radiusSq) );
+			gameRenderWorld->DebugSphere( colorWhite, tempSphere, 18, true );
+		}
+	}
 }
 
 /*
@@ -12870,6 +13480,40 @@ void idPlayer::ControllerShakeFromDamage( int damage )
 		int lowDuration = idMath::Ftoi( highDuration );
 		
 		SetControllerShake( highMag, highDuration, lowMag, lowDuration );
+	}
+	
+}
+
+/*
+============
+idPlayer::ControllerShakeFromDamage
+============
+*/
+void idPlayer::ControllerShakeFromDamage( int damage, const idVec3 &dir )
+{
+
+	// If the player is local. SHAkkkkkkeeee!
+	if( common->IsMultiplayer() && IsLocallyControlled() )
+	{
+	
+		int maxMagScale = pm_controllerShake_damageMaxMag.GetFloat();
+		int maxDurScale = pm_controllerShake_damageMaxDur.GetFloat();
+		
+		// determine rumble
+		// >= 100 damage - will be 300 Mag
+		float highMag = ( Max( damage, 100 ) / 100.0f ) * maxMagScale;
+		int highDuration = idMath::Ftoi( ( Max( damage, 100 ) / 100.0f ) * maxDurScale );
+		
+		if( commonVr->hasHMD )
+		{
+			SetControllerShake( highMag, highDuration, dir );
+		}
+		else
+		{
+			float lowMag = highMag * 0.75f;
+			int lowDuration = idMath::Ftoi( highDuration );
+			SetControllerShake( highMag, highDuration, lowMag, lowDuration );
+		}
 	}
 	
 }
@@ -13914,7 +14558,7 @@ void idPlayer::CalculateViewWeaponPos( idVec3& origin, idMat3& axis )
 	
 	// these cvars are just for hand tweaking before moving a value to the weapon def
 	idVec3	gunpos( g_gun_x.GetFloat(), g_gun_y.GetFloat(), g_gun_z.GetFloat() );
-	
+
 	// as the player changes direction, the gun will take a small lag
 	idVec3	gunOfs = GunAcceleratingOffset();
 	origin = viewOrigin + ( gunpos + gunOfs ) * viewAxis;
@@ -14361,6 +15005,17 @@ void idPlayer::SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQua
 	// the position for the player hand joint is modified 
 	// to reflect the position of the viewmodel.  
 	// armIK / reach_ik then performs crude IK on arm using new positon.
+
+	if (hand)
+	{
+		leftHandOrigin = handOrigin;
+		leftHandAxis = handAxis;
+	}
+	else
+	{
+		rightHandOrigin = handOrigin;
+		rightHandAxis = handAxis;
+	}
 
 	idEntityPtr<idWeapon> curEntity;
 
@@ -14831,7 +15486,7 @@ idVec3 idPlayer::GetEyePosition() const
 	{
 		org = GetPhysics()->GetOrigin();
 	}
-	return org +(GetPhysics()->GetGravityNormal() * -eyeOffset.z);
+	return org + (GetPhysics()->GetGravityNormal() * -eyeOffset.z) + idVec3(0, 0, commonVr->headHeightDiff);
 }
 
 /*
@@ -14966,6 +15621,146 @@ void idPlayer::CalculateFirstPersonView()
 		firstPersonViewAxis = firstPersonViewAxis * playerView.ShakeAxis();
 #endif
 	}
+	if ( commonVr->hasHMD )
+	{
+		CalculateLeftHand();
+		CalculateRightHand();
+		CalculateWaist();
+	}
+}
+
+void idPlayer::CalculateWaist()
+{
+	idMat3 & hmdAxis = commonVr->lastHMDViewAxis;
+
+	waistOrigin = hmdAxis * neckOffset + commonVr->lastHMDViewOrigin;
+	waistOrigin.z += waistZ;
+
+	if (hmdAxis[0].z < 0) // looking down
+	{
+		if (hmdAxis[2].z > 0)
+		{
+			// use a point between head forward and upward
+			float h = hmdAxis[2].z - hmdAxis[0].z;
+			float x = -hmdAxis[0].z / h;
+			float y = hmdAxis[2].z / h;
+			idVec3 i = hmdAxis[0] * y + hmdAxis[2] * x;
+			float yaw = atan2(i.y, i.x) * idMath::M_RAD2DEG;
+			waistAxis = idAngles(0, yaw, 0).ToMat3();
+		}
+		else
+		{
+			// use a point between head backward and upward
+			float h = -hmdAxis[2].z - hmdAxis[0].z;
+			float x = -hmdAxis[0].z / h;
+			float y = hmdAxis[2].z / h;
+			idVec3 i = hmdAxis[0] * y + hmdAxis[2] * x;
+			float yaw = atan2(i.y, i.x) * idMath::M_RAD2DEG;
+			waistAxis = idAngles(0, yaw, 0).ToMat3();
+		}
+	}
+	else // fallback
+	{
+		waistAxis = idAngles(0, hmdAxis.ToAngles().yaw, 0).ToMat3();
+	}
+}
+
+void idPlayer::CalculateLeftHand()
+{
+	slotIndex_t oldSlot;
+	if (vr_weaponHand.GetInteger() == 0)
+		oldSlot = otherHandSlot;
+	else
+		oldSlot = weaponHandSlot;
+	slotIndex_t slot = SLOT_NONE;
+	if ( commonVr->hasHMD )
+	{
+		// remove pitch
+		idMat3 axis = firstPersonViewAxis;
+		//float pitch = idMath::M_RAD2DEG * asin(axis[0][2]);
+		//idAngles angles(pitch, 0, 0);
+		//axis = angles.ToMat3() * axis;
+		//leftHandOrigin = hmdOrigin + (usercmd.vrLeftControllerOrigin - usercmd.vrHeadOrigin) * vrFaceForward * axis;
+		//leftHandAxis = usercmd.vrLeftControllerAxis * vrFaceForward * axis;
+
+		if( !vr_slotDisable.GetBool() )
+		{
+			for( int i = 0; i < SLOT_COUNT; i++ )
+			{
+				idVec3 slotOrigin = slots[i].origin;
+				if ( vr_weaponHand.GetInteger() && i != SLOT_FLASHLIGHT_SHOULDER )
+					slotOrigin.y *= -1;
+				idVec3 origin = waistOrigin + slotOrigin * waistAxis;
+				if( (leftHandOrigin - origin).LengthSqr() < slots[i].radiusSq )
+				{
+					slot = (slotIndex_t)i;
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		//leftHandOrigin = hmdOrigin + hmdAxis[2] * -5;
+		//leftHandAxis = hmdAxis;
+	}
+	if( oldSlot != slot )
+	{
+		SetControllerShake(0, 0, vr_slotMag.GetFloat(), vr_slotDur.GetInteger());
+	}
+	if (vr_weaponHand.GetInteger() == 0)
+		otherHandSlot = slot;
+	else
+		weaponHandSlot = slot;
+}
+
+void idPlayer::CalculateRightHand()
+{
+	slotIndex_t oldSlot;
+	if (vr_weaponHand.GetInteger() == 0)
+		oldSlot = weaponHandSlot;
+	else
+		oldSlot = otherHandSlot;
+	slotIndex_t slot = SLOT_NONE;
+	if ( commonVr->hasHMD )
+	{
+		// remove pitch
+		idMat3 axis = firstPersonViewAxis;
+		//float pitch = idMath::M_RAD2DEG * asin(axis[0][2]);
+		//idAngles angles(pitch, 0, 0);
+		//axis = angles.ToMat3() * axis;
+		//rightHandOrigin = hmdOrigin + (usercmd.vrRightControllerOrigin - usercmd.vrHeadOrigin) * vrFaceForward * axis;
+		//rightHandAxis = usercmd.vrRightControllerAxis * vrFaceForward * axis;
+
+		if( !vr_slotDisable.GetBool() )
+		{
+			for( int i = 0; i < SLOT_COUNT; i++ )
+			{
+				idVec3 slotOrigin = slots[i].origin;
+				if ( vr_weaponHand.GetInteger() && i != SLOT_FLASHLIGHT_SHOULDER )
+					slotOrigin.y *= -1;
+				idVec3 origin = waistOrigin + slotOrigin * waistAxis;
+				if( (rightHandOrigin - origin).LengthSqr() < slots[i].radiusSq )
+				{
+					slot = (slotIndex_t)i;
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		//rightHandOrigin = hmdOrigin + hmdAxis[2] * -5;
+		//rightHandAxis = hmdAxis;
+	}
+	if( oldSlot != slot )
+	{
+		SetControllerShake(vr_slotMag.GetFloat(), vr_slotDur.GetInteger(), 0, 0);
+	}
+	if (vr_weaponHand.GetInteger() == 0)
+		weaponHandSlot = slot;
+	else
+		otherHandSlot = slot;
 }
 
 /*
@@ -15165,6 +15960,8 @@ void idPlayer::CalculateRenderView()
 				
 		commonVr->lastHMDViewOrigin = origin;
 		commonVr->lastHMDViewAxis = axis;
+		commonVr->uncrouchedHMDViewOrigin = origin;
+		commonVr->uncrouchedHMDViewOrigin.z -= commonVr->headHeightDiff;
 				
 		renderView->vieworg = origin;
 		renderView->viewaxis = axis;
@@ -15195,11 +15992,17 @@ void idPlayer::CalculateRenderView()
 		{
 			commonVr->PDAforced = false;
 			commonVr->VR_GAME_PAUSED = false;
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			player->SetupPDASlot( true );
+			player->SetupHolsterSlot( true );
 		}
 
 		if ( commonVr->PDAforcetoggle )
 		{
-			if ( !commonVr->PDAforced )
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			player->SetupPDASlot( commonVr->PDAforced );
+			player->SetupHolsterSlot( commonVr->PDAforced );
+			if (!commonVr->PDAforced)
 			{
 				if ( weapon->IdentifyWeapon() != WEAPON_PDA )
 				{
@@ -17155,6 +17958,24 @@ void idPlayer::FreeModelDef()
 	idAFEntity_Base::FreeModelDef();
 	if( common->IsMultiplayer() && gameLocal.mpGame.IsGametypeFlagBased() )
 		playerIcon.FreeIcon();
+}
+
+void idPlayer::SetControllerShake( float magnitude, int duration, const idVec3 &direction )
+{
+	idVec3 dir = direction;
+	dir.Normalize();
+	idVec3 left = leftHandOrigin - rightHandOrigin;
+	float side = left * dir * 0.5 + 0.5;
+
+	// push magnitude up so the middle doesn't feel as weak
+	float invSide = 1.0 - side;
+	float rightSide = 1.0 - side*side;
+	float leftSide = 1.0 - invSide*invSide;
+
+	float leftMag = magnitude * leftSide;
+	float rightMag = magnitude * rightSide;
+
+	SetControllerShake( rightMag, duration, leftMag, duration );
 }
 
 /*

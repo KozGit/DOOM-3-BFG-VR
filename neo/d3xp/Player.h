@@ -259,6 +259,24 @@ typedef struct
 	idVec3	pos;
 } aasLocation_t;
 
+enum slotIndex_t
+{
+	SLOT_NONE = -1,
+	SLOT_PDA_HIP,
+	SLOT_WEAPON_HIP,
+	SLOT_WEAPON_BACK_BOTTOM,
+	SLOT_WEAPON_BACK_TOP,
+	SLOT_FLASHLIGHT_SHOULDER,
+	SLOT_FLASHLIGHT_HEAD,
+	SLOT_COUNT
+};
+
+struct slot_t
+{
+	idVec3 origin;
+	float radiusSq;
+};
+
 class idPlayer : public idActor
 {
 public:
@@ -298,6 +316,15 @@ public:
 	const idDeclSkin*		skinHeadingArrows;
 	const idDeclSkin*		skinHeadingArrowsScroll;
 	
+	renderEntity_t			pdaRenderEntity;					// used to present a model to the renderer
+	qhandle_t				pdaModelDefHandle;					// handle to static renderer model
+	idMat3					pdaHolsterAxis;
+
+	renderEntity_t			holsterRenderEntity;					// used to present a model to the renderer
+	qhandle_t				holsterModelDefHandle;					// handle to static renderer model
+	idMat3					holsterAxis;
+	int						holsteredWeapon;
+
 	renderEntity_t			hudEntity; // koz add a model to place the hud into the world
 	qhandle_t				hudHandle;
 	bool					hudActive;
@@ -489,6 +516,17 @@ public:
 
 	idVec3					firstPersonWeaponOrigin; // koz fixme check if still needed - independent weapons
 	
+	idVec3					leftHandOrigin;
+	idMat3					leftHandAxis;
+	slotIndex_t				otherHandSlot;
+
+	idVec3					rightHandOrigin;
+	idMat3					rightHandAxis;
+	slotIndex_t				weaponHandSlot;
+
+	idVec3					waistOrigin;
+	idMat3					waistAxis;
+
 	idDragEntity			dragEntity;
 	
 	idFuncMountedObject*		mountedObject;
@@ -513,6 +551,14 @@ public:
 	void					Spawn();
 	void					Think();
 	
+	void					SetupPDASlot( bool holsterPDA );
+	void					FreePDASlot();
+	void					UpdatePDASlot();
+
+	void					SetupHolsterSlot( int stashed = -1 );
+	void					FreeHolsterSlot();
+	void					UpdateHolsterSlot();
+
 	void					UpdateLaserSight();
 	bool					GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3& axis );
 
@@ -567,6 +613,8 @@ public:
 	
 	// Controller Shake
 	void					ControllerShakeFromDamage( int damage );
+	void					ControllerShakeFromDamage( int damage, const idVec3 &direction );
+	void					SetControllerShake( float magnitude, int duration, const idVec3 &direction );
 	void					SetControllerShake( float highMagnitude, int highDuration, float lowMagnitude, int lowDuration );
 	void					ResetControllerShake();
 	void					GetControllerShake( int& highMagnitude, int& lowMagnitude ) const;
@@ -612,6 +660,9 @@ public:
 	renderView_t* 			GetRenderView();
 	void					CalculateRenderView();	// called every tic by player code
 	void					CalculateFirstPersonView();
+	void					CalculateWaist();
+	void					CalculateLeftHand();
+	void					CalculateRightHand();
 	
 	void					AddChatMessage( int index, int alpha, const idStr& message );
 	void					UpdateSpectatingText();
@@ -687,6 +738,9 @@ public:
 	void					ClearPowerUps();
 	bool					PowerUpActive( int powerup ) const;
 	float					PowerUpModifier( int type );
+	
+	bool					OtherHandImpulseSlot();
+	bool					WeaponHandImpulseSlot();
 	
 	int						SlotForWeapon( const char* weaponName );
 	void					Reload();

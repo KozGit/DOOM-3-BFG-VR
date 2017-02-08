@@ -92,6 +92,14 @@ void idMenuScreen_Shell_VR_Character_Options::Initialize( idMenuHandler * data )
 	options->AddChild( control );
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType(OPTION_SLIDER_TEXT);
+	control->SetLabel("Holster Slots");
+	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_HOLSTER_SLOTS);
+	control->SetupEvents(DEFAULT_REPEAT_TIME, options->GetChildren().Num());
+	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_HOLSTER_SLOTS);
+	options->AddChild(control);
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "View Height" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT );
@@ -309,7 +317,7 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	originalFlashMode = vr_flashlightMode.GetInteger();
 	originalWeaponHand = vr_weaponHand.GetInteger();
 	originalViewHeight = pm_normalviewheight.GetFloat();
-
+	originalSlotDisable = vr_slotDisable.GetInteger();
 }
 
 /*
@@ -358,10 +366,20 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 		{
 			static const int numValues = 2;
 			static const int values[numValues] = { 0, 1 };
-			vr_weaponHand.SetInteger( AdjustOption( vr_weaponHand.GetInteger(), values, numValues, adjustAmount ) );
+			int new_hand = AdjustOption( vr_weaponHand.GetInteger(), values, numValues, adjustAmount );
+			if ( new_hand != vr_weaponHand.GetInteger() )
+				SwapWeaponHand();
 			break;
 		}
 		
+		case CHARACTER_OPTIONS_FIELD_HOLSTER_SLOTS:
+		{
+			static const int numValues = 2;
+			static const int values[numValues] = { 1, 0 };
+			vr_slotDisable.SetInteger(AdjustOption(vr_slotDisable.GetInteger(), values, numValues, adjustAmount));
+			break;
+		}
+
 		case CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT: {
 			const float percent = pm_normalviewheight.GetFloat();;
 			const float adjusted = percent + (float) adjustAmount * .5f;
@@ -442,7 +460,19 @@ idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_V
 			}
 		}
 		
-		case CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT: 
+		case CHARACTER_OPTIONS_FIELD_HOLSTER_SLOTS:
+		{
+			if (vr_slotDisable.GetInteger() == 0)
+			{
+				return "Enabled";
+			}
+			else
+			{
+				return "Disabled";
+			}
+		}
+
+		case CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT:
 		{
 			
 			return va( "%.1f", pm_normalviewheight.GetFloat() );
@@ -468,6 +498,10 @@ bool idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 		return true;
 	}
 	if ( originalWeaponHand != vr_weaponHand.GetInteger() )
+	{
+		return true;
+	}
+	if ( originalSlotDisable != vr_slotDisable.GetFloat() )
 	{
 		return true;
 	}

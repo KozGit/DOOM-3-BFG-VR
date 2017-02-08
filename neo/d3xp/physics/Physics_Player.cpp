@@ -748,7 +748,72 @@ bool idPhysics_Player::SlideMove( bool gravity, bool stepUp, bool stepDown, bool
 			break;
 		}
 	}
-	
+
+	// Leyland
+	blink = false;
+	idVec3 headOrigin = commonVr->uncrouchedHMDViewOrigin - current.origin;
+	headOrigin.z = 0.f;
+
+	static const float headBodyLimit = 11.f;
+	static const float maxHeadDist = headBodyLimit + 24.5f;
+	static const float headBodyLimitSq = headBodyLimit * headBodyLimit;
+	static const float maxHeadDistSq = maxHeadDist * maxHeadDist;
+
+	idBounds bounds(idVec3(-5,-5,-5), idVec3(5,5,5));
+	idVec3 start;
+
+	// see if we can raise our head high enough
+	start = end = current.origin;
+	start.z += 20.f;
+	end.z = commonVr->uncrouchedHMDViewOrigin.z;
+	gameLocal.clip.TraceBounds( trace, start, end, bounds, clipMask, self );
+	commonVr->headHeightDiff = trace.endpos.z - end.z;
+
+	if( trace.fraction < 1.f )
+	{
+		if( !headBumped )
+		{
+			blink = true;
+			headBumped = true;
+		}
+	}
+	else
+	{
+		if( headBumped )
+		{
+			blink = true;
+			headBumped = false;
+		}
+	}
+
+	// clamp to a max distance
+	float headDistSq = headOrigin.LengthSqr();
+	if( headDistSq > maxHeadDistSq )
+	{
+		headOrigin *= maxHeadDist / sqrtf(headDistSq);
+		headDistSq = maxHeadDistSq;
+		blink = true;
+	}
+
+	// head collision check if we are outside the body bounds
+	if( headDistSq > headBodyLimitSq )
+	{
+		// see if we can make it there
+		start = current.origin;
+		start.z = commonVr->uncrouchedHMDViewOrigin.z + commonVr->headHeightDiff;
+		end = headOrigin + start;
+		gameLocal.clip.TraceBounds( trace, start, end, bounds, clipMask, self );
+
+		if( trace.fraction < 1.0f )
+		{
+			blink = true;
+		}
+
+		headOrigin = trace.endpos - current.origin;
+	}
+	headOrigin.z = commonVr->headHeightDiff;
+	// end Leyland
+
 	// step down
 	if( stepDown && groundPlane )
 	{
@@ -1527,36 +1592,21 @@ void idPhysics_Player::CheckDuck()
 		// thought I was going to have to do a bunch of bullshit to toggle the crouch anim
 		// but turns out the walk anim with the waist IK doesn't look too terrible for now
 		// of course, I haven't tested crouching EVERYWHERE in the game yet.....
-
+		//  this code makes the bounding box reflect the exact player height
 		{
-			static int currentZ;
-			currentZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z;
+			maxZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z + commonVr->headHeightDiff;
+			idMath::ClampFloat(pm_crouchheight.GetFloat(), pm_normalheight.GetFloat(), maxZ);
+			maxZ = (int)maxZ; // if this is not cast as an int, it crashes the savegame file!!!!!!! WTF?
 
-			if ( currentZ <= ( pm_crouchheight.GetFloat() + 2.0f ) ) // give a little wiggle room.
+			current.movementFlags &= ~PMF_DUCKED;
+			if (maxZ <= (pm_crouchheight.GetFloat() + 2))
 			{
 				playerSpeed = crouchSpeed;
-				maxZ = pm_crouchheight.GetFloat();
+				if (!ladder)
+					current.movementFlags |= PMF_DUCKED;
 			}
-			else
-			{
-				maxZ = pm_normalheight.GetFloat();
-			}
-
 		}
 			
-		/*  this code makes the bounding box reflect the exact player height
-		{
-			maxZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z;
-			maxZ = (int)maxZ; // if this is not cast as an int, it crashes the savegame file!!!!!!! WTF?
-			idMath::ClampFloat( pm_crouchheight.GetFloat(), pm_normalheight.GetFloat(), maxZ );
-						
-			if ( maxZ <= ( pm_crouchheight.GetFloat() + 2 ) )
-			{
-				playerSpeed = crouchSpeed;
-			}
-		}
-
-		*/
 		else
 		{
 
@@ -2061,6 +2111,7 @@ idPhysics_Player::idPhysics_Player()
 	ladderNormal.Zero();
 	waterLevel = WATERLEVEL_NONE;
 	waterType = 0;
+	headBumped = false;
 }
 
 /*

@@ -1346,6 +1346,8 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							if ( (button & ButtonMaskFromId( vr::k_EButton_Grip )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_Grip )) )
 							{
 								//common->Printf( "inputDeviceNum %d L Grip\n", inputDeviceNum );
+								if ((button & ButtonMaskFromId(vr::k_EButton_Grip)) > 0)
+									commonVr->grabbedLeft = true;
 								PostInputEvent( inputDeviceNum, J_ACTION33, (button & ButtonMaskFromId( vr::k_EButton_Grip )) > 0 );
 							}
 
@@ -1485,7 +1487,9 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							if ( (button & ButtonMaskFromId( vr::k_EButton_Grip )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_Grip )) )
 							{
 								//common->Printf( "inputDeviceNum %d R Grip\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION51, (button & ButtonMaskFromId( vr::k_EButton_Grip )) > 0 );
+								if ((button & ButtonMaskFromId( vr::k_EButton_Grip)) > 0)
+									commonVr->grabbedRight = true;
+								PostInputEvent(inputDeviceNum, J_ACTION51, (button & ButtonMaskFromId(vr::k_EButton_Grip)) > 0);
 							}
 
 							if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) )
@@ -1625,22 +1629,26 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							PostInputEvent( inputDeviceNum, J_ACTION21, (inputState.Touches & ovrTouch_LThumbRest) );
 						}
 
-						if ( inputState.HandTrigger[ovrHand_Left] != oldInputState.HandTrigger[ovrHand_Left] )
+						if ( (inputState.HandTrigger[ovrHand_Left] > 0.25f) != (oldInputState.HandTrigger[ovrHand_Left] > 0.25f) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION22, inputState.HandTrigger[ovrHand_Left] > 0.25f );
+							if (inputState.HandTrigger[ovrHand_Left] > 0.25f)
+								commonVr->grabbedLeft = true;
+							PostInputEvent(inputDeviceNum, J_ACTION22, inputState.HandTrigger[ovrHand_Left] > 0.25f);
 						}
 
-						if ( inputState.IndexTrigger[ovrHand_Left] != oldInputState.IndexTrigger[ovrHand_Left] )
+						if ( (inputState.IndexTrigger[ovrHand_Left] > 0.25f) != (oldInputState.IndexTrigger[ovrHand_Left] > 0.25f) )
 						{
 							PostInputEvent( inputDeviceNum, J_ACTION23, inputState.IndexTrigger[ovrHand_Left] > 0.25f );
 						}
 
-						if ( inputState.HandTrigger[ovrHand_Right] != oldInputState.HandTrigger[ovrHand_Right] )
+						if ( (inputState.HandTrigger[ovrHand_Right] > 0.25f) != (oldInputState.HandTrigger[ovrHand_Right] > 0.25f) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION29, inputState.HandTrigger[ovrHand_Right] > 0.25f );
+							if (inputState.HandTrigger[ovrHand_Right] > 0.25f )
+								commonVr->grabbedRight = true;
+							PostInputEvent(inputDeviceNum, J_ACTION29, inputState.HandTrigger[ovrHand_Right] > 0.25f);
 						}
 
-						if ( inputState.IndexTrigger[ovrHand_Right] != oldInputState.IndexTrigger[ovrHand_Right] )
+						if ( (inputState.IndexTrigger[ovrHand_Right] > 0.25f) != (oldInputState.IndexTrigger[ovrHand_Right] > 0.25f) )
 						{
 							PostInputEvent( inputDeviceNum, J_ACTION30, inputState.IndexTrigger[ovrHand_Right] > 0.25f );
 						}

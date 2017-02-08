@@ -212,19 +212,6 @@ void idMenuScreen_Shell_Root::ShowScreen( const mainMenuTransition_t transitionT
 		
 			idMenuWidget_Button* buttonWidget = NULL;
 			
-#if !defined ( ID_RETAIL )
-			option.Append( "DEV" );	// DEV
-			menuOptions.Append( option );
-			options->GetChildByIndex( index ).ClearEventActions();
-			options->GetChildByIndex( index ).AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, ROOT_CMD_DEV );
-			buttonWidget = dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( index ) );
-			if( buttonWidget != NULL )
-			{
-				buttonWidget->SetDescription( "View a list of maps available for play" );
-			}
-			index++;
-#endif
-			
 			option.Clear();
 			option.Append( "#str_swf_campaign" );	// singleplayer
 			menuOptions.Append( option );
@@ -274,6 +261,20 @@ void idMenuScreen_Shell_Root::ShowScreen( const mainMenuTransition_t transitionT
 			}
 			index++;
 			
+#if !defined ( ID_RETAIL )
+			option.Clear();
+			option.Append( "DEV" );	// DEV
+			menuOptions.Append( option );
+			options->GetChildByIndex( index ).ClearEventActions();
+			options->GetChildByIndex( index ).AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, ROOT_CMD_DEV );
+			buttonWidget = dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( index ) );
+			if( buttonWidget != NULL )
+			{
+				buttonWidget->SetDescription( "View a list of maps available for play" );
+			}
+			index++;
+#endif
+
 			// only add quit option for PC
 			option.Clear();
 			option.Append( "#str_swf_quit" );	// quit

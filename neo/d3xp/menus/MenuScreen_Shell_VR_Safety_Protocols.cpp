@@ -453,9 +453,9 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 
 		case SAFETY_PROTOCOLS_FIELD_MOTION_SICKNESS:
 		{
-			static const int numValues = 4;
-			// 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Third Person, 6 = Particles, 7 = Particles & Chaperone"
-			static const int values[numValues] = { 0, 1, 3, 4 };
+			static const int numValues = 10;
+			// 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Reduce FOV & Chaperone, 6 = Slow Mo, 7 = Slow Mo & Chaperone, 8 = Slow Mo & Reduce FOV, 9 = Slow Mo, Chaperone, Reduce FOV, 10 = Third Person, 11 = Particles, 12 = Particles & Chaperone
+			static const int values[numValues] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 			vr_motionSickness.SetInteger(AdjustOption(vr_motionSickness.GetInteger(), values, numValues, adjustAmount));
 			break;
 		}
@@ -543,7 +543,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR
 
 		case SAFETY_PROTOCOLS_FIELD_MOTION_SICKNESS:
 		{
-			const char* names[] = { "None", "Chaperone", "Reduce FOV", "Black Screen", "Black & Chaperone", "Third Person", "Particles", "Particles & Chaperone" };
+			const char* names[] = { "None", "Chaperone", "Reduce FOV", "Black Screen", "Black + Chaperone", "FOV + Chaperone", "Slow Mo", "Slow Mo + Chaperone", "Slow Mo + FOV", "Slow+FOV+Chaperone", "Third Person", "Particles", "Particles & Chaperone" };
 			return names[vr_motionSickness.GetInteger()];
 		}
 

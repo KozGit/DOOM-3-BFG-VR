@@ -84,6 +84,8 @@ typedef enum
 	FLASH_MAX,
 } vr_flashlight_mode_t;
 
+void SwapWeaponHand();
+
 class idClipModel;
 
 class iVr
@@ -143,7 +145,9 @@ public:
 	bool				PDArising;
 	bool				gameSavingLoading;
 	bool				showingIntroVideo;
-	
+
+	bool				grabbedLeft, grabbedRight;
+
 	int					swfRenderMode;
 	bool				PDAclipModelSet;
 	int					pdaToggleTime;
@@ -184,6 +188,8 @@ public:
 	float				lastHMDRoll;
 	idVec3				lastHMDViewOrigin;
 	idMat3				lastHMDViewAxis;
+	idVec3				uncrouchedHMDViewOrigin;
+	float				headHeightDiff;
 			
 	bool				isWalking;
 	
@@ -515,6 +521,13 @@ extern idCVar	vr_motionSickness;
 extern idCVar	vr_strobeTime;
 extern idCVar	vr_chaperone;
 extern idCVar	vr_chaperoneColor;
+
+extern idCVar vr_slotDebug;
+extern idCVar vr_slotMag;
+extern idCVar vr_slotDur;
+extern idCVar vr_slotDisable;
+
+extern idCVar vr_handSwapsAnalogs;
 
 extern iVr* commonVr;
 extern iVoice* commonVoice;
