@@ -49,7 +49,7 @@ Reachability_Write
 */
 bool Reachability_Write( idFile* fp, idReachability* reach )
 {
-	fp->WriteFloatString( "\t\t%d %d (%f %f %f) (%f %f %f) %d %d",
+	fp->WriteFloatString( "%d %d (%f %f %f) (%f %f %f) %d %d",
 						  ( int ) reach->travelType, ( int ) reach->toAreaNum, reach->start.x, reach->start.y, reach->start.z,
 						  reach->end.x, reach->end.y, reach->end.z, reach->edgeNum, ( int ) reach->travelTime );
 	return true;
@@ -105,13 +105,13 @@ bool Reachability_Special_Write( idFile* fp, idReachability_Special* reach )
 	int i;
 	const idKeyValue* keyValue;
 	
-	fp->WriteFloatString( "\n\t\t{\n" );
+	fp->WriteFloatString( "\n{\n" );
 	for( i = 0; i < reach->dict.GetNumKeyVals(); i++ )
 	{
 		keyValue = reach->dict.GetKeyVal( i );
-		fp->WriteFloatString( "\t\t\t\"%s\" \"%s\"\n", keyValue->GetKey().c_str(), keyValue->GetValue().c_str() );
+		fp->WriteFloatString( "\"%s\" \"%s\"\n", keyValue->GetKey().c_str(), keyValue->GetValue().c_str() );
 	}
-	fp->WriteFloatString( "\t\t}\n" );
+	fp->WriteFloatString( "}\n" );
 	
 	return true;
 }
@@ -646,16 +646,45 @@ bool idAASSettings::ValidEntity( const char* classname ) const
 	idVec3			size;
 	idBounds		bounds;
 	
-	if( playerFlood )
+	if (playerFlood)
 	{
-		if( !strcmp( classname, "info_player_start" ) || !strcmp( classname , "info_player_deathmatch" ) || !strcmp( classname, "func_teleporter" ) )
+		// Carl: recognise some more items that imply player can go there. item_pda now causes mc_underground build to fail because it thinks it's outside.
+		if (!strcmp(classname, "info_player_start") || !strcmp(classname, "info_player_deathmatch") || !strcmp(classname, "func_teleporter")
+			|| !strcmp(classname, "info_player_teleport") || !strcmp(classname, "item_aircannister") || !strcmp(classname, "item_pda") || !strcmp(classname, "item_videocd")
+			|| !strcmp(classname, "weapon_pistol") || !strcmp(classname, "weapon_shotgun") || !strcmp(classname, "weapon_shotgun_double")
+			|| !strcmp(classname, "weapon_machinegun") || !strcmp(classname, "weapon_chaingun") || !strcmp(classname, "weapon_plasmagun")
+			|| !strcmp(classname, "weapon_rocketlauncher") || !strcmp(classname, "weapon_handgrenade") || !strcmp(classname, "weapon_bfg")
+			|| !strcmp(classname, "weapon_soulcube") || !strcmp(classname, "weapon_chainsaw") || !strcmp(classname, "weapon_grabber") || !strcmp(classname, "weapon_flashlight")
+			|| !strcmp(classname, "item_medkit") || !strcmp(classname, "item_medkit_small") || !strcmp(classname, "item_backpack") || !strcmp(classname, "item_envirosuit")
+			|| !strcmp(classname, "item_keycard_generic") || !strcmp(classname, "item_backpack") || !strcmp(classname, "item_grabbercd") || !strcmp(classname, "item_artifact_tablet")
+			|| !strcmp(classname, "item_armor_security") || !strcmp(classname, "item_armor_shard") || !strcmp(classname, "ammo_bfg_small")
+			|| !strcmp(classname, "ammo_bullets_large") || !strcmp(classname, "ammo_shells_large") || !strcmp(classname, "ammo_cells_large") || !strcmp(classname, "ammo_clip_large")
+			|| !strcmp(classname, "ammo_bullets_small") || !strcmp(classname, "ammo_shells_small") || !strcmp(classname, "ammo_cells_small") || !strcmp(classname, "ammo_clip_small")
+			|| !strcmp(classname, "ammo_rockets_large") || !strcmp(classname, "ammo_rockets_small") || !strcmp(classname, "ammo_belt_small") || !strcmp(classname, "ammo_grenade_small")
+			|| !strcmp(classname, "weapon_pistol_mp") || !strcmp(classname, "weapon_shotgun_mp") || !strcmp(classname, "weapon_shotgun_double_mp")
+			|| !strcmp(classname, "weapon_machinegun_mp") || !strcmp(classname, "weapon_chaingun_mp") || !strcmp(classname, "weapon_plasmagun_mp")
+			|| !strcmp(classname, "weapon_rocketlauncher_mp") || !strcmp(classname, "weapon_handgrenade_mp") || !strcmp(classname, "weapon_bfg_mp")
+			|| !strcmp(classname, "weapon_soulcube_mp") || !strcmp(classname, "weapon_chainsaw_mp") || !strcmp(classname, "weapon_grabber_mp") || !strcmp(classname, "weapon_flashlight_mp")
+			|| !strcmp(classname, "item_medkit_mp") || !strcmp(classname, "item_medkit_small_mp") || !strcmp(classname, "item_backpack_mp")
+			|| !strcmp(classname, "item_armor_security_mp") || !strcmp(classname, "item_armor_shard_mp") || !strcmp(classname, "ammo_bfg_small")
+			|| !strcmp(classname, "ammo_bullets_large_mp") || !strcmp(classname, "ammo_shells_large_mp") || !strcmp(classname, "ammo_cells_large_mp") || !strcmp(classname, "ammo_clip_large_mp")
+			|| !strcmp(classname, "ammo_bullets_small_mp") || !strcmp(classname, "ammo_shells_small_mp") || !strcmp(classname, "ammo_cells_small_mp") || !strcmp(classname, "ammo_clip_small_mp")
+			|| !strcmp(classname, "ammo_rockets_large_mp") || !strcmp(classname, "ammo_rockets_small_mp") || !strcmp(classname, "ammo_belt_small_mp") || !strcmp(classname, "ammo_grenade_small_mp")
+			|| !strcmp(classname, "moveable_item_medkit") || !strcmp(classname, "moveable_item_medkit_small") || !strcmp(classname, "moveable_item_armor_security") || !strcmp(classname, "moveable_item_armor_shard")
+			|| !strcmp(classname, "moveable_ammo_bullets_large") || !strcmp(classname, "moveable_ammo_shells_large") || !strcmp(classname, "moveable_ammo_cells_large") || !strcmp(classname, "moveable_ammo_clip_large")
+			|| !strcmp(classname, "moveable_ammo_bullets_small") || !strcmp(classname, "moveable_ammo_shells_small") || !strcmp(classname, "moveable_ammo_cells_small") || !strcmp(classname, "moveable_ammo_clip_small")
+			|| !strcmp(classname, "moveable_ammo_rockets_large") || !strcmp(classname, "moveable_ammo_rockets_small") || !strcmp(classname, "moveable_ammo_belt_small") || !strcmp(classname, "moveable_ammo_grenade_small")
+			|| !strcmp(classname, "powerup_megahealth") || !strcmp(classname, "powerup_beserk") || !strcmp(classname, "powerup_adrenaline")
+			|| !strcmp(classname, "powerup_invisibility") || !strcmp(classname, "powerup_invulnerability")
+			|| !strcmp(classname, "item_key_yellow") || !strcmp(classname, "item_generic") || !strcmp(classname, "ammo_bloodstone_small")
+			)
 		{
 			return true;
 		}
 	}
 	
 	const idDeclEntityDef* decl = static_cast<const idDeclEntityDef*>( declManager->FindType( DECL_ENTITYDEF, classname, false ) );
-	if( ( decl != NULL ) && decl->dict.GetString( "use_aas", NULL, use_aas ) && !fileExtension.Icmp( use_aas ) )
+	if( ( decl != NULL ) && decl->dict.GetString( "use_aas", NULL, use_aas ) && ( playerFlood || !fileExtension.Icmp( use_aas ) ) )
 	{
 		if( decl->dict.GetVector( "mins", NULL, bounds[0] ) )
 		{
@@ -667,14 +696,16 @@ bool idAASSettings::ValidEntity( const char* classname ) const
 			bounds[ 1 ].Set( size.x * 0.5f, size.y * 0.5f, size.z );
 		}
 		
-		if( !ValidForBounds( bounds ) )
+		// Carl: Anywhere a monster AAS can go, a player can go too. Without this, half the level is considered impossible to reach.
+		if( !( playerFlood || ValidForBounds( bounds ) ) )
 		{
-			common->Error( "%s cannot use %s\n", classname, fileExtension.c_str() );
+			common->Warning( "%s cannot use %s\n", classname, fileExtension.c_str() );
 		}
 		
 		return true;
 	}
 	
+	//common->Printf( "%s\n", classname );
 	return false;
 }
 
@@ -785,64 +816,64 @@ bool idAASFileLocal::Write( const idStr& fileName, unsigned int mapFileCRC )
 	settings.WriteToFile( aasFile );
 	
 	// write out planes
-	aasFile->WriteFloatString( "planes %d {\n", planeList.Num() );
+	aasFile->WriteFloatString( "planes %d{\n", planeList.Num() );
 	for( i = 0; i < planeList.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %f %f %f %f )\n", i,
+		aasFile->WriteFloatString( "%d(%f %f %f %f)\n", i,
 								   planeList[i].Normal().x, planeList[i].Normal().y, planeList[i].Normal().z, planeList[i].Dist() );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out vertices
-	aasFile->WriteFloatString( "vertices %d {\n", vertices.Num() );
+	aasFile->WriteFloatString( "vertices %d{\n", vertices.Num() );
 	for( i = 0; i < vertices.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %f %f %f )\n", i, vertices[i].x, vertices[i].y, vertices[i].z );
+		aasFile->WriteFloatString( "%d(%f %f %f)\n", i, vertices[i].x, vertices[i].y, vertices[i].z );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out edges
-	aasFile->WriteFloatString( "edges %d {\n", edges.Num() );
+	aasFile->WriteFloatString( "edges %d{\n", edges.Num() );
 	for( i = 0; i < edges.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d %d )\n", i, edges[i].vertexNum[0], edges[i].vertexNum[1] );
+		aasFile->WriteFloatString( "%d(%d %d)\n", i, edges[i].vertexNum[0], edges[i].vertexNum[1] );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out edgeIndex
-	aasFile->WriteFloatString( "edgeIndex %d {\n", edgeIndex.Num() );
+	aasFile->WriteFloatString( "edgeIndex %d{\n", edgeIndex.Num() );
 	for( i = 0; i < edgeIndex.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d )\n", i, edgeIndex[i] );
+		aasFile->WriteFloatString( "%d(%d)\n", i, edgeIndex[i] );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out faces
-	aasFile->WriteFloatString( "faces %d {\n", faces.Num() );
+	aasFile->WriteFloatString( "faces %d{\n", faces.Num() );
 	for( i = 0; i < faces.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d %d %d %d %d %d )\n", i, faces[i].planeNum, faces[i].flags,
+		aasFile->WriteFloatString( "%d(%d %d %d %d %d %d)\n", i, faces[i].planeNum, faces[i].flags,
 								   faces[i].areas[0], faces[i].areas[1], faces[i].firstEdge, faces[i].numEdges );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out faceIndex
-	aasFile->WriteFloatString( "faceIndex %d {\n", faceIndex.Num() );
+	aasFile->WriteFloatString( "faceIndex %d{\n", faceIndex.Num() );
 	for( i = 0; i < faceIndex.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d )\n", i, faceIndex[i] );
+		aasFile->WriteFloatString( "%d(%d)\n", i, faceIndex[i] );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out areas
-	aasFile->WriteFloatString( "areas %d {\n", areas.Num() );
+	aasFile->WriteFloatString( "areas %d{\n", areas.Num() );
 	for( i = 0; i < areas.Num(); i++ )
 	{
 		for( num = 0, reach = areas[i].reach; reach; reach = reach->next )
 		{
 			num++;
 		}
-		aasFile->WriteFloatString( "\t%d ( %d %d %d %d %d %d ) %d {\n", i, areas[i].flags, areas[i].contents,
+		aasFile->WriteFloatString( "%d(%d %d %d %d %d %d)%d{\n", i, areas[i].flags, areas[i].contents,
 								   areas[i].firstFace, areas[i].numFaces, areas[i].cluster, areas[i].clusterAreaNum, num );
 		for( reach = areas[i].reach; reach; reach = reach->next )
 		{
@@ -855,40 +886,40 @@ bool idAASFileLocal::Write( const idStr& fileName, unsigned int mapFileCRC )
 			}
 			aasFile->WriteFloatString( "\n" );
 		}
-		aasFile->WriteFloatString( "\t}\n" );
+		aasFile->WriteFloatString( "}\n" );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out nodes
-	aasFile->WriteFloatString( "nodes %d {\n", nodes.Num() );
+	aasFile->WriteFloatString( "nodes %d{\n", nodes.Num() );
 	for( i = 0; i < nodes.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d %d %d )\n", i, nodes[i].planeNum, nodes[i].children[0], nodes[i].children[1] );
+		aasFile->WriteFloatString( "%d(%d %d %d)\n", i, nodes[i].planeNum, nodes[i].children[0], nodes[i].children[1] );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out portals
-	aasFile->WriteFloatString( "portals %d {\n", portals.Num() );
+	aasFile->WriteFloatString( "portals %d{\n", portals.Num() );
 	for( i = 0; i < portals.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d %d %d %d %d )\n", i, portals[i].areaNum, portals[i].clusters[0],
+		aasFile->WriteFloatString( "%d(%d %d %d %d %d)\n", i, portals[i].areaNum, portals[i].clusters[0],
 								   portals[i].clusters[1], portals[i].clusterAreaNum[0], portals[i].clusterAreaNum[1] );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out portalIndex
-	aasFile->WriteFloatString( "portalIndex %d {\n", portalIndex.Num() );
+	aasFile->WriteFloatString( "portalIndex %d{\n", portalIndex.Num() );
 	for( i = 0; i < portalIndex.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d )\n", i, portalIndex[i] );
+		aasFile->WriteFloatString( "%d(%d)\n", i, portalIndex[i] );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out clusters
-	aasFile->WriteFloatString( "clusters %d {\n", clusters.Num() );
+	aasFile->WriteFloatString( "clusters %d{\n", clusters.Num() );
 	for( i = 0; i < clusters.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d %d %d %d )\n", i, clusters[i].numAreas, clusters[i].numReachableAreas,
+		aasFile->WriteFloatString( "%d(%d %d %d %d)\n", i, clusters[i].numAreas, clusters[i].numReachableAreas,
 								   clusters[i].firstPortal, clusters[i].numPortals );
 	}
 	aasFile->WriteFloatString( "}\n" );

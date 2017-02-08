@@ -12,7 +12,9 @@ ____________________________________________________________________________
 DOOM3-BFG VR : Fully Possessed
 Includes support for the HTC Vive, Oculus Rift and Touch motion controls.
 
-VR Implementation /u/Samson-
+Initial VR Implementation: /u/Samson-
+Major Contributions - Teleportation, Voice Commands, code improvements: Carl Kenner
+
 DOOM-3-BFG-VR Readme - https://github.com/KozGit/DOOM-3-BFG-VR
 
 Please note this readme has not been fully updated for the VR port yet.  See readme in binary download for more information.
