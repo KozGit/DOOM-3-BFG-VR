@@ -1610,6 +1610,7 @@ void idAnimated::Event_GetAnimationLength()
 
 	Some static entities may be optimized into inline geometry by dmap
 
+	func_static
 ===============================================================================
 */
 

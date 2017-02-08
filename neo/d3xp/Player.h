@@ -309,18 +309,20 @@ public:
 	const idDeclSkin*		skinCrosshairCircleDot;
 	const idDeclSkin*		skinCrosshairCross;
 
+	
 	idEntityPtr<idAnimatedEntity>	teleportTarget;
 	idAnimator*						teleportTargetAnimator;
 	
 	jointHandle_t			teleportBeamJoint[24];
 	jointHandle_t			teleportPadJoint;
 
-
+  idVec3 teleportPoint; // Carl: used for teleporting
 	idVec3 teleportAimPoint; // Carl: used for teleporting
 	float teleportAimPointPitch;
+
 	bool aimValidForTeleport;
 	
-	bool					PDAfixed; // koz has the PDA been fixed in space?
+	bool			  		PDAfixed; // koz has the PDA been fixed in space?
 	idVec3					PDAorigin; // koz 
 	idMat3					PDAaxis; // koz
 
@@ -512,6 +514,7 @@ public:
 	void					Think();
 	
 	void					UpdateLaserSight();
+	bool					GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3& axis );
 
 	// Koz begin
 	void					UpdateTeleportAim();
@@ -581,7 +584,7 @@ public:
 	// Carl : Teleporting
 	int						PointReachableAreaNum(const idVec3& pos, const float boundsScale = 2.0f) const;
 	bool					PathToGoal(aasPath_t& path, int areaNum, const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin) const;
-	bool					CanReachPosition(const idVec3& pos);
+	bool					CanReachPosition( const idVec3& pos, idVec3& betterPos );
 
 	virtual void			GetAASLocation(idAAS* aas, idVec3& pos, int& areaNum) const;
 	virtual void			GetAIAimTargets( const idVec3& lastSightPos, idVec3& headPos, idVec3& chestPos );
@@ -596,7 +599,11 @@ public:
 	
 	// use exitEntityNum to specify a teleport with private camera view and delayed exit
 	virtual void			Teleport( const idVec3& origin, const idAngles& angles, idEntity* destination );
-	
+	virtual bool			TeleportPathSegment( const idVec3& start, const idVec3& end, idVec3& lastPos );
+	virtual void			TeleportPath( const idVec3& target );
+	virtual bool			CheckTeleportPathSegment(const idVec3& start, const idVec3& end, idVec3& lastPos);
+	virtual bool			CheckTeleportPath(const idVec3& target, int toAreaNum = 0);
+
 	void					Kill( bool delayRespawn, bool nodamage );
 	virtual void			Killed( idEntity* inflictor, idEntity* attacker, int damage, const idVec3& dir, int location );
 	void					StartFxOnBone( const char* fx, const char* bone );

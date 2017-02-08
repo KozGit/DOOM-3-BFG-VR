@@ -144,7 +144,8 @@ userCmdString_t	userCmdStrings[] =
 	{ "_showScores",	UB_SHOWSCORES },
 	{ "_use",			UB_USE },
 	{ "_talk",		UB_TALK },
-	
+	{ "_teleport", UB_TELEPORT },
+
 	{ "_impulse0",		UB_IMPULSE0 },
 	{ "_impulse1",		UB_IMPULSE1 },
 	{ "_impulse2",		UB_IMPULSE2 },
@@ -190,8 +191,6 @@ userCmdString_t	userCmdStrings[] =
 	{ "_impulse40", UB_IMPULSE40 }, // new impulse for system menu;
 	{ "_impulse41", UB_IMPULSE41 }, // new impulse for click to move;
 	// koz end
-	{ "_impulse42", UB_IMPULSE42 }, // Carl: new impulse for teleport
-
 		
 	{ NULL,				UB_NONE },
 };
