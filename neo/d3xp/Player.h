@@ -601,6 +601,7 @@ public:
 	virtual void			Killed( idEntity* inflictor, idEntity* attacker, int damage, const idVec3& dir, int location );
 	void					StartFxOnBone( const char* fx, const char* bone );
 	
+	bool					ShouldBlink();
 	renderView_t* 			GetRenderView();
 	void					CalculateRenderView();	// called every tic by player code
 	void					CalculateFirstPersonView();
@@ -924,6 +925,7 @@ private:
 		
 	// koz end
 
+	bool					blink;
 		
 	idPhysics_Player		physicsObj;			// player physics
 	

@@ -2210,7 +2210,7 @@ public:
 			SAFETY_PROTOCOLS_FIELD_MOTION_SICKNESS,
 			SAFETY_PROTOCOLS_FIELD_CHAPERONE,
 			SAFETY_PROTOCOLS_FIELD_KNOCKBACK,
-			SAFETY_PROTOCOLS_FIELD_HEADKICK,
+			SAFETY_PROTOCOLS_FIELD_HEADBOB,
 			SAFETY_PROTOCOLS_FIELD_SHAKE_AMPLITUDE,
 			MAX_SAFETY_PROTOCOLS_FIELDS
 		};
@@ -2242,6 +2242,9 @@ public:
 		float originalComfortDelta;
 		float	originalKnockBack;
 		float	originalHeadKick;
+		float	originalStepSmooth;
+		float	originalJumpBounce;
+		float originalBobUp;
 		int		originalShakeAmplitude;
 	};
 
