@@ -492,3 +492,16 @@ const char* idSoundShader::GetSound( int index ) const
 	}
 	return "";
 }
+
+/*
+===============
+idSoundShader::GetLength
+===============
+*/
+uint32 idSoundShader::GetLength() const
+{
+	if (entries.Num())
+		return entries[0]->LengthInMsec();
+	else
+		return 0;
+}

@@ -184,17 +184,49 @@ enum sys_jEvents
 	J_ACTION28,
 	J_ACTION29,
 	J_ACTION30,
-	J_ACTION31, // openvr controller button start ( app, grip, trig, pad )
-	J_ACTION32,
-	J_ACTION33, 
-	J_ACTION34,
-	J_ACTION35,
-	J_ACTION36,
-	J_ACTION37,
-	J_ACTION38,
-	J_ACTION39,
-	J_ACTION40,
-	J_ACTION_MAX = J_ACTION40,
+	
+	// left openvr controller button start
+	J_ACTION31, // left openvr Sys 
+	J_ACTION32,	// left openvr ApplicationMenu
+	J_ACTION33, // left openvr Grip
+	J_ACTION34,	// left openvr DPad_Left ( not used ) 
+	J_ACTION35,	// left openvr DPad_Up ( not used ) 
+	J_ACTION36,	// left openvr DPad_Right ( not used ) 
+	J_ACTION37,	// left openvr DPad_Down ( not used ) 
+	J_ACTION38,	// left openvr k_EButton_A
+	J_ACTION39,	// left openvr 	k_EButton_SteamVR_Touchpad	
+	J_ACTION40,	// left openvr 	k_EButton_SteamVR_Trigger 
+	J_ACTION41,	// left openvr 8
+	J_ACTION42,	// left openvr 9
+	J_ACTION43,	// left openvr 10
+	J_ACTION44,	// left openvr 11
+	J_ACTION45,	// left openvr 12
+	J_ACTION46,	// left openvr 13
+	J_ACTION47,	// left openvr 14
+	J_ACTION48,	// left openvr 15
+
+	// right openvr controller button start
+	J_ACTION49, // right openvr Sys
+	J_ACTION50,	// right openvr ApplicationMenu
+	J_ACTION51, // right openvr Grip
+	J_ACTION52,	// right openvr DPad_Left ( not used ) 
+	J_ACTION53,	// right openvr DPad_Up ( not used ) 
+	J_ACTION54,	// right openvr DPad_Right ( not used ) 
+	J_ACTION55,	// right openvr DPad_Down ( not used ) 
+	J_ACTION56,	// right openvr k_EButton_A
+	J_ACTION57,	// right openvr 	k_EButton_SteamVR_Touchpad	
+	J_ACTION58,	// right openvr 	k_EButton_SteamVR_Trigger 
+	J_ACTION59,	// right openvr 8
+	J_ACTION60,	// right openvr 9
+	J_ACTION61,	// right openvr 10
+	J_ACTION62,	// right openvr 11
+	J_ACTION63,	// right openvr 12
+	J_ACTION64,	// right openvr 13
+	J_ACTION65,	// right openvr 14
+	J_ACTION66,	// right openvr 15
+
+	J_ACTION_MAX = J_ACTION66,
+
 	
 	J_AXIS_MIN,
 	J_AXIS_LEFT_X = J_AXIS_MIN + AXIS_LEFT_X,
@@ -451,14 +483,47 @@ enum keyNum_t
 	K_JOY28,
 	K_JOY29,
 	K_JOY30,
-	K_JOY31, // openVR controller buttons
-	K_JOY32,
-	K_JOY33,
-	K_JOY34,
-	K_JOY35,
-	K_JOY36,
-	K_JOY37,
-	K_JOY38,
+
+	// openVR controller buttons
+	// openVR left controller
+	K_JOY31,	// left openvr Sys 
+	K_JOY32,	// left openvr ApplicationMenu
+	K_JOY33,	// left openvr Grip
+	K_JOY34,	// left openvr DPad_Left ( not used )
+	K_JOY35,	// left openvr DPad_Up ( not used ) 
+	K_JOY36,	// left openvr DPad_Right ( not used ) 
+	K_JOY37,	// left openvr DPad_Down ( not used ) 
+	K_JOY38,	// left openvr k_EButton_A
+	K_JOY39,	// left openvr 	k_EButton_SteamVR_Touchpad	
+	K_JOY40,	// left openvr 	k_EButton_SteamVR_Trigger 
+	K_JOY41,	// left openvr 8
+	K_JOY42,	// left openvr 9
+	K_JOY43,	// left openvr 10
+	K_JOY44,	// left openvr 11
+	K_JOY45,	// left openvr 12
+	K_JOY46,	// left openvr 13
+	K_JOY47,	// left openvr 14
+	K_JOY48,	// left openvr 15
+	
+	//openVR right controller
+	K_JOY49,	// right openvr Sys
+	K_JOY50,	// right openvr ApplicationMenu
+	K_JOY51,	// right openvr Grip
+	K_JOY52,	// right openvr DPad_Left ( not used ) 
+	K_JOY53,	// right openvr DPad_Up ( not used ) 
+	K_JOY54,	// right openvr DPad_Right ( not used ) 
+	K_JOY55,	// right openvr DPad_Down ( not used ) 
+	K_JOY56,	// right openvr k_EButton_A
+	K_JOY57,	// right openvr 	k_EButton_SteamVR_Touchpad	
+	K_JOY58,	// right openvr 	k_EButton_SteamVR_Trigger 
+	K_JOY59,	// right openvr 8
+	K_JOY60,	// right openvr 9
+	K_JOY61,	// right openvr 10
+	K_JOY62,	// right openvr 11
+	K_JOY63,	// right openvr 12
+	K_JOY64,	// right openvr 13
+	K_JOY65,	// right openvr 14
+	K_JOY66,	// right openvr 15
 	// Koz end 
 	
 	K_JOY_STICK1_UP,
@@ -508,6 +573,30 @@ enum keyNum_t
 	K_JOY_DPAD_LEFT,
 	K_JOY_DPAD_RIGHT,
 
+	K_TALK,
+	K_SAY_PAUSE,
+	K_SAY_RESUME,
+	K_SAY_EXIT,
+	K_SAY_MENU,
+	K_SAY_CANCEL,
+	K_SAY_PDA,
+	K_SAY_RELOAD,
+	K_SAY_FIST,
+	K_SAY_CHAINSAW,
+	K_SAY_FLASHLIGHT,
+	K_SAY_GRABBER,
+	K_SAY_PISTOL,
+	K_SAY_SHOTGUN,
+	K_SAY_SUPER_SHOTGUN,
+	K_SAY_MACHINE_GUN,
+	K_SAY_CHAIN_GUN,
+	K_SAY_ROCKET_LAUNCHER,
+	K_SAY_GRENADES,
+	K_SAY_PLASMA_GUN,
+	K_SAY_BFG,
+	K_SAY_SOUL_CUBE,
+	K_SAY_ARTIFACT,
+
 	//------------------------
 	// K_MOUSE enums must be contiguous (no char codes in the middle)
 	//------------------------
@@ -535,31 +624,7 @@ enum keyNum_t
 	K_MWHEELDOWN,
 	K_MWHEELUP,
 
-	K_TALK,
-	K_SAY_PAUSE,
-	K_SAY_RESUME,
-	K_SAY_EXIT,
-	K_SAY_MENU,
-	K_SAY_CANCEL,
-	K_SAY_PDA,
-	K_SAY_RELOAD,
-	K_SAY_FIST,
-	K_SAY_CHAINSAW,
-	K_SAY_FLASHLIGHT,
-	K_SAY_GRABBER,
-	K_SAY_PISTOL,
-	K_SAY_SHOTGUN,
-	K_SAY_SUPER_SHOTGUN,
-	K_SAY_MACHINE_GUN,
-	K_SAY_CHAIN_GUN,
-	K_SAY_ROCKET_LAUNCHER,
-	K_SAY_GRENADES,
-	K_SAY_PLASMA_GUN,
-	K_SAY_BFG,
-	K_SAY_SOUL_CUBE,
-	K_SAY_ARTIFACT,
-
-	K_LAST_KEY
+  K_LAST_KEY
 };
 
 struct sysEvent_t

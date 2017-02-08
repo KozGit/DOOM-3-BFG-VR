@@ -198,6 +198,10 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 							r_windowHeight.SetInteger( glConfig.nativeScreenHeight );
 						}
 					}
+					//koz
+					GetWindowRect( hWnd, &rect );
+					ClipCursor( &rect );
+					//koz end;
 				}
 			}
 			break;
@@ -223,6 +227,13 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 				r_windowX.SetInteger( xPos + r.left );
 				r_windowY.SetInteger( yPos + r.top );
 			}
+			
+			//koz
+			GetWindowRect( hWnd, &r );
+			ClipCursor( &r );
+			//koz end;
+			
+			
 			break;
 		}
 		case WM_CREATE:
@@ -242,6 +253,13 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			void GLW_WM_CREATE( HWND hWnd );
 			GLW_WM_CREATE( hWnd );
 			
+			//koz
+			RECT r;
+			GetWindowRect( hWnd, &r );
+			ClipCursor( &r );
+			//koz end;
+			
+
 			break;
 			
 		case WM_DESTROY:
@@ -257,6 +275,7 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			soundSystem->SetMute( true );
 			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "quit\n" );
 			break;
+		
 			
 		case WM_ACTIVATE:
 			// if we got here because of an alt-tab or maximize,
@@ -278,10 +297,22 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 				{
 					SetCursor( NULL );
 				}
+				//koz
+				RECT r;
+				GetWindowRect( hWnd, &r );
+				ClipCursor( &r );
+				//koz end;
 			}
 			
 			if( fActive == WA_INACTIVE )
 			{
+				//koz begin
+				RECT desktop;
+				HWND hDesktop = GetDesktopWindow();
+				GetWindowRect( hDesktop, &desktop );
+				ClipCursor( &desktop );
+				//koz end
+
 				win32.movingWindow = false;
 				if( common->IsInitialized() )
 				{

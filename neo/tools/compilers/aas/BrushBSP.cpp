@@ -1712,7 +1712,8 @@ bool idBrushBSP::FloodFromEntities( const idMapFile* mapFile, int contents, cons
 	idVec3 origin;
 	idMapEntity* mapEnt;
 	idStr classname;
-	
+	const char*	cl;
+
 	inside = false;
 	outside->occupied = 0;
 	
@@ -1727,7 +1728,13 @@ bool idBrushBSP::FloodFromEntities( const idMapFile* mapFile, int contents, cons
 			continue;
 		}
 		
-		if( !mapEnt->epairs.GetString( "classname", "", classname ) )
+		// any entity can have "noFlood" set to skip it
+		if (mapEnt->epairs.GetString("noFlood", "", &cl))
+		{
+			continue;
+		}
+		
+		if (!mapEnt->epairs.GetString("classname", "", classname))
 		{
 			continue;
 		}
@@ -2140,18 +2147,18 @@ void idBrushBSP::UpdateTreeAfterMerge_r( idBrushBSPNode* node, const idBounds& b
 		node->children[1] = newNode;
 	}
 	
-	switch( bounds.PlaneSide( node->plane, 2.0f ) )
+	//switch( bounds.PlaneSide( node->plane, 2.0f ) )
 	{
-		case PLANESIDE_FRONT:
-			UpdateTreeAfterMerge_r( node->children[0], bounds, oldNode, newNode );
-			break;
-		case PLANESIDE_BACK:
+		//case PLANESIDE_FRONT:
+		//	UpdateTreeAfterMerge_r( node->children[0], bounds, oldNode, newNode );
+		//	break;
+		//case PLANESIDE_BACK:
+		//	UpdateTreeAfterMerge_r( node->children[1], bounds, oldNode, newNode );
+		//	break;
+		//default:
+			UpdateTreeAfterMerge_r( node->children[0], bounds, oldNode, newNode ); // Crashes here if you uncomment switch statement (because we aren't replacing some deleted nodes)
 			UpdateTreeAfterMerge_r( node->children[1], bounds, oldNode, newNode );
-			break;
-		default:
-			UpdateTreeAfterMerge_r( node->children[0], bounds, oldNode, newNode );
-			UpdateTreeAfterMerge_r( node->children[1], bounds, oldNode, newNode );
-			break;
+		//	break;
 	}
 }
 

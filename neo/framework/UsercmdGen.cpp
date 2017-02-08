@@ -144,7 +144,8 @@ userCmdString_t	userCmdStrings[] =
 	{ "_showScores",	UB_SHOWSCORES },
 	{ "_use",			UB_USE },
 	{ "_talk",		UB_TALK },
-	
+	{ "_teleport", UB_TELEPORT },
+
 	{ "_impulse0",		UB_IMPULSE0 },
 	{ "_impulse1",		UB_IMPULSE1 },
 	{ "_impulse2",		UB_IMPULSE2 },
@@ -190,8 +191,6 @@ userCmdString_t	userCmdStrings[] =
 	{ "_impulse40", UB_IMPULSE40 }, // new impulse for system menu;
 	{ "_impulse41", UB_IMPULSE41 }, // new impulse for click to move;
 	// koz end
-	{ "_impulse42", UB_IMPULSE42 }, // Carl: new impulse for teleport
-
 		
 	{ NULL,				UB_NONE },
 };
@@ -1378,7 +1377,7 @@ void idUsercmdGenLocal::JoystickMove2()
 		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_STEAMVR_X );
 		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_STEAMVR_Y );
 
-		//if ( comfortTurn != 0.0 && !lastComfortSteamVr )
+		//common->Printf( "Openvr mappedmove x %f y %f mappedLook x %f y %f : time %d\n", mappedMove.x, mappedMove.y, mappedLook.x, mappedLook.y, Sys_Milliseconds() );
 		if ( comfortTurn != 0.0 && ( Sys_Milliseconds() - lastComfortTimeSteamVr >= vr_comfortRepeat.GetInteger()) )
 		{
 			viewangles[YAW] += comfortTurn;
@@ -1390,6 +1389,7 @@ void idUsercmdGenLocal::JoystickMove2()
 		{
 			leftMapped = JoypadFunction( mappedMove, 1.0f, threshold, range, shape, mergedThreshold );
 			rightMapped = JoypadFunction( mappedLook, aimAssist, threshold, range, shape, mergedThreshold );
+			//common->Printf( "Openvr leftMapped x %f y %f rightMapped x %f y %f : time %d\n", leftMapped.x, leftMapped.y, rightMapped.x, rightMapped.y, Sys_Milliseconds() );
 		}
 		
 		CircleToSquare( leftMapped.x, leftMapped.y );
@@ -1483,13 +1483,9 @@ void idUsercmdGenLocal::CmdButtons()
 	{
 		cmd.buttons |= BUTTON_CROUCH;
 	}
-
 	
-	//koz begin crouch in game by crouching in real life
-	
-	//commonVr->HMDGetOrientation( hmdAng, headDelta, bodyDelta, absolute, false );
-
-	if ( commonVr->poseHmdHeadPositionDelta.z < -vr_crouchTriggerDist.GetFloat() ) cmd.buttons |= BUTTON_CROUCH;
+	//koz begin crouch trigger
+	if ( commonVr->poseHmdHeadPositionDelta.z < -vr_crouchTriggerDist.GetFloat() && vr_crouchMode.GetInteger() == 1 ) cmd.buttons |= BUTTON_CROUCH;
 	
 }
 

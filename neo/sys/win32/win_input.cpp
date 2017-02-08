@@ -746,46 +746,47 @@ void Sys_SetRumble( int device, int low, int hi )
 			return;
 		}
 		// koz end
-	} else {
+	} 
+	
+	else if( commonVr->motionControlType == MOTION_STEAMVR && vr_rumbleEnable.GetBool() )
+	{
 	
 		static int currentFrame = 0;
 		static int val = 0;
-
-		if ( commonVr->motionControlType == MOTION_STEAMVR && vr_rumbleEnable.GetBool() && device == 5 )
-		{
-			// Steam controller has one linear actuator for haptic feedback instead of
-			// two rumble motors. Haptic feedback is based on pulse length in microseconds
-			// not freq like a standard controller.
-			// this is a stupidly crude hack to provide some basic feedback to the controller
-			// if enabled. pulse strength is hacked from the low channel
-			// pulse only sent every frameskip frames to keep the feedback from feeling
-			// like a vibration instead of a pulse.
-			int skipFrames = vr_rumbleSkip.GetInteger();
-
-			//if ( low + hi > 0 ) common->Printf( "Rumble low %d hi %d\n", low, hi );
-
-			if ( currentFrame == 0 || hi > 16384 )
-			{
-				if ( hi > 65535 ) hi = 16384;
-
-				val = currentFrame == 0 ? low : ( (hi *2 ) / skipFrames );
-
-				if ( val > 65535 ) val = 65535;
-
-				val = (( 3500 / vr_rumbleDiv.GetFloat()) * val ) / 65535;
 				
-				// dont send the controller zero values - no need to turn off pulse as already time based.
-				if ( val >= 10 ) commonVr->MotionControllerSetHapticOpenVR( vr_weaponHand.GetInteger(), val );
-			}
+		// Steam controller has one linear actuator for haptic feedback instead of
+		// two rumble motors. Haptic feedback is based on pulse length in microseconds
+		// not freq like a standard controller.
+		// this is a stupidly crude hack to provide some basic feedback to the controller
+		// if enabled. pulse strength is hacked from the low channel
+		// pulse only sent every frameskip frames to keep the feedback from feeling
+		// like a vibration instead of a pulse.
+		int skipFrames = vr_rumbleSkip.GetInteger();
 
-			currentFrame++;
-			if ( currentFrame >= skipFrames ) currentFrame = 0;
-			return;
+		//if ( low + hi > 0 ) common->Printf( "Rumble low %d hi %d\n", low, hi );
 
+		if ( currentFrame == 0 || hi > 16384 )
+		{
+			if ( hi > 65535 ) hi = 16384;
+
+			val = currentFrame == 0 ? low : ( (hi *2 ) / skipFrames );
+
+			if ( val > 65535 ) val = 65535;
+
+			val = (( 3500 / vr_rumbleDiv.GetFloat()) * val ) / 65535;
+				
+			// dont send the controller zero values - no need to turn off pulse as already time based.
+			if ( val >= 10 ) commonVr->MotionControllerSetHapticOpenVR( vr_weaponHand.GetInteger(), val );
 		}
+
+		currentFrame++;
+		if ( currentFrame >= skipFrames ) currentFrame = 0;
+		return;
 	}
-		
-	return win32.g_Joystick.SetRumble( device, low, hi );
+	else
+	{
+		return win32.g_Joystick.SetRumble( device, low, hi );
+	}
 }
 
 int Sys_PollJoystickInputEvents( int deviceNum )
@@ -1044,7 +1045,6 @@ void idJoystickWin32::PostInputEvent( int inputDeviceNum, int event, int value, 
 	// add SteamVR controllers
 	else if ( event == J_AXIS_LEFT_STEAMVR_X )
 	{
-		
 		//common->Printf( "Pushing button K_STEAMVR_LEFT_PAD x\n" );
 		PushButton( inputDeviceNum, K_STEAMVR_LEFT_PAD_LEFT, (value < -range) );
 		PushButton( inputDeviceNum, K_STEAMVR_LEFT_PAD_RIGHT, (value > range) );
@@ -1069,10 +1069,12 @@ void idJoystickWin32::PostInputEvent( int inputDeviceNum, int event, int value, 
 	}
 	else if ( event == J_AXIS_LEFT_STEAMVR_TRIG )
 	{
+		//common->Printf( "Pushing button K_L_STEAMVRTRIG\n" );
 		PushButton( inputDeviceNum, K_L_STEAMVRTRIG, (value > range) );
 	}
 	else if ( event == J_AXIS_RIGHT_STEAMVR_TRIG )
 	{
+		//common->Printf( "Pushing button K_R_STEAMVRTRIG y\n" );
 		PushButton( inputDeviceNum, K_R_STEAMVRTRIG, (value > range) );
 	}
 	// Koz end
@@ -1107,373 +1109,554 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 	{
 		return numEvents;
 	}
-	
-	assert( inputDeviceNum < 4 )
-	if ( inputDeviceNum < 4 ) // koz normal controllers < 4
-	{
-		//	if ( inputDeviceNum > in_joystick.GetInteger() ) {
-		//		return numEvents;
-		//	}
-
-		controllerState_t* cs = &controllers[inputDeviceNum];
-
-		// grab the current packet under a critical section
-		XINPUT_STATE xis;
-		XINPUT_STATE old;
-		int		orBits;
+	//common->Printf( "Pollinput polling device # %d\n", inputDeviceNum );
+	assert( inputDeviceNum < 4 );
+		if ( inputDeviceNum < 4 )
 		{
-			idScopedCriticalSection crit( mutexXis );
-			xis = cs->current;
-			old = cs->previous;
-			cs->previous = xis;
-			// fetch or'd button bits
-			orBits = cs->buttonBits;
-			cs->buttonBits = 0;
-		}
+			//	if ( inputDeviceNum > in_joystick.GetInteger() ) {
+			//		return numEvents;
+			//	}
+
+			controllerState_t* cs = &controllers[inputDeviceNum];
+
+			// grab the current packet under a critical section
+			XINPUT_STATE xis;
+			XINPUT_STATE old;
+			int		orBits;
+			{
+				idScopedCriticalSection crit( mutexXis );
+				xis = cs->current;
+				old = cs->previous;
+				cs->previous = xis;
+				// fetch or'd button bits
+				orBits = cs->buttonBits;
+				cs->buttonBits = 0;
+			}
 #if 0
-		if( XInputGetState( inputDeviceNum, &xis ) != ERROR_SUCCESS )
-		{
-			return numEvents;
-		}
+			if( XInputGetState( inputDeviceNum, &xis ) != ERROR_SUCCESS )
+			{
+				return numEvents;
+			}
 #endif
-		for ( int i = 0; i < 32; i++ )
-		{
-			int	bit = 1 << i;
-
-			if ( ((xis.Gamepad.wButtons | old.Gamepad.wButtons) & bit) == 0
-				&& (orBits & bit) )
+			for ( int i = 0; i < 32; i++ )
 			{
-				idLib::Printf( "Dropped button press on bit %i\n", i );
-			}
-		}
+				int	bit = 1 << i;
 
-		if ( session->IsSystemUIShowing() )
-		{
-			// memset xis so the current input does not get latched if the UI is showing
-			memset( &xis, 0, sizeof( XINPUT_STATE ) );
-		}
-
-		int joyRemap[16] =
-		{
-			J_DPAD_UP, J_DPAD_DOWN,	// Up, Down
-			J_DPAD_LEFT, J_DPAD_RIGHT,	// Left, Right
-			J_ACTION9, J_ACTION10,		// Start, Back
-			J_ACTION7, J_ACTION8,		// Left Stick Down, Right Stick Down
-			J_ACTION5, J_ACTION6,		// Black, White (Left Shoulder, Right Shoulder)
-			0, 0,				// Unused
-			J_ACTION1, J_ACTION2,		// A, B
-			J_ACTION3, J_ACTION4,		// X, Y
-		};
-
-		// Check the digital buttons
-		for ( int i = 0; i < 16; i++ )
-		{
-			int mask = (1 << i);
-			if ( (xis.Gamepad.wButtons & mask) != (old.Gamepad.wButtons & mask) )
-			{
-				PostInputEvent( inputDeviceNum, joyRemap[i], (xis.Gamepad.wButtons & mask) > 0 );
-			}
-		}
-
-		// Check the triggers
-		if ( xis.Gamepad.bLeftTrigger != old.Gamepad.bLeftTrigger )
-		{
-			PostInputEvent( inputDeviceNum, J_AXIS_LEFT_TRIG, xis.Gamepad.bLeftTrigger * 128 );
-		}
-		if ( xis.Gamepad.bRightTrigger != old.Gamepad.bRightTrigger )
-		{
-			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_TRIG, xis.Gamepad.bRightTrigger * 128 );
-		}
-
-		if ( xis.Gamepad.sThumbLX != old.Gamepad.sThumbLX )
-		{
-			PostInputEvent( inputDeviceNum, J_AXIS_LEFT_X, xis.Gamepad.sThumbLX );
-		}
-		if ( xis.Gamepad.sThumbLY != old.Gamepad.sThumbLY )
-		{
-			PostInputEvent( inputDeviceNum, J_AXIS_LEFT_Y, -xis.Gamepad.sThumbLY );
-		}
-		if ( xis.Gamepad.sThumbRX != old.Gamepad.sThumbRX )
-		{
-			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_X, xis.Gamepad.sThumbRX );
-		}
-		if ( xis.Gamepad.sThumbRY != old.Gamepad.sThumbRY )
-		{
-			PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_Y, -xis.Gamepad.sThumbRY );
-		}
-		// Carl add talk
-		if (vr_talkMode.GetInteger() > 0)
-		{
-			static bool oldTalk = false;
-			bool talk = commonVoice->GetTalkButton();
-			if (talk != oldTalk)
-			{
-				PostInputEvent(inputDeviceNum, J_TALK, talk);
-				oldTalk = talk;
-			}
-		}
-		if (vr_voiceCommands.GetInteger() > 0)
-		{
-			static bool oldSay[J_SAY_MAX - J_SAY_MIN + 1] = {};
-			int max = vr_voiceCommands.GetInteger() >= 2 ? J_SAY_MAX : J_SAY_PDA;
-			for (int i = J_SAY_MIN; i <= J_SAY_MAX; ++i)
-			{
-				bool say = commonVoice->GetSayButton(i) && (i <= max);
-				if (say != oldSay[i - J_SAY_MIN])
+				if ( ((xis.Gamepad.wButtons | old.Gamepad.wButtons) & bit) == 0
+					&& (orBits & bit) )
 				{
-					PostInputEvent(inputDeviceNum, i, say);
-					oldSay[i - J_SAY_MIN] = say;
+					idLib::Printf( "Dropped button press on bit %i\n", i );
 				}
 			}
-		}
-		
 
-		//----------------------------------
-		// Koz begin add SteamVR left and right controllers
-		//	common->Printf( "Before Checking steam controllers svr = %d devno = %d\n", (int) (commonVr->motionControlType == MOTION_STEAMVR), inputDeviceNum );
-		if ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_STEAMVR ) 
-		{
-
-			//common->Printf( "Checking steam controllerstime %d\n",  Sys_Milliseconds() );
-			// left steam controller
-
-			static uint32 triggerAxis[2];
-			static uint32 padAxis[2];
-			static uint32 axisType;
-			static float triggerVal[2];
-			static float padAxisX[2];
-			static float padAxisY[2];
-
-			static uint64_t	 oldButton[2];
-			static uint32 lastPacketL = -1;
-			static uint32 lastPacketR = -1;
-			uint64_t button;
-
-			bool lGood = false;
-			bool rGood = false;
-
-
-			vr::VRControllerState_t& currentStateL = commonVr->pControllerStateL;
-			lGood = commonVr->m_pHMD->GetControllerState( commonVr->leftControllerDeviceNo, &currentStateL, sizeof( vr::VRControllerState_t ) );
-
-			vr::VRControllerState_t& currentStateR = commonVr->pControllerStateR;
-			rGood = commonVr->m_pHMD->GetControllerState( commonVr->rightControllerDeviceNo, &currentStateR, sizeof( vr::VRControllerState_t ) );
-
-			if ( currentStateL.unPacketNum != lastPacketL && lGood )
+			if ( session->IsSystemUIShowing() )
 			{
-				lastPacketL = currentStateL.unPacketNum;
+				// memset xis so the current input does not get latched if the UI is showing
+				memset( &xis, 0, sizeof( XINPUT_STATE ) );
+			}
 
-				for ( uint32 axis = 0; axis < vr::k_unControllerStateAxisCount; axis++ )
+			int joyRemap[16] =
+			{
+				J_DPAD_UP, J_DPAD_DOWN,	// Up, Down
+				J_DPAD_LEFT, J_DPAD_RIGHT,	// Left, Right
+				J_ACTION9, J_ACTION10,		// Start, Back
+				J_ACTION7, J_ACTION8,		// Left Stick Down, Right Stick Down
+				J_ACTION5, J_ACTION6,		// Black, White (Left Shoulder, Right Shoulder)
+				0, 0,				// Unused
+				J_ACTION1, J_ACTION2,		// A, B
+				J_ACTION3, J_ACTION4,		// X, Y
+			};
+
+			// Check the digital buttons
+			for ( int i = 0; i < 16; i++ )
+			{
+				int mask = (1 << i);
+				if ( (xis.Gamepad.wButtons & mask) != (old.Gamepad.wButtons & mask) )
 				{
-					uint32 axisNum = vr::Prop_Axis0Type_Int32 + axis;
+					PostInputEvent( inputDeviceNum, joyRemap[i], (xis.Gamepad.wButtons & mask) > 0 );
+				}
+			}
 
-					axisType = vr::VRSystem()->GetInt32TrackedDeviceProperty( commonVr->leftControllerDeviceNo, (vr::ETrackedDeviceProperty) (vr::Prop_Axis0Type_Int32 + axis) );
-					if ( axisType == vr::k_eControllerAxis_Trigger )
+			// Check the triggers
+			if ( xis.Gamepad.bLeftTrigger != old.Gamepad.bLeftTrigger )
+			{
+				PostInputEvent( inputDeviceNum, J_AXIS_LEFT_TRIG, xis.Gamepad.bLeftTrigger * 128 );
+			}
+			if ( xis.Gamepad.bRightTrigger != old.Gamepad.bRightTrigger )
+			{
+				PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_TRIG, xis.Gamepad.bRightTrigger * 128 );
+			}
+
+			if ( xis.Gamepad.sThumbLX != old.Gamepad.sThumbLX )
+			{
+				PostInputEvent( inputDeviceNum, J_AXIS_LEFT_X, xis.Gamepad.sThumbLX );
+			}
+			if ( xis.Gamepad.sThumbLY != old.Gamepad.sThumbLY )
+			{
+				PostInputEvent( inputDeviceNum, J_AXIS_LEFT_Y, -xis.Gamepad.sThumbLY );
+			}
+			if ( xis.Gamepad.sThumbRX != old.Gamepad.sThumbRX )
+			{
+				PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_X, xis.Gamepad.sThumbRX );
+			}
+			if ( xis.Gamepad.sThumbRY != old.Gamepad.sThumbRY )
+			{
+				PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_Y, -xis.Gamepad.sThumbRY );
+			}
+
+
+			//===================
+			// add speect recognition + oculus & openvr controllers
+			// device handling code is odd building usercmds, so 
+			// add all controllers as device 0.
+
+			if ( inputDeviceNum == 0 )
+			{
+
+				//=============================
+				// Carl add talk
+
+				if ( vr_talkMode.GetInteger() > 0 )
+				{
+					static bool oldTalk = false;
+					bool talk = commonVoice->GetTalkButton();
+					if ( talk != oldTalk )
 					{
-						triggerAxis[0] = axis;
+						common->Printf( "Posting talk input event\n" );
+						PostInputEvent( inputDeviceNum, J_TALK, talk );
+						oldTalk = talk;
 					}
-					if ( axisType == vr::k_eControllerAxis_TrackPad )
+				}
+        
+        if (vr_voiceCommands.GetInteger() > 0)
+		    {
+				  static bool oldSay[J_SAY_MAX - J_SAY_MIN + 1] = {};
+				  for ( int i = J_SAY_MIN; i <= J_SAY_MAX; ++i )
+				  {
+					  bool say = commonVoice->GetSayButton( i );
+					  if ( say != oldSay[i - J_SAY_MIN] )
+					  {
+						  common->Printf( "Posting say input event\n %d %d",i,say );
+						  PostInputEvent( inputDeviceNum, i, say );
+						  oldSay[i - J_SAY_MIN] = say;
+					  }
+				  }
+        }
+
+				//=============================
+				// Koz begin add SteamVR controllers
+
+				if ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_STEAMVR )
+				{
+
+					//common->Printf( "Checking steam controllerstime %d\n",  Sys_Milliseconds() );
+					// left steam controller
+
+					static uint32 triggerAxis[2] = {};
+					static uint32 padAxis[2] = {};
+					static uint32 axisType;
+					static float triggerVal[2] = {};
+					static float padAxisX[2] = {};
+					static float padAxisY[2] = {};
+
+					static float padX = 0.0f;
+					static float padY = 0.0f;
+					static float trig = 0.0f;
+
+
+					static uint64_t	 oldButton[2] = {};
+					static uint32 lastPacketL = -1;
+					static uint32 lastPacketR = -1;
+					uint64_t button;
+
+					bool lGood = false;
+					bool rGood = false;
+
+
+					vr::VRControllerState_t& currentStateL = commonVr->pControllerStateL;
+					lGood = commonVr->m_pHMD->GetControllerState( commonVr->leftControllerDeviceNo, &currentStateL, sizeof( currentStateL ) );
+
+					vr::VRControllerState_t& currentStateR = commonVr->pControllerStateR;
+					rGood = commonVr->m_pHMD->GetControllerState( commonVr->rightControllerDeviceNo, &currentStateR, sizeof( currentStateR ) );
+
+					if ( lGood ) // currentStateL.unPacketNum != lastPacketL && lGood )
 					{
-						padAxis[0] = axis;
+						
+						//lastPacketL = currentStateL.unPacketNum;
+
+						for ( uint32 axis = 0; axis < vr::k_unControllerStateAxisCount; axis++ )
+						{
+							uint32 axisNum = vr::Prop_Axis0Type_Int32 + axis;
+
+							axisType = vr::VRSystem()->GetInt32TrackedDeviceProperty( commonVr->leftControllerDeviceNo, (vr::ETrackedDeviceProperty) (vr::Prop_Axis0Type_Int32 + axis) );
+							if ( axisType == vr::k_eControllerAxis_Trigger )
+							{
+								triggerAxis[0] = axis;
+							}
+							if ( axisType == vr::k_eControllerAxis_TrackPad )
+							{
+								padAxis[0] = axis;
+							}
+
+						}
+
+						trig = currentStateL.rAxis[triggerAxis[0]].x;
+						padX = currentStateL.rAxis[padAxis[0]].x;
+						padY = currentStateL.rAxis[padAxis[0]].y;
+
+						// using (testing) the trigger button instead of reading the analog axis, so comment this out for now
+						/*
+						if ( trig != triggerVal[0] )
+						{
+							PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_TRIG, triggerVal[0] * 32767.0f );
+						}
+						*/
+
+						//post the axes 
+						// for some reason, on occasion posting a zero value seems to fail, which results in movment or turning stuck on.
+						// For now spam the 0 vals to make sure movement halts until I can find the cause. 
+						if ( padX != padAxisX[0] || padX == 0.0f ) 
+						{
+							//common->Printf( "Posting input event left steamvr pad x value %f time %d\n", padX, Sys_Milliseconds() );
+							PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_X, padX * 32767.0f );
+						}
+						
+						if ( padY != padAxisY[0] || padY == 0.0f )
+						{
+							//common->Printf( "Posting input event left steamvr pad y value %f time %d\n", padY, Sys_Milliseconds() );
+							PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_Y, -padY * 32767.0f );
+						}
+						
+						triggerVal[0] = trig;
+						padAxisX[0] = padX;
+						padAxisY[0] = padY;
+
+
+						// process buttons ( appmenu, grip, trigger, touchpad pressed )
+						button = currentStateL.ulButtonPressed;
+
+						if ( button != oldButton[0] )
+						{
+							if ( (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) )
+							{
+								//common->Printf( "inputDeviceNum %d L AppMenu\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION32, (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) > 0 );
+							}
+
+							if ( (button & ButtonMaskFromId( vr::k_EButton_Grip )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_Grip )) )
+							{
+								//common->Printf( "inputDeviceNum %d L Grip\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION33, (button & ButtonMaskFromId( vr::k_EButton_Grip )) > 0 );
+							}
+
+							if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) )
+							{
+								//common->Printf( "inputDeviceNum %d LTrig\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION40, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) > 0 );
+							}
+
+							if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) )
+							{
+								//common->Printf( "inputDeviceNum %d LPad\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION39, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) > 0 );
+							}
+
+							if ( (button & ButtonMaskFromId( vr::k_EButton_A )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_A )) )
+							{
+								//common->Printf( "inputDeviceNum %d L k_EButton_A\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION38, (button & ButtonMaskFromId( vr::k_EButton_A )) > 0 );
+							}
+
+							if ( (button & (1ull << 8)) != (oldButton[0] & (1ull << 8)) )
+							{
+								//common->Printf( "inputDeviceNum %d L Button 8\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION41, (button & (1ull << 8)) > 0 );
+							}
+
+							if ( (button & (1ull << 9)) != (oldButton[0] & (1ull << 9)) )
+							{
+								//common->Printf( "inputDeviceNum %d L Button 9\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION42, (button & (1ull << 9)) > 0 );
+							}
+
+							if ( (button & (1ull << 10)) != (oldButton[0] & (1ull << 10)) )
+							{
+								//common->Printf( "inputDeviceNum %d L Button 10\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION43, (button & (1ull << 10)) > 0 );
+							}
+
+							if ( (button & (1ull << 11)) != (oldButton[0] & (1ull << 11)) )
+							{
+								//common->Printf( "inputDeviceNum %d L Button 11\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION44, (button & (1ull << 11)) > 0 );
+							}
+
+							if ( (button & (1ull << 12)) != (oldButton[0] & (1ull << 12)) )
+							{
+								//common->Printf( "inputDeviceNum %d L Button 12\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION45, (button & (1ull << 12)) > 0 );
+							}
+
+							if ( (button & (1ull << 13)) != (oldButton[0] & (1ull << 13)) )
+							{
+								//common->Printf( "inputDeviceNum %d L Button 13\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION46, (button & (1ull << 13)) > 0 );
+							}
+
+							if ( (button & (1ull << 14)) != (oldButton[0] & (1ull << 14)) )
+							{
+								//common->Printf( "inputDeviceNum %d L Button 14\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION47, (button & (1ull << 14)) > 0 );
+							}
+
+							if ( (button & (1ull << 15)) != (oldButton[0] & (1ull << 15)) )
+							{
+								//common->Printf( "inputDeviceNum %d L Button 15\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION48, (button & (1ull << 15)) > 0 );
+							}
+
+
+							oldButton[0] = button;
+						}
 					}
 
-				}
+					//====================================================================
+					//right steamvr controller
 
-				triggerVal[0] = currentStateL.rAxis[triggerAxis[0]].x;
-				padAxisX[0] = currentStateL.rAxis[padAxis[0]].x;
-				padAxisY[0] = currentStateL.rAxis[padAxis[0]].y;
-
-				// using (testing) the trigger button instead of reading the analog axis
-				//PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_TRIG, triggerVal[0] * 32767.0f );
-
-				//post the axes
-				PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_X, padAxisX[0] * 32767.0f );
-				PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_Y, -padAxisY[0] * 32767.0f );
-
-				// process buttons ( appmenu, grip, trigger, touchpad pressed )
-				button = currentStateL.ulButtonPressed;
-
-				if ( (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) )
-				{
-					//common->Printf( "L AppMenu\n" );
-					PostInputEvent( inputDeviceNum, J_ACTION31, (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) > 0 );
-				}
-
-				if ( (button & ButtonMaskFromId( vr::k_EButton_Grip )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_Grip )) )
-				{
-					//common->Printf( "L Grip\n" );
-					PostInputEvent( inputDeviceNum, J_ACTION32, (button & ButtonMaskFromId( vr::k_EButton_Grip )) > 0 );
-				}
-
-				if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) )
-				{
-					//common->Printf( "LTrig\n" );
-					PostInputEvent( inputDeviceNum, J_ACTION33, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) > 0 );
-				}
-
-				if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) )
-				{
-					//common->Printf( "LPad\n" );
-					PostInputEvent( inputDeviceNum, J_ACTION34, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) > 0 );
-				}
-
-				oldButton[0] = button;
-			}
-
-			//====================================================================
-			//right steamvr controller
-
-			if ( currentStateR.unPacketNum != lastPacketR && rGood )
-			{
-				lastPacketR = currentStateR.unPacketNum;
-
-				for ( int axis = 0; axis <= 4; axis++ )
-				{
-					axisType = vr::VRSystem()->GetInt32TrackedDeviceProperty( commonVr->rightControllerDeviceNo, (vr::ETrackedDeviceProperty) ((int)vr::Prop_Axis0Type_Int32 + axis) );
-					if ( axisType == vr::k_eControllerAxis_Trigger )
+					if ( rGood ) // currentStateR.unPacketNum != lastPacketR && rGood )
 					{
-						triggerAxis[1] = axis;
+						//lastPacketR = currentStateR.unPacketNum;
+
+						for ( int axis = 0; axis <= 4; axis++ )
+						{
+							axisType = vr::VRSystem()->GetInt32TrackedDeviceProperty( commonVr->rightControllerDeviceNo, (vr::ETrackedDeviceProperty) ((int)vr::Prop_Axis0Type_Int32 + axis) );
+							if ( axisType == vr::k_eControllerAxis_Trigger )
+							{
+								triggerAxis[1] = axis;
+							}
+							if ( axisType == vr::k_eControllerAxis_TrackPad )
+							{
+								padAxis[1] = axis;
+							}
+						}
+
+						trig = currentStateR.rAxis[triggerAxis[1]].x;
+						padX = currentStateR.rAxis[padAxis[1]].x;
+						padY = currentStateR.rAxis[padAxis[1]].y;
+
+						// using (testing) the trigger button instead of reading the analog axis, so comment this out for now
+						/*
+						if ( trig != triggerVal[1] )
+						{
+							PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_STEAMVR_TRIG, triggerVal[1] * 32767.0f );
+						}
+						*/
+
+						//post the axes
+						if ( padX != padAxisX[1] || padX == 0.0f )
+						{
+							//common->Printf( "Posting input event right steamvr pad x value %f time %d \n", padX, Sys_Milliseconds() );
+							PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_STEAMVR_X, padX * 32767.0f );
+						}
+
+						if ( padY != padAxisY[1] || padY == 0.0f )
+						{
+							//common->Printf( "Posting input event right steamvr pad y value %f time %d\n", padY, Sys_Milliseconds() );
+							PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_STEAMVR_Y, -padY * 32767.0f );
+						}
+
+						triggerVal[1] = trig;
+						padAxisX[1] = padX;
+						padAxisY[1] = padY;
+						
+
+						// process buttons ( appmenu, grip, trigger, touchpad pressed )
+						button = currentStateR.ulButtonPressed;
+
+						if ( button != oldButton[1] )
+						{
+
+							if ( (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) )
+							{
+								//common->Printf( "inputDeviceNum %d R AppMenu\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION50, (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) > 0 );
+							}
+
+							if ( (button & ButtonMaskFromId( vr::k_EButton_Grip )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_Grip )) )
+							{
+								//common->Printf( "inputDeviceNum %d R Grip\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION51, (button & ButtonMaskFromId( vr::k_EButton_Grip )) > 0 );
+							}
+
+							if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) )
+							{
+								//common->Printf( "inputDeviceNum %d R Trig\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION58, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) > 0 );
+							}
+
+							if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) )
+							{
+								//common->Printf( "inputDeviceNum %d R Pad\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION57, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) > 0 );
+							}
+
+							if ( (button & ButtonMaskFromId( vr::k_EButton_A )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_A )) )
+							{
+								//common->Printf( "inputDeviceNum %d R k_EButton_A\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION56, (button & ButtonMaskFromId( vr::k_EButton_A )) > 0 );
+							}
+
+
+
+
+							if ( (button & (1ull << 8)) != (oldButton[1] & (1ull << 8)) )
+							{
+								//common->Printf( "inputDeviceNum %d R Button 8\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION59, (button & (1ull << 8)) > 0 );
+							}
+
+							if ( (button & (1ull << 9)) != (oldButton[1] & (1ull << 9)) )
+							{
+								//common->Printf( "inputDeviceNum %d R Button 9\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION60, (button & (1ull << 9)) > 0 );
+							}
+
+							if ( (button & (1ull << 10)) != (oldButton[1] & (1ull << 10)) )
+							{
+								//common->Printf( "inputDeviceNum %d R Button 10\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION61, (button & (1ull << 10)) > 0 );
+							}
+
+							if ( (button & (1ull << 11)) != (oldButton[1] & (1ull << 11)) )
+							{
+								//common->Printf( "inputDeviceNum %d R Button 11\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION62, (button & (1ull << 11)) > 0 );
+							}
+
+							if ( (button & (1ull << 12)) != (oldButton[1] & (1ull << 12)) )
+							{
+								//common->Printf( "inputDeviceNum %d R Button 12\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION63, (button & (1ull << 12)) > 0 );
+							}
+
+							if ( (button & (1ull << 13)) != (oldButton[1] & (1ull << 13)) )
+							{
+								//common->Printf( "inputDeviceNum %d R Button 13\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION64, (button & (1ull << 13)) > 0 );
+							}
+
+							if ( (button & (1ull << 14)) != (oldButton[1] & (1ull << 14)) )
+							{
+								//common->Printf( "inputDeviceNum %d R Button 14\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION65, (button & (1ull << 14)) > 0 );
+							}
+
+							if ( (button & (1ull << 15)) != (oldButton[1] & (1ull << 15)) )
+							{
+								//common->Printf( "inputDeviceNum %d R Button 15\n", inputDeviceNum );
+								PostInputEvent( inputDeviceNum, J_ACTION66, (button & (1ull << 15)) > 0 );
+							}
+
+							oldButton[1] = button;
+						}
 					}
-					if ( axisType == vr::k_eControllerAxis_TrackPad )
+				}
+
+				//=================================================
+				// Koz begin add touch controls
+
+				if ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_OCULUS )
+				{
+
+					static ovrInputState oldInputState;
+					ovrInputState    inputState;
+
+					if ( OVR_SUCCESS( ovr_GetInputState( commonVr->hmdSession, ovrControllerType_Touch, &inputState ) ) )
 					{
-						padAxis[1] = axis;
+						if ( (inputState.Buttons & ovrButton_A) != (oldInputState.Buttons & ovrButton_A) )
+						{
+							//common->Printf( "Posting input event for r_touch_a val : %d\n", (inputState.Buttons & ovrButton_A)  );
+							PostInputEvent( inputDeviceNum, J_ACTION24, (inputState.Buttons & ovrButton_A) );
+						}
+
+						if ( (inputState.Buttons & ovrButton_B) != (oldInputState.Buttons & ovrButton_B) )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION25, (inputState.Buttons & ovrButton_B) );
+						}
+
+						if ( (inputState.Buttons & ovrButton_Home) != (oldInputState.Buttons & ovrButton_Home) )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION26, (inputState.Buttons & ovrButton_Home) );
+						}
+
+						if ( (inputState.Buttons & ovrButton_RThumb) != (oldInputState.Buttons & ovrButton_RThumb) )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION27, (inputState.Buttons & ovrButton_RThumb) );
+						}
+
+						if ( (inputState.Touches & ovrTouch_RThumbRest) != (oldInputState.Touches & ovrTouch_RThumbRest) )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION28, (inputState.Touches & ovrTouch_RThumbRest) );
+						}
+
+						// left touch
+						if ( (inputState.Buttons & ovrButton_X) != (oldInputState.Buttons & ovrButton_X) )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION17, (inputState.Buttons & ovrButton_X) );
+						}
+
+						if ( (inputState.Buttons & ovrButton_Y) != (oldInputState.Buttons & ovrButton_Y) )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION18, (inputState.Buttons & ovrButton_Y) );
+						}
+
+						if ( (inputState.Buttons & ovrButton_Enter) != (oldInputState.Buttons & ovrButton_Enter) )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION19, (inputState.Buttons & ovrButton_Enter) );
+						}
+
+						if ( (inputState.Buttons & ovrButton_LThumb) != (oldInputState.Buttons & ovrButton_LThumb) )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION20, (inputState.Buttons & ovrButton_LThumb) );
+						}
+
+						if ( (inputState.Touches & ovrTouch_LThumbRest) != (oldInputState.Touches & ovrTouch_LThumbRest) )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION21, (inputState.Touches & ovrTouch_LThumbRest) );
+						}
+
+						if ( inputState.HandTrigger[ovrHand_Left] != oldInputState.HandTrigger[ovrHand_Left] )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION22, inputState.HandTrigger[ovrHand_Left] > 0.25f );
+						}
+
+						if ( inputState.IndexTrigger[ovrHand_Left] != oldInputState.IndexTrigger[ovrHand_Left] )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION23, inputState.IndexTrigger[ovrHand_Left] > 0.25f );
+						}
+
+						if ( inputState.HandTrigger[ovrHand_Right] != oldInputState.HandTrigger[ovrHand_Right] )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION29, inputState.HandTrigger[ovrHand_Right] > 0.25f );
+						}
+
+						if ( inputState.IndexTrigger[ovrHand_Right] != oldInputState.IndexTrigger[ovrHand_Right] )
+						{
+							PostInputEvent( inputDeviceNum, J_ACTION30, inputState.IndexTrigger[ovrHand_Right] > 0.25f );
+						}
+
+						PostInputEvent( inputDeviceNum, J_AXIS_LEFT_TOUCH_X, inputState.Thumbstick[ovrHand_Left].x * 32767.0f );
+						PostInputEvent( inputDeviceNum, J_AXIS_LEFT_TOUCH_Y, -inputState.Thumbstick[ovrHand_Left].y * 32767.0f );
+
+						PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_TOUCH_X, inputState.Thumbstick[ovrHand_Right].x * 32767.0f );
+						PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_TOUCH_Y, -inputState.Thumbstick[ovrHand_Right].y * 32767.0f );
+
+						oldInputState = inputState;
+
 					}
-
 				}
-
-				triggerVal[1] = currentStateR.rAxis[triggerAxis[1]].x;
-				padAxisX[1] = currentStateR.rAxis[padAxis[1]].x;
-				padAxisY[1] = currentStateR.rAxis[padAxis[1]].y;
-
-				// using (testing) the trigger button instead of reading the analog axis
-				//PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_STEAMVR_TRIG, triggerVal[1] * 32767.0f );
-
-				//post the axes
-				PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_STEAMVR_X, padAxisX[1] * 32767.0f );
-				PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_STEAMVR_Y, -padAxisY[1] * 32767.0f );
-
-				// process buttons ( appmenu, grip, trigger, touchpad pressed )
-				button = currentStateR.ulButtonPressed;
-
-				if ( (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) )
-				{
-					//common->Printf( "R AppMenu\n" );
-					PostInputEvent( inputDeviceNum, J_ACTION35, (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) > 0 );
-				}
-
-				if ( (button & ButtonMaskFromId( vr::k_EButton_Grip )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_Grip )) )
-				{
-					//common->Printf( "R Grip\n" );
-					PostInputEvent( inputDeviceNum, J_ACTION36, (button & ButtonMaskFromId( vr::k_EButton_Grip )) > 0 );
-				}
-
-				if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) )
-				{
-					//common->Printf( "R Trig\n" );
-					PostInputEvent( inputDeviceNum, J_ACTION37, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) > 0 );
-				}
-
-				if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) )
-				{
-					//common->Printf( "R Pad\n" );
-					PostInputEvent( inputDeviceNum, J_ACTION38, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) > 0 );
-				}
-
-				oldButton[1] = button;
-			}
+			} // end if inputdeviceno == 0
 		}
-		// Koz begin add touch
-		if ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_OCULUS )
-		{
-			
-			static ovrInputState oldInputState;
-			ovrInputState    inputState;
-			
-			if ( OVR_SUCCESS( ovr_GetInputState( commonVr->hmdSession, ovrControllerType_Touch, &inputState ) ) )
-			{
-				if ( (inputState.Buttons & ovrButton_A) != (oldInputState.Buttons & ovrButton_A) )
-				{
-					//common->Printf( "Posting input event for r_touch_a val : %d\n", (inputState.Buttons & ovrButton_A)  );
-					PostInputEvent( inputDeviceNum, J_ACTION24, (inputState.Buttons & ovrButton_A) );
-				}
-
-				if ( (inputState.Buttons & ovrButton_B) != (oldInputState.Buttons & ovrButton_B) )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION25, (inputState.Buttons & ovrButton_B) );
-				}
-
-				if ( (inputState.Buttons & ovrButton_Home) != (oldInputState.Buttons & ovrButton_Home) )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION26, (inputState.Buttons & ovrButton_Home) );
-				}
-
-				if ( (inputState.Buttons & ovrButton_RThumb) != (oldInputState.Buttons & ovrButton_RThumb) )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION27, (inputState.Buttons & ovrButton_RThumb) );
-				}
-
-				if ( (inputState.Touches & ovrTouch_RThumbRest) != (oldInputState.Touches & ovrTouch_RThumbRest) )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION28, (inputState.Touches & ovrTouch_RThumbRest) );
-				}
-
-				// left touch
-				if ( (inputState.Buttons & ovrButton_X) != (oldInputState.Buttons & ovrButton_X) )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION17, (inputState.Buttons & ovrButton_X) );
-				}
-
-				if ( (inputState.Buttons & ovrButton_Y) != (oldInputState.Buttons & ovrButton_Y) )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION18, (inputState.Buttons & ovrButton_Y) );
-				}
-
-				if ( (inputState.Buttons & ovrButton_Enter) != (oldInputState.Buttons & ovrButton_Enter) )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION19, (inputState.Buttons & ovrButton_Enter) );
-				}
-
-				if ( (inputState.Buttons & ovrButton_LThumb) != (oldInputState.Buttons & ovrButton_LThumb) )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION20, (inputState.Buttons & ovrButton_LThumb) );
-				}
-
-				if ( (inputState.Touches & ovrTouch_LThumbRest) != (oldInputState.Touches & ovrTouch_LThumbRest) )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION21, (inputState.Touches & ovrTouch_LThumbRest) );
-				}
-
-				if ( inputState.HandTrigger[ovrHand_Left] != oldInputState.HandTrigger[ovrHand_Left] )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION22, inputState.HandTrigger[ovrHand_Left] > 0.25f );
-				}
-
-				if ( inputState.IndexTrigger[ovrHand_Left] != oldInputState.IndexTrigger[ovrHand_Left] )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION23, inputState.IndexTrigger[ovrHand_Left] > 0.25f );
-				}
-
-				if ( inputState.HandTrigger[ovrHand_Right] != oldInputState.HandTrigger[ovrHand_Right] )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION29, inputState.HandTrigger[ovrHand_Right] > 0.25f );
-				}
-
-				if ( inputState.IndexTrigger[ovrHand_Right] != oldInputState.IndexTrigger[ovrHand_Right] )
-				{
-					PostInputEvent( inputDeviceNum, J_ACTION30, inputState.IndexTrigger[ovrHand_Right] > 0.25f );
-				}
-
-				PostInputEvent( inputDeviceNum, J_AXIS_LEFT_TOUCH_X, inputState.Thumbstick[ovrHand_Left].x * 32767.0f );
-				PostInputEvent( inputDeviceNum, J_AXIS_LEFT_TOUCH_Y, -inputState.Thumbstick[ovrHand_Left].y * 32767.0f );
-
-				PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_TOUCH_X, inputState.Thumbstick[ovrHand_Right].x * 32767.0f );
-				PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_TOUCH_Y, -inputState.Thumbstick[ovrHand_Right].y * 32767.0f );
-
-				oldInputState = inputState;
-
-			}
-		}
-	} 
 	return numEvents;
 }
 

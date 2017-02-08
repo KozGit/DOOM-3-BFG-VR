@@ -2210,7 +2210,7 @@ public:
 			SAFETY_PROTOCOLS_FIELD_MOTION_SICKNESS,
 			SAFETY_PROTOCOLS_FIELD_CHAPERONE,
 			SAFETY_PROTOCOLS_FIELD_KNOCKBACK,
-			SAFETY_PROTOCOLS_FIELD_HEADKICK,
+			SAFETY_PROTOCOLS_FIELD_HEADBOB,
 			SAFETY_PROTOCOLS_FIELD_SHAKE_AMPLITUDE,
 			MAX_SAFETY_PROTOCOLS_FIELDS
 		};
@@ -2242,6 +2242,9 @@ public:
 		float originalComfortDelta;
 		float	originalKnockBack;
 		float	originalHeadKick;
+		float	originalStepSmooth;
+		float	originalJumpBounce;
+		float originalBobUp;
 		int		originalShakeAmplitude;
 	};
 
@@ -2564,6 +2567,71 @@ private:
 
 // KOZ END VR options
 //=====================================================================================================================
+
+//*
+//================================================
+//idMenuScreen_Shell_VR_Flicksync
+//================================================
+//*/
+class idMenuScreen_Shell_VR_Flicksync : public idMenuScreen
+{
+public:
+public:
+
+	/*
+	================================================
+	idMenuDataSource_Shell_VR_Safety_Protocols
+	================================================
+	*/
+	class idMenuDataSource_Shell_VR_Flicksync : public idMenuDataSource
+	{
+	public:
+		enum vrFlicksync_t
+		{
+			FLICKSYNC_FIELD_CHARACTER,
+			FLICKSYNC_FIELD_NEWGAME,
+			MAX_FLICKSYNC_FIELDS
+		};
+
+		idMenuDataSource_Shell_VR_Flicksync();
+
+		// loads data
+		virtual void				LoadData();
+
+		// submits data
+		virtual void				CommitData();
+
+		// says whether something changed with the data
+		virtual bool				IsDataChanged() const;
+
+		// retrieves a particular field for reading
+		virtual idSWFScriptVar		GetField(const int fieldIndex) const;
+
+		// updates a particular field value
+		virtual void				AdjustField(const int fieldIndex, const int adjustAmount);
+
+		bool						IsRestartRequired() const;
+
+	private:
+		int	originalFlickCharacter;
+	};
+
+	idMenuScreen_Shell_VR_Flicksync() :
+		options(NULL),
+		btnBack(NULL)
+	{
+	}
+	virtual void				Initialize(idMenuHandler* data);
+	virtual void				Update();
+	virtual void				ShowScreen(const mainMenuTransition_t transitionType);
+	virtual void				HideScreen(const mainMenuTransition_t transitionType);
+	virtual bool				HandleAction(idWidgetAction& action, const idWidgetEvent& event, idMenuWidget* widget, bool forceHandled = false);
+
+private:
+	idMenuWidget_DynamicList* 	options;
+	idMenuDataSource_Shell_VR_Flicksync	systemData;
+	idMenuWidget_Button*			btnBack;
+};
 
 
 #endif

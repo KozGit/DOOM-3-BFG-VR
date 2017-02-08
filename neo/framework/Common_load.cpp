@@ -776,7 +776,8 @@ void idCommonLocal::ExecuteMapChange()
 	vr_weaponSight.SetModified();
 	// koz end
 
-	commonVr->isLoading = false;
+  commonVr->isLoading = false;
+
 }
 
 /*

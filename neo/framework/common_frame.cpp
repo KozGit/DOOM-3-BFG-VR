@@ -875,21 +875,24 @@ void idCommonLocal::Frame()
 		
 		// build a new usercmd
 		int deviceNum = session->GetSignInManager().GetMasterInputDevice();
-		usercmdGen->BuildCurrentUsercmd( deviceNum );
-		
-		
-		if( deviceNum == -1 || !commonVr->hasOculusRift )  
+
+		if ( game->isVR )
 		{
-			for( int i = 0; i < MAX_INPUT_DEVICES ; i++ )
-			{
-				Sys_PollJoystickInputEvents( i );
-				Sys_EndJoystickInputEvents();
-				// Carl: openvr only ???
-				if ( !commonVr->hasOculusRift )
-					usercmdGen->BuildCurrentUsercmd( deviceNum );
+			//Sys_PollJoystickInputEvents( 0 );
+			usercmdGen->BuildCurrentUsercmd( 0 );
+		}
+		else
+		{
+			usercmdGen->BuildCurrentUsercmd( deviceNum );
+
+			if ( deviceNum == -1 ) {
+				for ( int i = 0; i < MAX_INPUT_DEVICES; i++ ) {
+					Sys_PollJoystickInputEvents( i );
+					Sys_EndJoystickInputEvents();
+				}
 			}
 		}
-			
+		
 		if( pauseGame )
 		{
 			usercmdGen->Clear();

@@ -508,7 +508,8 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_SAFETY_PROTOCOLS, idMenuScreen_Shell_VR_Safety_Protocols, this ); // Carl
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this );
 		// koz end
-		
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this ); // Carl
+
 	}
 	else
 	{
@@ -548,7 +549,7 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_SAFETY_PROTOCOLS, idMenuScreen_Shell_VR_Safety_Protocols, this ); // Carl
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this );
 		// koz end 
-
+		BIND_SHELL_SCREEN(SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this); // Carl
 		
 		doom3Intro = declManager->FindMaterial( "gui/intro/introloop" );
 		roeIntro = declManager->FindMaterial( "gui/intro/marsflyby" );
@@ -798,6 +799,7 @@ enum shellCommandsPC_t
 	SHELL_CMD_DEV,
 	SHELL_CMD_CAMPAIGN,
 	SHELL_CMD_MULTIPLAYER,
+	SHELL_CMD_FLICKSYNC,
 	SHELL_CMD_SETTINGS,
 	SHELL_CMD_CREDITS,
 	SHELL_CMD_QUIT
@@ -1109,6 +1111,12 @@ bool idMenuHandler_Shell::HandleAction( idWidgetAction& action, const idWidgetEv
 					session->CreatePartyLobby( matchParameters );
 					break;
 				}
+				case SHELL_CMD_FLICKSYNC:
+				{
+					nextScreen = SHELL_AREA_VR_FLICKSYNC;
+					transition = MENU_TRANSITION_SIMPLE;
+					break;
+				}
 				case SHELL_CMD_SETTINGS:
 				{
 					nextScreen = SHELL_AREA_SETTINGS;
@@ -1295,7 +1303,7 @@ void idMenuHandler_Shell::UpdateBGState()
 
 	if( smallFrameShowing )
 	{
-		if( nextScreen != SHELL_AREA_PLAYSTATION && nextScreen != SHELL_AREA_SETTINGS && nextScreen != SHELL_AREA_CAMPAIGN && nextScreen != SHELL_AREA_DEV )
+		if( nextScreen != SHELL_AREA_PLAYSTATION && nextScreen != SHELL_AREA_SETTINGS && nextScreen != SHELL_AREA_CAMPAIGN && nextScreen != SHELL_AREA_VR_FLICKSYNC && nextScreen != SHELL_AREA_DEV )
 		{
 			if( nextScreen != SHELL_AREA_RESOLUTION && nextScreen != SHELL_AREA_GAMEPAD && nextScreen != SHELL_AREA_DIFFICULTY && nextScreen != SHELL_AREA_SYSTEM_OPTIONS && nextScreen != SHELL_AREA_GAME_OPTIONS && nextScreen != SHELL_AREA_NEW_GAME && nextScreen != SHELL_AREA_STEREOSCOPICS &&
 				nextScreen != SHELL_AREA_CONTROLS && nextScreen != SHELL_AREA_VR_SETTINGS && nextScreen != SHELL_AREA_VR_CHARACTER_OPTIONS && nextScreen != SHELL_AREA_VR_CONTROL_OPTIONS && nextScreen != SHELL_AREA_VR_HUD_OPTIONS && nextScreen != SHELL_AREA_VR_HUD_POSITION_OPTIONS &&
@@ -1307,7 +1315,7 @@ void idMenuHandler_Shell::UpdateBGState()
 	}
 	else
 	{
-		if( nextScreen == SHELL_AREA_RESOLUTION || nextScreen == SHELL_AREA_GAMEPAD || nextScreen == SHELL_AREA_PLAYSTATION || nextScreen == SHELL_AREA_SETTINGS || nextScreen == SHELL_AREA_CAMPAIGN || nextScreen == SHELL_AREA_CONTROLS || nextScreen == SHELL_AREA_DEV || nextScreen == SHELL_AREA_DIFFICULTY )
+		if( nextScreen == SHELL_AREA_RESOLUTION || nextScreen == SHELL_AREA_GAMEPAD || nextScreen == SHELL_AREA_PLAYSTATION || nextScreen == SHELL_AREA_SETTINGS || nextScreen == SHELL_AREA_CAMPAIGN || nextScreen == SHELL_AREA_VR_FLICKSYNC || nextScreen == SHELL_AREA_CONTROLS || nextScreen == SHELL_AREA_DEV || nextScreen == SHELL_AREA_DIFFICULTY )
 		{
 			ShowSmallFrame( true );
 		}

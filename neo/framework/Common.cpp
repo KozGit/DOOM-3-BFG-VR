@@ -377,6 +377,7 @@ void idCommonLocal::AddStartupCommands()
 		// directly as tokenized so nothing gets screwed
 		cmdSystem->BufferCommandArgs( CMD_EXEC_APPEND, com_consoleLines[i] );
 	}
+	
 }
 
 /*
@@ -1298,11 +1299,11 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		// Koz begin
 		if ( commonVr->hasOculusRift )
 		{
-			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_oculus_default.cfg\n" );
+			cmdSystem->AppendCommandText( "exec vr_oculus_default.cfg\n" );
 		}
 		else if ( commonVr->hasHMD )
 		{
-			cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_openvr_default.cfg\n" );
+			cmdSystem->AppendCommandText( "exec vr_openvr_default.cfg\n" );
 		}
 
 
@@ -1310,41 +1311,16 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		{
 			if ( commonVr->hasOculusRift )
 			{
-				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_oculus.cfg\n" );
+				cmdSystem->AppendCommandText( "exec vr_oculus.cfg\n" );
 			}
 			else if ( commonVr->hasHMD )
 			{
-				cmdSystem->BufferCommandText( CMD_EXEC_APPEND, "exec vr_openvr.cfg\n" );
+				cmdSystem->AppendCommandText( "exec vr_openvr.cfg\n" );
 			}
 		}
-
+		cmdSystem->ExecuteCommandBuffer();
 		// Koz end
-		// Carl talking should always be bound to _talk
-		cmdSystem->AppendCommandText("bind TALK _talk\n");
-		cmdSystem->AppendCommandText("bind SAY_PAUSE _impulse40\n");
-		//cmdSystem->AppendCommandText("bind SAY_RESUME _impulse40\n");
-		cmdSystem->AppendCommandText("bind SAY_EXIT _impulse40\n");
-		cmdSystem->AppendCommandText("bind SAY_MENU _impulse40\n");
-		//	cmdSystem->AppendCommandText("bind SAY_CANCEL _impulse\n");
-		cmdSystem->AppendCommandText("bind SAY_RELOAD _impulse13\n");
-		cmdSystem->AppendCommandText("bind SAY_PDA _impulse19\n");
-		cmdSystem->AppendCommandText("bind SAY_FIST _impulse1\n");
-		cmdSystem->AppendCommandText("bind SAY_CHAINSAW _impulse27\n");
-		cmdSystem->AppendCommandText("bind SAY_FLASHLIGHT _impulse16\n");
-		cmdSystem->AppendCommandText("bind SAY_GRABBER _impulse26\n");
-		cmdSystem->AppendCommandText("bind SAY_PISTOL _impulse2\n");
-		cmdSystem->AppendCommandText("bind SAY_SHOTGUN _impulse4\n");
-		cmdSystem->AppendCommandText("bind SAY_SUPER_SHOTGUN _impulse11\n");
-		cmdSystem->AppendCommandText("bind SAY_MACHINE_GUN _impulse5\n");
-		cmdSystem->AppendCommandText("bind SAY_CHAIN_GUN _impulse6\n");
-		cmdSystem->AppendCommandText("bind SAY_ROCKET_LAUNCHER _impulse9\n");
-		cmdSystem->AppendCommandText("bind SAY_GRENADES _impulse7\n");
-		cmdSystem->AppendCommandText("bind SAY_PLASMA_GUN _impulse8\n");
-		cmdSystem->AppendCommandText("bind SAY_BFG _impulse10\n");
-		cmdSystem->AppendCommandText("bind SAY_SOUL_CUBE _impulse12\n");
-		cmdSystem->AppendCommandText("bind SAY_ARTIFACT _impulse12\n");
-
-
+	
 		// run cfg execution
 		cmdSystem->ExecuteCommandBuffer();
 		
@@ -1353,12 +1329,10 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 	
 		// if any archived cvars are modified after this, we will trigger a writing of the config file
 		cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
-		
-
+	
 		// init OpenGL, which will open a window and connect sound and input hardware
 		renderSystem->InitOpenGL();
-		
-		
+			
 		// Support up to 2 digits after the decimal point
 				
 		com_engineHz_denominator = 100LL * com_engineHz.GetFloat();
@@ -1468,6 +1442,46 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		
 		AddStartupCommands();
 		
+		//koz moved static binds here to ensure all previous commands in the command buffer
+		//have been fully executed. Some of the .cfg files perform unbindall, which
+		//was wiping out these binds due to the way the commands queue.
+
+		// Carl talking should always be bound to _talk
+		cmdSystem->AppendCommandText( "bind TALK _talk\n" );
+		cmdSystem->AppendCommandText( "bind SAY_PAUSE _impulse40\n" );
+		//cmdSystem->AppendCommandText("bind SAY_RESUME _impulse40\n");
+		cmdSystem->AppendCommandText( "bind SAY_EXIT _impulse40\n" );
+		cmdSystem->AppendCommandText( "bind SAY_MENU _impulse40\n" );
+		//	cmdSystem->AppendCommandText("bind SAY_CANCEL _impulse\n");
+		cmdSystem->AppendCommandText( "bind SAY_RELOAD _impulse13\n" );
+		cmdSystem->AppendCommandText( "bind SAY_PDA _impulse19\n" );
+		//cmdSystem->AppendCommandText("bind SAY_FIST _impulse1\n");
+		cmdSystem->BufferCommandText( CMD_EXEC_NOW, "bind SAY_FIST _impulse26\n" );
+		cmdSystem->AppendCommandText( "bind SAY_CHAINSAW _impulse27\n" );
+		cmdSystem->AppendCommandText( "bind SAY_FLASHLIGHT _impulse16\n" );
+		cmdSystem->AppendCommandText( "bind SAY_GRABBER _impulse1\n" );
+		cmdSystem->AppendCommandText( "bind SAY_PISTOL _impulse2\n" );
+		cmdSystem->AppendCommandText( "bind SAY_SHOTGUN _impulse11\n" );
+		cmdSystem->AppendCommandText( "bind SAY_SUPER_SHOTGUN _impulse4\n" );
+		cmdSystem->AppendCommandText( "bind SAY_MACHINE_GUN _impulse5\n" );
+		cmdSystem->AppendCommandText( "bind SAY_CHAIN_GUN _impulse6\n" );
+		cmdSystem->AppendCommandText( "bind SAY_ROCKET_LAUNCHER _impulse9\n" );
+		cmdSystem->AppendCommandText( "bind SAY_GRENADES _impulse7\n" );
+		cmdSystem->AppendCommandText( "bind SAY_PLASMA_GUN _impulse8\n" );
+		cmdSystem->AppendCommandText( "bind SAY_BFG _impulse10\n" );
+		cmdSystem->AppendCommandText( "bind SAY_SOUL_CUBE _impulse12\n" );
+		cmdSystem->AppendCommandText( "bind SAY_ARTIFACT _impulse12\n" );
+		
+		//koz check for mod files:
+		findFile_t found = fileSystem->FindFile( "guis\\lookforward.tga" );
+		
+		if ( found == FIND_NO )
+		{
+			common->Printf( "Found file = %d\n", found );
+			common->Error( "Unable to locate mod files in 'Fully Possessed' mod directory.\nThe 'Fully Possessed' directory should exist in same directory as the Doom 3 executable.\n" );
+		}
+
+
 		StartMenu( true );
 
 		whiteMaterial = declManager->FindMaterial( "_white" );
@@ -1542,7 +1556,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 
 		if ( game->isVR )
 		{
-			while ( centered < 6 )
+			while ( centered == 0 )
 			{
 				RenderSplash();
 				if ( commonVr->hasOculusRift )
@@ -1565,63 +1579,41 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 					//common->Printf( "Bailed from keyevent\n" );
 					centered++;
 				}
-
+				
 				for ( int eachJ = 0; eachJ < MAX_INPUT_DEVICES; eachJ++ )
 				{
 
 					int numJoystickEvents = Sys_PollJoystickInputEvents( eachJ );
 					if ( numJoystickEvents > 0 )
 					{
-						int action;
-						int value;
-						if ( Sys_ReturnJoystickInputEvent( eachJ, action, value ) )
+						for ( int i = 0; i < numJoystickEvents; i++ )
 						{
-							if ( action >= J_ACTION1 && action <= J_ACTION_MAX )// || action < J_ACTION_MAX && action < MAX_JOY_EVENT )
-							{
-								//common->Printf( "Centered %d Bailed from action >= J_ACTION1 && action <= J_ACTION_MAX action %d numevents %d\n", centered ,action, numJoystickEvents );
-								centered ++ ;
-							}
-							else if ( action > J_AXIS_MIN && action < J_AXIS_MAX )
-							{
-								if ( abs( value ) > 16384 )
-								{
-									//common->Printf( "Centered %d Bailed from action J_AXIS_MIN && action < J_AXIS_MAX %d %d\n", centered, action, value );
-									centered ++;
-								}
+							int action;
+							int value;
 
+							if ( Sys_ReturnJoystickInputEvent( i, action, value ) )
+							{
+								if ( action >= J_ACTION1 && action <= J_ACTION_MAX )
+								{
+									if ( value != 0 )
+									{
+										centered++;
+										break;
+									}
+								}
 							}
 						}
+
+						Sys_EndJoystickInputEvents();
 					}
 				}
 			}
 		}
-		/*
-		int joyButton = K_JOY1 + (action - J_ACTION1);
-		Key( joyButton, (value != 0) );
-		}
-		else if ( (action >= J_AXIS_MIN) && (action <= J_AXIS_MAX) )
-		{
-		joystickAxis[action - J_AXIS_MIN] = static_cast<float>(value) / 32767.0f;
-		}
-		else if ( action >= J_DPAD_UP && action <= J_DPAD_RIGHT )
-		{
-		int joyButton = K_JOY_DPAD_UP + (action - J_DPAD_UP);
-		Key( joyButton, (value != 0) );
-		}
-		else
-		{
-		assert( !"Unknown joystick event" );
-		}
-		*/
 
 		if ( game->isVR ) commonVr->HMDResetTrackingOriginOffset();
 
 		commonVr->renderingSplash = false;
-
-
-
-		
-		
+	
 		// print all warnings queued during initialization
 		PrintWarnings();
 		

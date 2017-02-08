@@ -1,6 +1,7 @@
 #pragma hdrstop
 
 #include"precompiled.h"
+#include "d3xp/Game_local.h"
 
 #undef strncmp
 #undef vsnprintf
@@ -20,6 +21,7 @@ ISpObjectToken *pObjectToken = NULL;
 ISpRecoContext *pReco = NULL;
 ISpRecoGrammar *pGrammar = NULL;
 SPSTATEHANDLE rule = NULL;
+SPSTATEHANDLE flickSyncRule = NULL;
 
 extern iVoice voice;
 
@@ -77,12 +79,22 @@ void MadeASound()
 
 void StartedTalking()
 {
-
+	idPlayer* player = gameLocal.GetLocalPlayer();
+	if( player != NULL && player->hudManager && (vr_flickCharacter.GetInteger() || vr_voiceCommands.GetInteger() || vr_talkMode.GetInteger()) )
+	{
+		player->hudManager->SetRadioMessage( true );
+	}
 }
 
 void StoppedTalking()
 {
 	spoke = true;
+
+	idPlayer* player = gameLocal.GetLocalPlayer();
+	if( player != NULL && player->hudManager && (vr_flickCharacter.GetInteger() || vr_voiceCommands.GetInteger() || vr_talkMode.GetInteger()) )
+	{
+		player->hudManager->SetRadioMessage( false );
+	}
 }
 
 bool iVoice::GetTalkButton()
@@ -305,18 +317,32 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 				recoResult = reinterpret_cast<ISpRecoResult*>(event.lParam);
 				if (recoResult)
 				{
+					ULONG isLine = false;
+					ULONGLONG startTime = 0;
+					ULONG length = 0;
 					wchar_t* text;
 					SPPHRASE* pPhrase = NULL;
 					hr = recoResult->GetPhrase(&pPhrase);
 					int confidence = 0;
 					if SUCCEEDED(hr) {
 						confidence = pPhrase->Rule.Confidence; // -1, 0, or 1
+						isLine = pPhrase->Rule.ulId;
+						startTime = pPhrase->ftStartTime;
+						length = pPhrase->ulAudioSizeTime;
 					}
 					const char* confidences[3] = { "low", "medium", "high" };
 					hr = recoResult->GetText(SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL);
 					//voice.Say("%s: You said %S.", confidences[confidence + 1], text);
-					HearWord(text, confidence);
-
+					if (isLine)
+					{
+						char buffer[1024];
+						WideCharToMultiByte(CP_ACP, 0, text, -1, buffer, sizeof(buffer) / sizeof(buffer[0]), "'", NULL);
+						FlickSync_HearLine(buffer, confidence, startTime, length);
+					}
+					else
+					{
+						HearWord(text, confidence);
+					}
 					CoTaskMemFree(text);
 					CoTaskMemFree(pPhrase);
 				}
@@ -330,10 +356,26 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 				recoResult = reinterpret_cast<ISpRecoResult*>(event.lParam);
 				if (recoResult)
 				{
+					ULONG isLine = false;
+					
 					wchar_t* text;
+					SPPHRASE* pPhrase = NULL;
+					hr = recoResult->GetPhrase(&pPhrase);
+					int confidence = 0;
+					if SUCCEEDED(hr) {
+						confidence = pPhrase->Rule.Confidence; // -1, 0, or 1
+						isLine = pPhrase->Rule.ulId;
+					}
+					const char* confidences[3] = { "low", "medium", "high" };
 					hr = recoResult->GetText(SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL);
-					//voice.Say("Maybe %S.", text);
-
+					if (isLine)
+					{
+						//voice.Say("Maybe %s: %S", confidences[confidence + 1], text);
+					}
+					else
+					{
+						//voice.Say("Maybe %S.", text);
+					}
 					CoTaskMemFree(text);
 				}
 				break;
@@ -407,6 +449,18 @@ void iVoice::AddWord(const wchar_t* word)
 	pGrammar->AddWordTransition(rule, NULL, word, L" ", SPWT_LEXICAL, 1.0f, NULL);
 }
 
+void iVoice::AddFlickSyncLine(const char* line)
+{
+	wchar_t wbuffer[1024];
+	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, line, -1, wbuffer, sizeof(wbuffer) / sizeof(wbuffer[0]));
+	pGrammar->AddWordTransition(flickSyncRule, NULL, wbuffer, L" ", SPWT_LEXICAL, 1.0f, NULL);
+}
+
+void iVoice::AddFlickSyncLine(const wchar_t* line)
+{
+	pGrammar->AddWordTransition(flickSyncRule, NULL, line, L" ", SPWT_LEXICAL, 1.0f, NULL);
+}
+
 
 /*
 ==============
@@ -457,6 +511,9 @@ void iVoice::VoiceInit(void)
 					AddWord(words[i]);
 				}
 
+				pGrammar->GetRule(L"line", 1, SPRAF_TopLevel | SPRAF_Active, true, &flickSyncRule);
+				FlickSync_AddVoiceLines();
+
 				hr = pGrammar->Commit(NULL);
 				//if (SUCCEEDED(hr))
 				//	Say("Compiled.");
@@ -471,6 +528,7 @@ void iVoice::VoiceInit(void)
 				//if (SUCCEEDED(hr))
 				//	Say("Interested.");
 				hr = pGrammar->SetRuleState(L"word", NULL, SPRS_ACTIVE);
+				hr = pGrammar->SetRuleState(L"line", NULL, SPRS_ACTIVE);
 				//if (SUCCEEDED(hr))
 				//	Say("Listening.");
 				hr = pReco->Resume(0);

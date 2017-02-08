@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "..\LibOVR\Include\OVR_CAPI_GL.h"
 #include "vr_hmd.h"
 #include "Voice.h"
+#include "FlickSync.h"
 #include "..\renderer\Framebuffer.h"
 #include "..\LibOVR\Include\OVR_CAPI_Audio.h"
 #include "..\libs\OpenVR\headers\openvr.h"
@@ -474,6 +475,8 @@ extern idCVar	vr_offHandPosZ;
 extern idCVar	vr_padDeadzone;
 extern idCVar	vr_padToButtonThreshold;
 extern idCVar	vr_knockBack;
+extern idCVar	vr_jumpBounce;
+extern idCVar	vr_stepSmooth;
 
 extern idCVar	vr_mountedWeaponController;
 extern idCVar	vr_walkSpeedAdjust;
@@ -506,7 +509,10 @@ extern idCVar	vr_bodyToMove;
 extern idCVar	vr_stereoMirror;
 
 extern idCVar	vr_teleport;
+extern idCVar	vr_teleportMaxTravel;
+extern idCVar	vr_teleportThroughDoors;
 extern idCVar	vr_motionSickness;
+extern idCVar	vr_strobeTime;
 extern idCVar	vr_chaperone;
 extern idCVar	vr_chaperoneColor;
 
