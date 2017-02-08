@@ -377,6 +377,7 @@ void idCommonLocal::AddStartupCommands()
 		// directly as tokenized so nothing gets screwed
 		cmdSystem->BufferCommandArgs( CMD_EXEC_APPEND, com_consoleLines[i] );
 	}
+	
 }
 
 /*
@@ -1471,7 +1472,16 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		cmdSystem->AppendCommandText( "bind SAY_SOUL_CUBE _impulse12\n" );
 		cmdSystem->AppendCommandText( "bind SAY_ARTIFACT _impulse12\n" );
 		
+		//koz check for mod files:
+		findFile_t found = fileSystem->FindFile( "guis\\lookforward.tga" );
 		
+		if ( found == FIND_NO )
+		{
+			common->Printf( "Found file = %d\n", found );
+			common->Error( "Unable to locate mod files in 'Fully Possessed' mod directory.\nThe 'Fully Possessed' directory should exist in same directory as the Doom 3 executable.\n" );
+		}
+
+
 		StartMenu( true );
 
 		whiteMaterial = declManager->FindMaterial( "_white" );

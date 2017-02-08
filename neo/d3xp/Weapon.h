@@ -141,7 +141,6 @@ public:
 	idPlayer*				GetOwner();
 	virtual bool			ShouldConstructScriptObjectAtSpawn() const;
 	void					SetFlashlightOwner( idPlayer* owner );
-	void					SetLeftHandOwner( idPlayer* owner ); // koz for left hand model
 	
 	static void				CacheWeapon( const char* weaponName );
 	

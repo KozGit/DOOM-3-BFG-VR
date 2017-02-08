@@ -52,7 +52,8 @@ static bindInfo_t keyboardBinds[] =
 	{ "Reset HMD orientation", "_impulse32" },  // KOZ RESET HMD/BODY ORIENTATION 
 	{ "Comfort Turn Left", "_impulse35" },		// KOZ COMFORT TURN LEFT
 	{ "Comfort Turn Right", "_impulse34" },		// KOZ COMFORT TURN RIGHT
-	
+	{ "Teleport", "_teleport" },				// Carl: TELEPORT
+
 		
 	{ "                                ", "" }, // koz divider
 	{ "#str_02095", "" },						// HEADING
