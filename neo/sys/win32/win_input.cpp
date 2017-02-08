@@ -1110,7 +1110,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 		return numEvents;
 	}
 	//common->Printf( "Pollinput polling device # %d\n", inputDeviceNum );
-	assert( inputDeviceNum < 4 )
+	assert( inputDeviceNum < 4 );
 		if ( inputDeviceNum < 4 )
 		{
 			//	if ( inputDeviceNum > in_joystick.GetInteger() ) {

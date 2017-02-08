@@ -287,24 +287,6 @@ void idWeapon::SetFlashlightOwner( idPlayer* _owner )
 
 /*
 ================
-idWeapon::SetLeftHandOwner
-
-Only called at player spawn time, not each weapon switch
-================
-*/
-void idWeapon::SetLeftHandOwner( idPlayer* _owner )
-{
-	assert( !owner );
-	owner = _owner;
-	SetName( va( "%s_weapon_leftHand", owner->name.c_str() ) );
-
-	if ( worldModel.GetEntity() )
-	{
-		worldModel.GetEntity()->SetName( va( "%s_weapon_leftHand_worldmodel", owner->name.c_str() ) );
-	}
-}
-/*
-================
 idWeapon::ShouldConstructScriptObjectAtSpawn
 
 Called during idEntity::Spawn to see if it should construct the script object or not.

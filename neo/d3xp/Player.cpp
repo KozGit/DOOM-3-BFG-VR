@@ -72,17 +72,36 @@ idCVar vr_by2( "vr_by1", "5", CVAR_FLOAT, "" );
 idCVar vr_bz1( "vr_bz1", "-5", CVAR_FLOAT, "" );
 idCVar vr_bz2( "vr_bz2", "5", CVAR_FLOAT, "" );
 
+idCVar vr_teleportVel( "vr_teleportVel", "650", CVAR_FLOAT,"" );
+idCVar vr_teleportDist( "vr_teleportDist", "60", CVAR_FLOAT,"" );
+idCVar vr_teleportMaxPoints( "vr_teleportMaxPoints", "24", CVAR_FLOAT, "" );
+idCVar vr_teleportMaxDrop( "vr_teleportMaxDrop", "360", CVAR_FLOAT, "" );
+
+idCVar vr_teleportSlerpTime( "vr_teleportSlerpTime", "200", CVAR_FLOAT, "" );
+
+idCVar vr_teleportAimMode( "vr_teleportAimMode", "0", CVAR_INTEGER | CVAR_ARCHIVE, "0 = WeaponSight, 1 = Parabolic from Weapon, 2 = Parabolic from Off Hand" );
+
+
+/*
+idCVar tpitch( "tpitch", "0", CVAR_FLOAT, "" );
+idCVar troll( "troll", "90", CVAR_FLOAT, "" );
+idCVar tyaw( "tyaw", "0", CVAR_FLOAT, "" );
+idCVar tmode( "tmode", "0", CVAR_INTEGER, "" );
+idCVar tinv( "tinv", "0", CVAR_INTEGER, "" );
+idCVar tneg( "tneg", "0", CVAR_INTEGER, "" );
+*/
+
 /*
 were for testing
 
 idCVar qtx( "qtx", "0.0", CVAR_FLOAT, "" );
 idCVar qty( "qty", "0.0", CVAR_FLOAT, "" );
 idCVar qtz( "qtz", "0.0", CVAR_FLOAT, "" );
-
+ */
 idCVar ftx( "ftx", "0", CVAR_FLOAT, "" );
 idCVar fty( "fty", "0", CVAR_FLOAT, "" );
 idCVar ftz( "ftz", "0", CVAR_FLOAT, "" );
-*/
+
 
 
 extern idCVar g_demoMode;
@@ -1514,7 +1533,7 @@ idPlayer::idPlayer():
 	aas = NULL;
 	travelFlags = TFL_WALK | TFL_AIR | TFL_CROUCH | TFL_WALKOFFLEDGE | TFL_BARRIERJUMP | TFL_JUMP | TFL_LADDER | TFL_WATERJUMP | TFL_ELEVATOR | TFL_SPECIAL;
 	aimValidForTeleport = false;
-	aimPointPitch = 0.0f;
+	teleportAimPointPitch = 0.0f;
 
 	noclip					= false;
 	godmode					= false;
@@ -1549,6 +1568,7 @@ idPlayer::idPlayer():
 
 	crosshairHandle = -1;
 	memset( &crosshairEntity, 0, sizeof( crosshairEntity ) );
+		
 	// koz end
 
 
@@ -1801,10 +1821,7 @@ void idPlayer::SetupWeaponEntity()
 		flashlight = static_cast<idWeapon*>( gameLocal.SpawnEntityType( idWeapon::Type, NULL ) );
 		flashlight.GetEntity()->SetFlashlightOwner( this );
 		//FlashlightOff();
-
-		// koz model for independent left hand in VR when using motion controls
-		//leftHand = static_cast<idWeapon*>(gameLocal.SpawnEntityType( idWeapon::Type, NULL ));
-		//leftHand.GetEntity()->SetLeftHandOwner( this );
+				
 	}
 	
 	for( w = 0; w < MAX_WEAPONS; w++ )
@@ -2239,6 +2256,7 @@ void idPlayer::Init()
 	skinCrosshairDot = declManager->FindSkin( "skins/vr/crosshairDot" );
 	skinCrosshairCircleDot = declManager->FindSkin( "skins/vr/crosshairCircleDot" );
 	skinCrosshairCross = declManager->FindSkin( "skins/vr/crosshairCross" );
+		
 
 	// heading indicator for VR - point the direction the body is facing.
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
@@ -2259,9 +2277,60 @@ void idPlayer::Init()
 	throwDirection = vec3_zero;
 	throwVelocity = 0.0f;
 		
+	InitTeleportTarget();
 	// Koz end
 
 }
+
+
+
+/*
+==============
+idPlayer::InitTeleportTarget
+==============
+*/
+void idPlayer::InitTeleportTarget()
+{
+	idVec3 origin;
+	int targetAnim; 
+
+	idStr jointName;
+
+	common->Printf( "Initializing teleport target\n" );
+	origin = GetPhysics()->GetOrigin() + (origin + modelOffset) * GetPhysics()->GetAxis();
+
+	teleportTarget = (idAnimatedEntity*) gameLocal.SpawnEntityType( idAnimatedEntity::Type, NULL );
+	
+	teleportTarget.GetEntity()->SetModel( "telepad1" );
+	teleportTarget.GetEntity()->SetOrigin( origin );
+	teleportTarget.GetEntity()->SetAxis( GetPhysics()->GetAxis() );
+	
+	teleportTargetAnimator = teleportTarget.GetEntity()->GetAnimator();
+	targetAnim = teleportTargetAnimator->GetAnim( "idle" );
+	common->Printf( "Teleport target idle anim # = %d\n", targetAnim );
+	teleportTargetAnimator->PlayAnim( ANIMCHANNEL_ALL, targetAnim, gameLocal.time, 0 );
+
+	teleportPadJoint = teleportTargetAnimator->GetJointHandle( "pad" );
+
+	if ( teleportPadJoint == INVALID_JOINT )
+	{
+		common->Printf( "Unable to find joint teleportPadJoint \n" );
+	}
+
+	for ( int i = 0; i < 24; i++ )
+	{
+		jointName = va( "padbeam%d", i + 1 );
+		teleportBeamJoint[i] = teleportTargetAnimator->GetJointHandle( jointName.c_str() );
+		if ( teleportBeamJoint[i] == INVALID_JOINT )
+		{
+			common->Printf( "Unable to find teleportBeamJoint %s\n", jointName.c_str() );
+		}
+	}
+		
+}
+
+
+
 
 /*
 ==============
@@ -2572,7 +2641,7 @@ idPlayer::~idPlayer()
 	
 	delete flashlight.GetEntity();
 	flashlight = NULL;
-	
+		
 	if( enviroSuitLight.IsValid() )
 	{
 		enviroSuitLight.GetEntity()->ProcessEvent( &EV_Remove );
@@ -9197,7 +9266,7 @@ void idPlayer::PerformImpulse( int impulse )
 						playerView.Flash(colorBlack, 140);
 					else
 						playerView.Flash(colorWhite, 140);
-					Teleport(aimPoint, viewAngles, NULL);
+					Teleport(teleportAimPoint, viewAngles, NULL);
 					if (t == 1)
 						PlayFootStepSound();
 				}
@@ -10730,7 +10799,7 @@ void idPlayer::UpdateLaserSight()
 	{
 		hideSight = true;
 	}
-	
+		
 	if ( vr_weaponSight.GetInteger() == 0 ) // using the lasersight
 	{
 		// common->Printf( "Using lasersight  hidesight = %i\n", hideSight );
@@ -10793,8 +10862,9 @@ void idPlayer::UpdateLaserSight()
 		{
 			gameRenderWorld->UpdateEntityDef( laserSightHandle, &laserSightRenderEntity );
 		}
-
+		
 		return;
+	
 	}
 	
 	// using the crosshair model instead of the lasersight
@@ -10915,13 +10985,17 @@ void idPlayer::UpdateLaserSight()
 	}
 
 	crosshairEntity.origin = start + muzzleAxis[0] * beamLength;
+	
+
+	
+	
 
 	// Carl: teleport
-	aimPoint = crosshairEntity.origin;
-	aimPointPitch = surfaceAngle.pitch;
-	bool aimValid = (vr_teleport.GetInteger() > 0) && CanReachPosition(aimPoint);
+	teleportAimPoint = crosshairEntity.origin;
+	teleportAimPointPitch = surfaceAngle.pitch;
+	bool aimValid = (vr_teleport.GetInteger() > 0) && CanReachPosition(teleportAimPoint);
 	// 45 degrees is maximum slope you can walk up
-	bool pitchValid = (vr_teleport.GetInteger() > 0) && aimPointPitch >= 45; // -90 = ceiling, 0 = wall, 90 = floor
+	bool pitchValid = (vr_teleport.GetInteger() > 0) && teleportAimPointPitch >= 45; // -90 = ceiling, 0 = wall, 90 = floor
 	aimValidForTeleport = aimValid && pitchValid;
 
 	if ( aimValidForTeleport )
@@ -10947,6 +11021,418 @@ void idPlayer::UpdateLaserSight()
 	}
 
 }
+
+
+
+bool idPlayer::GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis ) // returns true if the teleport beam should be displayed
+{
+	const idVec3 beamOff[2] = { idVec3( 2.5f, 0.0f, 1.0f ), idVec3( 2.5f, 0.0f, 1.5f ) };
+
+	if ( gameLocal.inCinematic || AI_DEAD || game->IsPDAOpen() )
+	{
+		return false;
+	}
+
+	if ( vr_teleportAimMode.GetInteger() == 0 )// teleport aim mode is to use the standard weaponsight, so just return.
+	{
+		return false;
+	}
+
+	if ( vr_teleportAimMode.GetInteger() == 1 )// teleport aim origin from the weapon.
+	{
+		if ( !weapon.GetEntity()->ShowCrosshair() ||
+			weapon->IsHidden() ||
+			weapon->hideOffset != 0 ||						// koz - turn off lasersight If gun is lowered ( in gui ).
+			commonVr->handInGui ||							// turn off lasersight if hand is in gui.
+			weapon.GetEntity()->GetGrabberState() >= 2 	// koz turn off laser sight if grabber is dragging an entity
+			)
+		{
+			return false;
+		}
+
+		if ( !weapon->GetMuzzlePositionWithHacks( beamOrigin, beamAxis ) )
+		{
+			// weapon has no muzzle, so get the position and axis of the animated hand joint
+			int hand = vr_weaponHand.GetInteger();
+
+			if ( animator.GetJointTransform( ik_hand[hand], gameLocal.time, beamOrigin, beamAxis ) )
+			{
+				beamAxis = ik_handCorrectAxis[hand][1].Inverse() * beamAxis;
+
+				beamOrigin = beamOrigin * renderEntity.axis + renderEntity.origin;
+				beamAxis = beamAxis * renderEntity.axis;
+				beamOrigin += beamOff[hand] * beamAxis;
+			}
+			else
+			{
+				// we failed to get the joint for some reason, so just default to the weapon origin and axis
+				beamOrigin = weapon->viewWeaponOrigin;
+				beamAxis = weapon->viewWeaponAxis;
+			}
+		}
+	}
+
+	else // beam originates from the off hand, use the flashlight if in the hand;
+	{
+		if ( commonVr->currentFlashlightPosition == FLASH_HAND ) // flashlight is in the hand, so originate the beam slightly in front of the flashlight.
+		{
+			beamAxis = flashlight->GetRenderEntity()->axis;
+			beamOrigin = flashlight->GetRenderEntity()->origin + 6 * beamAxis[0];
+		}
+		else // just send it from the hand.
+		{
+			int hand = 1 - vr_weaponHand.GetInteger();
+			if ( animator.GetJointTransform( ik_hand[hand], gameLocal.time, beamOrigin, beamAxis ) )
+			{
+				beamAxis = ik_handCorrectAxis[hand][1].Inverse() * beamAxis;
+
+				beamOrigin = beamOrigin * renderEntity.axis + renderEntity.origin;
+				beamAxis = beamAxis * renderEntity.axis;
+				beamOrigin += beamOff[hand] * beamAxis;
+			}
+			else
+			{
+				// we failed to get the joint for some reason, so just default to the weapon origin and axis
+				beamOrigin = weapon->viewWeaponOrigin;
+				beamAxis = weapon->viewWeaponAxis;
+			}
+		}
+
+	}
+	return true;
+}
+
+
+/*
+==============
+Koz
+idPlayer::UpdateTeleportAim
+
+equation for parabola :	y = y0 + vy0 * t - .5 * g * t^2
+						x = x0 + vx0 * t
+==============
+*/
+
+
+
+void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVec3 p0, idVec3 v0, idVec3 a, float dist, int points, idVec3 hitLocation, idVec3 hitNormal, float timeToHit )
+{
+	// teleport target is a .md5 model
+	// model has two components:
+	// the aiming beam comprised of a ribbon with 23 segments/24  ( joints teleportBeamJoint[ 0 - 23 ] )
+	// and the telepad itself  ( joint teleportPadJoint )
+	// the origin of the model should be set to the starting point of the aiming beam
+	// teleportBeamJoint[0] should also be set to the origin
+	// teleportBeamJoint[1 - 22] trace the arc
+	// teleportBeamJoint[23] and teleportPadJoint should be set to the end position of the beam
+
+	int slTime = vr_teleportSlerpTime.GetFloat();
+
+	const float grav = 9.81f * 39.3701f;
+
+	const float parm0FrameDelt = 255 / (250 / (1000 / commonVr->hmdHz));
+	const float parm1FrameDelt = 1 / (250 / (1000 / commonVr->hmdHz));
+	
+	static float parm0Delt = parm0FrameDelt;
+	static float parm1Delt = parm1FrameDelt;
+
+	static float parm0Val = 255.0f;
+	static float parm1Val = 1.0f;
+		
+	float numPoints = vr_teleportMaxPoints.GetFloat();// 24;
+	float vel = vr_teleportVel.GetFloat();
+	float dist = vr_teleportDist.GetFloat();
+
+	trace_t traceResults;
+	idVec3 last = vec3_zero;
+	idVec3 next = vec3_zero;
+	idVec3 endPos = vec3_zero;
+
+	idVec3 up = idVec3( 0, 0, 1 );
+
+	idMat3 padAxis = mat3_identity;
+	float t = 0;
+		
+	idMat3 forward = mat3_identity;
+	float beamAngle = 0.0f;
+	float vx, vz = 0.0f;
+	float z0 = 0.0f;
+	float tDisX = 0.0f;
+	float zDelt, xDelt = 0.0f;
+
+	idVec2 st, en, df = vec2_zero;
+	idVec3 jpos = vec3_zero;
+
+	static bool isShowing = false;
+	static idVec3 beamOrigin = vec3_zero;
+	static idMat3 beamAxis = mat3_identity;
+	
+	aimValidForTeleport = false;
+	
+	if ( vr_teleport.GetInteger() == 0 || !GetTeleportBeamOrigin( beamOrigin, beamAxis ) )
+	{
+		aimValidForTeleport = false;
+		teleportTarget.GetEntity()->Hide();
+		return;
+	}
+	
+	forward = idAngles( 0.0f, beamAxis.ToAngles().yaw, 0.0f ).ToMat3();
+	teleportTarget.GetEntity()->SetAxis( forward );
+		
+	beamAngle = idMath::ClampFloat( -65.0f, 65.0f, beamAxis.ToAngles().pitch );
+
+	dist *= idMath::Cos( DEG2RAD( beamAngle ) ); // we want to be able to aim farther horizontally than vertically, so modify velocity and dist based on pitch.
+	vel *= idMath::Cos( DEG2RAD( beamAngle ) );
+
+	vx = vel * idMath::Cos( DEG2RAD( beamAngle ));
+	vz = vel * idMath::Sin( DEG2RAD( beamAngle ));
+
+	tDisX = dist / vel;
+	
+	last = beamOrigin;
+	z0 = beamOrigin.z;
+	
+	for ( int i = 0; i < numPoints; i++ )
+	{
+		t += tDisX;
+			
+		zDelt = z0 - vz * t - 0.5 * grav * ( t * t );
+		xDelt = vx * tDisX;
+
+		next = last + forward[0] * xDelt;
+		
+		if ( z0 - zDelt >= vr_teleportMaxDrop.GetFloat() )
+		{
+			zDelt = z0 - vr_teleportMaxDrop.GetFloat();
+			t = (idMath::Sqrt( (2 * grav * z0) - (2 * grav * zDelt) + (vz * vz) ) - vz) / grav;
+			xDelt = vx * t;
+			next = beamOrigin + forward[0] * xDelt;
+			i = numPoints;
+		}
+		
+		next.z = zDelt;
+		
+		padAxis = forward;
+		
+		if ( gameLocal.clip.TracePoint( traceResults, last, next, MASK_SHOT_RENDERMODEL, this ) )
+		{
+				
+			const char * hitMat;
+			
+			hitMat = traceResults.c.material->GetName();
+			float hitPitch = traceResults.c.normal.ToAngles().pitch;
+
+			// handrails really make aiming suck, so skip any non floor hits that consist of these materials
+			// really need to verify this doesn't break anything.
+
+			if ( idStr::FindText( hitMat, "base_trim" ) > -1 ||
+				idStr::FindText( hitMat, "swatch" ) > -1 ||
+				idStr::FindText( hitMat, "mchangar2" ) > -1 ||
+				idStr::FindText( hitMat, "mchangar3" ) > -1
+				)
+			{
+				
+				if ( hitPitch != -90 )
+				{
+
+					common->Printf( "Beam hit rejected: material %s\n", hitMat );
+					last = next;
+					endPos = last;
+					continue;
+				} 
+
+			}
+								
+			common->Printf( "Beam hit material = %s\n", traceResults.c.material->GetName() );
+			next = traceResults.c.point;
+			endPos = next;
+			
+			
+			//set the axis for the telepad to match the surface
+			static idAngles surfaceAngle = ang_zero;
+
+			static idQuat lastQ = idAngles( 0.0f, 0.0f, 90.0f ).ToQuat();
+			static idQuat nextQ = lastQ;
+			static idQuat lastSet = lastQ;
+
+			static idMat3 lastAxis = mat3_zero;
+			static idMat3 curAxis = mat3_zero;
+
+			static int slerpEnd = Sys_Milliseconds() - 500;
+			static idVec3 lastHitNormal = vec3_zero;
+
+			idVec3 hitNormal = traceResults.c.normal;
+
+			static idAngles muzzleAngle = ang_zero;
+			static idAngles diffAngle = ang_zero;
+			static float rollDiff = 0.0f;
+
+			surfaceAngle = traceResults.c.normal.ToAngles().Normalize180();
+			muzzleAngle = beamAxis.ToAngles().Normalize180();
+			muzzleAngle.roll = 0;
+
+			surfaceAngle.pitch *= -1;
+			surfaceAngle.yaw += 180;
+			surfaceAngle.Normalize180();
+
+			diffAngle = idAngles( 0, 0, muzzleAngle.yaw - surfaceAngle.yaw ).Normalize180();
+
+			rollDiff = diffAngle.roll * 1 / (90 / surfaceAngle.pitch);
+
+			surfaceAngle.roll = muzzleAngle.roll - rollDiff;
+			surfaceAngle.Normalize180();
+			curAxis = surfaceAngle.ToMat3();
+						
+			if ( hitNormal != lastHitNormal )
+			{
+
+				lastHitNormal = hitNormal;
+
+				if ( slerpEnd - Sys_Milliseconds() <= 0 )
+				{
+					lastQ = lastAxis.ToQuat();
+				}
+				else
+				{
+					lastQ = lastSet;
+				}
+
+				slerpEnd = Sys_Milliseconds() + slTime;
+				nextQ = curAxis.ToQuat();
+
+			}
+
+			if ( slerpEnd - Sys_Milliseconds() <= 0 )
+			{
+				padAxis = curAxis;
+			}
+			else
+			{
+				float qt = (float)((float)(slTime + 1.0f) - (float)(slerpEnd - Sys_Milliseconds())) / (float)slTime;
+				lastSet.Slerp( lastQ, nextQ, qt );
+				padAxis = lastSet.ToMat3();
+			}
+						
+			lastAxis = curAxis;
+			
+			if ( hitPitch >= -90.0f && hitPitch <= -45.0f )
+			{
+				
+				// pitch indicates a flat surface or <45 deg slope,
+				// check to see if a clip test passes at the location before
+				// checking reachability. 
+				// the clip test will prevent us from teleporting too close to walls.
+
+				static trace_t trace;
+				static idClipModel* clip;
+				static idMat3 clipAxis;
+				static idVec3 tracePt;
+				tracePt = traceResults.c.point;
+				
+				if ( fabs( hitPitch ) != 90 )
+				{
+					// this is a gross hack among grosser hacks so the clip test will pass on sloped floors.
+					tracePt.z += (pm_bboxwidth.GetFloat() / 1.9f );
+				}
+
+				clip = physicsObj.GetClipModel();
+				clipAxis = physicsObj.GetClipModel()->GetAxis();
+				
+				gameLocal.clip.Translation( trace, tracePt, tracePt, clip, clipAxis, CONTENTS_SOLID, NULL );
+
+				if ( trace.fraction < 1.0f )
+				{
+					aimValidForTeleport = false;
+					isShowing = false;
+				}
+								
+				else if ( CanReachPosition( traceResults.c.point ) )
+				{
+										
+					if ( !isShowing )
+					{
+						slerpEnd = Sys_Milliseconds() - 10;
+						padAxis = curAxis;
+						lastAxis = curAxis;
+					}
+
+					aimValidForTeleport = true;
+					teleportAimPoint = traceResults.c.point;
+					teleportTarget.GetEntity()->GetRenderEntity()->weaponDepthHack = false;
+					isShowing = true;
+					
+				}
+			}
+			
+			const idMat3 correct = idAngles( -90.0f, 0.0f, 90.0f ).ToMat3();
+			padAxis *= forward.Inverse();
+			padAxis = correct * padAxis;
+			
+			break;
+		}
+	
+		last = next;
+		endPos = last;
+	}
+		
+	teleportTarget.GetEntity()->SetOrigin( beamOrigin );
+
+	// an approximation of a parabola has been scanned for surface hits and the endpoint has been calculated.
+	// update the beam model by setting the joint positions along the beam to trace the arc.
+	// joint 0 should be set to the origin, and the origin of the model is set to the origin of the beam in worldspace.
+	
+	teleportTargetAnimator->SetJointPos( teleportBeamJoint[0], JOINTMOD_WORLD_OVERRIDE, vec3_zero ); // joint 0 always the origin.
+		
+	st = beamOrigin.ToVec2();
+	en = endPos.ToVec2();
+		
+	tDisX = ( (en - st).Length() / vx ) / 23.0f; // time for each segment of arc at velocity vx.
+	t = 0.0f;
+	
+	next = beamOrigin;
+	
+	idMat3 forwardInv = forward.Inverse();
+
+	for ( int i = 1; i < 23; i++ )
+	{
+		t += tDisX;
+	
+		zDelt = z0 - vz * t - 0.5f * grav * (t * t);
+		xDelt = vx * tDisX;
+
+		next = next + forward[0] * xDelt;
+		next.z = zDelt;
+
+		jpos = (next - beamOrigin) * forwardInv;
+		teleportTargetAnimator->SetJointPos( teleportBeamJoint[i], JOINTMOD_WORLD_OVERRIDE, jpos );
+	}
+		
+	jpos = (endPos - beamOrigin) * forwardInv;
+	teleportTargetAnimator->SetJointPos( teleportBeamJoint[23], JOINTMOD_WORLD_OVERRIDE, jpos );
+	teleportTargetAnimator->SetJointPos( teleportPadJoint, JOINTMOD_WORLD_OVERRIDE, jpos );
+
+	teleportTargetAnimator->SetJointAxis( teleportPadJoint, JOINTMOD_WORLD_OVERRIDE, padAxis );
+
+
+	if ( !aimValidForTeleport )
+	{
+		// this will show the beam, but hide the teleport target
+		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[0] = 0;
+		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[1] = 0;
+		isShowing = false;
+	}
+	else
+	{
+		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[0] = 255;
+		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[1] = 1;
+		teleportTarget.GetEntity()->Show();
+	}
+	
+	teleportTarget.GetEntity()->Present();
+	
+	return;
+}
+
 
 /*
 ==============
@@ -11561,6 +12047,7 @@ void idPlayer::Think()
 	
 	// stereo rendering laser sight that replaces the crosshair
 	UpdateLaserSight();
+	UpdateTeleportAim();
 
 	if ( game->isVR ) UpdateHeadingBeam(); // koz
 
@@ -13161,7 +13648,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 		motionRotation = motRot.ToQuat();
 		
 		SetHandIKPos( currentHand, weapOrigin, weapAxis, motionRotation, false );
-
+				
 		if ( PDAfixed ) return;
 
 		if ( currentWeaponEnum == WEAPON_PDA )
@@ -15126,6 +15613,7 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 	
 	// stereo rendering laser sight that replaces the crosshair
 	UpdateLaserSight();
+	UpdateTeleportAim();
 
 	if ( game->isVR ) UpdateHeadingBeam(); // koz
 		

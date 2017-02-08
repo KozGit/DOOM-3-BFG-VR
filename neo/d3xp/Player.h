@@ -308,8 +308,16 @@ public:
 	const idDeclSkin*		skinCrosshairDot;
 	const idDeclSkin*		skinCrosshairCircleDot;
 	const idDeclSkin*		skinCrosshairCross;
-	idVec3 aimPoint; // Carl: used for teleporting
-	float aimPointPitch;
+
+	idEntityPtr<idAnimatedEntity>	teleportTarget;
+	idAnimator*						teleportTargetAnimator;
+	
+	jointHandle_t			teleportBeamJoint[24];
+	jointHandle_t			teleportPadJoint;
+
+
+	idVec3 teleportAimPoint; // Carl: used for teleporting
+	float teleportAimPointPitch;
 	bool aimValidForTeleport;
 	
 	bool					PDAfixed; // koz has the PDA been fixed in space?
@@ -325,6 +333,7 @@ public:
 	//float					independentWeaponPitch; // deltas to provide aim independent of body/view orientation
 	//float					independentWeaponYaw;
 
+	
 	// Koz end
 	
 	bool					noclip;
@@ -377,9 +386,7 @@ public:
 	
 	int						flashlightBattery;
 	idEntityPtr<idWeapon>	flashlight;
-
-	idEntityPtr<idWeapon>	leftHand; // koz model for left hand for motion controls.
-		
+			
 	idEntityPtr<idWeapon>	weapon;
 	idMenuHandler_HUD* 		hudManager;
 	idMenuScreen_HUD* 		hud;
@@ -507,6 +514,8 @@ public:
 	void					UpdateLaserSight();
 
 	// Koz begin
+	void					UpdateTeleportAim();
+	bool					GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis);
 	void					UpdatePlayerSkinsPoses();
 	void					SetWeaponHandPose();
 	void					SetFlashHandPose();
@@ -521,6 +530,7 @@ public:
 	{
 		return physicsObj.IsCrouching();
 	}
+	void					InitTeleportTarget();
 	// Koz end
 		
 	// save games
