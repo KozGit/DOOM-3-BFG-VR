@@ -1456,13 +1456,13 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		cmdSystem->AppendCommandText( "bind SAY_RELOAD _impulse13\n" );
 		cmdSystem->AppendCommandText( "bind SAY_PDA _impulse19\n" );
 		//cmdSystem->AppendCommandText("bind SAY_FIST _impulse1\n");
-		cmdSystem->BufferCommandText( CMD_EXEC_NOW, "bind SAY_FIST _impulse1\n" );
+		cmdSystem->BufferCommandText( CMD_EXEC_NOW, "bind SAY_FIST _impulse26\n" );
 		cmdSystem->AppendCommandText( "bind SAY_CHAINSAW _impulse27\n" );
 		cmdSystem->AppendCommandText( "bind SAY_FLASHLIGHT _impulse16\n" );
-		cmdSystem->AppendCommandText( "bind SAY_GRABBER _impulse26\n" );
+		cmdSystem->AppendCommandText( "bind SAY_GRABBER _impulse1\n" );
 		cmdSystem->AppendCommandText( "bind SAY_PISTOL _impulse2\n" );
-		cmdSystem->AppendCommandText( "bind SAY_SHOTGUN _impulse4\n" );
-		cmdSystem->AppendCommandText( "bind SAY_SUPER_SHOTGUN _impulse11\n" );
+		cmdSystem->AppendCommandText( "bind SAY_SHOTGUN _impulse11\n" );
+		cmdSystem->AppendCommandText( "bind SAY_SUPER_SHOTGUN _impulse4\n" );
 		cmdSystem->AppendCommandText( "bind SAY_MACHINE_GUN _impulse5\n" );
 		cmdSystem->AppendCommandText( "bind SAY_CHAIN_GUN _impulse6\n" );
 		cmdSystem->AppendCommandText( "bind SAY_ROCKET_LAUNCHER _impulse9\n" );

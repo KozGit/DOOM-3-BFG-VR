@@ -77,8 +77,13 @@ static bindInfo_t keyboardBinds[] =
 	{ "                                ", "" }, // koz divider
 	{ "#str_02093", "" },						// HEADING
 	{ "#str_00100177", "_impulse0" },			// FISTS / GRABBER
+	{ "Fists", "_impulse26" },			// Carl: Fists
+	{ "Chainsaw", "_impulse27" },		// Carl: Chainsaw
+	{ "Grabber", "_impulse1" },			// Carl: Grabber
 	{ "#str_00100178", "_impulse2" },			// PISTOL
 	{ "#str_00100179", "_impulse3" },			// SHOTGUN / DOUBLE
+	{ "Single Shotgun", "_impulse11" },			// Carl: Shotgun
+	{ "Double Shotgun", "_impulse4" },			// Carl: Double
 	{ "#str_00100180", "_impulse5" },			// MACHINEGUN
 	{ "#str_00100181", "_impulse6" },			// CHAINGUN
 	{ "#str_00100182", "_impulse7" },			// GRENADES

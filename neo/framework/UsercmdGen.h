@@ -1,3 +1,4 @@
+
 /*
 ===========================================================================
 
@@ -51,17 +52,17 @@ const int BUTTON_CHATTING		= BIT( 7 );
 
 // usercmd_t->impulse commands
 const int IMPULSE_0				= 0;			// weap 0
-const int IMPULSE_1				= 1;			// weap 1 Carl: fists
+const int IMPULSE_1				= 1;			// weap 1 Carl: grabber
 const int IMPULSE_2				= 2;			// weap 2
 const int IMPULSE_3				= 3;			// weap 3
-const int IMPULSE_4				= 4;			// weap 4 Carl: single barreled shotgun
+const int IMPULSE_4				= 4;			// weap 4 Carl: double barreled shotgun
 const int IMPULSE_5				= 5;			// weap 5
 const int IMPULSE_6				= 6;			// weap 6
 const int IMPULSE_7				= 7;			// weap 7
 const int IMPULSE_8				= 8;			// weap 8
 const int IMPULSE_9				= 9;			// weap 9
 const int IMPULSE_10			= 10;			// weap 10
-const int IMPULSE_11			= 11;			// weap 11 Carl: double barreled shotgun
+const int IMPULSE_11			= 11;			// weap 11 Carl: single barreled shotgun
 const int IMPULSE_12			= 12;			// weap 12
 const int IMPULSE_13			= 13;			// weap reload
 const int IMPULSE_14			= 14;			// weap next
@@ -71,7 +72,7 @@ const int IMPULSE_18			= 18;			// center view
 const int IMPULSE_19			= 19;			// show PDA/SCORES
 const int IMPULSE_22			= 22;			// spectate
 const int IMPULSE_25			= 25;			// Envirosuit light
-const int IMPULSE_26			= 26;			// Carl: Grabber
+const int IMPULSE_26			= 26;			// Carl: Fists
 const int IMPULSE_27			= 27;			// Chainsaw
 const int IMPULSE_28			= 28;			// quick 0
 const int IMPULSE_29			= 29;			// quick 1
@@ -88,7 +89,7 @@ const int IMPULSE_37			= 37;			// toggle headingbeam
 const int IMPULSE_38			= 38;			// walk in place
 const int IMPULSE_39			= 39;			// freelook
 const int IMPULSE_40			= 40;			// system menu
-
+const int IMPULSE_41      = 41;     // click to move
 //koz end
 const int IMPULSE_42			= 42;			// Carl: Teleport
 
