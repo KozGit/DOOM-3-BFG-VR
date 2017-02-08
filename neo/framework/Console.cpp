@@ -31,6 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "ConsoleHistory.h"
 #include "../renderer/ResolutionScale.h"
 #include "Common_local.h"
+#include "d3xp/Game_local.h"
 
 // Koz begin
 
@@ -106,6 +107,7 @@ private:
 	// koz 
 	float				DrawVRWip( float y );
 	// koz end
+	void				DrawFlicksync( float& leftY, float& centerY );
 
 	void				DrawOverlayText( float& leftY, float& rightY, float& centerY );
 	void				DrawDebugGraphs();
@@ -328,6 +330,49 @@ float idConsoleLocal::DrawMemoryUsage( float y )
 	return y;
 }
 
+
+/*
+==================
+idConsoleLocal::DrawFlicksync
+==================
+*/
+void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
+{
+	if (gameLocal.inCinematic)
+		centerY += BIGCHAR_HEIGHT * 3;
+	if (leftY < centerY)
+		leftY = centerY;
+
+	const char* s = va("SCORE: %i", FlickSync_Score);
+	int w = strlen(s) * BIGCHAR_WIDTH;
+	renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, colorWhite, true);
+	centerY += BIGCHAR_HEIGHT + 4;
+
+	if (FlickSync_CueCards > 0)
+	{
+		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, va("Cue cards: %i", FlickSync_CueCards), colorWhite, true);
+		leftY += SMALLCHAR_HEIGHT + 4;
+	}
+
+	if (!gameLocal.inCinematic)
+		return;
+
+	if (FlickSync_CorrectInARow > 0)
+	{
+		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, va("Correct in a row: %i", FlickSync_CorrectInARow), colorWhite, true);
+		leftY += SMALLCHAR_HEIGHT + 4;
+	}
+	else
+	{
+		idVec4 color;
+		if (FlickSync_FailsInARow > 0)
+			color = colorRed;
+		else
+			color = colorWhite;
+		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, va("Lives: %i", 3 - FlickSync_FailsInARow), color, true);
+		leftY += SMALLCHAR_HEIGHT + 4;
+	}
+}
 
 /*
 ==================
@@ -1459,6 +1504,10 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 		righty = DrawVRWip( righty );
 	}
 	// koz end
+	if ( vr_flickCharacter.GetInteger() )
+	{
+		DrawFlicksync( lefty, centery );
+	}
 
 	DrawOverlayText( lefty, righty, centery );
 	DrawDebugGraphs();

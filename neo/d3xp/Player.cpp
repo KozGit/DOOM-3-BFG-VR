@@ -4232,17 +4232,22 @@ void idPlayer::DrawHUD( idMenuHandler_HUD* _hudManager )
 {
 	SCOPED_PROFILE_EVENT( "idPlayer::DrawHUD" );
 	// Koz begin
-	if ( game->isVR && vr_hudType.GetInteger() == VR_HUD_NONE )
+	if ( game->isVR && vr_hudType.GetInteger() == VR_HUD_NONE && !vr_flickCharacter.GetInteger() )
 	{
 		return;
 	}
 	// Koz end
-	
-	if( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || !g_showHud.GetBool() )
+
+	if( !weapon.GetEntity() )
 	{
 		return;
 	}
 	
+	if ( ( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || !g_showHud.GetBool() ) && !vr_flickCharacter.GetInteger() )
+	{
+		return;
+	}
+
 	if( common->IsMultiplayer() )
 	{
 		UpdateChattingHud();
@@ -4366,7 +4371,12 @@ void idPlayer::DrawHUDVR( idMenuHandler_HUD* _hudManager )
 	renderSystem->CaptureRenderToImage( "_crosshairImage", true );
 	
 
-	if ( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || vr_hudType.GetInteger() == VR_HUD_NONE )
+	if (!weapon.GetEntity())
+	{
+		return;
+	}
+
+	if ((influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || vr_hudType.GetInteger() == VR_HUD_NONE) && !vr_flickCharacter.GetInteger())
 	{
 		return;
 	}
@@ -4422,7 +4432,7 @@ void idPlayer::EnterCinematic()
 	StopSound( SND_CHANNEL_PDA_AUDIO, false );
 	StopSound( SND_CHANNEL_PDA_VIDEO, false );
 	
-	if( hudManager )
+	if( hudManager && !vr_flickCharacter.GetInteger() )
 	{
 		hudManager->SetRadioMessage( false );
 	}
@@ -4460,6 +4470,25 @@ void idPlayer::EnterCinematic()
 	AI_TELEPORT		= false;
 	AI_TURN_LEFT	= false;
 	AI_TURN_RIGHT	= false;
+
+	if( vr_flickCharacter.GetInteger() )
+	{
+		HideTip();
+		if( hud )
+		{
+			if( objectiveUp )
+			{
+				hud->HideObjective( false );
+				objectiveUp = false;
+			}
+			hud->SetCursorState(this, CURSOR_TALK, 0);
+			hud->SetCursorState(this, CURSOR_IN_COMBAT, 0);
+			hud->SetCursorState(this, CURSOR_ITEM, 0);
+			hud->SetCursorState(this, CURSOR_GRABBER, 0);
+			hud->SetCursorState(this, CURSOR_NONE, 0);
+			hud->UpdateCursorState();
+		}
+	}
 }
 
 /*
@@ -11716,7 +11745,11 @@ void idPlayer::UpdateVrHud()
 	}
 	else
 	{
-		hudEntity.allowSurfaceInViewID = entityNumber + 1;
+		// always show HUD if in flicksync
+		if ( vr_flickCharacter.GetInteger() )
+			hudEntity.allowSurfaceInViewID = 0;
+		else
+			hudEntity.allowSurfaceInViewID = entityNumber + 1;
 		
 		if ( vr_hudPosLock.GetInteger() == 1 ) // hud in fixed position in space
 		{

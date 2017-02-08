@@ -141,6 +141,9 @@ void idMenuScreen_Shell_Dev::SetupDevOptions()
 	devOptions.Append( devOption_t( "game/le_exis2", "Exis 2" ) );
 	devOptions.Append( devOption_t( "game/le_hell", "Hell" ) );
 	devOptions.Append( devOption_t( "game/le_hell_post", "Hell Post" ) );
+	//devOptions.Append( devOption_t( NULL, "-Test Maps-" ) );
+	//devOptions.Append( devOption_t( "game/pdas", "PDAs" ) );
+	//devOptions.Append( devOption_t( "testmaps/test_box", "Box" ) );
 	devOptions.Append( devOption_t( NULL, "-Multiplayer Maps-" ) );
 	devOptions.Append( devOption_t( "game/mp/d3dm1", "DM Tomiko Reactor" ) );
 	devOptions.Append( devOption_t( "game/mp/d3dm2", "DM Delta Labs" ) );
@@ -155,7 +158,7 @@ void idMenuScreen_Shell_Dev::SetupDevOptions()
 	devOptions.Append( devOption_t( "game/mp/d3ctf2", "CTF PumpStation" ) );
 	devOptions.Append( devOption_t( "game/mp/d3ctf3", "CTF Power-Up Lab" ) );
 	devOptions.Append( devOption_t( "game/mp/d3ctf4", "CTF Bio-Sec HQ" ) );
-		
+
 	idList< idList< idStr, TAG_IDLIB_LIST_MENU >, TAG_IDLIB_LIST_MENU > menuOptions;
 	
 	for( int i = 0; i < devOptions.Num(); ++i )

@@ -29,33 +29,38 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-#ifndef __VOICE_H__
-#define __VOICE_H__
+#ifndef __FLICKSYNC_H__
+#define __FLICKSYNC_H__
 
-class iVoice
+typedef enum
 {
-public:
-
-	iVoice();
-
-	void		VoiceInit(void);
-	void		VoiceShutdown(void);
-	void		Speed(int talkingSpeed);
-	void		Say(VERIFY_FORMAT_STRING const char* fmt, ...);
-	void		HearWord(const char *w, int confidence);
-	void		HearWord(const wchar_t *w, int confidence);
-	void		Event(WPARAM wParam, LPARAM lParam);
-	bool		GetTalkButton();
-	bool		GetSayButton(int j);
-
-	void		AddFlickSyncLine(const char* line);
-	void		AddFlickSyncLine(const wchar_t* line);
-	//---------------------------
-private:
-	void		AddWord(const char* word);
-	void		AddWord(const wchar_t* word);
+	FLICK_NONE = 0,
+	FLICK_BETRUGER = 1,	 // Dr. Malcom Betruger
+	FLICK_SWANN = 2,     // Councillor Elliot Swann
+	FLICK_CAMPBELL = 3,  // Swann's bodyguard, Jack Campbell
+	FLICK_DARKSTAR = 4,  // Darkstar pilot
+	FLICK_TOWER = 5,     // Air traffic controller
+	FLICK_RECEPTION = 6, // Receptionist who gives you the PDA
+	FLICK_KELLY = 7,     // Sergeant Thomas Kelly
+	FLICK_BROOKS = 8,		 // Mars Sec underground who gives you equipment
+	FLICK_MARK_RYAN = 9, // Guarding airlock to decommissioned comm facility
+	FLICK_ISHII = 10,     // Jonathon Ishii in decomissioned com facility
+	FLICK_ROLAND = 11,   // Roland, hiding in the ceiling in Mars City
+	FLICK_MCNEIL = 12,   // Dr. Elizabeth McNeil from Resurrection of Evil
+	FLICK_MARINE_PDA = 13, // Marine with PDA at start of RoE
+	FLICK_MARINE_TORCH = 14, // Marine with Torch (and possibly others) at start of RoE
+	FLICK_POINT = 15,    // Marine with explosives at start of RoE
 };
 
+bool FlickSync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length );
+void FlickSync_AddVoiceLines();
+void FlickSync_HearLine( const char* line, int confidence, uint64 startTime, uint32 length );
 
+extern idCVar vr_flickCharacter;
+
+extern int FlickSync_Score;
+extern int FlickSync_CueCards;
+extern int FlickSync_CorrectInARow;
+extern int FlickSync_FailsInARow;
 
 #endif
