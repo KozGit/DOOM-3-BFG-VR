@@ -49,7 +49,7 @@ Reachability_Write
 */
 bool Reachability_Write( idFile* fp, idReachability* reach )
 {
-	fp->WriteFloatString( "\t\t%d %d (%f %f %f) (%f %f %f) %d %d",
+	fp->WriteFloatString( "%d %d (%f %f %f) (%f %f %f) %d %d",
 						  ( int ) reach->travelType, ( int ) reach->toAreaNum, reach->start.x, reach->start.y, reach->start.z,
 						  reach->end.x, reach->end.y, reach->end.z, reach->edgeNum, ( int ) reach->travelTime );
 	return true;
@@ -105,13 +105,13 @@ bool Reachability_Special_Write( idFile* fp, idReachability_Special* reach )
 	int i;
 	const idKeyValue* keyValue;
 	
-	fp->WriteFloatString( "\n\t\t{\n" );
+	fp->WriteFloatString( "\n{\n" );
 	for( i = 0; i < reach->dict.GetNumKeyVals(); i++ )
 	{
 		keyValue = reach->dict.GetKeyVal( i );
-		fp->WriteFloatString( "\t\t\t\"%s\" \"%s\"\n", keyValue->GetKey().c_str(), keyValue->GetValue().c_str() );
+		fp->WriteFloatString( "\"%s\" \"%s\"\n", keyValue->GetKey().c_str(), keyValue->GetValue().c_str() );
 	}
-	fp->WriteFloatString( "\t\t}\n" );
+	fp->WriteFloatString( "}\n" );
 	
 	return true;
 }
@@ -816,64 +816,64 @@ bool idAASFileLocal::Write( const idStr& fileName, unsigned int mapFileCRC )
 	settings.WriteToFile( aasFile );
 	
 	// write out planes
-	aasFile->WriteFloatString( "planes %d {\n", planeList.Num() );
+	aasFile->WriteFloatString( "planes %d{\n", planeList.Num() );
 	for( i = 0; i < planeList.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %f %f %f %f )\n", i,
+		aasFile->WriteFloatString( "%d(%f %f %f %f)\n", i,
 								   planeList[i].Normal().x, planeList[i].Normal().y, planeList[i].Normal().z, planeList[i].Dist() );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out vertices
-	aasFile->WriteFloatString( "vertices %d {\n", vertices.Num() );
+	aasFile->WriteFloatString( "vertices %d{\n", vertices.Num() );
 	for( i = 0; i < vertices.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %f %f %f )\n", i, vertices[i].x, vertices[i].y, vertices[i].z );
+		aasFile->WriteFloatString( "%d(%f %f %f)\n", i, vertices[i].x, vertices[i].y, vertices[i].z );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out edges
-	aasFile->WriteFloatString( "edges %d {\n", edges.Num() );
+	aasFile->WriteFloatString( "edges %d{\n", edges.Num() );
 	for( i = 0; i < edges.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d %d )\n", i, edges[i].vertexNum[0], edges[i].vertexNum[1] );
+		aasFile->WriteFloatString( "%d(%d %d)\n", i, edges[i].vertexNum[0], edges[i].vertexNum[1] );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out edgeIndex
-	aasFile->WriteFloatString( "edgeIndex %d {\n", edgeIndex.Num() );
+	aasFile->WriteFloatString( "edgeIndex %d{\n", edgeIndex.Num() );
 	for( i = 0; i < edgeIndex.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d )\n", i, edgeIndex[i] );
+		aasFile->WriteFloatString( "%d(%d)\n", i, edgeIndex[i] );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out faces
-	aasFile->WriteFloatString( "faces %d {\n", faces.Num() );
+	aasFile->WriteFloatString( "faces %d{\n", faces.Num() );
 	for( i = 0; i < faces.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d %d %d %d %d %d )\n", i, faces[i].planeNum, faces[i].flags,
+		aasFile->WriteFloatString( "%d(%d %d %d %d %d %d)\n", i, faces[i].planeNum, faces[i].flags,
 								   faces[i].areas[0], faces[i].areas[1], faces[i].firstEdge, faces[i].numEdges );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out faceIndex
-	aasFile->WriteFloatString( "faceIndex %d {\n", faceIndex.Num() );
+	aasFile->WriteFloatString( "faceIndex %d{\n", faceIndex.Num() );
 	for( i = 0; i < faceIndex.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d )\n", i, faceIndex[i] );
+		aasFile->WriteFloatString( "%d(%d)\n", i, faceIndex[i] );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out areas
-	aasFile->WriteFloatString( "areas %d {\n", areas.Num() );
+	aasFile->WriteFloatString( "areas %d{\n", areas.Num() );
 	for( i = 0; i < areas.Num(); i++ )
 	{
 		for( num = 0, reach = areas[i].reach; reach; reach = reach->next )
 		{
 			num++;
 		}
-		aasFile->WriteFloatString( "\t%d ( %d %d %d %d %d %d ) %d {\n", i, areas[i].flags, areas[i].contents,
+		aasFile->WriteFloatString( "%d(%d %d %d %d %d %d)%d{\n", i, areas[i].flags, areas[i].contents,
 								   areas[i].firstFace, areas[i].numFaces, areas[i].cluster, areas[i].clusterAreaNum, num );
 		for( reach = areas[i].reach; reach; reach = reach->next )
 		{
@@ -886,40 +886,40 @@ bool idAASFileLocal::Write( const idStr& fileName, unsigned int mapFileCRC )
 			}
 			aasFile->WriteFloatString( "\n" );
 		}
-		aasFile->WriteFloatString( "\t}\n" );
+		aasFile->WriteFloatString( "}\n" );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out nodes
-	aasFile->WriteFloatString( "nodes %d {\n", nodes.Num() );
+	aasFile->WriteFloatString( "nodes %d{\n", nodes.Num() );
 	for( i = 0; i < nodes.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d %d %d )\n", i, nodes[i].planeNum, nodes[i].children[0], nodes[i].children[1] );
+		aasFile->WriteFloatString( "%d(%d %d %d)\n", i, nodes[i].planeNum, nodes[i].children[0], nodes[i].children[1] );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out portals
-	aasFile->WriteFloatString( "portals %d {\n", portals.Num() );
+	aasFile->WriteFloatString( "portals %d{\n", portals.Num() );
 	for( i = 0; i < portals.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d %d %d %d %d )\n", i, portals[i].areaNum, portals[i].clusters[0],
+		aasFile->WriteFloatString( "%d(%d %d %d %d %d)\n", i, portals[i].areaNum, portals[i].clusters[0],
 								   portals[i].clusters[1], portals[i].clusterAreaNum[0], portals[i].clusterAreaNum[1] );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out portalIndex
-	aasFile->WriteFloatString( "portalIndex %d {\n", portalIndex.Num() );
+	aasFile->WriteFloatString( "portalIndex %d{\n", portalIndex.Num() );
 	for( i = 0; i < portalIndex.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d )\n", i, portalIndex[i] );
+		aasFile->WriteFloatString( "%d(%d)\n", i, portalIndex[i] );
 	}
 	aasFile->WriteFloatString( "}\n" );
 	
 	// write out clusters
-	aasFile->WriteFloatString( "clusters %d {\n", clusters.Num() );
+	aasFile->WriteFloatString( "clusters %d{\n", clusters.Num() );
 	for( i = 0; i < clusters.Num(); i++ )
 	{
-		aasFile->WriteFloatString( "\t%d ( %d %d %d %d )\n", i, clusters[i].numAreas, clusters[i].numReachableAreas,
+		aasFile->WriteFloatString( "%d(%d %d %d %d)\n", i, clusters[i].numAreas, clusters[i].numReachableAreas,
 								   clusters[i].firstPortal, clusters[i].numPortals );
 	}
 	aasFile->WriteFloatString( "}\n" );
