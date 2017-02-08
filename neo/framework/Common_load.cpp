@@ -412,6 +412,8 @@ void idCommonLocal::ExecuteMapChange()
 		return;
 	}
 	
+	commonVr->isLoading = true;
+
 	// Clear all dialogs before beginning the load
 	common->Dialog().ClearDialogs( true );
 	
@@ -424,6 +426,7 @@ void idCommonLocal::ExecuteMapChange()
 	if( matchParameters.numSlots <= 0 )
 	{
 		idLib::Warning( "numSlots <= 0 in ExecuteMapChange" );
+		commonVr->isLoading = false;
 		return;
 	}
 	
@@ -768,10 +771,13 @@ void idCommonLocal::ExecuteMapChange()
 	commonVr->VR_GAME_PAUSED = false;
 	commonVr->pdaToggleTime = Sys_Milliseconds();
 	commonVr->wasLoaded = true;
+	commonVr->playerDead = false;
 		
 	vr_headingBeamMode.SetModified();
 	vr_weaponSight.SetModified();
 	// koz end
+
+  commonVr->isLoading = false;
 
 }
 

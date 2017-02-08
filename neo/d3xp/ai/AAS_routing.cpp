@@ -39,6 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 #define MAX_ROUTING_CACHE_MEMORY	(2*1024*1024)
 
 #define LEDGE_TRAVELTIME_PANALTY	250
+#define LEDGE_TRAVELTIME_PENALTY_PLAYER	10
 
 /*
 ============
@@ -925,7 +926,10 @@ void idAASLocal::UpdateAreaRoutingCache( idRoutingCache* areaCache ) const
 					// avoid areas near ledges
 					if( file->GetArea( nextAreaNum ).flags & AREA_LEDGE )
 					{
-						nextUpdate->tmpTravelTime += LEDGE_TRAVELTIME_PANALTY;
+						if (GetSettings()->playerFlood)
+							nextUpdate->tmpTravelTime += LEDGE_TRAVELTIME_PENALTY_PLAYER;
+						else
+							nextUpdate->tmpTravelTime += LEDGE_TRAVELTIME_PANALTY;
 					}
 				}
 				
@@ -1507,7 +1511,10 @@ bool idAASLocal::FindNearestGoal( aasGoal_t& goal, int areaNum, const idVec3 ori
 				// avoid areas near ledges
 				if( file->GetArea( nextAreaNum ).flags & AREA_LEDGE )
 				{
-					nextUpdate->tmpTravelTime += LEDGE_TRAVELTIME_PANALTY;
+					if (GetSettings()->playerFlood)
+						nextUpdate->tmpTravelTime += LEDGE_TRAVELTIME_PENALTY_PLAYER;
+					else
+						nextUpdate->tmpTravelTime += LEDGE_TRAVELTIME_PANALTY;
 				}
 			}
 			

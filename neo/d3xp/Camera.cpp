@@ -663,8 +663,163 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		// Maybe I should redefine the camera animation files to 
 		// provide more coherent camera transitions in cutscenes?
 
-		view->viewaxis = camFrame2[0].q.ToMat3();
-		view->vieworg = camFrame2[0].t + offset;
+		// Flicksync camera
+		idEntity* ent = NULL;
+		static idEntity* hiddenEnt = NULL;
+		switch (vr_flickCharacter.GetInteger())
+		{
+		case FLICK_BETRUGER:
+			ent = gameLocal.FindEntity("marscity_cinematic_betruger_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("marscity_cinematic_betruger_speech");
+			if (!ent)
+				ent = gameLocal.FindEntity("delta3_betruger_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("delta3_betruger_2");
+			if (!ent)
+				ent = gameLocal.FindEntity("delta4_betruger_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("monorail_raisecommando_betruger_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("char_betruger_2");
+			if (!ent)
+				ent = gameLocal.FindEntity("char_betruger_1");
+			// maledict_death_skull_1
+			if (!ent)
+				ent = gameLocal.FindEntity("maledict_intro_cinematic_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("jay_hell_maledict_intro_cinematic_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("monster_boss_d3xp_maledict_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("monster_boss_maledict_cinematic_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("monster_boss_maledict_cinematic_2");
+			if (!ent)
+				ent = gameLocal.FindEntity("maledict_death_cinematic_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("maledict_death_cinematic_flyin");
+			if (!ent)
+				ent = gameLocal.FindEntity("maledict_death_cinematic_death");
+			break;
+		case FLICK_TOWER:
+			ent = gameLocal.FindEntity("marscity_sec_window_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("erebus1_intro_scientist_1");
+			break;
+		case FLICK_SWANN:
+			ent = gameLocal.FindEntity("marscity_cinematic_swann_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("marscity_cinematic_swann_speech");
+			if (!ent)
+				ent = gameLocal.FindEntity("marscity_walking_swann_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("admin_overhear_swann_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("admin_overhear_swann_2");
+			if (!ent)
+				ent = gameLocal.FindEntity("enpro_swann_2");
+			if (!ent)
+				ent = gameLocal.FindEntity("enpro_swann_3");
+			if (!ent)
+				ent = gameLocal.FindEntity("char_swann_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("delta5_wounded_swann_1");
+			break;
+		case FLICK_CAMPBELL:
+			ent = gameLocal.FindEntity("marscity_cinematic_campbell_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("marscity_cinematic_campbell_2");
+			if (!ent)
+				ent = gameLocal.FindEntity("char_campbell_bfgcase_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("admin_overhear_campbell_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("admin_overhear_campbell_2");
+			if (!ent)
+				ent = gameLocal.FindEntity("admin_overhear_campbell_3");
+			if (!ent)
+				ent = gameLocal.FindEntity("cpu1_camphunt_campbell_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("cpu1_wounded_campbell_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("enpro_campbell_2");
+			if (!ent)
+				ent = gameLocal.FindEntity("enpro_campbell_3");
+			if (!ent)
+				ent = gameLocal.FindEntity("char_campbell_bfg_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("char_campbell_bfg_2");
+			break;
+			// 
+		case FLICK_RECEPTION:
+			ent = gameLocal.FindEntity("marscity_receptionist_full");
+			break;
+		case FLICK_KELLY:
+			ent = gameLocal.FindEntity("marscity_cinematic_sarge_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("marscity_cinematic_sarge2_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("sarge_secondary");
+			break;
+		case FLICK_ISHII:
+			ent = gameLocal.FindEntity("underground_crazy_sci_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("underground_crazy_zombie_1");
+			break;
+		case FLICK_MCNEIL:
+			ent = gameLocal.FindEntity("erebus1_intro_mcneil_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("phobos2_cinematic_mcneil_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("phobos2_mcneil_typing_1");
+			// phobos2_mcneil_chair_cine_1
+			break;
+		case FLICK_MARINE_PDA:
+			ent = gameLocal.FindEntity("erebus1_intro_marine1_1");
+			break;
+		case FLICK_MARINE_TORCH:
+			ent = gameLocal.FindEntity("erebus1_intro_marine2_1");
+			break;
+		case FLICK_POINT:
+			ent = gameLocal.FindEntity("erebus1_intro_detonate_1");
+			break;
+		}
+		// only use character if it's not hidden, and it's within range of current camera
+		if ( ent && ( ent == hiddenEnt || !ent->IsHidden() ) && ( ent->GetPhysics()->GetOrigin() - view->vieworg ).LengthSqr() <= 400*400 )
+		{
+			idVec3 camPos = view->vieworg;
+			if (ent->GetPhysics()->IsType(idPhysics_Actor::Type))
+			{
+				idActor* actor = static_cast<idActor*>(ent);
+				actor->GetViewPos(view->vieworg, view->viewaxis);
+				if ((view->vieworg - actor->GetPhysics()->GetOrigin()).z <= 32)
+					view->vieworg.z = actor->GetPhysics()->GetOrigin().z + pm_normalviewheight.GetFloat();
+				idEntity* head = actor->GetHeadEntity();
+				if (head)
+				{
+					//head->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1; //view->viewID;
+					head->GetRenderEntity()->allowSurfaceInViewID = 666;
+					view->vieworg = head->GetPhysics()->GetOrigin() + idVec3(0, 0, 10);
+				}
+				if ( vr_playerBodyMode.GetInteger() > 0 || !head )
+				{
+					//actor->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1; //view->viewID;
+					actor->GetRenderEntity()->allowSurfaceInViewID = 666;
+				}
+			}
+			else
+			{
+				view->viewaxis = ent->GetPhysics()->GetAxis();
+				view->vieworg = ent->GetPhysics()->GetOrigin();
+			}
+			hiddenEnt = ent;			//ent->Hide();
+		}
+		else
+		{
+			view->viewaxis = camFrame2[0].q.ToMat3();
+			view->vieworg = camFrame2[0].t + offset;
+		}
 
 		// remove camera pitch & roll, this is uncomfortable in VR.
 

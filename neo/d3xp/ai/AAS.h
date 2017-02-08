@@ -137,11 +137,13 @@ public:
 	// Returns true if one can fly along a straight line from the origin to the goal origin.
 	virtual bool				FlyPathValid( int areaNum, const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin, int travelFlags, idVec3& endPos, int& endAreaNum ) const = 0;
 	// Show the walk path from the origin towards the area.
-	virtual void				ShowWalkPath( const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin ) const = 0;
+	virtual void				ShowWalkPath( const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin, int travelFlags = TFL_WALK | TFL_AIR ) const = 0;
 	// Show the fly path from the origin towards the area.
 	virtual void				ShowFlyPath( const idVec3& origin, int goalAreaNum, const idVec3& goalOrigin ) const = 0;
 	// Find the nearest goal which satisfies the callback.
 	virtual bool				FindNearestGoal( aasGoal_t& goal, int areaNum, const idVec3 origin, const idVec3& target, int travelFlags, aasObstacle_t* obstacles, int numObstacles, idAASCallback& callback ) const = 0;
+	// Carl: Show the area
+	virtual void				DrawArea( int areaNum ) const = 0;
 };
 
 #endif /* !__AAS_H__ */

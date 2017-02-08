@@ -377,6 +377,7 @@ void idCommonLocal::AddStartupCommands()
 		// directly as tokenized so nothing gets screwed
 		cmdSystem->BufferCommandArgs( CMD_EXEC_APPEND, com_consoleLines[i] );
 	}
+	
 }
 
 /*
@@ -1455,13 +1456,13 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		cmdSystem->AppendCommandText( "bind SAY_RELOAD _impulse13\n" );
 		cmdSystem->AppendCommandText( "bind SAY_PDA _impulse19\n" );
 		//cmdSystem->AppendCommandText("bind SAY_FIST _impulse1\n");
-		cmdSystem->BufferCommandText( CMD_EXEC_NOW, "bind SAY_FIST _impulse1\n" );
+		cmdSystem->BufferCommandText( CMD_EXEC_NOW, "bind SAY_FIST _impulse26\n" );
 		cmdSystem->AppendCommandText( "bind SAY_CHAINSAW _impulse27\n" );
 		cmdSystem->AppendCommandText( "bind SAY_FLASHLIGHT _impulse16\n" );
-		cmdSystem->AppendCommandText( "bind SAY_GRABBER _impulse26\n" );
+		cmdSystem->AppendCommandText( "bind SAY_GRABBER _impulse1\n" );
 		cmdSystem->AppendCommandText( "bind SAY_PISTOL _impulse2\n" );
-		cmdSystem->AppendCommandText( "bind SAY_SHOTGUN _impulse4\n" );
-		cmdSystem->AppendCommandText( "bind SAY_SUPER_SHOTGUN _impulse11\n" );
+		cmdSystem->AppendCommandText( "bind SAY_SHOTGUN _impulse11\n" );
+		cmdSystem->AppendCommandText( "bind SAY_SUPER_SHOTGUN _impulse4\n" );
 		cmdSystem->AppendCommandText( "bind SAY_MACHINE_GUN _impulse5\n" );
 		cmdSystem->AppendCommandText( "bind SAY_CHAIN_GUN _impulse6\n" );
 		cmdSystem->AppendCommandText( "bind SAY_ROCKET_LAUNCHER _impulse9\n" );
@@ -1471,7 +1472,16 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		cmdSystem->AppendCommandText( "bind SAY_SOUL_CUBE _impulse12\n" );
 		cmdSystem->AppendCommandText( "bind SAY_ARTIFACT _impulse12\n" );
 		
+		//koz check for mod files:
+		findFile_t found = fileSystem->FindFile( "guis\\lookforward.tga" );
 		
+		if ( found == FIND_NO )
+		{
+			common->Printf( "Found file = %d\n", found );
+			common->Error( "Unable to locate mod files in 'Fully Possessed' mod directory.\nThe 'Fully Possessed' directory should exist in same directory as the Doom 3 executable.\n" );
+		}
+
+
 		StartMenu( true );
 
 		whiteMaterial = declManager->FindMaterial( "_white" );

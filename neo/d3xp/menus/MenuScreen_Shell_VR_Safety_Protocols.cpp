@@ -378,8 +378,8 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 	switch ( fieldIndex ) {
 		case SAFETY_PROTOCOLS_FIELD_TELEPORTATION:
 		{
-			static const int numValues = 3;
-			static const int values[numValues] = { 0, 1, 2 };
+			static const int numValues = 5;
+			static const int values[numValues] = { 0, 1, 2, 3, 4 };
 			vr_teleport.SetInteger( AdjustOption( vr_teleport.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
@@ -514,7 +514,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR
 	
 		case SAFETY_PROTOCOLS_FIELD_TELEPORTATION:
 		{
-			const char* names[] = { "Disabled", "Walk Style", "Teleport Style" };
+			const char* names[] = { "Disabled", "Gun Sight", "Right Hand", "Left Hand", "Head" };
 			return names[vr_teleport.GetInteger()];
 		}
 

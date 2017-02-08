@@ -132,6 +132,7 @@ enum rootMenuCmds_t
 	ROOT_CMD_DEV,
 	ROOT_CMD_CAMPAIGN,
 	ROOT_CMD_MULTIPLAYER,
+	ROOT_CMD_FLICKSYNC,
 	ROOT_CMD_PLAYSTATION,
 	ROOT_CMD_CREDITS
 };
@@ -528,6 +529,11 @@ bool idMenuScreen_Shell_Root::HandleAction( idWidgetAction& action, const idWidg
 				case ROOT_CMD_CAMPAIGN:
 				{
 					menuData->SetNextScreen( SHELL_AREA_CAMPAIGN, MENU_TRANSITION_SIMPLE );
+					break;
+				}
+				case ROOT_CMD_FLICKSYNC:
+				{
+					menuData->SetNextScreen(SHELL_AREA_VR_FLICKSYNC, MENU_TRANSITION_SIMPLE);
 					break;
 				}
 				case ROOT_CMD_MULTIPLAYER:
