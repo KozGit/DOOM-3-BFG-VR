@@ -1449,7 +1449,8 @@ idMenuHandler_Shell::StartGame
 */
 void idMenuHandler_Shell::StartGame( int index )
 {
-	if( index == 0 )
+	commonVr->showingIntroVideo = false;
+	if (index == 0)
 	{
 		cmdSystem->AppendCommandText( va( "map %s %d\n", "game/mars_city1", 0 ) );
 	}
@@ -1575,7 +1576,7 @@ void idMenuHandler_Shell::ShowDoomIntro()
 										thisObject->GetSprite()->SetVisible( false );
 										if( nextIndex >= NUM_DOOM_INTRO_LINES )
 										{
-											shell->StartGame( 0 );
+											shell->StartGame(0);
 										}
 									}
 								}
@@ -1799,7 +1800,7 @@ void idMenuHandler_Shell::ShowROEIntro()
 														}
 														else
 														{
-															shell->StartGame( 1 );
+															shell->StartGame(1);
 															return idSWFScriptVar();
 														}
 													}
