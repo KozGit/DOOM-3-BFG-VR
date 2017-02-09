@@ -365,11 +365,36 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 	else
 	{
 		idVec4 color;
-		if (FlickSync_FailsInARow > 0)
+		if (FlickSync_FailsInARow > 0 || Flicksync_GameOver)
 			color = colorRed;
 		else
 			color = colorWhite;
-		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, va("Lives: %i", 3 - FlickSync_FailsInARow), color, true);
+		if (Flicksync_GameOver)
+		{
+			const char* s = "GAME OVER";
+			int w = strlen(s) * BIGCHAR_WIDTH;
+			renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, color, true);
+			centerY += BIGCHAR_HEIGHT + 4;
+		}
+		else if (FlickSync_FailsInARow == 2)
+		{
+			const char* s = "FINAL WARNING";
+			int w = strlen(s) * BIGCHAR_WIDTH;
+			renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, color, true);
+			centerY += BIGCHAR_HEIGHT + 4;
+		}
+		else
+		{
+			renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, va("Lives: %i", 3 - FlickSync_FailsInARow), color, true);
+			leftY += SMALLCHAR_HEIGHT + 4;
+		}
+	}
+
+	if ( Flicksync_CueCardActive )
+	{
+		if ( leftY < centerY )
+			leftY = centerY;
+		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, Flicksync_CueCardText.c_str(), colorWhite, true);
 		leftY += SMALLCHAR_HEIGHT + 4;
 	}
 }

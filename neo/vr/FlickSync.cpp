@@ -5,14 +5,19 @@
 #include "FlickSync.h"
 #include "Voice.h"
 
-idCVar vr_flickCharacter( "vr_flickCharacter", "0", CVAR_INTEGER | CVAR_ARCHIVE, "FlickSync character. 0 = none, 1 = Betruger, 2 = Swan, 3 = Campbell, 4 = DarkStar, 5 = Tower, 6 = Reception, 7 = Kelly, 8 = Brooks, 9 = Mark Ryan, 10 = Ishii, 11 = Roland, 12 = McNeil, 13 = Marine w PDA, 14 = Marine w Torch, 15 = Point", 0, 15 );
+idCVar vr_flickCharacter( "vr_flickCharacter", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Flicksync character. 0 = none, 1 = Betruger, 2 = Swan, 3 = Campbell, 4 = DarkStar, 5 = Tower, 6 = Reception, 7 = Kelly, 8 = Brooks, 9 = Mark Ryan, 10 = Ishii, 11 = Roland, 12 = McNeil, 13 = Marine w PDA, 14 = Marine w Torch, 15 = Point", 0, 15 );
+idCVar vr_flicksyncCueCards( "vr_flicksyncCueCards", "0", CVAR_INTEGER | CVAR_ARCHIVE, "How many Cue Card Power-Ups to start with. Default = 0, max = 5", 0, 5 );
 
 // Note: use the console command "teleport trigger_once_8" to skip to the Betruger meeting, and "teleport trigger_once_40" for Sergeant Kelly
 
 int FlickSync_Score = 0;
-int FlickSync_CueCards = 0;
-int FlickSync_CorrectInARow = 0;
-int FlickSync_FailsInARow = 0;
+int FlickSync_CueCards = 0;	// How many Cue Card Power-Ups we have in our inventory. 0 to 5.
+int FlickSync_CorrectInARow = 0;	// 7 correct in a row will give us another Cue Card Power-Up
+int FlickSync_FailsInARow = 0;	// 3 fails in a row is Game Over
+idStr Flicksync_CueCardText = "";	// What our cue card would say if we used it
+bool Flicksync_CueCardActive = false;	// Are we currently using one of our Cue Card Power-Ups?
+int Flicksync_CheatCount = 0;	// Cheat once = warning, cheat twice it's GAME OVER!
+bool Flicksync_GameOver = false;
 
 typedef struct
 {
@@ -380,6 +385,11 @@ static const spoken_line_t lineArray[] = {
 
 */
 
+void Flicksync_DoGameOver()
+{
+	Flicksync_GameOver = true;
+	commonVoice->Say("Game Over");
+}
 
 void FlickSync_ScoreFail()
 {
@@ -389,7 +399,7 @@ void FlickSync_ScoreFail()
 	if (FlickSync_FailsInARow == 2)
 		commonVoice->Say("Final warning");
 	else if (FlickSync_FailsInARow == 3)
-		commonVoice->Say("Game Over");
+		Flicksync_DoGameOver();
 	else
 		commonVoice->Say("Miss");
 }
@@ -400,6 +410,10 @@ void FlickSync_ScoreLine(int confidence, uint64 ourStartTime, uint64 realStartTi
 	int64 startDelay = (int64)(ourStartTime - realStartTime);
 	int64 endDelay = (int64)(ourStartTime - realStartTime) + (int32)(ourLength - realLength);
 	float speed = (float)ourLength / (float)realLength;
+
+	Flicksync_GameOver = false; // for now, we can't actually end the game
+	Flicksync_CueCardText = "";
+	Flicksync_CueCardActive = false;
 
 	FlickSync_Score += 100; // specified in Chapter 11
 	FlickSync_CorrectInARow++; // specified in Chapter 11
@@ -434,8 +448,10 @@ void FlickSync_ScoreLine(int confidence, uint64 ourStartTime, uint64 realStartTi
 		// Good!
 		if (confidence < 0)
 			commonVoice->Say("Unclear!");
-		else if (confidence > 0)
-			commonVoice->Say("Great!");
+		else if (confidence > 0) {
+			FlickSync_Score += 50; // arbitrary bonus points for speaking clearly with OK timing
+			commonVoice->Say("Bonus!");
+		} 
 		else
 			commonVoice->Say("Good!");
 	}
@@ -576,6 +592,10 @@ bool FlickSync_Voice( const char* entity, const char* animation, const char* lin
 		waitingLine.startTime = startTime;
 		waitingLine.shader = lineName;
 		hasWaitingLine = true;
+		// if we used up our cue card
+		if ( Flicksync_CueCardText != "" )
+			Flicksync_CueCardActive = false;
+		Flicksync_CueCardText = line;
 	}
 	return false;
 }
@@ -640,3 +660,35 @@ void FlickSync_HearLine( const char* line, int confidence, uint64 startTime, uin
 	}
 }
 
+// reset score to 0
+void Flicksync_NewGame()
+{
+	hasWaitingLine = false;
+	lastLineHeard = -1; // empty ring buffer of heard lines
+	FlickSync_Score = 0;
+	FlickSync_FailsInARow = 0;
+	FlickSync_CorrectInARow = 0;
+	FlickSync_CueCards = vr_flicksyncCueCards.GetInteger(); // allow them to start with cue cards
+	Flicksync_CueCardText = "";
+}
+
+bool Flicksync_UseCueCard()
+{
+	if( FlickSync_CueCards > 0 && !Flicksync_CueCardActive )
+	{
+		--FlickSync_CueCards;
+		Flicksync_CueCardActive = true;
+		return true;
+	}
+	else
+		return false;
+}
+
+void Flicksync_Cheat()
+{
+	++Flicksync_CheatCount;
+	if( Flicksync_CheatCount >= 2 )
+	{
+		Flicksync_DoGameOver();
+	}
+}

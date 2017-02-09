@@ -2591,6 +2591,7 @@ public:
 		enum vrFlicksync_t
 		{
 			FLICKSYNC_FIELD_CHARACTER,
+			FLICKSYNC_FIELD_CUECARDS,
 			FLICKSYNC_FIELD_NEWGAME,
 			MAX_FLICKSYNC_FIELDS
 		};
@@ -2616,6 +2617,7 @@ public:
 
 	private:
 		int	originalFlickCharacter;
+		int	originalFlicksyncCueCards;
 	};
 
 	idMenuScreen_Shell_VR_Flicksync() :

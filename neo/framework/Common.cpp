@@ -2004,6 +2004,8 @@ bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
 		{
 			send1 = false;
 		}
+		if ( game->CheckInCinematic() && ButtonState( UB_ATTACK ) )
+			Flicksync_UseCueCard();
 	}
 	
 	if ( game && game->IsInGame() )
