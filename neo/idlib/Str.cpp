@@ -1515,7 +1515,13 @@ idStr::Cmp
 int idStr::Cmp( const char* s1, const char* s2 )
 {
 	int c1, c2, d;
-	
+	// Carl: check for NULL strings
+	d = ( s1 != NULL ) - ( s2 != NULL );
+	if( d )
+	{
+		return ( INT32_SIGNBITNOTSET( d ) << 1 ) - 1;
+	}
+	// original code
 	do
 	{
 		c1 = *s1++;
