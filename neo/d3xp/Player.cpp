@@ -11790,14 +11790,14 @@ void idPlayer::UpdateLaserSight()
 	
 
 	// Carl: teleport
-
 	if (showTeleport)
 	{
+		// teleportAimPoint is where you are actually aiming. teleportPoint is where AAS has nudged the teleport cursor to (so you can't teleport too close to a wall).
+		// teleportAimPointPitch is the pitch of the surface you are aiming at, where 90 is the floor and 0 is the wall
 		teleportAimPoint = crosshairEntity.origin;
-		teleportAimPointPitch = surfaceAngle.pitch;
-		// if the elevator is moving up, we don't want to fall through the floor
+		teleportAimPointPitch = surfaceAngle.pitch;		// if the elevator is moving up, we don't want to fall through the floor
 		if (aimElevator)
-			teleportAimPoint = teleportAimPoint + idVec3(0, 0, 10);
+			teleportPoint = teleportAimPoint = teleportAimPoint + idVec3(0, 0, 10);
 		// 45 degrees is maximum slope you can walk up
 		bool pitchValid = ( teleportAimPointPitch >= 45 && !aimActor ) || aimLadder; // -90 = ceiling, 0 = wall, 90 = floor
 		// can always teleport into nearby elevator, otherwise we need to check
@@ -12158,7 +12158,6 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 					isShowing = false;
 				}
 							
-				//else if ( CanReachPosition( traceResults.c.point ) )
 				else if ( CanReachPosition( teleportAimPoint, teleportPoint ) )
 				{
 										
