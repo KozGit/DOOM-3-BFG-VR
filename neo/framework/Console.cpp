@@ -394,8 +394,27 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 	{
 		if ( leftY < centerY )
 			leftY = centerY;
-		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, Flicksync_CueCardText.c_str(), colorWhite, true);
-		leftY += SMALLCHAR_HEIGHT + 4;
+		//renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, Flicksync_CueCardText.c_str(), colorWhite, true);
+		renderSystem->SetColor( colorWhite );
+
+		const char *text_p = Flicksync_CueCardText.c_str();
+		const char *end_p = text_p + idStr::Length( text_p );
+
+		while (text_p != end_p)
+		{
+			for (int x = 0; x < LINE_WIDTH && text_p != end_p; x++, text_p++)
+			{
+				if (*text_p == ' ')
+					continue;
+				if (*text_p == '\n')
+				{
+					text_p++;
+					break;
+				}
+				renderSystem->DrawSmallChar( LOCALSAFE_LEFT + (x + 1)*SMALLCHAR_WIDTH, idMath::Ftoi(leftY), *text_p );
+			}
+			leftY += SMALLCHAR_HEIGHT + 4;
+		}
 	}
 }
 
