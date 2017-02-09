@@ -517,6 +517,10 @@ void FlickSync_ResumeCutscene()
 // length is in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
 bool FlickSync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length )
 {
+	// if we're not in flicksync mode, then play it like normal
+	if (!vr_flickCharacter.GetInteger())
+		return true;
+
 	SYSTEMTIME systime;
 	GetSystemTime(&systime);
 	// startTime is also in FileTime

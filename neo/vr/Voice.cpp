@@ -335,9 +335,12 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 					//voice.Say("%s: You said %S.", confidences[confidence + 1], text);
 					if (isLine)
 					{
-						char buffer[1024];
-						WideCharToMultiByte(CP_ACP, 0, text, -1, buffer, sizeof(buffer) / sizeof(buffer[0]), "'", NULL);
-						FlickSync_HearLine(buffer, confidence, startTime, length);
+						if ( vr_flickCharacter.GetInteger() )
+						{
+							char buffer[1024];
+							WideCharToMultiByte(CP_ACP, 0, text, -1, buffer, sizeof(buffer) / sizeof(buffer[0]), "'", NULL);
+							FlickSync_HearLine(buffer, confidence, startTime, length);
+						}
 					}
 					else
 					{

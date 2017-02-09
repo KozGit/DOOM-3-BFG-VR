@@ -223,7 +223,7 @@ otherwise return default alpha.
 */
 float idMenuScreen_HUD::GetHudAlpha()
 {
-	if( vr_flickCharacter.GetInteger() )
+	if( vr_flickCharacter.GetInteger() && gameLocal.inCinematic )
 		return 0;
 
 	static int lastFrame = idLib::frameNumber;

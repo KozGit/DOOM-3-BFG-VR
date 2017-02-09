@@ -12349,11 +12349,20 @@ void idPlayer::UpdateVrHud()
 		{
 			hudPitch = vr_hudType.GetInteger() == VR_HUD_LOOK_DOWN ? vr_hudPosAngle.GetFloat() : 10.0f;
 			
-			GetViewPos(hudOrigin, hudAxis);
-			hudAxis = idAngles( hudPitch, viewAngles.yaw, 0.0f ).ToMat3();
-			//hudOrigin = GetEyePosition();
-			
-			hudOrigin += hudAxis[0] * vr_hudPosDis.GetFloat(); 
+			float yaw;
+			if( gameLocal.inCinematic )
+			{
+				yaw = commonVr->lastHMDViewAxis.ToAngles().yaw;
+				hudOrigin = commonVr->lastHMDViewOrigin;
+			}
+			else
+			{
+				GetViewPos( hudOrigin, hudAxis );
+				yaw = viewAngles.yaw;
+			}
+			hudAxis = idAngles( hudPitch, yaw, 0.0f ).ToMat3();
+
+			hudOrigin += hudAxis[0] * vr_hudPosDis.GetFloat();
 			hudOrigin += hudAxis[1] * vr_hudPosHor.GetFloat();
 			hudOrigin.z += vr_hudPosVer.GetFloat();
 		}
