@@ -4277,7 +4277,7 @@ void idPlayer::DrawHUD( idMenuHandler_HUD* _hudManager )
 {
 	SCOPED_PROFILE_EVENT( "idPlayer::DrawHUD" );
 	// Koz begin
-	if ( game->isVR && vr_hudType.GetInteger() == VR_HUD_NONE && !vr_flickCharacter.GetInteger() )
+	if ( game->isVR && vr_hudType.GetInteger() == VR_HUD_NONE && !vr_flicksyncCharacter.GetInteger() )
 	{
 		return;
 	}
@@ -4288,7 +4288,7 @@ void idPlayer::DrawHUD( idMenuHandler_HUD* _hudManager )
 		return;
 	}
 	
-	if ( ( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || !g_showHud.GetBool() ) && !vr_flickCharacter.GetInteger() )
+	if ( ( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || !g_showHud.GetBool() ) && !vr_flicksyncCharacter.GetInteger() )
 	{
 		return;
 	}
@@ -4421,7 +4421,7 @@ void idPlayer::DrawHUDVR( idMenuHandler_HUD* _hudManager )
 		return;
 	}
 
-	if ((influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || vr_hudType.GetInteger() == VR_HUD_NONE) && !vr_flickCharacter.GetInteger())
+	if ((influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || vr_hudType.GetInteger() == VR_HUD_NONE) && !vr_flicksyncCharacter.GetInteger())
 	{
 		return;
 	}
@@ -4477,7 +4477,7 @@ void idPlayer::EnterCinematic()
 	StopSound( SND_CHANNEL_PDA_AUDIO, false );
 	StopSound( SND_CHANNEL_PDA_VIDEO, false );
 	
-	if( hudManager && !vr_flickCharacter.GetInteger() )
+	if( hudManager && !vr_flicksyncCharacter.GetInteger() )
 	{
 		hudManager->SetRadioMessage( false );
 	}
@@ -4516,7 +4516,7 @@ void idPlayer::EnterCinematic()
 	AI_TURN_LEFT	= false;
 	AI_TURN_RIGHT	= false;
 
-	if( vr_flickCharacter.GetInteger() )
+	if( vr_flicksyncCharacter.GetInteger() )
 	{
 		HideTip();
 		if( hud )
@@ -12340,7 +12340,7 @@ void idPlayer::UpdateVrHud()
 	else
 	{
 		// always show HUD if in flicksync
-		if ( vr_flickCharacter.GetInteger() )
+		if ( vr_flicksyncCharacter.GetInteger() )
 			hudEntity.allowSurfaceInViewID = 0;
 		else
 			hudEntity.allowSurfaceInViewID = entityNumber + 1;

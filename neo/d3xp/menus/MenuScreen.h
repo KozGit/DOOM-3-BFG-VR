@@ -2616,7 +2616,7 @@ public:
 		bool						IsRestartRequired() const;
 
 	private:
-		int	originalFlickCharacter;
+		int	originalFlicksyncCharacter;
 		int	originalFlicksyncCueCards;
 	};
 

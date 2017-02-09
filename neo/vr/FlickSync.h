@@ -29,8 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-#ifndef __FLICKSYNC_H__
-#define __FLICKSYNC_H__
+#ifndef __Flicksync_H__
+#define __Flicksync_H__
 
 typedef enum
 {
@@ -52,20 +52,20 @@ typedef enum
 	FLICK_POINT = 15,    // Marine with explosives at start of RoE
 };
 
-bool FlickSync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length );
-void FlickSync_AddVoiceLines();
-void FlickSync_HearLine( const char* line, int confidence, uint64 startTime, uint32 length );
+bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length );
+void Flicksync_AddVoiceLines();
+void Flicksync_HearLine( const char* line, int confidence, uint64 startTime, uint32 length );
 void Flicksync_NewGame();
 bool Flicksync_UseCueCard();
 void Flicksync_Cheat();
 
-extern idCVar vr_flickCharacter;
+extern idCVar vr_flicksyncCharacter;
 extern idCVar vr_flicksyncCueCards;
 
-extern int FlickSync_Score;
-extern int FlickSync_CueCards;
-extern int FlickSync_CorrectInARow;
-extern int FlickSync_FailsInARow;
+extern int Flicksync_Score;
+extern int Flicksync_CueCards;
+extern int Flicksync_CorrectInARow;
+extern int Flicksync_FailsInARow;
 extern idStr Flicksync_CueCardText;	// What our cue card would say if we used it
 extern bool Flicksync_CueCardActive;	// Are we currently using one of our Cue Card Power-Ups?
 extern int Flicksync_CheatCount;	// Cheat once = warning, cheat twice it's GAME OVER!

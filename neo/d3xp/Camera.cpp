@@ -666,7 +666,7 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		// Flicksync camera
 		idEntity* ent = NULL;
 		static idEntity* hiddenEnt = NULL;
-		switch (vr_flickCharacter.GetInteger())
+		switch (vr_flicksyncCharacter.GetInteger())
 		{
 		case FLICK_BETRUGER:
 			ent = gameLocal.FindEntity("marscity_cinematic_betruger_1");

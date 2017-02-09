@@ -48,8 +48,8 @@ public:
 	bool		GetTalkButton();
 	bool		GetSayButton(int j);
 
-	void		AddFlickSyncLine(const char* line);
-	void		AddFlickSyncLine(const wchar_t* line);
+	void		AddFlicksyncLine(const char* line);
+	void		AddFlicksyncLine(const wchar_t* line);
 	//---------------------------
 private:
 	void		AddWord(const char* word);

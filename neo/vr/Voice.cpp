@@ -21,7 +21,7 @@ ISpObjectToken *pObjectToken = NULL;
 ISpRecoContext *pReco = NULL;
 ISpRecoGrammar *pGrammar = NULL;
 SPSTATEHANDLE rule = NULL;
-SPSTATEHANDLE flickSyncRule = NULL;
+SPSTATEHANDLE flicksyncRule = NULL;
 
 extern iVoice voice;
 
@@ -80,7 +80,7 @@ void MadeASound()
 void StartedTalking()
 {
 	idPlayer* player = gameLocal.GetLocalPlayer();
-	if( player != NULL && player->hudManager && (vr_flickCharacter.GetInteger() || vr_voiceCommands.GetInteger() || vr_talkMode.GetInteger()) )
+	if( player != NULL && player->hudManager && (vr_flicksyncCharacter.GetInteger() || vr_voiceCommands.GetInteger() || vr_talkMode.GetInteger()) )
 	{
 		player->hudManager->SetRadioMessage( true );
 	}
@@ -91,7 +91,7 @@ void StoppedTalking()
 	spoke = true;
 
 	idPlayer* player = gameLocal.GetLocalPlayer();
-	if( player != NULL && player->hudManager && (vr_flickCharacter.GetInteger() || vr_voiceCommands.GetInteger() || vr_talkMode.GetInteger()) )
+	if( player != NULL && player->hudManager && (vr_flicksyncCharacter.GetInteger() || vr_voiceCommands.GetInteger() || vr_talkMode.GetInteger()) )
 	{
 		player->hudManager->SetRadioMessage( false );
 	}
@@ -335,11 +335,11 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 					//voice.Say("%s: You said %S.", confidences[confidence + 1], text);
 					if (isLine)
 					{
-						if ( vr_flickCharacter.GetInteger() )
+						if ( vr_flicksyncCharacter.GetInteger() )
 						{
 							char buffer[1024];
 							WideCharToMultiByte(CP_ACP, 0, text, -1, buffer, sizeof(buffer) / sizeof(buffer[0]), "'", NULL);
-							FlickSync_HearLine(buffer, confidence, startTime, length);
+							Flicksync_HearLine(buffer, confidence, startTime, length);
 						}
 					}
 					else
@@ -452,16 +452,16 @@ void iVoice::AddWord(const wchar_t* word)
 	pGrammar->AddWordTransition(rule, NULL, word, L" ", SPWT_LEXICAL, 1.0f, NULL);
 }
 
-void iVoice::AddFlickSyncLine(const char* line)
+void iVoice::AddFlicksyncLine(const char* line)
 {
 	wchar_t wbuffer[1024];
 	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, line, -1, wbuffer, sizeof(wbuffer) / sizeof(wbuffer[0]));
-	pGrammar->AddWordTransition(flickSyncRule, NULL, wbuffer, L" ", SPWT_LEXICAL, 1.0f, NULL);
+	pGrammar->AddWordTransition(flicksyncRule, NULL, wbuffer, L" ", SPWT_LEXICAL, 1.0f, NULL);
 }
 
-void iVoice::AddFlickSyncLine(const wchar_t* line)
+void iVoice::AddFlicksyncLine(const wchar_t* line)
 {
-	pGrammar->AddWordTransition(flickSyncRule, NULL, line, L" ", SPWT_LEXICAL, 1.0f, NULL);
+	pGrammar->AddWordTransition(flicksyncRule, NULL, line, L" ", SPWT_LEXICAL, 1.0f, NULL);
 }
 
 
@@ -514,8 +514,8 @@ void iVoice::VoiceInit(void)
 					AddWord(words[i]);
 				}
 
-				pGrammar->GetRule(L"line", 1, SPRAF_TopLevel | SPRAF_Active, true, &flickSyncRule);
-				FlickSync_AddVoiceLines();
+				pGrammar->GetRule(L"line", 1, SPRAF_TopLevel | SPRAF_Active, true, &flicksyncRule);
+				Flicksync_AddVoiceLines();
 
 				hr = pGrammar->Commit(NULL);
 				//if (SUCCEEDED(hr))

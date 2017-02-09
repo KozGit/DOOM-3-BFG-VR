@@ -251,7 +251,7 @@ bool idMenuScreen_Shell_VR_Flicksync::HandleAction( idWidgetAction& action, cons
 				{
 					// reset score to 0
 					Flicksync_NewGame();
-					switch (vr_flickCharacter.GetInteger())
+					switch (vr_flicksyncCharacter.GetInteger())
 					{
 						case FLICK_RECEPTION:
 							cmdSystem->AppendCommandText("devmap game/mars_city1\n");
@@ -340,7 +340,7 @@ idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Gameplay_Options::Loa
 */
 void idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicksync::LoadData() {
 
-	originalFlickCharacter = vr_flickCharacter.GetInteger();
+	originalFlicksyncCharacter = vr_flicksyncCharacter.GetInteger();
 	originalFlicksyncCueCards = vr_flicksyncCueCards.GetInteger();
 }
 
@@ -374,7 +374,7 @@ void idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicksync::Adjus
 	{
 		static const int numValues = 12;
 		static const int values[numValues] = { FLICK_NONE, FLICK_BETRUGER, FLICK_SWANN, FLICK_CAMPBELL, FLICK_TOWER, FLICK_RECEPTION, FLICK_KELLY, FLICK_ISHII, FLICK_MCNEIL, FLICK_MARINE_PDA, FLICK_MARINE_TORCH, FLICK_POINT };
-		vr_flickCharacter.SetInteger( AdjustOption( vr_flickCharacter.GetInteger(), values, numValues, adjustAmount ) );
+		vr_flicksyncCharacter.SetInteger( AdjustOption( vr_flicksyncCharacter.GetInteger(), values, numValues, adjustAmount ) );
 		break;
 
 	}
@@ -408,7 +408,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicks
 	case FLICKSYNC_FIELD_CHARACTER:
 	{
 		const char* names[] = { "None", "Dr. Betruger", "Elliot Swann", "Jack Campbell", "Darkstar", "S.L. Medley (Tower)", "Reception", "Sergeant Kelly", "Brooks (Mars Sec)", "Mark Ryan (airlock)", "Ishii (missing scientist)", "Roland (ceiling)", "Dr. Elizabeth McNeil", "Marine with PDA", "Marine with Torch", "Point (explosives)" };
-		return names[vr_flickCharacter.GetInteger()];
+		return names[vr_flicksyncCharacter.GetInteger()];
 	}
 	case FLICKSYNC_FIELD_CUECARDS:
 	{
@@ -427,7 +427,7 @@ idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Gameplay_Options::IsD
 */
 bool idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicksync::IsDataChanged() const {
 
-	if (originalFlickCharacter != vr_flickCharacter.GetInteger())
+	if (originalFlicksyncCharacter != vr_flicksyncCharacter.GetInteger())
 	{
 		return true;
 	}
