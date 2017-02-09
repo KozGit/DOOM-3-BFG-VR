@@ -1558,7 +1558,7 @@ idPlayer::idPlayer():
 	aimValidForTeleport = false;
 
 	
-	aimPoint = vec3_zero;
+	teleportAimPoint = vec3_zero;
 	teleportPoint = vec3_zero;
 	teleportAimPointPitch = 0.0f;
 
@@ -11790,16 +11790,17 @@ void idPlayer::UpdateLaserSight()
 	
 
 	// Carl: teleport
-
 	if (showTeleport)
 	{
-		aimPoint = crosshairEntity.origin;
-		aimPointPitch = surfaceAngle.pitch;
+		// aimPoint is where you are actually aiming. teleportPoint is where AAS has nudged the teleport cursor to (so you can't teleport too close to a wall).
+		// teleportAimPointPitch is the pitch of the surface you are aiming at, where 90 is the floor and 0 is the wall
+		idVec3 aimPoint = crosshairEntity.origin;
+		teleportAimPointPitch = surfaceAngle.pitch;
 		// if the elevator is moving up, we don't want to fall through the floor
 		if (aimElevator)
 			teleportPoint = aimPoint = aimPoint + idVec3(0, 0, 10);
 		// 45 degrees is maximum slope you can walk up
-		bool pitchValid = (aimPointPitch >= 45 && !aimActor) || aimLadder; // -90 = ceiling, 0 = wall, 90 = floor
+		bool pitchValid = (teleportAimPointPitch >= 45 && !aimActor) || aimLadder; // -90 = ceiling, 0 = wall, 90 = floor
 		// can always teleport into nearby elevator, otherwise we need to check
 		aimValidForTeleport = pitchValid && ((aimElevator && beamLength <= 300) || CanReachPosition(aimPoint, teleportPoint));
 
@@ -12152,13 +12153,15 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 				
 				gameLocal.clip.Translation( trace, tracePt, tracePt, clip, clipAxis, CONTENTS_SOLID, NULL );
 
+				idVec3 betterPos;
+
 				if ( trace.fraction < 1.0f )
 				{
 					aimValidForTeleport = false;
 					isShowing = false;
 				}
 								
-				else if ( CanReachPosition( traceResults.c.point ) )
+				else if ( CanReachPosition( traceResults.c.point, betterPos ) )
 				{
 										
 					if ( !isShowing )
@@ -12169,7 +12172,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 					}
 
 					aimValidForTeleport = true;
-					teleportAimPoint = traceResults.c.point;
+					teleportAimPoint = betterPos; // traceResults.c.point; // betterPos has been nudged away from walls, and is the actual point you can reach
 					teleportTarget.GetEntity()->GetRenderEntity()->weaponDepthHack = false;
 					isShowing = true;
 					
