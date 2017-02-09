@@ -1558,7 +1558,7 @@ idPlayer::idPlayer():
 	aimValidForTeleport = false;
 
 	
-	aimPoint = vec3_zero;
+	teleportAimPoint = vec3_zero;
 	teleportPoint = vec3_zero;
 	teleportAimPointPitch = 0.0f;
 
@@ -11793,15 +11793,15 @@ void idPlayer::UpdateLaserSight()
 
 	if (showTeleport)
 	{
-		aimPoint = crosshairEntity.origin;
-		aimPointPitch = surfaceAngle.pitch;
+		teleportAimPoint = crosshairEntity.origin;
+		teleportAimPointPitch = surfaceAngle.pitch;
 		// if the elevator is moving up, we don't want to fall through the floor
 		if (aimElevator)
-			teleportPoint = aimPoint = aimPoint + idVec3(0, 0, 10);
+			teleportAimPoint = teleportAimPoint + idVec3(0, 0, 10);
 		// 45 degrees is maximum slope you can walk up
-		bool pitchValid = (aimPointPitch >= 45 && !aimActor) || aimLadder; // -90 = ceiling, 0 = wall, 90 = floor
+		bool pitchValid = ( teleportAimPointPitch >= 45 && !aimActor ) || aimLadder; // -90 = ceiling, 0 = wall, 90 = floor
 		// can always teleport into nearby elevator, otherwise we need to check
-		aimValidForTeleport = pitchValid && ((aimElevator && beamLength <= 300) || CanReachPosition(aimPoint, teleportPoint));
+		aimValidForTeleport = pitchValid && (( aimElevator && beamLength <= 300 ) || CanReachPosition( teleportAimPoint, teleportPoint ));
 
 		if ( aimValidForTeleport )
 		{
@@ -12037,14 +12037,13 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 			// handrails really make aiming suck, so skip any non floor hits that consist of these materials
 			// really need to verify this doesn't break anything.
 
-			if ( idStr::FindText( hitMat, "base_trim" ) > -1 ||
-				idStr::FindText( hitMat, "swatch" ) > -1 ||
-				idStr::FindText( hitMat, "mchangar2" ) > -1 ||
-				idStr::FindText( hitMat, "mchangar3" ) > -1
-				)
+			
+			if ( hitPitch != -90 )
 			{
-				
-				if ( hitPitch != -90 )
+				if ( idStr::FindText( hitMat, "base_trim" ) > -1 ||
+					idStr::FindText( hitMat, "swatch" ) > -1 ||
+					idStr::FindText( hitMat, "mchangar2" ) > -1 ||
+					idStr::FindText( hitMat, "mchangar3" ) > -1 )
 				{
 
 					common->Printf( "Beam hit rejected: material %s\n", hitMat );
@@ -12151,14 +12150,16 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 				clipAxis = physicsObj.GetClipModel()->GetAxis();
 				
 				gameLocal.clip.Translation( trace, tracePt, tracePt, clip, clipAxis, CONTENTS_SOLID, NULL );
-
+				teleportAimPoint = traceResults.c.point;
+				
 				if ( trace.fraction < 1.0f )
 				{
 					aimValidForTeleport = false;
 					isShowing = false;
 				}
-								
-				else if ( CanReachPosition( traceResults.c.point ) )
+							
+				//else if ( CanReachPosition( traceResults.c.point ) )
+				else if ( CanReachPosition( teleportAimPoint, teleportPoint ) )
 				{
 										
 					if ( !isShowing )
@@ -12169,7 +12170,6 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 					}
 
 					aimValidForTeleport = true;
-					teleportAimPoint = traceResults.c.point;
 					teleportTarget.GetEntity()->GetRenderEntity()->weaponDepthHack = false;
 					isShowing = true;
 					

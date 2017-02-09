@@ -298,7 +298,101 @@ models/mapobjects/filler/cola2vr
 	specularmap		models/mapobjects/filler/cola1_s.tga
 }
 
+teleportTargetCircle
+{
+	translucent
+	noShadows
+	twoSided
+	nonsolid
+	qer_editorimage textures/decals/telemars.tga
 
+	{
+		blend	add 
+  		map     models/images/teleporttarget_1_circle.tga
+	
+		red parm0
+		green parm0
+		blue parm0
+	}
+  
+} 			
 
+teleportTargetCenter
+{
+	translucent
+	noShadows
+	twoSided
+	nonsolid
+	qer_editorimage textures/decals/telemars.tga
 
+	{
+		blend	add 
+  		map     models/images/teleporttarget_1_center.tga
+		rgb			guiLightTable[ time * 4  ] * 1.5
+	}
+  
+} 	
 
+teleportTargetFX
+{
+	translucent
+	noShadows
+	twoSided
+	nonsolid
+	qer_editorimage textures/decals/telemars.tga
+	
+    {
+		blend	add
+		map 	models/images/teleporttarget_b_add.tga
+  		rgb		telemars[ time * .3 ] * parm1 * 1.25
+		
+		rotate time * .025
+
+	} 
+   	{
+		blend	add
+  		map 	models/images/teleporttarget_c_add.tga
+		rgb		telemars[ time * .1 ] * parm1 * 1.25
+		
+		rotate time * -.035
+
+	} 			
+ 				
+  
+}
+
+teleportTargetBeamBlue
+{
+	translucent
+	noShadows
+	twoSided
+	nonsolid
+	
+	{
+		blend add
+		map models/images/teleportbeam.tga
+		rgb			guiLightTable[ time * 10  ] * 1.5
+		scroll	time * -0.25, 0
+	}
+	{
+		blend add
+		map models/images/teleportbeam_a.tga
+		rgb			guiLightTable[ time * 15  ] 
+		scroll	time * -0.30, time * 0.15
+	}
+	{
+		blend add
+		map models/images/teleportbeam_b.tga
+		rgb			guiLightTable[ time * 12  ] 
+		scroll	time * -.95 , time * -0.25
+	}
+		{
+		blend add
+		map models/images/teleportbeam_b.tga
+		rgb			guiLightTable[ time * 1.2  ] 
+		scroll	time * -.5 , time * 0.45
+	}
+}
+ 
+  
+}
