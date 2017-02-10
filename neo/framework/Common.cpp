@@ -1991,7 +1991,7 @@ bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
 	if ( game->isVR )
 	{
 		static bool send1 = false;
-		if ( game->CheckInCinematic() == true && !send1 )
+		if ( ( Flicksync_InCutscene || game->CheckInCinematic() == true ) && !send1 )
 		{
 			if ( ButtonState( UB_IMPULSE19 ) )
 			{
@@ -2012,7 +2012,7 @@ bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
 	{
 		if ( event->evType == SE_KEY && event->evValue2 == 1 && (event->evValue == K_ESCAPE || event->evValue == K_JOY9 || event->evValue == K_SAY_CANCEL || event->evValue == K_SAY_RESUME ) )
 		{
-			if( game->CheckInCinematic() == true )
+			if( Flicksync_InCutscene || game->CheckInCinematic() == true )
 			{
 				if (vr_flicksyncCharacter.GetInteger())
 					Flicksync_GiveUp();

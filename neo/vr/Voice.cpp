@@ -95,6 +95,7 @@ void StoppedTalking()
 	{
 		player->hudManager->SetRadioMessage( false );
 	}
+	Flicksync_StoppedTalking();
 }
 
 bool iVoice::GetTalkButton()
@@ -345,6 +346,7 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 					else
 					{
 						HearWord(text, confidence);
+						Flicksync_StoppedTalking();
 					}
 					CoTaskMemFree(text);
 					CoTaskMemFree(pPhrase);

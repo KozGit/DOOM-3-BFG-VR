@@ -55,6 +55,7 @@ typedef enum
 bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length );
 void Flicksync_AddVoiceLines();
 void Flicksync_HearLine( const char* line, int confidence, uint64 startTime, uint32 length );
+void Flicksync_StoppedTalking();
 void Flicksync_NewGame();
 bool Flicksync_UseCueCard();
 void Flicksync_Cheat();
@@ -71,7 +72,10 @@ extern int Flicksync_CorrectInARow;
 extern int Flicksync_FailsInARow;
 extern idStr Flicksync_CueCardText;	// What our cue card would say if we used it
 extern bool Flicksync_CueCardActive;	// Are we currently using one of our Cue Card Power-Ups?
+extern idStr Flicksync_CueText;
+extern bool Flicksync_CueActive;
 extern int Flicksync_CheatCount;	// Cheat once = warning, cheat twice it's GAME OVER!
 extern bool Flicksync_GameOver;
+extern bool Flicksync_InCutscene;
 
 #endif

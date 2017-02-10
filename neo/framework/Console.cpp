@@ -416,6 +416,48 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 			leftY += SMALLCHAR_HEIGHT + 4;
 		}
 	}
+	// Subtitles for the cue spoken by the other character that we must respond to
+	if (Flicksync_CueActive)
+	{
+		float y = LOCALSAFE_BOTTOM - 10 * (BIGCHAR_HEIGHT + 4);
+		if (y < leftY)
+			y = leftY;
+		if (y < centerY)
+			y = centerY;
+		renderSystem->SetColor(colorYellow);
+
+		const char *text_p = Flicksync_CueText.c_str();
+		const char *end_p = text_p + idStr::Length(text_p);
+
+		while (text_p != end_p)
+		{
+			for (int x = 0; x < LINE_WIDTH && text_p != end_p; x++, text_p++)
+			{
+				if (*text_p == ' ')
+					continue;
+				if (*text_p == '\n')
+				{
+					text_p++;
+					break;
+				}
+				renderSystem->DrawSmallChar(LOCALSAFE_LEFT + (x + 1)*SMALLCHAR_WIDTH, idMath::Ftoi(y), *text_p);
+			}
+			y += SMALLCHAR_HEIGHT + 4;
+		}
+		{
+			const char* s = "FINAL DIALOGUE WARNING!";
+			int w = strlen(s) * SMALLCHAR_WIDTH;
+			static int flash = 0;
+			flash++;
+			if (flash > 20)
+				flash = 0;
+			if (flash < 10)
+			{
+				renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(y) + 2, s, colorRed, true);
+			}
+			y += SMALLCHAR_HEIGHT + 4;
+		}
+	}
 }
 
 /*

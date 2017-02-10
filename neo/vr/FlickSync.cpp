@@ -19,8 +19,11 @@ int Flicksync_CorrectInARow = 0;	// 7 correct in a row will give us another Cue 
 int Flicksync_FailsInARow = 0;	// 3 fails in a row is Game Over
 idStr Flicksync_CueCardText = "";	// What our cue card would say if we used it
 bool Flicksync_CueCardActive = false;	// Are we currently using one of our Cue Card Power-Ups?
+idStr Flicksync_CueText = "";	// What cue line we need to respond to
+bool Flicksync_CueActive = false;	// Are we playing and displaying the cue line subtitle?
 int Flicksync_CheatCount = 0;	// Cheat once = warning, cheat twice it's GAME OVER!
 bool Flicksync_GameOver = false;
+bool Flicksync_InCutscene = false;
 
 typedef struct
 {
@@ -40,23 +43,22 @@ typedef struct
 	uint32 length;
 	int confidence;
 	const char* shader;
+	idStr entity;
 	char text[1024];
 } timed_spoken_line_t;
 
 #define MAX_HEARD_LINES 3
-timed_spoken_line_t linesHeard[MAX_HEARD_LINES] = {};
-int firstLineHeard = 0, lastLineHeard = -1;
+static timed_spoken_line_t linesHeard[MAX_HEARD_LINES] = {};
+static int firstLineHeard = 0, lastLineHeard = -1;
 
-timed_spoken_line_t waitingLine = {};
-bool hasWaitingLine = false;
+static timed_spoken_line_t waitingLine = {};
+static bool hasWaitingLine = false;
 
-timed_spoken_line_t pausedLine = {};
-idStr pausedEntity = "";
-bool hasPausedLine = false, endAfterPause = false;
+static timed_spoken_line_t pausedLine = {};
+static bool hasPausedLine = false, endAfterPause = false;
 
-timed_spoken_line_t cueLine = {};
-idStr cueEntity = "";
-bool hasCueLine = false;
+static timed_spoken_line_t cueLine = {};
+static bool hasCueLine = false, needCue = false;
 
 static const character_map_t entityArray[] = {
 // Mars City Intro
@@ -404,6 +406,8 @@ void Flicksync_DoGameOver()
 
 void Flicksync_ScoreFail()
 {
+	needCue = false;
+	Flicksync_CueActive = false;
 	Flicksync_Score -= 10; // Chapter 11 says you lose points, but doesn't say how many.
 	Flicksync_CorrectInARow = 0;
 	Flicksync_FailsInARow++;
@@ -423,8 +427,10 @@ void Flicksync_ScoreLine(int confidence, uint64 ourStartTime, uint64 realStartTi
 	float speed = (float)ourLength / (float)realLength;
 
 	Flicksync_GameOver = false; // for now, we can't actually end the game
+	Flicksync_CueActive = false;
 	Flicksync_CueCardText = "";
 	Flicksync_CueCardActive = false;
+	needCue = false;
 
 	Flicksync_Score += 100; // specified in Chapter 11
 	Flicksync_CorrectInARow++; // specified in Chapter 11
@@ -534,7 +540,7 @@ void Flicksync_SayPausedLine()
 	if (!hasPausedLine)
 		return;
 	idEntity* ent = NULL;
-	ent = gameLocal.FindEntity(pausedEntity);
+	ent = gameLocal.FindEntity(pausedLine.entity);
 	if (ent != NULL)
 	{
 		const idSoundShader* shader;
@@ -544,13 +550,47 @@ void Flicksync_SayPausedLine()
 		else
 			ent->StartSound(pausedLine.shader, SND_CHANNEL_VOICE, 0, false, NULL);
 	}
+	// if our character has a line after this, then this becomes the cue line
+	cueLine = pausedLine;
+	hasCueLine = true;
 	hasPausedLine = false;
+}
+
+void Flicksync_SayCueLine()
+{
+	needCue = false;
+	Flicksync_CueActive = true;
+	if (!hasCueLine)
+	{
+		Flicksync_CueText = ""; // "(you speak first)";
+		return;
+	}
+	idEntity* ent = NULL;
+	ent = gameLocal.FindEntity(cueLine.entity);
+	if (ent != NULL)
+	{
+		const idSoundShader* shader;
+		shader = declManager->FindSound(cueLine.shader);
+		if (shader)
+			ent->StartSoundShader(shader, SND_CHANNEL_VOICE, 0, false, NULL);
+		else
+			ent->StartSound(cueLine.shader, SND_CHANNEL_VOICE, 0, false, NULL);
+	}
+	Flicksync_CueText = Flicksync_LineNameToLine(cueLine.shader);
+}
+
+void Flicksync_StoppedTalking()
+{
+	if (needCue)
+		Flicksync_SayCueLine();
 }
 
 void Flicksync_PauseCutscene()
 {
 	g_stopTime.SetBool( true );
-	timescale.SetFloat( 0.2f );
+	// This makes background sounds slow mo, which is really only good for the long DarkStar landing sound.
+	// But it messes up our FINAL DIALOGUE WARNING.
+	//timescale.SetFloat( 0.2f );
 }
 
 void Flicksync_ResumeCutscene()
@@ -585,12 +625,16 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 	{
 		//commonVoice->Say("pausing to wait for %s", waitingLine.text);
 		// pause cutscene until we hear the line we are waiting for
-		pausedEntity = entity;
+		pausedLine.entity = entity;
 		pausedLine.shader = lineName;
 		pausedLine.startTime = startTime;
 		pausedLine.length = length;
 		hasPausedLine = true;
 		Flicksync_PauseCutscene();
+		if ( commonVoice->GetTalkButton() )
+			needCue = true;
+		else
+			Flicksync_SayCueLine();
 		// don't let them say the next line until we have said ours.
 		return false;
 	}
@@ -604,6 +648,11 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 	if (character != vr_flicksyncCharacter.GetInteger())
 	{
 		// this is a different character speaking
+		cueLine.entity = entity;
+		cueLine.shader = lineName;
+		cueLine.startTime = startTime;
+		cueLine.length = length;
+		hasCueLine = true;
 		return true;
 	}
 
@@ -625,12 +674,19 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 			lastLineHeard = -1;
 		else
 			firstLineHeard = (lastLineHeard + 1) % MAX_HEARD_LINES;
+		// If our character has another line straight after this, this is our cue
+		cueLine.entity = entity;
+		cueLine.shader = lineName;
+		cueLine.startTime = startTime;
+		cueLine.length = length;
+		hasCueLine = true;
 	}
 	else
 	{
 		//commonVoice->Say("Wait for %s", line);
 		//   set waiting line to this line
 		idStr::Copynz(waitingLine.text, line, 1024);
+		waitingLine.entity = entity;
 		waitingLine.length = length;
 		waitingLine.startTime = startTime;
 		waitingLine.shader = lineName;
@@ -672,6 +728,10 @@ void Flicksync_HearLine( const char* line, int confidence, uint64 startTime, uin
 		//commonVoice->Say("That's what we were waiting to hear.");
 		// score it based on timing
 		Flicksync_ScoreLine(confidence, startTime, waitingLine.startTime, length, waitingLine.length);
+		// if our character has another line straight after this, this becomes our cue
+		cueLine = waitingLine;
+		hasCueLine = true;
+
 		// if we were waiting on a line that is late, unpause cutscene
 		hasWaitingLine = false;
 		Flicksync_ResumeCutscene();
@@ -681,6 +741,7 @@ void Flicksync_HearLine( const char* line, int confidence, uint64 startTime, uin
 	{
 		if (hasWaitingLine)
 		{
+			Flicksync_StoppedTalking();
 			//commonVoice->Say("Sorry, was waiting to hear %s.", waitingLine.text);
 		}
 		else
@@ -709,6 +770,7 @@ void Flicksync_NewGame()
 	hasWaitingLine = false;
 	hasPausedLine = false;
 	hasCueLine = false;
+	needCue = false;
 	lastLineHeard = -1; // empty ring buffer of heard lines
 	Flicksync_Score = 0;
 	Flicksync_FailsInARow = 0;
@@ -716,8 +778,6 @@ void Flicksync_NewGame()
 	Flicksync_CueCards = vr_flicksyncCueCards.GetInteger(); // allow them to start with cue cards
 	Flicksync_CueCardText = "";
 }
-
-bool inCutscene = false;
 
 void Flicksync_EndCutscene()
 {
@@ -731,23 +791,25 @@ void Flicksync_EndCutscene()
 	{
 		endAfterPause = false;
 		hasCueLine = false;
+		needCue = false;
 		Flicksync_ResumeCutscene();
 		lastLineHeard = -1; // empty ring buffer of heard lines
 		Flicksync_CueCardText = "";
 		timescale.SetFloat(1.0f);
-		inCutscene = false;
+		Flicksync_InCutscene = false;
 	}
 }
 
 void Flicksync_StartCutscene()
 {
-	if ( inCutscene )
+	if ( Flicksync_InCutscene )
 		return;
-	inCutscene = true;
+	Flicksync_InCutscene = true;
 	endAfterPause = false;
 	hasPausedLine = false;
 	hasWaitingLine = false;
 	hasCueLine = false;
+	needCue = false;
 	Flicksync_ResumeCutscene();
 	lastLineHeard = -1; // empty ring buffer of heard lines
 	Flicksync_CueCardText = "";
