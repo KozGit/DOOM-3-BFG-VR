@@ -58,6 +58,9 @@ void Flicksync_HearLine( const char* line, int confidence, uint64 startTime, uin
 void Flicksync_NewGame();
 bool Flicksync_UseCueCard();
 void Flicksync_Cheat();
+void Flicksync_GiveUp();
+void Flicksync_StartCutscene();
+void Flicksync_EndCutscene();
 
 extern idCVar vr_flicksyncCharacter;
 extern idCVar vr_flicksyncCueCards;

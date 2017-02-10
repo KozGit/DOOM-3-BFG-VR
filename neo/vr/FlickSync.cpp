@@ -2,11 +2,14 @@
 
 #include"precompiled.h"
 
+#include "d3xp/Game_local.h"
+
 #include "FlickSync.h"
 #include "Voice.h"
 
 idCVar vr_flicksyncCharacter( "vr_flicksyncCharacter", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Flicksync character. 0 = none, 1 = Betruger, 2 = Swan, 3 = Campbell, 4 = DarkStar, 5 = Tower, 6 = Reception, 7 = Kelly, 8 = Brooks, 9 = Mark Ryan, 10 = Ishii, 11 = Roland, 12 = McNeil, 13 = Marine w PDA, 14 = Marine w Torch, 15 = Point", 0, 15 );
 idCVar vr_flicksyncCueCards( "vr_flicksyncCueCards", "0", CVAR_INTEGER | CVAR_ARCHIVE, "How many Cue Card Power-Ups to start with. Default = 0, max = 5", 0, 5 );
+extern idCVar timescale;
 
 // Note: use the console command "teleport trigger_once_8" to skip to the Betruger meeting, and "teleport trigger_once_40" for Sergeant Kelly
 
@@ -46,6 +49,14 @@ int firstLineHeard = 0, lastLineHeard = -1;
 
 timed_spoken_line_t waitingLine = {};
 bool hasWaitingLine = false;
+
+timed_spoken_line_t pausedLine = {};
+idStr pausedEntity = "";
+bool hasPausedLine = false, endAfterPause = false;
+
+timed_spoken_line_t cueLine = {};
+idStr cueEntity = "";
+bool hasCueLine = false;
 
 static const character_map_t entityArray[] = {
 // Mars City Intro
@@ -518,14 +529,39 @@ bool Flicksync_WaitingOnLineThatIsLate(const char* lineName, uint64 startTime)
 	return true;
 }
 
+void Flicksync_SayPausedLine()
+{
+	if (!hasPausedLine)
+		return;
+	idEntity* ent = NULL;
+	ent = gameLocal.FindEntity(pausedEntity);
+	if (ent != NULL)
+	{
+		const idSoundShader* shader;
+		shader = declManager->FindSound(pausedLine.shader);
+		if (shader)
+			ent->StartSoundShader(shader, SND_CHANNEL_VOICE, 0, false, NULL);
+		else
+			ent->StartSound(pausedLine.shader, SND_CHANNEL_VOICE, 0, false, NULL);
+	}
+	hasPausedLine = false;
+}
+
 void Flicksync_PauseCutscene()
 {
-
+	g_stopTime.SetBool( true );
+	timescale.SetFloat( 0.2f );
 }
 
 void Flicksync_ResumeCutscene()
 {
-
+	timescale.SetFloat( 1.0f );
+	g_stopTime.SetBool(false);
+	Flicksync_SayPausedLine();
+	if (endAfterPause)
+	{
+		Flicksync_EndCutscene();
+	}
 }
 
 // return true if the game is allowed to play this line, or false if the user is going to say it.
@@ -544,18 +580,26 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 
 	int character = EntityToCharacter(entity, lineName);
 
+	// If the next character tries to speak before we finished our line, pause the cutscene to wait for us.
+	if (Flicksync_WaitingOnLineThatIsLate(lineName, startTime))
+	{
+		//commonVoice->Say("pausing to wait for %s", waitingLine.text);
+		// pause cutscene until we hear the line we are waiting for
+		pausedEntity = entity;
+		pausedLine.shader = lineName;
+		pausedLine.startTime = startTime;
+		pausedLine.length = length;
+		hasPausedLine = true;
+		Flicksync_PauseCutscene();
+		// don't let them say the next line until we have said ours.
+		return false;
+	}
+
 	// I don't know why, but sometimes this function is called 3 times for the same line.
 	static const char* previousLineName = "";
 	if (idStr::Cmp(lineName, previousLineName) == 0)
 		return character != vr_flicksyncCharacter.GetInteger();
 	previousLineName = lineName;
-
-	if (Flicksync_WaitingOnLineThatIsLate(lineName, startTime))
-	{
-		//commonVoice->Say("pausing to wait for %s", waitingLine.text);
-		// pause cutscene until we hear the line we are waiting for
-		Flicksync_PauseCutscene();
-	}
 
 	if (character != vr_flicksyncCharacter.GetInteger())
 	{
@@ -663,12 +707,51 @@ void Flicksync_HearLine( const char* line, int confidence, uint64 startTime, uin
 void Flicksync_NewGame()
 {
 	hasWaitingLine = false;
+	hasPausedLine = false;
+	hasCueLine = false;
 	lastLineHeard = -1; // empty ring buffer of heard lines
 	Flicksync_Score = 0;
 	Flicksync_FailsInARow = 0;
 	Flicksync_CorrectInARow = 0;
 	Flicksync_CueCards = vr_flicksyncCueCards.GetInteger(); // allow them to start with cue cards
 	Flicksync_CueCardText = "";
+}
+
+bool inCutscene = false;
+
+void Flicksync_EndCutscene()
+{
+	if (hasWaitingLine)
+	{
+		hasPausedLine = false;
+		endAfterPause = true;
+		Flicksync_PauseCutscene();
+	}
+	else
+	{
+		endAfterPause = false;
+		hasCueLine = false;
+		Flicksync_ResumeCutscene();
+		lastLineHeard = -1; // empty ring buffer of heard lines
+		Flicksync_CueCardText = "";
+		timescale.SetFloat(1.0f);
+		inCutscene = false;
+	}
+}
+
+void Flicksync_StartCutscene()
+{
+	if ( inCutscene )
+		return;
+	inCutscene = true;
+	endAfterPause = false;
+	hasPausedLine = false;
+	hasWaitingLine = false;
+	hasCueLine = false;
+	Flicksync_ResumeCutscene();
+	lastLineHeard = -1; // empty ring buffer of heard lines
+	Flicksync_CueCardText = "";
+	timescale.SetFloat( 1.0f );
 }
 
 bool Flicksync_UseCueCard()
@@ -689,5 +772,24 @@ void Flicksync_Cheat()
 	if( Flicksync_CheatCount >= 2 )
 	{
 		Flicksync_DoGameOver();
+	}
+}
+
+void Flicksync_GiveUp()
+{
+	if ( hasPausedLine || g_stopTime.GetBool() )
+	{
+		hasWaitingLine = false;
+		Flicksync_ScoreFail();
+		Flicksync_ResumeCutscene();
+	}
+	else if ( hasWaitingLine )
+	{
+		hasWaitingLine = false;
+		Flicksync_ScoreFail();
+	}
+	else
+	{
+		gameLocal.SkipCinematicScene();
 	}
 }

@@ -2014,7 +2014,10 @@ bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
 		{
 			if( game->CheckInCinematic() == true )
 			{
-				game->SkipCinematicScene();
+				if (vr_flicksyncCharacter.GetInteger())
+					Flicksync_GiveUp();
+				else
+					game->SkipCinematicScene();
 			}
 			else
 			{

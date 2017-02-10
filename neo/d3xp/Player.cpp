@@ -4533,6 +4533,7 @@ void idPlayer::EnterCinematic()
 			hud->SetCursorState(this, CURSOR_NONE, 0);
 			hud->UpdateCursorState();
 		}
+		Flicksync_StartCutscene();
 	}
 }
 
@@ -4543,6 +4544,9 @@ idPlayer::ExitCinematic
 */
 void idPlayer::ExitCinematic()
 {
+	if ( vr_flicksyncCharacter.GetInteger() )
+		Flicksync_EndCutscene();
+
 	Show();
 	
 	if( weaponEnabled && weapon.GetEntity() )
@@ -10775,8 +10779,9 @@ void idPlayer::Move()
 	}
 	const int comfortMode = vr_motionSickness.GetInteger();
 	//"	0 off | 2 = tunnel | 5 = tunnel + chaperone | 6 slow mo | 7 slow mo + chaperone | 8 tunnel + slow mo | 9 = tunnel + slow mo + chaperone
-	if (comfortMode < 2) 
+	if ( comfortMode < 2 || game->CheckInCinematic() ) 
 	{
+		this->playerView.EnableVrComfortVision( false );
 		return;
 	}
 
@@ -10792,6 +10797,8 @@ void idPlayer::Move()
 			this->playerView.EnableVrComfortVision(true);
 		}
 	}
+	else
+		this->playerView.EnableVrComfortVision(false);
 
 	if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9))
 	{
