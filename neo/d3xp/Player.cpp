@@ -12136,10 +12136,36 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 						
 			lastAxis = curAxis;
 			
-			teleportPoint = teleportAimPoint = traceResults.c.point;
-			if (hitPitch >= -90.0f && hitPitch <= -45.0f)
+			bool aimLadder = false, aimActor = false, aimElevator = false;
+			aimLadder = traceResults.c.material && (traceResults.c.material->GetSurfaceFlags() & SURF_LADDER);
+			idEntity* aimEntity = gameLocal.GetTraceEntity(traceResults);
+			if (aimEntity)
 			{
-				if (CanReachPosition(teleportAimPoint, teleportPoint))
+				if (aimEntity->IsType(idActor::Type))
+					aimActor = aimEntity->health > 0;
+				else if (aimEntity->IsType(idElevator::Type))
+					aimElevator = true;
+				else if (aimEntity->IsType(idStaticEntity::Type) || aimEntity->IsType(idLight::Type))
+				{
+					renderEntity_t *rend = aimEntity->GetRenderEntity();
+					if (rend)
+					{
+						idRenderModel *model = rend->hModel;
+						aimElevator = (model && idStr::Cmp(model->Name(), "models/mapobjects/elevators/elevator.lwo") == 0);
+					}
+				}
+			}
+
+			teleportPoint = teleportAimPoint = traceResults.c.point;
+			float beamLengthSquared = 0;
+			if (aimElevator)
+			{
+				teleportPoint = teleportAimPoint = teleportAimPoint + idVec3(0, 0, 10);
+				beamLengthSquared = (teleportPoint - beamOrigin).LengthSqr();
+			}
+			if ((hitPitch >= -90.0f && hitPitch <= -45.0f && !aimActor) || aimLadder)
+			{
+				if ((aimElevator && beamLengthSquared <= 300 * 300) || CanReachPosition(teleportAimPoint, teleportPoint))
 				{
 										
 					// pitch indicates a flat surface or <45 deg slope,
