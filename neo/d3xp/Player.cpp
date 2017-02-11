@@ -79,9 +79,6 @@ idCVar vr_teleportMaxDrop( "vr_teleportMaxDrop", "360", CVAR_FLOAT, "" );
 
 idCVar vr_teleportSlerpTime( "vr_teleportSlerpTime", "200", CVAR_FLOAT, "" );
 
-idCVar vr_teleportAimMode( "vr_teleportAimMode", "0", CVAR_INTEGER | CVAR_ARCHIVE, "0 = WeaponSight, 1 = Parabolic from Weapon, 2 = Parabolic from Off Hand" );
-
-
 /*
 idCVar tpitch( "tpitch", "0", CVAR_FLOAT, "" );
 idCVar troll( "troll", "90", CVAR_FLOAT, "" );
