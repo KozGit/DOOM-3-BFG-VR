@@ -11955,6 +11955,8 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 
 	static float parm0Val = 255.0f;
 	static float parm1Val = 1.0f;
+
+	static bool pleaseDuck = false; // Low Headroom Please Duck
 		
 	float numPoints = vr_teleportMaxPoints.GetFloat();// 24;
 	float vel = vr_teleportVel.GetFloat();
@@ -11985,6 +11987,8 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	static idMat3 beamAxis = mat3_identity;
 	
 	bool showTeleport = vr_teleport.GetInteger() > 1 && common->ButtonState(UB_TELEPORT);
+
+	pleaseDuck = false;
 
 	if ( !showTeleport || !GetTeleportBeamOrigin( beamOrigin, beamAxis ) )
 	{
@@ -12138,7 +12142,6 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 			teleportPoint = teleportAimPoint = traceResults.c.point;
 			if (hitPitch >= -90.0f && hitPitch <= -45.0f)
 			{
-				
 				if (CanReachPosition(teleportAimPoint, teleportPoint))
 				{
 										
@@ -12163,11 +12166,18 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 					clipAxis = physicsObj.GetClipModel()->GetAxis();
 
 					gameLocal.clip.Translation(trace, tracePt, tracePt, clip, clipAxis, CONTENTS_SOLID, NULL);
+					// Carl: check if we're on stairs
+					if (trace.fraction < 1.0f)
+					{
+						tracePt.z += pm_stepsize.GetFloat();
+						gameLocal.clip.Translation(trace, tracePt, tracePt, clip, clipAxis, CONTENTS_SOLID, NULL);
+					}
 
 					if (trace.fraction < 1.0f)
 					{
 						aimValidForTeleport = false;
 						isShowing = false;
+						pleaseDuck = true;
 					}
 					else
 					{
@@ -12244,6 +12254,8 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[1] = 0;
 		teleportTarget.GetEntity()->Show();
 		isShowing = false;
+		if ( pleaseDuck )
+			gameRenderWorld->DrawText( "Low Headroom\nPlease Duck", teleportPoint + idVec3( 0, 0, 18 ), 0.2f, colorOrange, viewAngles.ToMat3() );
 	}
 	else
 	{
