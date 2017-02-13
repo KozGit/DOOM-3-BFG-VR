@@ -79,27 +79,14 @@ idCVar vr_teleportMaxDrop( "vr_teleportMaxDrop", "360", CVAR_FLOAT, "" );
 
 idCVar vr_teleportSlerpTime( "vr_teleportSlerpTime", "200", CVAR_FLOAT, "" );
 
-/*
-idCVar tpitch( "tpitch", "0", CVAR_FLOAT, "" );
-idCVar troll( "troll", "90", CVAR_FLOAT, "" );
-idCVar tyaw( "tyaw", "0", CVAR_FLOAT, "" );
-idCVar tmode( "tmode", "0", CVAR_INTEGER, "" );
-idCVar tinv( "tinv", "0", CVAR_INTEGER, "" );
-idCVar tneg( "tneg", "0", CVAR_INTEGER, "" );
-*/
+idCVar vr_teleportSkipHandrails( "vr_teleportSkipHandrails", "0", CVAR_INTEGER | CVAR_ARCHIVE , "Teleport aim ingnores handrails. 1 = true" );
+idCVar vr_teleportShowAimAssist( "vr_teleportShowAimAssist", "0", CVAR_INTEGER | CVAR_ARCHIVE , "Move telepad target to reflect aim assist. 1 = true" );
 
-/*
-were for testing
-
-idCVar qtx( "qtx", "0.0", CVAR_FLOAT, "" );
-idCVar qty( "qty", "0.0", CVAR_FLOAT, "" );
-idCVar qtz( "qtz", "0.0", CVAR_FLOAT, "" );
- */
+/* were for testing
 idCVar ftx( "ftx", "0", CVAR_FLOAT, "" );
 idCVar fty( "fty", "0", CVAR_FLOAT, "" );
 idCVar ftz( "ftz", "0", CVAR_FLOAT, "" );
-
-
+*/
 
 extern idCVar g_demoMode;
 
@@ -125,7 +112,6 @@ idAngles pdaAngle2(0,0,76.5);
 idAngles pdaAngle3(0,0,0);
 
 extern idCVar g_useWeaponDepthHack;
-
 
 
 /*
@@ -11847,7 +11833,8 @@ void idPlayer::UpdateLaserSight()
 
 bool idPlayer::GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis ) // returns true if the teleport beam should be displayed
 {
-	const idVec3 beamOff[2] = { idVec3( 2.5f, 0.0f, 1.0f ), idVec3( 2.5f, 0.0f, 1.5f ) };
+	//const idVec3 beamOff[2] = { idVec3( 2.5f, 0.0f, 1.0f ), idVec3( 2.5f, 0.0f, 1.5f ) };
+	const idVec3 beamOff[2] = { idVec3( 4.5f, 0.0f, 1.0f ), idVec3( 4.5f, 0.0f, 1.5f ) };
 
 	if ( gameLocal.inCinematic || AI_DEAD || game->IsPDAOpen() )
 	{
@@ -11891,11 +11878,27 @@ bool idPlayer::GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis ) // 
 				beamAxis = weapon->viewWeaponAxis;
 			}
 		}
+		else // had a valid muzzle;
+		{
+			beamOrigin -= 2 * beamAxis[1]; // if coming from the muzzle, move 2 in down, looks better when it doesn't interfere with the laser sight.
+		}
+
+		if ( weapon->IdentifyWeapon() == WEAPON_CHAINSAW )
+		{
+			beamOrigin += 6 * beamAxis[0]; // move the beam origin 6 inches forward
+		}
+		else
+		{
+			beamOrigin += 4 * beamAxis[0]; // move the beam origin 4 inches forward
+		}
+
+
 	}
 	else if ( vr_teleport.GetInteger() == 4 ) // beam originates from in front of the head
 	{
 		beamAxis = commonVr->lastHMDViewAxis;
 		beamOrigin = commonVr->lastHMDViewOrigin + 12 * beamAxis[0];
+		beamOrigin = beamOrigin + 5 * beamAxis[2];
 	}
 
 	else // beam originates from the off hand, use the flashlight if in the hand;
@@ -11903,7 +11906,7 @@ bool idPlayer::GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis ) // 
 		if ( commonVr->currentFlashlightPosition == FLASH_HAND ) // flashlight is in the hand, so originate the beam slightly in front of the flashlight.
 		{
 			beamAxis = flashlight->GetRenderEntity()->axis;
-			beamOrigin = flashlight->GetRenderEntity()->origin + 6 * beamAxis[0];
+			beamOrigin = flashlight->GetRenderEntity()->origin + 10 * beamAxis[0];
 		}
 		else // just send it from the hand.
 		{
@@ -11987,10 +11990,21 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	idVec3 jpos = vec3_zero;
 
 	static bool isShowing = false;
+	static bool wasShowing = false;
+
 	static idVec3 beamOrigin = vec3_zero;
 	static idMat3 beamAxis = mat3_identity;
 	
 	bool showTeleport = vr_teleport.GetInteger() > 1 && common->ButtonState(UB_TELEPORT);
+	static bool lastShowTeleport = false;
+
+	
+	if ( !lastShowTeleport )
+	{
+		isShowing = false;
+	}
+
+	lastShowTeleport = showTeleport;
 
 	pleaseDuck = false;
 
@@ -12036,10 +12050,12 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 			xDelt = vx * t;
 			next = beamOrigin + forward[0] * xDelt;
 			i = numPoints;
+						
 		}
 		
 		next.z = zDelt;
-		
+		teleportPoint = teleportAimPoint = next;
+
 		padAxis = forward;
 		
 		if ( gameLocal.clip.TracePoint( traceResults, last, next, MASK_SHOT_RENDERMODEL, this ) )
@@ -12055,7 +12071,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 			// Carl: It does break teleporting onto handrails, which I intended to be able to do.
 
 			
-			if ( hitPitch != -90 )
+			if ( vr_teleportSkipHandrails.GetInteger() == 1 && hitPitch != -90 )
 			{
 				if ( idStr::FindText( hitMat, "base_trim" ) > -1 ||
 					idStr::FindText( hitMat, "swatch" ) > -1 ||
@@ -12063,7 +12079,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 					idStr::FindText( hitMat, "mchangar3" ) > -1 )
 				{
 
-					common->Printf( "Beam hit rejected: material %s\n", hitMat );
+					common->Printf( "Beam hit rejected: material %s hitpitch %f\n", hitMat,hitPitch );
 					last = next;
 					endPos = last;
 					continue;
@@ -12071,7 +12087,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 
 			}
 								
-			common->Printf( "Beam hit material = %s\n", traceResults.c.material->GetName() );
+			//common->Printf( "Beam hit material = %s\n", traceResults.c.material->GetName() );
 			next = traceResults.c.point;
 			endPos = next;
 			
@@ -12115,7 +12131,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 			{
 
 				lastHitNormal = hitNormal;
-
+								
 				if ( slerpEnd - Sys_Milliseconds() <= 0 )
 				{
 					lastQ = lastAxis.ToQuat();
@@ -12129,7 +12145,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 				nextQ = curAxis.ToQuat();
 
 			}
-
+			
 			if ( slerpEnd - Sys_Milliseconds() <= 0 )
 			{
 				padAxis = curAxis;
@@ -12186,12 +12202,14 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 					static idVec3 tracePt;
 					tracePt = teleportPoint;
 
+					/*
+					no longer needed, as the clip test for stairs will pass on slopes as well.
 					if (fabs(hitPitch) != 90)
 					{
 						// this is a gross hack among grosser hacks so the clip test will pass on sloped floors.
 						tracePt.z += (pm_bboxwidth.GetFloat() / 1.9f);
 					}
-
+					*/
 					clip = physicsObj.GetClipModel();
 					clipAxis = physicsObj.GetClipModel()->GetAxis();
 
@@ -12212,17 +12230,25 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 					else
 					{
 						aimValidForTeleport = true;
+						if ( !isShowing )
+						{
+							slerpEnd = Sys_Milliseconds() - 100;
+							padAxis = curAxis;
+							lastAxis = curAxis;
+						}
+												
 						teleportTarget.GetEntity()->GetRenderEntity()->weaponDepthHack = false;
 						isShowing = true;
 					}
 
-					if (!isShowing)
+					/*
+					if ( !isShowing )
 					{
-						slerpEnd = Sys_Milliseconds() - 10;
+						slerpEnd = Sys_Milliseconds() - 100;
 						padAxis = curAxis;
 						lastAxis = curAxis;
 					}
-					
+					*/
 				}
 			}
 			
@@ -12265,18 +12291,25 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 		next = next + forward[0] * xDelt;
 		next.z = zDelt;
 
-		jpos = (next - beamOrigin) * forwardInv;
+		jpos = ( next - beamOrigin ) * forwardInv;
 		teleportTargetAnimator->SetJointPos( teleportBeamJoint[i], JOINTMOD_WORLD_OVERRIDE, jpos );
 	}
 		
-	jpos = (endPos - beamOrigin) * forwardInv;
+	jpos = ( endPos - beamOrigin ) * forwardInv;
 	teleportTargetAnimator->SetJointPos( teleportBeamJoint[23], JOINTMOD_WORLD_OVERRIDE, jpos );
-	jpos = (teleportPoint - beamOrigin) * forwardInv;
+	
+	if ( vr_teleportShowAimAssist.GetInteger() )
+	{
+		jpos = (teleportPoint - beamOrigin) * forwardInv;
+	}
+	else
+	{
+		jpos = (teleportAimPoint - beamOrigin) * forwardInv;
+	}
+		
 	teleportTargetAnimator->SetJointPos( teleportPadJoint, JOINTMOD_WORLD_OVERRIDE, jpos );
-
 	teleportTargetAnimator->SetJointAxis( teleportPadJoint, JOINTMOD_WORLD_OVERRIDE, padAxis );
-
-
+	
 	if ( !aimValidForTeleport )
 	{
 		// this will show the beam, but hide the teleport target
@@ -12292,6 +12325,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[0] = 255;
 		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[1] = 1;
 		teleportTarget.GetEntity()->Show();
+		isShowing = true;
 	}
 	
 	teleportTarget.GetEntity()->Present();

@@ -44,6 +44,8 @@ extern idCVar r_windowY;
 extern idCVar r_windowWidth;
 extern idCVar r_windowHeight;
 
+idCVar vr_mouseCapture( "vr_mouseCapture", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Constrain the mouse to the game window while running." );
+
 static void WIN_DisableAltTab()
 {
 	if( s_alttab_disabled || win32.win_allowAltTab.GetBool() )
@@ -199,8 +201,11 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 						}
 					}
 					//koz
-					GetWindowRect( hWnd, &rect );
-					ClipCursor( &rect );
+					if ( vr_mouseCapture.GetInteger() == 1 )
+					{
+						GetWindowRect( hWnd, &rect );
+						ClipCursor( &rect );
+					}
 					//koz end;
 				}
 			}
@@ -229,8 +234,11 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			}
 			
 			//koz
-			GetWindowRect( hWnd, &r );
-			ClipCursor( &r );
+			if ( vr_mouseCapture.GetInteger() == 1 )
+			{
+				GetWindowRect( hWnd, &r );
+				ClipCursor( &r );
+			}
 			//koz end;
 			
 			
@@ -254,12 +262,14 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			GLW_WM_CREATE( hWnd );
 			
 			//koz
-			RECT r;
-			GetWindowRect( hWnd, &r );
-			ClipCursor( &r );
+			if ( vr_mouseCapture.GetInteger() == 1 )
+			{
+				RECT r;
+				GetWindowRect( hWnd, &r );
+				ClipCursor( &r );
+			}
 			//koz end;
 			
-
 			break;
 			
 		case WM_DESTROY:
@@ -298,19 +308,25 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 					SetCursor( NULL );
 				}
 				//koz
-				RECT r;
-				GetWindowRect( hWnd, &r );
-				ClipCursor( &r );
+				if ( vr_mouseCapture.GetInteger() == 1 )
+				{
+					RECT r;
+					GetWindowRect( hWnd, &r );
+					ClipCursor( &r );
+				}
 				//koz end;
 			}
 			
 			if( fActive == WA_INACTIVE )
 			{
 				//koz begin
-				RECT desktop;
-				HWND hDesktop = GetDesktopWindow();
-				GetWindowRect( hDesktop, &desktop );
-				ClipCursor( &desktop );
+				if ( vr_mouseCapture.GetInteger() == 1 )
+				{
+					RECT desktop;
+					HWND hDesktop = GetDesktopWindow();
+					GetWindowRect( hDesktop, &desktop );
+					ClipCursor( &desktop );
+				}
 				//koz end
 
 				win32.movingWindow = false;

@@ -313,6 +313,7 @@ teleportTargetCircle
 		red parm0
 		green parm0
 		blue parm0
+		alpha 0.5
 	}
   
 } 			
@@ -321,6 +322,7 @@ teleportTargetCenter
 {
 	translucent
 	noShadows
+	noselfShadow
 	twoSided
 	nonsolid
 	qer_editorimage textures/decals/telemars.tga
@@ -337,6 +339,7 @@ teleportTargetFX
 {
 	translucent
 	noShadows
+	noselfShadow
 	twoSided
 	nonsolid
 	qer_editorimage textures/decals/telemars.tga
@@ -365,6 +368,7 @@ teleportTargetBeamBlue
 {
 	translucent
 	noShadows
+	noselfShadow
 	twoSided
 	nonsolid
 	
@@ -394,5 +398,100 @@ teleportTargetBeamBlue
 	}
 }
  
+teleportTargetCylinder
+{
+	translucent
+	noShadows
+	noSelfShadow
+	twoSided
+	nonsolid
+	qer_editorimage textures/decals/telemars.tga
+	
+    {
+		blend	add
+		map 	models/images/telepadcylinder.tga
+  		rgb			guiLightTable[ time *.15 ] * parm1 
+		scroll time * 0.025,0
+
+	} 
+ 
+	{
+		blend	add
+  		map 	models/images/telepad_swirl.tga
+		rgb			guiLightTable[ time *.25 ] * parm1 
+		scroll time * -.129,0
+	} 			
+ 				
+	{
+		blend	add
+  		map 	models/images/telepad_swirl2.tga
+		rgb			guiLightTable[ time *.15 ] * parm1 
+		scroll time * .219,0
+	} 			
   
+}
+
+teleportTargetBeamoriginStar
+{
+	noSelfShadow
+	noshadows
+	//twosided
+	translucent
+	discrete
+	nonsolid
+	noimpact
+	deform sprite
+
+	qer_editorimage		textures/particles/plasma.tga
+
+	{
+	    blend  add   // GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		map    textures/particles/plasma2.tga
+		//rotate	parm5 * time
+		rotate time * .03
+		rgb		bathroom2table[ time * 3 ] * .25
+		clamp
+
+	}
+	
+
+}
+
+
+
+teleportTargetBeamoriginBall
+{
+	noSelfShadow
+	noshadows
+	//twosided
+	translucent
+	discrete
+	nonsolid
+	noimpact
+	deform sprite
+
+	qer_editorimage		textures/particles/plasma.tga
+
+	{
+	    blend  add   // GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		map    textures/particles/plasma.tga
+		rgb		bathroom2table[ time * 3 ] *.75
+		rotate time * .03
+		clamp
+
+	}
+	{
+	    blend  add   // GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		map    textures/particles/plasma.tga
+		rgb		bathroom2table[ time * 3 ] * .75
+		rotate time * -.03
+		clamp
+
+	}
+	
+
+}
+
+
+
 }
