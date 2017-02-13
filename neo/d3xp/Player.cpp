@@ -4277,7 +4277,7 @@ void idPlayer::DrawHUD( idMenuHandler_HUD* _hudManager )
 {
 	SCOPED_PROFILE_EVENT( "idPlayer::DrawHUD" );
 	// Koz begin
-	if ( game->isVR && vr_hudType.GetInteger() == VR_HUD_NONE && !vr_flickCharacter.GetInteger() )
+	if ( game->isVR && vr_hudType.GetInteger() == VR_HUD_NONE && !vr_flicksyncCharacter.GetInteger() )
 	{
 		return;
 	}
@@ -4288,7 +4288,7 @@ void idPlayer::DrawHUD( idMenuHandler_HUD* _hudManager )
 		return;
 	}
 	
-	if ( ( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || !g_showHud.GetBool() ) && !vr_flickCharacter.GetInteger() )
+	if ( ( !weapon.GetEntity() || influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || !g_showHud.GetBool() ) && !vr_flicksyncCharacter.GetInteger() )
 	{
 		return;
 	}
@@ -4421,7 +4421,7 @@ void idPlayer::DrawHUDVR( idMenuHandler_HUD* _hudManager )
 		return;
 	}
 
-	if ((influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || vr_hudType.GetInteger() == VR_HUD_NONE) && !vr_flickCharacter.GetInteger())
+	if ((influenceActive != INFLUENCE_NONE || privateCameraView || gameLocal.GetCamera() || vr_hudType.GetInteger() == VR_HUD_NONE) && !vr_flicksyncCharacter.GetInteger())
 	{
 		return;
 	}
@@ -4477,7 +4477,7 @@ void idPlayer::EnterCinematic()
 	StopSound( SND_CHANNEL_PDA_AUDIO, false );
 	StopSound( SND_CHANNEL_PDA_VIDEO, false );
 	
-	if( hudManager && !vr_flickCharacter.GetInteger() )
+	if( hudManager && !vr_flicksyncCharacter.GetInteger() )
 	{
 		hudManager->SetRadioMessage( false );
 	}
@@ -4516,7 +4516,7 @@ void idPlayer::EnterCinematic()
 	AI_TURN_LEFT	= false;
 	AI_TURN_RIGHT	= false;
 
-	if( vr_flickCharacter.GetInteger() )
+	if( vr_flicksyncCharacter.GetInteger() )
 	{
 		HideTip();
 		if( hud )
@@ -4533,6 +4533,7 @@ void idPlayer::EnterCinematic()
 			hud->SetCursorState(this, CURSOR_NONE, 0);
 			hud->UpdateCursorState();
 		}
+		Flicksync_StartCutscene();
 	}
 }
 
@@ -4543,6 +4544,9 @@ idPlayer::ExitCinematic
 */
 void idPlayer::ExitCinematic()
 {
+	if ( vr_flicksyncCharacter.GetInteger() )
+		Flicksync_EndCutscene();
+
 	Show();
 	
 	if( weaponEnabled && weapon.GetEntity() )
@@ -10775,8 +10779,9 @@ void idPlayer::Move()
 	}
 	const int comfortMode = vr_motionSickness.GetInteger();
 	//"	0 off | 2 = tunnel | 5 = tunnel + chaperone | 6 slow mo | 7 slow mo + chaperone | 8 tunnel + slow mo | 9 = tunnel + slow mo + chaperone
-	if (comfortMode < 2) 
+	if ( comfortMode < 2 || game->CheckInCinematic() ) 
 	{
+		this->playerView.EnableVrComfortVision( false );
 		return;
 	}
 
@@ -10792,6 +10797,8 @@ void idPlayer::Move()
 			this->playerView.EnableVrComfortVision(true);
 		}
 	}
+	else
+		this->playerView.EnableVrComfortVision(false);
 
 	if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9))
 	{
@@ -12340,7 +12347,7 @@ void idPlayer::UpdateVrHud()
 	else
 	{
 		// always show HUD if in flicksync
-		if ( vr_flickCharacter.GetInteger() )
+		if ( vr_flicksyncCharacter.GetInteger() )
 			hudEntity.allowSurfaceInViewID = 0;
 		else
 			hudEntity.allowSurfaceInViewID = entityNumber + 1;
@@ -12349,11 +12356,20 @@ void idPlayer::UpdateVrHud()
 		{
 			hudPitch = vr_hudType.GetInteger() == VR_HUD_LOOK_DOWN ? vr_hudPosAngle.GetFloat() : 10.0f;
 			
-			GetViewPos(hudOrigin, hudAxis);
-			hudAxis = idAngles( hudPitch, viewAngles.yaw, 0.0f ).ToMat3();
-			//hudOrigin = GetEyePosition();
-			
-			hudOrigin += hudAxis[0] * vr_hudPosDis.GetFloat(); 
+			float yaw;
+			if( gameLocal.inCinematic )
+			{
+				yaw = commonVr->lastHMDViewAxis.ToAngles().yaw;
+				hudOrigin = commonVr->lastHMDViewOrigin;
+			}
+			else
+			{
+				GetViewPos( hudOrigin, hudAxis );
+				yaw = viewAngles.yaw;
+			}
+			hudAxis = idAngles( hudPitch, yaw, 0.0f ).ToMat3();
+
+			hudOrigin += hudAxis[0] * vr_hudPosDis.GetFloat();
 			hudOrigin += hudAxis[1] * vr_hudPosHor.GetFloat();
 			hudOrigin.z += vr_hudPosVer.GetFloat();
 		}

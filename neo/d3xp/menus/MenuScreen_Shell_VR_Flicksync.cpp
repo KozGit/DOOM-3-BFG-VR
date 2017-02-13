@@ -76,6 +76,14 @@ void idMenuScreen_Shell_VR_Flicksync::Initialize( idMenuHandler* data )
 	options->AddChild(control);
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType(OPTION_SLIDER_TEXT);
+	control->SetLabel("Cue Cards");
+	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Flicksync::FLICKSYNC_FIELD_CUECARDS);
+	control->SetupEvents(DEFAULT_REPEAT_TIME, options->GetChildren().Num());
+	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Flicksync::FLICKSYNC_FIELD_CUECARDS);
+	options->AddChild(control);
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType(OPTION_BUTTON_TEXT);
 	control->SetLabel("Play");
 	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Flicksync::FLICKSYNC_FIELD_NEWGAME);
@@ -241,7 +249,9 @@ bool idMenuScreen_Shell_VR_Flicksync::HandleAction( idWidgetAction& action, cons
 			switch ( selectionIndex ) {
 			  case idMenuDataSource_Shell_VR_Flicksync::FLICKSYNC_FIELD_NEWGAME:
 				{
-					switch (vr_flickCharacter.GetInteger())
+					// reset score to 0
+					Flicksync_NewGame();
+					switch (vr_flicksyncCharacter.GetInteger())
 					{
 						case FLICK_RECEPTION:
 							cmdSystem->AppendCommandText("devmap game/mars_city1\n");
@@ -330,7 +340,8 @@ idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Gameplay_Options::Loa
 */
 void idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicksync::LoadData() {
 
-	originalFlickCharacter = vr_flickCharacter.GetInteger();
+	originalFlicksyncCharacter = vr_flicksyncCharacter.GetInteger();
+	originalFlicksyncCueCards = vr_flicksyncCueCards.GetInteger();
 }
 
 /*
@@ -363,7 +374,15 @@ void idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicksync::Adjus
 	{
 		static const int numValues = 12;
 		static const int values[numValues] = { FLICK_NONE, FLICK_BETRUGER, FLICK_SWANN, FLICK_CAMPBELL, FLICK_TOWER, FLICK_RECEPTION, FLICK_KELLY, FLICK_ISHII, FLICK_MCNEIL, FLICK_MARINE_PDA, FLICK_MARINE_TORCH, FLICK_POINT };
-		vr_flickCharacter.SetInteger( AdjustOption( vr_flickCharacter.GetInteger(), values, numValues, adjustAmount ) );
+		vr_flicksyncCharacter.SetInteger( AdjustOption( vr_flicksyncCharacter.GetInteger(), values, numValues, adjustAmount ) );
+		break;
+
+	}
+	case FLICKSYNC_FIELD_CUECARDS:
+	{
+		static const int numValues = 6;
+		static const int values[numValues] = { 0, 1, 2, 3, 4, 5 };
+		vr_flicksyncCueCards.SetInteger( AdjustOption( vr_flicksyncCueCards.GetInteger(), values, numValues, adjustAmount ) );
 		break;
 
 	}
@@ -389,7 +408,12 @@ idSWFScriptVar idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicks
 	case FLICKSYNC_FIELD_CHARACTER:
 	{
 		const char* names[] = { "None", "Dr. Betruger", "Elliot Swann", "Jack Campbell", "Darkstar", "S.L. Medley (Tower)", "Reception", "Sergeant Kelly", "Brooks (Mars Sec)", "Mark Ryan (airlock)", "Ishii (missing scientist)", "Roland (ceiling)", "Dr. Elizabeth McNeil", "Marine with PDA", "Marine with Torch", "Point (explosives)" };
-		return names[vr_flickCharacter.GetInteger()];
+		return names[vr_flicksyncCharacter.GetInteger()];
+	}
+	case FLICKSYNC_FIELD_CUECARDS:
+	{
+		const char* names[] = { "0 (default)", "1", "2", "3", "4", "5" };
+		return names[vr_flicksyncCueCards.GetInteger()];
 	}
 
 	}
@@ -403,7 +427,11 @@ idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Gameplay_Options::IsD
 */
 bool idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicksync::IsDataChanged() const {
 
-	if (originalFlickCharacter != vr_flickCharacter.GetInteger())
+	if (originalFlicksyncCharacter != vr_flicksyncCharacter.GetInteger())
+	{
+		return true;
+	}
+	if (originalFlicksyncCueCards != vr_flicksyncCueCards.GetInteger())
 	{
 		return true;
 	}

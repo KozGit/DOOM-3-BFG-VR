@@ -666,7 +666,7 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		// Flicksync camera
 		idEntity* ent = NULL;
 		static idEntity* hiddenEnt = NULL;
-		switch (vr_flickCharacter.GetInteger())
+		switch (vr_flicksyncCharacter.GetInteger())
 		{
 		case FLICK_BETRUGER:
 			ent = gameLocal.FindEntity("marscity_cinematic_betruger_1");
@@ -704,6 +704,8 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 			break;
 		case FLICK_TOWER:
 			ent = gameLocal.FindEntity("marscity_sec_window_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("marscity_sec_window2_1");
 			if (!ent)
 				ent = gameLocal.FindEntity("erebus1_intro_scientist_1");
 			break;
@@ -786,7 +788,7 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 			break;
 		}
 		// only use character if it's not hidden, and it's within range of current camera
-		if ( ent && ( ent == hiddenEnt || !ent->IsHidden() ) && ( ent->GetPhysics()->GetOrigin() - view->vieworg ).LengthSqr() <= 400*400 )
+		if ( ent && ( ent == hiddenEnt || !ent->IsHidden() ) && ( ent->GetPhysics()->GetOrigin() - view->vieworg ).LengthSqr() <= 500*500 )
 		{
 			idVec3 camPos = view->vieworg;
 			if (ent->GetPhysics()->IsType(idPhysics_Actor::Type))

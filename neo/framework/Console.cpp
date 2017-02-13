@@ -343,34 +343,120 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 	if (leftY < centerY)
 		leftY = centerY;
 
-	const char* s = va("SCORE: %i", FlickSync_Score);
+	const char* s = va("SCORE: %i", Flicksync_Score);
 	int w = strlen(s) * BIGCHAR_WIDTH;
 	renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, colorWhite, true);
 	centerY += BIGCHAR_HEIGHT + 4;
 
-	if (FlickSync_CueCards > 0)
+	if (Flicksync_CueCards > 0)
 	{
-		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, va("Cue cards: %i", FlickSync_CueCards), colorWhite, true);
+		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, va("Cue cards: %i", Flicksync_CueCards), colorWhite, true);
 		leftY += SMALLCHAR_HEIGHT + 4;
 	}
 
 	if (!gameLocal.inCinematic)
 		return;
 
-	if (FlickSync_CorrectInARow > 0)
+	if (Flicksync_CorrectInARow > 0)
 	{
-		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, va("Correct in a row: %i", FlickSync_CorrectInARow), colorWhite, true);
+		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, va("Correct in a row: %i", Flicksync_CorrectInARow), colorWhite, true);
 		leftY += SMALLCHAR_HEIGHT + 4;
 	}
 	else
 	{
 		idVec4 color;
-		if (FlickSync_FailsInARow > 0)
+		if (Flicksync_FailsInARow > 0 || Flicksync_GameOver)
 			color = colorRed;
 		else
 			color = colorWhite;
-		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, va("Lives: %i", 3 - FlickSync_FailsInARow), color, true);
-		leftY += SMALLCHAR_HEIGHT + 4;
+		if (Flicksync_GameOver)
+		{
+			const char* s = "GAME OVER";
+			int w = strlen(s) * BIGCHAR_WIDTH;
+			renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, color, true);
+			centerY += BIGCHAR_HEIGHT + 4;
+		}
+		else if (Flicksync_FailsInARow == 2)
+		{
+			const char* s = "FINAL WARNING";
+			int w = strlen(s) * BIGCHAR_WIDTH;
+			renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, color, true);
+			centerY += BIGCHAR_HEIGHT + 4;
+		}
+		else
+		{
+			renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, va("Lives: %i", 3 - Flicksync_FailsInARow), color, true);
+			leftY += SMALLCHAR_HEIGHT + 4;
+		}
+	}
+
+	if ( Flicksync_CueCardActive )
+	{
+		if ( leftY < centerY )
+			leftY = centerY;
+		//renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, Flicksync_CueCardText.c_str(), colorWhite, true);
+		renderSystem->SetColor( colorWhite );
+
+		const char *text_p = Flicksync_CueCardText.c_str();
+		const char *end_p = text_p + idStr::Length( text_p );
+
+		while (text_p != end_p)
+		{
+			for (int x = 0; x < LINE_WIDTH && text_p != end_p; x++, text_p++)
+			{
+				if (*text_p == ' ')
+					continue;
+				if (*text_p == '\n')
+				{
+					text_p++;
+					break;
+				}
+				renderSystem->DrawSmallChar( LOCALSAFE_LEFT + (x + 1)*SMALLCHAR_WIDTH, idMath::Ftoi(leftY), *text_p );
+			}
+			leftY += SMALLCHAR_HEIGHT + 4;
+		}
+	}
+	// Subtitles for the cue spoken by the other character that we must respond to
+	if (Flicksync_CueActive)
+	{
+		float y = LOCALSAFE_BOTTOM - 10 * (BIGCHAR_HEIGHT + 4);
+		if (y < leftY)
+			y = leftY;
+		if (y < centerY)
+			y = centerY;
+		renderSystem->SetColor(colorYellow);
+
+		const char *text_p = Flicksync_CueText.c_str();
+		const char *end_p = text_p + idStr::Length(text_p);
+
+		while (text_p != end_p)
+		{
+			for (int x = 0; x < LINE_WIDTH && text_p != end_p; x++, text_p++)
+			{
+				if (*text_p == ' ')
+					continue;
+				if (*text_p == '\n')
+				{
+					text_p++;
+					break;
+				}
+				renderSystem->DrawSmallChar(LOCALSAFE_LEFT + (x + 1)*SMALLCHAR_WIDTH, idMath::Ftoi(y), *text_p);
+			}
+			y += SMALLCHAR_HEIGHT + 4;
+		}
+		{
+			const char* s = "FINAL DIALOGUE WARNING!";
+			int w = strlen(s) * SMALLCHAR_WIDTH;
+			static int flash = 0;
+			flash++;
+			if (flash > 20)
+				flash = 0;
+			if (flash < 10)
+			{
+				renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(y) + 2, s, colorRed, true);
+			}
+			y += SMALLCHAR_HEIGHT + 4;
+		}
 	}
 }
 
@@ -1504,7 +1590,7 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 		righty = DrawVRWip( righty );
 	}
 	// koz end
-	if ( vr_flickCharacter.GetInteger() )
+	if ( vr_flicksyncCharacter.GetInteger() )
 	{
 		DrawFlicksync( lefty, centery );
 	}
