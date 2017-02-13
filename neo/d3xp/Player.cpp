@@ -79,9 +79,6 @@ idCVar vr_teleportMaxDrop( "vr_teleportMaxDrop", "360", CVAR_FLOAT, "" );
 
 idCVar vr_teleportSlerpTime( "vr_teleportSlerpTime", "200", CVAR_FLOAT, "" );
 
-idCVar vr_teleportAimMode( "vr_teleportAimMode", "0", CVAR_INTEGER | CVAR_ARCHIVE, "0 = WeaponSight, 1 = Parabolic from Weapon, 2 = Parabolic from Off Hand" );
-
-
 /*
 idCVar tpitch( "tpitch", "0", CVAR_FLOAT, "" );
 idCVar troll( "troll", "90", CVAR_FLOAT, "" );
@@ -11562,7 +11559,7 @@ void idPlayer::UpdateLaserSight()
 
 	// Carl: teleport
 	static bool oldTeleport = false;
-	bool showTeleport = vr_teleport.GetInteger() == 1 || ( vr_teleport.GetInteger() > 0 && common->ButtonState( UB_TELEPORT ) );
+	bool showTeleport = vr_teleport.GetInteger() == 1; // only show the teleport gun cursor if we're teleporting using the gun aim mode
 	showTeleport = showTeleport && !AI_DEAD && !gameLocal.inCinematic && !game->IsPDAOpen();
 
 	// check if lasersight should be hidden
@@ -11857,12 +11854,12 @@ bool idPlayer::GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis ) // 
 		return false;
 	}
 
-	if ( vr_teleportAimMode.GetInteger() == 0 )// teleport aim mode is to use the standard weaponsight, so just return.
+	if ( vr_teleport.GetInteger() == 1 )// teleport aim mode is to use the standard weaponsight, so just return.
 	{
 		return false;
 	}
 
-	if ( vr_teleportAimMode.GetInteger() == 1 )// teleport aim origin from the weapon.
+	if ( vr_teleport.GetInteger() == 2 + vr_weaponHand.GetInteger() )// teleport aim origin from the weapon.
 	{
 		if ( !weapon.GetEntity()->ShowCrosshair() ||
 			weapon->IsHidden() ||
@@ -11894,6 +11891,11 @@ bool idPlayer::GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis ) // 
 				beamAxis = weapon->viewWeaponAxis;
 			}
 		}
+	}
+	else if ( vr_teleport.GetInteger() == 4 ) // beam originates from in front of the head
+	{
+		beamAxis = commonVr->lastHMDViewAxis;
+		beamOrigin = commonVr->lastHMDViewOrigin + 12 * beamAxis[0];
 	}
 
 	else // beam originates from the off hand, use the flashlight if in the hand;
@@ -11957,6 +11959,8 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 
 	static float parm0Val = 255.0f;
 	static float parm1Val = 1.0f;
+
+	static bool pleaseDuck = false; // Low Headroom Please Duck
 		
 	float numPoints = vr_teleportMaxPoints.GetFloat();// 24;
 	float vel = vr_teleportVel.GetFloat();
@@ -11986,16 +11990,21 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	static idVec3 beamOrigin = vec3_zero;
 	static idMat3 beamAxis = mat3_identity;
 	
-	aimValidForTeleport = false;
-	
-	if ( vr_teleport.GetInteger() == 0 || !GetTeleportBeamOrigin( beamOrigin, beamAxis ) )
+	bool showTeleport = vr_teleport.GetInteger() > 1 && common->ButtonState(UB_TELEPORT);
+
+	pleaseDuck = false;
+
+	if ( !showTeleport || !GetTeleportBeamOrigin( beamOrigin, beamAxis ) )
 	{
-		aimValidForTeleport = false;
+		if (vr_teleport.GetInteger() != 1)
+			aimValidForTeleport = false;
 		teleportTarget.GetEntity()->Hide();
 		return;
 	}
 	
-	forward = idAngles( 0.0f, beamAxis.ToAngles().yaw, 0.0f ).ToMat3();
+	aimValidForTeleport = false;
+
+	forward = idAngles(0.0f, beamAxis.ToAngles().yaw, 0.0f).ToMat3();
 	teleportTarget.GetEntity()->SetAxis( forward );
 		
 	beamAngle = idMath::ClampFloat( -65.0f, 65.0f, beamAxis.ToAngles().pitch );
@@ -12043,6 +12052,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 
 			// handrails really make aiming suck, so skip any non floor hits that consist of these materials
 			// really need to verify this doesn't break anything.
+			// Carl: It does break teleporting onto handrails, which I intended to be able to do.
 
 			
 			if ( hitPitch != -90 )
@@ -12133,51 +12143,85 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 						
 			lastAxis = curAxis;
 			
-			if ( hitPitch >= -90.0f && hitPitch <= -45.0f )
+			bool aimLadder = false, aimActor = false, aimElevator = false;
+			aimLadder = traceResults.c.material && (traceResults.c.material->GetSurfaceFlags() & SURF_LADDER);
+			idEntity* aimEntity = gameLocal.GetTraceEntity(traceResults);
+			if (aimEntity)
 			{
-				
-				// pitch indicates a flat surface or <45 deg slope,
-				// check to see if a clip test passes at the location before
-				// checking reachability. 
-				// the clip test will prevent us from teleporting too close to walls.
-
-				static trace_t trace;
-				static idClipModel* clip;
-				static idMat3 clipAxis;
-				static idVec3 tracePt;
-				tracePt = traceResults.c.point;
-				
-				if ( fabs( hitPitch ) != 90 )
+				if (aimEntity->IsType(idActor::Type))
+					aimActor = aimEntity->health > 0;
+				else if (aimEntity->IsType(idElevator::Type))
+					aimElevator = true;
+				else if (aimEntity->IsType(idStaticEntity::Type) || aimEntity->IsType(idLight::Type))
 				{
-					// this is a gross hack among grosser hacks so the clip test will pass on sloped floors.
-					tracePt.z += (pm_bboxwidth.GetFloat() / 1.9f );
+					renderEntity_t *rend = aimEntity->GetRenderEntity();
+					if (rend)
+					{
+						idRenderModel *model = rend->hModel;
+						aimElevator = (model && idStr::Cmp(model->Name(), "models/mapobjects/elevators/elevator.lwo") == 0);
+					}
 				}
+			}
 
-				clip = physicsObj.GetClipModel();
-				clipAxis = physicsObj.GetClipModel()->GetAxis();
-				
-				gameLocal.clip.Translation( trace, tracePt, tracePt, clip, clipAxis, CONTENTS_SOLID, NULL );
-				teleportAimPoint = traceResults.c.point;
-				
-				if ( trace.fraction < 1.0f )
-				{
-					aimValidForTeleport = false;
-					isShowing = false;
-				}
-							
-				else if ( CanReachPosition( teleportAimPoint, teleportPoint ) )
+			teleportPoint = teleportAimPoint = traceResults.c.point;
+			float beamLengthSquared = 0;
+			if (aimElevator)
+			{
+				teleportPoint = teleportAimPoint = teleportAimPoint + idVec3(0, 0, 10);
+				beamLengthSquared = (teleportPoint - beamOrigin).LengthSqr();
+			}
+			if ((hitPitch >= -90.0f && hitPitch <= -45.0f && !aimActor) || aimLadder)
+			{
+				if ((aimElevator && beamLengthSquared <= 300 * 300) || CanReachPosition(teleportAimPoint, teleportPoint))
 				{
 										
-					if ( !isShowing )
+					// pitch indicates a flat surface or <45 deg slope,
+					// check to see if a clip test passes at the location AFTER
+					// checking reachability. 
+					// the clip test will prevent us from teleporting too close to walls.
+
+					static trace_t trace;
+					static idClipModel* clip;
+					static idMat3 clipAxis;
+					static idVec3 tracePt;
+					tracePt = teleportPoint;
+
+					if (fabs(hitPitch) != 90)
+					{
+						// this is a gross hack among grosser hacks so the clip test will pass on sloped floors.
+						tracePt.z += (pm_bboxwidth.GetFloat() / 1.9f);
+					}
+
+					clip = physicsObj.GetClipModel();
+					clipAxis = physicsObj.GetClipModel()->GetAxis();
+
+					gameLocal.clip.Translation(trace, tracePt, tracePt, clip, clipAxis, CONTENTS_SOLID, NULL);
+					// Carl: check if we're on stairs
+					if (trace.fraction < 1.0f)
+					{
+						tracePt.z += pm_stepsize.GetFloat();
+						gameLocal.clip.Translation(trace, tracePt, tracePt, clip, clipAxis, CONTENTS_SOLID, NULL);
+					}
+
+					if (trace.fraction < 1.0f)
+					{
+						aimValidForTeleport = false;
+						isShowing = false;
+						pleaseDuck = true;
+					}
+					else
+					{
+						aimValidForTeleport = true;
+						teleportTarget.GetEntity()->GetRenderEntity()->weaponDepthHack = false;
+						isShowing = true;
+					}
+
+					if (!isShowing)
 					{
 						slerpEnd = Sys_Milliseconds() - 10;
 						padAxis = curAxis;
 						lastAxis = curAxis;
 					}
-
-					aimValidForTeleport = true;
-					teleportTarget.GetEntity()->GetRenderEntity()->weaponDepthHack = false;
-					isShowing = true;
 					
 				}
 			}
@@ -12227,6 +12271,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 		
 	jpos = (endPos - beamOrigin) * forwardInv;
 	teleportTargetAnimator->SetJointPos( teleportBeamJoint[23], JOINTMOD_WORLD_OVERRIDE, jpos );
+	jpos = (teleportPoint - beamOrigin) * forwardInv;
 	teleportTargetAnimator->SetJointPos( teleportPadJoint, JOINTMOD_WORLD_OVERRIDE, jpos );
 
 	teleportTargetAnimator->SetJointAxis( teleportPadJoint, JOINTMOD_WORLD_OVERRIDE, padAxis );
@@ -12237,7 +12282,10 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 		// this will show the beam, but hide the teleport target
 		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[0] = 0;
 		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[1] = 0;
+		teleportTarget.GetEntity()->Show();
 		isShowing = false;
+		if ( pleaseDuck )
+			gameRenderWorld->DrawText( "Low Headroom\nPlease Duck", teleportPoint + idVec3( 0, 0, 18 ), 0.2f, colorOrange, viewAngles.ToMat3() );
 	}
 	else
 	{

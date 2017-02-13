@@ -213,7 +213,11 @@ void SwapBinding(int Old, int New)
 void SwapWeaponHand()
 {
 	vr_weaponHand.SetInteger(1 - vr_weaponHand.GetInteger());
-
+	// swap teleport hand
+	if (vr_teleport.GetInteger() == 2)
+		vr_teleport.SetInteger( 3 );
+	else if (vr_teleport.GetInteger() == 3)
+		vr_teleport.SetInteger( 2 );
 	// swap motion controller bindings to other hand
 	for (int k = K_JOY17; k <= K_JOY18; k++)
 		SwapBinding(k, k + 7);
