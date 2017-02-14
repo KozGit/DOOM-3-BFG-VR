@@ -11798,7 +11798,7 @@ void idPlayer::UpdateLaserSight()
 		teleportAimPoint = crosshairEntity.origin;
 		teleportAimPointPitch = surfaceAngle.pitch;		// if the elevator is moving up, we don't want to fall through the floor
 		if (aimElevator)
-			teleportPoint = teleportAimPoint = teleportAimPoint + idVec3(0, 0, 10);
+			teleportPoint = teleportAimPoint + idVec3(0, 0, 10);
 		// 45 degrees is maximum slope you can walk up
 		bool pitchValid = ( teleportAimPointPitch >= 45 && !aimActor ) || aimLadder; // -90 = ceiling, 0 = wall, 90 = floor
 		// can always teleport into nearby elevator, otherwise we need to check
@@ -12194,12 +12194,38 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 			float beamLengthSquared = 0;
 			if (aimElevator)
 			{
-				teleportPoint = teleportAimPoint = teleportAimPoint + idVec3(0, 0, 10);
+				teleportPoint = teleportAimPoint + idVec3(0, 0, 10);
 				beamLengthSquared = (teleportPoint - beamOrigin).LengthSqr();
 			}
 			if ((hitPitch >= -90.0f && hitPitch <= -45.0f && !aimActor) || aimLadder)
 			{
-				if ((aimElevator && beamLengthSquared <= 300 * 300) || CanReachPosition(teleportAimPoint, teleportPoint))
+				bool aimValid = (aimElevator && beamLengthSquared <= 300 * 300) || CanReachPosition(teleportAimPoint, teleportPoint);
+				// check if we are teleporting OUT of an elevator
+				if (!aimValid && !aimActor && fabs(teleportPoint.z - physicsObj.GetOrigin().z) <= 10 && (teleportPoint - beamOrigin).LengthSqr() <= 300 * 300)
+				{
+					// do a trace to see if we're in an elevator, and if so, set aimValid to true
+					trace_t result;
+					physicsObj.ClipTranslation(result, GetPhysics()->GetGravityNormal() * 10, NULL);
+					if (result.fraction < 1.0f)
+					{
+						aimEntity = gameLocal.GetTraceEntity(result);
+						if (aimEntity)
+						{
+							if (aimEntity->IsType(idElevator::Type))
+								aimValid = true;
+							else if (aimEntity->IsType(idStaticEntity::Type) || aimEntity->IsType(idLight::Type))
+							{
+								renderEntity_t *rend = aimEntity->GetRenderEntity();
+								if (rend)
+								{
+									idRenderModel *model = rend->hModel;
+									aimValid = (model && idStr::Cmp(model->Name(), "models/mapobjects/elevators/elevator.lwo") == 0);
+								}
+							}
+						}
+					}
+				}
+				if ( aimValid )
 				{
 										
 					// pitch indicates a flat surface or <45 deg slope,
