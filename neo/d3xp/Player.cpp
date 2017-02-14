@@ -11787,7 +11787,7 @@ void idPlayer::UpdateLaserSight()
 		teleportAimPoint = crosshairEntity.origin;
 		teleportAimPointPitch = surfaceAngle.pitch;		// if the elevator is moving up, we don't want to fall through the floor
 		if (aimElevator)
-			teleportPoint = teleportAimPoint = teleportAimPoint + idVec3(0, 0, 10);
+			teleportPoint = teleportAimPoint + idVec3(0, 0, 10);
 		// 45 degrees is maximum slope you can walk up
 		bool pitchValid = ( teleportAimPointPitch >= 45 && !aimActor ) || aimLadder; // -90 = ceiling, 0 = wall, 90 = floor
 		// can always teleport into nearby elevator, otherwise we need to check
@@ -12183,7 +12183,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 			float beamLengthSquared = 0;
 			if (aimElevator)
 			{
-				teleportPoint = teleportAimPoint = teleportAimPoint + idVec3(0, 0, 10);
+				teleportPoint = teleportAimPoint + idVec3(0, 0, 10);
 				beamLengthSquared = (teleportPoint - beamOrigin).LengthSqr();
 			}
 			if ((hitPitch >= -90.0f && hitPitch <= -45.0f && !aimActor) || aimLadder)
