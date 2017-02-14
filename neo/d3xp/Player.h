@@ -343,8 +343,9 @@ public:
 	jointHandle_t			teleportBeamJoint[24];
 	jointHandle_t			teleportPadJoint;
 
-  idVec3 teleportPoint; // Carl: used for teleporting
+	idVec3 teleportPoint; // Carl: used for teleporting
 	idVec3 teleportAimPoint; // Carl: used for teleporting
+	idVec3 teleportDir; // direction of teleport movement - needed for scripts where entities check player movement.
 	float teleportAimPointPitch;
 
 	bool aimValidForTeleport;

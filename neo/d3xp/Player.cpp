@@ -82,11 +82,11 @@ idCVar vr_teleportSlerpTime( "vr_teleportSlerpTime", "200", CVAR_FLOAT, "" );
 idCVar vr_teleportSkipHandrails( "vr_teleportSkipHandrails", "0", CVAR_INTEGER | CVAR_ARCHIVE , "Teleport aim ingnores handrails. 1 = true" );
 idCVar vr_teleportShowAimAssist( "vr_teleportShowAimAssist", "0", CVAR_INTEGER | CVAR_ARCHIVE , "Move telepad target to reflect aim assist. 1 = true" );
 
-/* were for testing
-idCVar ftx( "ftx", "0", CVAR_FLOAT, "" );
+// for testing
+idCVar ftx( "ftx", "1.0", CVAR_FLOAT, "" );
 idCVar fty( "fty", "0", CVAR_FLOAT, "" );
 idCVar ftz( "ftz", "0", CVAR_FLOAT, "" );
-*/
+
 
 extern idCVar g_demoMode;
 
@@ -9721,7 +9721,18 @@ void idPlayer::EvaluateControls()
 				//	playerView.Flash( colorWhite, 140 );
 				TeleportPath( teleportPoint );
 				//if ( t == 1 )
-					PlayFootStepSound();
+				
+				//koz begin
+				//some of the entities in the game, like the sentry bot and the scientist in alpha2, want you to follow them.
+				//If you fall too far behind, they will stop, and they monitor your direction of movement and velocity
+				//to determine if you are moving towards them before they start moving again.
+				//Teleporting imparts no velocity to the player, so those entities will not start moving again. ( unless you teleport way in front of them )
+				//Impart a tiny velocity here, just enough so the entities know you have moved, not enough to really change the player position.
+				
+				physicsObj.SetLinearVelocity( physicsObj.GetLinearVelocity() - teleportDir * 10.0f );
+				//koz end
+
+				PlayFootStepSound();
 			}
 		}
 	}
@@ -12322,6 +12333,8 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	}
 	else
 	{
+		teleportDir = (physicsObj.GetOrigin() - teleportPoint);
+		teleportDir.Normalize(); // = teleportDir / (teleportDir.Length() + 0.001);
 		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[0] = 255;
 		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[1] = 1;
 		teleportTarget.GetEntity()->Show();
