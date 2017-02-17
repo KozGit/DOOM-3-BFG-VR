@@ -303,7 +303,7 @@ public:
 	idVec3				leanOffset;
 	idVec3				fixedPDAMoveDelta;
 
-
+	int					teleportButtonCount;
 
 	float				independentWeaponYaw;
 	float				independentWeaponPitch;
@@ -317,8 +317,7 @@ public:
 	bool				updateScreen;
 
 	bool				scanningPDA;
-
-
+	
 	float				bodyMoveAng;
 
 

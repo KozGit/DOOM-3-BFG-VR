@@ -398,6 +398,8 @@ iVr::iVr()
 	motionControlType = MOTION_NONE;
 
 	bodyMoveAng = 0.0f;
+	teleportButtonCount = 0;
+
 
 	currentFlashMode = vr_flashlightMode.GetInteger();
 	renderingSplash = true;

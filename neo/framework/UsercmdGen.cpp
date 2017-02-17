@@ -1438,14 +1438,31 @@ idUsercmdGenLocal::CmdButtons
 */
 void idUsercmdGenLocal::CmdButtons()
 {
+		
 	cmd.buttons = 0;
+	
+	//koz begin cancel teleport if fire button pressed.
+	static int teleportCanceled = 0;
 	
 	// check the attack button
 	if( ButtonState( UB_ATTACK ) )
 	{
-		cmd.buttons |= BUTTON_ATTACK;
+		
+		if ( commonVr->teleportButtonCount != 0 )
+		{
+			commonVr->teleportButtonCount = 0;
+			teleportCanceled = 1;
+		}
+		else if ( teleportCanceled == 0 )
+		{
+			cmd.buttons |= BUTTON_ATTACK;
+		}
+		
 	}
 	
+	teleportCanceled &= ButtonState( UB_ATTACK );
+	//koz end
+
 	// check the use button
 	if( ButtonState( UB_USE ) )
 	{

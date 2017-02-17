@@ -2314,7 +2314,7 @@ void idPlayer::InitTeleportTarget()
 
 	idStr jointName;
 
-	teleportButtonCount = 0;
+	commonVr->teleportButtonCount = 0;
 
 	common->Printf( "Initializing teleport target\n" );
 	origin = GetPhysics()->GetOrigin() + (origin + modelOffset) * GetPhysics()->GetAxis();
@@ -7845,12 +7845,12 @@ void idPlayer::UpdateFocus()
 	oldTalkCursor = talkCursor;
 	oldVehicle = focusVehicle;
 
-	if ( focusTime <= gameLocal.time || teleportButtonCount != 0) // koz kill the focus and drop the hand if teleport pressed.
+	if ( focusTime <= gameLocal.time || commonVr->teleportButtonCount != 0) // koz kill the focus and drop the hand if teleport pressed.
 	{
 		ClearFocus();
 		raised = false;
 		lowered = false;
-		if ( teleportButtonCount != 0 ) return;
+		if ( commonVr->teleportButtonCount != 0 ) return;
 	}
 
 	// don't let spectators interact with GUIs
@@ -9712,23 +9712,23 @@ void idPlayer::EvaluateControls()
 
 	if ( game->IsPDAOpen() || commonVr->VR_GAME_PAUSED || currentWeapon == weapon_pda || commonVr->PDAforcetoggle ) // no teleporting in these cases
 	{
-		teleportButtonCount = 0;
+		commonVr->teleportButtonCount = 0;
 	}
 	else
 	{
 
 		if ( common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState )
 		{
-			teleportButtonCount++;
+			commonVr->teleportButtonCount++;
 		}
 
 		if ( usercmd.buttons & BUTTON_ATTACK )
 		{
-			teleportButtonCount = 0; // let the fire button abort teleporting.
+			commonVr->teleportButtonCount = 0; // let the fire button abort teleporting.
 		}
 
-		if ( (vr_teleport.GetInteger() == 1 && teleportButtonCount != 0) ||
-			(teleportButtonCount > 1) ||
+		if ( (vr_teleport.GetInteger() == 1 && commonVr->teleportButtonCount != 0) ||
+			(commonVr->teleportButtonCount > 1) ||
 			((oldTeleportButtonState && !common->ButtonState( UB_TELEPORT )) && !vr_teleportButtonMode.GetBool()) )
 		{
 			doTeleport = true;  //common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState;
@@ -9739,7 +9739,7 @@ void idPlayer::EvaluateControls()
 	
 	if( doTeleport )
 	{
-		teleportButtonCount = 0;
+		commonVr->teleportButtonCount = 0;
 		//teleportTarget.GetEntity()->Hide();
 		// teleport
 		if ( aimValidForTeleport )
@@ -12039,7 +12039,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	static idVec3 beamOrigin = vec3_zero;
 	static idMat3 beamAxis = mat3_identity;
 	
-	bool showTeleport = vr_teleport.GetInteger() > 1 && teleportButtonCount != 0;
+	bool showTeleport = vr_teleport.GetInteger() > 1 && commonVr->teleportButtonCount != 0;
 	static bool lastShowTeleport = false;
 
 	
