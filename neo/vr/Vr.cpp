@@ -183,7 +183,7 @@ idCVar vr_APISelect( "vr_APISelect", "0", CVAR_INTEGER | CVAR_ARCHIVE, "VR API S
 
 idCVar vr_teleportSkipHandrails( "vr_teleportSkipHandrails", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Teleport aim ingnores handrails. 1 = true" );
 idCVar vr_teleportShowAimAssist( "vr_teleportShowAimAssist", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Move telepad target to reflect aim assist. 1 = true" );
-idCVar vr_teleportSkin( "vr_teleportSkin", "0", CVAR_INTEGER, "Test skins for cylinder", 0, 2 );
+idCVar vr_teleportSkin( "vr_teleportSkin", "2", CVAR_INTEGER, "Test skins for cylinder", 0, 2 );
 idCVar vr_teleportButtonMode( "vr_teleportButtonMode", "0", CVAR_BOOL | CVAR_ARCHIVE, "0 = Press aim, release teleport./n1 = 1st press aim, 2nd press teleport" );
 
 // Koz end

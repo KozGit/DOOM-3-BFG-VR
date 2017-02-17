@@ -1447,7 +1447,6 @@ void idUsercmdGenLocal::CmdButtons()
 	// check the attack button
 	if( ButtonState( UB_ATTACK ) )
 	{
-		
 		if ( commonVr->teleportButtonCount != 0 )
 		{
 			commonVr->teleportButtonCount = 0;
