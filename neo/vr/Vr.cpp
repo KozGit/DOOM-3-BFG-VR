@@ -179,6 +179,13 @@ idCVar vr_forceOculusAudio( "vr_forceOculusAudio", "1", CVAR_BOOL | CVAR_ARCHIVE
 idCVar vr_stereoMirror( "vr_stereoMirror", "1", CVAR_BOOL | CVAR_ARCHIVE, "Render mirror window with stereo views. 0 = Mono , 1 = Stereo Warped" );
 
 idCVar vr_APISelect( "vr_APISelect", "0", CVAR_INTEGER | CVAR_ARCHIVE, "VR API Select:\n 0 = Autodetect ( Oculus Native then OpenVR ) ,\n 1 = Oculus Native Only\n 2 = OpenVR only\n" );
+
+
+idCVar vr_teleportSkipHandrails( "vr_teleportSkipHandrails", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Teleport aim ingnores handrails. 1 = true" );
+idCVar vr_teleportShowAimAssist( "vr_teleportShowAimAssist", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Move telepad target to reflect aim assist. 1 = true" );
+idCVar vr_teleportSkin( "vr_teleportSkin", "0", CVAR_INTEGER, "Test skins for cylinder", 0, 2 );
+idCVar vr_teleportButtonMode( "vr_teleportButtonMode", "0", CVAR_BOOL | CVAR_ARCHIVE, "0 = Press aim, release teleport./n1 = 1st press aim, 2nd press teleport" );
+
 // Koz end
 // Carl
 idCVar vr_teleport( "vr_teleport", "2", CVAR_INTEGER | CVAR_ARCHIVE, "Player can teleport at will. 0 = disabled, 1 = gun sight, 2 = right hand, 3 = left hand, 4 = head", 0, 4 );

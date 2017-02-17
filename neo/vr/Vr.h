@@ -514,6 +514,11 @@ extern idCVar	vr_bodyToMove;
 
 extern idCVar	vr_stereoMirror;
 
+extern idCVar	vr_teleportSkipHandrails;
+extern idCVar	vr_teleportShowAimAssist;
+extern idCVar	vr_teleportSkin;
+extern idCVar	vr_teleportButtonMode;
+
 extern idCVar	vr_teleport;
 extern idCVar	vr_teleportMaxTravel;
 extern idCVar	vr_teleportThroughDoors;

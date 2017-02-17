@@ -89,7 +89,7 @@ const int IMPULSE_37			= 37;			// toggle headingbeam
 const int IMPULSE_38			= 38;			// walk in place
 const int IMPULSE_39			= 39;			// freelook
 const int IMPULSE_40			= 40;			// system menu
-const int IMPULSE_41      = 41;     // click to move
+const int IMPULSE_41			= 41;     // click to move
 //koz end
 const int IMPULSE_42			= 42;			// Carl: Teleport
 

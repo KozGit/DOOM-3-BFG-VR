@@ -397,7 +397,64 @@ teleportTargetBeamBlue
 		scroll	time * -.5 , time * 0.45
 	}
 }
- 
+
+teleportTargetBeamoriginStar
+{
+	noSelfShadow
+	noshadows
+	//twosided
+	translucent
+	discrete
+	nonsolid
+	noimpact
+	deform sprite
+
+	qer_editorimage		textures/particles/plasma.tga
+
+	{
+	    blend  add   // GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		map    textures/particles/plasma2.tga
+		//rotate	parm5 * time
+		rotate time * .03
+		rgb		bathroom2table[ time * 3 ] * .25
+		clamp
+
+	}
+
+}
+
+teleportTargetBeamoriginBall
+{
+	noSelfShadow
+	noshadows
+	//twosided
+	translucent
+	discrete
+	nonsolid
+	noimpact
+	deform sprite
+
+	qer_editorimage		textures/particles/plasma.tga
+
+	{
+	    blend  add   // GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		map    textures/particles/plasma.tga
+		rgb		bathroom2table[ time * 3 ] *.75
+		rotate time * .03
+		clamp
+
+	}
+	{
+	    blend  add   // GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
+		map    textures/particles/plasma.tga
+		rgb		bathroom2table[ time * 3 ] * .75
+		rotate time * -.03
+		clamp
+
+	}
+
+}
+
 teleportTargetCylinder
 {
 	translucent
@@ -431,67 +488,73 @@ teleportTargetCylinder
   
 }
 
-teleportTargetBeamoriginStar
+teleportTargetCylinderDim
 {
-	noSelfShadow
-	noshadows
-	//twosided
 	translucent
-	discrete
+	noShadows
+	noSelfShadow
+	twoSided
 	nonsolid
-	noimpact
-	deform sprite
-
-	qer_editorimage		textures/particles/plasma.tga
-
-	{
-	    blend  add   // GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
-		map    textures/particles/plasma2.tga
-		//rotate	parm5 * time
-		rotate time * .03
-		rgb		bathroom2table[ time * 3 ] * .25
-		clamp
-
-	}
+	qer_editorimage textures/decals/telemars.tga
 	
+    {
+		blend	add
+		map 	models/images/telepadcylinder.tga
+  		rgb			guiLightTable[ time *.15 ] * parm1 
+		scroll time * 0.025,0
 
+	} 
+ 
+	{
+		blend	add
+  		map 	models/images/telepad_swirl_dim.tga
+		rgb			guiLightTable[ time *.25 ] * parm1 
+		scroll time * -.129,0
+	} 			
+ 				
+	{
+		blend	add
+  		map 	models/images/telepad_swirl2_dim.tga
+		rgb			guiLightTable[ time *.15 ] * parm1 
+		scroll time * .219,0
+	} 			
+  
 }
 
-
-
-teleportTargetBeamoriginBall
+teleportTargetCylinderBolt
 {
-	noSelfShadow
-	noshadows
-	//twosided
 	translucent
-	discrete
+	noShadows
+	noselfShadow
+	twoSided
 	nonsolid
-	noimpact
-	deform sprite
-
-	qer_editorimage		textures/particles/plasma.tga
-
-	{
-	    blend  add   // GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
-		map    textures/particles/plasma.tga
-		rgb		bathroom2table[ time * 3 ] *.75
-		rotate time * .03
-		clamp
-
-	}
-	{
-	    blend  add   // GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
-		map    textures/particles/plasma.tga
-		rgb		bathroom2table[ time * 3 ] * .75
-		rotate time * -.03
-		clamp
-
-	}
+	qer_editorimage textures/decals/telemars.tga
 	
+	 {
+		blend	add
+		map 	models/images/telepadcylinder.tga
+  		rgb			guiLightTable[ time *.15 ] * parm1 
+		scroll time * 0.025,0
 
+	} 
+    {
+		blend	add
+		map 	models/images/telepad_elec.tga
+  		rgb		telemars[ time * .25 ] * parm1 * 1.25
+		scroll time * .014, time * .14
+		
+
+	} 
+   	{
+		blend	add
+  		map 	models/images/telepad_elec2.tga
+		rgb		telemars[ time * .15 ] * parm1 * 1.25
+		scroll time * -.019, time * .20
+		rotate 90
+
+	} 		
+
+   
 }
 
 
-
-}

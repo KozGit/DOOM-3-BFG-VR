@@ -77,10 +77,6 @@ idCVar vr_teleportDist( "vr_teleportDist", "60", CVAR_FLOAT,"" );
 idCVar vr_teleportMaxPoints( "vr_teleportMaxPoints", "24", CVAR_FLOAT, "" );
 idCVar vr_teleportMaxDrop( "vr_teleportMaxDrop", "360", CVAR_FLOAT, "" );
 
-idCVar vr_teleportSlerpTime( "vr_teleportSlerpTime", "200", CVAR_FLOAT, "" );
-
-idCVar vr_teleportSkipHandrails( "vr_teleportSkipHandrails", "0", CVAR_INTEGER | CVAR_ARCHIVE , "Teleport aim ingnores handrails. 1 = true" );
-idCVar vr_teleportShowAimAssist( "vr_teleportShowAimAssist", "0", CVAR_INTEGER | CVAR_ARCHIVE , "Move telepad target to reflect aim assist. 1 = true" );
 
 // for testing
 idCVar ftx( "ftx", "1.0", CVAR_FLOAT, "" );
@@ -2297,7 +2293,8 @@ void idPlayer::Init()
 	
 	throwDirection = vec3_zero;
 	throwVelocity = 0.0f;
-		
+	
+	
 	InitTeleportTarget();
 	// Koz end
 
@@ -2316,6 +2313,8 @@ void idPlayer::InitTeleportTarget()
 	int targetAnim; 
 
 	idStr jointName;
+
+	teleportButtonCount = 0;
 
 	common->Printf( "Initializing teleport target\n" );
 	origin = GetPhysics()->GetOrigin() + (origin + modelOffset) * GetPhysics()->GetAxis();
@@ -2336,6 +2335,13 @@ void idPlayer::InitTeleportTarget()
 	if ( teleportPadJoint == INVALID_JOINT )
 	{
 		common->Printf( "Unable to find joint teleportPadJoint \n" );
+	}
+
+	teleportCenterPadJoint = teleportTargetAnimator->GetJointHandle( "centerpad" );
+
+	if ( teleportCenterPadJoint == INVALID_JOINT )
+	{
+		common->Printf( "Unable to find joint teleportCenterPadJoint \n" );
 	}
 
 	for ( int i = 0; i < 24; i++ )
@@ -7839,11 +7845,12 @@ void idPlayer::UpdateFocus()
 	oldTalkCursor = talkCursor;
 	oldVehicle = focusVehicle;
 
-	if ( focusTime <= gameLocal.time )
+	if ( focusTime <= gameLocal.time || teleportButtonCount != 0) // koz kill the focus and drop the hand if teleport pressed.
 	{
 		ClearFocus();
 		raised = false;
 		lowered = false;
+		if ( teleportButtonCount != 0 ) return;
 	}
 
 	// don't let spectators interact with GUIs
@@ -9698,16 +9705,42 @@ void idPlayer::EvaluateControls()
 		PerformImpulse( usercmd.impulse );
 	}
 	
+	// handle teleporting
 	// if we released the teleport button
-	static int oldTeleportState = false;
-	bool doTeleport;
-	if( vr_teleport.GetInteger() == 1 )
-		doTeleport = common->ButtonState( UB_TELEPORT ) && !oldTeleportState;
+	static int oldTeleportButtonState = false;
+	bool doTeleport = false;
+
+	if ( game->IsPDAOpen() || commonVr->VR_GAME_PAUSED || currentWeapon == weapon_pda || commonVr->PDAforcetoggle ) // no teleporting in these cases
+	{
+		teleportButtonCount = 0;
+	}
 	else
-		doTeleport = oldTeleportState && !common->ButtonState( UB_TELEPORT );
-	oldTeleportState = common->ButtonState( UB_TELEPORT );
+	{
+
+		if ( common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState )
+		{
+			teleportButtonCount++;
+		}
+
+		if ( usercmd.buttons & BUTTON_ATTACK )
+		{
+			teleportButtonCount = 0; // let the fire button abort teleporting.
+		}
+
+		if ( (vr_teleport.GetInteger() == 1 && teleportButtonCount != 0) ||
+			(teleportButtonCount > 1) ||
+			((oldTeleportButtonState && !common->ButtonState( UB_TELEPORT )) && !vr_teleportButtonMode.GetBool()) )
+		{
+			doTeleport = true;  //common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState;
+		}
+
+		oldTeleportButtonState = common->ButtonState( UB_TELEPORT );
+	}
+	
 	if( doTeleport )
 	{
+		teleportButtonCount = 0;
+		//teleportTarget.GetEntity()->Hide();
 		// teleport
 		if ( aimValidForTeleport )
 		{
@@ -11961,7 +11994,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	// teleportBeamJoint[1 - 22] trace the arc
 	// teleportBeamJoint[23] and teleportPadJoint should be set to the end position of the beam
 
-	int slTime = vr_teleportSlerpTime.GetFloat();
+	const int slTime = 200; // 200ms, remove vr_teleportSlerpTime.GetFloat();
 
 	const float grav = 9.81f * 39.3701f;
 
@@ -12006,7 +12039,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	static idVec3 beamOrigin = vec3_zero;
 	static idMat3 beamAxis = mat3_identity;
 	
-	bool showTeleport = vr_teleport.GetInteger() > 1 && common->ButtonState(UB_TELEPORT);
+	bool showTeleport = vr_teleport.GetInteger() > 1 && teleportButtonCount != 0;
 	static bool lastShowTeleport = false;
 
 	
@@ -12308,15 +12341,23 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 		
 	jpos = ( endPos - beamOrigin ) * forwardInv;
 	teleportTargetAnimator->SetJointPos( teleportBeamJoint[23], JOINTMOD_WORLD_OVERRIDE, jpos );
+	//teleportCenterPadJoint
+	
+	//set the center aiming point
+	jpos = (teleportAimPoint - beamOrigin) * forwardInv;
+	teleportTargetAnimator->SetJointPos( teleportCenterPadJoint, JOINTMOD_WORLD_OVERRIDE, jpos );
+	teleportTargetAnimator->SetJointAxis( teleportCenterPadJoint, JOINTMOD_WORLD_OVERRIDE, padAxis );
 	
 	if ( vr_teleportShowAimAssist.GetInteger() )
 	{
+		// if we want to have the telepad reflect the aim assist, update the joint for the telepad
+		//otherwise it will use the same origin as the aiming point
 		jpos = (teleportPoint - beamOrigin) * forwardInv;
 	}
-	else
-	{
-		jpos = (teleportAimPoint - beamOrigin) * forwardInv;
-	}
+	//else
+	//{
+	//	jpos = (teleportAimPoint - beamOrigin) * forwardInv;
+	//}
 		
 	teleportTargetAnimator->SetJointPos( teleportPadJoint, JOINTMOD_WORLD_OVERRIDE, jpos );
 	teleportTargetAnimator->SetJointAxis( teleportPadJoint, JOINTMOD_WORLD_OVERRIDE, padAxis );
@@ -12333,8 +12374,9 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	}
 	else
 	{
-		teleportDir = (physicsObj.GetOrigin() - teleportPoint);
-		teleportDir.Normalize(); // = teleportDir / (teleportDir.Length() + 0.001);
+		teleportTarget.GetEntity()->GetRenderEntity()->customSkin = declManager->FindSkin( (va( "skins/vr/pad%d", vr_teleportSkin.GetInteger() + 1 )) );
+		teleportDir = ( physicsObj.GetOrigin() - teleportPoint );
+		teleportDir.Normalize();
 		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[0] = 255;
 		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[1] = 1;
 		teleportTarget.GetEntity()->Show();

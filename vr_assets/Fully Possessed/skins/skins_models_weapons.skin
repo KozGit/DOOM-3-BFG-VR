@@ -183,3 +183,18 @@ skin skins/vr/crosshairCircleDot{
 skin skins/vr/crosshairCross{
 	vr/weaponsight vr/weaponsightCross
 }
+
+
+//just for testing telepad materials, delete when done
+skin skins/vr/pad1{
+	teleportTargetCylinder teleportTargetCylinder
+}
+
+skin skins/vr/pad2{
+	teleportTargetCylinder teleportTargetCylinderDim
+}
+
+skin skins/vr/pad3{
+	teleportTargetCylinder teleportTargetCylinderBolt
+}
+

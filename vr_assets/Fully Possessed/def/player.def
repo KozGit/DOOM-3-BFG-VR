@@ -596,6 +596,11 @@ entityDef player_base {
 	"skinCrosshairCircleDot"	"skins/vr/crosshairCircleDot" 
 	"skinCrosshairCross"		"skins/vr/crosshairCross"
 	
+	//koz just for testing telepad materials, delete when done
+	"skinpad1"					"skins/vr/pad1"
+	"skinpad2"					"skins/vr/pad2"
+	"skinpad3"					"skins/vr/pad3"
+	
 }
 
 /***********************************************************************
