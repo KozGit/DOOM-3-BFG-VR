@@ -4891,7 +4891,27 @@ void idWeapon::Event_LaunchProjectiles( int num_projectiles, float spread, float
 			projBounds = proj->GetPhysics()->GetBounds().Rotate( proj->GetPhysics()->GetAxis() );
 			
 			// make sure the projectile starts inside the bounding box of the owner
-			if( i == 0 )
+			// Carl: unless it's a grenade, in which case we want to be able to drop it over a railing without inexplicably killing ourselves
+			if( IdentifyWeapon() == WEAPON_HANDGRENADE && game->isVR && commonVr->VR_USE_MOTION_CONTROLS && i == 0 )
+			{
+				muzzle_pos = muzzleOrigin + muzzleAxis[ 0 ] * 2.0f;
+				// Carl: check that there's a grenade-sized gap at hand height from the center of our chest to our grenade,
+				// so we can drop grenades over a railing, but not through a solid wall or glass window.
+				// Ideally start should be our right shoulder at grenade height, but I'm not sure how to get that.
+				start = ownerBounds.GetCenter();
+				start.z = muzzleOrigin.z;
+				// MASK_SHOT_RENDERMODEL goes through chainlink fences, but a grenade shouldn't.
+				gameLocal.clip.Translation(tr, start, muzzle_pos, proj->GetPhysics()->GetClipModel(), proj->GetPhysics()->GetClipModel()->GetAxis(), MASK_SHOT_RENDERMODEL | CONTENTS_PLAYERCLIP, owner);
+				// Try reaching down from neck height if sticking our hand out straight doesn't work.
+				// Ideally this should be our right shoulder at shoulder height, but I'm not sure how to get that.
+				if ( tr.fraction < 1.0f )
+				{
+					start.z = commonVr->lastHMDViewOrigin.z - 6;
+					gameLocal.clip.Translation(tr, start, muzzle_pos, proj->GetPhysics()->GetClipModel(), proj->GetPhysics()->GetClipModel()->GetAxis(), MASK_SHOT_RENDERMODEL | CONTENTS_PLAYERCLIP, owner);
+				}
+				muzzle_pos = tr.endpos;
+			}
+			else if( i == 0 )
 			{
 				muzzle_pos = muzzleOrigin + muzzleAxis[ 0 ] * 2.0f;
 				if( ( ownerBounds - projBounds ).RayIntersection( muzzle_pos, muzzleAxis[0], distance ) )

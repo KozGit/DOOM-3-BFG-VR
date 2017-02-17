@@ -2319,8 +2319,11 @@ void idPlayer::InitTeleportTarget()
 	common->Printf( "Initializing teleport target\n" );
 	origin = GetPhysics()->GetOrigin() + (origin + modelOffset) * GetPhysics()->GetAxis();
 
-	teleportTarget = (idAnimatedEntity*) gameLocal.SpawnEntityType( idAnimatedEntity::Type, NULL );
-	
+	if ( !( teleportTarget = (idAnimatedEntity*)gameLocal.FindEntity( "vrTeleportTarget" ) ) )
+	{
+		teleportTarget = (idAnimatedEntity*)gameLocal.SpawnEntityType( idAnimatedEntity::Type, NULL );
+		teleportTarget->name = "vrTeleportTarget";
+	}
 	teleportTarget.GetEntity()->SetModel( "telepad1" );
 	teleportTarget.GetEntity()->SetOrigin( origin );
 	teleportTarget.GetEntity()->SetAxis( GetPhysics()->GetAxis() );
@@ -3564,6 +3567,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	vr_headingBeamMode.SetModified();
 
 	// Koz end
+	InitTeleportTarget();
 
 }
 
@@ -6900,6 +6904,10 @@ void idPlayer::UpdateWeapon()
 	
 	assert( !spectating );
 	
+	// Voice wakes up nearby monsters while you're speaking
+	if( vr_talkMode.GetInteger() > 0 && ( usercmd.buttons & BUTTON_CHATTING ) )
+		gameLocal.AlertAI( this );
+
 	if( common->IsClient() )
 	{
 		// clients need to wait till the weapon and it's world model entity
