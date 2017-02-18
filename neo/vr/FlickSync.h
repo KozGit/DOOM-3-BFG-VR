@@ -41,7 +41,7 @@ typedef enum
 	FLICK_DARKSTAR = 4,  // Darkstar pilot
 	FLICK_TOWER = 5,     // Air traffic controller
 	FLICK_RECEPTION = 6, // Receptionist who gives you the PDA
-	FLICK_KELLY = 7,     // Sergeant Thomas Kelly
+	FLICK_SARGE = 7,     // Sergeant Thomas Kelly
 	FLICK_BROOKS = 8,		 // Mars Sec underground who gives you equipment
 	FLICK_MARK_RYAN = 9, // Guarding airlock to decommissioned comm facility
 	FLICK_ISHII = 10,     // Jonathon Ishii in decomissioned com facility
@@ -50,7 +50,53 @@ typedef enum
 	FLICK_MARINE_PDA = 13, // Marine with PDA at start of RoE
 	FLICK_MARINE_TORCH = 14, // Marine with Torch (and possibly others) at start of RoE
 	FLICK_POINT = 15,    // Marine with explosives at start of RoE
+	FLICK_BRAVO_LEAD = 16,
+	FLICK_PLAYER = 17,   // POV or our silent protagonist, even though we have no lines
 };
+
+typedef enum
+{
+	// Mars City 1
+	CUTSCENE_NONE = 0,
+	FMV_UAC,
+	CUTSCENE_DARKSTAR,
+	ACTING_BIOSCAN,
+	CUTSCENE_RECEPTION,
+	CUTSCENE_MEETING,
+	ACTING_SUITS,
+	ACTING_KITCHEN,
+	ACTING_BEFORE_SARGE,
+	CUTSCENE_SARGE,
+
+	// MC Underground
+	ACTING_GEARUP,
+	ACTING_CRANE,
+	ACTING_HEY_YOURE_LOOKING,
+	ACTING_SCOTTY,
+	ACTING_SNEAKING,
+	ACTING_MAINTENANCE,
+	ACTING_AIRLOCK,
+	CUTSCENE_ISHII,
+	CUTSCENE_IMP,
+
+	// Mars City 2 always plays in the background?
+	ACTING_CEILING,
+	ACTING_SARGE_VIDEO,
+
+	// Admin
+	CUTSCENE_ADMIN,
+	CUTSCENE_PINKY,
+	ACTING_OVERHEAR,
+
+	// RoE: Erebus
+	FMV_ROE,
+	CUTSCENE_ARTIFACT,
+	CUTSCENE_BLOOD,
+
+	// Lost Missions: Enpro
+	FMV_LOST_MISSIONS,
+	CUTSCENE_BRAVO_TEAM,
+} t_cutscene;
 
 bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length );
 void Flicksync_AddVoiceLines();
@@ -61,10 +107,13 @@ bool Flicksync_UseCueCard();
 void Flicksync_Cheat();
 void Flicksync_GiveUp();
 void Flicksync_StartCutscene();
-void Flicksync_EndCutscene();
+bool Flicksync_EndCutscene();
+void Flicksync_GoToCutscene( t_cutscene scene );
+t_cutscene Flicksync_GetNextCutscene();
 
 extern idCVar vr_flicksyncCharacter;
 extern idCVar vr_flicksyncCueCards;
+extern idCVar vr_cutscenesOnly;
 
 extern int Flicksync_Score;
 extern int Flicksync_CueCards;
@@ -77,5 +126,8 @@ extern bool Flicksync_CueActive;
 extern int Flicksync_CheatCount;	// Cheat once = warning, cheat twice it's GAME OVER!
 extern bool Flicksync_GameOver;
 extern bool Flicksync_InCutscene;
+
+extern t_cutscene Flicksync_skipToCutscene;
+extern t_cutscene Flicksync_currentCutscene;
 
 #endif

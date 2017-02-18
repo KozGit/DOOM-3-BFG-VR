@@ -1208,7 +1208,7 @@ FullscreenFX_Helltime::Active
 bool FullscreenFX_Helltime::Active()
 {
 
-	if( gameLocal.inCinematic || common->IsMultiplayer() )
+	if( Flicksync_InCutscene || gameLocal.inCinematic || common->IsMultiplayer() )
 	{
 		return false;
 	}

@@ -1550,7 +1550,7 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 	
 	int buttonCurrentlyClicked = ButtonState( UB_IMPULSE41 );
 
-	if ( game->CheckInCinematic() == true ) return; // do nothing in cinematics
+	if ( game->CheckInCinematic() == true || Flicksync_InCutscene ) return; // do nothing in cinematics
 
 
 	//common->Printf( "Forwardmove %d rightmove %d\n", cmd.forwardmove, cmd.rightmove );
