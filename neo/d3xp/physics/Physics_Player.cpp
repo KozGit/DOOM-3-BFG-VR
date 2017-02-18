@@ -1587,12 +1587,12 @@ void idPhysics_Player::CheckDuck()
 	{
 
 		if ( current.movementType == PM_NORMAL && game->isVR && vr_crouchMode.GetInteger() == 0 )
-		// game is in full motion crouch mode, dont do anything except change the bounding box to match the height
+		// game is in full motion crouch mode, dont do anything except change the bounding box to crouch height if ducking
 		// and change the player speed to crouch speed if player has ducked enough.
 		// thought I was going to have to do a bunch of bullshit to toggle the crouch anim
 		// but turns out the walk anim with the waist IK doesn't look too terrible for now
 		// of course, I haven't tested crouching EVERYWHERE in the game yet.....
-		//  this code makes the bounding box reflect the exact player height
+		//  
 		{
 			maxZ = pm_normalviewheight.GetFloat() + commonVr->poseHmdBodyPositionDelta.z + commonVr->headHeightDiff;
 			idMath::ClampFloat(pm_crouchheight.GetFloat(), pm_normalheight.GetFloat(), maxZ);

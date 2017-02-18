@@ -557,4 +557,94 @@ teleportTargetCylinderBolt
    
 }
 
+teleportTargetCylinderBolt
+{
+	translucent
+	noShadows
+	noselfShadow
+	twoSided
+	nonsolid
+	qer_editorimage textures/decals/telemars.tga
+	
+	 {
+		blend	add
+		map 	models/images/telepadcylinder.tga
+  		rgb			guiLightTable[ time *.15 ] * parm1 
+		scroll time * 0.025,0
 
+	} 
+    {
+		blend	add
+		map 	models/images/telepad_elec.tga
+  		rgb		telemars[ time * .25 ] * parm1 * 1.25
+		scroll time * .014, time * .14
+		
+
+	} 
+   	{
+		blend	add
+  		map 	models/images/telepad_elec2.tga
+		rgb		telemars[ time * .15 ] * parm1 * 1.25
+		scroll time * -.019, time * .20
+		rotate 90
+
+	} 		
+
+   
+}
+
+teleportTargetCylinderCrouch
+{
+	translucent
+	noShadows
+	noselfShadow
+	twoSided
+	nonsolid
+	qer_editorimage textures/decals/telemars.tga
+	
+	 {
+		blend	add
+		map 	models/images/telepadcylinderred.tga
+  		rgb			guiLightTable[ time *.15 ] * parm1 *.5
+		scroll time * 0.025,0
+
+	} 
+    {
+		blend	add
+		map 	models/images/telepad_elec.tga
+  		red		telemars[ time * .25 ] * parm1 * 1.25
+		green 0 
+		blue 0
+		scroll time * .014, time * .14
+		
+
+	} 
+   	{
+		blend	add
+  		map 	models/images/telepad_elec2.tga
+		red		telemars[ time * .15 ] * parm1 * 1.25
+		green 0
+		blue 0
+		scroll time * -.019, time * .20
+		rotate 90
+
+	} 		
+   
+}
+
+teleportTargetCircleRed
+{
+	translucent
+	noShadows
+	twoSided
+	nonsolid
+	qer_editorimage textures/decals/telemars.tga
+
+	{
+		blend	add 
+  		map     models/images/teleporttarget_1_circlered.tga
+		rgb	guiLightTable[ time *.415 ] 
+		alpha 0.5
+	}
+  
+} 

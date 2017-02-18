@@ -78,6 +78,7 @@ idCVar vr_teleportMaxPoints( "vr_teleportMaxPoints", "24", CVAR_FLOAT, "" );
 idCVar vr_teleportMaxDrop( "vr_teleportMaxDrop", "360", CVAR_FLOAT, "" );
 
 
+
 // for testing
 idCVar ftx( "ftx", "1.0", CVAR_FLOAT, "" );
 idCVar fty( "fty", "0", CVAR_FLOAT, "" );
@@ -2330,7 +2331,7 @@ void idPlayer::InitTeleportTarget()
 	
 	teleportTargetAnimator = teleportTarget.GetEntity()->GetAnimator();
 	targetAnim = teleportTargetAnimator->GetAnim( "idle" );
-	common->Printf( "Teleport target idle anim # = %d\n", targetAnim );
+	//common->Printf( "Teleport target idle anim # = %d\n", targetAnim );
 	teleportTargetAnimator->PlayAnim( ANIMCHANNEL_ALL, targetAnim, gameLocal.time, 0 );
 
 	teleportPadJoint = teleportTargetAnimator->GetJointHandle( "pad" );
@@ -2356,10 +2357,8 @@ void idPlayer::InitTeleportTarget()
 			common->Printf( "Unable to find teleportBeamJoint %s\n", jointName.c_str() );
 		}
 	}
-		
+
 }
-
-
 
 
 /*
@@ -11994,26 +11993,19 @@ equation for parabola :	y = y0 + vy0 * t - .5 * g * t^2
 void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVec3 p0, idVec3 v0, idVec3 a, float dist, int points, idVec3 hitLocation, idVec3 hitNormal, float timeToHit )
 {
 	// teleport target is a .md5 model
-	// model has two components:
+	// model has 3 components:
 	// the aiming beam comprised of a ribbon with 23 segments/24  ( joints teleportBeamJoint[ 0 - 23 ] )
-	// and the telepad itself  ( joint teleportPadJoint )
+	// the telepad itself (big circle with the fx and cylinder - joint teleportPadJoint )
+	// the center aiming dot ( terminates the beam, shown whenever beam is on - joint teleportCenterPadJoint )
 	// the origin of the model should be set to the starting point of the aiming beam
 	// teleportBeamJoint[0] should also be set to the origin
 	// teleportBeamJoint[1 - 22] trace the arc
-	// teleportBeamJoint[23] and teleportPadJoint should be set to the end position of the beam
+	// teleportBeamJoint[23] and teleportCenterPadJoint should be set to the end position of the beam
+	// teleportPadJoint should be set to the position of the teleport target ( can be different from beam if aim assist is active ) 
 
 	const int slTime = 200; // 200ms, remove vr_teleportSlerpTime.GetFloat();
 
 	const float grav = 9.81f * 39.3701f;
-
-	const float parm0FrameDelt = 255 / (250 / (1000 / commonVr->hmdHz));
-	const float parm1FrameDelt = 1 / (250 / (1000 / commonVr->hmdHz));
-	
-	static float parm0Delt = parm0FrameDelt;
-	static float parm1Delt = parm1FrameDelt;
-
-	static float parm0Val = 255.0f;
-	static float parm1Val = 1.0f;
 
 	static bool pleaseDuck = false; // Low Headroom Please Duck
 		
@@ -12050,7 +12042,9 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	bool showTeleport = vr_teleport.GetInteger() > 1 && commonVr->teleportButtonCount != 0;
 	static bool lastShowTeleport = false;
 
+
 	
+
 	if ( !lastShowTeleport )
 	{
 		isShowing = false;
@@ -12280,14 +12274,6 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 					static idVec3 tracePt;
 					tracePt = teleportPoint;
 
-					/*
-					no longer needed, as the clip test for stairs will pass on slopes as well.
-					if (fabs(hitPitch) != 90)
-					{
-						// this is a gross hack among grosser hacks so the clip test will pass on sloped floors.
-						tracePt.z += (pm_bboxwidth.GetFloat() / 1.9f);
-					}
-					*/
 					clip = physicsObj.GetClipModel();
 					clipAxis = physicsObj.GetClipModel()->GetAxis();
 
@@ -12303,7 +12289,45 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 					{
 						aimValidForTeleport = false;
 						isShowing = false;
-						pleaseDuck = true;
+						//koz
+						//please duck sometimes shows incorrectly if a moveable object is in the way.
+						//add a clip check at the crouch height, and if it passes, show the please duck graphic.
+						//otherwise something is in the way.
+
+						if ( clip->GetBounds()[1][2] == pm_crouchheight.GetFloat() ) // player is already crouching and we failed the clip test
+						{
+							pleaseDuck = false;
+						}
+						else
+						{
+							
+							// change bounds to crouch height and check again.
+							idBounds bounds = clip->GetBounds();
+							bounds[1][2] = pm_crouchheight.GetFloat();
+							if ( pm_usecylinder.GetBool() )
+							{
+								clip->LoadModel( idTraceModel( bounds, 8 ) );
+							}
+							else
+							{
+								clip->LoadModel( idTraceModel( bounds ) );
+							}
+
+							gameLocal.clip.Translation( trace, tracePt, tracePt, clip, clipAxis, CONTENTS_SOLID, NULL );
+							
+							pleaseDuck = trace.fraction >= 1.0f ? true : false;
+							
+							//reset bounds
+							bounds[1][2] = pm_normalheight.GetFloat();
+							if ( pm_usecylinder.GetBool() )
+							{
+								clip->LoadModel( idTraceModel( bounds, 8 ) );
+							}
+							else
+							{
+								clip->LoadModel( idTraceModel( bounds ) );
+							}
+						}
 					}
 					else
 					{
@@ -12318,15 +12342,6 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 						teleportTarget.GetEntity()->GetRenderEntity()->weaponDepthHack = false;
 						isShowing = true;
 					}
-
-					/*
-					if ( !isShowing )
-					{
-						slerpEnd = Sys_Milliseconds() - 100;
-						padAxis = curAxis;
-						lastAxis = curAxis;
-					}
-					*/
 				}
 			}
 			
@@ -12388,23 +12403,37 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 		//otherwise it will use the same origin as the aiming point
 		jpos = (teleportPoint - beamOrigin) * forwardInv;
 	}
-	//else
-	//{
-	//	jpos = (teleportAimPoint - beamOrigin) * forwardInv;
-	//}
-		
+			
 	teleportTargetAnimator->SetJointPos( teleportPadJoint, JOINTMOD_WORLD_OVERRIDE, jpos );
 	teleportTargetAnimator->SetJointAxis( teleportPadJoint, JOINTMOD_WORLD_OVERRIDE, padAxis );
 	
 	if ( !aimValidForTeleport )
 	{
 		// this will show the beam, but hide the teleport target
-		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[0] = 0;
-		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[1] = 0;
-		teleportTarget.GetEntity()->Show();
-		isShowing = false;
+		
 		if ( pleaseDuck )
-			gameRenderWorld->DrawText( "Low Headroom\nPlease Duck", teleportPoint + idVec3( 0, 0, 18 ), 0.2f, colorOrange, viewAngles.ToMat3() );
+		{
+			teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[0] = 1;
+			teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[1] = 1;
+			teleportTarget.GetEntity()->Show();
+			teleportTarget.GetEntity()->GetRenderEntity()->customSkin = declManager->FindSkin("skins/vr/padcrouch" );
+			isShowing = true;
+
+			if ( !vr_teleportHint.GetBool() )
+			{
+				ShowTip( "Duck!", "If the teleport target turns red, there is limited headroom at the teleport destination. You must crouch before teleporting to this location.", false );
+				vr_teleportHint.SetBool( true );
+			}
+			//gameRenderWorld->DrawText( "Low Headroom\nPlease Duck", teleportPoint + idVec3( 0, 0, 18 ), 0.2f, colorOrange, viewAngles.ToMat3() );
+		}
+		else
+		{
+			teleportTarget.GetEntity()->GetRenderEntity()->customSkin = declManager->FindSkin( (va( "skins/vr/pad%d", vr_teleportSkin.GetInteger() + 1 )) );
+			teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[0] = 0;
+			teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[1] = 0;
+			teleportTarget.GetEntity()->Show();
+			isShowing = false;
+		}
 	}
 	else
 	{
@@ -16192,7 +16221,7 @@ void idPlayer::CalculateRenderView()
 			{
 				if ( weapon->IdentifyWeapon() != WEAPON_PDA )
 				{
-					common->Printf( "idPlayer::CalculateRenderView calling SelectWeapon for PDA\nPDA Forced = %i, PDAForceToggle = %i\n",commonVr->PDAforced,commonVr->PDAforcetoggle );
+					//common->Printf( "idPlayer::CalculateRenderView calling SelectWeapon for PDA\nPDA Forced = %i, PDAForceToggle = %i\n",commonVr->PDAforced,commonVr->PDAforcetoggle );
 					SelectWeapon( weapon_pda, true );
 					
 					const function_t* func;

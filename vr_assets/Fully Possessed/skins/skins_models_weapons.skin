@@ -198,3 +198,8 @@ skin skins/vr/pad3{
 	teleportTargetCylinder teleportTargetCylinderBolt
 }
 
+skins/vr/padcrouch{
+	teleportTargetCylinder teleportTargetCylinderCrouch
+	teleportTargetCircle teleportTargetCircleRed
+	teleportTargetFX textures/common/nodraw
+}
