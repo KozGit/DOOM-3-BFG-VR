@@ -401,8 +401,8 @@ void idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicksync::Adjus
 	}
 	case FLICKSYNC_FIELD_GAMETYPE:
 	{
-		static const int numValues = 2;
-		static const int values[numValues] = { 0, 1 };
+		static const int numValues = 3;
+		static const int values[numValues] = { 0, 1, 2 };
 		vr_cutscenesOnly.SetInteger( AdjustOption( vr_cutscenesOnly.GetInteger(), values, numValues, adjustAmount ) );
 		break;
 

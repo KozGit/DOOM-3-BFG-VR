@@ -2,6 +2,8 @@
 
 #include"precompiled.h"
 
+#include "framework/Common_local.h"
+
 #include "d3xp/Game_local.h"
 
 #include "FlickSync.h"
@@ -48,6 +50,12 @@ typedef struct
 	idStr entity;
 	char text[1024];
 } timed_spoken_line_t;
+
+typedef struct
+{
+	t_cutscene cutscene;
+	const char *camera;
+} cutscene_camera_t;
 
 #define MAX_HEARD_LINES 3
 static timed_spoken_line_t linesHeard[MAX_HEARD_LINES] = {};
@@ -103,6 +111,7 @@ static const character_map_t entityArray[] = {
 	{ FLICK_MARINE_PDA, "erebus1_intro_marine3_1" },
 	{ FLICK_MARINE_TORCH, "erebus1_intro_flash_1" },
 	{ FLICK_BETRUGER, "maledict_intro_cinematic_1" },
+	{ FLICK_POINT, "erebus1_cinematic_marine_gravitygun_end_1" },
 
 	{ FLICK_MARINE_PDA, "enpro_soldier2_1" },
 	{ FLICK_POINT, "enpro_soldier1_1" },
@@ -345,6 +354,40 @@ static const spoken_line_t lineArray[] = {
 	{ "e1_bet_huntthemdown", "Hunt them down." },
 	{ NULL, "Our new reign begins now." },
 
+	// Grabber cutscene
+	/*
+	//Voice erebus1_cinematic_marine_gravitygun_1: ggun_a:
+	{ "grabber_cin_idle", "" },
+	//Voice2 erebus1_cinematic_marine_gravitygun_1: ggun_a:
+	{ "grabber_marine_breathe", "" },
+	//Voice2 erebus1_cinematic_imp_2: imp_b:
+	{ "grabber_imp_thud", "" },
+	//Voice2 erebus1_cinematic_imp_2: imp_c:
+	{ "grabber_imp_yell", "" },
+	//Voice erebus1_cinematic_imp_2: imp_c:
+	{ "grabber_imp_attack", "" },
+	//Voice erebus1_cinematic_imp_2: imp_d:
+	{ "monster_demon_imp_fireball_flight", "" },
+	//Voice erebus1_cinematic_marine_gravitygun_1: ggun_d:
+	{ "grabber_cin_electro", "" },
+	//Voice2 erebus1_cinematic_marine_gravitygun_1: ggun_d:
+	{ "grabber_cin_fireloop", "" },
+	//Voice2 erebus1_cinematic_imp_2: imp_e:
+	{ "grabber_imp_idle2", "" },
+	//Voice erebus1_cinematic_marine_gravitygun_1: ggun_f:
+	{ "grabber_cin_release", "" },
+	//Voice2 erebus1_cinematic_marine_gravitygun_1: ggun_f:
+	{ "grabber_cin_silent", "" },
+	//Voice2 erebus1_cinematic_imp_2: imp_g:
+	{ "monster_demon_imp_fireball_explode", "" },
+	//Voice erebus1_cinematic_imp_2: imp_g:
+	{ "monster_demon_imp_die", "" },
+	//Voice erebus1_cinematic_marine_gravitygun_1: ggun_h:
+	{ "e1_fall_01", "" },
+	*/
+	//Voice erebus1_cinematic_marine_gravitygun_end_1: ggun_end_b:
+	{ "e1_dying_marine_grabber", "He tried to hit me with a fireball. But I grabbed it and threw it right back at him. You're not going to get far with that pistol. Take this grabber. It's more useful than you think." },
+
 	  //Voice enpro_soldier2_1: shot_a:
 	{ "enpro_move_in", "Bravo team. Entry secure. Move in and take positions." },
 	  //Voice enpro_soldier2_1: shot_c:
@@ -436,6 +479,53 @@ static const spoken_line_t lineArray[] = {
 { "snd_huntthemdown", "." }
 
 */
+
+
+static const cutscene_camera_t cameraArray[] = {
+	// Mars City 1
+	{ CUTSCENE_DARKSTAR, "marscity_cinematic_cam_2" },
+	{ CUTSCENE_RECEPTION, "marscity_recep_cam_a" },
+	{ CUTSCENE_MEETING, "betrugerspeech" },
+	{ CUTSCENE_SARGE, "marscity_cinematic_cam_sarge" },
+	// Mars City Underground
+	{ CUTSCENE_ISHII, "underground_invasion_cam_9" },
+	{ CUTSCENE_IMP, "underground_impintro_cam_2" },
+	// Admin
+	{ CUTSCENE_ADMIN, "admin_overhear_cam_1" },
+	{ CUTSCENE_PINKY, "admin_pinkyattack_cam_1" },
+	// Alpha Labs 1
+	{ CUTSCENE_ALPHALABS1, "alphalabs1_cam_2" },
+	// Alpha Labs 4
+	{ CUTSCENE_VAGARY, "alphalabs3_vagaryintro_cam_1" },
+	// Enpro TODO (lots of enpro cameras)
+	//{ CUTSCENE_ENPRO, "" },
+	// CPU 1
+	{ CUTSCENE_CAMPHUNT, "cpu1_camphunt_cam_1" },
+	// CPU Boss
+	{ CUTSCENE_CPU_BOSS, "cin_cpu_boss_cam_1" },
+	// Delta 2a
+	{ CUTSCENE_DELTA_SCIENTIST, "delta2a_scientist_cam_1" },
+	{ CUTSCENE_DELTA_TELEPORTER, "delta2a_teleporter_cam_2" },
+	// Delta 4
+	{ CUTSCENE_DELTA_HKINTRO, "delta4_hkintro_cam_1" },
+	// Erebus 1
+	{ CUTSCENE_ARTIFACT, "erebus1_intro_camera_1" },
+	{ CUTSCENE_BLOOD, "func_cameraview_1" },
+	{ CUTSCENE_GRABBER, "erebus1_cinematic_camera_15" },
+
+};
+
+t_cutscene CameraToCutscene(idStr & name)
+{
+	if (g_debugCinematic.GetBool())
+		gameLocal.Printf("%d: CameraToCutscene():\n\t{ CUTSCENE_, \"%s\" },\n", gameLocal.framenum, name.c_str());
+	for (int i = 0; i < sizeof(cameraArray) / sizeof(*cameraArray); i++)
+	{
+		if (name.Cmp(cameraArray[i].camera) == 0)
+			return cameraArray[i].cutscene;
+	}
+	return CUTSCENE_NONE;
+}
 
 void Flicksync_DoGameOver()
 {
@@ -677,7 +767,7 @@ void Flicksync_ResumeCutscene()
 bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length )
 {
 	// if we're not in flicksync mode, then play it like normal
-	if (!vr_flicksyncCharacter.GetInteger())
+	if( !vr_flicksyncCharacter.GetInteger() || ( !Flicksync_InCutscene && !gameLocal.inCinematic ) )
 		return true;
 
 	SYSTEMTIME systime;
@@ -890,6 +980,13 @@ bool Flicksync_EndCutscene()
 		Flicksync_CueCardText = "";
 		timescale.SetFloat(1.0f);
 		Flicksync_InCutscene = false;
+
+		// Check if we need to skip to another cutscene after this
+		if (vr_cutscenesOnly.GetInteger() == 1 && Flicksync_skipToCutscene == CUTSCENE_NONE)
+			Flicksync_skipToCutscene = Flicksync_GetNextCutscene();
+		if (Flicksync_skipToCutscene != CUTSCENE_NONE && Flicksync_skipToCutscene != Flicksync_currentCutscene)
+			Flicksync_GoToCutscene( Flicksync_skipToCutscene );
+
 		return true;
 	}
 }
@@ -902,8 +999,11 @@ void Flicksync_StartCutscene()
 			gameLocal.Printf("%d: change cutscene camera angle\n", gameLocal.framenum);
 		return;
 	}
+	t_cutscene c = CameraToCutscene(gameLocal.GetCamera()->name);
+	if (c)
+		Flicksync_currentCutscene = c;
 	if (g_debugCinematic.GetBool())
-		gameLocal.Printf( "%d: Flicksync_StartCutscene()\n", gameLocal.framenum );
+		gameLocal.Printf("%d: Flicksync_StartCutscene()\n", gameLocal.framenum);
 	Flicksync_InCutscene = true;
 	endAfterPause = false;
 	hasPausedLine = false;
@@ -914,6 +1014,12 @@ void Flicksync_StartCutscene()
 	lastLineHeard = -1; // empty ring buffer of heard lines
 	Flicksync_CueCardText = "";
 	timescale.SetFloat( 1.0f );
+
+	// If this is the right cutscene, we're done. If wrong cutscene, skip it until we get to the one we want.
+	if (Flicksync_skipToCutscene == Flicksync_currentCutscene)
+		Flicksync_skipToCutscene = CUTSCENE_NONE;
+	else if (Flicksync_skipToCutscene != CUTSCENE_NONE)
+		gameLocal.SkipCinematicScene();
 }
 
 bool Flicksync_UseCueCard()
@@ -968,15 +1074,52 @@ void Flicksync_GiveUp()
 	}
 }
 
+idStr CutsceneToMapName( t_cutscene c )
+{
+	common->Printf("CutsceneToMapName() current = \"%s\"", commonLocal.GetCurrentMapName());
+	if (!c)
+		return "";
+	if (c >= FMV_UAC && c <= CUTSCENE_SARGE)
+		return "game/mars_city1";
+	else if (c <= CUTSCENE_IMP)
+		return "game/mc_underground";
+	else if (c <= ACTING_SARGE_VIDEO)
+		return "game/mars_city2";
+	else if (c <= ACTING_OVERHEAR)
+		return "game/admin";
+	else if (c <= CUTSCENE_ALPHALABS1)
+		return "game/alphalabs1";
+	else if (c <= CUTSCENE_VAGARY)
+		return "game/alphalabs4";
+	else if (c <= CUTSCENE_DELTA_TELEPORTER)
+		return "game/delta2a";
+	else if (c <= CUTSCENE_DELTA_HKINTRO)
+		return "game/delta4";
+	else if (c <= CUTSCENE_CAMPHUNT)
+		return "game/cpu";
+	else if (c <= CUTSCENE_CPU_BOSS)
+		return "game/cpuboss";
+	else if (c <= CUTSCENE_GRABBER)
+		return "game/erebus1";
+	else
+		return "game/le_enpro1";
+}
+
 // Note: use the console command "teleport trigger_once_8" to skip to the Betruger meeting, and "teleport trigger_once_40" for Sergeant Kelly
 void Flicksync_GoToCutscene( t_cutscene scene )
 {
 	if (g_debugCinematic.GetBool())
 		gameLocal.Printf("%d: Flicksync_GoToCutscene(%d)\n", gameLocal.framenum, scene);
-	Flicksync_currentCutscene = scene;
-	Flicksync_skipToCutscene = CUTSCENE_NONE;
+	//Flicksync_currentCutscene = scene;
+	//Flicksync_skipToCutscene = CUTSCENE_NONE;
 
 	// check we're on the correct map first
+	idStr map = CutsceneToMapName(scene);
+	if( map.Cmp( commonLocal.GetCurrentMapName() )!=0 )
+	{
+		gameLocal.sessionCommand = "map " + map;
+	}
+
 	// go to cutscene
 	idPlayer *player = gameLocal.GetLocalPlayer();
 	if (!player)
@@ -1016,8 +1159,28 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 	case CUTSCENE_ISHII:
 		ent = gameLocal.FindEntity("trigger_once_120");
 		break;
+	case CUTSCENE_IMP:
+		ent = gameLocal.FindEntity("impintrotrigger");
+		break;
+	case CUTSCENE_ADMIN:
+		ent = gameLocal.FindEntity("trigger_once_21");
+		break;
+	case CUTSCENE_PINKY:
+		ent = gameLocal.FindEntity("tim_trigger_once_11"); // This is triggered by a GUI, not sure how to handle it.
+		break;
+	case CUTSCENE_ALPHALABS1:
+		ent = gameLocal.FindEntity("trigger_once_12");
+		break;
+	case CUTSCENE_VAGARY:
+		ent = gameLocal.FindEntity("func_door_438"); // triggered by a door? how to handle it?
+		break;
+	case CUTSCENE_CAMPHUNT: // trigger on level load
+		break;
 	case CUTSCENE_BLOOD:
 		ent = gameLocal.FindEntity("trigger_once_56");
+		break;
+	case CUTSCENE_GRABBER:
+		ent = gameLocal.FindEntity("trigger_once_88");
 		break;
 	}
 
@@ -1082,6 +1245,12 @@ t_cutscene Flicksync_GetNextCutscene()
 		return CUTSCENE_PINKY;
 	case CUTSCENE_PINKY:
 	case ACTING_OVERHEAR:
+		return CUTSCENE_ALPHALABS1;
+
+	case CUTSCENE_ALPHALABS1:
+		return CUTSCENE_VAGARY;
+
+	case CUTSCENE_VAGARY:
 	case FMV_ROE:
 		return CUTSCENE_ARTIFACT;
 
@@ -1089,6 +1258,8 @@ t_cutscene Flicksync_GetNextCutscene()
 	case FMV_LOST_MISSIONS:
 		return CUTSCENE_BLOOD;
 	case CUTSCENE_BLOOD:
+		return CUTSCENE_GRABBER;
+	case CUTSCENE_GRABBER:
 		return CUTSCENE_BRAVO_TEAM;
 
 	case CUTSCENE_BRAVO_TEAM:

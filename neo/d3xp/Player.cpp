@@ -5747,7 +5747,8 @@ void idPlayer::GivePDA( const idDeclPDA* pda, const char* securityItem, bool tog
 	
 	// This is kind of a hack, but it works nicely
 	// We don't want to display the 'you got a new pda' message during a map load
-	if ( gameLocal.GetFrameNum() > 10 ) 
+	// or if we're about to skip to another cutscene
+	if ( gameLocal.GetFrameNum() > 10 && vr_cutscenesOnly.GetInteger() != 1 && Flicksync_skipToCutscene == CUTSCENE_NONE ) 
 	{
 				
 		const char* sec = pda->GetSecurity();

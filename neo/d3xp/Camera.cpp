@@ -791,6 +791,8 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 			ent = gameLocal.FindEntity("erebus1_intro_detonate_1");
 			if (!ent)
 				ent = gameLocal.FindEntity("enpro_soldier1_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("erebus1_cinematic_marine_gravitygun_end_1");
 			break;
 		case FLICK_BRAVO_LEAD:
 			ent = gameLocal.FindEntity("enpro_soldier3_1");
