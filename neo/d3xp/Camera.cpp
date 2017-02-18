@@ -764,10 +764,12 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 			if (!ent)
 				ent = gameLocal.FindEntity("sarge_secondary");
 			break;
-		case FLICK_ISHII:
+		case FLICK_SCIENTIST:
 			ent = gameLocal.FindEntity("underground_crazy_sci_1");
 			if (!ent)
 				ent = gameLocal.FindEntity("underground_crazy_zombie_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("delta2a_scientist_1");
 			break;
 		case FLICK_MCNEIL:
 			ent = gameLocal.FindEntity("erebus1_intro_mcneil_1");

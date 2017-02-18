@@ -44,7 +44,7 @@ typedef enum
 	FLICK_SARGE = 7,     // Sergeant Thomas Kelly
 	FLICK_BROOKS = 8,		 // Mars Sec underground who gives you equipment
 	FLICK_MARK_RYAN = 9, // Guarding airlock to decommissioned comm facility
-	FLICK_ISHII = 10,     // Jonathon Ishii in decomissioned com facility
+	FLICK_SCIENTIST = 10,     // Jonathon Ishii in decomissioned com facility, and Delta2a scientist
 	FLICK_ROLAND = 11,   // Roland, hiding in the ceiling in Mars City
 	FLICK_MCNEIL = 12,   // Dr. Elizabeth McNeil from Resurrection of Evil
 	FLICK_MARINE_PDA = 13, // Marine with PDA at start of RoE
@@ -93,10 +93,9 @@ typedef enum
 	// Alpha Labs 4
 	CUTSCENE_VAGARY,
 
-	// CPU 1
-	CUTSCENE_CAMPHUNT,
-	// CPU Boss
-	CUTSCENE_CPU_BOSS,
+	// Monorail
+	CUTSCENE_MONORAIL_RAISE_COMMANDO,
+	CUTSCENE_MONORAIL_CRASH,
 
 	// Delta 2a
 	CUTSCENE_DELTA_SCIENTIST,
@@ -105,11 +104,29 @@ typedef enum
 	// Delta 4
 	CUTSCENE_DELTA_HKINTRO,
 
-	// RoE: Erebus
+	// Hell 1
+	CUTSCENE_GUARDIAN_INTRO,
+	CUTSCENE_GUARDIAN_DEATH,
+
+	// CPU 1
+	CUTSCENE_CAMPHUNT,
+	// CPU Boss
+	CUTSCENE_CPU_BOSS,
+
+	// RoE: Erebus 1
 	FMV_ROE,
 	CUTSCENE_ARTIFACT,
 	CUTSCENE_BLOOD,
 	CUTSCENE_GRABBER,
+	// Erebus 2
+	CUTSCENE_VULGARINTRO,
+	// Erebus 5
+	CUTSCENE_ENVIROSUIT_ON,
+	CUTSCENE_ENVIROSUIT_OFF,
+	CUTSCENE_CLOUD,
+	// Erebus 6
+	// Hell
+
 
 	// Lost Missions: Enpro
 	FMV_LOST_MISSIONS,

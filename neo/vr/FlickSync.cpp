@@ -90,15 +90,26 @@ static const character_map_t entityArray[] = {
 	{ FLICK_BROOKS, "underground_window_security_1" },
 	{ FLICK_MARK_RYAN, "underground_security_helmet_mark_3" },
 // Mars City Underground, all hell breaks loose
-	{ FLICK_ISHII, "underground_crazy_sci_1" },
-	{ FLICK_ISHII, "underground_crazy_zombie_1" },
-	{ FLICK_ISHII, "underground_crazy_zombie_1_head" },
+	{ FLICK_SCIENTIST, "underground_crazy_sci_1" },
+	{ FLICK_SCIENTIST, "underground_crazy_zombie_1" },
+	{ FLICK_SCIENTIST, "underground_crazy_zombie_1_head" },
 // Mars City 2: Ceiling guy
 	{ FLICK_ROLAND, "marscity2_maint_ceiling_1_head" },
 
 	// Admin
 	{ FLICK_SWANN, "admin_overhear_swann_1" },
 	{ FLICK_CAMPBELL, "admin_overhear_campbell_3" },
+
+	// CPU
+	{ FLICK_CAMPBELL, "cpu1_camphunt_campbell_1" },
+	{ FLICK_CAMPBELL, "cpu1_wounded_campbell_1" },
+
+	// Monorail
+	{ FLICK_BETRUGER, "monorail_raisecommando_betruger_1" },
+
+	// Delta 2a
+	{ FLICK_SCIENTIST, "delta2a_scientist_1_head" },
+	{ FLICK_SCIENTIST, "delta2a_scientist_1" },
 
 // ROE, Erebus1: Intro
 	{ FLICK_TOWER, "erebus1_intro_scientist_1" },
@@ -264,7 +275,8 @@ static const spoken_line_t lineArray[] = {
 	{ "mark_mcu_secondary2", "Well? What the hell are you waiting for, marine?" },
 
 	//Voice underground_crazy_sci_1: crazy_a:
-	{ "scinuts1a", "Huh? No, no. Please. You must let me get this communication out. They have to be warned while there is still time. I can't let. I..." },
+	//{ "scinuts1a", "Huh? No, no. Please. You must let me get this communication out. They have to be warned while there is still time. I can't let. I..." },
+	{ "scinuts1a", "No no. Please. You must let me get this communication out. They have to be warned while there is still time." },
 	//Voice underground_crazy_sci_1: crazy_c:
 	{ "scinuts2a", "You don't know what I've seen. You can't possibly understand or comprehend." },
 	//Voice underground_crazy_sci_1: crazy_c:
@@ -315,6 +327,28 @@ static const spoken_line_t lineArray[] = {
 	//Voice admin_overhear_campbell_3: overhear3:
 	{ "admin_campbell_planb", "OK. Plan B." },
 
+	//Voice monorail_raisecommando_betruger_1: raise:
+	{ "monorail_betruger_one", "torzu amiran enochus" },
+	//Voice monorail_raisecommando_betruger_1: raise:
+	{ "monorail_betruger_two", "Rise. Rise. Quath mir yacoban." },
+	//Voice monorail_raisecommando_betruger_1: raise:
+	{ "monorail_betruger_three", "There is no death for you." },
+
+	//Voice delta2a_scientist_1_head: start:
+	{ "delta2a_sci_wuh", "What? Who's there?" },
+	//Voice delta2a_scientist_1_head: shot_one:
+	{ "delta2a_sci_thankgod", "Oh, thank God. You're not one of them. I thought everyone else was gone." },
+	//Voice delta2a_scientist_1_head: shot_two:
+	{ "delta2a_sci_iwaspart", "I. I was part of this. I helped them. The madness of opening to another dimension. "
+	"Look, I don't. We don't have much time. We let it through. The evil. "
+	"The protective stabiliser on the portal just failed after Betroogger took the device. It was an artifact we had found in the ruins. He took it into the portal. And hell followed him out." },
+	//Voice delta2a_scientist_1_head: shot_four:
+	{ "delta2a_sci_imgoin", "I'm going to try to get the teleporter systems running again. The areas are destroyed around us. So it's the only way through this part of the complex. "
+	"You need to find me a working plasma inducer. It's all I need to get the teleporter working. You can look for it in operations. I have a security clearance. I'll unlock some doors for you. "
+	"There. We don't have a lot of time. Please hurry." },
+
+	//Voice cpu1_camphunt_campbell_1: camphunt_d:
+	{ "cpu_campbell_hunt", "Where are you hiding?" },
 
 	// ROE Intro
 	{ "e1_sci01_thereclose", "Dr. McNeil, they're close." },
@@ -508,10 +542,26 @@ static const cutscene_camera_t cameraArray[] = {
 	{ CUTSCENE_DELTA_TELEPORTER, "delta2a_teleporter_cam_2" },
 	// Delta 4
 	{ CUTSCENE_DELTA_HKINTRO, "delta4_hkintro_cam_1" },
+	// Monorail
+	{ CUTSCENE_MONORAIL_RAISE_COMMANDO, "monorail_raisecommando_cam_1" },
+	{ CUTSCENE_MONORAIL_CRASH, "monorail_crash_cam_1" },
+
+	// Hell 1
+	{ CUTSCENE_GUARDIAN_INTRO, "hell1_guardianintro_cam_1" },
+	{ CUTSCENE_GUARDIAN_DEATH, "hell1_guardiandeath_cam_1" },
+	// Hellhole
+
+	// le_enpro1
+	// le_hell_post
+
+
+
 	// Erebus 1
 	{ CUTSCENE_ARTIFACT, "erebus1_intro_camera_1" },
 	{ CUTSCENE_BLOOD, "func_cameraview_1" },
 	{ CUTSCENE_GRABBER, "erebus1_cinematic_camera_15" },
+	// Erebus 2
+	{ CUTSCENE_VULGARINTRO, "erebus2_vulgarintro_cam_1" },
 
 };
 
@@ -808,7 +858,7 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 	if (character != vr_flicksyncCharacter.GetInteger())
 	{
 		if (g_debugCinematic.GetBool())
-			gameLocal.Printf("%d: Flicksync_Voice(): This is a different character speaking, so set cure line\n", gameLocal.framenum);
+			gameLocal.Printf("%d: Flicksync_Voice(): This is a different character speaking, so set cue line\n", gameLocal.framenum);
 		// this is a different character speaking
 		cueLine.entity = entity;
 		cueLine.shader = lineName;
@@ -1091,16 +1141,24 @@ idStr CutsceneToMapName( t_cutscene c )
 		return "game/alphalabs1";
 	else if (c <= CUTSCENE_VAGARY)
 		return "game/alphalabs4";
+	else if (c <= CUTSCENE_MONORAIL_CRASH)
+		return "game/monorail";
 	else if (c <= CUTSCENE_DELTA_TELEPORTER)
 		return "game/delta2a";
 	else if (c <= CUTSCENE_DELTA_HKINTRO)
 		return "game/delta4";
+	else if (c <= CUTSCENE_GUARDIAN_DEATH)
+		return "game/hell1";
 	else if (c <= CUTSCENE_CAMPHUNT)
 		return "game/cpu";
 	else if (c <= CUTSCENE_CPU_BOSS)
 		return "game/cpuboss";
 	else if (c <= CUTSCENE_GRABBER)
 		return "game/erebus1";
+	else if (c <= CUTSCENE_VULGARINTRO)
+		return "game/erebus2";
+	else if (c <= CUTSCENE_CLOUD)
+		return "game/erebus5";
 	else
 		return "game/le_enpro1";
 }
@@ -1125,6 +1183,7 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 	if (!player)
 		return;
 	idEntity *ent = NULL;
+	idEntity *relay = NULL;
 	idVec3 origin;
 	idAngles angles;
 	idMat3 axis;
@@ -1166,7 +1225,7 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		ent = gameLocal.FindEntity("trigger_once_21");
 		break;
 	case CUTSCENE_PINKY:
-		ent = gameLocal.FindEntity("tim_trigger_once_11"); // This is triggered by a GUI, not sure how to handle it.
+		relay = gameLocal.FindEntity("tim_trigger_once_11"); // This is triggered by a GUI, not sure how to handle it.
 		break;
 	case CUTSCENE_ALPHALABS1:
 		ent = gameLocal.FindEntity("trigger_once_12");
@@ -1174,13 +1233,42 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 	case CUTSCENE_VAGARY:
 		ent = gameLocal.FindEntity("func_door_438"); // triggered by a door? how to handle it?
 		break;
+
+	case CUTSCENE_MONORAIL_RAISE_COMMANDO:
+		//ent = gameLocal.FindEntity("trigger_once_44"); // plays at start of level
+		break;
+	case CUTSCENE_MONORAIL_CRASH:
+		ent = gameLocal.FindEntity("fredfadetrig");
+		break;
+	case CUTSCENE_DELTA_SCIENTIST:
+		ent = gameLocal.FindEntity("fred_trigger_once_1");
+		break;
+	case CUTSCENE_DELTA_TELEPORTER:
+		relay = gameLocal.FindEntity("trigger_once_1");
+		break;
+	case CUTSCENE_DELTA_HKINTRO:
+		ent = gameLocal.FindEntity("trigger_once_1");
+		break;
+
 	case CUTSCENE_CAMPHUNT: // trigger on level load
+		break;
+	case CUTSCENE_CPU_BOSS:
+		relay = gameLocal.FindEntity("trigger_relay_54");
 		break;
 	case CUTSCENE_BLOOD:
 		ent = gameLocal.FindEntity("trigger_once_56");
 		break;
 	case CUTSCENE_GRABBER:
 		ent = gameLocal.FindEntity("trigger_once_88");
+		break;
+	case CUTSCENE_VULGARINTRO:
+		ent = gameLocal.FindEntity("trigger_once_25");
+		break;
+	case CUTSCENE_GUARDIAN_INTRO:
+		relay = gameLocal.FindEntity("guardian_trigger_once");
+		break;
+	case CUTSCENE_GUARDIAN_DEATH:
+		relay = gameLocal.FindEntity("trigger_GuardianDeath");
 		break;
 	}
 
@@ -1190,6 +1278,12 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		angles.yaw = ent->GetPhysics()->GetAxis()[0].ToYaw();
 		origin = ent->GetPhysics()->GetOrigin();
 		player->Teleport( origin, angles, ent );
+	}
+	if (relay)
+	{
+		relay->Signal(SIG_TRIGGER);
+		relay->ProcessEvent(&EV_Activate, player);
+		relay->TriggerGuis();
 	}
 }
 
@@ -1206,12 +1300,15 @@ t_cutscene Flicksync_GetNextCutscene()
 	case ACTING_BIOSCAN:
 		if( c == FLICK_TOWER || c == FLICK_BETRUGER || c == FLICK_SWANN || c == FLICK_CAMPBELL )
 			return CUTSCENE_MEETING;
-		else if( c == FLICK_SARGE )
-			return CUTSCENE_SARGE;
+		//else if( c == FLICK_SARGE )
+		//	return CUTSCENE_SARGE;
 		else
 			return CUTSCENE_RECEPTION;
 	case CUTSCENE_RECEPTION:
-		return CUTSCENE_MEETING;
+		if (c == FLICK_SCIENTIST)
+			return CUTSCENE_SARGE;
+		else
+			return CUTSCENE_MEETING;
 	case CUTSCENE_MEETING:
 	case ACTING_SUITS:
 	case ACTING_KITCHEN:
@@ -1242,7 +1339,7 @@ t_cutscene Flicksync_GetNextCutscene()
 		return CUTSCENE_ADMIN;
 
 	case CUTSCENE_ADMIN:
-		return CUTSCENE_PINKY;
+		//return CUTSCENE_PINKY; // not working yet
 	case CUTSCENE_PINKY:
 	case ACTING_OVERHEAR:
 		return CUTSCENE_ALPHALABS1;
@@ -1251,6 +1348,28 @@ t_cutscene Flicksync_GetNextCutscene()
 		return CUTSCENE_VAGARY;
 
 	case CUTSCENE_VAGARY:
+		return CUTSCENE_MONORAIL_RAISE_COMMANDO;
+
+	case CUTSCENE_MONORAIL_RAISE_COMMANDO:
+		//return CUTSCENE_MONORAIL_CRASH; // not really working or important
+	case CUTSCENE_MONORAIL_CRASH:
+		return CUTSCENE_DELTA_SCIENTIST;
+	case CUTSCENE_DELTA_SCIENTIST:
+		return CUTSCENE_DELTA_TELEPORTER;
+	case CUTSCENE_DELTA_TELEPORTER:
+		return CUTSCENE_DELTA_HKINTRO;
+	case CUTSCENE_DELTA_HKINTRO:
+		return CUTSCENE_GUARDIAN_INTRO;
+
+	case CUTSCENE_GUARDIAN_INTRO:
+		return CUTSCENE_GUARDIAN_DEATH;
+	case CUTSCENE_GUARDIAN_DEATH:
+		return CUTSCENE_CAMPHUNT;
+
+	case CUTSCENE_CAMPHUNT:
+		return CUTSCENE_CPU_BOSS;
+	case CUTSCENE_CPU_BOSS:
+
 	case FMV_ROE:
 		return CUTSCENE_ARTIFACT;
 
@@ -1260,7 +1379,12 @@ t_cutscene Flicksync_GetNextCutscene()
 	case CUTSCENE_BLOOD:
 		return CUTSCENE_GRABBER;
 	case CUTSCENE_GRABBER:
-		return CUTSCENE_BRAVO_TEAM;
+		//return CUTSCENE_VULGARINTRO; // not quite working
+	case CUTSCENE_VULGARINTRO:
+		if( c == FLICK_MARINE_PDA || c == FLICK_MARINE_TORCH || c == FLICK_POINT )
+			return CUTSCENE_BRAVO_TEAM;
+		else
+			return CUTSCENE_NONE;
 
 	case CUTSCENE_BRAVO_TEAM:
 	default:
