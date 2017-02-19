@@ -10414,7 +10414,7 @@ void idPlayer::Move_Interpolated( float fraction )
 		// dont change the eyeoffset if using full motion crouch.
 		if ( game->isVR )
 		{
-			if ( vr_crouchMode.GetInteger() != 0 )
+			if ( vr_crouchMode.GetInteger() != 0 || (usercmd.buttons & BUTTON_CROUCH) )
 			{
 				newEyeOffset = 34; //Carl: When showing our body, our body doesn't crouch enough, so move eyes as high as possible (any higher and the top of our head wouldn't fit)
 			}
@@ -10688,10 +10688,10 @@ void idPlayer::Move()
 		
 		if ( game->isVR )
 		{
-			if ( vr_crouchMode.GetInteger() != 0 )
+			if ( vr_crouchMode.GetInteger() != 0 || (usercmd.buttons & BUTTON_CROUCH) )
 			{
 				newEyeOffset = 34;  //Carl: When showing our body, our body doesn't crouch enough, so move eyes as high as possible (any higher and the top of our head wouldn't fit)
-				if ( commonVr->poseHmdHeadPositionDelta.z < -vr_crouchTriggerDist.GetFloat() )
+				if ( vr_crouchMode.GetInteger() != 0 && commonVr->poseHmdHeadPositionDelta.z < -vr_crouchTriggerDist.GetFloat() )
 				{
 					// crouch was initiated by the trigger, adjust eyeOffset by trigger val so view isnt too low.
 					newEyeOffset += vr_crouchTriggerDist.GetFloat();
