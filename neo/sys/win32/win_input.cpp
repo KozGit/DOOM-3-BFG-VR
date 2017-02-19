@@ -1138,6 +1138,13 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 				return numEvents;
 			}
 #endif
+			// Carl: Update VR_USE_MOTION_CONTROLS if we've just started using the XBox controller
+			if (commonVr->VR_USE_MOTION_CONTROLS && (xis.Gamepad.wButtons || xis.Gamepad.bLeftTrigger > 64 || xis.Gamepad.bRightTrigger > 64
+				|| abs(xis.Gamepad.sThumbLX) + abs(xis.Gamepad.sThumbLY) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE || abs(xis.Gamepad.sThumbRX) + abs(xis.Gamepad.sThumbRY) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ) )
+			{
+				commonVr->VR_USE_MOTION_CONTROLS = false;
+			}
+
 			for ( int i = 0; i < 32; i++ )
 			{
 				int	bit = 1 << i;
@@ -1576,8 +1583,11 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 					if ( OVR_SUCCESS( ovr_GetInputState( commonVr->hmdSession, ovrControllerType_Touch, &inputState ) ) )
 					{
-						// Carl: Update VR_USE_MOTION_CONTROLS if we've just started using Touch.
-						if( !commonVr->VR_USE_MOTION_CONTROLS )
+						// Carl: Update VR_USE_MOTION_CONTROLS if we've just started using Touch
+						if( !commonVr->VR_USE_MOTION_CONTROLS && !vr_controllerStandard.GetInteger() && (
+							inputState.Buttons || inputState.HandTrigger[0] > 0.25f || inputState.HandTrigger[1] > 0.25f || inputState.IndexTrigger[0] > 0.25f || inputState.IndexTrigger[1] > 0.25f
+							|| (fabs(inputState.Thumbstick[0].x) + fabs(inputState.Thumbstick[0].y) > 0.5f) || (fabs(inputState.Thumbstick[1].x) + fabs(inputState.Thumbstick[1].y) > 0.5f)
+							|| (inputState.Touches & (ovrTouch_LButtonMask | ovrTouch_RButtonMask)) ) )
 						{
 							unsigned int ctrlrs = ovr_GetConnectedControllerTypes( commonVr->hmdSession );
 							if( ( ctrlrs & ovrControllerType_Touch ) != 0 )

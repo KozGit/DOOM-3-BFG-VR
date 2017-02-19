@@ -9735,7 +9735,7 @@ void idPlayer::EvaluateControls()
 			commonVr->teleportButtonCount = 0; // let the fire button abort teleporting.
 		}
 
-		if ( (vr_teleport.GetInteger() == 1 && commonVr->teleportButtonCount != 0) ||
+		if ( (vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS && commonVr->teleportButtonCount != 0) ||
 			(commonVr->teleportButtonCount > 1) ||
 			((oldTeleportButtonState && !common->ButtonState( UB_TELEPORT )) && !vr_teleportButtonMode.GetBool()) )
 		{
@@ -11597,7 +11597,7 @@ void idPlayer::UpdateLaserSight()
 
 	// Carl: teleport
 	static bool oldTeleport = false;
-	bool showTeleport = vr_teleport.GetInteger() == 1; // only show the teleport gun cursor if we're teleporting using the gun aim mode
+	bool showTeleport = vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS; // only show the teleport gun cursor if we're teleporting using the gun aim mode
 	showTeleport = showTeleport && !AI_DEAD && !gameLocal.inCinematic && !Flicksync_InCutscene && !game->IsPDAOpen();
 
 	// check if lasersight should be hidden
@@ -11707,7 +11707,7 @@ void idPlayer::UpdateLaserSight()
 	//int mode = vr_weaponSight.GetInteger();
 	//if ( mode != lastCrosshairMode )
 
-	if ( vr_teleport.GetInteger() == 1 && vr_weaponSight.GetInteger() == 0 )
+	if ( vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS && vr_weaponSight.GetInteger() == 0 )
 		vr_weaponSight.SetInteger( 1 );
 
 	if ( vr_weaponSight.IsModified() || ( oldTeleport && !showTeleport) )
@@ -11856,7 +11856,7 @@ void idPlayer::UpdateLaserSight()
 			crosshairEntity.origin = teleportPoint;
 			crosshairEntity.customSkin = skinCrosshairCross;
 		}
-		else if ( vr_teleport.GetInteger() == 1 )
+		else if ( vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS )
 		{
 			crosshairEntity.customSkin = skinCrosshairDot;
 		}
@@ -11893,12 +11893,12 @@ bool idPlayer::GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis ) // 
 		return false;
 	}
 
-	if ( vr_teleport.GetInteger() == 1 )// teleport aim mode is to use the standard weaponsight, so just return.
+	if ( vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS )// teleport aim mode is to use the standard weaponsight, so just return.
 	{
 		return false;
 	}
 
-	if ( vr_teleport.GetInteger() == 2 + vr_weaponHand.GetInteger() )// teleport aim origin from the weapon.
+	if ( vr_teleport.GetInteger() == 2 + vr_weaponHand.GetInteger() && commonVr->VR_USE_MOTION_CONTROLS )// teleport aim origin from the weapon.
 	{
 		if ( !weapon.GetEntity()->ShowCrosshair() ||
 			weapon->IsHidden() ||
@@ -11946,7 +11946,7 @@ bool idPlayer::GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis ) // 
 
 
 	}
-	else if ( vr_teleport.GetInteger() == 4 ) // beam originates from in front of the head
+	else if ( vr_teleport.GetInteger() == 4 || !commonVr->VR_USE_MOTION_CONTROLS ) // beam originates from in front of the head
 	{
 		beamAxis = commonVr->lastHMDViewAxis;
 		beamOrigin = commonVr->lastHMDViewOrigin + 12 * beamAxis[0];
@@ -12040,7 +12040,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	static idVec3 beamOrigin = vec3_zero;
 	static idMat3 beamAxis = mat3_identity;
 	
-	bool showTeleport = vr_teleport.GetInteger() > 1 && commonVr->teleportButtonCount != 0;
+	bool showTeleport = ( vr_teleport.GetInteger() > 1 || ( !commonVr->VR_USE_MOTION_CONTROLS && vr_teleport.GetInteger() > 0 ) ) && commonVr->teleportButtonCount != 0;
 	static bool lastShowTeleport = false;
 
 
@@ -12928,7 +12928,8 @@ void idPlayer::Think()
 
 
 	// koz check for forced standard controller
-	commonVr->VR_USE_MOTION_CONTROLS = !vr_controllerStandard.GetInteger();
+	if( commonVr->VR_USE_MOTION_CONTROLS && vr_controllerStandard.GetInteger() )
+		commonVr->VR_USE_MOTION_CONTROLS = false;
 
 	//koz turn body on or off in vr, update hand poses/skins if body or weapon hand changes.
 	if ( game->isVR )
