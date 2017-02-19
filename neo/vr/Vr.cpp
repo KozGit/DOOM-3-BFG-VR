@@ -564,8 +564,8 @@ bool iVr::OculusInit( void )
 
 	VR_USE_MOTION_CONTROLS = false;
 
-	int ctrlrs = ovr_GetConnectedControllerTypes( hmdSession );
-	if ( (ctrlrs && 3) != 0 )
+	unsigned int ctrlrs = ovr_GetConnectedControllerTypes( hmdSession );
+	if( ( ctrlrs & ovrControllerType_Touch ) != 0 )
 	{
 		VR_USE_MOTION_CONTROLS = true;
 		motionControlType = MOTION_OCULUS;

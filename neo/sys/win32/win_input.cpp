@@ -1568,8 +1568,11 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 				//=================================================
 				// Koz begin add touch controls
+				// Carl: There's never any reason not to recognise button presses or joysticks from Touch controllers.
+				// Touch controllers will turn themselves off if not in use, and send no buttons.
+				// And Touch controllers were cleverly designed so if you place them on a flat surface, no buttons are bumped.
 
-				if ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_OCULUS )
+				if ( commonVr->hasOculusRift ) // was ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_OCULUS )
 				{
 
 					static ovrInputState oldInputState;
@@ -1577,6 +1580,17 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 					if ( OVR_SUCCESS( ovr_GetInputState( commonVr->hmdSession, ovrControllerType_Touch, &inputState ) ) )
 					{
+						// Carl: Update VR_USE_MOTION_CONTROLS if we've just started using Touch.
+						if( !commonVr->VR_USE_MOTION_CONTROLS )
+						{
+							unsigned int ctrlrs = ovr_GetConnectedControllerTypes( commonVr->hmdSession );
+							if( ( ctrlrs & ovrControllerType_Touch ) != 0 )
+							{
+								commonVr->VR_USE_MOTION_CONTROLS = true;
+								commonVr->motionControlType = MOTION_OCULUS;
+							}
+						}
+
 						if ( (inputState.Buttons & ovrButton_A) != (oldInputState.Buttons & ovrButton_A) )
 						{
 							//common->Printf( "Posting input event for r_touch_a val : %d\n", (inputState.Buttons & ovrButton_A)  );
