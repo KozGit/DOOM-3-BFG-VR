@@ -1542,6 +1542,8 @@ idPlayer::idPlayer():
 	teleportPoint = vec3_zero;
 	teleportAimPointPitch = 0.0f;
 
+	handGrabbingWorld[0] = false;
+	handGrabbingWorld[1] = false;
 
 	noclip					= false;
 	godmode					= false;
@@ -6081,6 +6083,25 @@ bool idPlayer::WeaponHandImpulseSlot()
 	return false;
 }
 
+// 0 = right hand, 1 = left hand; true if pressed, false if released; returns true if handled as grab
+bool idPlayer::GrabWorld( int hand, bool pressed )
+{
+	bool b;
+	if( !pressed )
+	{
+		b = handGrabbingWorld[hand];
+		handGrabbingWorld[hand] = false;
+		return b;
+	}
+	if ( hand == vr_weaponHand.GetInteger() )
+		b = WeaponHandImpulseSlot();
+	else
+		b = OtherHandImpulseSlot();
+	handGrabbingWorld[hand] = b;
+	return b;
+}
+
+
 /*
 ==================
 idPlayer::SlotForWeapon
@@ -9687,25 +9708,7 @@ void idPlayer::EvaluateControls()
 		}
 	}
 
-	bool grabbed = false;
-	if( commonVr->grabbedLeft )
-	{
-		commonVr->grabbedLeft = false;
-		if( (vr_weaponHand.GetInteger()==0 && OtherHandImpulseSlot()) || (vr_weaponHand.GetInteger()==1 && WeaponHandImpulseSlot()) )
-		{
-			grabbed = true;
-		}
-	}
-	if( commonVr->grabbedRight )
-	{
-		commonVr->grabbedRight = false;
-		if( (vr_weaponHand.GetInteger()==1 && OtherHandImpulseSlot()) || (vr_weaponHand.GetInteger()==0 && WeaponHandImpulseSlot()) )
-		{
-			grabbed = true;
-		}
-	}
-
-	if( !grabbed && usercmd.impulseSequence != oldImpulseSequence )
+	if( usercmd.impulseSequence != oldImpulseSequence )
 	{
 		PerformImpulse( usercmd.impulse );
 	}

@@ -527,6 +527,8 @@ public:
 	idMat3					rightHandAxis;
 	slotIndex_t				weaponHandSlot;
 
+	bool handGrabbingWorld[2];
+
 	idVec3					waistOrigin;
 	idMat3					waistAxis;
 
@@ -744,6 +746,7 @@ public:
 	
 	bool					OtherHandImpulseSlot();
 	bool					WeaponHandImpulseSlot();
+	bool					GrabWorld( int hand, bool pressed ); // 0 = right hand, 1 = left hand; true if pressed, false if released; returns true if handled as grab
 	
 	int						SlotForWeapon( const char* weaponName );
 	void					Reload();

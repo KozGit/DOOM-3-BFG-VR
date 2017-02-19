@@ -146,8 +146,6 @@ public:
 	bool				gameSavingLoading;
 	bool				showingIntroVideo;
 
-	bool				grabbedLeft, grabbedRight;
-
 	int					swfRenderMode;
 	bool				PDAclipModelSet;
 	int					pdaToggleTime;
