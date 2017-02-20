@@ -255,7 +255,8 @@ public:
 	float				hmdAspect;
 	hmdEye_t			hmdEye[2];
 	
-	
+	float				VRScreenSeparation; // for Reduce FOV motion sickness fix
+
 	float				officialIPD;
 	float				officialHeight;
 	

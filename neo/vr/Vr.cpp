@@ -290,6 +290,8 @@ iVr::iVr()
 
 	vrIsBackgroundSaving = false;
 
+	VRScreenSeparation = 0.0f;
+
 	officialIPD = 64.0f;
 	officialHeight = 72.0f;
 
@@ -569,6 +571,9 @@ bool iVr::OculusInit( void )
 		motionControlType = MOTION_OCULUS;
 	}
 
+	// Carl: TODO
+	VRScreenSeparation = 0.0f;
+
 	hasOculusRift = true;
 	return true;
 }
@@ -663,6 +668,22 @@ bool iVr::OpenVRInit(void)
 	commonVr->hmdHz = (int)m_pHMD->GetFloatTrackedDeviceProperty( vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_DisplayFrequency_Float );
 
 	officialIPD = m_pHMD->GetFloatTrackedDeviceProperty( vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_UserIpdMeters_Float ) * 100;
+
+	// Leyland's code, used for Reduce FOV motion sickness fix
+	float				openVRfovEye[2][4];
+	m_pHMD->GetProjectionRaw(vr::Eye_Left,
+		&openVRfovEye[1][0], &openVRfovEye[1][1],
+		&openVRfovEye[1][2], &openVRfovEye[1][3]);
+
+	m_pHMD->GetProjectionRaw(vr::Eye_Right,
+		&openVRfovEye[0][0], &openVRfovEye[0][1],
+		&openVRfovEye[0][2], &openVRfovEye[0][3]);
+
+	VRScreenSeparation =
+		0.5f * (openVRfovEye[1][1] + openVRfovEye[1][0])
+		/ (openVRfovEye[1][1] - openVRfovEye[1][0])
+		- 0.5f * (openVRfovEye[0][1] + openVRfovEye[0][0])
+		/ (openVRfovEye[0][1] - openVRfovEye[0][0]);
 
 	com_engineHz.SetInteger( commonVr->hmdHz );
 
