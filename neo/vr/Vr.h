@@ -146,8 +146,6 @@ public:
 	bool				gameSavingLoading;
 	bool				showingIntroVideo;
 
-	bool				grabbedLeft, grabbedRight;
-
 	int					swfRenderMode;
 	bool				PDAclipModelSet;
 	int					pdaToggleTime;
@@ -257,7 +255,8 @@ public:
 	float				hmdAspect;
 	hmdEye_t			hmdEye[2];
 	
-	
+	float				VRScreenSeparation; // for Reduce FOV motion sickness fix
+
 	float				officialIPD;
 	float				officialHeight;
 	

@@ -591,7 +591,7 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 		}
 
 		if (vrComfortVision) {
-			float extend = -0.5f * 0.0f * renderSystem->GetVirtualWidth(); // glConfig.openVRScreenSeparation
+			float extend = -0.5f * commonVr->VRScreenSeparation * renderSystem->GetVirtualWidth(); // glConfig.openVRScreenSeparation
 			float offset = -extend * view->viewEyeBuffer;
 
 			renderSystem->SetColor4(0, 0, 0, 255);
@@ -1208,7 +1208,7 @@ FullscreenFX_Helltime::Active
 bool FullscreenFX_Helltime::Active()
 {
 
-	if( gameLocal.inCinematic || common->IsMultiplayer() )
+	if( Flicksync_InCutscene || gameLocal.inCinematic || common->IsMultiplayer() )
 	{
 		return false;
 	}

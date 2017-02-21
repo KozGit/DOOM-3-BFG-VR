@@ -1586,7 +1586,7 @@ void idPhysics_Player::CheckDuck()
 	else
 	{
 
-		if ( current.movementType == PM_NORMAL && game->isVR && vr_crouchMode.GetInteger() == 0 )
+		if ( current.movementType == PM_NORMAL && game->isVR && vr_crouchMode.GetInteger() == 0 && !(command.buttons & BUTTON_CROUCH) )
 		// game is in full motion crouch mode, dont do anything except change the bounding box to crouch height if ducking
 		// and change the player speed to crouch speed if player has ducked enough.
 		// thought I was going to have to do a bunch of bullshit to toggle the crouch anim

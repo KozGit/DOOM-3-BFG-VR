@@ -1550,7 +1550,7 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 	
 	int buttonCurrentlyClicked = ButtonState( UB_IMPULSE41 );
 
-	if ( game->CheckInCinematic() == true ) return; // do nothing in cinematics
+	if ( game->CheckInCinematic() == true || Flicksync_InCutscene ) return; // do nothing in cinematics
 
 
 	//common->Printf( "Forwardmove %d rightmove %d\n", cmd.forwardmove, cmd.rightmove );
@@ -2025,7 +2025,25 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 		int value;
 		if( Sys_ReturnJoystickInputEvent( i, action, value ) )
 		{
-			if( action >= J_ACTION1 && action <= J_ACTION_MAX )
+			// left grip button
+			if( action == J_ACTION22 || action == J_ACTION33 )
+			{
+				int joyButton = K_JOY1 + (action - J_ACTION1);
+				// vrLeftGrab = (value != 0);
+				idPlayer * player = gameLocal.GetLocalPlayer();
+				if ( !player || !player->GrabWorld( 1, (value != 0) ) )
+					Key( joyButton, ( value != 0 ) );
+			}
+			// right grip button
+			else if( action == J_ACTION29 || action == J_ACTION51 )
+			{
+				int joyButton = K_JOY1 + (action - J_ACTION1);
+				// vrRightGrab = (value != 0);
+				idPlayer * player = gameLocal.GetLocalPlayer();
+				if ( !player || !player->GrabWorld( 0, (value != 0) ) )
+					Key( joyButton, ( value != 0 ) );
+			}
+			else if( action >= J_ACTION1 && action <= J_ACTION_MAX )
 			{
 				int joyButton = K_JOY1 + ( action - J_ACTION1 );
 				Key( joyButton, ( value != 0 ) );

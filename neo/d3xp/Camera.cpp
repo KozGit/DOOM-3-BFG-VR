@@ -757,17 +757,19 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		case FLICK_RECEPTION:
 			ent = gameLocal.FindEntity("marscity_receptionist_full");
 			break;
-		case FLICK_KELLY:
+		case FLICK_SARGE:
 			ent = gameLocal.FindEntity("marscity_cinematic_sarge_1");
 			if (!ent)
 				ent = gameLocal.FindEntity("marscity_cinematic_sarge2_1");
 			if (!ent)
 				ent = gameLocal.FindEntity("sarge_secondary");
 			break;
-		case FLICK_ISHII:
+		case FLICK_SCIENTIST:
 			ent = gameLocal.FindEntity("underground_crazy_sci_1");
 			if (!ent)
 				ent = gameLocal.FindEntity("underground_crazy_zombie_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("delta2a_scientist_1");
 			break;
 		case FLICK_MCNEIL:
 			ent = gameLocal.FindEntity("erebus1_intro_mcneil_1");
@@ -779,17 +781,82 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 			break;
 		case FLICK_MARINE_PDA:
 			ent = gameLocal.FindEntity("erebus1_intro_marine1_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("enpro_soldier2_1");
 			break;
 		case FLICK_MARINE_TORCH:
 			ent = gameLocal.FindEntity("erebus1_intro_marine2_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("enpro_soldier4_1");
 			break;
 		case FLICK_POINT:
 			ent = gameLocal.FindEntity("erebus1_intro_detonate_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("enpro_soldier1_1");
+			if (!ent)
+				ent = gameLocal.FindEntity("erebus1_cinematic_marine_gravitygun_end_1");
 			break;
+		case FLICK_BRAVO_LEAD:
+			ent = gameLocal.FindEntity("enpro_soldier3_1");
+		case FLICK_PLAYER:
+			static const char * player_entities[] = {
+				"marscity_cinematic_player_1",
+				"marscity_reception_player_1",
+				"playerspeech",
+				"marscity_cinematic_player_sarge",
+				"admin_overhear_player_1_pinky",
+				"admin_overhear_player_2",
+				"admin_overhear_player_3",
+				"alphalabs1_player_2",
+				"alphalabs1_player_3",
+				"alphalabs3_vagaryintro_player_1",
+				"alphalabs3_vagaryintro_player_2",
+				"cpuboss_cin_player_1",
+				"delta2a_player_2",
+				"delta2a_player_3",
+				"delta4_cin_player_1",
+				"delta4_cin_player_2",
+				"enpro_cin_player_1",
+				"enpro_cin_player_2",
+				"enpro_cin_player_5",
+				"enpro_cin_player_7",
+				"wounded_marine_cinematic_player",
+				"erebus1_cinematic_player_fill_1",
+				"erebus1_cinematic_player_start_1",
+				"erebus1_cinematic_player_end_1",
+				"erebus2_cinematic_player_vulgarintro_1",
+				"ht_erebus2_cinematic_player",
+				"ht_erebus2_cinematic_player_end",
+				"erebus5_envirosuit_player_1",
+				"erebus5_cloud_player_cinematic_1",
+				"erebus5_envirosuit_player_3",
+				"ber_erebus6_cinematic_player",
+				"ber_erebus6_cinematic_player_end",
+				"maledict_death_player_turnrun_1",
+				"maledict_death_player_run_1",
+				"maledict_death_player_rocket_1",
+				"maledict_death_player_heart_1",
+				"maledict_death_player_heart_2",
+				"maledict_death_player_heart_flyin",
+				"hell1_cin_player_3",
+				"hellhole_cin_player_1",
+				"hellhole_cin_player_2",
+				"player1",
+			};
+			for (int e = 0; e < sizeof(player_entities) / sizeof(player_entities[0]); e++)
+			{
+				ent = gameLocal.FindEntity(player_entities[e]);
+				if (ent)
+					break;
+			}
 		}
+		static idEntity *last_ent = NULL;
 		// only use character if it's not hidden, and it's within range of current camera
 		if ( ent && ( ent == hiddenEnt || !ent->IsHidden() ) && ( ent->GetPhysics()->GetOrigin() - view->vieworg ).LengthSqr() <= 500*500 )
 		{
+			if (g_debugCinematic.GetBool() && ent!=last_ent)
+				gameLocal.Printf("%d: Flicksync using character %s\n", gameLocal.framenum, ent->name.c_str());
+			last_ent = ent;
 			idVec3 camPos = view->vieworg;
 			if (ent->GetPhysics()->IsType(idPhysics_Actor::Type))
 			{
@@ -815,10 +882,14 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 				view->viewaxis = ent->GetPhysics()->GetAxis();
 				view->vieworg = ent->GetPhysics()->GetOrigin();
 			}
-			hiddenEnt = ent;			//ent->Hide();
+			hiddenEnt = ent;
+			//ent->Hide();
 		}
 		else
 		{
+			if (g_debugCinematic.GetBool() && ent != last_ent)
+				gameLocal.Printf("%d: Flicksync using camera %s\n", gameLocal.framenum, this->name.c_str());
+			last_ent = ent;
 			view->viewaxis = camFrame2[0].q.ToMat3();
 			view->vieworg = camFrame2[0].t + offset;
 		}

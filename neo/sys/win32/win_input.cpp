@@ -1138,6 +1138,13 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 				return numEvents;
 			}
 #endif
+			// Carl: Update VR_USE_MOTION_CONTROLS if we've just started using the XBox controller
+			if (commonVr->VR_USE_MOTION_CONTROLS && (xis.Gamepad.wButtons || xis.Gamepad.bLeftTrigger > 64 || xis.Gamepad.bRightTrigger > 64
+				|| abs(xis.Gamepad.sThumbLX) + abs(xis.Gamepad.sThumbLY) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE || abs(xis.Gamepad.sThumbRX) + abs(xis.Gamepad.sThumbRY) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ) )
+			{
+				commonVr->VR_USE_MOTION_CONTROLS = false;
+			}
+
 			for ( int i = 0; i < 32; i++ )
 			{
 				int	bit = 1 << i;
@@ -1346,8 +1353,6 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							if ( (button & ButtonMaskFromId( vr::k_EButton_Grip )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_Grip )) )
 							{
 								//common->Printf( "inputDeviceNum %d L Grip\n", inputDeviceNum );
-								if ((button & ButtonMaskFromId(vr::k_EButton_Grip)) > 0)
-									commonVr->grabbedLeft = true;
 								PostInputEvent( inputDeviceNum, J_ACTION33, (button & ButtonMaskFromId( vr::k_EButton_Grip )) > 0 );
 							}
 
@@ -1487,8 +1492,6 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							if ( (button & ButtonMaskFromId( vr::k_EButton_Grip )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_Grip )) )
 							{
 								//common->Printf( "inputDeviceNum %d R Grip\n", inputDeviceNum );
-								if ((button & ButtonMaskFromId( vr::k_EButton_Grip)) > 0)
-									commonVr->grabbedRight = true;
 								PostInputEvent(inputDeviceNum, J_ACTION51, (button & ButtonMaskFromId(vr::k_EButton_Grip)) > 0);
 							}
 
@@ -1568,8 +1571,11 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 				//=================================================
 				// Koz begin add touch controls
+				// Carl: There's never any reason not to recognise button presses or joysticks from Touch controllers.
+				// Touch controllers will turn themselves off if not in use, and send no buttons.
+				// And Touch controllers were cleverly designed so if you place them on a flat surface, no buttons are bumped.
 
-				if ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_OCULUS )
+				if ( commonVr->hasOculusRift ) // was ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_OCULUS )
 				{
 
 					static ovrInputState oldInputState;
@@ -1577,6 +1583,20 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 					if ( OVR_SUCCESS( ovr_GetInputState( commonVr->hmdSession, ovrControllerType_Touch, &inputState ) ) )
 					{
+						// Carl: Update VR_USE_MOTION_CONTROLS if we've just started using Touch
+						if( !commonVr->VR_USE_MOTION_CONTROLS && !vr_controllerStandard.GetInteger() && (
+							inputState.Buttons || inputState.HandTrigger[0] > 0.25f || inputState.HandTrigger[1] > 0.25f || inputState.IndexTrigger[0] > 0.25f || inputState.IndexTrigger[1] > 0.25f
+							|| (fabs(inputState.Thumbstick[0].x) + fabs(inputState.Thumbstick[0].y) > 0.5f) || (fabs(inputState.Thumbstick[1].x) + fabs(inputState.Thumbstick[1].y) > 0.5f)
+							|| (inputState.Touches & (ovrTouch_LButtonMask | ovrTouch_RButtonMask)) ) )
+						{
+							unsigned int ctrlrs = ovr_GetConnectedControllerTypes( commonVr->hmdSession );
+							if( ( ctrlrs & ovrControllerType_Touch ) != 0 )
+							{
+								commonVr->VR_USE_MOTION_CONTROLS = true;
+								commonVr->motionControlType = MOTION_OCULUS;
+							}
+						}
+
 						if ( (inputState.Buttons & ovrButton_A) != (oldInputState.Buttons & ovrButton_A) )
 						{
 							//common->Printf( "Posting input event for r_touch_a val : %d\n", (inputState.Buttons & ovrButton_A)  );
@@ -1631,8 +1651,6 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 						if ( (inputState.HandTrigger[ovrHand_Left] > 0.25f) != (oldInputState.HandTrigger[ovrHand_Left] > 0.25f) )
 						{
-							if (inputState.HandTrigger[ovrHand_Left] > 0.25f)
-								commonVr->grabbedLeft = true;
 							PostInputEvent(inputDeviceNum, J_ACTION22, inputState.HandTrigger[ovrHand_Left] > 0.25f);
 						}
 
@@ -1643,8 +1661,6 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 						if ( (inputState.HandTrigger[ovrHand_Right] > 0.25f) != (oldInputState.HandTrigger[ovrHand_Right] > 0.25f) )
 						{
-							if (inputState.HandTrigger[ovrHand_Right] > 0.25f )
-								commonVr->grabbedRight = true;
 							PostInputEvent(inputDeviceNum, J_ACTION29, inputState.HandTrigger[ovrHand_Right] > 0.25f);
 						}
 
