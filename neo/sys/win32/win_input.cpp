@@ -1253,7 +1253,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 				//=============================
 				// Koz begin add SteamVR controllers
 
-				if ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_STEAMVR )
+				if ( commonVr->hasHMD && !commonVr->hasOculusRift ) // was  commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_STEAMVR
 				{
 
 					//common->Printf( "Checking steam controllerstime %d\n",  Sys_Milliseconds() );
@@ -1341,6 +1341,12 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 						// process buttons ( appmenu, grip, trigger, touchpad pressed )
 						button = currentStateL.ulButtonPressed;
+
+						if( !commonVr->VR_USE_MOTION_CONTROLS && vr_autoSwitchControllers.GetBool() && ( button > oldButton[0] || trig > 0.25f || (fabs(padX) + fabs(padY) > 0.5f) ) )
+						{
+							commonVr->VR_USE_MOTION_CONTROLS = true;
+							commonVr->motionControlType = MOTION_STEAMVR;
+						}
 
 						if ( button != oldButton[0] )
 						{
@@ -1479,6 +1485,12 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 						// process buttons ( appmenu, grip, trigger, touchpad pressed )
 						button = currentStateR.ulButtonPressed;
+
+						if( !commonVr->VR_USE_MOTION_CONTROLS && vr_autoSwitchControllers.GetBool() && ( button > oldButton[0] || trig > 0.25f || (fabs(padX) + fabs(padY) > 0.5f) ) )
+						{
+							commonVr->VR_USE_MOTION_CONTROLS = true;
+							commonVr->motionControlType = MOTION_STEAMVR;
+						}
 
 						if ( button != oldButton[1] )
 						{
