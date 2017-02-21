@@ -338,7 +338,7 @@ idConsoleLocal::DrawFlicksync
 */
 void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 {
-	if (gameLocal.inCinematic)
+	if ( gameLocal.inCinematic || Flicksync_InCutscene )
 		centerY += BIGCHAR_HEIGHT * 3;
 	if (leftY < centerY)
 		leftY = centerY;
@@ -354,7 +354,7 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 		leftY += SMALLCHAR_HEIGHT + 4;
 	}
 
-	if (!gameLocal.inCinematic)
+	if ( !gameLocal.inCinematic && !Flicksync_InCutscene )
 		return;
 
 	if (Flicksync_CorrectInARow > 0)
@@ -398,6 +398,8 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 		renderSystem->SetColor( colorWhite );
 
 		const char *text_p = Flicksync_CueCardText.c_str();
+		if (*text_p == '\0')
+			text_p = "( Wait )";
 		const char *end_p = text_p + idStr::Length( text_p );
 
 		while (text_p != end_p)
@@ -424,7 +426,8 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 			y = leftY;
 		if (y < centerY)
 			y = centerY;
-		renderSystem->SetColor(colorYellow);
+		const idVec4 colorSubtitle = idVec4( 0.96f, 0.96f, 0.25f, 1.0f );
+		renderSystem->SetColor( colorSubtitle );
 
 		const char *text_p = Flicksync_CueText.c_str();
 		const char *end_p = text_p + idStr::Length(text_p);

@@ -842,6 +842,8 @@ void idCommonLocal::Frame()
 			ExecuteMapChange();
 			mapSpawnData.savegameFile = NULL;
 			mapSpawnData.persistentPlayerInfo.Clear();
+			if ( Flicksync_skipToCutscene )
+				Flicksync_GoToCutscene( Flicksync_skipToCutscene );
 			return;
 		}
 		else if( session->GetState() != idSession::INGAME && mapSpawned )

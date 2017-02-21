@@ -1542,6 +1542,8 @@ idPlayer::idPlayer():
 	teleportPoint = vec3_zero;
 	teleportAimPointPitch = 0.0f;
 
+	handGrabbingWorld[0] = false;
+	handGrabbingWorld[1] = false;
 
 	noclip					= false;
 	godmode					= false;
@@ -4536,9 +4538,6 @@ idPlayer::ExitCinematic
 */
 void idPlayer::ExitCinematic()
 {
-	if ( vr_flicksyncCharacter.GetInteger() )
-		Flicksync_EndCutscene();
-
 	Show();
 	
 	if( weaponEnabled && weapon.GetEntity() )
@@ -5457,7 +5456,7 @@ void idPlayer::UpdatePowerUps()
 			healthPulse = true;
 		}
 	}
-	if( !gameLocal.inCinematic && influenceActive == 0 && g_skill.GetInteger() == 3 && gameLocal.time > nextHealthTake && !AI_DEAD && health > g_healthTakeLimit.GetInteger() )
+	if( !gameLocal.inCinematic && !Flicksync_InCutscene && influenceActive == 0 && g_skill.GetInteger() == 3 && gameLocal.time > nextHealthTake && !AI_DEAD && health > g_healthTakeLimit.GetInteger() )
 	{
 		assert( !common->IsClient() );	// healthPool never be set on client
 		
@@ -5750,7 +5749,8 @@ void idPlayer::GivePDA( const idDeclPDA* pda, const char* securityItem, bool tog
 	
 	// This is kind of a hack, but it works nicely
 	// We don't want to display the 'you got a new pda' message during a map load
-	if ( gameLocal.GetFrameNum() > 10 ) 
+	// or if we're about to skip to another cutscene
+	if ( gameLocal.GetFrameNum() > 10 && vr_cutscenesOnly.GetInteger() != 1 && Flicksync_skipToCutscene == CUTSCENE_NONE ) 
 	{
 				
 		const char* sec = pda->GetSecurity();
@@ -6083,6 +6083,25 @@ bool idPlayer::WeaponHandImpulseSlot()
 	return false;
 }
 
+// 0 = right hand, 1 = left hand; true if pressed, false if released; returns true if handled as grab
+bool idPlayer::GrabWorld( int hand, bool pressed )
+{
+	bool b;
+	if( !pressed )
+	{
+		b = handGrabbingWorld[hand];
+		handGrabbingWorld[hand] = false;
+		return b;
+	}
+	if ( hand == vr_weaponHand.GetInteger() )
+		b = WeaponHandImpulseSlot();
+	else
+		b = OtherHandImpulseSlot();
+	handGrabbingWorld[hand] = b;
+	return b;
+}
+
+
 /*
 ==================
 idPlayer::SlotForWeapon
@@ -6112,7 +6131,7 @@ idPlayer::Reload
 */
 void idPlayer::Reload()
 {
-	if( spectating || gameLocal.inCinematic || influenceActive )
+	if( spectating || gameLocal.inCinematic || Flicksync_InCutscene || influenceActive )
 	{
 		return;
 	}
@@ -6183,7 +6202,7 @@ idPlayer::NextWeapon
 void idPlayer::NextWeapon()
 {
 
-	if( !weaponEnabled || spectating || hiddenWeapon || gameLocal.inCinematic || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || health < 0 )
+	if( !weaponEnabled || spectating || hiddenWeapon || gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || health < 0 )
 	{
 		return;
 	}
@@ -6247,7 +6266,7 @@ idPlayer::PrevWeapon
 void idPlayer::PrevWeapon()
 {
 
-	if( !weaponEnabled || spectating || hiddenWeapon || gameLocal.inCinematic || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || health < 0 )
+	if( !weaponEnabled || spectating || hiddenWeapon || gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || health < 0 )
 	{
 		return;
 	}
@@ -6311,7 +6330,7 @@ void idPlayer::SelectWeapon( int num, bool force, bool specific )
 {
 	const char* weap;
 	
-	if( !weaponEnabled || spectating || gameLocal.inCinematic || health < 0 || commonVr->handInGui ) // koz don't let the player change weapons if hand is currently in a gui
+	if( !weaponEnabled || spectating || gameLocal.inCinematic || Flicksync_InCutscene || health < 0 || commonVr->handInGui ) // koz don't let the player change weapons if hand is currently in a gui
 	{
 		return;
 	}
@@ -6609,7 +6628,7 @@ idPlayer::Weapon_Combat
 */
 void idPlayer::Weapon_Combat()
 {
-	if( influenceActive || !weaponEnabled || gameLocal.inCinematic || privateCameraView )
+	if( influenceActive || !weaponEnabled || gameLocal.inCinematic || Flicksync_InCutscene || privateCameraView )
 	{
 		return;
 	}
@@ -6727,7 +6746,7 @@ void idPlayer::Weapon_Combat()
 
 	int c = vr_chaperone.GetInteger();
 	bool force;
-	if ( !weaponEnabled || spectating || gameLocal.inCinematic || health < 0 || hiddenWeapon || currentWeapon < 0 )
+	if ( !weaponEnabled || spectating || Flicksync_InCutscene || gameLocal.inCinematic || health < 0 || hiddenWeapon || currentWeapon < 0 )
 		force = c >= 4;
 	else
 		force = ( c >= 4 ) || ( c >= 1 && currentWeapon == weapon_handgrenade )
@@ -7123,7 +7142,7 @@ void idPlayer::FlashlightOn()
 	{
 		return;
 	}
-	if( gameLocal.inCinematic )
+	if( gameLocal.inCinematic || Flicksync_InCutscene )
 	{
 		return;
 	}
@@ -7822,7 +7841,7 @@ void idPlayer::UpdateFocus()
 	
 
 
-	if ( gameLocal.inCinematic )
+	if ( Flicksync_InCutscene || gameLocal.inCinematic )
 	{
 		return;
 	}
@@ -9689,25 +9708,7 @@ void idPlayer::EvaluateControls()
 		}
 	}
 
-	bool grabbed = false;
-	if( commonVr->grabbedLeft )
-	{
-		commonVr->grabbedLeft = false;
-		if( (vr_weaponHand.GetInteger()==0 && OtherHandImpulseSlot()) || (vr_weaponHand.GetInteger()==1 && WeaponHandImpulseSlot()) )
-		{
-			grabbed = true;
-		}
-	}
-	if( commonVr->grabbedRight )
-	{
-		commonVr->grabbedRight = false;
-		if( (vr_weaponHand.GetInteger()==1 && OtherHandImpulseSlot()) || (vr_weaponHand.GetInteger()==0 && WeaponHandImpulseSlot()) )
-		{
-			grabbed = true;
-		}
-	}
-
-	if( !grabbed && usercmd.impulseSequence != oldImpulseSequence )
+	if( usercmd.impulseSequence != oldImpulseSequence )
 	{
 		PerformImpulse( usercmd.impulse );
 	}
@@ -9734,7 +9735,7 @@ void idPlayer::EvaluateControls()
 			commonVr->teleportButtonCount = 0; // let the fire button abort teleporting.
 		}
 
-		if ( (vr_teleport.GetInteger() == 1 && commonVr->teleportButtonCount != 0) ||
+		if ( (vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS && commonVr->teleportButtonCount != 0) ||
 			(commonVr->teleportButtonCount > 1) ||
 			((oldTeleportButtonState && !common->ButtonState( UB_TELEPORT )) && !vr_teleportButtonMode.GetBool()) )
 		{
@@ -10356,7 +10357,7 @@ void idPlayer::Move_Interpolated( float fraction )
 		physicsObj.SetContents( CONTENTS_CORPSE | CONTENTS_MONSTERCLIP );
 		physicsObj.SetMovementType( PM_DEAD );
 	}
-	else if( gameLocal.inCinematic || gameLocal.GetCamera() || privateCameraView || ( influenceActive == INFLUENCE_LEVEL2 ) )
+	else if( gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.GetCamera() || privateCameraView || ( influenceActive == INFLUENCE_LEVEL2 ) )
 	{
 		physicsObj.SetContents( CONTENTS_BODY );
 		physicsObj.SetMovementType( PM_FREEZE );
@@ -10416,7 +10417,7 @@ void idPlayer::Move_Interpolated( float fraction )
 		// dont change the eyeoffset if using full motion crouch.
 		if ( game->isVR )
 		{
-			if ( vr_crouchMode.GetInteger() != 0 )
+			if ( vr_crouchMode.GetInteger() != 0 || (usercmd.buttons & BUTTON_CROUCH) )
 			{
 				newEyeOffset = 34; //Carl: When showing our body, our body doesn't crouch enough, so move eyes as high as possible (any higher and the top of our head wouldn't fit)
 			}
@@ -10520,7 +10521,7 @@ void idPlayer::Move()
 		physicsObj.SetContents( CONTENTS_CORPSE | CONTENTS_MONSTERCLIP );
 		physicsObj.SetMovementType( PM_DEAD );
 	}
-	else if( gameLocal.inCinematic || gameLocal.GetCamera() || privateCameraView || ( influenceActive == INFLUENCE_LEVEL2 ) )
+	else if( gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.GetCamera() || privateCameraView || ( influenceActive == INFLUENCE_LEVEL2 ) )
 	{
 		physicsObj.SetContents( CONTENTS_BODY );
 		physicsObj.SetMovementType( PM_FREEZE );
@@ -10690,10 +10691,10 @@ void idPlayer::Move()
 		
 		if ( game->isVR )
 		{
-			if ( vr_crouchMode.GetInteger() != 0 )
+			if ( vr_crouchMode.GetInteger() != 0 || (usercmd.buttons & BUTTON_CROUCH) )
 			{
 				newEyeOffset = 34;  //Carl: When showing our body, our body doesn't crouch enough, so move eyes as high as possible (any higher and the top of our head wouldn't fit)
-				if ( commonVr->poseHmdHeadPositionDelta.z < -vr_crouchTriggerDist.GetFloat() )
+				if ( vr_crouchMode.GetInteger() != 0 && commonVr->poseHmdHeadPositionDelta.z < -vr_crouchTriggerDist.GetFloat() )
 				{
 					// crouch was initiated by the trigger, adjust eyeOffset by trigger val so view isnt too low.
 					newEyeOffset += vr_crouchTriggerDist.GetFloat();
@@ -10731,7 +10732,7 @@ void idPlayer::Move()
 		}
 	}
 	
-	if( noclip || gameLocal.inCinematic || ( influenceActive == INFLUENCE_LEVEL2 ) )
+	if( noclip || gameLocal.inCinematic || Flicksync_InCutscene || ( influenceActive == INFLUENCE_LEVEL2 ) )
 	{
 		AI_CROUCH	= false;
 		AI_ONGROUND	= ( influenceActive == INFLUENCE_LEVEL2 );
@@ -10813,7 +10814,7 @@ void idPlayer::Move()
 	}
 	const int comfortMode = vr_motionSickness.GetInteger();
 	//"	0 off | 2 = tunnel | 5 = tunnel + chaperone | 6 slow mo | 7 slow mo + chaperone | 8 tunnel + slow mo | 9 = tunnel + slow mo + chaperone
-	if ( comfortMode < 2 || game->CheckInCinematic() ) 
+	if ( comfortMode < 2 || Flicksync_InCutscene || game->CheckInCinematic() ) 
 	{
 		this->playerView.EnableVrComfortVision( false );
 		return;
@@ -11596,8 +11597,8 @@ void idPlayer::UpdateLaserSight()
 
 	// Carl: teleport
 	static bool oldTeleport = false;
-	bool showTeleport = vr_teleport.GetInteger() == 1; // only show the teleport gun cursor if we're teleporting using the gun aim mode
-	showTeleport = showTeleport && !AI_DEAD && !gameLocal.inCinematic && !game->IsPDAOpen();
+	bool showTeleport = vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS; // only show the teleport gun cursor if we're teleporting using the gun aim mode
+	showTeleport = showTeleport && !AI_DEAD && !gameLocal.inCinematic && !Flicksync_InCutscene && !game->IsPDAOpen();
 
 	// check if lasersight should be hidden
 	if ( !IsGameStereoRendered() ||
@@ -11706,7 +11707,7 @@ void idPlayer::UpdateLaserSight()
 	//int mode = vr_weaponSight.GetInteger();
 	//if ( mode != lastCrosshairMode )
 
-	if ( vr_teleport.GetInteger() == 1 && vr_weaponSight.GetInteger() == 0 )
+	if ( vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS && vr_weaponSight.GetInteger() == 0 )
 		vr_weaponSight.SetInteger( 1 );
 
 	if ( vr_weaponSight.IsModified() || ( oldTeleport && !showTeleport) )
@@ -11855,7 +11856,7 @@ void idPlayer::UpdateLaserSight()
 			crosshairEntity.origin = teleportPoint;
 			crosshairEntity.customSkin = skinCrosshairCross;
 		}
-		else if ( vr_teleport.GetInteger() == 1 )
+		else if ( vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS )
 		{
 			crosshairEntity.customSkin = skinCrosshairDot;
 		}
@@ -11887,17 +11888,17 @@ bool idPlayer::GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis ) // 
 	//const idVec3 beamOff[2] = { idVec3( 2.5f, 0.0f, 1.0f ), idVec3( 2.5f, 0.0f, 1.5f ) };
 	const idVec3 beamOff[2] = { idVec3( 4.5f, 0.0f, 1.0f ), idVec3( 4.5f, 0.0f, 1.5f ) };
 
-	if ( gameLocal.inCinematic || AI_DEAD || game->IsPDAOpen() )
+	if ( gameLocal.inCinematic || Flicksync_InCutscene || AI_DEAD || game->IsPDAOpen() )
 	{
 		return false;
 	}
 
-	if ( vr_teleport.GetInteger() == 1 )// teleport aim mode is to use the standard weaponsight, so just return.
+	if ( vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS )// teleport aim mode is to use the standard weaponsight, so just return.
 	{
 		return false;
 	}
 
-	if ( vr_teleport.GetInteger() == 2 + vr_weaponHand.GetInteger() )// teleport aim origin from the weapon.
+	if ( vr_teleport.GetInteger() == 2 + vr_weaponHand.GetInteger() && commonVr->VR_USE_MOTION_CONTROLS )// teleport aim origin from the weapon.
 	{
 		if ( !weapon.GetEntity()->ShowCrosshair() ||
 			weapon->IsHidden() ||
@@ -11945,7 +11946,7 @@ bool idPlayer::GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis ) // 
 
 
 	}
-	else if ( vr_teleport.GetInteger() == 4 ) // beam originates from in front of the head
+	else if ( vr_teleport.GetInteger() == 4 || !commonVr->VR_USE_MOTION_CONTROLS ) // beam originates from in front of the head
 	{
 		beamAxis = commonVr->lastHMDViewAxis;
 		beamOrigin = commonVr->lastHMDViewOrigin + 12 * beamAxis[0];
@@ -12039,7 +12040,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	static idVec3 beamOrigin = vec3_zero;
 	static idMat3 beamAxis = mat3_identity;
 	
-	bool showTeleport = vr_teleport.GetInteger() > 1 && commonVr->teleportButtonCount != 0;
+	bool showTeleport = ( vr_teleport.GetInteger() > 1 || ( !commonVr->VR_USE_MOTION_CONTROLS && vr_teleport.GetInteger() > 0 ) ) && commonVr->teleportButtonCount != 0;
 	static bool lastShowTeleport = false;
 
 
@@ -12720,7 +12721,7 @@ void idPlayer::Think()
 		usercmd.buttons &= ~( BUTTON_JUMP | BUTTON_CROUCH );
 	}
 	
-	if( objectiveSystemOpen || gameLocal.inCinematic || influenceActive )
+	if( objectiveSystemOpen || gameLocal.inCinematic || Flicksync_InCutscene || influenceActive )
 	{
 		if( objectiveSystemOpen && AI_PAIN )
 		{
@@ -12927,7 +12928,8 @@ void idPlayer::Think()
 
 
 	// koz check for forced standard controller
-	commonVr->VR_USE_MOTION_CONTROLS = !vr_controllerStandard.GetInteger();
+	if( commonVr->VR_USE_MOTION_CONTROLS && vr_controllerStandard.GetInteger() )
+		commonVr->VR_USE_MOTION_CONTROLS = false;
 
 	//koz turn body on or off in vr, update hand poses/skins if body or weapon hand changes.
 	if ( game->isVR )
@@ -13898,7 +13900,7 @@ void idPlayer::Damage( idEntity* inflictor, idEntity* attacker, const idVec3& di
 	
 	SetTimeState ts( timeGroup );
 	
-	if( !fl.takedamage || noclip || spectating || gameLocal.inCinematic )
+	if( !fl.takedamage || noclip || spectating || gameLocal.inCinematic || Flicksync_InCutscene )
 	{
 		return;
 	}
@@ -17149,7 +17151,7 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 	// this may use firstPersonView, or a thirdPerson / camera view
 	CalculateRenderView();
 	
-	if( !gameLocal.inCinematic && weapon.GetEntity() && ( health > 0 ) && !( common->IsMultiplayer() && spectating ) )
+	if( !gameLocal.inCinematic && !Flicksync_InCutscene && weapon.GetEntity() && ( health > 0 ) && !( common->IsMultiplayer() && spectating ) )
 	{
 		UpdateWeapon();
 	}
@@ -18289,7 +18291,7 @@ idPlayer::GetControllerShake
 void idPlayer::GetControllerShake( int& highMagnitude, int& lowMagnitude ) const
 {
 
-	if( gameLocal.inCinematic )
+	if( Flicksync_InCutscene || gameLocal.inCinematic )
 	{
 		// no controller shake during cinematics
 		highMagnitude = 0;

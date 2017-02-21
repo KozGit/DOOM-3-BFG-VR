@@ -456,6 +456,13 @@ entityDef player_base_d3le_sp {
 	"skinCrosshairDot_d3le"			"skins/vr/crosshairDot" 
 	"skinCrosshairCircleDot_d3le"	"skins/vr/crosshairCircleDot" 
 	"skinCrosshairCross_d3le"		"skins/vr/crosshairCross"
+
+	//koz just for testing telepad materials, delete when done
+	"skinpad1"					"skins/vr/pad1"
+	"skinpad2"					"skins/vr/pad2"
+	"skinpad3"					"skins/vr/pad3"
+	"skinpadcrouch"				"skins/vr/padcrouch"
+
 }
 
 

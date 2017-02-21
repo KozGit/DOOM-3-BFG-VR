@@ -3752,7 +3752,7 @@ void idPhantomObjects::Think()
 	}
 	
 	targetEnt = target.GetEntity();
-	if( targetEnt == NULL || ( targetEnt->health <= 0 ) || ( end_time && ( gameLocal.time > end_time ) ) || gameLocal.inCinematic )
+	if( targetEnt == NULL || ( targetEnt->health <= 0 ) || ( end_time && ( gameLocal.time > end_time ) ) || gameLocal.inCinematic || Flicksync_InCutscene )
 	{
 		BecomeInactive( TH_THINK );
 		return;

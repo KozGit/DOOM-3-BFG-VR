@@ -84,6 +84,14 @@ void idMenuScreen_Shell_VR_Flicksync::Initialize( idMenuHandler* data )
 	options->AddChild(control);
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType(OPTION_SLIDER_TEXT);
+	control->SetLabel("Game Type");
+	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Flicksync::FLICKSYNC_FIELD_GAMETYPE);
+	control->SetupEvents(DEFAULT_REPEAT_TIME, options->GetChildren().Num());
+	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Flicksync::FLICKSYNC_FIELD_GAMETYPE);
+	options->AddChild(control);
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType(OPTION_BUTTON_TEXT);
 	control->SetLabel("Play");
 	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Flicksync::FLICKSYNC_FIELD_NEWGAME);
@@ -251,26 +259,27 @@ bool idMenuScreen_Shell_VR_Flicksync::HandleAction( idWidgetAction& action, cons
 				{
 					// reset score to 0
 					Flicksync_NewGame();
+					Flicksync_skipToCutscene = CUTSCENE_NONE;
 					switch (vr_flicksyncCharacter.GetInteger())
 					{
 						case FLICK_RECEPTION:
+							//Flicksync_skipToCutscene = CUTSCENE_RECEPTION;
 							cmdSystem->AppendCommandText("devmap game/mars_city1\n");
-							cmdSystem->AppendCommandText("teleport tim_func_door_70\n");
 							break;
-						case FLICK_KELLY:
+						case FLICK_SARGE:
+							//Flicksync_skipToCutscene = CUTSCENE_SARGE;
 							cmdSystem->AppendCommandText("devmap game/mars_city1\n");
-							cmdSystem->AppendCommandText("teleport trigger_once_40\n");
 							break;
 						case FLICK_BROOKS:
 							cmdSystem->AppendCommandText("devmap game/mc_underground\n");
 							break;
 						case FLICK_MARK_RYAN:
+							Flicksync_skipToCutscene = ACTING_AIRLOCK;
 							cmdSystem->AppendCommandText("devmap game/mc_underground\n");
-							cmdSystem->AppendCommandText("teleport trigger_once_93\n");
 							break;
-						case FLICK_ISHII:
+						case FLICK_SCIENTIST:
+							Flicksync_skipToCutscene = CUTSCENE_ISHII;
 							cmdSystem->AppendCommandText("devmap game/mc_underground\n");
-							cmdSystem->AppendCommandText("teleport trigger_once_120\n");
 							break;
 						case FLICK_ROLAND:
 							cmdSystem->AppendCommandText("devmap game/mars_city2\n");
@@ -280,6 +289,9 @@ bool idMenuScreen_Shell_VR_Flicksync::HandleAction( idWidgetAction& action, cons
 						case FLICK_MARINE_TORCH:
 						case FLICK_POINT:
 							cmdSystem->AppendCommandText("devmap game/erebus1\n");
+							break;
+						case FLICK_BRAVO_LEAD:
+							cmdSystem->AppendCommandText("devmap game/le_enpro1\n");
 							break;
 						case FLICK_NONE:
 						case FLICK_DARKSTAR:
@@ -342,6 +354,7 @@ void idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicksync::LoadD
 
 	originalFlicksyncCharacter = vr_flicksyncCharacter.GetInteger();
 	originalFlicksyncCueCards = vr_flicksyncCueCards.GetInteger();
+	originalCutscenesOnly = vr_cutscenesOnly.GetInteger();
 }
 
 /*
@@ -372,8 +385,8 @@ void idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicksync::Adjus
 	switch ( fieldIndex ) {
 	case FLICKSYNC_FIELD_CHARACTER:
 	{
-		static const int numValues = 12;
-		static const int values[numValues] = { FLICK_NONE, FLICK_BETRUGER, FLICK_SWANN, FLICK_CAMPBELL, FLICK_TOWER, FLICK_RECEPTION, FLICK_KELLY, FLICK_ISHII, FLICK_MCNEIL, FLICK_MARINE_PDA, FLICK_MARINE_TORCH, FLICK_POINT };
+		static const int numValues = 14;
+		static const int values[numValues] = { FLICK_NONE, FLICK_BETRUGER, FLICK_SWANN, FLICK_CAMPBELL, FLICK_TOWER, FLICK_RECEPTION, FLICK_SARGE, FLICK_SCIENTIST, FLICK_MCNEIL, FLICK_MARINE_PDA, FLICK_MARINE_TORCH, FLICK_POINT, FLICK_BRAVO_LEAD, FLICK_PLAYER };
 		vr_flicksyncCharacter.SetInteger( AdjustOption( vr_flicksyncCharacter.GetInteger(), values, numValues, adjustAmount ) );
 		break;
 
@@ -383,6 +396,14 @@ void idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicksync::Adjus
 		static const int numValues = 6;
 		static const int values[numValues] = { 0, 1, 2, 3, 4, 5 };
 		vr_flicksyncCueCards.SetInteger( AdjustOption( vr_flicksyncCueCards.GetInteger(), values, numValues, adjustAmount ) );
+		break;
+
+	}
+	case FLICKSYNC_FIELD_GAMETYPE:
+	{
+		static const int numValues = 3;
+		static const int values[numValues] = { 0, 1, 2 };
+		vr_cutscenesOnly.SetInteger( AdjustOption( vr_cutscenesOnly.GetInteger(), values, numValues, adjustAmount ) );
 		break;
 
 	}
@@ -407,13 +428,18 @@ idSWFScriptVar idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicks
 
 	case FLICKSYNC_FIELD_CHARACTER:
 	{
-		const char* names[] = { "None", "Dr. Betruger", "Elliot Swann", "Jack Campbell", "Darkstar", "S.L. Medley (Tower)", "Reception", "Sergeant Kelly", "Brooks (Mars Sec)", "Mark Ryan (airlock)", "Ishii (missing scientist)", "Roland (ceiling)", "Dr. Elizabeth McNeil", "Marine with PDA", "Marine with Torch", "Point (explosives)" };
+		const char* names[] = { "None", "Dr. Betruger", "Elliot Swann", "Jack Campbell", "Darkstar", "S.L. Medley (Tower)", "Reception", "Sergeant Kelly", "Brooks (Mars Sec)", "Mark Ryan (airlock)", "Scientists", "Roland (ceiling)", "Dr. Elizabeth McNeil", "Marine with PDA", "Marine with Torch", "Point (explosives)", "Bravo Lead", "Player" };
 		return names[vr_flicksyncCharacter.GetInteger()];
 	}
 	case FLICKSYNC_FIELD_CUECARDS:
 	{
 		const char* names[] = { "0 (default)", "1", "2", "3", "4", "5" };
 		return names[vr_flicksyncCueCards.GetInteger()];
+	}
+	case FLICKSYNC_FIELD_GAMETYPE:
+	{
+		const char* names[] = { "Cutscenes + Game", "Cutscenes Only", "No Cutscenes" };
+		return names[vr_cutscenesOnly.GetInteger()];
 	}
 
 	}
@@ -432,6 +458,10 @@ bool idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicksync::IsDat
 		return true;
 	}
 	if (originalFlicksyncCueCards != vr_flicksyncCueCards.GetInteger())
+	{
+		return true;
+	}
+	if (originalCutscenesOnly != vr_cutscenesOnly.GetInteger())
 	{
 		return true;
 	}
