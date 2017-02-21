@@ -44,6 +44,9 @@ idCVar vr_rumbleDiv( "vr_rumbleDiv", "1", CVAR_FLOAT | CVAR_ARCHIVE, "rumble div
 idCVar vr_rumbleSkip( "vr_rumbleSkip", "1", CVAR_FLOAT | CVAR_ARCHIVE, "frames to skip\n" );
 idCVar vr_rumbleEnable( "vr_rumbleEnable", "1", CVAR_BOOL | CVAR_ARCHIVE, "Enable VR controller rumble\n" );
 
+idCVar vr_openVrStuckPadAxisFix( "vr_openVrStuckPadAxisFix", "1", CVAR_BOOL | CVAR_ARCHIVE, "Check for openVR controller stuck pad axis." );
+idCVar vr_openVrStuckPadAxisFixThresh( "vr_openVrStuckPadAxisFixThresh", "12", CVAR_INTEGER | CVAR_ARCHIVE, "# of identical non zero input polls before axis flagged as stuck." );
+
 
 /*
 ============================================================
@@ -1248,9 +1251,13 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 				if ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_STEAMVR )
 				{
-
-					//common->Printf( "Checking steam controllerstime %d\n",  Sys_Milliseconds() );
-					// left steam controller
+					int dupeThreshold = vr_openVrStuckPadAxisFixThresh.GetInteger();
+					bool defaultX = false;
+					bool defaultY = false;
+					static int lXcount = 0;
+					static int lYcount = 0;
+					static int rXcount = 0;
+					static int rYcount = 0;
 
 					static uint32 triggerAxis[2] = {};
 					static uint32 padAxis[2] = {};
@@ -1263,7 +1270,6 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 					static float padY = 0.0f;
 					static float trig = 0.0f;
 
-
 					static uint64_t	 oldButton[2] = {};
 					static uint32 lastPacketL = -1;
 					static uint32 lastPacketR = -1;
@@ -1271,19 +1277,18 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 					bool lGood = false;
 					bool rGood = false;
-
-
+					
 					vr::VRControllerState_t& currentStateL = commonVr->pControllerStateL;
 					lGood = commonVr->m_pHMD->GetControllerState( commonVr->leftControllerDeviceNo, &currentStateL, sizeof( currentStateL ) );
 
 					vr::VRControllerState_t& currentStateR = commonVr->pControllerStateR;
 					rGood = commonVr->m_pHMD->GetControllerState( commonVr->rightControllerDeviceNo, &currentStateR, sizeof( currentStateR ) );
 
-					if ( lGood ) // currentStateL.unPacketNum != lastPacketL && lGood )
+
+					// left steam controller
+					if ( lGood )  
 					{
 						
-						//lastPacketL = currentStateL.unPacketNum;
-
 						for ( uint32 axis = 0; axis < vr::k_unControllerStateAxisCount; axis++ )
 						{
 							uint32 axisNum = vr::Prop_Axis0Type_Int32 + axis;
@@ -1310,28 +1315,72 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 						{
 							PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_TRIG, triggerVal[0] * 32767.0f );
 						}
+						triggerVal[0] = trig;
 						*/
 
+						// the vive controllers ( at least mine, in multiple games, even after calibration) sometimes miss when a finger has been removed from the touchpad, 
+						// and keep sending the exact same values until the pad is touched again.  This causes movement or rotation to get stuck on 
+						// until the controller is touched again, which is really bad, especially if its rotation.
+						// it's pretty much physically impossible to keep you finger so still on the pad it reports the exact same values 
+						// more than a few times in a row, so count non zero repeats, and default the value to 0 if it's been repeated too many times.
+											
+
+						if ( vr_openVrStuckPadAxisFix.GetBool() )
+						{
+							if ( padX != 0.0f && padAxisX[0] == padX )
+							{
+								if ( lXcount > dupeThreshold )
+								{
+									padX = 0.0f;
+									defaultX = true;
+								}
+								else
+								{
+									lXcount++;
+									if ( lXcount > dupeThreshold ) common->Printf( "Defaulting left x axis val %f time %d\n", padX, Sys_Milliseconds() );
+								}
+							}
+							else
+							{
+								lXcount = 0;
+							}
+
+							if ( padY != 0.0f && padAxisY[0] == padY )
+							{
+								if ( lYcount > dupeThreshold )
+								{
+									padY = 0.0f;
+									defaultY = true;
+								}
+								else
+								{
+									lYcount++;
+									if ( lYcount > dupeThreshold ) common->Printf( "Defaulting left y axis val %f time %d\n", padY, Sys_Milliseconds() );
+								}
+							}
+							else
+							{
+								lYcount = 0;
+							}
+						}
+						
 						//post the axes 
-						// for some reason, on occasion posting a zero value seems to fail, which results in movment or turning stuck on.
-						// For now spam the 0 vals to make sure movement halts until I can find the cause. 
-						if ( padX != padAxisX[0] || padX == 0.0f ) 
+						if ( padX != padAxisX[0] || defaultX ) 
 						{
 							//common->Printf( "Posting input event left steamvr pad x value %f time %d\n", padX, Sys_Milliseconds() );
 							PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_X, padX * 32767.0f );
 						}
 						
-						if ( padY != padAxisY[0] || padY == 0.0f )
+						if ( padY != padAxisY[0] || defaultY )
 						{
 							//common->Printf( "Posting input event left steamvr pad y value %f time %d\n", padY, Sys_Milliseconds() );
 							PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_Y, -padY * 32767.0f );
 						}
 						
-						triggerVal[0] = trig;
-						padAxisX[0] = padX;
-						padAxisY[0] = padY;
-
-
+						
+						if ( !defaultX ) padAxisX[0] = padX;
+						if ( !defaultY ) padAxisY[0] = padY;
+						
 						// process buttons ( appmenu, grip, trigger, touchpad pressed )
 						button = currentStateL.ulButtonPressed;
 
@@ -1425,10 +1474,9 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 					//====================================================================
 					//right steamvr controller
 
-					if ( rGood ) // currentStateR.unPacketNum != lastPacketR && rGood )
+					
+					if ( rGood )
 					{
-						//lastPacketR = currentStateR.unPacketNum;
-
 						for ( int axis = 0; axis <= 4; axis++ )
 						{
 							axisType = vr::VRSystem()->GetInt32TrackedDeviceProperty( commonVr->rightControllerDeviceNo, (vr::ETrackedDeviceProperty) ((int)vr::Prop_Axis0Type_Int32 + axis) );
@@ -1442,36 +1490,87 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							}
 						}
 
-						trig = currentStateR.rAxis[triggerAxis[1]].x;
-						padX = currentStateR.rAxis[padAxis[1]].x;
-						padY = currentStateR.rAxis[padAxis[1]].y;
-
 						// using (testing) the trigger button instead of reading the analog axis, so comment this out for now
 						/*
+						trig = currentStateR.rAxis[triggerAxis[1]].x;
 						if ( trig != triggerVal[1] )
 						{
-							PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_STEAMVR_TRIG, triggerVal[1] * 32767.0f );
+						PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_STEAMVR_TRIG, triggerVal[1] * 32767.0f );
 						}
+						triggerVal[1] = trig;
 						*/
+						
+						padX = currentStateR.rAxis[padAxis[1]].x;
+						padY = currentStateR.rAxis[padAxis[1]].y;
+								
+					
+						// the vive controllers ( at least mine, in multiple games, even after calibration) sometimes miss when a finger has been removed from the touchpad, 
+						// and keep sending the exact same values until the pad is touched again.  This causes movement or rotation to get stuck on 
+						// until the controller is touched again, which is really bad, especially if its rotation.
+						// it's pretty much physically impossible to keep you finger so still on the pad it reports the exact same values 
+						// more than a few times in a row, so count non zero repeats, and default the value to 0 if it's been repeated too many times.
+						
+						defaultX = false;
+						defaultY = false;
+
+						if ( vr_openVrStuckPadAxisFix.GetBool() )
+						{
+							if ( padX != 0.0f && padAxisX[1] == padX )
+							{
+								if ( rXcount > dupeThreshold )
+								{
+									padX = 0;
+									defaultX = true;
+								}
+								else
+								{
+									rXcount++;
+									//common->Printf( "Dupe axis val detected right X axis val %f count %d time %d\n", padY, rXcount, Sys_Milliseconds() );
+									if ( rXcount > dupeThreshold ) common->Printf( "Defaulting right X axis val %f time %d\n", padX, Sys_Milliseconds() );
+								}
+							}
+							else
+							{
+								rXcount = 0;
+							}
+
+							if ( padY != 0.0f && padAxisY[1] == padY )
+							{
+								if ( rYcount > dupeThreshold )
+								{
+									padY = 0;
+									defaultY = true;
+								}
+								else
+								{
+									rYcount++;
+									//common->Printf( "Dupe axis val detected right Y axis val %f count %d time %d\n", padY, rYcount, Sys_Milliseconds() );
+									if ( rYcount > dupeThreshold ) common->Printf( "Defaulting right Y axis val %f time %d\n", padY, Sys_Milliseconds() );
+								}
+							}
+							else
+							{
+								rYcount = 0;
+							}
+						}
+
 
 						//post the axes
-						if ( padX != padAxisX[1] || padX == 0.0f )
+						if ( padX != padAxisX[1] || defaultX )
 						{
 							//common->Printf( "Posting input event right steamvr pad x value %f time %d \n", padX, Sys_Milliseconds() );
 							PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_STEAMVR_X, padX * 32767.0f );
 						}
 
-						if ( padY != padAxisY[1] || padY == 0.0f )
+						if ( padY != padAxisY[1] || defaultY )
 						{
 							//common->Printf( "Posting input event right steamvr pad y value %f time %d\n", padY, Sys_Milliseconds() );
 							PostInputEvent( inputDeviceNum, J_AXIS_RIGHT_STEAMVR_Y, -padY * 32767.0f );
 						}
-
-						triggerVal[1] = trig;
+												
 						padAxisX[1] = padX;
 						padAxisY[1] = padY;
 						
-
 						// process buttons ( appmenu, grip, trigger, touchpad pressed )
 						button = currentStateR.ulButtonPressed;
 
