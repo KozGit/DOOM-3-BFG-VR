@@ -311,7 +311,7 @@ entityDef player_base_d3xp_sp {
 
 	"def_weapon0"						"weapon_fists"
 	"weapon0_best"						"0"					// whether weapon should be chosen when out of ammo
-	"weapon0_cycle"						"0"					// whether weapon should be selected when using next/prev weapon
+	"weapon0_cycle"						"1"					// whether weapon should be selected when using next/prev weapon
 	"weapon0_toggle"					"0"					// whether selecting weapon twice switches between current and previous weapons
 	"weapon0_allowempty"				"1"
 	"weapon0_visible"					"1"					// whether you can see this weapon in the inventory or not
