@@ -1142,7 +1142,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 			}
 #endif
 			// Carl: Update VR_USE_MOTION_CONTROLS if we've just started using the XBox controller
-			if (commonVr->VR_USE_MOTION_CONTROLS && (xis.Gamepad.wButtons || xis.Gamepad.bLeftTrigger > 64 || xis.Gamepad.bRightTrigger > 64
+			if (commonVr->VR_USE_MOTION_CONTROLS && vr_autoSwitchControllers.GetBool() && (xis.Gamepad.wButtons || xis.Gamepad.bLeftTrigger > 64 || xis.Gamepad.bRightTrigger > 64
 				|| abs(xis.Gamepad.sThumbLX) + abs(xis.Gamepad.sThumbLY) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE || abs(xis.Gamepad.sThumbRX) + abs(xis.Gamepad.sThumbRY) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ) )
 			{
 				commonVr->VR_USE_MOTION_CONTROLS = false;
@@ -1256,7 +1256,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 				//=============================
 				// Koz begin add SteamVR controllers
 
-				if ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_STEAMVR )
+				if ( commonVr->hasHMD && !commonVr->hasOculusRift ) // was  commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_STEAMVR
 				{
 					int dupeThreshold = vr_openVrStuckPadAxisFixThresh.GetInteger();
 					bool defaultX = false;
@@ -1390,6 +1390,12 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 						
 						// process buttons ( appmenu, grip, trigger, touchpad pressed )
 						button = currentStateL.ulButtonPressed;
+
+						if( !commonVr->VR_USE_MOTION_CONTROLS && vr_autoSwitchControllers.GetBool() && ( button > oldButton[0] || trig > 0.25f || (fabs(padX) + fabs(padY) > 0.5f) ) )
+						{
+							commonVr->VR_USE_MOTION_CONTROLS = true;
+							commonVr->motionControlType = MOTION_STEAMVR;
+						}
 
 						if ( button != oldButton[0] )
 						{
@@ -1579,6 +1585,12 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 						// process buttons ( appmenu, grip, trigger, touchpad pressed )
 						button = currentStateR.ulButtonPressed;
 
+						if( !commonVr->VR_USE_MOTION_CONTROLS && vr_autoSwitchControllers.GetBool() && ( button > oldButton[0] || trig > 0.25f || (fabs(padX) + fabs(padY) > 0.5f) ) )
+						{
+							commonVr->VR_USE_MOTION_CONTROLS = true;
+							commonVr->motionControlType = MOTION_STEAMVR;
+						}
+
 						if ( button != oldButton[1] )
 						{
 
@@ -1683,7 +1695,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 					if ( OVR_SUCCESS( ovr_GetInputState( commonVr->hmdSession, ovrControllerType_Touch, &inputState ) ) )
 					{
 						// Carl: Update VR_USE_MOTION_CONTROLS if we've just started using Touch
-						if( !commonVr->VR_USE_MOTION_CONTROLS && !vr_controllerStandard.GetInteger() && (
+						if( !commonVr->VR_USE_MOTION_CONTROLS  && vr_autoSwitchControllers.GetBool() && !vr_controllerStandard.GetInteger() && (
 							inputState.Buttons || inputState.HandTrigger[0] > 0.25f || inputState.HandTrigger[1] > 0.25f || inputState.IndexTrigger[0] > 0.25f || inputState.IndexTrigger[1] > 0.25f
 							|| (fabs(inputState.Thumbstick[0].x) + fabs(inputState.Thumbstick[0].y) > 0.5f) || (fabs(inputState.Thumbstick[1].x) + fabs(inputState.Thumbstick[1].y) > 0.5f)
 							|| (inputState.Touches & (ovrTouch_LButtonMask | ovrTouch_RButtonMask)) ) )
