@@ -25,6 +25,40 @@ SPSTATEHANDLE flicksyncRule = NULL;
 
 extern iVoice voice;
 
+vr_voiceAction_t voiceActionStrings[J_SAY_NUM] =
+{
+	{ "LIST", J_SAY_LIST },
+	{ "LISTENSTART", J_SAY_LISTENSTART },
+	{ "LISTENSTOP", J_SAY_LISTENSTOP },
+	{ "PAUSE", J_SAY_PAUSE },
+	{ "RESUME", J_SAY_RESUME },
+	{ "EXIT", J_SAY_EXIT },
+	{ "TALK", J_TALK },
+	{ "MENU", J_SAY_MENU },
+	{ "CANCEL", J_SAY_CANCEL },
+	{ "RELOAD", J_SAY_RELOAD },
+	{ "PDA", J_SAY_PDA },
+	{ "FIST", J_SAY_FIST },
+	{ "CHAINSAW", J_SAY_CHAINSAW },
+	{ "FLASHLIGHT", J_SAY_FLASHLIGHT },
+	{ "GRABBER", J_SAY_GRABBER },
+	{ "PISTOL", J_SAY_PISTOL },
+	{ "SHOTGUN", J_SAY_SHOTGUN },
+	{ "SUPERSHOTGUN", J_SAY_SUPER_SHOTGUN },
+	{ "MACHINEGUN", J_SAY_MACHINE_GUN },
+	{ "CHAINGUN", J_SAY_CHAIN_GUN },
+	{ "ROCKETLAUNCHER", J_SAY_ROCKET_LAUNCHER },
+	{ "GRENADE", J_SAY_GRENADES },
+	{ "PLASMAGUN", J_SAY_PLASMA_GUN },
+	{ "BFG", J_SAY_BFG },
+	{ "SOULCUBE", J_SAY_SOUL_CUBE },
+	{ "ARTIFACT", J_SAY_ARTIFACT },
+};
+	
+idList<idStr> voiceCommandStrings;
+idList<int> voiceCommandActions;
+
+	
 const char* words[] = {
 	"what can I say",
 	"consecution", "start listening",
@@ -59,6 +93,8 @@ void __stdcall SpeechCallback(WPARAM wParam, LPARAM lParam)
 {
 	commonVoice->Event(wParam, lParam);
 }
+
+
 
 /*
 ==============
@@ -117,6 +153,21 @@ bool iVoice::GetTalkButton()
 #endif
 }
 
+idStr buildCmdString( int actionNum )
+{
+	idStr cmdStr;
+
+	for ( int i = 0; i < voiceCommandActions.Num(); i++ )
+	{
+		if ( voiceCommandActions[i] == actionNum )
+		{
+			cmdStr += ", ," + voiceCommandStrings[i];
+		}
+	}
+	return cmdStr;
+
+}
+
 bool iVoice::GetSayButton(int j)
 {
 	bool result = heard[j - J_SAY_MIN];
@@ -124,8 +175,136 @@ bool iVoice::GetSayButton(int j)
 	return result;
 }
 
+void iVoice::ListVoiceCmds_f( const idCmdArgs& args )
+{
+	common->Printf( "Listing available voice commands\n" );
+	
+	for ( int i = 0; i < J_SAY_NUM; i++ )
+	{
+		common->Printf( "\nAction:  %s\n", voiceActionStrings[i].string.c_str() );
+
+		int count = 0;
+		for ( int j = 0; j < voiceCommandActions.Num(); j++ )
+		{
+			if ( voiceCommandActions[j] == voiceActionStrings[i].action )
+			{
+				count++;
+				common->Printf( "    Phrase %d: %s\n", count, voiceCommandStrings[j].c_str() );
+			}
+		}
+		if ( count == 0 ) common->Printf( "    No phrase defined\n" );
+
+	}
+}
+
+
 void iVoice::HearWord(const char *w, int confidence)
 {
+
+	int index = voiceCommandStrings.FindIndex( w );
+	if ( index == -1 ) return; // not found;
+	
+	int action = voiceCommandActions[index];
+		
+	if (action == J_SAY_LIST ) 
+	{		
+		common->Printf( "J_SAY_LIST parsed" );
+		Speed( 4 );
+		if ( vr_talkMode.GetInteger() > 0 )
+			Say( npc.c_str() );
+			//Say( "You can say anything to NPC's." );
+
+		if ( !listening )
+		{
+			Say( available.c_str() );// +", " + buildCmdString( J_SAY_LIST ) + buildCmdString( J_SAY_LISTENSTART );
+			Say( buildCmdString( J_SAY_LIST ).c_str() );
+			Say( buildCmdString( J_SAY_LISTENSTART ).c_str() );
+			//Say( "You can say: what can I say, or start listening." );
+		}
+		else
+		{
+			if ( vr_voiceCommands.GetInteger() > 2 )
+				Say( cmds2.c_str() );
+				//Say( "You can use voice commands, weapon names, or holodeck commands." );
+			else if ( vr_voiceCommands.GetInteger() == 1 )
+				Say( cmds1.c_str() );
+				//Say( "You can use voice commands or holodeck commands." );
+			Speed( 6 );
+						
+			Say( available.c_str() );// +", " + buildCmdString( J_SAY_LIST ) + buildCmdString( J_SAY_LISTENSTART );
+			Say( buildCmdString( J_SAY_LIST ).c_str() );
+			Say( buildCmdString( J_SAY_LISTENSTOP ).c_str() );
+			Say( buildCmdString( J_SAY_LISTENSTART ).c_str() );
+			//Say( "You can say: What can I say, stop listening, start listening." );
+			
+			Speed( 7 );
+			if ( vr_voiceCommands.GetInteger() >= 1 )
+			{
+				Say( buildCmdString( J_SAY_PAUSE ) );
+				Say( buildCmdString( J_SAY_RESUME ) );
+				Say( buildCmdString( J_SAY_EXIT ) );
+				Say( buildCmdString( J_SAY_MENU ) );
+				Say( buildCmdString( J_SAY_CANCEL ) );
+				Say( buildCmdString( J_SAY_PDA ) );
+				//Say( "pause game, resume game, exit game, menu, cancel, PDA." );
+			}
+					
+			if ( vr_voiceCommands.GetInteger() >= 2 )
+			{
+				Say( buildCmdString( J_SAY_RELOAD ) );
+				Say( buildCmdString( J_SAY_FLASHLIGHT ) );
+				Say( buildCmdString( J_SAY_FIST ) );
+				Say( buildCmdString( J_SAY_CHAINSAW ) );
+				Say( buildCmdString( J_SAY_GRABBER ) );
+				Say( buildCmdString( J_SAY_PISTOL ) );
+				Say( buildCmdString( J_SAY_SHOTGUN ) );
+				Say( buildCmdString( J_SAY_SUPER_SHOTGUN ) );
+				Say( buildCmdString( J_SAY_MACHINE_GUN ) );
+				Say( buildCmdString( J_SAY_CHAIN_GUN ) );
+				Say( buildCmdString( J_SAY_ROCKET_LAUNCHER ) );
+				Say( buildCmdString( J_SAY_GRENADES ) );
+				Say( buildCmdString( J_SAY_PLASMA_GUN ) );
+				Say( buildCmdString( J_SAY_BFG ) );
+				Say( buildCmdString( J_SAY_SOUL_CUBE ) );
+				Say( buildCmdString( J_SAY_ARTIFACT ) );
+										
+				//Say( "reload, flashlight, fists, chainsaw, grabber, pistol, shotgun, super shotgun, machine gun, chain gun, rocket launcher, grenades, plasma gun, BFG 9000, soul cube, the artifact." );
+			}
+					
+		}
+	}
+
+	else if ( action == J_SAY_LISTENSTART )
+
+	{
+		if ( !listening )
+		{
+			listening = true;
+			Speed( 5 );
+			Say( startListen.c_str() );
+			//Say( "Started listening." );
+		}
+	}
+
+	else if ( listening && confidence >= SP_NORMAL_CONFIDENCE )
+	{
+		int heardIndex = voiceCommandActions.FindIndex( action );
+
+		if ( action == J_SAY_LISTENSTOP )
+		{
+			listening = false;
+			Speed( 5 );
+			Say( stopListen.c_str() );
+			//Say( "Stopped listening." );
+		}
+		else
+		{
+			heard[action - J_SAY_MIN] = true;
+		}
+
+	}
+
+	/*
 #define ifw(s) if (!strcmp(w, s))
 #define ifw2(s1, s2) if (!strcmp(w, s1) || !strcmp(w, s2))
 #define ifw3(s1, s2, s3) if (!strcmp(w, s1) || !strcmp(w, s2) || !strcmp(w, s3))
@@ -275,6 +454,7 @@ void iVoice::HearWord(const char *w, int confidence)
 	}
 
 #undef ifw
+*/
 }
 
 void iVoice::HearWord(const wchar_t *w, int confidence)
@@ -469,12 +649,129 @@ void iVoice::AddFlicksyncLine(const wchar_t* line)
 
 /*
 ==============
+iVoice::InitVoiceDictionary
+==============
+*/
+
+bool iVoice::InitVoiceDictionary( void )
+{
+	idLexer		parser( LEXFL_NOSTRINGESCAPECHARS | LEXFL_NOSTRINGCONCAT  );
+	idToken		token;
+	idStr		filename;
+
+	int maxActions = J_SAY_NUM;
+	int numActions;
+	int numEntries;
+	int currentAction;
+	
+	voiceCommandStrings.Clear();
+	voiceCommandActions.Clear();
+
+	filename = "/dict/voice";
+	filename.SetFileExtension( "dict" );
+	if ( !parser.LoadFile( filename ) )
+	{
+		gameLocal.Error( "Error initializing voice commands.\nUnable to load '%s'",filename.c_str());
+	}
+
+	parser.ExpectTokenString( "numActions" );
+	numActions = parser.ParseInt();
+
+	if ( numActions > maxActions )
+	{
+		parser.Error( "Invalid number of actions: %d\nMax defined actions = %d\n", numActions,maxActions );
+	}
+	
+	parser.ExpectTokenString( "available" );
+	parser.ReadToken( &token );
+	available = token;
+
+	parser.ExpectTokenString( "npc" );
+	parser.ReadToken( &token );
+	npc = token;
+
+	parser.ExpectTokenString( "cmds1" );
+	parser.ReadToken( &token );
+	cmds1 = token;
+
+	parser.ExpectTokenString( "cmds2" );
+	parser.ReadToken( &token );
+	cmds2 = token;
+
+	parser.ExpectTokenString( "start" );
+	parser.ReadToken( &token );
+	startListen = token;
+
+	parser.ExpectTokenString( "stop" );
+	parser.ReadToken( &token );
+	stopListen = token;
+	
+	for ( int i = 0; i < numActions; i++ )
+	{
+		parser.ExpectTokenString( "action" );
+		parser.ExpectTokenString( "{" );
+		parser.ExpectTokenString( "name" );
+		parser.ReadToken( &token );
+
+		//common->Printf( "Read token %s \n", token.c_str() );
+		
+		for ( int j = 0; j < maxActions; j++ )
+		{
+			if ( !token.Cmp( voiceActionStrings[j].string ) )
+			{
+				currentAction = voiceActionStrings[j].action;
+				//common->Printf( "Token identified as action %d \n", currentAction );
+				break;
+			}
+		}
+				
+		parser.ExpectTokenString( "entries" );
+		numEntries = parser.ParseInt();
+
+		for ( int k = 0; k < numEntries; k++ )
+		{
+			parser.ReadToken( &token );
+			//common->Printf( "Current Action %d Entry %d : %s\n",currentAction, k + 1, token.c_str() );
+						
+			voiceCommandStrings.Append( token );
+			voiceCommandActions.Append( currentAction );
+			
+		}
+		parser.ExpectTokenString( "}" );
+	}
+	
+	/*
+	for ( int i = 0; i < voiceCommandStrings.Num(); i++ )
+	{
+		common->Printf( "Voice command %d i: %s %d\n", i + 1, voiceCommandStrings[i].c_str(), voiceCommandActions[i] );
+	}
+	
+	common->Printf("PDA looked up command action = %d\n", voiceCommandActions[voiceCommandStrings.FindIndex( "PDA" )]);
+	*/
+
+	cmdSystem->AddCommand( "vr_listVoiceCommands", ListVoiceCmds_f, CMD_FL_SYSTEM, "lists voice activated commands" );
+
+	return true;
+}
+
+
+/*
+==============
 iVoice::VoiceInit
 ==============
 */
 
 void iVoice::VoiceInit(void)
 {
+	
+	if ( !InitVoiceDictionary() )
+	{
+		pVoice = NULL;
+		return;
+
+	}
+		
+	
 	// CoInitialize(NULL) is already called by  Sys_Init(), just make sure we call this after Sys_Init() 
 	HRESULT hr = CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void **)&pVoice);
 	if (SUCCEEDED(hr))
@@ -511,10 +808,22 @@ void iVoice::VoiceInit(void)
 			{
 				//Say("Grammar created.");
 				pGrammar->GetRule(L"word", 0, SPRAF_TopLevel | SPRAF_Active, true, &rule);
+				
+				
+				//koz begin
+				
+				/*
 				for (int i = 0; i < sizeof(words) / sizeof(words[0]); ++i)
 				{
 					AddWord(words[i]);
 				}
+				*/
+
+				for ( int i = 0; i < voiceCommandStrings.Num(); i++ )
+				{
+					AddWord( voiceCommandStrings[i].c_str() );
+				}
+				// koz end
 
 				pGrammar->GetRule(L"line", 1, SPRAF_TopLevel | SPRAF_Active, true, &flicksyncRule);
 				Flicksync_AddVoiceLines();

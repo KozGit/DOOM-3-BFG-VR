@@ -32,6 +32,13 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __VOICE_H__
 #define __VOICE_H__
 
+
+typedef struct vr_voiceAction_s
+{
+	idStr string;
+	int	action;
+} vr_voiceAction_t;
+
 class iVoice
 {
 public:
@@ -39,6 +46,8 @@ public:
 	iVoice();
 
 	void		VoiceInit(void);
+	bool		InitVoiceDictionary( void );
+	static void		ListVoiceCmds_f( const idCmdArgs& args );
 	void		VoiceShutdown(void);
 	void		Speed(int talkingSpeed);
 	void		Say(VERIFY_FORMAT_STRING const char* fmt, ...);
@@ -52,6 +61,14 @@ public:
 	void		AddFlicksyncLine(const wchar_t* line);
 	//---------------------------
 private:
+	
+	idStr available;
+	idStr npc;
+	idStr cmds1;
+	idStr cmds2;
+	idStr startListen;
+	idStr stopListen;
+	
 	void		AddWord(const char* word);
 	void		AddWord(const wchar_t* word);
 };

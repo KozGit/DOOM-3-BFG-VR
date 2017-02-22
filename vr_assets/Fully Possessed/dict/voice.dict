@@ -1,0 +1,275 @@
+numActions 26
+
+// these strings in quotes can be changed to localize these phrases if needed.
+// the 6 phrases must be all be present and listed in this order.
+
+available "The available commands are:"
+npc "You can say anything to NPC's"
+cmds1 "You can use voice commands or holodeck commands."
+cmds2 "You can use voice commands, weapon names, or holodeck commands."
+start "Started listening."
+stop "Stopped listening."
+
+action {
+
+	name LIST
+	entries 1
+	
+	"what can I say"
+}
+
+action {
+	
+	name LISTENSTART
+	entries 2
+	
+	"start listening"
+	"consecution"
+}
+
+action {
+	
+	name LISTENSTOP
+	entries 2
+	
+	"stop listening"
+	"consentient"
+}
+
+action {
+
+	name PAUSE
+	entries 2
+	"pause game"
+	"computer, freeze program"
+}
+
+action {
+
+	name RESUME
+	entries 6
+	
+	"resume game"
+	"unpause game"
+	"computer, resume program"
+	"computer, play program"
+	"computer, run program"
+	"computer, continue program"
+}
+
+action {
+
+	name EXIT
+	entries 5
+	
+	"exit game"
+	"computer, end program"
+	"computer, exit"
+	"computer, program complete"
+	"computer, cancel program"
+}
+
+action {
+
+	name TALK
+	entries 6
+	
+	"hey"
+	"talk"
+	"hello"
+	"goodbye"
+	"greets"
+	"hey dickwad"
+}
+
+action {
+
+	name MENU
+	entries 2
+	
+	"menu"
+	"system"
+}
+
+action {
+
+	name CANCEL
+	entries 1
+	
+	"cancel"
+}
+
+action {
+
+	name RELOAD
+	entries 1
+	
+	"reload"
+}
+
+action {
+
+	name PDA
+	entries 2
+	
+	"PDA"
+	"personal data assistant"
+}
+
+action {
+
+	name FIST
+	entries 3
+	
+	"fist"
+	"fists"
+	"hands"
+}
+
+action {
+
+	name CHAINSAW
+	entries 5
+	
+	"chainsaw"
+	"beaver tooth"
+	"beaver tooth chainsaw"
+	"mixom beaver tooth"
+	"mixom beaver tooth chainsaw"
+}
+
+action {
+
+	name FLASHLIGHT
+	entries 2
+	
+	"flashlight"
+	"torch"
+}
+
+action {
+
+	name GRABBER
+	entries 4
+	
+	"grabber"
+	"ionized plasma levitator"
+	"IPL unit"
+	"gravity gun"
+}
+
+action {
+
+	name PISTOL
+	entries 1
+	
+	"pistol"
+}
+
+action {
+
+	name SHOTGUN
+	entries 4
+	
+	"shotgun"
+	"pump action shotgun"
+	"single barreled shotgun"
+	"single barrel shotgun"
+}
+
+action {
+
+	name SUPERSHOTGUN
+	entries 4
+	
+	"super shotgun"
+	"double barreled shotgun"
+	"double barrel shotgun"
+	"combat shotgun"
+}
+
+action {
+
+	name MACHINEGUN
+	entries 5
+	
+	"machine gun"
+	"enforcer"
+	"M G 88"
+	"M G 88 enforcer"
+	"M G"
+}
+
+action {
+
+	name CHAINGUN
+	entries 6
+	
+	"chain gun"
+	"mach 2 chain gun"
+	"UAC Weapons division mach 2 chain gun"
+	"saw"
+	"mini gun"
+	"gatling gun"
+}
+
+action {
+
+	name ROCKETLAUNCHER
+	entries 1
+	
+	"rocket launcher"
+}
+
+action {
+
+	name GRENADE
+	entries 2
+	
+	"grenade"
+	"grenades"
+}
+
+action {
+
+	name PLASMAGUN
+	entries 2
+	
+	"plasma gun"
+	"plasma rifle"
+}
+
+action {
+
+	name BFG
+	entries 6
+	
+	"BFG"
+	"BFG 9000"
+	"bio force gun"
+	"big fucking gun"
+	"big fragging gun"
+	"big freaking gun"
+}
+
+action {
+
+	name SOULCUBE
+	entries 1
+	
+	"soul cube"
+}
+
+action {
+
+	name ARTIFACT
+	entries 4
+	
+	"artifact"
+	"the artifact"
+	"heart of hell"
+	"blood stone"
+}
+
+	
+	
