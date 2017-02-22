@@ -471,6 +471,11 @@ ___________________________________________________
 6) CONSOLE VARIABLES
 __________________________________________
 
+// DG: support "com_showFPS 2" for fps-only view like in classic doom3 => make it CVAR_INTEGER
+com_showFPS 0 - INTEGER - show frames rendered per second. 0: off 1: default bfg values, 2: only show FPS (classic view)
+
+noclip - Toggle no-clipping mode, in case you accidentally teleport somewhere you can't get out of
+
 vr_showWIP 0 BOOL - show VR walk in place data 
 vr_wipScale 1.0 FLOAT - 
 
@@ -603,6 +608,7 @@ vr_flicksyncCharacter 0 INTEGER - Flicksync character. 0 = none, 1 = Betruger, 2
 vr_flicksyncCueCards 0 INTEGER - How many Cue Card Power-Ups to start with. Default = 0, max = 5
 vr_cutscenesOnly 0 INTEGER - Skip action and only show cutscenes. 0 = normal game, 1 = cutscenes only, 2 = action only
 
+g_stopTime 0 BOOL - Freeze time. This is used by the Flicksync to pause cutscenes. If there's a bug and everything is frozen try setting it to 0.
 
 vr_wristStatMon 1 INTEGER - Use wrist status monitor. 0 = Disable 1 = Right Wrist 2 = Left Wrist 
 
@@ -690,6 +696,8 @@ vr_teleport 2 INTEGER - Player can teleport at will. 0 = disabled, 1 = gun sight
 vr_teleportMaxTravel 950 INTEGER - Maximum teleport path length/complexity/time. About 250 or 500 are good choices, but must be >= about 950 to use tightrope in MC Underground. 150, 5000 
 vr_teleportThroughDoors 0 BOOL - Player can teleport somewhere visible even if the path to get there takes them through closed (but not locked) doors.
 
+ai_debugMove 0 BOOL - Debug teleporter and monster navigation by showing teleport path
+
 vr_teleportSkipHandrails 0 INTEGER - Teleport aim ingnores handrails. 1 = true
 vr_teleportShowAimAssist 0 INTEGER - Move telepad target to reflect aim assist. 1 = true
 vr_teleportSkin 2 INTEGER - Test skins for cylinder 0, 2 
@@ -703,6 +711,8 @@ vr_teleportMaxDrop 360 FLOAT -
 
 vr_motionSickness 8 INTEGER - Motion sickness prevention aids. 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Reduce FOV & Chaperone, 6 = Slow Mo, 7 = Slow Mo & Chaperone, 8 = Slow Mo & Reduce FOV, 9 = Slow Mo, Chaperone, Reduce FOV, 10 = Third Person, 11 = Particles, 12 = Particles & Chaperone 0, 12 
 vr_strobeTime 500 INTEGER - Time in ms between flashes when blacking screen. 0 = no strobe
+
+timescale 1.0 FLOAT - game speed multiplier. Used by slow mo motion sickness fix. If there's an issue with it, you may need to set timescale 1
 
 vr_chaperone 2 INTEGER - Chaperone/Guardian mode. 0 = when near, 1 = when throwing, 2 = when melee, 3 = when dodging, 4 = always 0, 4 
 //vr_chaperoneColor 0 INTEGER - Chaperone colour. 0 = default, 1 = black, 2 = grey, 3 = white, 4 = red, 5 = green, 6 = blue, 7 = yellow, 8 = cyan, 9 = magenta, 10 = purple 0, 10 
