@@ -37,25 +37,27 @@ This file contains the following sections:
 
 	2) GENERAL NOTES
 	
-	3) LICENSE
+	3) INSTALLATION, GETTING THE GAMEDATA, RUNNING THE GAME
 	
-	4) GETTING THE SOURCE CODE
+	4) INSTRUCTIONS FOR NEW FEATURES
+	
+	5) CHANGES
+	
+	6) CONSOLE VARIABLES
+	
+	7) KNOWN ISSUES
+	
+	8) GETTING THE SOURCE CODE
 
-	5) COMPILING ON WIN32 WITH VISUAL C++ 2013 EXPRESS EDITION
+	9) COMPILING ON WIN32 WITH VISUAL C++ 2013 EXPRESS EDITION
 
-	6) COMPILING ON GNU/LINUX
-	
-	7) INSTALLATION, GETTING THE GAMEDATA, RUNNING THE GAME
-	
-	8) CHANGES
-	
-	9) CONSOLE VARIABLES
-	
-	10) KNOWN ISSUES
+	10) COMPILING ON GNU/LINUX
 	
 	11) BUG REPORTS
 	
-	12) CODE LICENSE EXCEPTIONS
+	12) LICENSE
+	
+	13) CODE LICENSE EXCEPTIONS
 
 
 
@@ -399,6 +401,31 @@ Or you can just watch all the cutscenes by setting Character to None and Game Mo
 
 The Flicksync settings carry over into a normal game, so change them back to normal when finished.
 You will see SCORE: 0 on the menus if you are in Flicksync mode.
+
+Default gamepad controls
+------------------------
+
+You can play the game in VR using an XBox 360/One gamepad if you don't have motion controllers.
+It will automatically switch to gamepad mode when you start using the gamepad.
+You can still use the gamepad for room-scale if you want.
+
+Left stick makes you move. But this will cause motion sickness.
+So it's recommended to teleport by holding B, looking where you want to go, and letting go.
+Push left stick in = run
+Left trigger = flashlight
+
+Right stick aims your weapon, and will turn you if you aim too far.
+Push right stick in = crouch
+Right trigger fires
+Shoulder buttons switch weapons
+
+A = jump
+B = teleport
+X = reload
+Y = use
+View / Back = PDA.
+≡ / Start = menu.
+
 ___________________________________________________
 
 5) CHANGES
@@ -443,6 +470,246 @@ ___________________________________________________
 
 6) CONSOLE VARIABLES
 __________________________________________
+
+vr_showWIP 0 BOOL - show VR walk in place data 
+vr_wipScale 1.0 FLOAT - 
+
+vr_comfortRepeat 100 INTEGER - Delay in MS between repeating comfort snap turns.
+
+vr_joyCurves 0 INTEGER - Joy powercurves. 0 = Doom default  1 = Mixed curve with vr_joyCurveSensitivity and vr_joyCurveLin 
+vr_joyCurveSensitivity 9 FLOAT - Sensitivity val 0 - 9 
+vr_joyCurveLin 4 FLOAT - Linear point for joyCurves  sens < lin = power curve , sens = lin = linear , sens > lin = frac power curve. 
+
+vr_grabberBeamWidth 4 INTEGER - Beam width for grabber in VR. Default 4.
+
+vr_debugGui 0 BOOL - 
+vr_guiFocusPitchAdj 7 FLOAT - View pitch adjust to help activate in game touch screens
+
+vr_bx1 -5 FLOAT - 
+vr_bx2 5 FLOAT - 
+vr_by1 -5 FLOAT - 
+vr_by2 5 FLOAT - 
+vr_bz1 -5 FLOAT - 
+vr_bz2 5 FLOAT - 
+
+// for testing
+ftx 1.0 FLOAT - 
+fty 0 FLOAT - 
+ftz 0 FLOAT - 
+
+vr_slotDebug 0 BOOL - slot debug visualation
+vr_slotMag 0.1 FLOAT - slot vibration magnitude (0 is off)
+vr_slotDur 18 INTEGER - slot vibration duration in milliseconds
+vr_slotDisable 0 BOOL - slot disable
+
+vr_blink 1 FLOAT - Darkens the screen when head bumps walls and objects.
+
+vr_throwPower 4.0 FLOAT - Throw power
+
+vr_guiH 100 INTEGER - 
+vr_guiA 100 INTEGER - 
+
+vr_rumbleDiv 1 FLOAT - rumble divisor 
+vr_rumbleSkip 1 FLOAT - frames to skip 
+vr_rumbleEnable 1 BOOL - Enable VR controller rumble 
+
+vr_openVrStuckPadAxisFix 1 BOOL - Check for openVR controller stuck pad axis.
+vr_openVrStuckPadAxisFixThresh 12 INTEGER - # of identical non zero input polls before axis flagged as stuck.
+
+vr_mouseCapture 0 INTEGER - Constrain the mouse to the game window while running.
+
+vr_debugTouchCursor 0 BOOL - Show the cursor position when using touch screen mode.
+
+vr_pixelDensity 1.25 FLOAT - 
+vr_vignette 1 INTEGER - unused
+vr_enable 1 INTEGER - Enable VR mode. 0 = Disabled 1 = Enabled.
+vr_FBOscale 1.0 FLOAT - unused
+vr_scale 1.0 FLOAT - unused
+vr_useOculusProfile 1 INTEGER - Use Oculus Profile values. 0 = use user defined profile, 1 = use Oculus profile.
+vr_manualIPDEnable 0 INTEGER - Override the HMD provided IPD value with value in vr_manualIPD 0 = disable 1= use manual iPD 
+vr_manualIPD 64 FLOAT - User defined IPD value in MM
+vr_manualHeight 70 FLOAT - User defined player height in inches
+vr_minLoadScreenTime 6000 FLOAT - Min time to display load screens in ms. 0.0f, 10000.0f 
+
+vr_clipPositional 1 BOOL - Clip positional tracking movement . 1 = Clip 0 = No clipping. 
+
+vr_armIKenable 1 BOOL - Enable IK on arms when using motion controls and player body is visible.  1 = Enabled 0 = disabled 
+vr_weaponHand 0 INTEGER - Which hand holds weapon.  0 = Right hand  1 = Left Hand  0, 1 
+
+// flashlight cvars
+
+vr_flashlightMode 3 INTEGER - Flashlight mount. 0 = Body 1 = Head 2 = Gun 3= Hand ( if motion controls available.)
+
+vr_flashlightBodyPosX 0 FLOAT - Flashlight vertical offset for body mount.
+vr_flashlightBodyPosY 0 FLOAT - Flashlight horizontal offset for body mount.
+vr_flashlightBodyPosZ 0 FLOAT - Flashlight forward offset for body mount.
+
+vr_flashlightHelmetPosX 6 FLOAT - Flashlight vertical offset for helmet mount.
+vr_flashlightHelmetPosY -6 FLOAT - Flashlight horizontal offset for helmet mount.
+vr_flashlightHelmetPosZ -20 FLOAT - Flashlight forward offset for helmet mount.
+
+vr_offHandPosX 0 FLOAT - X position for off hand when not using motion controls.
+vr_offHandPosY 0 FLOAT - Y position for off hand when not using motion controls.
+vr_offHandPosZ 0 FLOAT - Z position for off hand when not using motion controls.
+
+vr_forward_keyhole 11.25 FLOAT - Forward movement keyhole in deg. If view is inside body direction +/- this value, forward movement is in view direction, not body direction
+
+vr_PDAscale 3 FLOAT - unused
+vr_PDAfixLocation 0 BOOL - Fix PDA position in space in front of player  instead of holding in hand.
+
+vr_weaponPivotOffsetForward 3 FLOAT - 
+vr_weaponPivotOffsetHorizontal 0 FLOAT - 
+vr_weaponPivotOffsetVertical 0 FLOAT - 
+vr_weaponPivotForearmLength 16 FLOAT - ;
+
+vr_guiScale 1 FLOAT - scale reduction factor for full screen menu/pda scale in VR 0.0001f, 1.0f  //koz allow scaling of full screen guis/pda
+vr_guiSeparation .01 FLOAT - Screen separation value for fullscreen guis.
+
+vr_guiMode 2 INTEGER - Gui interaction mode.  0 = Weapon aim as cursor  1 = Look direction as cursor  2 = Touch screen 
+
+vr_hudScale 1.0 FLOAT - Hud scale 0.1f, 2.0f 
+vr_hudPosHor 0 FLOAT - Hud Horizontal offset in inches
+vr_hudPosVer 7 FLOAT - Hud Vertical offset in inches
+vr_hudPosDis 32 FLOAT - Hud Distance from view in inches
+vr_hudPosAngle 30 FLOAT - Hud View Angle
+vr_hudPosLock 1 INTEGER - Lock Hud to:  0 = Face, 1 = Body
+
+
+vr_hudType vr_hudType2 INTEGER - VR Hud Type. 0 = Disable. 1 = Full 2=Look Activate 0, 2 
+vr_hudRevealAngle vr_hudRevealAngle48 FLOAT - HMD pitch to reveal HUD in look activate mode.
+vr_hudTransparency vr_hudTransparency1 FLOATHud transparency. 0.0 = Invisible thru 1.0 = full 0.0, 100.0 
+vr_hudOcclusion vr_hudOcclusion1 BOOLHud occlusion. 0 = Objects occlude HUD, 1 = No occlusion 
+vr_hudHealth vr_hudHealth1 BOOL - Show Armor/Health in Hud.
+vr_hudAmmo vr_hudAmmo1 BOOL - Show Ammo in Hud.
+vr_hudPickUps vr_hudPickUps1 BOOL - Show item pick ups in Hud.
+vr_hudTips vr_hudTips1 BOOL - Show tips Hud.
+vr_hudLocation vr_hudLocation1 BOOL - Show player location in Hud.
+vr_hudObjective vr_hudObjective1 BOOL - Show objectives in Hud.
+vr_hudStamina vr_hudStamina1 BOOL - Show stamina in Hud.
+vr_hudPills vr_hudPills1 BOOL - Show weapon pills in Hud.
+vr_hudComs vr_hudComs1 BOOL - Show communications in Hud.
+vr_hudWeap vr_hudWeap1 BOOL - Show weapon pickup/change icons in Hud.
+vr_hudNewItems vr_hudNewItems1 BOOL - Show new items acquired in Hud.
+vr_hudFlashlight vr_hudFlashlight1 BOOL - Show flashlight in Hud.
+vr_hudLowHealth vr_hudLowHealth0 INTEGER0 = Disable, otherwise force hud if heath below this value.
+
+vr_voiceCommands vr_voiceCommands2 INTEGER - Enable voice commands. 0 = none, 1 = menus, 2 = menus and weapons
+//vr_talkWakeMonsters 1 INTEGER - Talking wakes monsters. 0 = no, 1 = yes
+vr_talkMode 2 INTEGER - Talk to NPC 0 = buttons, 1 = buttons or voice, 2 = voice only, 3 = voice no cursor
+vr_tweakTalkCursor 25 FLOAT - Tweak talk cursor y pos in VR. % val 0 to 99 
+
+vr_flicksyncCharacter 0 INTEGER - Flicksync character. 0 = none, 1 = Betruger, 2 = Swan, 3 = Campbell, 4 = DarkStar, 5 = Tower, 6 = Reception, 7 = Kelly, 8 = Brooks, 9 = Mark Ryan, 10 = Ishii, 11 = Roland, 12 = McNeil, 13 = Marine w PDA, 14 = Marine w Torch, 15 = Point, 16 = Bravo Lead, 17 = Player 0, FLICK_PLAYER 
+
+vr_flicksyncCueCards 0 INTEGER - How many Cue Card Power-Ups to start with. Default = 0, max = 5
+vr_cutscenesOnly 0 INTEGER - Skip action and only show cutscenes. 0 = normal game, 1 = cutscenes only, 2 = action only
+
+
+vr_wristStatMon 1 INTEGER - Use wrist status monitor. 0 = Disable 1 = Right Wrist 2 = Left Wrist 
+
+// koz display windows monitor name in the resolution selection menu, helpful to ID which is the rift if using extended mode
+vr_listMonitorName 0 BOOL - List monitor name with resolution.
+
+vr_viewModelArms 1 BOOL - Dont change this, will be removed. Display arms on view models in VR
+vr_disableWeaponAnimation 1 BOOL - Disable weapon animations in VR. ( 1 = disabled )
+vr_headKick 0 BOOL - Damage can 'kick' the players view. 0 = Disabled in VR.
+vr_joystickMenuMapping 1 BOOL - Use alternate joy mapping  in menus/PDA.  0 = D3 Standard  1 = VR Mode. (Both joys can nav menus,  joy r/l to change select area in PDA.
+
+
+vr_deadzonePitch 90 FLOAT - Vertical Aim Deadzone 0, 180 
+vr_deadzoneYaw 30 FLOAT - Horizontal Aim Deadzone 0, 180 
+vr_comfortDelta 10 FLOAT - Comfort Mode turning angle  0, 180 
+
+//vr_interactiveCinematic 1 BOOL - Interactive cinematics in VR ( no camera )
+
+vr_headingBeamWidth 12.0 FLOAT - heading beam width // Koz default was 2, IMO too big in VR.
+vr_headingBeamLength 96 FLOAT - heading beam length // koz default was 250, but was to short in VR.  Length will be clipped if object is hit, this is max length for the hit trace. 
+vr_headingBeamMode 3 INTEGER - 0 = disabled, 1 = solid, 2 = arrows, 3 = scrolling arrows
+
+vr_weaponSight 0 INTEGER - Weapon Sight.  0 = Lasersight  1 = Red dot  2 = Circle dot  3 = Crosshair 
+vr_weaponSightToSurface 1 INTEGER - Map sight to surface. 0 = Disabled 1 = Enabled 
+
+vr_motionWeaponPitchAdj 40 FLOAT - Weapon controller pitch adjust
+vr_motionFlashPitchAdj 40 FLOAT - Flashlight controller pitch adjust
+
+vr_nodalX -3 FLOAT - Forward offset from eyes to neck
+vr_nodalZ -6 FLOAT - Vertical offset from neck to eye height
+
+vr_vcx -3.5 FLOAT - Controller X offset to handle center // these values work for steam
+vr_vcy 0 FLOAT - Controller Y offset to handle center
+vr_vcz -.5 FLOAT - Controller Z offset to handle center
+
+vr_mountx 0 FLOAT - If motion controller mounted on object, X offset from controller to object handle.  (Eg controller mounted on Topshot)
+vr_mounty 0 FLOAT - If motion controller mounted on object, Y offset from controller to object handle.  (Eg controller mounted on Topshot)
+vr_mountz 0 FLOAT - If motion controller mounted on object, Z offset from controller to object handle.  (Eg controller mounted on Topshot)
+
+vr_mountedWeaponController 0 BOOL - If physical controller mounted on object (eg topshot), enable this to apply mounting offsets 0=disabled 1 = enabled
+
+vr_3dgui 1 BOOL - 3d effects for in game guis. 0 = disabled 1 = enabled 
+vr_shakeAmplitude 1.0 FLOAT - Screen shake amplitude 0.0 = disabled to 1.0 = full  0.0f, 1.0f 
+
+
+vr_controllerStandard 0 INTEGER - If 1, use standard controller, not motion controllers Restart after changing 
+
+vr_padDeadzone .25 FLOAT - Deadzone for steam pads.  0.0 = no deadzone 1.0 = dead 
+vr_padToButtonThreshold .7 FLOAT - Threshold value for pad contact  to register as button press  .1 high sensitiveity thru  .99 low sensitivity
+vr_knockBack 0 BOOL - Enable damage knockback in VR. 0 = Disabled, 1 = Enabled
+vr_jumpBounce 0 FLOAT - Enable view bounce after jumping. 0 = Disabled, 1 = Full 0.0f, 1.0f  // Carl
+vr_stepSmooth 1 FLOAT - Enable smoothing when climbing stairs. 0 = Disabled, 1 = Full 0.0f, 1.0f  // Carl
+vr_walkSpeedAdjust -20 FLOAT - Player walk speed adjustment in VR. (slow down default movement)
+
+vr_wipPeriodMin 10.0 FLOAT - 
+vr_wipPeriodMax 2000.0 FLOAT - 
+
+vr_wipVelocityMin .05 FLOAT - 
+vr_wipVelocityMax 2.0 FLOAT - 
+
+vr_headbbox 10.0 FLOAT - 
+
+vr_pdaPosX 20 FLOAT - 
+vr_pdaPosY 0 FLOAT - 
+vr_pdaPosZ -11 FLOAT - 
+
+vr_pdaPitch 30 FLOAT - 
+
+vr_movePoint 0 INTEGER - If enabled, move in the direction the off hand is pointing.
+vr_moveClick 0 INTEGER0 = Normal movement.  1 = Click and hold to walk, run button to run.  2 = Click to start walking, then touch only. Run btn to run.  3 = Click to start walking, hold click to run.  4 = Click to start walking, then click toggles run 
+vr_playerBodyMode 0 INTEGER - Player body mode: 0 = Display full body 1 = Just Hands  2 = Weapons only 
+vr_bodyToMove 1 BOOL - Lock body orientaion to movement direction.
+
+vr_crouchMode 0 INTEGER - Crouch Mode:  0 = Full motion crouch (In game matches real life)  1 = Crouch anim triggered by smaller movement.
+vr_crouchTriggerDist 10 FLOAT - Distance ( in inches ) player must crouch in real life to toggle crouch 
+
+vr_frameCheck 0 INTEGER - 0 = bypass frame check
+
+vr_forceOculusAudio 1 BOOL - Request openAL to search for Rift headphones instead of default device Fails to default device if rift not found.
+vr_stereoMirror 1 BOOL - Render mirror window with stereo views. 0 = Mono , 1 = Stereo Warped
+
+vr_APISelect 0 INTEGER - VR API Select:  0 = Autodetect ( Oculus Native then OpenVR ) ,  1 = Oculus Native Only  2 = OpenVR only 
+
+vr_teleport 2 INTEGER - Player can teleport at will. 0 = disabled, 1 = gun sight, 2 = right hand, 3 = left hand, 4 = head 0, 4 
+vr_teleportMaxTravel 950 INTEGER - Maximum teleport path length/complexity/time. About 250 or 500 are good choices, but must be >= about 950 to use tightrope in MC Underground. 150, 5000 
+vr_teleportThroughDoors 0 BOOL - Player can teleport somewhere visible even if the path to get there takes them through closed (but not locked) doors.
+
+vr_teleportSkipHandrails 0 INTEGER - Teleport aim ingnores handrails. 1 = true
+vr_teleportShowAimAssist 0 INTEGER - Move telepad target to reflect aim assist. 1 = true
+vr_teleportSkin 2 INTEGER - Test skins for cylinder 0, 2 
+vr_teleportButtonMode 0 BOOL - 0 = Press aim, release teleport./n1 = 1st press aim, 2nd press teleport
+vr_teleportHint 0 BOOL - 
+
+vr_teleportVel 650 FLOAT 
+vr_teleportDist 60 FLOAT 
+vr_teleportMaxPoints 24 FLOAT - 
+vr_teleportMaxDrop 360 FLOAT - 
+
+vr_motionSickness 8 INTEGER - Motion sickness prevention aids. 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Reduce FOV & Chaperone, 6 = Slow Mo, 7 = Slow Mo & Chaperone, 8 = Slow Mo & Reduce FOV, 9 = Slow Mo, Chaperone, Reduce FOV, 10 = Third Person, 11 = Particles, 12 = Particles & Chaperone 0, 12 
+vr_strobeTime 500 INTEGER - Time in ms between flashes when blacking screen. 0 = no strobe
+
+vr_chaperone 2 INTEGER - Chaperone/Guardian mode. 0 = when near, 1 = when throwing, 2 = when melee, 3 = when dodging, 4 = always 0, 4 
+//vr_chaperoneColor 0 INTEGER - Chaperone colour. 0 = default, 1 = black, 2 = grey, 3 = white, 4 = red, 5 = green, 6 = blue, 7 = yellow, 8 = cyan, 9 = magenta, 10 = purple 0, 10 
+
+vr_handSwapsAnalogs 0 BOOL - Should swapping the weapon hand affect analog controls (stick or touchpad) or just buttons/triggers? 0 = only swap buttons, 1 = swap all controls
+vr_autoSwitchControllers 1 BOOL - Automatically switch to/from gamepad mode when using gamepad/motion controller. Should be true unless you're trying to use both together, or you get false detections. 0 = no, 1 = yes.
+
 
 r_useShadowMapping 1 - Use soft shadow mapping instead of hard stencil shadows
 
