@@ -1635,7 +1635,7 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		return;
 	}
 
-	if ( vr_movePoint.GetInteger() == 1 && ( abs( cmd.forwardmove ) >= .1 || abs( cmd.rightmove ) >= .1) ) // body will follow motion from move vector
+	if ( commonVr->VR_USE_MOTION_CONTROLS && vr_movePoint.GetInteger() == 1 && ( abs( cmd.forwardmove ) >= .1 || abs( cmd.rightmove ) >= .1) ) // body will follow motion from move vector
 	{
 		static idAngles controllerAng;
 
@@ -1646,7 +1646,7 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		commonVr->bodyYawOffset = controllerAng.yaw;
 
 	}
-	else if ( vr_movePoint.GetInteger() == 2 ) // body will follow view
+	else if ( !commonVr->VR_USE_MOTION_CONTROLS || vr_movePoint.GetInteger() == 2 ) // body will follow view
 	{
 		viewangles[YAW] += commonVr->poseHmdAngles.yaw - commonVr->bodyMoveAng;
 		commonVr->bodyMoveAng = commonVr->poseHmdAngles.yaw;
