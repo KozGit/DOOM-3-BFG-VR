@@ -599,7 +599,7 @@ vr_hudFlashlight vr_hudFlashlight1 BOOL - Show flashlight in Hud.
 vr_hudLowHealth vr_hudLowHealth0 INTEGER0 = Disable, otherwise force hud if heath below this value.
 
 vr_voiceCommands vr_voiceCommands2 INTEGER - Enable voice commands. 0 = none, 1 = menus, 2 = menus and weapons
-//vr_talkWakeMonsters 1 INTEGER - Talking wakes monsters. 0 = no, 1 = yes
+vr_talkWakeMonsters 1 BOOL - Talking wakes monsters. 0 = no, 1 = yes
 vr_talkMode 2 INTEGER - Talk to NPC 0 = buttons, 1 = buttons or voice, 2 = voice only, 3 = voice no cursor
 vr_tweakTalkCursor 25 FLOAT - Tweak talk cursor y pos in VR. % val 0 to 99 
 
@@ -701,7 +701,7 @@ ai_debugMove 0 BOOL - Debug teleporter and monster navigation by showing telepor
 vr_teleportSkipHandrails 0 INTEGER - Teleport aim ingnores handrails. 1 = true
 vr_teleportShowAimAssist 0 INTEGER - Move telepad target to reflect aim assist. 1 = true
 vr_teleportSkin 2 INTEGER - Test skins for cylinder 0, 2 
-vr_teleportButtonMode 0 BOOL - 0 = Press aim, release teleport./n1 = 1st press aim, 2nd press teleport
+vr_teleportButtonMode 0 BOOL - 0 = Press aim, release teleport. 1 = 1st press aim, 2nd press teleport
 vr_teleportHint 0 BOOL - 
 
 vr_teleportVel 650 FLOAT 

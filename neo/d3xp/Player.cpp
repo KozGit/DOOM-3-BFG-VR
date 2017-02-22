@@ -6923,7 +6923,7 @@ void idPlayer::UpdateWeapon()
 	assert( !spectating );
 	
 	// Voice wakes up nearby monsters while you're speaking
-	if( vr_talkMode.GetInteger() > 0 && ( usercmd.buttons & BUTTON_CHATTING ) )
+	if( vr_talkWakeMonsters.GetBool() && ( usercmd.buttons & BUTTON_CHATTING ) )
 		gameLocal.AlertAI( this );
 
 	if( common->IsClient() )
