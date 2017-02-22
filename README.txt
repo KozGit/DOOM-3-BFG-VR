@@ -350,7 +350,55 @@ For a (long) list of what you can say, say:
 - what can I say
 
 
+Flicksync:
+----------
 
+The Flicksync mode is still very buggy and a work in progress.
+
+Flicksync mode is based on the book Ready Player One by Ernest Cline.
+
+The aim is to act out the game's cutscenes by becoming one of the characters.
+You must say all of that character's lines exactly at the appropriate points.
+
+If you don't say the line in time, the other character will repeat the cue (with subtitles),
+"Final Dialog Warning" will appear, and the game will pause indefinitely waiting for you to say it.
+
+If you can't remember the line, pull the trigger to use a Cue Card Power-Up (if you have one).
+The Cue Card will show you what you need to say (phonetically) in white near the top.
+
+If you don't have a Cue Card Power-Up, or the speech recognition can't recognise the way you say it,
+you can press the PDA or menu button to give up that line and lose 10 points.
+
+After you give up twice in a row, it will say "Final Warning". A third failure is GAME OVER.
+
+Pressing the PDA or menu button while it's not waiting for a line, will skip the cutscene like normal.
+
+When you say the line correctly, you get 100 points.
+If you say the line clearly and at roughly the right time, you get another 50 bonus points.
+
+If you get 7 lines right in a row, you get another Cue Card Power-Up, up to a maximum of 5.
+
+There are no action bonuses yet. And you automatically follow the character's path.
+
+If the cutscene seems to finish, but it won't let you move, it's still waiting for you to say the 
+last line of the cutscene (or to skip it).
+
+The Flicksync mode is still very buggy and a work in progress. Sorry.
+
+To start a Flicksync game, choose Campaign from the main menu, then choose Flicksync.
+Choose which character you will be.
+Choose how many Cue Cards you start with.
+Choose whether to play just the Flicksync cutscene parts,
+or play the normal Doom 3 game with Flicksync mode for the cutscenes,
+(or a non-Flicksync game with no cutscenes).
+Then choose Play.
+You will start from a different point depending on which character you choose.
+
+You can also watch the cutscenes from the POV of the player character(s) by choosing Player.
+Or you can just watch all the cutscenes by setting Character to None and Game Mode to Cutscenes.
+
+The Flicksync settings carry over into a normal game, so change them back to normal when finished.
+You will see SCORE: 0 on the menus if you are in Flicksync mode.
 ___________________________________________________
 
 5) CHANGES
