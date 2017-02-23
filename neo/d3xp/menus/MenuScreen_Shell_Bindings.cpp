@@ -315,7 +315,12 @@ void idMenuScreen_Shell_Bindings::UpdateBindingDisplay()
 				}
 				const char* buttonsWithImages[] =
 				{
-					"JOY1", "JOY2", "JOY3", "JOY4", "JOY5", "JOY6",
+					"JOY1", "JOY2", "JOY3", "JOY4", "JOY5", "JOY6", "JOY9", "JOY10",
+					"R_TOUCHA", "R_TOUCHB", "L_TOUCHX", "L_TOUCHY", "L_TOUCHM",
+					"L_STEAMVR_APP", "R_STEAMVR_APP",
+					"L_STEAMVR_PAD", "R_STEAMVR_PAD",
+					"L_STEAMVR_U", "L_STEAMVR_D", "L_STEAMVR_L", "L_STEAMVR_R",
+					"R_STEAMVR_U", "R_STEAMVR_D", "R_STEAMVR_L", "R_STEAMVR_R",
 					"JOY_TRIGGER1", "JOY_TRIGGER2", 0
 				};
 				for( int i = 0; i < joyBinds.Num(); i++ )

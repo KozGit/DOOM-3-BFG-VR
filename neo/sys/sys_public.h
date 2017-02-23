@@ -155,77 +155,96 @@ enum sys_mEvents
 enum sys_jEvents
 {
 	J_ACTION1,
-	J_ACTION2,
-	J_ACTION3,
-	J_ACTION4,
-	J_ACTION5,
-	J_ACTION6,
-	J_ACTION7,
-	J_ACTION8,
-	J_ACTION9,
-	J_ACTION10,
+
+	J_XBOX_ACTION_FIRST = J_ACTION1,
+	J_XBOX_A = J_XBOX_ACTION_FIRST,
+	J_XBOX_B,
+	J_XBOX_X,
+	J_XBOX_Y,
+	J_XBOX_LSHOULDER,
+	J_XBOX_RSHOULDER,
+	J_XBOX_LSTICK,
+	J_XBOX_RSTICK,
+	J_XBOX_START,
+	J_XBOX_BACK,
 	J_ACTION11,
 	J_ACTION12,
 	J_ACTION13,
 	J_ACTION14,
 	J_ACTION15,
 	J_ACTION16,
-	J_ACTION17, // touch button start
-	J_ACTION18,
-	J_ACTION19, 
-	J_ACTION20,
-	J_ACTION21,
-	J_ACTION22,
-	J_ACTION23,
-	J_ACTION24,
-	J_ACTION25,
-	J_ACTION26,
-	J_ACTION27,
-	J_ACTION28,
-	J_ACTION29,
-	J_ACTION30,
-	
+	J_XBOX_ACTION_MAX = J_ACTION16,
+
+	// touch button start
+	J_TOUCH_ACTION_FIRST,
+	J_LT_ACTION_FIRST = J_TOUCH_ACTION_FIRST,
+	J_LT_X = J_LT_ACTION_FIRST,
+	J_LT_Y,
+	J_LT_MENU,
+	J_LT_STICK,
+	J_LT_REST,
+	J_LT_GRIP,
+	J_LT_TRIGGER,
+	J_LT_ACTION_MAX = J_LT_TRIGGER,
+
+	J_RT_ACTION_FIRST,
+	J_RT_A = J_RT_ACTION_FIRST,
+	J_RT_B,
+	J_RT_OCULUS,
+	J_RT_STICK,
+	J_RT_REST,
+	J_RT_GRIP,
+	J_RT_TRIGGER,
+	J_RT_ACTION_MAX = J_RT_TRIGGER,
+	J_TOUCH_ACTION_MAX = J_RT_ACTION_MAX,
+
 	// left openvr controller button start
-	J_ACTION31, // left openvr Sys 
-	J_ACTION32,	// left openvr ApplicationMenu
-	J_ACTION33, // left openvr Grip
-	J_ACTION34,	// left openvr DPad_Left ( not used ) 
-	J_ACTION35,	// left openvr DPad_Up ( not used ) 
-	J_ACTION36,	// left openvr DPad_Right ( not used ) 
-	J_ACTION37,	// left openvr DPad_Down ( not used ) 
-	J_ACTION38,	// left openvr k_EButton_A
-	J_ACTION39,	// left openvr 	k_EButton_SteamVR_Touchpad	
-	J_ACTION40,	// left openvr 	k_EButton_SteamVR_Trigger 
-	J_ACTION41,	// left openvr 8
-	J_ACTION42,	// left openvr 9
-	J_ACTION43,	// left openvr 10
-	J_ACTION44,	// left openvr 11
-	J_ACTION45,	// left openvr 12
-	J_ACTION46,	// left openvr 13
-	J_ACTION47,	// left openvr 14
-	J_ACTION48,	// left openvr 15
+	J_STEAMVR_ACTION_FIRST,
+	J_LV_ACTION_FIRST = J_STEAMVR_ACTION_FIRST,
+	J_LV_SYS = J_LV_ACTION_FIRST, // left openvr Sys 
+	J_LV_MENU,	// left openvr ApplicationMenu
+	J_LV_GRIP, // left openvr Grip
+	J_LSTEAMVR_DPAD_LEFT,	// left openvr DPad_Left ( not used ) 
+	J_LSTEAMVR_DPAD_UP,	// left openvr DPad_Up ( not used ) 
+	J_LSTEAMVR_DPAD_RIGHT,	// left openvr DPad_Right ( not used ) 
+	J_LSTEAMVR_DPAD_DOWN,	// left openvr DPad_Down ( not used ) 
+	J_LSTEAMVR_A,	// left openvr k_EButton_A
+	J_LV_PAD,	// left openvr 	k_EButton_SteamVR_Touchpad	
+	J_LV_TRIGGER,	// left openvr 	k_EButton_SteamVR_Trigger 
+	J_LSTEAMVR_8,	// left openvr 8
+	J_LSTEAMVR_9,	// left openvr 9
+	J_LSTEAMVR_10,	// left openvr 10
+	J_LSTEAMVR_11,	// left openvr 11
+	J_LSTEAMVR_12,	// left openvr 12
+	J_LSTEAMVR_13,	// left openvr 13
+	J_LSTEAMVR_14,	// left openvr 14
+	J_LSTEAMVR_15,	// left openvr 15
+	J_LV_ACTION_MAX = J_LSTEAMVR_15,
 
 	// right openvr controller button start
-	J_ACTION49, // right openvr Sys
-	J_ACTION50,	// right openvr ApplicationMenu
-	J_ACTION51, // right openvr Grip
-	J_ACTION52,	// right openvr DPad_Left ( not used ) 
-	J_ACTION53,	// right openvr DPad_Up ( not used ) 
-	J_ACTION54,	// right openvr DPad_Right ( not used ) 
-	J_ACTION55,	// right openvr DPad_Down ( not used ) 
-	J_ACTION56,	// right openvr k_EButton_A
-	J_ACTION57,	// right openvr 	k_EButton_SteamVR_Touchpad	
-	J_ACTION58,	// right openvr 	k_EButton_SteamVR_Trigger 
-	J_ACTION59,	// right openvr 8
-	J_ACTION60,	// right openvr 9
-	J_ACTION61,	// right openvr 10
-	J_ACTION62,	// right openvr 11
-	J_ACTION63,	// right openvr 12
-	J_ACTION64,	// right openvr 13
-	J_ACTION65,	// right openvr 14
-	J_ACTION66,	// right openvr 15
+	J_RV_ACTION_FIRST,
+	J_RV_SYS = J_RV_ACTION_FIRST, // right openvr Sys
+	J_RV_MENU,	// right openvr ApplicationMenu
+	J_RV_GRIP, // right openvr Grip
+	J_RSTEAMVR_DPAD_LEFT,	// right openvr DPad_Left ( not used ) 
+	J_RSTEAMVR_DPAD_UP,	// right openvr DPad_Up ( not used ) 
+	J_RSTEAMVR_DPAD_RIGHT,	// right openvr DPad_Right ( not used ) 
+	J_RSTEAMVR_DPAD_DOWN,	// right openvr DPad_Down ( not used ) 
+	J_RSTEAMVR_A,	// right openvr k_EButton_A
+	J_RV_PAD,	// right openvr 	k_EButton_SteamVR_Touchpad	
+	J_RV_TRIGGER,	// right openvr 	k_EButton_SteamVR_Trigger 
+	J_RSTEAMVR_8,	// right openvr 8
+	J_RSTEAMVR_9,	// right openvr 9
+	J_RSTEAMVR_10,	// right openvr 10
+	J_RSTEAMVR_11,	// right openvr 11
+	J_RSTEAMVR_12,	// right openvr 12
+	J_RSTEAMVR_13,	// right openvr 13
+	J_RSTEAMVR_14,	// right openvr 14
+	J_RSTEAMVR_15,	// right openvr 15
+	J_RV_ACTION_MAX = J_RSTEAMVR_15,
+	J_STEAMVR_ACTION_MAX = J_RV_ACTION_MAX,
 
-	J_ACTION_MAX = J_ACTION66,
+	J_ACTION_MAX = J_RSTEAMVR_15,
 
 	
 	J_AXIS_MIN,

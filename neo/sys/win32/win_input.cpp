@@ -1169,12 +1169,12 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 			{
 				J_DPAD_UP, J_DPAD_DOWN,	// Up, Down
 				J_DPAD_LEFT, J_DPAD_RIGHT,	// Left, Right
-				J_ACTION9, J_ACTION10,		// Start, Back
-				J_ACTION7, J_ACTION8,		// Left Stick Down, Right Stick Down
-				J_ACTION5, J_ACTION6,		// Black, White (Left Shoulder, Right Shoulder)
-				0, 0,				// Unused
-				J_ACTION1, J_ACTION2,		// A, B
-				J_ACTION3, J_ACTION4,		// X, Y
+				J_XBOX_START, J_XBOX_BACK,		// Start, Back
+				J_XBOX_LSTICK, J_XBOX_RSTICK,		// Left Stick Down, Right Stick Down
+				J_XBOX_LSHOULDER, J_XBOX_RSHOULDER,		// Black, White (Left Shoulder, Right Shoulder)
+				J_ACTION11, J_ACTION12,				// Unused
+				J_XBOX_A, J_XBOX_B,		// A, B
+				J_XBOX_X, J_XBOX_Y,		// X, Y
 			};
 
 			// Check the digital buttons
@@ -1402,79 +1402,79 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							if ( (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) )
 							{
 								//common->Printf( "inputDeviceNum %d L AppMenu\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION32, (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) > 0 );
+								PostInputEvent( inputDeviceNum, J_LV_MENU, (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) > 0 );
 							}
 
 							if ( (button & ButtonMaskFromId( vr::k_EButton_Grip )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_Grip )) )
 							{
 								//common->Printf( "inputDeviceNum %d L Grip\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION33, (button & ButtonMaskFromId( vr::k_EButton_Grip )) > 0 );
+								PostInputEvent( inputDeviceNum, J_LV_GRIP, (button & ButtonMaskFromId( vr::k_EButton_Grip )) > 0 );
 							}
 
 							if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) )
 							{
 								//common->Printf( "inputDeviceNum %d LTrig\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION40, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) > 0 );
+								PostInputEvent( inputDeviceNum, J_LV_TRIGGER, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) > 0 );
 							}
 
 							if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) )
 							{
 								//common->Printf( "inputDeviceNum %d LPad\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION39, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) > 0 );
+								PostInputEvent( inputDeviceNum, J_LV_PAD, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) > 0 );
 							}
 
 							if ( (button & ButtonMaskFromId( vr::k_EButton_A )) != (oldButton[0] & ButtonMaskFromId( vr::k_EButton_A )) )
 							{
 								//common->Printf( "inputDeviceNum %d L k_EButton_A\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION38, (button & ButtonMaskFromId( vr::k_EButton_A )) > 0 );
+								PostInputEvent( inputDeviceNum, J_LSTEAMVR_A, (button & ButtonMaskFromId( vr::k_EButton_A )) > 0 );
 							}
 
 							if ( (button & (1ull << 8)) != (oldButton[0] & (1ull << 8)) )
 							{
 								//common->Printf( "inputDeviceNum %d L Button 8\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION41, (button & (1ull << 8)) > 0 );
+								PostInputEvent( inputDeviceNum, J_LSTEAMVR_8, (button & (1ull << 8)) > 0 );
 							}
 
 							if ( (button & (1ull << 9)) != (oldButton[0] & (1ull << 9)) )
 							{
 								//common->Printf( "inputDeviceNum %d L Button 9\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION42, (button & (1ull << 9)) > 0 );
+								PostInputEvent( inputDeviceNum, J_LSTEAMVR_9, (button & (1ull << 9)) > 0 );
 							}
 
 							if ( (button & (1ull << 10)) != (oldButton[0] & (1ull << 10)) )
 							{
 								//common->Printf( "inputDeviceNum %d L Button 10\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION43, (button & (1ull << 10)) > 0 );
+								PostInputEvent( inputDeviceNum, J_LSTEAMVR_10, (button & (1ull << 10)) > 0 );
 							}
 
 							if ( (button & (1ull << 11)) != (oldButton[0] & (1ull << 11)) )
 							{
 								//common->Printf( "inputDeviceNum %d L Button 11\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION44, (button & (1ull << 11)) > 0 );
+								PostInputEvent( inputDeviceNum, J_LSTEAMVR_11, (button & (1ull << 11)) > 0 );
 							}
 
 							if ( (button & (1ull << 12)) != (oldButton[0] & (1ull << 12)) )
 							{
 								//common->Printf( "inputDeviceNum %d L Button 12\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION45, (button & (1ull << 12)) > 0 );
+								PostInputEvent( inputDeviceNum, J_LSTEAMVR_12, (button & (1ull << 12)) > 0 );
 							}
 
 							if ( (button & (1ull << 13)) != (oldButton[0] & (1ull << 13)) )
 							{
 								//common->Printf( "inputDeviceNum %d L Button 13\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION46, (button & (1ull << 13)) > 0 );
+								PostInputEvent( inputDeviceNum, J_LSTEAMVR_13, (button & (1ull << 13)) > 0 );
 							}
 
 							if ( (button & (1ull << 14)) != (oldButton[0] & (1ull << 14)) )
 							{
 								//common->Printf( "inputDeviceNum %d L Button 14\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION47, (button & (1ull << 14)) > 0 );
+								PostInputEvent( inputDeviceNum, J_LSTEAMVR_14, (button & (1ull << 14)) > 0 );
 							}
 
 							if ( (button & (1ull << 15)) != (oldButton[0] & (1ull << 15)) )
 							{
 								//common->Printf( "inputDeviceNum %d L Button 15\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION48, (button & (1ull << 15)) > 0 );
+								PostInputEvent( inputDeviceNum, J_LSTEAMVR_15, (button & (1ull << 15)) > 0 );
 							}
 
 
@@ -1597,31 +1597,31 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							if ( (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) )
 							{
 								//common->Printf( "inputDeviceNum %d R AppMenu\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION50, (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) > 0 );
+								PostInputEvent( inputDeviceNum, J_RV_MENU, (button & ButtonMaskFromId( vr::k_EButton_ApplicationMenu )) > 0 );
 							}
 
 							if ( (button & ButtonMaskFromId( vr::k_EButton_Grip )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_Grip )) )
 							{
 								//common->Printf( "inputDeviceNum %d R Grip\n", inputDeviceNum );
-								PostInputEvent(inputDeviceNum, J_ACTION51, (button & ButtonMaskFromId(vr::k_EButton_Grip)) > 0);
+								PostInputEvent(inputDeviceNum, J_RV_GRIP, (button & ButtonMaskFromId(vr::k_EButton_Grip)) > 0);
 							}
 
 							if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) )
 							{
 								//common->Printf( "inputDeviceNum %d R Trig\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION58, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) > 0 );
+								PostInputEvent( inputDeviceNum, J_RV_TRIGGER, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Trigger )) > 0 );
 							}
 
 							if ( (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) )
 							{
 								//common->Printf( "inputDeviceNum %d R Pad\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION57, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) > 0 );
+								PostInputEvent( inputDeviceNum, J_RV_PAD, (button & ButtonMaskFromId( vr::k_EButton_SteamVR_Touchpad )) > 0 );
 							}
 
 							if ( (button & ButtonMaskFromId( vr::k_EButton_A )) != (oldButton[1] & ButtonMaskFromId( vr::k_EButton_A )) )
 							{
 								//common->Printf( "inputDeviceNum %d R k_EButton_A\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION56, (button & ButtonMaskFromId( vr::k_EButton_A )) > 0 );
+								PostInputEvent( inputDeviceNum, J_RSTEAMVR_A, (button & ButtonMaskFromId( vr::k_EButton_A )) > 0 );
 							}
 
 
@@ -1630,49 +1630,49 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							if ( (button & (1ull << 8)) != (oldButton[1] & (1ull << 8)) )
 							{
 								//common->Printf( "inputDeviceNum %d R Button 8\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION59, (button & (1ull << 8)) > 0 );
+								PostInputEvent( inputDeviceNum, J_RSTEAMVR_8, (button & (1ull << 8)) > 0 );
 							}
 
 							if ( (button & (1ull << 9)) != (oldButton[1] & (1ull << 9)) )
 							{
 								//common->Printf( "inputDeviceNum %d R Button 9\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION60, (button & (1ull << 9)) > 0 );
+								PostInputEvent( inputDeviceNum, J_RSTEAMVR_9, (button & (1ull << 9)) > 0 );
 							}
 
 							if ( (button & (1ull << 10)) != (oldButton[1] & (1ull << 10)) )
 							{
 								//common->Printf( "inputDeviceNum %d R Button 10\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION61, (button & (1ull << 10)) > 0 );
+								PostInputEvent( inputDeviceNum, J_RSTEAMVR_10, (button & (1ull << 10)) > 0 );
 							}
 
 							if ( (button & (1ull << 11)) != (oldButton[1] & (1ull << 11)) )
 							{
 								//common->Printf( "inputDeviceNum %d R Button 11\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION62, (button & (1ull << 11)) > 0 );
+								PostInputEvent( inputDeviceNum, J_RSTEAMVR_11, (button & (1ull << 11)) > 0 );
 							}
 
 							if ( (button & (1ull << 12)) != (oldButton[1] & (1ull << 12)) )
 							{
 								//common->Printf( "inputDeviceNum %d R Button 12\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION63, (button & (1ull << 12)) > 0 );
+								PostInputEvent( inputDeviceNum, J_RSTEAMVR_12, (button & (1ull << 12)) > 0 );
 							}
 
 							if ( (button & (1ull << 13)) != (oldButton[1] & (1ull << 13)) )
 							{
 								//common->Printf( "inputDeviceNum %d R Button 13\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION64, (button & (1ull << 13)) > 0 );
+								PostInputEvent( inputDeviceNum, J_RSTEAMVR_13, (button & (1ull << 13)) > 0 );
 							}
 
 							if ( (button & (1ull << 14)) != (oldButton[1] & (1ull << 14)) )
 							{
 								//common->Printf( "inputDeviceNum %d R Button 14\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION65, (button & (1ull << 14)) > 0 );
+								PostInputEvent( inputDeviceNum, J_RSTEAMVR_14, (button & (1ull << 14)) > 0 );
 							}
 
 							if ( (button & (1ull << 15)) != (oldButton[1] & (1ull << 15)) )
 							{
 								//common->Printf( "inputDeviceNum %d R Button 15\n", inputDeviceNum );
-								PostInputEvent( inputDeviceNum, J_ACTION66, (button & (1ull << 15)) > 0 );
+								PostInputEvent( inputDeviceNum, J_RSTEAMVR_15, (button & (1ull << 15)) > 0 );
 							}
 
 							oldButton[1] = button;
@@ -1711,73 +1711,73 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 						if ( (inputState.Buttons & ovrButton_A) != (oldInputState.Buttons & ovrButton_A) )
 						{
 							//common->Printf( "Posting input event for r_touch_a val : %d\n", (inputState.Buttons & ovrButton_A)  );
-							PostInputEvent( inputDeviceNum, J_ACTION24, (inputState.Buttons & ovrButton_A) );
+							PostInputEvent( inputDeviceNum, J_RT_A, (inputState.Buttons & ovrButton_A) );
 						}
 
 						if ( (inputState.Buttons & ovrButton_B) != (oldInputState.Buttons & ovrButton_B) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION25, (inputState.Buttons & ovrButton_B) );
+							PostInputEvent( inputDeviceNum, J_RT_B, (inputState.Buttons & ovrButton_B) );
 						}
 
 						if ( (inputState.Buttons & ovrButton_Home) != (oldInputState.Buttons & ovrButton_Home) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION26, (inputState.Buttons & ovrButton_Home) );
+							PostInputEvent( inputDeviceNum, J_RT_OCULUS, (inputState.Buttons & ovrButton_Home) );
 						}
 
 						if ( (inputState.Buttons & ovrButton_RThumb) != (oldInputState.Buttons & ovrButton_RThumb) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION27, (inputState.Buttons & ovrButton_RThumb) );
+							PostInputEvent( inputDeviceNum, J_RT_STICK, (inputState.Buttons & ovrButton_RThumb) );
 						}
 
 						if ( (inputState.Touches & ovrTouch_RThumbRest) != (oldInputState.Touches & ovrTouch_RThumbRest) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION28, (inputState.Touches & ovrTouch_RThumbRest) );
+							PostInputEvent( inputDeviceNum, J_RT_REST, (inputState.Touches & ovrTouch_RThumbRest) );
 						}
 
 						// left touch
 						if ( (inputState.Buttons & ovrButton_X) != (oldInputState.Buttons & ovrButton_X) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION17, (inputState.Buttons & ovrButton_X) );
+							PostInputEvent( inputDeviceNum, J_LT_X, (inputState.Buttons & ovrButton_X) );
 						}
 
 						if ( (inputState.Buttons & ovrButton_Y) != (oldInputState.Buttons & ovrButton_Y) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION18, (inputState.Buttons & ovrButton_Y) );
+							PostInputEvent( inputDeviceNum, J_LT_Y, (inputState.Buttons & ovrButton_Y) );
 						}
 
 						if ( (inputState.Buttons & ovrButton_Enter) != (oldInputState.Buttons & ovrButton_Enter) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION19, (inputState.Buttons & ovrButton_Enter) );
+							PostInputEvent( inputDeviceNum, J_LT_MENU, (inputState.Buttons & ovrButton_Enter) );
 						}
 
 						if ( (inputState.Buttons & ovrButton_LThumb) != (oldInputState.Buttons & ovrButton_LThumb) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION20, (inputState.Buttons & ovrButton_LThumb) );
+							PostInputEvent( inputDeviceNum, J_LT_STICK, (inputState.Buttons & ovrButton_LThumb) );
 						}
 
 						if ( (inputState.Touches & ovrTouch_LThumbRest) != (oldInputState.Touches & ovrTouch_LThumbRest) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION21, (inputState.Touches & ovrTouch_LThumbRest) );
+							PostInputEvent( inputDeviceNum, J_LT_REST, (inputState.Touches & ovrTouch_LThumbRest) );
 						}
 
 						if ( (inputState.HandTrigger[ovrHand_Left] > 0.25f) != (oldInputState.HandTrigger[ovrHand_Left] > 0.25f) )
 						{
-							PostInputEvent(inputDeviceNum, J_ACTION22, inputState.HandTrigger[ovrHand_Left] > 0.25f);
+							PostInputEvent(inputDeviceNum, J_LT_GRIP, inputState.HandTrigger[ovrHand_Left] > 0.25f);
 						}
 
 						if ( (inputState.IndexTrigger[ovrHand_Left] > 0.25f) != (oldInputState.IndexTrigger[ovrHand_Left] > 0.25f) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION23, inputState.IndexTrigger[ovrHand_Left] > 0.25f );
+							PostInputEvent( inputDeviceNum, J_LT_TRIGGER, inputState.IndexTrigger[ovrHand_Left] > 0.25f );
 						}
 
 						if ( (inputState.HandTrigger[ovrHand_Right] > 0.25f) != (oldInputState.HandTrigger[ovrHand_Right] > 0.25f) )
 						{
-							PostInputEvent(inputDeviceNum, J_ACTION29, inputState.HandTrigger[ovrHand_Right] > 0.25f);
+							PostInputEvent(inputDeviceNum, J_RT_GRIP, inputState.HandTrigger[ovrHand_Right] > 0.25f);
 						}
 
 						if ( (inputState.IndexTrigger[ovrHand_Right] > 0.25f) != (oldInputState.IndexTrigger[ovrHand_Right] > 0.25f) )
 						{
-							PostInputEvent( inputDeviceNum, J_ACTION30, inputState.IndexTrigger[ovrHand_Right] > 0.25f );
+							PostInputEvent( inputDeviceNum, J_RT_TRIGGER, inputState.IndexTrigger[ovrHand_Right] > 0.25f );
 						}
 
 						PostInputEvent( inputDeviceNum, J_AXIS_LEFT_TOUCH_X, inputState.Thumbstick[ovrHand_Left].x * 32767.0f );
