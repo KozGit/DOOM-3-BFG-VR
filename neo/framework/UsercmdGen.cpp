@@ -2026,7 +2026,7 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 		if( Sys_ReturnJoystickInputEvent( i, action, value ) )
 		{
 			// left grip button
-			if( action == J_ACTION22 || action == J_ACTION33 )
+			if( action == J_LT_GRIP || action == J_LV_GRIP )
 			{
 				int joyButton = K_JOY1 + (action - J_ACTION1);
 				// vrLeftGrab = (value != 0);
@@ -2035,7 +2035,7 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 					Key( joyButton, ( value != 0 ) );
 			}
 			// right grip button
-			else if( action == J_ACTION29 || action == J_ACTION51 )
+			else if( action == J_RT_GRIP || action == J_RV_GRIP )
 			{
 				int joyButton = K_JOY1 + (action - J_ACTION1);
 				// vrRightGrab = (value != 0);
