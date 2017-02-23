@@ -124,6 +124,10 @@ static const character_map_t entityArray[] = {
 	{ FLICK_BETRUGER, "maledict_intro_cinematic_1" },
 	{ FLICK_POINT, "erebus1_cinematic_marine_gravitygun_end_1" },
 
+// Phobos 2
+	{ FLICK_MCNEIL, "phobos2_cinematic_mcneil_1" },
+
+// LE Enpro: intro
 	{ FLICK_MARINE_PDA, "enpro_soldier2_1" },
 	{ FLICK_POINT, "enpro_soldier1_1" },
 	{ FLICK_BRAVO_LEAD, "enpro_soldier3_1" },
@@ -422,7 +426,29 @@ static const spoken_line_t lineArray[] = {
 	//Voice erebus1_cinematic_marine_gravitygun_end_1: ggun_end_b:
 	{ "e1_dying_marine_grabber", "He tried to hit me with a fireball. But I grabbed it and threw it right back at him. You're not going to get far with that pistol. Take this grabber. It's more useful than you think." },
 
-	  //Voice enpro_soldier2_1: shot_a:
+	// Phobos 2
+	//Voice phobos2_cinematic_mcneil_1: mcn_b:
+	{ "p2_mcneil_speech_01", "God, it's good to see you." },
+	//Voice phobos2_cinematic_mcneil_1: mcn_c:
+	{ "p2_mcneil_speech_02a", "There's so much I need to explain, but we don't have much time. The artifact is a gateway from hell. Much like the one that Betroogger opened with the teleporters in the Delta Labs." },
+	//Voice phobos2_cinematic_mcneil_1: mcn_f:
+	{ "p2_mcneil_speech_04", "With the artifact though, as long as it resides in our dimension, there's always the danger of it being awakened, and then another invasion." },
+	//Voice phobos2_cinematic_mcneil_1: mcn_h:
+	{ "p2_mcneil_speech_05", "The ancients knew it. And now we know it." },
+	//Voice phobos2_cinematic_mcneil_1: mcn_h:
+	{ "p2_mcneil_speech_06", "It must be returned to the source of its evil in order to be destroyed. They couldn't do it, so they locked it away and fought to the death." },
+	//Voice2 phobos2_cinematic_mcneil_1: mcn_h:
+	//{ "p2_mcn_dataup", "" },
+	//Voice phobos2_cinematic_mcneil_1: mcn_i:
+	{ "p2_mcneil_speech_07", "You can use the delta teleporter to return the artifact to hell for good. I know this sounds crazy, but it's the only way." },
+	//Voice phobos2_cinematic_mcneil_1: mcn_j:
+	{ "p2_mcneil_meeting2", "The important thing right now is getting the Phobos teleporter online. There are four core systems that must be shut down before I can reroute the power to the teleporter." },
+	//Voice2 phobos2_cinematic_mcneil_1: mcn_j:
+	//{ "p2_mcn_screenup1", "" },
+	//Voice phobos2_cinematic_mcneil_1: mcn_k:
+	{ "p2_mcneil_meeting3", "Take this. You'll need it to get to the pumping station. Now go." },
+
+	 //Voice enpro_soldier2_1: shot_a:
 	{ "enpro_move_in", "Bravo team. Entry secure. Move in and take positions." },
 	  //Voice enpro_soldier2_1: shot_c:
 	{ "enpro_quiet", "Quiet. Did you hear that?" },
@@ -562,6 +588,8 @@ static const cutscene_camera_t cameraArray[] = {
 	{ CUTSCENE_GRABBER, "erebus1_cinematic_camera_15" },
 	// Erebus 2
 	{ CUTSCENE_VULGARINTRO, "erebus2_vulgarintro_cam_1" },
+	// Phobos 2
+	{ CUTSCENE_PHOBOS2, "phobos2_mcneil_camera_1" },
 
 };
 
@@ -1159,6 +1187,8 @@ idStr CutsceneToMapName( t_cutscene c )
 		return "game/erebus2";
 	else if (c <= CUTSCENE_CLOUD)
 		return "game/erebus5";
+	else if (c <= CUTSCENE_PHOBOS2)
+		return "game/phobos2";
 	else
 		return "game/le_enpro1";
 }
@@ -1269,6 +1299,9 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		break;
 	case CUTSCENE_GUARDIAN_DEATH:
 		relay = gameLocal.FindEntity("trigger_GuardianDeath");
+		break;
+	case CUTSCENE_PHOBOS2:
+		ent = gameLocal.FindEntity("trigger_once_45");
 		break;
 	}
 
@@ -1381,6 +1414,9 @@ t_cutscene Flicksync_GetNextCutscene()
 	case CUTSCENE_GRABBER:
 		//return CUTSCENE_VULGARINTRO; // not quite working
 	case CUTSCENE_VULGARINTRO:
+		return CUTSCENE_PHOBOS2;
+
+	case CUTSCENE_PHOBOS2:
 		if( c == FLICK_MARINE_PDA || c == FLICK_MARINE_TORCH || c == FLICK_POINT )
 			return CUTSCENE_BRAVO_TEAM;
 		else

@@ -126,6 +126,8 @@ typedef enum
 	CUTSCENE_CLOUD,
 	// Erebus 6
 	// Hell
+	// Phobos 2
+	CUTSCENE_PHOBOS2,
 
 
 	// Lost Missions: Enpro
