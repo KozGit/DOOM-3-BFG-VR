@@ -76,6 +76,18 @@ idSWF::idSWF( const char* filename_, idSoundWorld* soundWorld_ )
 	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCHM>", "guis/assets/hud/controller/touch_menu.tga", "", 38, 34, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<R_TOUCHA>", "guis/assets/hud/controller/touch_a.tga", "", 38, 34, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<R_TOUCHB>", "guis/assets/hud/controller/touch_b.tga", "", 38, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_STEAMVR_APP>", "guis/assets/hud/controller/lvive_menu.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_STEAMVR_APP>", "guis/assets/hud/controller/rvive_menu.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_STEAMVR_PAD>", "guis/assets/hud/controller/lvive_pad.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_STEAMVR_U>", "guis/assets/hud/controller/lvive_up.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_STEAMVR_D>", "guis/assets/hud/controller/lvive_down.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_STEAMVR_L>", "guis/assets/hud/controller/lvive_left.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_STEAMVR_R>", "guis/assets/hud/controller/lvive_right.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_STEAMVR_PAD>", "guis/assets/hud/controller/rvive_pad.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_STEAMVR_U>", "guis/assets/hud/controller/rvive_up.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_STEAMVR_D>", "guis/assets/hud/controller/rvive_down.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_STEAMVR_L>", "guis/assets/hud/controller/rvive_left.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_STEAMVR_R>", "guis/assets/hud/controller/rvive_right.tga", "", 52, 34, 0 ) );
 	
 	for( int index = 0; index < tooltipButtonImage.Num(); index++ )
 	{
