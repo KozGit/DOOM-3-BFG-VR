@@ -429,6 +429,123 @@ Y = use
 View / Back = PDA.
 ≡ / Start = menu.
 
+Motion sickness (and safety) options
+------------------------------------
+
+The best way to avoid motion sickness is to play standing up, walking and
+crouching in real life, and using teleportation for all artificial movement.
+You can play like that even if using a gamepad.
+Don't touch the analog stick unless you absolutely have to.
+No artificial movement means no motion sickness.
+
+There are some places where you have to use artificial movement though, such as
+climbing ladders, jumping across gaps, and some glitchy areas.
+So there are some menu options you can use to help.
+
+Go to Settings > VR Options > Comfort + Safety Protocols
+
+The first option is Teleport.
+By default, teleport is set to "Right Hand", which I recommend.
+You can also set it to "Left Hand" if you prefer. But it automatically switches
+when you swap weapon hands, so you don't normally need to set it manually.
+If you prefer look-based aiming, you can set it to "Head". If you don't use
+motion controllers, it will always use "Head" mode no matter what you choose.
+You can disable teleporting completely, but I don't recommend it.
+
+If you don't like the parabolic aiming or holding down the button, you can also
+try the "Gun Sight" option. The gun's laser dot will change to a circle when
+you aim at the floor if it's a valid destination, or a cross if it's not. Then
+you just tap the teleport button to teleport there. This mode hurts your frame
+rate though, and may be buggy. You must also set the laser sight to dot mode.
+
+Next is Turning.
+If you don't want to feel sick, always turn in real life instead of using the
+controllers. But sometimes that's impossible due to bad 360 degree tracking,
+or not wanting to stand up after being on your feet all day.
+
+Turning can be set to "Real Life" to enforce real life turning for gamers with
+bad habits.
+You can choose "Analog" for the traditional kind of stick turning in FPS games,
+but I don't recommend it. It will make you feel sick.
+Or you can choose to "Snap Turn" a fixed number of degrees each time you push
+the stick. This is also known as "Comfort Mode". The default is 45 degrees,
+which I recommend. But you can choose 10, 30, 45, 90, or 180.
+Changing the turning menu option will remap your control bindings for whatever
+controls you assigned to turning.
+If you want to use a combination of both kinds of turning, you can adjust the
+control bindings yourself in Settings > Controls > Key Bindings.
+
+Next, the "Walk Speed Adjust" setting is used to slow down your normal walking
+speed. The faster you move, the sicker you'll feel. The number is how much is
+subtracted from the normal movement speed (140). The default is -20. More
+negative means slower. It only affects walking - you can still run with the run
+button (left trigger by default).
+There's an alternative to "Walk Speed Adjust" in the next option, which slows
+time instead. If you use that, you can set Walk Speed Adjust to 0.
+
+"Motion Sickness Aid" is the most important setting to experiment with.
+It applies an effect whenever you're moving artificially, either using the
+joystick, jumping, crouching, or because you were pushed by something in the
+game, or you fell off a ledge, or you tried to walk in real life through a
+solid virtual object.
+Some effects can work in combination with other effects.
+
+The only 100% effect mode, is "Black Screen". It completely blacks out your
+whole view while moving artificially, so there's no vection and no motion
+sickness. It will strobe a brief frame a couple of times per second (but
+you can adjust that with the console variable vr_strobeTime which is in ms).
+Obviously blacking out the screen makes it harder to navigate and see what
+you're doing, but you shouldn't be using artificial navigation much, only
+when it won't let you teleport. A bigger problem is that the game is already
+very black and full of strobing, so it gets disorienting and scary.
+
+The simplest mode is "Chaperone". It just turns on the chaperone (aka guardian)
+grid whenever you are moving artificially. Any grid that's solidly locked to
+the real world is supposed to help with motion sickness. But the other methods
+are probably more effective. Chaperone can be combined with other effects
+(including "Black Screen" if you don't like the empty void) for stronger
+results. Chaperone is one of the two combined default effects.
+
+A good mode to use is "Reduce FOV", aka "Tunnel vision". When moving, it blocks
+out your peripheral vision when moving, which is where most of the motion
+sickness comes from. It can be combined with other effects. The default setting
+is "Reduce FOV + Chaperone", and it is recommended.
+
+Another good mode is "Slow Mo". It slows time while you are moving, to make it
+feel like you are moving slower, but without harming your ability to dodge
+and escape from monsters. The faster you move, the more time is slowed. The
+downside of this mode is that all the sound and voices are slowed down and made
+deeper, which affects the atmosphere of the first level. Which is why it's not
+on by default. This effect can be combined with Chaperone and/or Reduce FOV.
+
+But if you find those modes annoying and you don't get motion sick, you can
+choose "None".
+
+Next is the "Chaperone" setting. It's about safety rather than motion sickness
+(although it may help with motion sickness). It lets you turn the chaperone
+(guardian) grid on all the time, or only when you're throwing grenades, or when
+you're swinging around virtual Melee weapons. You can't disable the chaperone
+grid, but you can set it to "Near" for normal chaperone behaviour. I broke my
+TV throwing things in Budget Cuts, so I recommend forcing the chaperone on when
+throwing, at least. The options from most reckless to most safe are: "Near",
+"Throw", "Melee", or "Always". The default is "Melee", which means it will be
+on whenever you're using grenades, grabber, chainsaw, or fists.
+
+"Knockback" and "Headkick" are Doom 3's effects that push your view. They don't
+work well in VR, and make you sick, so I recommend disabling them. They are
+disabled by default. But you can enable one or both if you want.
+
+Next, "Step Smooth" makes climbing stairs smooth instead of jarring. Smooth
+motion increases motion sickness, but in this case the stairs are too bad
+without it. It's enabled by default, but you can turn it off if you prefer.
+
+"Jump Bounce" is when your view bounces when landing after jumping. It causes
+motion sickness, so it's disabled by default.
+
+"Shake Amplitude" is how much to shake your view when there's a loud rumble.
+It's set to 0 by default, which I recommend, because it causes motion sickness
+in VR.
+
 ___________________________________________________
 
 5) CHANGES
