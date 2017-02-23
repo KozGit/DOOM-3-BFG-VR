@@ -352,6 +352,9 @@ public:
 	idVec3				poseLastHmdBodyPositionDelta;
 	idVec3				poseLastHmdAbsolutePosition;
 	float				lastBodyYawOffset;
+
+	idStr				currentBindingDisplay;
+
 	
 	// clip stuff
 	idClipModel*		bodyClip;

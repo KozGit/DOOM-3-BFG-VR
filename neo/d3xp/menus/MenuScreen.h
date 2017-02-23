@@ -833,6 +833,7 @@ public:
 	{
 		bindingsChanged = changed;
 	}
+	void						UpdateBindingString();
 	
 protected:
 	void						HandleRestoreDefaults();

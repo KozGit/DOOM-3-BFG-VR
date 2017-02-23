@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #include "../Game_local.h"
 
+extern idCVar in_useJoystick;
+
 typedef struct
 {
 	const char* display;
@@ -178,7 +180,7 @@ idMenuScreen_Shell_Bindings::Update
 */
 void idMenuScreen_Shell_Bindings::Update()
 {
-
+		
 	if( menuData != NULL )
 	{
 		idMenuWidget_CommandBar* cmdBar = menuData->GetCmdBar();
@@ -221,6 +223,7 @@ void idMenuScreen_Shell_Bindings::Update()
 	}
 	
 	idMenuScreen::Update();
+	
 }
 
 /*
@@ -254,8 +257,135 @@ void idMenuScreen_Shell_Bindings::ShowScreen( const mainMenuTransition_t transit
 	
 	ToggleWait( false );
 	UpdateBindingDisplay();
-	
 	idMenuScreen::ShowScreen( transitionType );
+}
+/*
+========================
+idMenuScreen_Shell_Bindings::UpdateBindingString
+========================
+*/
+void idMenuScreen_Shell_Bindings::UpdateBindingString()
+{
+	//koz begin;
+	int curIndex = options->GetViewIndex();
+	if ( idStr::Icmp( keyboardBinds[curIndex].bind, "" ) == 0 )
+	{
+		commonVr->currentBindingDisplay = "";
+	}
+	else
+	{
+		{
+			keyBindings_t bind = idKeyInput::KeyBindingsFromBinding( keyboardBinds[curIndex].bind, false, true );
+
+			idStr bindings;
+
+			if ( !bind.gamepad.IsEmpty() && (in_useJoystick.GetBool() || commonVr->hasHMD) )
+			{
+				idStrList joyBinds;
+				int start = 0;
+				while ( start < bind.gamepad.Length() )
+				{
+					int end = bind.gamepad.Find( ", ", true, start );
+					if ( end < 0 )
+					{
+						end = bind.gamepad.Length();
+					}
+					joyBinds.Alloc().CopyRange( bind.gamepad, start, end );
+					start = end + 2;
+				}
+				const char* buttonsWithImages[] =
+				{
+					"JOY1", "JOY2", "JOY3", "JOY4", "JOY5", "JOY6",
+					"JOY_TRIGGER1", "JOY_TRIGGER2", 0
+				};
+
+				//koz begin
+				//limited space in the menus, so dont list controllers we are not using,
+				//and list motion controllers 1st.
+
+				if ( commonVr->VR_USE_MOTION_CONTROLS )
+				{
+					for ( int i = 0; i < joyBinds.Num(); i++ )
+					{
+						// only list bindings for motion controllers we are using due to limited space.
+						if ( (commonVr->motionControlType == MOTION_OCULUS && (joyBinds[i].Icmpn( "L_TOUCH", 7 ) == 0 || joyBinds[i].Icmpn( "R_TOUCH", 7 ) == 0)) ||
+							(commonVr->motionControlType == MOTION_STEAMVR && (joyBinds[i].Icmpn( "L_STEAMVR", 9 ) == 0 || joyBinds[i].Icmpn( "R_STEAMVR", 9 ) == 0)) )
+						{
+							if ( !bindings.IsEmpty() )
+							{
+								bindings.Append( ", " );
+							}
+							bindings.Append( joyBinds[i] );
+						}
+					}
+				}
+
+				for ( int i = 0; i < joyBinds.Num(); i++ )
+				{
+					// motion controls already added, so don't add them here.
+					// dont list the SAY_ commands, they can be changed via the dict file.
+
+					if ( joyBinds[i].Icmpn( "L_TOUCH", 7 ) == 0 ||
+						joyBinds[i].Icmpn( "R_TOUCH", 7 ) == 0 ||
+						joyBinds[i].Icmpn( "L_STEAMVR", 9 ) == 0 ||
+						joyBinds[i].Icmpn( "R_STEAMVR", 9 ) == 0 ||
+						joyBinds[i].Icmpn( "SAY_", 4 ) == 0 )
+					{
+						continue;
+					}
+
+					// Koz end
+					bool hasImage = false;
+					for ( const char** b = buttonsWithImages; *b != 0; b++ )
+					{
+						if ( joyBinds[i].Icmp( *b ) == 0 )
+						{
+							hasImage = true;
+							break;
+						}
+					}
+					if ( !bindings.IsEmpty() )
+					{
+						bindings.Append( ", " );
+					}
+					if ( hasImage )
+					{
+						bindings.Append( '<' );
+						bindings.Append( joyBinds[i] );
+						bindings.Append( '>' );
+					}
+					else
+					{
+						bindings.Append( joyBinds[i] );
+					}
+				}
+				bindings.Replace( "JOY_DPAD", "DPAD" );
+			}
+
+			if ( !bind.keyboard.IsEmpty() )
+			{
+				if ( !bindings.IsEmpty() )
+				{
+					bindings.Append( ", " );
+				}
+				bindings.Append( bind.keyboard );
+			}
+
+			if ( !bind.mouse.IsEmpty() )
+			{
+				if ( !bindings.IsEmpty() )
+				{
+					bindings.Append( ", " );
+				}
+				bindings.Append( bind.mouse );
+			}
+
+			bindings.ToUpper();
+			commonVr->currentBindingDisplay = bindings;
+		
+		}
+	}
+	
 }
 
 /*
@@ -275,7 +405,6 @@ void idMenuScreen_Shell_Bindings::HideScreen( const mainMenuTransition_t transit
 	idMenuScreen::HideScreen( transitionType );
 }
 
-extern idCVar in_useJoystick;
 
 /*
 ========================
@@ -284,7 +413,7 @@ idMenuScreen_Shell_Bindings::UpdateBindingDisplay
 */
 void idMenuScreen_Shell_Bindings::UpdateBindingDisplay()
 {
-
+	UpdateBindingString();//koz
 	idList< idList< idStr, TAG_IDLIB_LIST_MENU >, TAG_IDLIB_LIST_MENU > bindList;
 	
 	for( int i = 0; i < numBinds; ++i )
@@ -318,16 +447,43 @@ void idMenuScreen_Shell_Bindings::UpdateBindingDisplay()
 					"JOY1", "JOY2", "JOY3", "JOY4", "JOY5", "JOY6",
 					"JOY_TRIGGER1", "JOY_TRIGGER2", 0
 				};
+				
+				//koz begin
+				//limited space in the menus, so dont list controllers we are not using,
+				//and list motion controllers 1st.
+				
+				if ( commonVr->VR_USE_MOTION_CONTROLS )
+				{
+					for ( int i = 0; i < joyBinds.Num(); i++ )
+					{
+						// only list bindings for motion controllers we are using due to limited space.
+						if ( (commonVr->motionControlType == MOTION_OCULUS && (joyBinds[i].Icmpn( "L_TOUCH", 7 ) == 0 || joyBinds[i].Icmpn( "R_TOUCH", 7 ) == 0)) ||
+							(commonVr->motionControlType == MOTION_STEAMVR && (joyBinds[i].Icmpn( "L_STEAMVR", 9 ) == 0 || joyBinds[i].Icmpn( "R_STEAMVR", 9 ) == 0)) )
+						{
+							if ( !bindings.IsEmpty() )
+							{
+								bindings.Append( ", " );
+							}
+							bindings.Append( joyBinds[i] );
+						}
+					}
+				}
+										
 				for( int i = 0; i < joyBinds.Num(); i++ )
 				{
-					// Koz  - removing the following check to allow joystick rebinding.
-					/*
-					if ( joyBinds[i].Icmpn( "JOY_STICK", 9 ) == 0 )
+					// motion controls already added, so don't add them here.
+					// dont list the SAY_ commands, they can be changed via the dict file.
+
+					if (	joyBinds[i].Icmpn( "L_TOUCH", 7 ) == 0 ||
+							joyBinds[i].Icmpn( "R_TOUCH", 7 ) == 0 || 
+							joyBinds[i].Icmpn( "L_STEAMVR", 9 ) == 0 ||
+							joyBinds[i].Icmpn( "R_STEAMVR", 9 ) == 0 ||
+							joyBinds[i].Icmpn( "SAY_", 4 ) == 0 )
 					{
-						continue; // Can't rebind the sticks, so don't even show them
+						continue; 
 					}
-					*/
-					// Koz end
+					
+				// Koz end
 					bool hasImage = false;
 					for( const char** b = buttonsWithImages; *b != 0; b++ )
 					{
@@ -468,7 +624,6 @@ void idMenuScreen_Shell_Bindings::SetBinding( int keyNum )
 	UpdateBindingDisplay();
 	ToggleWait( false );
 	Update();
-	
 }
 
 /*
@@ -547,6 +702,7 @@ bool idMenuScreen_Shell_Bindings::HandleAction( idWidgetAction& action, const id
 		case WIDGET_ACTION_GO_BACK:
 		{
 			menuData->SetNextScreen( SHELL_AREA_CONTROLS, MENU_TRANSITION_SIMPLE );
+			commonVr->currentBindingDisplay = ""; //koz
 			return true;
 		}
 		case WIDGET_ACTION_JOY3_ON_PRESS:
@@ -574,7 +730,7 @@ bool idMenuScreen_Shell_Bindings::HandleAction( idWidgetAction& action, const id
 			
 			if( options->GetViewIndex() != listIndex )
 			{
-			
+				
 				if( idStr::Icmp( keyboardBinds[ listIndex ].bind, "" ) == 0 )
 				{
 					return true;
@@ -635,10 +791,11 @@ bool idMenuScreen_Shell_Bindings::HandleAction( idWidgetAction& action, const id
 						}
 					}
 				}
-				
+		
 				options->Scroll( scroll, true );
+				UpdateBindingString();
 			}
-			
+
 			return true;
 		}
 	}

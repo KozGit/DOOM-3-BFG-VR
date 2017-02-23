@@ -106,6 +106,7 @@ private:
 	
 	// koz 
 	float				DrawVRWip( float y );
+	void				DrawVRBinding();
 	// koz end
 	void				DrawFlicksync( float& leftY, float& centerY );
 
@@ -461,6 +462,36 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 			y += SMALLCHAR_HEIGHT + 4;
 		}
 	}
+}
+
+/*
+==================
+koz begin
+idConsoleLocal::DrawVRBinding
+==================
+*/
+void idConsoleLocal::DrawVRBinding()
+{
+	
+	int y = LOCALSAFE_BOTTOM - (BIGCHAR_HEIGHT + 6) * 2 ;
+	int left = LOCALSAFE_LEFT + BIGCHAR_WIDTH * 6;
+	int maxChar = (LOCALSAFE_RIGHT - left) / SMALLCHAR_WIDTH;
+	idStr temp;
+	if ( commonVr->currentBindingDisplay.Icmp( "" ) != 0 )
+	{
+		renderSystem->DrawSmallStringExt( left, y, "Current Bindings:", colorWhite, true );
+		y += SMALLCHAR_HEIGHT + 4;
+		temp = commonVr->currentBindingDisplay.Left( maxChar );
+		renderSystem->DrawSmallStringExt(left, y, temp.c_str(), colorWhite, true );
+		if ( commonVr->currentBindingDisplay.Length() > maxChar )
+		{
+			y += SMALLCHAR_HEIGHT + 4;
+			temp = commonVr->currentBindingDisplay.Mid( maxChar, maxChar );
+			renderSystem->DrawSmallStringExt( left, y, temp.c_str(), colorWhite, true );
+		}
+	}
+	return;
+
 }
 
 /*
@@ -1588,6 +1619,7 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 		righty = DrawMemoryUsage( righty );
 	}
 	// koz
+	DrawVRBinding();
 	if ( vr_showWIP.GetBool() )
 	{
 		righty = DrawVRWip( righty );

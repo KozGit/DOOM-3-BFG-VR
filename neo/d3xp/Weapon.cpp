@@ -1558,8 +1558,8 @@ idWeapon::UpdateVRGUI
 void idWeapon::UpdateVRGUI()
 {
 
-	int healthv = 0.0f;
-	int armorv = 0.0f;
+	float healthv = 0.0f;
+	float armorv = 0.0f;
 	float armorb = 0.0f;
 	float healthb = 0.0f;
 
@@ -1629,25 +1629,29 @@ void idWeapon::UpdateVRGUI()
 	player = gameLocal.GetLocalPlayer();
 	if ( player )
 	{
-		healthv = player->health;
+		healthv = (float)player->health;
 		if ( player->inventory.armor )
 		{
-			armorv = player->inventory.armor;
+			armorv = (float)player->inventory.armor;
 		}
 
 		//healthv = vr_guiH.GetInteger();
 		//armorv = vr_guiA.GetInteger();
 				
-		healthv = idMath::ClampInt( 0, 100, healthv );
-		armorv = idMath::ClampInt( 0, 100, armorv );
+		healthv = idMath::ClampFloat( 0.0, 100.0, healthv );
+		armorv = idMath::ClampFloat( 0.0, 100.0, armorv );
 		
-		if ( healthv >= 75 ) healthb = ( healthv / 100.0f ) ;
-		if ( armorv >= 75 ) armorb = ( armorv / 100.0f ) ;
+		if ( healthv >= 75.0 ) healthb = ( healthv / 100.0f ) ;
+		if ( armorv >= 75.0 ) armorb = ( armorv / 100.0f ) ;
+
+		healthb = idMath::ClampFloat( 0.0, 100.0, healthb );
+		armorb = idMath::ClampFloat( 0.0, 100.0, armorb );
 		
 	}
 	
-	vrStatGui->SetStateString( "player_health", va( "%i", healthv ) );
-	vrStatGui->SetStateString( "player_armor", va( "%i%%", armorv ) );
+	vrStatGui->SetStateString( "player_health", va( "%f", healthv ) );
+	//vrStatGui->SetStateString( "player_armor", va( "%i%%", armorv ) );
+	vrStatGui->SetStateString( "player_armor", va( "%f", armorv ) );
 	vrStatGui->SetStateString( "player_healthb", va( "%f", healthb ) );
 	vrStatGui->SetStateString( "player_armorb", va( "%f", armorb ) );
 	

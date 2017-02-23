@@ -404,6 +404,9 @@ iVr::iVr()
 
 	currentFlashMode = vr_flashlightMode.GetInteger();
 	renderingSplash = true;
+
+	currentBindingDisplay = "";
+
 	
 }
 
