@@ -1172,7 +1172,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 				J_XBOX_START, J_XBOX_BACK,		// Start, Back
 				J_XBOX_LSTICK, J_XBOX_RSTICK,		// Left Stick Down, Right Stick Down
 				J_XBOX_LSHOULDER, J_XBOX_RSHOULDER,		// Black, White (Left Shoulder, Right Shoulder)
-				0, 0,				// Unused
+				J_ACTION11, J_ACTION12,				// Unused
 				J_XBOX_A, J_XBOX_B,		// A, B
 				J_XBOX_X, J_XBOX_Y,		// X, Y
 			};
