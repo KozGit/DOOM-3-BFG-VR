@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 #include "precompiled.h"
 
+#include "DXT/DXTCodec.h"
 #include "tr_local.h"
 
 /*
@@ -710,6 +711,8 @@ void idImage::ActuallySaveImage() {
 				memset( clear.Ptr(), 0, clear.Size() );
 				for ( int level = 0; level < opts.numLevels; level++ ) {
 					SubImageUpload( level, 0, 0, 0, opts.width >> level, opts.height >> level, clear.Ptr() );
+					if (level == 0)
+						R_WriteTGA(GetName(), clear.Ptr(), opts.width >> level, opts.height >> level, false);
 				}
 
 				return;
@@ -732,7 +735,21 @@ void idImage::ActuallySaveImage() {
 	for ( int i = 0; i < im.NumImages(); i++ ) {
 		const bimageImage_t & img = im.GetImageHeader( i );
 		const byte * data = im.GetImageData( i );
-		SubImageUpload( img.level, 0, 0, img.destZ, img.width, img.height, data );
+		if( opts.format == FMT_DXT5 && i == 0 )
+		{
+			idDxtDecoder d;
+			idTempArray<byte> outBuf(img.width * img.height * 4 * 2);
+			memset(outBuf.Ptr(), 0, outBuf.Size());
+			d.DecompressImageDXT5(data, outBuf.Ptr(), img.width, img.height);
+			R_WriteTGA(va("%s.tga", GetName()), outBuf.Ptr(), img.width, img.height, false);
+			//R_WritePNG(va("%s.png", GetName()), outBuf.Ptr(), img.width, img.height, false);
+		}
+		else if( i == 0 )
+		{
+			R_WriteTGA(va("%s.tga", GetName()), data, img.width, img.height, false);
+			//R_WritePNG(va("%s.png", GetName()), data, img.width, img.height, false);
+		}
+		SubImageUpload(img.level, 0, 0, img.destZ, img.width, img.height, data);
 	}
 }
 /*
