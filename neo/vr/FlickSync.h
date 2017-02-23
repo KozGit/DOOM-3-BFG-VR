@@ -93,6 +93,11 @@ typedef enum
 	// Alpha Labs 4
 	CUTSCENE_VAGARY,
 
+	// Recycling 1
+	CUTSCENE_REVINTRO,
+	// Recycling 2
+	CUTSCENE_MANCINTRO,
+
 	// Monorail
 	CUTSCENE_MONORAIL_RAISE_COMMANDO,
 	CUTSCENE_MONORAIL_CRASH,

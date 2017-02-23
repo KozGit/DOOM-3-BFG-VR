@@ -559,22 +559,27 @@ static const cutscene_camera_t cameraArray[] = {
 	{ CUTSCENE_VAGARY, "alphalabs3_vagaryintro_cam_1" },
 	// Enpro TODO (lots of enpro cameras)
 	//{ CUTSCENE_ENPRO, "" },
-	// CPU 1
-	{ CUTSCENE_CAMPHUNT, "cpu1_camphunt_cam_1" },
-	// CPU Boss
-	{ CUTSCENE_CPU_BOSS, "cin_cpu_boss_cam_1" },
+	// Recycling 1
+	{ CUTSCENE_REVINTRO, "recycling1_revintro_cam_1" },
+	// Recycling 2
+	{ CUTSCENE_MANCINTRO, "recycling2_mancintro_cam_1" },
+
+	// Monorail
+	{ CUTSCENE_MONORAIL_RAISE_COMMANDO, "monorail_raisecommando_cam_1" },
+	{ CUTSCENE_MONORAIL_CRASH, "monorail_crash_cam_1" },
 	// Delta 2a
 	{ CUTSCENE_DELTA_SCIENTIST, "delta2a_scientist_cam_1" },
 	{ CUTSCENE_DELTA_TELEPORTER, "delta2a_teleporter_cam_2" },
 	// Delta 4
 	{ CUTSCENE_DELTA_HKINTRO, "delta4_hkintro_cam_1" },
-	// Monorail
-	{ CUTSCENE_MONORAIL_RAISE_COMMANDO, "monorail_raisecommando_cam_1" },
-	{ CUTSCENE_MONORAIL_CRASH, "monorail_crash_cam_1" },
-
 	// Hell 1
 	{ CUTSCENE_GUARDIAN_INTRO, "hell1_guardianintro_cam_1" },
 	{ CUTSCENE_GUARDIAN_DEATH, "hell1_guardiandeath_cam_1" },
+	// CPU 1
+	{ CUTSCENE_CAMPHUNT, "cpu1_camphunt_cam_1" },
+	// CPU Boss
+	{ CUTSCENE_CPU_BOSS, "cin_cpu_boss_cam_1" },
+
 	// Hellhole
 
 	// le_enpro1
@@ -1169,6 +1174,10 @@ idStr CutsceneToMapName( t_cutscene c )
 		return "game/alphalabs1";
 	else if (c <= CUTSCENE_VAGARY)
 		return "game/alphalabs4";
+	else if (c <= CUTSCENE_REVINTRO)
+		return "game/recycling1";
+	else if (c <= CUTSCENE_MANCINTRO)
+		return "game/recycling2";
 	else if (c <= CUTSCENE_MONORAIL_CRASH)
 		return "game/monorail";
 	else if (c <= CUTSCENE_DELTA_TELEPORTER)
@@ -1263,6 +1272,13 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 	case CUTSCENE_VAGARY:
 		ent = gameLocal.FindEntity("func_door_438"); // triggered by a door? how to handle it?
 		break;
+	case CUTSCENE_REVINTRO:
+		ent = gameLocal.FindEntity("trigger_once_62");
+		break;
+	case CUTSCENE_MANCINTRO:
+		ent = gameLocal.FindEntity("trigger_once_30");
+		break;
+
 
 	case CUTSCENE_MONORAIL_RAISE_COMMANDO:
 		//ent = gameLocal.FindEntity("trigger_once_44"); // plays at start of level
@@ -1331,6 +1347,7 @@ t_cutscene Flicksync_GetNextCutscene()
 		return CUTSCENE_DARKSTAR;
 	case CUTSCENE_DARKSTAR:
 	case ACTING_BIOSCAN:
+		//return CUTSCENE_PINKY; // Carl: Debug hack
 		if( c == FLICK_TOWER || c == FLICK_BETRUGER || c == FLICK_SWANN || c == FLICK_CAMPBELL )
 			return CUTSCENE_MEETING;
 		//else if( c == FLICK_SARGE )
@@ -1372,15 +1389,18 @@ t_cutscene Flicksync_GetNextCutscene()
 		return CUTSCENE_ADMIN;
 
 	case CUTSCENE_ADMIN:
-		//return CUTSCENE_PINKY; // not working yet
+		return CUTSCENE_PINKY; // not working yet
 	case CUTSCENE_PINKY:
 	case ACTING_OVERHEAR:
 		return CUTSCENE_ALPHALABS1;
 
 	case CUTSCENE_ALPHALABS1:
 		return CUTSCENE_VAGARY;
-
 	case CUTSCENE_VAGARY:
+		return CUTSCENE_REVINTRO;
+	case CUTSCENE_REVINTRO:
+		return CUTSCENE_MANCINTRO;
+	case CUTSCENE_MANCINTRO:
 		return CUTSCENE_MONORAIL_RAISE_COMMANDO;
 
 	case CUTSCENE_MONORAIL_RAISE_COMMANDO:
