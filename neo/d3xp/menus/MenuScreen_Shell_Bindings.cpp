@@ -315,7 +315,8 @@ void idMenuScreen_Shell_Bindings::UpdateBindingDisplay()
 				}
 				const char* buttonsWithImages[] =
 				{
-					"JOY1", "JOY2", "JOY3", "JOY4", "JOY5", "JOY6",
+					"JOY1", "JOY2", "JOY3", "JOY4", "JOY5", "JOY6", "JOY9", "JOY10",
+					"R_TOUCHA", "R_TOUCHB", "L_TOUCHX", "L_TOUCHY", "L_TOUCHM",
 					"JOY_TRIGGER1", "JOY_TRIGGER2", 0
 				};
 				for( int i = 0; i < joyBinds.Num(); i++ )

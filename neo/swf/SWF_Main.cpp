@@ -62,6 +62,8 @@ idSWF::idSWF( const char* filename_, idSoundWorld* soundWorld_ )
 	tooltipButtonImage.Append( keyButtonImages_t( "<JOY2>", "guis/assets/hud/controller/xb360/b", "guis/assets/hud/controller/ps3/circle", 37, 37, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<JOY3>", "guis/assets/hud/controller/xb360/x", "guis/assets/hud/controller/ps3/square", 37, 37, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<JOY4>", "guis/assets/hud/controller/xb360/y", "guis/assets/hud/controller/ps3/triangle", 37, 37, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY9>", "guis/assets/hud/controller/xb360/menu.tga", "", 37, 37, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY10>", "guis/assets/hud/controller/xb360/view.tga", "", 37, 37, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<JOY_TRIGGER2>", "guis/assets/hud/controller/xb360/rt", "guis/assets/hud/controller/ps3/r2", 64, 52, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<JOY_TRIGGER1>", "guis/assets/hud/controller/xb360/lt", "guis/assets/hud/controller/ps3/l2", 64, 52, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<JOY5>", "guis/assets/hud/controller/xb360/lb", "guis/assets/hud/controller/ps3/l1", 52, 32, 0 ) );
@@ -69,6 +71,11 @@ idSWF::idSWF( const char* filename_, idSoundWorld* soundWorld_ )
 	tooltipButtonImage.Append( keyButtonImages_t( "<MOUSE1>", "guis/assets/hud/controller/mouse1", "", 64, 52, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<MOUSE2>", "guis/assets/hud/controller/mouse2", "", 64, 52, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<MOUSE3>", "guis/assets/hud/controller/mouse3", "", 64, 52, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCHX>", "guis/assets/hud/controller/touch_x.tga", "", 38, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCHY>", "guis/assets/hud/controller/touch_y.tga", "", 38, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCHM>", "guis/assets/hud/controller/touch_menu.tga", "", 38, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_TOUCHA>", "guis/assets/hud/controller/touch_a.tga", "", 38, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_TOUCHB>", "guis/assets/hud/controller/touch_b.tga", "", 38, 34, 0 ) );
 	
 	for( int index = 0; index < tooltipButtonImage.Num(); index++ )
 	{
