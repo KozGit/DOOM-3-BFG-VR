@@ -479,7 +479,7 @@ void idConsoleLocal::DrawVRBinding()
 	idStr temp;
 	if ( commonVr->currentBindingDisplay.Icmp( "" ) != 0 )
 	{
-		renderSystem->DrawSmallStringExt( left, y, "Current Bindings:", colorWhite, true );
+		renderSystem->DrawSmallStringExt( LOCALSAFE_LEFT + SMALLCHAR_WIDTH * 28 , y - 4 , "Current Bindings:", colorWhite, true );
 		y += SMALLCHAR_HEIGHT + 4;
 		temp = commonVr->currentBindingDisplay.Left( maxChar );
 		renderSystem->DrawSmallStringExt(left, y, temp.c_str(), colorWhite, true );

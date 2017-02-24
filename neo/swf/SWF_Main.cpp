@@ -88,6 +88,12 @@ idSWF::idSWF( const char* filename_, idSoundWorld* soundWorld_ )
 	tooltipButtonImage.Append( keyButtonImages_t( "<R_STEAMVR_D>", "guis/assets/hud/controller/rvive_down.tga", "", 52, 34, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<R_STEAMVR_L>", "guis/assets/hud/controller/rvive_left.tga", "", 52, 34, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<R_STEAMVR_R>", "guis/assets/hud/controller/rvive_right.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_STEAMVR_TRIG>", "guis/assets/hud/controller/rvive_trig.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_STEAMVR_TRIG>", "guis/assets/hud/controller/lvive_trig.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_STEAMVR_GRIP>", "guis/assets/hud/controller/rvive_grip.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_STEAMVR_GRIP>", "guis/assets/hud/controller/lvive_grip.tga", "", 52, 34, 0 ) );
+
+	
 	
 	for( int index = 0; index < tooltipButtonImage.Num(); index++ )
 	{

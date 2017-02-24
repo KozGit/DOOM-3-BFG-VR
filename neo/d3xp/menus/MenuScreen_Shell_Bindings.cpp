@@ -301,6 +301,8 @@ void idMenuScreen_Shell_Bindings::UpdateBindingString()
 					"L_STEAMVR_PAD", "R_STEAMVR_PAD",
 					"L_STEAMVR_U", "L_STEAMVR_D", "L_STEAMVR_L", "L_STEAMVR_R",
 					"R_STEAMVR_U", "R_STEAMVR_D", "R_STEAMVR_L", "R_STEAMVR_R",
+					"R_STEAMVR_TRIG", "L_STEAMVR_TRIG", 
+					"R_STEAMVR_GRIP", "L_STEAMVR_GRIP",
 					"JOY_TRIGGER1", "JOY_TRIGGER2", 0
 				};
 
@@ -455,6 +457,8 @@ void idMenuScreen_Shell_Bindings::UpdateBindingDisplay()
 					"L_STEAMVR_PAD", "R_STEAMVR_PAD",
 					"L_STEAMVR_U", "L_STEAMVR_D", "L_STEAMVR_L", "L_STEAMVR_R",
 					"R_STEAMVR_U", "R_STEAMVR_D", "R_STEAMVR_L", "R_STEAMVR_R",
+					"R_STEAMVR_TRIG", "L_STEAMVR_TRIG",
+					"R_STEAMVR_GRIP", "L_STEAMVR_GRIP",
 					"JOY_TRIGGER1", "JOY_TRIGGER2", 0
 				};
 				
