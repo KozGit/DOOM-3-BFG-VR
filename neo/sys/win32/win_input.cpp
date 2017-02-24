@@ -1316,6 +1316,9 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 						padX = currentStateL.rAxis[padAxis[0]].x;
 						padY = currentStateL.rAxis[padAxis[0]].y;
 
+						if ( fabs( padX ) < vr_padDeadzone.GetFloat() ) padX = 0.0f;
+						if ( fabs( padY ) < vr_padDeadzone.GetFloat() ) padY = 0.0f;
+
 						// using (testing) the trigger button instead of reading the analog axis, so comment this out for now
 						/*
 						if ( trig != triggerVal[0] )
@@ -1514,7 +1517,9 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 						padX = currentStateR.rAxis[padAxis[1]].x;
 						padY = currentStateR.rAxis[padAxis[1]].y;
 								
-					
+						if ( fabs( padX ) < vr_padDeadzone.GetFloat() ) padX = 0.0f;
+						if ( fabs( padY ) < vr_padDeadzone.GetFloat() ) padY = 0.0f;
+
 						// the vive controllers ( at least mine, in multiple games, even after calibration) sometimes miss when a finger has been removed from the touchpad, 
 						// and keep sending the exact same values until the pad is touched again.  This causes movement or rotation to get stuck on 
 						// until the controller is touched again, which is really bad, especially if its rotation.
