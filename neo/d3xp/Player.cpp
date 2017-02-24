@@ -9522,19 +9522,24 @@ void idPlayer::PerformImpulse( int impulse )
 
 		case IMPULSE_34: // comfort turn right
 		{
-			idAngles ang = viewAngles;
-			ang[YAW] -= vr_comfortDelta.GetFloat();
-			ang.Normalize180();
-			SetViewAngles( ang );
+			// koz fixme
+			// this performs comfort turns for key input,
+			// really need to move this to usercmdgen
+
+			static idAngles angles;
+			angles.Set( 0.0f, vr_comfortDelta.GetFloat(), 0.0f );
+			SetDeltaViewAngles( deltaViewAngles - angles );
 			break;
 		}
 		
 		case IMPULSE_35: // comfort turn left
 		{
-			idAngles ang = viewAngles;
-			ang[YAW] += vr_comfortDelta.GetFloat();
-			ang.Normalize180();
-			SetViewAngles( ang );
+			// koz fixme
+			// this performs comfort turns for key input,
+			// really need to move this to usercmdgen
+			static idAngles angles;
+			angles.Set( 0.0f, vr_comfortDelta.GetFloat(), 0.0f );
+			SetDeltaViewAngles( deltaViewAngles + angles );
 			break;
 		}
 		

@@ -1387,7 +1387,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_Y, -padY * 32767.0f );
 						}
 						
-						
+						//pad deadzone
 						if ( !defaultX ) padAxisX[0] = padX;
 						if ( !defaultY ) padAxisY[0] = padY;
 						
@@ -1517,6 +1517,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 						padX = currentStateR.rAxis[padAxis[1]].x;
 						padY = currentStateR.rAxis[padAxis[1]].y;
 								
+						//pad deadzone
 						if ( fabs( padX ) < vr_padDeadzone.GetFloat() ) padX = 0.0f;
 						if ( fabs( padY ) < vr_padDeadzone.GetFloat() ) padY = 0.0f;
 
