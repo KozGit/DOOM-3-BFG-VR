@@ -103,6 +103,14 @@ static const character_map_t entityArray[] = {
 	{ FLICK_SWANN, "admin_overhear_swann_1" },
 	{ FLICK_CAMPBELL, "admin_overhear_campbell_3" },
 
+	// enpro and le_enpro1: intro
+	{ FLICK_MARINE_PDA, "enpro_soldier2_1" },
+	{ FLICK_POINT, "enpro_soldier1_1" },
+	{ FLICK_BRAVO_LEAD, "enpro_soldier3_1" },
+	{ FLICK_MARINE_TORCH, "enpro_soldier4_1" },
+	{ FLICK_SWANN, "enpro_swann_2" },
+	{ FLICK_CAMPBELL, "enpro_campbell_2" },
+
 	// CPU
 	{ FLICK_CAMPBELL, "cpu1_camphunt_campbell_1" },
 	{ FLICK_CAMPBELL, "cpu1_wounded_campbell_1" },
@@ -132,12 +140,6 @@ static const character_map_t entityArray[] = {
 
 // Phobos 2
 	{ FLICK_MCNEIL, "phobos2_cinematic_mcneil_1" },
-
-// LE Enpro: intro
-	{ FLICK_MARINE_PDA, "enpro_soldier2_1" },
-	{ FLICK_POINT, "enpro_soldier1_1" },
-	{ FLICK_BRAVO_LEAD, "enpro_soldier3_1" },
-	{ FLICK_MARINE_TORCH, "enpro_soldier4_1" }
 	
 };
 
@@ -336,6 +338,16 @@ static const spoken_line_t lineArray[] = {
 	//{ "bfgcase_unlock", NULL },
 	//Voice admin_overhear_campbell_3: overhear3:
 	{ "admin_campbell_planb", "OK. Plan B." },
+
+	//Enpro Escape
+	//Voice enpro_swann_2: escape_a:
+	{ "enpro_do_u_see", "Do you see the card?" },
+	//Voice enpro_campbell_2: escape_b:
+	{ "enpro_no_sir", "No sir." },
+	//Voice enpro_swann_2: escape_b:
+	{ "enpro_ok_lets_get_to", "OK, let's get to the communications facility. We can stop the transmission from there." },
+	//Voice enpro_campbell_2: escape_b:
+	{ "enpro_yes_sir", "Whatever you say, councillor." }, // this is the same as an existing line!
 
 	//Voice monorail_raisecommando_betruger_1: raise:
 	{ "monorail_betruger_one", "torzu amiran enochus" },
@@ -582,7 +594,8 @@ static const cutscene_camera_t cameraArray[] = {
 	// Alpha Labs 4
 	{ CUTSCENE_VAGARY, "alphalabs3_vagaryintro_cam_1" },
 	// Enpro TODO (lots of enpro cameras)
-	//{ CUTSCENE_ENPRO, "" },
+	{ CUTSCENE_ENPRO, "enpro_exit_cam_a" },
+	{ CUTSCENE_ENPRO_ESCAPE, "enpro_monitor_cam_4" },
 	// Recycling 1
 	{ CUTSCENE_REVINTRO, "recycling1_revintro_cam_1" },
 	// Recycling 2
@@ -607,7 +620,7 @@ static const cutscene_camera_t cameraArray[] = {
 	// Hellhole
 
 	// le_enpro1
-	{ CUTSCENE_BRAVO_TEAM, "enpro_exit_cam_a" },
+	//{ CUTSCENE_BRAVO_TEAM, "enpro_exit_cam_a" },
 	// le_hell_post
 
 
@@ -627,12 +640,22 @@ t_cutscene CameraToCutscene(idStr & name)
 {
 	if (g_debugCinematic.GetBool())
 		gameLocal.Printf("%d: CameraToCutscene():\n\t{ CUTSCENE_, \"%s\" },\n", gameLocal.framenum, name.c_str());
+	t_cutscene result = CUTSCENE_NONE;
 	for (int i = 0; i < sizeof(cameraArray) / sizeof(*cameraArray); i++)
 	{
 		if (name.Cmp(cameraArray[i].camera) == 0)
-			return cameraArray[i].cutscene;
+		{
+			result = cameraArray[i].cutscene;
+			break;
+		}
 	}
-	return CUTSCENE_NONE;
+	// One cutscene is ambiguous
+	if (result == CUTSCENE_ENPRO)
+	{
+		if (idStr::Cmp(commonLocal.GetCurrentMapName(), "game/enpro") != 0)
+			result = CUTSCENE_BRAVO_TEAM;
+	}
+	return result;
 }
 
 void Flicksync_DoGameOver()
@@ -1230,6 +1253,8 @@ idStr CutsceneToMapName( t_cutscene c )
 		return "game/alphalabs1";
 	else if (c <= CUTSCENE_VAGARY)
 		return "game/alphalabs4";
+	else if (c <= CUTSCENE_ENPRO_ESCAPE)
+		return "game/enpro";
 	else if (c <= CUTSCENE_REVINTRO)
 		return "game/recycling1";
 	else if (c <= CUTSCENE_MANCINTRO)
@@ -1349,6 +1374,11 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 	case CUTSCENE_VAGARY:
 		ent = gameLocal.FindEntity("func_door_438"); // triggered by a door? how to handle it?
 		break;
+
+	case CUTSCENE_ENPRO_ESCAPE:
+		relay = gameLocal.FindEntity("fredthing");
+		break;
+
 	case CUTSCENE_REVINTRO:
 		ent = gameLocal.FindEntity("trigger_once_62");
 		break;
@@ -1534,9 +1564,9 @@ t_cutscene Flicksync_GetNextCutscene()
 
 	case CUTSCENE_ADMIN:
 		if (scenes == SCENES_MINEONLY && c == FLICK_SWANN)
-			return CUTSCENE_FLICKSYNC_COMPLETE;
+			return CUTSCENE_ENPRO; // should be ENPRO_ESCAPE but can't skip first cutscene
 		else if (scenes == SCENES_MINEONLY && c == FLICK_CAMPBELL)
-			return CUTSCENE_CAMPHUNT;
+			return CUTSCENE_ENPRO; // should be ENPRO_ESCAPE but can't skip first cutscene
 		else if (scenes == SCENES_MINEONLY && c == FLICK_BETRUGER)
 			return CUTSCENE_MONORAIL_RAISE_COMMANDO;
 		else
@@ -1554,14 +1584,28 @@ t_cutscene Flicksync_GetNextCutscene()
 
 	case CUTSCENE_ALPHALABS1:
 		if (scenes == SCENES_STORYLINE && !player_storyline && c != FLICK_SCIENTIST)
-			return CUTSCENE_MONORAIL_RAISE_COMMANDO;
+			return CUTSCENE_ENPRO; // should be ENPRO_ESCAPE but can't skip first cutscene
 		else
 			return CUTSCENE_VAGARY;
 	case CUTSCENE_VAGARY:
-		if (scenes == SCENES_STORYLINE && !player_storyline && c != FLICK_SCIENTIST)
+		if (scenes == SCENES_STORYLINE && !player_storyline && c != FLICK_SCIENTIST && c != FLICK_BRAVO_LEAD && c != FLICK_MARINE_PDA && c != FLICK_MARINE_TORCH && c != FLICK_POINT)
+			return CUTSCENE_ENPRO; // should be ENPRO_ESCAPE but can't skip first cutscene
+		else if (scenes == SCENES_MINEONLY && c == FLICK_PLAYER)
+			return CUTSCENE_ENPRO; // should be ENPRO_ESCAPE but can't skip first cutscene
+		else
+			return CUTSCENE_ENPRO;
+	case CUTSCENE_ENPRO:
+			return CUTSCENE_ENPRO_ESCAPE;
+	case CUTSCENE_ENPRO_ESCAPE:
+		if (c == FLICK_SWANN && scenes == SCENES_MINEONLY)
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+		else if (c == FLICK_CAMPBELL && scenes == SCENES_MINEONLY)
+			return CUTSCENE_CAMPHUNT;
+		else if (scenes == SCENES_STORYLINE && !player_storyline && c != FLICK_SCIENTIST)
 			return CUTSCENE_MONORAIL_RAISE_COMMANDO;
 		else
 			return CUTSCENE_REVINTRO;
+
 	case CUTSCENE_REVINTRO:
 		if (scenes == SCENES_STORYLINE && !player_storyline && c != FLICK_SCIENTIST)
 			return CUTSCENE_MONORAIL_RAISE_COMMANDO;

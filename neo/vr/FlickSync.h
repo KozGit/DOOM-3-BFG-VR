@@ -93,6 +93,10 @@ typedef enum
 	// Alpha Labs 4
 	CUTSCENE_VAGARY, // Player
 
+	// Enpro
+	CUTSCENE_ENPRO, // Bravo Lead, Marine PDA, Marine Torch, Point
+	CUTSCENE_ENPRO_ESCAPE,
+
 	// Recycling 1
 	CUTSCENE_REVINTRO, // Player
 	// Recycling 2
