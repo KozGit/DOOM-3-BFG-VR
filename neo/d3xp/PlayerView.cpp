@@ -730,7 +730,8 @@ idPlayerView::ScreenFade
 */
 void idPlayerView::ScreenFade()
 {
-	if( !fadeTime )
+	// Carl: Don't cover screen when we need to read the Flicksync HUD or see what's happening
+	if( !fadeTime || g_stopTime.GetBool() || ( Flicksync_InCutscene && (Flicksync_CueActive || Flicksync_CueCardActive) ) )
 	{
 		return;
 	}

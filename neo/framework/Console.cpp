@@ -355,7 +355,22 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 		leftY += SMALLCHAR_HEIGHT + 4;
 	}
 
-	if ( !gameLocal.inCinematic && !Flicksync_InCutscene )
+	if (Flicksync_complete)
+	{
+		const char* s = "FLICKSYNC COMPLETE";
+		int w = strlen(s) * BIGCHAR_WIDTH;
+		renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, colorGreen, true);
+		centerY += BIGCHAR_HEIGHT + 4;
+	}
+	else if (Flicksync_GameOver)
+	{
+		const char* s = "GAME OVER";
+		int w = strlen(s) * BIGCHAR_WIDTH;
+		renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, colorRed, true);
+		centerY += BIGCHAR_HEIGHT + 4;
+	}
+
+	if (Flicksync_complete || Flicksync_GameOver || (!gameLocal.inCinematic && !Flicksync_InCutscene))
 		return;
 
 	if (Flicksync_CorrectInARow > 0)
@@ -370,14 +385,7 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 			color = colorRed;
 		else
 			color = colorWhite;
-		if (Flicksync_GameOver)
-		{
-			const char* s = "GAME OVER";
-			int w = strlen(s) * BIGCHAR_WIDTH;
-			renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, color, true);
-			centerY += BIGCHAR_HEIGHT + 4;
-		}
-		else if (Flicksync_FailsInARow == 2)
+		if (Flicksync_FailsInARow == 2)
 		{
 			const char* s = "FINAL WARNING";
 			int w = strlen(s) * BIGCHAR_WIDTH;

@@ -347,7 +347,13 @@ void Cmd_Give_f( const idCmdArgs& args )
 	{
 		give_all = false;
 	}
-	
+
+	// Carl: Flicksync cheat: give cuecard
+	if (idStr::Icmp(name, "cuecard") == 0)
+	{
+		Flicksync_CueCards = 100;
+	}
+
 	if( give_all || ( idStr::Cmpn( name, "weapon", 6 ) == 0 ) )
 	{
 		if( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )

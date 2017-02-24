@@ -388,6 +388,11 @@ There are no action bonuses yet. And you automatically follow the character's pa
 If the cutscene seems to finish, but it won't let you move, it's still waiting for you to say the 
 last line of the cutscene (or to skip it).
 
+When you have finished all the cutscenes you chose, you win, and it will say "Flicksync Complete".
+If you were playing in Cutscenes Only mode, then all the NPCs and monsters will disappear and you
+will go back to being yourself insted of your character. You can then walk around the empty level
+and use the level's exit to return to the main menu, or use the pause menu to exit.
+
 The Flicksync mode is still very buggy and a work in progress. Sorry.
 
 To start a Flicksync game, choose Campaign from the main menu, then choose Flicksync.
@@ -396,13 +401,23 @@ Choose how many Cue Cards you start with.
 Choose whether to play just the Flicksync cutscene parts,
 or play the normal Doom 3 game with Flicksync mode for the cutscenes,
 (or a non-Flicksync game with no cutscenes).
+Choose which scenes you want to play.
+You can play: all the cutscenes,
+just the cutscenes for your character's expansion,
+all the scenes starting from your character's first scene,
+all the scenes related to your character's story arc,
+or just the scenes with your character in them.
+Then choose the highest level you got up to in the game if you want to avoid spoilers.
+
 Then choose Play.
-You will start from a different point depending on which character you choose.
+You will start from a different point depending on which character or scenes you choose.
 
 You can also watch the cutscenes from the POV of the player character(s) by choosing Player.
-Or you can just watch all the cutscenes by setting Character to None and Game Mode to Cutscenes.
+Or you can just watch all the cutscenes by setting Character to None and Game Mode to Cutscenes Only.
 
-The Flicksync settings carry over into a normal game, so change them back to normal when finished.
+The Flicksync settings carry over if you start a map from the DEV menu, so you may 
+want to change them back to normal first.
+But starting a new game from the new game menu will clear the flicksync settings.
 You will see SCORE: 0 on the menus if you are in Flicksync mode.
 
 Default gamepad controls
@@ -723,10 +738,12 @@ vr_talkWakeMonsters 1 BOOL - Talking wakes monsters. 0 = no, 1 = yes
 vr_talkMode 2 INTEGER - Talk to NPC 0 = buttons, 1 = buttons or voice, 2 = voice only, 3 = voice no cursor
 vr_tweakTalkCursor 25 FLOAT - Tweak talk cursor y pos in VR. % val 0 to 99 
 
-vr_flicksyncCharacter 0 INTEGER - Flicksync character. 0 = none, 1 = Betruger, 2 = Swan, 3 = Campbell, 4 = DarkStar, 5 = Tower, 6 = Reception, 7 = Kelly, 8 = Brooks, 9 = Mark Ryan, 10 = Ishii, 11 = Roland, 12 = McNeil, 13 = Marine w PDA, 14 = Marine w Torch, 15 = Point, 16 = Bravo Lead, 17 = Player 0, FLICK_PLAYER 
+vr_flicksyncCharacter 0 INTEGER - Flicksync character. 0 = none, 1 = Betruger, 2 = Swan, 3 = Campbell, 4 = DarkStar, 5 = Tower, 6 = Reception, 7 = Kelly, 8 = Brooks, 9 = Mark Ryan, 10 = Ishii, 11 = Roland, 12 = McNeil, 13 = Marine w PDA, 14 = Marine w Torch, 15 = Point, 16 = Bravo Lead, 17 = Player
 
 vr_flicksyncCueCards 0 INTEGER - How many Cue Card Power-Ups to start with. Default = 0, max = 5
 vr_cutscenesOnly 0 INTEGER - Skip action and only show cutscenes. 0 = normal game, 1 = cutscenes only, 2 = action only
+vr_flicksyncScenes 1, INTEGER - 0 = all scenes, 1 = my chapter, 2 = from my start, 3 = my storyline, 4 = my scenes only
+vr_flicksyncSpoiler 0 INTEGER - Don't show any cutscene past this point. 0 = allow spoilers, cutscene number = limit
 
 g_stopTime 0 BOOL - Freeze time. This is used by the Flicksync to pause cutscenes. If there's a bug and everything is frozen try setting it to 0.
 

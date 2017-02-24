@@ -12,6 +12,8 @@
 idCVar vr_flicksyncCharacter( "vr_flicksyncCharacter", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Flicksync character. 0 = none, 1 = Betruger, 2 = Swan, 3 = Campbell, 4 = DarkStar, 5 = Tower, 6 = Reception, 7 = Kelly, 8 = Brooks, 9 = Mark Ryan, 10 = Ishii, 11 = Roland, 12 = McNeil, 13 = Marine w PDA, 14 = Marine w Torch, 15 = Point, 16 = Bravo Lead, 17 = Player", 0, FLICK_PLAYER );
 idCVar vr_flicksyncCueCards( "vr_flicksyncCueCards", "0", CVAR_INTEGER | CVAR_ARCHIVE, "How many Cue Card Power-Ups to start with. Default = 0, max = 5", 0, 5 );
 idCVar vr_cutscenesOnly( "vr_cutscenesOnly", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Skip action and only show cutscenes. 0 = normal game, 1 = cutscenes only, 2 = action only", 0, 2 );
+idCVar vr_flicksyncScenes( "vr_flicksyncScenes", "1", CVAR_INTEGER | CVAR_ARCHIVE, "0 = all scenes, 1 = my chapter, 2 = from my start, 3 = my storyline, 4 = my scenes only", 0, 4 );
+idCVar vr_flicksyncSpoiler( "vr_flicksyncSpoiler", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Don't show any cutscene past this point. 0 = allow spoilers, cutscene number = limit", 0, CUTSCENE_FLICKSYNC_COMPLETE - 1 );
 
 extern idCVar timescale;
 
@@ -25,6 +27,7 @@ idStr Flicksync_CueText = "";	// What cue line we need to respond to
 bool Flicksync_CueActive = false;	// Are we playing and displaying the cue line subtitle?
 int Flicksync_CheatCount = 0;	// Cheat once = warning, cheat twice it's GAME OVER!
 bool Flicksync_GameOver = false;
+bool Flicksync_complete = false;
 bool Flicksync_InCutscene = false;
 t_cutscene Flicksync_skipToCutscene;
 t_cutscene Flicksync_currentCutscene;
@@ -110,6 +113,9 @@ static const character_map_t entityArray[] = {
 	// Delta 2a
 	{ FLICK_SCIENTIST, "delta2a_scientist_1_head" },
 	{ FLICK_SCIENTIST, "delta2a_scientist_1" },
+
+	// Delta 4
+	{ FLICK_BETRUGER, "delta4_betruger_1" },
 
 // ROE, Erebus1: Intro
 	{ FLICK_TOWER, "erebus1_intro_scientist_1" },
@@ -351,6 +357,24 @@ static const spoken_line_t lineArray[] = {
 	"You need to find me a working plasma inducer. It's all I need to get the teleporter working. You can look for it in operations. I have a security clearance. I'll unlock some doors for you. "
 	"There. We don't have a lot of time. Please hurry." },
 
+	// Delta Labs 4
+	//Voice delta4_betruger_1: laugh:
+	{ "delta4_betruger_escape", "You cannot escape." },
+	//Voice delta4_betruger_1: laugh:
+	{ "delta4_betruger_laugh", "Ha ha ha" },
+	//Voice haz: runoutcough:
+	//{ "cough", "" },
+	//Voice delta4_cin_hazguy_1: hkgrab:
+	//{ "d4_hazmat_what", "what" },
+	//Voice delta4_cin_hazguy_1: hkgrab:
+	//{ "d4_hazmat_ohno", "oh no" },
+	//Voice delta4_cin_hk1_3: throw:
+	//{ "monster_demon_hellknight_chatter_combat", "" },
+	//Voice delta4_cin_hazguy_2: hkthrow:
+	//{ "d4_hazmat_scream", "argh" },
+	//Voice monster_demon_hellknight_2: sight:
+	//{ "monster_demon_hellknight_sight2", "" },
+
 	//Voice cpu1_camphunt_campbell_1: camphunt_d:
 	{ "cpu_campbell_hunt", "Where are you hiding?" },
 
@@ -583,6 +607,7 @@ static const cutscene_camera_t cameraArray[] = {
 	// Hellhole
 
 	// le_enpro1
+	{ CUTSCENE_BRAVO_TEAM, "enpro_exit_cam_a" },
 	// le_hell_post
 
 
@@ -615,6 +640,14 @@ void Flicksync_DoGameOver()
 	if (g_debugCinematic.GetBool())
 		gameLocal.Printf("%d: Flicksync_GameOver()\n", gameLocal.framenum);
 	Flicksync_GameOver = true;
+	hasWaitingLine = false;
+	hasCueLine = false;
+	Flicksync_CueActive = false;
+	Flicksync_CueCardText = "";
+	Flicksync_CueCardActive = false;
+	needCue = false;
+	if (hasPausedLine)
+		Flicksync_ResumeCutscene();
 	commonVoice->Say("Game Over");
 }
 
@@ -642,11 +675,13 @@ void Flicksync_ScoreLine(int confidence, uint64 ourStartTime, uint64 realStartTi
 	int64 endDelay = (int64)(ourStartTime - realStartTime) + (int32)(ourLength - realLength);
 	float speed = (float)ourLength / (float)realLength;
 
-	Flicksync_GameOver = false; // for now, we can't actually end the game
+	//Flicksync_GameOver = false; // for now, we can't actually end the game
 	Flicksync_CueActive = false;
 	Flicksync_CueCardText = "";
 	Flicksync_CueCardActive = false;
 	needCue = false;
+	if (Flicksync_GameOver || Flicksync_complete)
+		return;
 
 	Flicksync_Score += 100; // specified in Chapter 11
 	Flicksync_CorrectInARow++; // specified in Chapter 11
@@ -813,7 +848,7 @@ void Flicksync_SayCueLine()
 
 void Flicksync_StoppedTalking()
 {
-	if (needCue)
+	if (needCue && !Flicksync_complete && !Flicksync_GameOver)
 	{
 		if (g_debugCinematic.GetBool())
 			gameLocal.Printf("%d: Flicksync_StoppedTalking(), so say the cue line we couldn't say before.\n", gameLocal.framenum);
@@ -850,7 +885,7 @@ void Flicksync_ResumeCutscene()
 bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length )
 {
 	// if we're not in flicksync mode, then play it like normal
-	if( !vr_flicksyncCharacter.GetInteger() || ( !Flicksync_InCutscene && !gameLocal.inCinematic ) )
+	if( Flicksync_complete || Flicksync_GameOver || !vr_flicksyncCharacter.GetInteger() || ( !Flicksync_InCutscene && !gameLocal.inCinematic ) )
 		return true;
 
 	SYSTEMTIME systime;
@@ -960,6 +995,9 @@ void Flicksync_AddVoiceLines()
 // startTime & length are in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
 void Flicksync_HearLine( const char* line, int confidence, uint64 startTime, uint32 length )
 {
+	if (Flicksync_complete || Flicksync_GameOver)
+		return;
+
 	if( !startTime )
 	{
 		SYSTEMTIME systime;
@@ -1033,6 +1071,18 @@ void Flicksync_NewGame()
 	Flicksync_CorrectInARow = 0;
 	Flicksync_CueCards = vr_flicksyncCueCards.GetInteger(); // allow them to start with cue cards
 	Flicksync_CueCardText = "";
+	Flicksync_complete = false;
+	Flicksync_GameOver = false;
+}
+
+void NotFlicksync_NewGame()
+{
+	if (g_debugCinematic.GetBool())
+		gameLocal.Printf("%d: NotFlicksync_NewGame()\n", gameLocal.framenum);
+	vr_flicksyncCharacter.SetInteger(0);
+	if (vr_cutscenesOnly.GetInteger() == 1)
+		vr_cutscenesOnly.SetInteger(0);
+	Flicksync_NewGame();
 }
 
 bool Flicksync_EndCutscene()
@@ -1065,8 +1115,14 @@ bool Flicksync_EndCutscene()
 		Flicksync_InCutscene = false;
 
 		// Check if we need to skip to another cutscene after this
-		if (vr_cutscenesOnly.GetInteger() == 1 && Flicksync_skipToCutscene == CUTSCENE_NONE)
+		if (Flicksync_GameOver || Flicksync_complete)
+			Flicksync_skipToCutscene = CUTSCENE_NONE;
+		else if (vr_cutscenesOnly.GetInteger() == 1 && Flicksync_skipToCutscene == CUTSCENE_NONE)
 			Flicksync_skipToCutscene = Flicksync_GetNextCutscene();
+		// Don't allow spoilers
+		if (vr_flicksyncSpoiler.GetInteger() > 0 && Flicksync_skipToCutscene >= vr_flicksyncSpoiler.GetInteger())
+			Flicksync_skipToCutscene = CUTSCENE_FLICKSYNC_COMPLETE;
+		// Actually skip to next cutscene
 		if (Flicksync_skipToCutscene != CUTSCENE_NONE && Flicksync_skipToCutscene != Flicksync_currentCutscene)
 			Flicksync_GoToCutscene( Flicksync_skipToCutscene );
 
@@ -1107,7 +1163,7 @@ void Flicksync_StartCutscene()
 
 bool Flicksync_UseCueCard()
 {
-	if( Flicksync_CueCards > 0 && !Flicksync_CueCardActive )
+	if( (Flicksync_CueCards > 0 || g_debugCinematic.GetBool()) && !Flicksync_CueCardActive )
 	{
 		if (g_debugCinematic.GetBool())
 			gameLocal.Printf("%d: Flicksync_UseCueCard() successful\n", gameLocal.framenum);
@@ -1210,6 +1266,27 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 	//Flicksync_currentCutscene = scene;
 	//Flicksync_skipToCutscene = CUTSCENE_NONE;
 
+	if (scene == CUTSCENE_FLICKSYNC_COMPLETE)
+	{
+		if (g_debugCinematic.GetBool())
+			gameLocal.Printf("%d: Flicksync_Complete()\n", gameLocal.framenum);
+		Flicksync_complete = true;
+		commonVoice->Say("Flick sync complete.");
+		if (vr_cutscenesOnly.GetInteger() == 1)
+		{
+			// delete all non-player actors from map
+			idEntity *ent = NULL;
+			for (ent = gameLocal.spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next())
+			{
+				if (ent->IsType(idAI::Type))
+				{
+					ent->PostEventMS(&EV_Remove, 0);
+				}
+			}
+		}
+		return;
+	}
+
 	// check we're on the correct map first
 	idStr map = CutsceneToMapName(scene);
 	if( map.Cmp( commonLocal.GetCurrentMapName() )!=0 )
@@ -1293,7 +1370,7 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		relay = gameLocal.FindEntity("trigger_once_1");
 		break;
 	case CUTSCENE_DELTA_HKINTRO:
-		ent = gameLocal.FindEntity("trigger_once_1");
+		relay = gameLocal.FindEntity("trigger_once_1");
 		break;
 
 	case CUTSCENE_CAMPHUNT: // trigger on level load
@@ -1336,11 +1413,61 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 	}
 }
 
+t_cutscene Flicksync_GetFirstScene(int character)
+{
+	switch (character)
+	{
+	case FLICK_NONE:
+		return CUTSCENE_NONE;
+
+	case FLICK_RECEPTION:
+		return CUTSCENE_RECEPTION;
+
+	case FLICK_SARGE:
+		return CUTSCENE_SARGE;
+
+	case FLICK_SCIENTIST:
+		return CUTSCENE_ISHII;
+
+	case FLICK_BROOKS:
+		return ACTING_GEARUP;
+	case FLICK_ROLAND:
+		return ACTING_CEILING;
+
+	case FLICK_BRAVO_LEAD:
+		return CUTSCENE_BRAVO_TEAM;
+
+	case FLICK_MARINE_PDA:
+	case FLICK_MARINE_TORCH:
+	case FLICK_POINT:
+	case FLICK_MCNEIL:
+		return CUTSCENE_ARTIFACT;
+
+	case FLICK_TOWER:
+	case FLICK_BETRUGER:
+	case FLICK_SWANN:
+	case FLICK_CAMPBELL:
+	case FLICK_PLAYER:
+	default:
+		return CUTSCENE_DARKSTAR;
+	}
+}
+
 t_cutscene Flicksync_GetNextCutscene()
 {
 	if (g_debugCinematic.GetBool())
 		gameLocal.Printf("%d: Flicksync_GetNextCutscene()\n", gameLocal.framenum);
 	int c = vr_flicksyncCharacter.GetInteger();
+	t_cutscene first = Flicksync_GetFirstScene( c );
+	int scenes = vr_flicksyncScenes.GetInteger();
+	bool player_storyline = c == FLICK_NONE || c == FLICK_PLAYER || c == FLICK_BETRUGER || c == FLICK_RECEPTION || c == FLICK_SARGE;
+
+	// if we're before our first cutscene, go to our first cutscene
+	if (Flicksync_currentCutscene < first && scenes == SCENES_MINEONLY || scenes == SCENES_MYSTART)
+	{
+		return first;
+	}
+
 	switch (Flicksync_currentCutscene)
 	{
 	case FMV_UAC:
@@ -1348,14 +1475,20 @@ t_cutscene Flicksync_GetNextCutscene()
 	case CUTSCENE_DARKSTAR:
 	case ACTING_BIOSCAN:
 		//return CUTSCENE_PINKY; // Carl: Debug hack
-		if( c == FLICK_TOWER || c == FLICK_BETRUGER || c == FLICK_SWANN || c == FLICK_CAMPBELL )
+		if (c == FLICK_DARKSTAR && scenes == SCENES_MINEONLY)
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+		else if ((c == FLICK_DARKSTAR || c == FLICK_BRAVO_LEAD) && scenes == SCENES_STORYLINE)
+			return CUTSCENE_ISHII;
+		else if (c == FLICK_SARGE && scenes == SCENES_MINEONLY)
+			return CUTSCENE_SARGE;
+		else if (scenes == SCENES_MINEONLY && c != FLICK_RECEPTION && c != FLICK_PLAYER )
 			return CUTSCENE_MEETING;
-		//else if( c == FLICK_SARGE )
-		//	return CUTSCENE_SARGE;
+		else if (scenes == SCENES_STORYLINE && !player_storyline)
+			return CUTSCENE_MEETING;
 		else
 			return CUTSCENE_RECEPTION;
 	case CUTSCENE_RECEPTION:
-		if (c == FLICK_SCIENTIST)
+		if (scenes == SCENES_STORYLINE && c != FLICK_NONE && c != FLICK_PLAYER && c != FLICK_BETRUGER && c != FLICK_SWANN && c != FLICK_CAMPBELL)
 			return CUTSCENE_SARGE;
 		else
 			return CUTSCENE_MEETING;
@@ -1363,10 +1496,17 @@ t_cutscene Flicksync_GetNextCutscene()
 	case ACTING_SUITS:
 	case ACTING_KITCHEN:
 	case ACTING_BEFORE_SARGE:
-		return CUTSCENE_SARGE;
+		if (scenes == SCENES_MINEONLY && c == FLICK_RECEPTION)
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+		if (scenes == SCENES_MINEONLY && (c == FLICK_SWANN || c == FLICK_CAMPBELL || c == FLICK_BETRUGER))
+			return CUTSCENE_ADMIN;
+		else
+			return CUTSCENE_SARGE;
 	case CUTSCENE_SARGE:
-		if ( c == FLICK_TOWER )
+		if ( c == FLICK_TOWER && scenes == SCENES_MINEONLY )
 			return CUTSCENE_ARTIFACT;
+		else if ( c == FLICK_SARGE && scenes == SCENES_MINEONLY )
+			return CUTSCENE_ALPHALABS1;
 		else
 			return CUTSCENE_ISHII;
 
@@ -1379,71 +1519,138 @@ t_cutscene Flicksync_GetNextCutscene()
 	case ACTING_AIRLOCK:
 		return CUTSCENE_ISHII;
 	case CUTSCENE_ISHII:
-		if ( c == FLICK_NONE || c == FLICK_PLAYER || c == FLICK_RECEPTION || c == FLICK_SARGE )
-			return CUTSCENE_IMP;
-		else
+		if ((c == FLICK_DARKSTAR || c == FLICK_BRAVO_LEAD) && scenes == SCENES_STORYLINE)
+			return CUTSCENE_BRAVO_TEAM;
+		else if (scenes == SCENES_MINEONLY && c == FLICK_SCIENTIST)
+			return CUTSCENE_DELTA_SCIENTIST;
+		else if (scenes == SCENES_STORYLINE && !player_storyline && c != FLICK_SCIENTIST )
 			return CUTSCENE_ADMIN;
+		else
+			return CUTSCENE_IMP;
 	case CUTSCENE_IMP:
 	case ACTING_CEILING:
 	case ACTING_SARGE_VIDEO:
 		return CUTSCENE_ADMIN;
 
 	case CUTSCENE_ADMIN:
-		return CUTSCENE_PINKY; // not working yet
+		if (scenes == SCENES_MINEONLY && c == FLICK_SWANN)
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+		else if (scenes == SCENES_MINEONLY && c == FLICK_CAMPBELL)
+			return CUTSCENE_CAMPHUNT;
+		else if (scenes == SCENES_MINEONLY && c == FLICK_BETRUGER)
+			return CUTSCENE_MONORAIL_RAISE_COMMANDO;
+		else
+			return CUTSCENE_PINKY;
 	case CUTSCENE_PINKY:
 	case ACTING_OVERHEAR:
-		return CUTSCENE_ALPHALABS1;
+		if (scenes == SCENES_MINEONLY && c == FLICK_SWANN)
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+		else if (scenes == SCENES_MINEONLY && c == FLICK_CAMPBELL)
+			return CUTSCENE_CAMPHUNT;
+		if (scenes == SCENES_STORYLINE && !player_storyline && c != FLICK_SCIENTIST)
+			return CUTSCENE_MONORAIL_RAISE_COMMANDO;
+		else
+			return CUTSCENE_ALPHALABS1;
 
 	case CUTSCENE_ALPHALABS1:
-		return CUTSCENE_VAGARY;
+		if (scenes == SCENES_STORYLINE && !player_storyline && c != FLICK_SCIENTIST)
+			return CUTSCENE_MONORAIL_RAISE_COMMANDO;
+		else
+			return CUTSCENE_VAGARY;
 	case CUTSCENE_VAGARY:
-		return CUTSCENE_REVINTRO;
+		if (scenes == SCENES_STORYLINE && !player_storyline && c != FLICK_SCIENTIST)
+			return CUTSCENE_MONORAIL_RAISE_COMMANDO;
+		else
+			return CUTSCENE_REVINTRO;
 	case CUTSCENE_REVINTRO:
-		return CUTSCENE_MANCINTRO;
+		if (scenes == SCENES_STORYLINE && !player_storyline && c != FLICK_SCIENTIST)
+			return CUTSCENE_MONORAIL_RAISE_COMMANDO;
+		else
+			return CUTSCENE_MANCINTRO;
 	case CUTSCENE_MANCINTRO:
-		return CUTSCENE_MONORAIL_RAISE_COMMANDO;
+		if (scenes == SCENES_MINEONLY && c == FLICK_PLAYER)
+			return CUTSCENE_DELTA_SCIENTIST;
+		else
+			return CUTSCENE_MONORAIL_RAISE_COMMANDO;
 
 	case CUTSCENE_MONORAIL_RAISE_COMMANDO:
 		//return CUTSCENE_MONORAIL_CRASH; // not really working or important
 	case CUTSCENE_MONORAIL_CRASH:
-		return CUTSCENE_DELTA_SCIENTIST;
+		if (scenes == SCENES_MINEONLY && c == FLICK_BETRUGER)
+			return CUTSCENE_DELTA_HKINTRO;
+		else
+			return CUTSCENE_DELTA_SCIENTIST;
 	case CUTSCENE_DELTA_SCIENTIST:
-		return CUTSCENE_DELTA_TELEPORTER;
+		if (scenes == SCENES_MINEONLY && c == FLICK_SCIENTIST)
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+		else if (scenes == SCENES_STORYLINE && !player_storyline && c != FLICK_SCIENTIST)
+			return CUTSCENE_DELTA_HKINTRO;
+		else
+			return CUTSCENE_DELTA_TELEPORTER;
 	case CUTSCENE_DELTA_TELEPORTER:
 		return CUTSCENE_DELTA_HKINTRO;
 	case CUTSCENE_DELTA_HKINTRO:
-		return CUTSCENE_GUARDIAN_INTRO;
+		if (scenes == SCENES_MINEONLY && c == FLICK_BETRUGER)
+			return CUTSCENE_ARTIFACT;
+		else
+			return CUTSCENE_GUARDIAN_INTRO;
 
 	case CUTSCENE_GUARDIAN_INTRO:
 		return CUTSCENE_GUARDIAN_DEATH;
 	case CUTSCENE_GUARDIAN_DEATH:
-		return CUTSCENE_CAMPHUNT;
+		if (scenes == SCENES_MINEONLY && c == FLICK_PLAYER)
+			return CUTSCENE_CPU_BOSS;
+		else
+			return CUTSCENE_CAMPHUNT;
 
 	case CUTSCENE_CAMPHUNT:
-		return CUTSCENE_CPU_BOSS;
+		if (scenes == SCENES_MINEONLY && c == FLICK_CAMPBELL)
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+		else
+			return CUTSCENE_CPU_BOSS;
 	case CUTSCENE_CPU_BOSS:
+		if (scenes == SCENES_CHAPTER || ((scenes == SCENES_STORYLINE || scenes == SCENES_MINEONLY) && (c == FLICK_SWANN || c == FLICK_CAMPBELL || c == FLICK_SCIENTIST || c == FLICK_SARGE || c == FLICK_BROOKS || c == FLICK_ROLAND || c == FLICK_DARKSTAR || c == FLICK_RECEPTION)))
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+		else
+			return CUTSCENE_ARTIFACT;
 
 	case FMV_ROE:
 		return CUTSCENE_ARTIFACT;
 
 	case CUTSCENE_ARTIFACT:
-	case FMV_LOST_MISSIONS:
-		return CUTSCENE_BLOOD;
+		if (scenes == SCENES_MINEONLY && (c == FLICK_MARINE_PDA || c == FLICK_MARINE_TORCH))
+			return CUTSCENE_BRAVO_TEAM;
+		else if (scenes == SCENES_MINEONLY && c == FLICK_BETRUGER)
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+		else if (scenes == SCENES_MINEONLY && c == FLICK_POINT)
+			return CUTSCENE_GRABBER;
+		else
+			return CUTSCENE_BLOOD;
 	case CUTSCENE_BLOOD:
 		return CUTSCENE_GRABBER;
 	case CUTSCENE_GRABBER:
 		//return CUTSCENE_VULGARINTRO; // not quite working
 	case CUTSCENE_VULGARINTRO:
-		return CUTSCENE_PHOBOS2;
-
-	case CUTSCENE_PHOBOS2:
-		if( c == FLICK_MARINE_PDA || c == FLICK_MARINE_TORCH || c == FLICK_POINT )
+		if (scenes == SCENES_MINEONLY && c == FLICK_POINT)
 			return CUTSCENE_BRAVO_TEAM;
 		else
-			return CUTSCENE_NONE;
+			return CUTSCENE_PHOBOS2;
 
+	case CUTSCENE_PHOBOS2:
+		if ( c == FLICK_MCNEIL && (scenes == SCENES_MINEONLY || scenes == SCENES_CHAPTER || scenes == SCENES_STORYLINE ) )
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+		// Bravo Team (Lost Missions) only comes after RoE if we started from RoE or chose an RoE Marine.
+		else if (scenes == SCENES_STORYLINE && (c == FLICK_MARINE_PDA || c == FLICK_MARINE_TORCH || c == FLICK_POINT ) )
+			return CUTSCENE_BRAVO_TEAM;
+		else if (scenes == SCENES_MYSTART && c >= FLICK_MCNEIL && c != FLICK_PLAYER && c != FLICK_BRAVO_LEAD)
+			return CUTSCENE_BRAVO_TEAM;
+		else
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+
+	case FMV_LOST_MISSIONS:
+		return CUTSCENE_BRAVO_TEAM;
 	case CUTSCENE_BRAVO_TEAM:
 	default:
-		return CUTSCENE_NONE;
+		return CUTSCENE_FLICKSYNC_COMPLETE;
 	}
 }
