@@ -126,24 +126,6 @@ int idMD5Anim::Length() const
 		// Originally set the length to 1 at animation load time, but this way the user can toggle
 		// animations without having to reload them all.  
 	
-		//common->Printf( "Anim name %s\n", name.c_str() );
-		
-		/*if (	strstr( name, "idle")  &&  // is this an idle animation?
-				// only disable idle animations with the following in their path:
-				( strstr( name, "artifact" ) ||
-				strstr( name, "bfg" ) ||
-				strstr( name, "chaingun" ) ||
-				strstr( name, "grenade" ) ||
-				strstr( name, "machinegun" ) || 
-				strstr( name, "rocketlauncher" ) ||
-				strstr( name, "pistol" ) ||
-				strstr( name, "plasma" ) ||
-				strstr( name, "shotgun" ) ||
-				strstr( name, "grabber" ) ||
-				strstr( name, "doublebarrel" ) ||
-				strstr( name, "blood_orb" )) )
-		*/
-
 		if ( strstr( name, "idle" ) && strstr( name, "md5/weapons" ) )
 		{	
 			// let the idle animations play for the soulcube, artifact, & bloodstone

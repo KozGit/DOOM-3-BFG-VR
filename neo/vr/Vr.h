@@ -369,22 +369,17 @@ private:
 
 #endif
 
-extern idCVar	vr_vignette;
 extern idCVar	vr_scale;
 extern idCVar	vr_useOculusProfile;
 extern idCVar	vr_manualIPDEnable;
 extern idCVar	vr_manualIPD;
 extern idCVar	vr_manualHeight;
 
-extern idCVar	vr_viewModelArms;
+//extern idCVar	vr_viewModelArms;
 extern idCVar	vr_wristStatMon;
 extern idCVar	vr_disableWeaponAnimation;
 extern idCVar	vr_headKick;
 
-extern idCVar	vR_TOUCHEnable;
-extern idCVar	vR_TOUCHForceDetect;
-
-extern idCVar	vr_armIKenable;
 extern idCVar	vr_weaponHand;
 
 extern idCVar	vr_flashlightMode;
@@ -399,7 +394,6 @@ extern idCVar	vr_flashlightHelmetPosZ;
 
 extern idCVar	vr_forward_keyhole;
 
-extern idCVar	vr_PDAscale;
 extern idCVar	vr_PDAfixLocation;
 
 extern idCVar	vr_weaponPivotOffsetForward;
@@ -446,13 +440,9 @@ extern idCVar	vr_voiceCommands;
 extern idCVar	vr_listMonitorName;
 
 extern idCVar	vr_enable;
-extern idCVar	vr_FBOscale;
-extern idCVar	vR_TOUCHEnable;
 extern idCVar	vr_joystickMenuMapping;
 
 extern idCVar	vr_trackingPredictionUserDefined;
-
-extern idCVar	vr_clipPositional;
 
 extern idCVar	vr_minLoadScreenTime;
 
@@ -462,8 +452,6 @@ extern idCVar	vr_comfortDelta;
 
 //extern idCVar	vr_interactiveCinematic;
 
-extern idCVar	vr_headingBeamLength;
-extern idCVar	vr_headingBeamWidth;
 extern idCVar	vr_headingBeamMode;
 
 extern idCVar	vr_weaponSight;

@@ -12920,7 +12920,7 @@ void idPlayer::Think()
 	
 	
 	static int lastFlashMode = commonVr->GetCurrentFlashMode();
-	static bool lastViewArms = vr_viewModelArms.GetBool();
+	//static bool lastViewArms = vr_viewModelArms.GetBool();
 	static bool lastFists = false;
 	static bool lastHandInGui = false;
 
@@ -12944,14 +12944,14 @@ void idPlayer::Think()
 			}
 		}
 				
-		
+		/*
 		if ( vr_viewModelArms.GetBool() != lastViewArms )
 		{
 			lastViewArms = vr_viewModelArms.GetBool();
 			UpdatePlayerSkinsPoses();
 			
 		}
-		
+		*/
 		
 		if ( vr_weaponHand.IsModified()  )
 		{
