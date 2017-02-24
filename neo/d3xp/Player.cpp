@@ -9695,7 +9695,8 @@ void idPlayer::EvaluateControls()
 				
 				if ( game->isVR )
 				{
-					common->Printf( "Player evaluate controls setting playerdead true %d\n", Sys_Milliseconds() );
+					if ( !commonVr->playerDead )
+						common->Printf( "Player evaluate controls setting playerdead true %d\n", Sys_Milliseconds() );
 					commonVr->wasLoaded = false;
 					commonVr->playerDead = true;
 					extern idCVar timescale;

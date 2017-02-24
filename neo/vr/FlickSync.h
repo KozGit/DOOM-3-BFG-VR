@@ -93,6 +93,11 @@ typedef enum
 	// Alpha Labs 4
 	CUTSCENE_VAGARY,
 
+	// Recycling 1
+	CUTSCENE_REVINTRO,
+	// Recycling 2
+	CUTSCENE_MANCINTRO,
+
 	// Monorail
 	CUTSCENE_MONORAIL_RAISE_COMMANDO,
 	CUTSCENE_MONORAIL_CRASH,
@@ -126,6 +131,8 @@ typedef enum
 	CUTSCENE_CLOUD,
 	// Erebus 6
 	// Hell
+	// Phobos 2
+	CUTSCENE_PHOBOS2,
 
 
 	// Lost Missions: Enpro
