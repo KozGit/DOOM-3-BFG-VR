@@ -14936,51 +14936,73 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 				originOffset = weapon->weaponHandDefaultPos[1 - currentHand];
 				origin -= originOffset * axis;
 				origin += handWeaponAttacherToDefaultOffset[1 - currentHand][currentWeapon] * axis; // add the attacher offsets
+				
+				
 				// the non weapon hand was set to the PDA fixed location, now fall thru and normal motion controls will place the pointer hand location
+				
 			}
 		}
-		else
+		//else
 		{
 			// non motion control weapon positioning for everything except PDA.
-						
+
 			static idQuat angQuat;
 			static idVec3 gunpos;
-						
-		//	angQuat = idAngles( 0, 0, 0 ).ToQuat();
-		//	angQuat *= idAngles( 0, commonVr->independentWeaponYaw, 0 ).ToQuat();
-		//	angQuat *= idAngles( commonVr->independentWeaponPitch, 0, 0 ).ToQuat();
-			
-			angQuat = idAngles( commonVr->independentWeaponPitch, commonVr->independentWeaponYaw, 0 ).ToQuat();
-		
-		
-			//gunRot = idAngles( 0, 0, 0 ).ToQuat(); // testing straightened models;
 
-			//gunAxis = gunRot * angQuat;
+			static idVec3 newOrg;
+			static idMat3 newAx;
+
+			static float origWeapPitch;
+			static float origWeapYaw;
+
+			static bool lastPdaFixed = PDAfixed;
+
+			if ( (PDAfixed != lastPdaFixed ) && !commonVr->VR_USE_MOTION_CONTROLS )
+			{
+				lastPdaFixed = PDAfixed;
+				if ( PDAfixed )
+				{
+					origWeapPitch = commonVr->independentWeaponPitch;
+					origWeapYaw = commonVr->independentWeaponYaw;
+					commonVr->independentWeaponPitch = 30;
+					commonVr->independentWeaponYaw = 0;
+				}
+				else
+				{
+					commonVr->independentWeaponPitch = origWeapPitch;
+					commonVr->independentWeaponYaw = origWeapYaw;
+				}
+			}
+
+			newOrg = origin;
+			newAx = axis;
+					
+			angQuat = idAngles( commonVr->independentWeaponPitch, commonVr->independentWeaponYaw, 0 ).ToQuat();
+				
 			gunAxis = angQuat;
 			gunAxis *= bodyAxis.ToQuat();
-			axis = gunAxis.ToMat3();
+			newAx = gunAxis.ToMat3();
 			
 			int flip = vr_weaponHand.GetInteger() == 0 ? 1 : -1;
 			
 			gunpos = idVec3( vr_weaponPivotOffsetForward.GetFloat(), vr_weaponPivotOffsetHorizontal.GetFloat() * flip, vr_weaponPivotOffsetVertical.GetFloat() );
 			gunOrigin += gunpos * bodyAxis;			// koz move the gun to the hand position
-			
-			
-			idVec3 forearm = idVec3( vr_weaponPivotForearmLength.GetFloat(), 0.0f, 0.0f );
-			origin = gunOrigin + forearm * axis;
 						
-			idMat3 jax = axis;
-			idVec3 org = origin;
-
-			//animator.SetJointAxis( armIK.elbowJoints[0], JOINTMOD_LOCAL, jax );
+			idVec3 forearm = idVec3( vr_weaponPivotForearmLength.GetFloat(), 0.0f, 0.0f );
+			newOrg = gunOrigin + forearm * newAx;
+						
 			
-			weapon->CalculateHideRise( origin, axis );// koz
+						
+			weapon->CalculateHideRise( newOrg, newAx );// koz
 			
-			SetHandIKPos( currentHand, origin, axis, angQuat, false );
+			SetHandIKPos( currentHand, newOrg, newAx, angQuat, false );
 			originOffset = weapon->weaponHandDefaultPos[currentHand];
 			
-			//if ( PDAfixed ) return;
+			if ( PDAfixed ) return;
 					
+			origin = newOrg;
+			axis = newAx;
+
 			origin -= originOffset * axis;
 			origin += handWeaponAttacherToDefaultOffset[currentHand][currentWeapon] * axis; // add the attacher offsets
 		}
