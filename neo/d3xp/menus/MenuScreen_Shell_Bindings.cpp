@@ -295,7 +295,12 @@ void idMenuScreen_Shell_Bindings::UpdateBindingString()
 				}
 				const char* buttonsWithImages[] =
 				{
-					"JOY1", "JOY2", "JOY3", "JOY4", "JOY5", "JOY6",
+					"JOY1", "JOY2", "JOY3", "JOY4", "JOY5", "JOY6", "JOY9", "JOY10",
+					"R_TOUCHA", "R_TOUCHB", "L_TOUCHX", "L_TOUCHY", "L_TOUCHM",
+					"L_STEAMVR_APP", "R_STEAMVR_APP",
+					"L_STEAMVR_PAD", "R_STEAMVR_PAD",
+					"L_STEAMVR_U", "L_STEAMVR_D", "L_STEAMVR_L", "L_STEAMVR_R",
+					"R_STEAMVR_U", "R_STEAMVR_D", "R_STEAMVR_L", "R_STEAMVR_R",
 					"JOY_TRIGGER1", "JOY_TRIGGER2", 0
 				};
 
@@ -465,11 +470,29 @@ void idMenuScreen_Shell_Bindings::UpdateBindingDisplay()
 						if ( (commonVr->motionControlType == MOTION_OCULUS && (joyBinds[i].Icmpn( "L_TOUCH", 7 ) == 0 || joyBinds[i].Icmpn( "R_TOUCH", 7 ) == 0)) ||
 							(commonVr->motionControlType == MOTION_STEAMVR && (joyBinds[i].Icmpn( "L_STEAMVR", 9 ) == 0 || joyBinds[i].Icmpn( "R_STEAMVR", 9 ) == 0)) )
 						{
-							if ( !bindings.IsEmpty() )
+							bool hasImage = false;
+							for( const char** b = buttonsWithImages; *b != 0; b++ )
+							{
+								if( joyBinds[i].Icmp(*b) == 0 )
+								{
+									hasImage = true;
+									break;
+								}
+							}
+							if( !bindings.IsEmpty() )
 							{
 								bindings.Append( ", " );
 							}
-							bindings.Append( joyBinds[i] );
+							if( hasImage )
+							{
+								bindings.Append( '<' );
+								bindings.Append( joyBinds[i] );
+								bindings.Append( '>' );
+							}
+							else
+							{
+								bindings.Append( joyBinds[i] );
+							}
 						}
 					}
 				}
