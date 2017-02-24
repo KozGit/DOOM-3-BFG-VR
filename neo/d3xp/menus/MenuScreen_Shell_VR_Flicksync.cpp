@@ -546,7 +546,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicks
 			return "CPU Boss";
 		if (n <= CUTSCENE_VULGARINTRO)
 			return "RoE: Erebus 1";
-		if (n <= CUTSCENE_ENVIROSUIT_ON)
+		if (n <= CUTSCENE_CLOUD)
 			return "RoE: Erebus 2";
 		if (n <= CUTSCENE_PHOBOS2)
 			return "RoE: Erebus 5";

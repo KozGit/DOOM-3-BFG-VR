@@ -129,11 +129,13 @@ typedef enum
 	CUTSCENE_GRABBER, // Point, Player
 	// Erebus 2
 	CUTSCENE_VULGARINTRO, // Player
+	CUTSCENE_HUNTERINTRO, // Player
 	// Erebus 5
+	CUTSCENE_CLOUD, // ?
 	CUTSCENE_ENVIROSUIT_ON, // ?
 	CUTSCENE_ENVIROSUIT_OFF, // ?
-	CUTSCENE_CLOUD, // ?
 	// Erebus 6
+	CUTSCENE_EREBUS6_MONSTERS,
 	// Hell
 	// Phobos 2
 	CUTSCENE_PHOBOS2, // McNeil, Player
@@ -165,7 +167,8 @@ void Flicksync_Cheat();
 void Flicksync_GiveUp();
 void Flicksync_StartCutscene();
 bool Flicksync_EndCutscene();
-void Flicksync_GoToCutscene( t_cutscene scene );
+bool Flicksync_NextCutscene();
+void Flicksync_GoToCutscene(t_cutscene scene);
 t_cutscene Flicksync_GetNextCutscene();
 void Flicksync_ResumeCutscene();
 

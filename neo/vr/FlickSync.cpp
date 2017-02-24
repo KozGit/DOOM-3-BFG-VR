@@ -137,6 +137,8 @@ static const character_map_t entityArray[] = {
 	{ FLICK_MARINE_TORCH, "erebus1_intro_flash_1" },
 	{ FLICK_BETRUGER, "maledict_intro_cinematic_1" },
 	{ FLICK_POINT, "erebus1_cinematic_marine_gravitygun_end_1" },
+// ROE, Erebus5: Cloud
+	{ FLICK_SCIENTIST, "erebus5_cloud_cinematic_1" },
 
 // Phobos 2
 	{ FLICK_MCNEIL, "phobos2_cinematic_mcneil_1" },
@@ -462,6 +464,31 @@ static const spoken_line_t lineArray[] = {
 	//Voice erebus1_cinematic_marine_gravitygun_end_1: ggun_end_b:
 	{ "e1_dying_marine_grabber", "He tried to hit me with a fireball. But I grabbed it and threw it right back at him. You're not going to get far with that pistol. Take this grabber. It's more useful than you think." },
 
+	
+
+	//Voice2 erebus5_cloud_cinematic_1: e5_cloud_cinematic_a:
+	//{ "marscity_reception_type", "" },
+	//Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_b:
+	{ "e5_cloud_triggered1", "Frankly, I don't know if our systems can handle too many more of these power surges. We're working with old equipment here. If I don't have the primitive soon, it will be too late." },
+	//Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_e:
+	{ "e5_cloud_triggered2", "Hm. Speak of the devil. Your marine has the primitive." },
+	//Voice2 erebus5_cloud_cinematic_1: e5_cloud_cinematic_g:
+	//{ "marscity_reception_type", "" },
+ //Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_h:
+	{ "e5_cloud_triggered3", "Damn. Another surge. " },
+//Voice2 erebus5_cloud_cinematic_1: e5_cloud_cinematic_i:
+//{ "typing", "" },
+ //Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_j:
+	{ "e5_cloud_triggered4", "It's working. It's all here. Amazing. Everything is right here. The invasion, the demons, it's all exactly the same as the ancient writings." },
+ //Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_l:
+	{ "e5_cloud_triggered5", "Doctor McNeil. Our assumptions were correct. The artifact is a weapon of unbelievable power." },
+ //Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_o:
+	{ "e5_cloud_triggered6", "Yes but, it looks like there's more to all of this than we had thought. The ancients write of three unstoppable beasts, horrific and powerful demons they called the hunters. Apparently a reference to their protection of the artifact. I'll contact you when I know more." },
+//Voice2 erebus5_cloud_cinematic_1: e5_cloud_cinematic_q:
+//{ "type", "" },
+ //Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_u:
+	{ "e5_cloud_triggered7", "This is starting to make some sense. Not only is the artifact a source of great power. It's also a gateway. A one way portal from hell to our dimension. I need to gather more information here, but Doctor McNeil is an expert on the ancient civilization. You must get the artifact to her if we're going to understand how to destroy it. Take the key to the armory. You may need some extra firepower." },
+
 	// Phobos 2
 	//Voice phobos2_cinematic_mcneil_1: mcn_b:
 	{ "p2_mcneil_speech_01", "God, it's good to see you." },
@@ -631,6 +658,10 @@ static const cutscene_camera_t cameraArray[] = {
 	{ CUTSCENE_GRABBER, "erebus1_cinematic_camera_15" },
 	// Erebus 2
 	{ CUTSCENE_VULGARINTRO, "erebus2_vulgarintro_cam_1" },
+	{ CUTSCENE_HUNTERINTRO, "erebus2_hunterintro_cam_1" },
+	// Erebus 5
+	{ CUTSCENE_CLOUD, "erebus5_cloud_cinematic_camera_cam_1" },
+
 	// Phobos 2
 	{ CUTSCENE_PHOBOS2, "phobos2_mcneil_camera_1" },
 
@@ -900,6 +931,7 @@ void Flicksync_ResumeCutscene()
 	{
 		// try again to end the cutscene
 		Flicksync_EndCutscene();
+		Flicksync_NextCutscene();
 	}
 }
 
@@ -907,6 +939,18 @@ void Flicksync_ResumeCutscene()
 // length is in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
 bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length )
 {
+	if (gameLocal.skipCinematic)
+	{
+		if (hasPausedLine)
+			Flicksync_ResumeCutscene();
+		hasWaitingLine = false;
+		hasPausedLine = false;
+		hasCueLine = false;
+		Flicksync_CueActive = false;
+		needCue = false;
+		return true;
+	}
+
 	// if we're not in flicksync mode, then play it like normal
 	if( Flicksync_complete || Flicksync_GameOver || !vr_flicksyncCharacter.GetInteger() || ( !Flicksync_InCutscene && !gameLocal.inCinematic ) )
 		return true;
@@ -1110,7 +1154,7 @@ void NotFlicksync_NewGame()
 
 bool Flicksync_EndCutscene()
 {
-	if (hasWaitingLine)
+	if (hasWaitingLine && !gameLocal.skipCinematic)
 	{
 		if (g_debugCinematic.GetBool())
 			gameLocal.Printf("%d: Flicksync_EndCutscene() while waiting for line\n", gameLocal.framenum);
@@ -1136,6 +1180,23 @@ bool Flicksync_EndCutscene()
 		Flicksync_CueCardText = "";
 		timescale.SetFloat(1.0f);
 		Flicksync_InCutscene = false;
+
+		return true;
+	}
+}
+
+bool Flicksync_NextCutscene()
+{
+	if (hasWaitingLine)
+	{
+		if (g_debugCinematic.GetBool())
+			gameLocal.Printf("%d: Flicksync_NextCutscene() while waiting for line\n", gameLocal.framenum);
+		return false;
+	}
+	else
+	{
+		if (g_debugCinematic.GetBool())
+			gameLocal.Printf("%d: Flicksync_NextCutscene()\n", gameLocal.framenum);
 
 		// Check if we need to skip to another cutscene after this
 		if (Flicksync_GameOver || Flicksync_complete)
@@ -1273,10 +1334,12 @@ idStr CutsceneToMapName( t_cutscene c )
 		return "game/cpuboss";
 	else if (c <= CUTSCENE_GRABBER)
 		return "game/erebus1";
-	else if (c <= CUTSCENE_VULGARINTRO)
+	else if (c <= CUTSCENE_HUNTERINTRO)
 		return "game/erebus2";
-	else if (c <= CUTSCENE_CLOUD)
+	else if (c <= CUTSCENE_ENVIROSUIT_OFF)
 		return "game/erebus5";
+	else if (c <= CUTSCENE_EREBUS6_MONSTERS)
+		return "game/erebus6";
 	else if (c <= CUTSCENE_PHOBOS2)
 		return "game/phobos2";
 	else
@@ -1414,14 +1477,27 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 	case CUTSCENE_GRABBER:
 		ent = gameLocal.FindEntity("trigger_once_88");
 		break;
-	case CUTSCENE_VULGARINTRO:
+	case CUTSCENE_VULGARINTRO: // not really working
+		ent = gameLocal.FindEntity("trigger_once_15");
+		if (ent)
+		{
+			origin = ent->GetPhysics()->GetOrigin();
+			player->GetPhysics()->SetOrigin(origin);
+			player->TouchTriggers();
+		}
 		ent = gameLocal.FindEntity("trigger_once_25");
+		break;
+	case CUTSCENE_HUNTERINTRO:
+		ent = gameLocal.FindEntity("trigger_once_55");
 		break;
 	case CUTSCENE_GUARDIAN_INTRO:
 		relay = gameLocal.FindEntity("guardian_trigger_once");
 		break;
 	case CUTSCENE_GUARDIAN_DEATH:
 		relay = gameLocal.FindEntity("trigger_GuardianDeath");
+		break;
+	case CUTSCENE_CLOUD:
+		ent = gameLocal.FindEntity("trigger_once_78");
 		break;
 	case CUTSCENE_PHOBOS2:
 		ent = gameLocal.FindEntity("trigger_once_45");
@@ -1432,8 +1508,9 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 	{
 		angles.Zero();
 		angles.yaw = ent->GetPhysics()->GetAxis()[0].ToYaw();
-		origin = ent->GetPhysics()->GetOrigin();
-		player->Teleport( origin, angles, ent );
+		player->GetPhysics()->SetOrigin(ent->GetPhysics()->GetOrigin());
+		player->GetFloorPos( 128, origin );
+		player->Teleport( origin, angles, NULL );
 	}
 	if (relay)
 	{
@@ -1626,7 +1703,7 @@ t_cutscene Flicksync_GetNextCutscene()
 			return CUTSCENE_DELTA_SCIENTIST;
 	case CUTSCENE_DELTA_SCIENTIST:
 		if (scenes == SCENES_MINEONLY && c == FLICK_SCIENTIST)
-			return CUTSCENE_FLICKSYNC_COMPLETE;
+			return CUTSCENE_CLOUD;
 		else if (scenes == SCENES_STORYLINE && !player_storyline && c != FLICK_SCIENTIST)
 			return CUTSCENE_DELTA_HKINTRO;
 		else
@@ -1653,7 +1730,7 @@ t_cutscene Flicksync_GetNextCutscene()
 		else
 			return CUTSCENE_CPU_BOSS;
 	case CUTSCENE_CPU_BOSS:
-		if (scenes == SCENES_CHAPTER || ((scenes == SCENES_STORYLINE || scenes == SCENES_MINEONLY) && (c == FLICK_SWANN || c == FLICK_CAMPBELL || c == FLICK_SCIENTIST || c == FLICK_SARGE || c == FLICK_BROOKS || c == FLICK_ROLAND || c == FLICK_DARKSTAR || c == FLICK_RECEPTION)))
+		if (scenes == SCENES_CHAPTER || ((scenes == SCENES_STORYLINE || scenes == SCENES_MINEONLY) && (c == FLICK_SWANN || c == FLICK_CAMPBELL || c == FLICK_SARGE || c == FLICK_BROOKS || c == FLICK_ROLAND || c == FLICK_DARKSTAR || c == FLICK_RECEPTION)))
 			return CUTSCENE_FLICKSYNC_COMPLETE;
 		else
 			return CUTSCENE_ARTIFACT;
@@ -1665,18 +1742,34 @@ t_cutscene Flicksync_GetNextCutscene()
 		if (scenes == SCENES_MINEONLY && (c == FLICK_MARINE_PDA || c == FLICK_MARINE_TORCH))
 			return CUTSCENE_BRAVO_TEAM;
 		else if (scenes == SCENES_MINEONLY && c == FLICK_BETRUGER)
-			return CUTSCENE_FLICKSYNC_COMPLETE;
+			return CUTSCENE_HUNTERINTRO;
 		else if (scenes == SCENES_MINEONLY && c == FLICK_POINT)
 			return CUTSCENE_GRABBER;
 		else
 			return CUTSCENE_BLOOD;
 	case CUTSCENE_BLOOD:
-		return CUTSCENE_GRABBER;
+		if (scenes == SCENES_MINEONLY && c == FLICK_MCNEIL)
+			return CUTSCENE_PHOBOS2;
+		else
+			return CUTSCENE_GRABBER;
 	case CUTSCENE_GRABBER:
-		//return CUTSCENE_VULGARINTRO; // not quite working
-	case CUTSCENE_VULGARINTRO:
 		if (scenes == SCENES_MINEONLY && c == FLICK_POINT)
 			return CUTSCENE_BRAVO_TEAM;
+		else
+			return CUTSCENE_HUNTERINTRO;
+
+	case CUTSCENE_VULGARINTRO:
+			return CUTSCENE_HUNTERINTRO;
+	case CUTSCENE_HUNTERINTRO:
+		if (scenes == SCENES_MINEONLY && c == FLICK_BETRUGER)
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+		else
+			return CUTSCENE_CLOUD;
+
+	case CUTSCENE_CLOUD:
+	case CUTSCENE_EREBUS6_MONSTERS:
+		if (scenes == SCENES_MINEONLY && c == FLICK_SCIENTIST)
+			return CUTSCENE_FLICKSYNC_COMPLETE;
 		else
 			return CUTSCENE_PHOBOS2;
 

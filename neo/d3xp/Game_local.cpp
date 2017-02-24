@@ -2560,6 +2560,7 @@ void idGameLocal::RunFrame( idUserCmdMgr& cmdMgr, gameReturn_t& ret )
 	player = GetLocalPlayer();
 	
 	static bool wasInCinematic = false;
+	static bool cutsceneEnded = false;
 
 	if ( !common->IsMultiplayer() && g_stopTime.GetBool() || commonVr->VR_GAME_PAUSED ) // koz vr pause
 	{
@@ -2748,7 +2749,7 @@ void idGameLocal::RunFrame( idUserCmdMgr& cmdMgr, gameReturn_t& ret )
 			
 			// Carl: We have to do it this way, or we get begin/end events for every camera change in a cutscene
 			if( wasInCinematic && !inCinematic )
-				Flicksync_EndCutscene();
+				cutsceneEnded = Flicksync_EndCutscene() || cutsceneEnded;
 			wasInCinematic = inCinematic;
 
 			// display how long it took to calculate the current game frame
@@ -2789,6 +2790,11 @@ void idGameLocal::RunFrame( idUserCmdMgr& cmdMgr, gameReturn_t& ret )
 		skipCinematic = false;
 	}
 	
+	// Skip to next cutscene if needed
+	if (cutsceneEnded)
+		Flicksync_NextCutscene();
+	cutsceneEnded = false;
+
 	// show any debug info for this frame
 	RunDebugInfo();
 	D_DrawDebugLines();
