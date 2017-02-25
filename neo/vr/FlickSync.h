@@ -131,14 +131,16 @@ typedef enum
 	CUTSCENE_VULGARINTRO, // Player
 	CUTSCENE_HUNTERINTRO, // Player
 	// Erebus 5
-	CUTSCENE_CLOUD, // ?
+	CUTSCENE_CLOUD, // Dr. Cloud, McNeil, Player
 	CUTSCENE_ENVIROSUIT_ON, // ?
 	CUTSCENE_ENVIROSUIT_OFF, // ?
 	// Erebus 6
 	CUTSCENE_EREBUS6_MONSTERS,
-	// Hell
+	CUTSCENE_EREBUS6_BER, // Player, (Hunters)
+	CUTSCENE_EREBUS6_BER_DEATH, // Player, (Hunters)
 	// Phobos 2
 	CUTSCENE_PHOBOS2, // McNeil, Player
+	// Hell
 
 
 	// Lost Missions: Enpro

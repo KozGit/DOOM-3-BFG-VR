@@ -669,6 +669,9 @@ static const cutscene_camera_t cameraArray[] = {
 	{ CUTSCENE_HUNTERINTRO, "erebus2_hunterintro_cam_1" },
 	// Erebus 5
 	{ CUTSCENE_CLOUD, "erebus5_cloud_cinematic_camera_cam_1" },
+	// Erebus 6
+	{ CUTSCENE_EREBUS6_BER, "ber_erebus6_cinematic_cam_1" },
+	{ CUTSCENE_EREBUS6_BER_DEATH, "erebus6_cinematic_cam_death_1" },
 
 	// Phobos 2
 	{ CUTSCENE_PHOBOS2, "phobos2_mcneil_camera_1" },
@@ -1381,7 +1384,7 @@ idStr CutsceneToMapName( t_cutscene c )
 		return "game/erebus2";
 	else if (c <= CUTSCENE_ENVIROSUIT_OFF)
 		return "game/erebus5";
-	else if (c <= CUTSCENE_EREBUS6_MONSTERS)
+	else if (c <= CUTSCENE_EREBUS6_BER_DEATH)
 		return "game/erebus6";
 	else if (c <= CUTSCENE_PHOBOS2)
 		return "game/phobos2";
@@ -1550,6 +1553,12 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		break;
 	case CUTSCENE_CLOUD:
 		ent = gameLocal.FindEntity("trigger_once_78");
+		break;
+	case CUTSCENE_EREBUS6_BER:
+		ent = gameLocal.FindEntity("trigger_once_12");
+		break;
+	case CUTSCENE_EREBUS6_BER_DEATH:
+		relay = gameLocal.FindEntity("ber_end_trigger_relay");
 		break;
 	case CUTSCENE_PHOBOS2:
 		ent = gameLocal.FindEntity("trigger_once_45");
@@ -1834,8 +1843,16 @@ t_cutscene Flicksync_GetNextCutscene()
 	case CUTSCENE_EREBUS6_MONSTERS:
 		if (scenes == SCENES_MINEONLY && c == FLICK_SCIENTIST)
 			return CUTSCENE_FLICKSYNC_COMPLETE;
-		else
+		else if (scenes == SCENES_MINEONLY && c == FLICK_MCNEIL)
 			return CUTSCENE_PHOBOS2;
+		else if (scenes == SCENES_STORYLINE && c != FLICK_NONE && c != FLICK_SCIENTIST && c != FLICK_PLAYER && c!= FLICK_MCNEIL)
+			return CUTSCENE_PHOBOS2;
+		else
+			return CUTSCENE_EREBUS6_BER;
+	case CUTSCENE_EREBUS6_BER:
+		return CUTSCENE_EREBUS6_BER_DEATH;
+	case CUTSCENE_EREBUS6_BER_DEATH:
+		return CUTSCENE_PHOBOS2;
 
 	case CUTSCENE_PHOBOS2:
 		if ( c == FLICK_MCNEIL && (scenes == SCENES_MINEONLY || scenes == SCENES_CHAPTER || scenes == SCENES_STORYLINE ) )
