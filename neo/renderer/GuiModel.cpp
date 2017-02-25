@@ -47,6 +47,8 @@ idGuiModel::idGuiModel()
 	{
 		shaderParms[i] = 1.0f;
 	}
+	
+	renderEye = 0;
 }
 
 /*
@@ -293,14 +295,14 @@ void idGuiModel::EmitFullScreen()
 		viewDef->renderView.stereoScreenSeparation = screenSeparation;
 		
 		extern idCVar stereoRender_swapEyes;
-		viewDef->renderView.viewEyeBuffer = 0;	// render to both buffers
+		//viewDef->renderView.viewEyeBuffer = 0;	// render to both buffers
+		viewDef->renderView.viewEyeBuffer = tr.guiModel->GetEye();
 		if( stereoRender_swapEyes.GetBool() )
 		{
 			viewDef->renderView.stereoScreenSeparation = -screenSeparation;
 		}
 	}
 	
-
 	viewDef->scissor.x1 = 0;
 	viewDef->scissor.y1 = 0;
 	viewDef->scissor.x2 = viewDef->viewport.x2 - viewDef->viewport.x1;
@@ -361,6 +363,21 @@ void idGuiModel::EmitFullScreen()
 	
 	// add the command to draw this view
 	R_AddDrawViewCmd( viewDef, true );
+}
+
+/*
+=============
+void idGuiModel::SetEye
+=============
+*/
+void idGuiModel::SetEye( int eye )
+{
+	if ( renderEye == eye )
+	{
+		EmitFullScreen();
+		Clear();
+		renderEye = eye;
+	}
 }
 
 /*

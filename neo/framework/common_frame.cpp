@@ -31,8 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "Common_local.h"
-#include "../renderer/Image.h" // now I did it!
-#include "../renderer/ImageOpts.h"
+//#include "../renderer/Image.h" // now I did it!
+//#include "../renderer/ImageOpts.h"
 
 // RB begin
 #if defined(USE_DOOMCLASSIC)
@@ -43,6 +43,8 @@ If you have questions concerning this license or the applicable additional terms
 
 // Koz begin
 #include "vr\Vr.h"
+#include "renderer\tr_local.h"
+extern idRenderSystemLocal tr;
 // Koz end
 
 /*
@@ -306,6 +308,7 @@ void idCommonLocal::Draw()
 		//commented out, need to test all this crap again.
 		if ( commonVr->PDAforced || commonVr->PDAforcetoggle ) //&& !commonVr->playerDead) // koz fixme do we only want to use the PDA model in VR?
 		{
+			tr.guiModel->SetEye( 0 );// koz set eye to 0 to render guimodel to both eyes. ( -1 left, 1 right ) 
 			game->Shell_Render(); //koz render the menu
 			Dialog().Render( false );
 			console->Draw( false );

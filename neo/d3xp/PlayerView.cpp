@@ -451,6 +451,8 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 		return;
 	}
 	
+	tr.guiModel->SetEye( view->viewEyeBuffer );
+
 	// koz fixme sanity check this move.
 	// hack the shake in at the very last moment, so it can't cause any consistency problems
 	renderView_t hackedView = *view;
@@ -539,6 +541,7 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 		
 		if( player->spectating )
 		{
+			tr.guiModel->SetEye( 0 );
 			return;
 		}
 		
@@ -586,14 +589,19 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 		
 		if( bfgVision )
 		{
+			float extend = -0.5f * commonVr->VRScreenSeparation * renderSystem->GetVirtualWidth();
+			float offset = -extend * view->viewEyeBuffer;
+			
 			renderSystem->SetColor4( 1.0f, 1.0f, 1.0f, 1.0f );
-			renderSystem->DrawStretchPic( 0.0f, 0.0f, renderSystem->GetVirtualWidth(), renderSystem->GetVirtualHeight(), 0.0f, 0.0f, 1.0f, 1.0f, bfgMaterial );
+			//renderSystem->DrawStretchPic( 0.0f, 0.0f, renderSystem->GetVirtualWidth(), renderSystem->GetVirtualHeight(), 0.0f, 0.0f, 1.0f, 1.0f, bfgMaterial );
+			renderSystem->DrawStretchPic( offset - extend, 0.0f, renderSystem->GetVirtualWidth() + extend * 2, renderSystem->GetVirtualHeight(), 0.0f, 0.0f, 1.0f, 1.0f, bfgMaterial );
 		}
 
-		if (vrComfortVision) {
-			float extend = -0.5f * commonVr->VRScreenSeparation * renderSystem->GetVirtualWidth(); // glConfig.openVRScreenSeparation
+		if ( vrComfortVision )
+		{
+			float extend = -0.5f * commonVr->VRScreenSeparation * renderSystem->GetVirtualWidth(); 
 			float offset = -extend * view->viewEyeBuffer;
-
+					
 			renderSystem->SetColor4(0, 0, 0, 255);
 
 			int width = renderSystem->GetVirtualWidth();
@@ -654,6 +662,8 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 			renderSystem->DrawStretchPic( 0.0f, 0.0f, renderSystem->GetVirtualWidth(), renderSystem->GetVirtualHeight(), 0.0f, 0.0f, 1.0f, 1.0f, mtr );
 		}
 	}
+
+	tr.guiModel->SetEye( 0 );
 }
 
 
@@ -807,7 +817,8 @@ stereoDistances_t	CaclulateStereoDistances(
 	{
 		// head mounted display mode
 		dists.worldSeparation = CentimetersToInches( interOcularCentimeters * 0.5 );
-		dists.screenSeparation = 0.0f;
+		//dists.screenSeparation = 0.0f;
+		dists.screenSeparation = commonVr->VRScreenSeparation;
 		return dists;
 	}
 	
@@ -879,7 +890,7 @@ void idPlayerView::EmitStereoEyeView( const int eye, idMenuHandler_HUD* hudManag
 	
 	eyeView.viewEyeBuffer = stereoRender_swapEyes.GetBool() ? eye : -eye;
 	eyeView.stereoScreenSeparation = eye * dists.screenSeparation;
-
+	
 	// Koz begin
 	if ( game->isVR )
 	{
@@ -1536,6 +1547,12 @@ void FullscreenFX_Warp::HighQuality()
 	
 	// draw the warps
 	center.x = renderSystem->GetVirtualWidth() / 2.0f;
+
+	if ( game->isVR )
+	{
+		center.x += commonVr->VRScreenSeparation * tr.guiModel->GetEye() * 0.5f;
+	}
+
 	center.y = renderSystem->GetVirtualHeight() / 2.0f;
 	radius = 200;
 	

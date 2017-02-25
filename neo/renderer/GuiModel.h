@@ -52,6 +52,12 @@ public:
 	
 	void	EmitToCurrentView( float modelMatrix[16], bool depthHack );
 	void	EmitFullScreen();
+
+	//Koz 
+	void	SetEye( int eye );
+	int		GetEye() { return renderEye; };
+	// koz end
+
 	
 	// the returned pointer will be in write-combined memory, so only make contiguous
 	// 32 bit writes and never read from it.
@@ -68,6 +74,8 @@ private:
 	
 	float						shaderParms[ MAX_ENTITY_SHADER_PARMS ];
 	
+	int							renderEye;
+
 	static const float STEREO_DEPTH_NEAR;
 	static const float STEREO_DEPTH_MID;
 	static const float STEREO_DEPTH_FAR;
