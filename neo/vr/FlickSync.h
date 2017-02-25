@@ -145,7 +145,8 @@ typedef enum
 	FMV_LOST_MISSIONS, // (Announcer)
 	CUTSCENE_BRAVO_TEAM, // Bravo Lead, Marine PDA, Marine Torch, Point, Player
 
-	CUTSCENE_FLICKSYNC_COMPLETE
+	CUTSCENE_FLICKSYNC_COMPLETE,
+	CUTSCENE_FLICKSYNC_GAMEOVER
 } t_cutscene;
 
 typedef enum {

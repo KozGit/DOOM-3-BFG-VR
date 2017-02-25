@@ -1231,12 +1231,10 @@ bool Flicksync_NextCutscene()
 			gameLocal.Printf("%d: Flicksync_NextCutscene()\n", gameLocal.framenum);
 
 		// Check if we need to skip to another cutscene after this
-		if (Flicksync_GameOver || Flicksync_complete)
-			Flicksync_skipToCutscene = CUTSCENE_NONE;
-		else if (vr_cutscenesOnly.GetInteger() == 1 && Flicksync_skipToCutscene == CUTSCENE_NONE)
+		if (vr_cutscenesOnly.GetInteger() == 1 && Flicksync_skipToCutscene == CUTSCENE_NONE)
 			Flicksync_skipToCutscene = Flicksync_GetNextCutscene();
 		// Don't allow spoilers
-		if (vr_flicksyncSpoiler.GetInteger() > 0 && Flicksync_skipToCutscene >= vr_flicksyncSpoiler.GetInteger())
+		if (vr_flicksyncSpoiler.GetInteger() > 0 && Flicksync_skipToCutscene >= vr_flicksyncSpoiler.GetInteger() && Flicksync_skipToCutscene < CUTSCENE_FLICKSYNC_COMPLETE)
 			Flicksync_skipToCutscene = CUTSCENE_FLICKSYNC_COMPLETE;
 		// Actually skip to next cutscene
 		if (Flicksync_skipToCutscene != CUTSCENE_NONE && Flicksync_skipToCutscene != Flicksync_currentCutscene)
@@ -1385,6 +1383,15 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		gameLocal.Printf("%d: Flicksync_GoToCutscene(%d)\n", gameLocal.framenum, scene);
 	//Flicksync_currentCutscene = scene;
 	//Flicksync_skipToCutscene = CUTSCENE_NONE;
+
+	if (scene == CUTSCENE_FLICKSYNC_GAMEOVER)
+	{
+		if (g_debugCinematic.GetBool())
+			gameLocal.Printf("%d: Flicksync Game Over: disconnecting\n", gameLocal.framenum);
+		if (vr_cutscenesOnly.GetInteger() == 1)
+			gameLocal.sessionCommand = "disconnect";
+		return;
+	}
 
 	if (scene == CUTSCENE_FLICKSYNC_COMPLETE)
 	{
@@ -1596,6 +1603,10 @@ t_cutscene Flicksync_GetNextCutscene()
 {
 	if (g_debugCinematic.GetBool())
 		gameLocal.Printf("%d: Flicksync_GetNextCutscene()\n", gameLocal.framenum);
+
+	if (Flicksync_GameOver && vr_cutscenesOnly.GetInteger() == 1)
+		return CUTSCENE_FLICKSYNC_GAMEOVER;
+
 	int c = vr_flicksyncCharacter.GetInteger();
 	t_cutscene first = Flicksync_GetFirstScene( c );
 	int scenes = vr_flicksyncScenes.GetInteger();
@@ -1616,6 +1627,8 @@ t_cutscene Flicksync_GetNextCutscene()
 		//return CUTSCENE_PINKY; // Carl: Debug hack
 		if (c == FLICK_DARKSTAR && scenes == SCENES_MINEONLY)
 			return CUTSCENE_FLICKSYNC_COMPLETE;
+		else if ( c == FLICK_TOWER && scenes == SCENES_MINEONLY )
+			return CUTSCENE_SARGE;
 		else if ((c == FLICK_DARKSTAR || c == FLICK_BRAVO_LEAD) && scenes == SCENES_STORYLINE)
 			return CUTSCENE_ISHII;
 		else if (c == FLICK_SARGE && scenes == SCENES_MINEONLY)
@@ -1701,6 +1714,8 @@ t_cutscene Flicksync_GetNextCutscene()
 			return CUTSCENE_ENPRO; // should be ENPRO_ESCAPE but can't skip first cutscene
 		else if (scenes == SCENES_MINEONLY && c == FLICK_PLAYER)
 			return CUTSCENE_ENPRO; // should be ENPRO_ESCAPE but can't skip first cutscene
+		else if (scenes == SCENES_MINEONLY && c == FLICK_SARGE)
+			return CUTSCENE_CPU_BOSS;
 		else
 			return CUTSCENE_ENPRO;
 	case CUTSCENE_ENPRO:
@@ -1782,6 +1797,8 @@ t_cutscene Flicksync_GetNextCutscene()
 	case CUTSCENE_BLOOD:
 		if (scenes == SCENES_MINEONLY && c == FLICK_MCNEIL)
 			return CUTSCENE_PHOBOS2;
+		else if (scenes == SCENES_MINEONLY && c == FLICK_TOWER)
+			return CUTSCENE_FLICKSYNC_COMPLETE;
 		else
 			return CUTSCENE_GRABBER;
 	case CUTSCENE_GRABBER:
