@@ -730,7 +730,8 @@ idPlayerView::ScreenFade
 */
 void idPlayerView::ScreenFade()
 {
-	if( !fadeTime )
+	// Carl: Don't cover screen when we need to read the Flicksync HUD or see what's happening
+	if( !fadeTime || g_stopTime.GetBool() || ( Flicksync_InCutscene && (Flicksync_CueActive || Flicksync_CueCardActive) ) )
 	{
 		return;
 	}
@@ -980,6 +981,8 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 	// Carl: Motion sickness aids for artificial locomotion
 	// 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Reduce FOV & Chaperone, 6 = Slow Mo, 7 = Slow Mo & Chaperone, 8 = Slow Mo & Reduce FOV, 9 = Slow Mo, Chaperone, Reduce FOV, 10 = Third Person, 11 = Particles, 12 = Particles & Chaperone
 	int fix = vr_motionSickness.GetInteger();
+	if( gameLocal.inCinematic || Flicksync_InCutscene )
+		fix = 0;
 	commonVr->ForceChaperone( 1, player->ShouldBlink() && ( fix == 1 || fix == 4 || fix == 5 || fix == 7 || fix == 9 ) );
 	if( vr_blink.GetFloat() > 0.f && player->ShouldBlink() && ( fix == 3 || fix == 4 ) && !commonVr->VR_GAME_PAUSED )
 	{

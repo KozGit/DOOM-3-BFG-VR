@@ -58,15 +58,15 @@ typedef enum
 {
 	// Mars City 1
 	CUTSCENE_NONE = 0,
-	FMV_UAC,
-	CUTSCENE_DARKSTAR,
-	ACTING_BIOSCAN,
-	CUTSCENE_RECEPTION,
-	CUTSCENE_MEETING,
-	ACTING_SUITS,
-	ACTING_KITCHEN,
-	ACTING_BEFORE_SARGE,
-	CUTSCENE_SARGE,
+	FMV_UAC, // (Announcer)
+	CUTSCENE_DARKSTAR, // Tower, Betruger, Swann, Campbell, Player, (Announcer, Darkstar, Dr. Caseon)
+	ACTING_BIOSCAN, // Player, (Bioscanner)
+	CUTSCENE_RECEPTION, // Reception, Player
+	CUTSCENE_MEETING, // Betruger, Swann, Campbell, Player, Reception
+	ACTING_SUITS, // Player
+	ACTING_KITCHEN, // Player
+	ACTING_BEFORE_SARGE, // Scientists, Player
+	CUTSCENE_SARGE, // Player
 
 	// MC Underground
 	ACTING_GEARUP,
@@ -76,86 +76,114 @@ typedef enum
 	ACTING_SNEAKING,
 	ACTING_MAINTENANCE,
 	ACTING_AIRLOCK,
-	CUTSCENE_ISHII,
-	CUTSCENE_IMP,
+	CUTSCENE_ISHII, // Scientists, Player
+	CUTSCENE_IMP, // Player
 
 	// Mars City 2 always plays in the background?
 	ACTING_CEILING,
-	ACTING_SARGE_VIDEO,
+	ACTING_SARGE_VIDEO, // Sarge, Player
 
 	// Admin
-	CUTSCENE_ADMIN,
-	CUTSCENE_PINKY,
-	ACTING_OVERHEAR,
+	CUTSCENE_ADMIN, // Swann, Campbell, Betruger, Player
+	CUTSCENE_PINKY, // Player
+	ACTING_OVERHEAR, // Swann, Campbell, Player
 
 	// Alpha Labs 1
-	CUTSCENE_ALPHALABS1,
+	CUTSCENE_ALPHALABS1, // Player
 	// Alpha Labs 4
-	CUTSCENE_VAGARY,
+	CUTSCENE_VAGARY, // Player
+
+	// Enpro
+	CUTSCENE_ENPRO, // Bravo Lead, Marine PDA, Marine Torch, Point
+	CUTSCENE_ENPRO_ESCAPE,
 
 	// Recycling 1
-	CUTSCENE_REVINTRO,
+	CUTSCENE_REVINTRO, // Player
 	// Recycling 2
-	CUTSCENE_MANCINTRO,
+	CUTSCENE_MANCINTRO, // Player
 
 	// Monorail
-	CUTSCENE_MONORAIL_RAISE_COMMANDO,
-	CUTSCENE_MONORAIL_CRASH,
+	CUTSCENE_MONORAIL_RAISE_COMMANDO, // Betruger
+	CUTSCENE_MONORAIL_CRASH, // Player
 
 	// Delta 2a
-	CUTSCENE_DELTA_SCIENTIST,
-	CUTSCENE_DELTA_TELEPORTER,
+	CUTSCENE_DELTA_SCIENTIST, // Scientists, Player
+	CUTSCENE_DELTA_TELEPORTER, // Player
 
 	// Delta 4
-	CUTSCENE_DELTA_HKINTRO,
+	CUTSCENE_DELTA_HKINTRO, // Betruger, Player
 
 	// Hell 1
-	CUTSCENE_GUARDIAN_INTRO,
-	CUTSCENE_GUARDIAN_DEATH,
+	CUTSCENE_GUARDIAN_INTRO, // Player
+	CUTSCENE_GUARDIAN_DEATH, // Player
 
 	// CPU 1
-	CUTSCENE_CAMPHUNT,
+	CUTSCENE_CAMPHUNT, // Campbell
 	// CPU Boss
-	CUTSCENE_CPU_BOSS,
+	CUTSCENE_CPU_BOSS, // Player
+
+	// Hellhole
+	CUTSCENE_ENDING, // Player, Rescue Team, Betruger, Swann
 
 	// RoE: Erebus 1
-	FMV_ROE,
-	CUTSCENE_ARTIFACT,
-	CUTSCENE_BLOOD,
-	CUTSCENE_GRABBER,
+	FMV_ROE, // (Announcer)
+	CUTSCENE_ARTIFACT, // Tower, McNeil, Marine PDA, Marine Torch, Point, Player
+	CUTSCENE_BLOOD, // Player
+	CUTSCENE_GRABBER, // Point, Player
 	// Erebus 2
-	CUTSCENE_VULGARINTRO,
+	CUTSCENE_VULGARINTRO, // Player
+	CUTSCENE_HUNTERINTRO, // Player
 	// Erebus 5
-	CUTSCENE_ENVIROSUIT_ON,
-	CUTSCENE_ENVIROSUIT_OFF,
-	CUTSCENE_CLOUD,
+	CUTSCENE_CLOUD, // Dr. Cloud, McNeil, Player
+	CUTSCENE_ENVIROSUIT_ON, // ?
+	CUTSCENE_ENVIROSUIT_OFF, // ?
 	// Erebus 6
-	// Hell
+	CUTSCENE_EREBUS6_MONSTERS,
+	CUTSCENE_EREBUS6_BER, // Player, (Hunters)
+	CUTSCENE_EREBUS6_BER_DEATH, // Player, (Hunters)
 	// Phobos 2
-	CUTSCENE_PHOBOS2,
-
+	CUTSCENE_PHOBOS2, // McNeil, Player
+	// Hell
+	CUTSCENE_HELL_MALEDICT, // Player, Betruger
+	CUTSCENE_HELL_MALEDICT_DEATH, // Player, Betruger, McNeil
 
 	// Lost Missions: Enpro
-	FMV_LOST_MISSIONS,
-	CUTSCENE_BRAVO_TEAM,
+	FMV_LOST_MISSIONS, // (Announcer)
+	CUTSCENE_BRAVO_TEAM, // Bravo Lead, Marine PDA, Marine Torch, Point, Player
+
+	CUTSCENE_FLICKSYNC_COMPLETE,
+	CUTSCENE_FLICKSYNC_GAMEOVER
 } t_cutscene;
+
+typedef enum {
+	SCENES_ALL = 0,
+	SCENES_CHAPTER = 1,
+	SCENES_MYSTART = 2,
+	SCENES_STORYLINE = 3,
+	SCENES_MINEONLY = 4
+};
 
 bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length );
 void Flicksync_AddVoiceLines();
 void Flicksync_HearLine( const char* line, int confidence, uint64 startTime, uint32 length );
 void Flicksync_StoppedTalking();
 void Flicksync_NewGame();
+void NotFlicksync_NewGame();
 bool Flicksync_UseCueCard();
 void Flicksync_Cheat();
 void Flicksync_GiveUp();
 void Flicksync_StartCutscene();
 bool Flicksync_EndCutscene();
-void Flicksync_GoToCutscene( t_cutscene scene );
+bool Flicksync_NextCutscene();
+void Flicksync_GoToCutscene(t_cutscene scene);
 t_cutscene Flicksync_GetNextCutscene();
+void Flicksync_ResumeCutscene();
 
 extern idCVar vr_flicksyncCharacter;
 extern idCVar vr_flicksyncCueCards;
 extern idCVar vr_cutscenesOnly;
+extern idCVar vr_flicksyncScenes;
+extern idCVar vr_flicksyncSpoiler;
 
 extern int Flicksync_Score;
 extern int Flicksync_CueCards;
@@ -167,6 +195,7 @@ extern idStr Flicksync_CueText;
 extern bool Flicksync_CueActive;
 extern int Flicksync_CheatCount;	// Cheat once = warning, cheat twice it's GAME OVER!
 extern bool Flicksync_GameOver;
+extern bool Flicksync_complete;
 extern bool Flicksync_InCutscene;
 
 extern t_cutscene Flicksync_skipToCutscene;

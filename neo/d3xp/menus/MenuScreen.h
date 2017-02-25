@@ -2594,6 +2594,8 @@ public:
 			FLICKSYNC_FIELD_CHARACTER,
 			FLICKSYNC_FIELD_CUECARDS,
 			FLICKSYNC_FIELD_GAMETYPE,
+			FLICKSYNC_FIELD_MINEONLY,
+			FLICKSYNC_FIELD_SPOILER,
 			FLICKSYNC_FIELD_NEWGAME,
 			MAX_FLICKSYNC_FIELDS
 		};
@@ -2621,6 +2623,8 @@ public:
 		int	originalFlicksyncCharacter;
 		int	originalFlicksyncCueCards;
 		int	originalCutscenesOnly;
+		int	originalFlicksyncScenes;
+		int	originalFlicksyncSpoiler;
 	};
 
 	idMenuScreen_Shell_VR_Flicksync() :

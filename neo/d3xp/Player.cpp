@@ -6630,6 +6630,7 @@ void idPlayer::Weapon_Combat()
 {
 	if( influenceActive || !weaponEnabled || gameLocal.inCinematic || Flicksync_InCutscene || privateCameraView )
 	{
+		commonVr->ForceChaperone(0, false);
 		return;
 	}
 	

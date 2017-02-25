@@ -793,7 +793,7 @@ void idAI::Spawn()
 	idVec3				local_dir;
 	bool				talks;
 	
-	if( !g_monsters.GetBool() )
+	if( !g_monsters.GetBool() || (Flicksync_complete && vr_cutscenesOnly.GetInteger()==1) )
 	{
 		PostEventMS( &EV_Remove, 0 );
 		return;

@@ -199,7 +199,7 @@ idTarget_EndLevel::Event_Activate
 void idTarget_EndLevel::Event_Activate( idEntity* activator )
 {
 	extern idCVar g_demoMode;
-	if( g_demoMode.GetInteger() > 0 )
+	if( g_demoMode.GetInteger() > 0 || Flicksync_complete || Flicksync_GameOver )
 	{
 		gameLocal.sessionCommand = "disconnect";
 		return;
