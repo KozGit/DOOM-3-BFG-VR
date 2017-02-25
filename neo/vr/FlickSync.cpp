@@ -833,7 +833,7 @@ int Flicksync_AlreadyHeardLine(const char* line)
 	return -1;
 }
 
-bool Flicksync_WaitingOnLineThatIsLate(const char* lineName, uint64 startTime)
+bool Flicksync_WaitingOnLineThatIsLate(const char* lineName, uint64 startTime, int character)
 {
 	if (!hasWaitingLine)
 		return false;
@@ -841,7 +841,8 @@ bool Flicksync_WaitingOnLineThatIsLate(const char* lineName, uint64 startTime)
 	if (idStr::Cmp(waitingLine.shader, lineName) == 0)
 		return false;
 	// if the new line is supposed to start before our line is finished, then no need to wait
-	if (startTime < (waitingLine.startTime + waitingLine.length))
+	// unless the new line is also our character
+	if (startTime < (waitingLine.startTime + waitingLine.length) && character != EntityToCharacter(waitingLine.entity, waitingLine.shader) )
 		return false;
 	return true;
 }
@@ -926,19 +927,50 @@ void Flicksync_ResumeCutscene()
 		gameLocal.Printf("%d: Flicksync_ResumeCutscene()\n", gameLocal.framenum);
 	timescale.SetFloat(1.0f);
 	g_stopTime.SetBool(false);
-	Flicksync_SayPausedLine();
+
+	// If it was our next line that was paused, start waiting for it.
+	int character = 0;
+	if (hasPausedLine)
+		character = EntityToCharacter(pausedLine.entity.c_str(), pausedLine.shader);
+	if (character == vr_flicksyncCharacter.GetInteger())
+	{
+		// we already set CueLine to WaitingLine before calling ResumeCutscene
+		waitingLine = pausedLine;
+		hasWaitingLine = true;
+		// adjust the start time to start now
+		SYSTEMTIME systime;
+		GetSystemTime(&systime);
+		uint64 startTime = 0;
+		SystemTimeToFileTime(&systime, (LPFILETIME)&startTime);
+		waitingLine.startTime = startTime;
+		// if we used up our cue card
+		if (Flicksync_CueCardText != "")
+			Flicksync_CueCardActive = false;
+		Flicksync_CueCardText = waitingLine.text;
+	}
+	// Otherwise, let the other character say their paused line.
+	else
+		Flicksync_SayPausedLine();
+	hasPausedLine = false;
 	if (endAfterPause)
 	{
-		// try again to end the cutscene
+		// try again to end the cutscene if we paused because we hit the end.
 		Flicksync_EndCutscene();
 		Flicksync_NextCutscene();
 	}
 }
 
+// The game is trying to make a character speak a line.
 // return true if the game is allowed to play this line, or false if the user is going to say it.
 // length is in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
 bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length )
 {
+	SYSTEMTIME systime;
+	GetSystemTime(&systime);
+	// startTime is also in FileTime
+	uint64 startTime = 0;
+	SystemTimeToFileTime(&systime, (LPFILETIME)&startTime);
+
 	if (gameLocal.skipCinematic)
 	{
 		if (hasPausedLine)
@@ -955,21 +987,17 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 	if( Flicksync_complete || Flicksync_GameOver || !vr_flicksyncCharacter.GetInteger() || ( !Flicksync_InCutscene && !gameLocal.inCinematic ) )
 		return true;
 
-	SYSTEMTIME systime;
-	GetSystemTime(&systime);
-	// startTime is also in FileTime
-	uint64 startTime = 0;
-	SystemTimeToFileTime(&systime, (LPFILETIME)&startTime);
-
 	int character = EntityToCharacter(entity, lineName);
 
 	// If the next character tries to speak before we finished our line, pause the cutscene to wait for us.
-	if (Flicksync_WaitingOnLineThatIsLate(lineName, startTime))
+	if (Flicksync_WaitingOnLineThatIsLate(lineName, startTime, character))
 	{
 		if (g_debugCinematic.GetBool())
 			gameLocal.Printf("%d: new Flicksync_Voice() while waiting for line. Pausing to wait for \"%s\"\n", gameLocal.framenum, waitingLine.text);
 		//commonVoice->Say("pausing to wait for %s", waitingLine.text);
 		// pause cutscene until we hear the line we are waiting for
+		const char *line = Flicksync_LineNameToLine(lineName);
+		idStr::Copynz(pausedLine.text, line, 1024);
 		pausedLine.entity = entity;
 		pausedLine.shader = lineName;
 		pausedLine.startTime = startTime;
@@ -984,7 +1012,8 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 		return false;
 	}
 
-	// I don't know why, but sometimes this function is called 3 times for the same line.
+	// I don't know why, but often this function is called 3 times for the same line.
+	// Worse: sometimes it repeats a pair of lines 3 times, but I'm not handling that yet.
 	static const char* previousLineName = "";
 	if (idStr::Cmp(lineName, previousLineName) == 0)
 		return character != vr_flicksyncCharacter.GetInteger();
@@ -1003,10 +1032,13 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 		return true;
 	}
 
+	// Before we implemented pausing, we failed them when they took too long and it was time for their next line
+#if 0
 	if (Flicksync_WaitingOnLineThatIsLate(lineName, startTime))
 	{
 		Flicksync_ScoreFail();
 	}
+#endif
 
 	const char *line = Flicksync_LineNameToLine(lineName);
 
