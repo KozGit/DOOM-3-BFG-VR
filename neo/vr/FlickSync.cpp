@@ -653,6 +653,7 @@ static const cutscene_camera_t cameraArray[] = {
 	{ CUTSCENE_CPU_BOSS, "cin_cpu_boss_cam_1" },
 
 	// Hellhole
+	{ CUTSCENE_ENDING, "hellhole_cam_3" },
 
 	// le_enpro1
 	//{ CUTSCENE_BRAVO_TEAM, "enpro_exit_cam_a" },
@@ -675,6 +676,11 @@ static const cutscene_camera_t cameraArray[] = {
 
 	// Phobos 2
 	{ CUTSCENE_PHOBOS2, "phobos2_mcneil_camera_1" },
+
+	// RoE: Hell
+	{ CUTSCENE_HELL_MALEDICT, "jay_hell_intro_cinematic_cam_1" },
+	{ CUTSCENE_HELL_MALEDICT_DEATH, "maledict_heart_flyin_cinematic_cam_1" },
+
 
 };
 
@@ -1378,6 +1384,8 @@ idStr CutsceneToMapName( t_cutscene c )
 		return "game/cpu";
 	else if (c <= CUTSCENE_CPU_BOSS)
 		return "game/cpuboss";
+	else if (c <= CUTSCENE_ENDING)
+		return "game/hellhole";
 	else if (c <= CUTSCENE_GRABBER)
 		return "game/erebus1";
 	else if (c <= CUTSCENE_HUNTERINTRO)
@@ -1388,6 +1396,8 @@ idStr CutsceneToMapName( t_cutscene c )
 		return "game/erebus6";
 	else if (c <= CUTSCENE_PHOBOS2)
 		return "game/phobos2";
+	else if (c <= CUTSCENE_HELL_MALEDICT_DEATH)
+		return "game/hell";
 	else
 		return "game/le_enpro1";
 }
@@ -1526,6 +1536,7 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 	case CUTSCENE_CPU_BOSS:
 		relay = gameLocal.FindEntity("trigger_relay_54");
 		break;
+
 	case CUTSCENE_BLOOD:
 		ent = gameLocal.FindEntity("trigger_once_56");
 		break;
@@ -1562,6 +1573,12 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		break;
 	case CUTSCENE_PHOBOS2:
 		ent = gameLocal.FindEntity("trigger_once_45");
+		break;
+	case CUTSCENE_HELL_MALEDICT:
+		relay = gameLocal.FindEntity("jay_intro_trigger_once");	// broken
+		break;
+	case CUTSCENE_HELL_MALEDICT_DEATH:
+		ent = gameLocal.FindEntity("trigger_once_flyin");
 		break;
 	}
 
@@ -1646,7 +1663,6 @@ t_cutscene Flicksync_GetNextCutscene()
 		return CUTSCENE_DARKSTAR;
 	case CUTSCENE_DARKSTAR:
 	case ACTING_BIOSCAN:
-		//return CUTSCENE_PINKY; // Carl: Debug hack
 		if (c == FLICK_DARKSTAR && scenes == SCENES_MINEONLY)
 			return CUTSCENE_FLICKSYNC_COMPLETE;
 		else if ( c == FLICK_TOWER && scenes == SCENES_MINEONLY )
@@ -1799,6 +1815,9 @@ t_cutscene Flicksync_GetNextCutscene()
 		else
 			return CUTSCENE_CPU_BOSS;
 	case CUTSCENE_CPU_BOSS:
+		return CUTSCENE_ENDING;
+
+	case CUTSCENE_ENDING:
 		if (scenes == SCENES_CHAPTER || ((scenes == SCENES_STORYLINE || scenes == SCENES_MINEONLY) && (c == FLICK_SWANN || c == FLICK_CAMPBELL || c == FLICK_SARGE || c == FLICK_BROOKS || c == FLICK_ROLAND || c == FLICK_DARKSTAR || c == FLICK_RECEPTION)))
 			return CUTSCENE_FLICKSYNC_COMPLETE;
 		else
@@ -1835,7 +1854,7 @@ t_cutscene Flicksync_GetNextCutscene()
 			return CUTSCENE_HUNTERINTRO;
 	case CUTSCENE_HUNTERINTRO:
 		if (scenes == SCENES_MINEONLY && c == FLICK_BETRUGER)
-			return CUTSCENE_FLICKSYNC_COMPLETE;
+			return CUTSCENE_HELL_MALEDICT_DEATH;	// should be CUTSCENE_HELL_MALEDICT, but it's currently broken
 		else
 			return CUTSCENE_CLOUD;
 
@@ -1855,10 +1874,15 @@ t_cutscene Flicksync_GetNextCutscene()
 		return CUTSCENE_PHOBOS2;
 
 	case CUTSCENE_PHOBOS2:
-		if ( c == FLICK_MCNEIL && (scenes == SCENES_MINEONLY || scenes == SCENES_CHAPTER || scenes == SCENES_STORYLINE ) )
+		return CUTSCENE_HELL_MALEDICT_DEATH; // fixme
+
+	case CUTSCENE_HELL_MALEDICT:
+		return CUTSCENE_HELL_MALEDICT_DEATH;
+	case CUTSCENE_HELL_MALEDICT_DEATH:
+		if (c == FLICK_MCNEIL && (scenes == SCENES_MINEONLY || scenes == SCENES_CHAPTER || scenes == SCENES_STORYLINE))
 			return CUTSCENE_FLICKSYNC_COMPLETE;
 		// Bravo Team (Lost Missions) only comes after RoE if we started from RoE or chose an RoE Marine.
-		else if (scenes == SCENES_STORYLINE && (c == FLICK_MARINE_PDA || c == FLICK_MARINE_TORCH || c == FLICK_POINT ) )
+		else if (scenes == SCENES_STORYLINE && (c == FLICK_MARINE_PDA || c == FLICK_MARINE_TORCH || c == FLICK_POINT))
 			return CUTSCENE_BRAVO_TEAM;
 		else if (scenes == SCENES_MYSTART && c >= FLICK_MCNEIL && c != FLICK_PLAYER && c != FLICK_BRAVO_LEAD)
 			return CUTSCENE_BRAVO_TEAM;

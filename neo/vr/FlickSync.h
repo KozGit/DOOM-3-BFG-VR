@@ -122,6 +122,9 @@ typedef enum
 	// CPU Boss
 	CUTSCENE_CPU_BOSS, // Player
 
+	// Hellhole
+	CUTSCENE_ENDING, // Player, Rescue Team, Betruger, Swann
+
 	// RoE: Erebus 1
 	FMV_ROE, // (Announcer)
 	CUTSCENE_ARTIFACT, // Tower, McNeil, Marine PDA, Marine Torch, Point, Player
@@ -141,7 +144,8 @@ typedef enum
 	// Phobos 2
 	CUTSCENE_PHOBOS2, // McNeil, Player
 	// Hell
-
+	CUTSCENE_HELL_MALEDICT, // Player, Betruger
+	CUTSCENE_HELL_MALEDICT_DEATH, // Player, Betruger, McNeil
 
 	// Lost Missions: Enpro
 	FMV_LOST_MISSIONS, // (Announcer)
