@@ -73,6 +73,8 @@ static bool hasPausedLine = false, endAfterPause = false;
 static timed_spoken_line_t cueLine = {};
 static bool hasCueLine = false, needCue = false;
 
+static const char* previousLineName = "";
+
 static const character_map_t entityArray[] = {
 // Mars City Intro
 	{ FLICK_TOWER, "marscity_sec_window_1" },
@@ -136,8 +138,11 @@ static const character_map_t entityArray[] = {
 	{ FLICK_MARINE_PDA, "erebus1_intro_marine3_1" },
 	{ FLICK_MARINE_TORCH, "erebus1_intro_flash_1" },
 	{ FLICK_BETRUGER, "maledict_intro_cinematic_1" },
+	{ FLICK_BETRUGER, "bet_newreign_speaker" },
 	{ FLICK_POINT, "erebus1_cinematic_marine_gravitygun_end_1" },
-// ROE, Erebus5: Cloud
+	// ROE, Erebus2: Hunter
+	{ FLICK_BETRUGER, "speaker_betruger_taunt1" },
+	// ROE, Erebus5: Cloud
 	{ FLICK_SCIENTIST, "erebus5_cloud_cinematic_1" },
 
 // Phobos 2
@@ -162,7 +167,7 @@ static const character_map_t shaderArray[] = {
 	{ FLICK_POINT, "e1_tango_chatter" },
 	{ FLICK_NONE, "e1_tango_garbled" },
 	{ FLICK_MARINE_PDA, "e1_mchatter_07" },
-	{ FLICK_MCNEIL, "e1_mchatter_10" },
+	{ FLICK_NONE, "e1_mchatter_10" }, // Look at that.
 	{ FLICK_NONE, "e1_dscream_03" },
 
 	// LE
@@ -177,7 +182,7 @@ static const spoken_line_t lineArray[] = {
 	{ NULL, "Roger that, Tower." },
 	{ "marscity_cin_marine1_1", "We have them on radar, sir. They'll be landing in a few moments." },
 	{ "marscity_cin_bertruger1_1", "Excellent. See that councillor Swan is sent directly to me." },
-	{ "marscity_cin_marine1_2", "Here, sir." },
+	{ "marscity_cin_marine1_2", "Here sir." },
 	{ NULL, "Tower. Darkstar on final." },
 	{ NULL, "We've got you, Darkstar, you are set for lockdown. Welcome back." },
 	{ "marscity_cin_swann1_1", "I can't believe it's come to this. I didn't want to come here." },
@@ -408,7 +413,7 @@ static const spoken_line_t lineArray[] = {
 	{ "e1_tango_chatter", "We have reached target and are now preparing to secure the area." },
 	{ "e1_tango_garbled", "We have reached target and are now preparing to secure the area." },
 	{ "e1_mcneil_troublewithtransmission", "We're having trouble with your transmission. I need that stream brought back online now. Damn it. I can't see a thing." },
-	{ "e1_sci_channel", "" },
+	//{ "e1_sci_channel", "Frequency deviation in 2 and 3. Request comm channel move, delta 4." },
 	{ "e1_mchatter_08", "Go slowly." },
 	{ "e1_mchatter_04", "Do you hear that sound?" },
 	{ "e1_mchatter_07", "What the hell is that?" },
@@ -428,7 +433,8 @@ static const spoken_line_t lineArray[] = {
 	{ "e1_bet_awaken", "Awaken." },
 	//Voice maledict_intro_cinematic_1: maledict_intro:
 	{ "e1_bet_huntthemdown", "Hunt them down." },
-	{ NULL, "Our new reign begins now." },
+	//Speaker bet_newreign_speaker:
+	{ "sound/vo/erebus1/betruger_ournewreign", "Our new reign begins now." },
 
 	// Grabber cutscene
 	/*
@@ -464,7 +470,9 @@ static const spoken_line_t lineArray[] = {
 	//Voice erebus1_cinematic_marine_gravitygun_end_1: ggun_end_b:
 	{ "e1_dying_marine_grabber", "He tried to hit me with a fireball. But I grabbed it and threw it right back at him. You're not going to get far with that pistol. Take this grabber. It's more useful than you think." },
 
-	
+	// Erebus2
+	//Speaker speaker_betruger_taunt1:
+	{ "bet_welcomedeath", "Welcome to your death" }, // actually: "Welcome to your death, mortal." but last part is inaudible
 
 	//Voice2 erebus5_cloud_cinematic_1: e5_cloud_cinematic_a:
 	//{ "marscity_reception_type", "" },
@@ -475,7 +483,7 @@ static const spoken_line_t lineArray[] = {
 	//Voice2 erebus5_cloud_cinematic_1: e5_cloud_cinematic_g:
 	//{ "marscity_reception_type", "" },
  //Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_h:
-	{ "e5_cloud_triggered3", "Damn. Another surge. " },
+	{ "e5_cloud_triggered3", "Damn. Another surge." },
 //Voice2 erebus5_cloud_cinematic_1: e5_cloud_cinematic_i:
 //{ "typing", "" },
  //Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_j:
@@ -925,6 +933,7 @@ void Flicksync_ResumeCutscene()
 {
 	if (g_debugCinematic.GetBool())
 		gameLocal.Printf("%d: Flicksync_ResumeCutscene()\n", gameLocal.framenum);
+	// Do the actual unpausing
 	timescale.SetFloat(1.0f);
 	g_stopTime.SetBool(false);
 
@@ -937,6 +946,7 @@ void Flicksync_ResumeCutscene()
 		// we already set CueLine to WaitingLine before calling ResumeCutscene
 		waitingLine = pausedLine;
 		hasWaitingLine = true;
+		previousLineName = waitingLine.text;
 		// adjust the start time to start now
 		SYSTEMTIME systime;
 		GetSystemTime(&systime);
@@ -997,6 +1007,8 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 		//commonVoice->Say("pausing to wait for %s", waitingLine.text);
 		// pause cutscene until we hear the line we are waiting for
 		const char *line = Flicksync_LineNameToLine(lineName);
+		if (!line || idStr::Cmp(line, "")==0)
+			return true;
 		idStr::Copynz(pausedLine.text, line, 1024);
 		pausedLine.entity = entity;
 		pausedLine.shader = lineName;
@@ -1014,7 +1026,6 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 
 	// I don't know why, but often this function is called 3 times for the same line.
 	// Worse: sometimes it repeats a pair of lines 3 times, but I'm not handling that yet.
-	static const char* previousLineName = "";
 	if (idStr::Cmp(lineName, previousLineName) == 0)
 		return character != vr_flicksyncCharacter.GetInteger();
 	previousLineName = lineName;
@@ -1068,6 +1079,8 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 			gameLocal.Printf("%d: Flicksync_Voice(): Starting to wait for: %s\n", gameLocal.framenum, line);
 		//commonVoice->Say("Wait for %s", line);
 		//   set waiting line to this line
+		if (!line || idStr::Cmp(line, "") == 0)
+			return true;
 		idStr::Copynz(waitingLine.text, line, 1024);
 		waitingLine.entity = entity;
 		waitingLine.length = length;
@@ -1401,14 +1414,14 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		commonVoice->Say("Flick sync complete.");
 		if (vr_cutscenesOnly.GetInteger() == 1)
 		{
-			// delete all non-player actors from map
+			// delete all AIs, and unlock all doors
 			idEntity *ent = NULL;
 			for (ent = gameLocal.spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next())
 			{
 				if (ent->IsType(idAI::Type))
-				{
 					ent->PostEventMS(&EV_Remove, 0);
-				}
+				else if (ent->IsType(idDoor::Type))
+					((idDoor *)ent)->Lock(false);
 			}
 		}
 		return;
@@ -1788,7 +1801,7 @@ t_cutscene Flicksync_GetNextCutscene()
 	case CUTSCENE_ARTIFACT:
 		if (scenes == SCENES_MINEONLY && (c == FLICK_MARINE_PDA || c == FLICK_MARINE_TORCH))
 			return CUTSCENE_BRAVO_TEAM;
-		else if (scenes == SCENES_MINEONLY && c == FLICK_BETRUGER)
+		else if ((scenes == SCENES_MINEONLY || scenes == SCENES_STORYLINE) && c == FLICK_BETRUGER)
 			return CUTSCENE_HUNTERINTRO;
 		else if (scenes == SCENES_MINEONLY && c == FLICK_POINT)
 			return CUTSCENE_GRABBER;
@@ -1796,7 +1809,9 @@ t_cutscene Flicksync_GetNextCutscene()
 			return CUTSCENE_BLOOD;
 	case CUTSCENE_BLOOD:
 		if (scenes == SCENES_MINEONLY && c == FLICK_MCNEIL)
-			return CUTSCENE_PHOBOS2;
+			return CUTSCENE_CLOUD;
+		else if (scenes == SCENES_STORYLINE && c == FLICK_MCNEIL)
+			return CUTSCENE_HUNTERINTRO;
 		else if (scenes == SCENES_MINEONLY && c == FLICK_TOWER)
 			return CUTSCENE_FLICKSYNC_COMPLETE;
 		else

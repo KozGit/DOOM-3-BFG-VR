@@ -301,6 +301,12 @@ void idSound::DoSound( bool play )
 {
 	if( play )
 	{
+		if (vr_flicksyncCharacter.GetInteger())
+		{
+			if (g_debugCinematic.GetBool())
+				common->Printf("//Speaker %s:\n\t{ \"%s\", \"\" },\n", name.c_str(), refSound.shader->base->GetName());
+			//Flicksync_Voice(name.c_str(), "", refSound.shader->base->GetName(), refSound.shader->GetLength() * 10000);
+		}
 		StartSoundShader( refSound.shader, SND_CHANNEL_ANY, refSound.parms.soundShaderFlags, true, &playingUntilTime );
 		playingUntilTime += gameLocal.time;
 	}
