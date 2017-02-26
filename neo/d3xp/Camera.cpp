@@ -758,10 +758,12 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 			ent = gameLocal.FindEntity("marscity_receptionist_full");
 			break;
 		case FLICK_SARGE:
-			ent = gameLocal.FindEntity("marscity_cinematic_sarge_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("marscity_cinematic_sarge2_1");
-			if (!ent)
+			ent = gameLocal.FindEntity("marscity_cinematic_sarge2_1");
+			if (!ent || ent->IsHidden())
+				ent = gameLocal.FindEntity("marscity_cinematic_sarge2_1_head");
+			if (!ent || ent->IsHidden())
+				ent = gameLocal.FindEntity("marscity_cinematic_sarge_1");
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("sarge_secondary");
 			break;
 		case FLICK_SCIENTIST:
@@ -852,10 +854,10 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		}
 		static idEntity *last_ent = NULL;
 		// only use character if it's not hidden, and it's within range of current camera
-		if ( ent && ( ent == hiddenEnt || !ent->IsHidden() ) && ( ent->GetPhysics()->GetOrigin() - view->vieworg ).LengthSqr() <= 500*500 )
+		if ( ent && ( ent == hiddenEnt || !ent->IsHidden() ) && ( ent->GetPhysics()->GetOrigin() - view->vieworg ).LengthSqr() <= 550*550 )
 		{
 			if (g_debugCinematic.GetBool() && ent!=last_ent)
-				gameLocal.Printf("%d: Flicksync using character %s\n", gameLocal.framenum, ent->name.c_str());
+				gameLocal.Printf("%d: Flicksync using character %s (%s)\n", gameLocal.framenum, ent->name.c_str(), ent->GetClassname());
 			last_ent = ent;
 			idVec3 camPos = view->vieworg;
 			if (ent->GetPhysics()->IsType(idPhysics_Actor::Type))

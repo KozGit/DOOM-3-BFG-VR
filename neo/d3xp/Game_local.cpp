@@ -4830,7 +4830,10 @@ void idGameLocal::SetCamera( idCamera* cam )
 		}
 		
 		// set r_znear so that transitioning into/out of the player's head doesn't clip through the view
-		cvarSystem->SetCVarFloat( "r_znear", 1.0f );
+		if (vr_flicksyncCharacter.GetInteger())
+			cvarSystem->SetCVarFloat("r_znear", 3.0f);
+		else
+			cvarSystem->SetCVarFloat( "r_znear", 1.0f );
 		
 		// hide all the player models
 		for( i = 0; i < numClients; i++ )

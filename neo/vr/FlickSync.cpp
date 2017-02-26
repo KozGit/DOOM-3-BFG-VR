@@ -1894,7 +1894,10 @@ t_cutscene Flicksync_GetNextCutscene()
 		else
 			return CUTSCENE_CPU_BOSS;
 	case CUTSCENE_CPU_BOSS:
-		return CUTSCENE_CYBERDEMON;
+		if (scenes == SCENES_MINEONLY && c == FLICK_SARGE)
+			return CUTSCENE_FLICKSYNC_COMPLETE;
+		else
+			return CUTSCENE_CYBERDEMON;
 
 	case CUTSCENE_CYBERDEMON:
 		return CUTSCENE_ENDING;
