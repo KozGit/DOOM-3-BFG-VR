@@ -878,6 +878,9 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 					//actor->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1; //view->viewID;
 					actor->GetRenderEntity()->allowSurfaceInViewID = 666;
 				}
+				// Fix facing backwards as Betruger in the meeting cutscene.
+				if (actor->name == "marscity_cinematic_betruger_speech")
+					view->viewaxis = idAngles(0, view->viewaxis.ToAngles().yaw + 180, 0).ToMat3();
 			}
 			else
 			{
