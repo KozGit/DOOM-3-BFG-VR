@@ -1742,7 +1742,6 @@ t_cutscene Flicksync_GetNextCutscene()
 		return CUTSCENE_DARKSTAR;
 	case CUTSCENE_DARKSTAR:
 	case ACTING_BIOSCAN:
-		return CUTSCENE_CYBERDEMON;
 		if (c == FLICK_DARKSTAR && scenes == SCENES_MINEONLY)
 			return CUTSCENE_FLICKSYNC_COMPLETE;
 		else if ( c == FLICK_TOWER && scenes == SCENES_MINEONLY )
