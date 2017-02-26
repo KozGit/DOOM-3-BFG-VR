@@ -730,27 +730,27 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 			break;
 		case FLICK_CAMPBELL:
 			ent = gameLocal.FindEntity("marscity_cinematic_campbell_1");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("marscity_cinematic_campbell_2");
-			if (!ent)
-				ent = gameLocal.FindEntity("char_campbell_bfgcase_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("admin_overhear_campbell_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("admin_overhear_campbell_2");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("admin_overhear_campbell_3");
-			if (!ent)
+			if (!ent || ent->IsHidden())
+				ent = gameLocal.FindEntity("char_campbell_bfgcase_1");
+			if (!ent || ent->IsHidden())
+				ent = gameLocal.FindEntity("admin_overhear_campbell_1");
+			if (!ent || ent->IsHidden())
+				ent = gameLocal.FindEntity("admin_overhear_campbell_2");
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("cpu1_camphunt_campbell_1");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("cpu1_wounded_campbell_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("enpro_campbell_2");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("enpro_campbell_3");
-			if (!ent)
+			if (!ent || ent->IsHidden())
+				ent = gameLocal.FindEntity("enpro_campbell_2");
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("char_campbell_bfg_1");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("char_campbell_bfg_2");
 			break;
 			// 

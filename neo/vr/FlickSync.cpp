@@ -335,6 +335,10 @@ static const spoken_line_t lineArray[] = {
 
 
 	// Admin overheard
+	//Speaker speaker_152
+	{ "admin_swann_i_dont_think", "I don't think you understand" }, // ...
+	//Speaker speaker_153
+	{ "admin_betruger_no_i_understand", "No, I understand" }, // ...
 	//Voice admin_overhear_swann_1: overhear_a:
 	{ "admin_swann_im_telling_you", "I'm telling you now, doctor. The UAC is taking over this operation." },
 	//Voice admin_overhear_swann_1: overhear_a:
@@ -1554,7 +1558,34 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		ent = gameLocal.FindEntity("impintrotrigger");
 		break;
 	case CUTSCENE_ADMIN:
-		ent = gameLocal.FindEntity("trigger_once_21");
+		{
+			// open elevator doors so we can actually see the cutscene
+			idDoor* door = (idDoor *)gameLocal.FindEntity("func_door_240");
+			if (door)
+			{
+				door->Lock(0);
+				door->Open();
+			}
+			door = (idDoor *)gameLocal.FindEntity("func_door_241");
+			if (door)
+			{
+				door->Lock(0);
+				door->Open();
+			}
+			door = (idDoor *)gameLocal.FindEntity("func_door_242");
+			if (door)
+			{
+				door->Lock(0);
+				door->Open();
+			}
+			door = (idDoor *)gameLocal.FindEntity("func_door_243");
+			if (door)
+			{
+				door->Lock(0);
+				door->Open();
+			}
+			ent = gameLocal.FindEntity("trigger_once_21");
+		}
 		break;
 	case CUTSCENE_PINKY:
 		relay = gameLocal.FindEntity("tim_trigger_once_11"); // This is triggered by a GUI, not sure how to handle it.
