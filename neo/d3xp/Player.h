@@ -336,6 +336,8 @@ public:
 	const idDeclSkin*		skinCrosshairCircleDot;
 	const idDeclSkin*		skinCrosshairCross;
 
+	const idDeclSkin*		skinTelepadCrouch;
+	
 	
 	idEntityPtr<idAnimatedEntity>	teleportTarget;
 	idAnimator*						teleportTargetAnimator;

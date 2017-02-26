@@ -372,7 +372,7 @@ void idGuiModel::SetEye
 */
 void idGuiModel::SetEye( int eye )
 {
-	if ( renderEye == eye )
+	if ( renderEye != eye )
 	{
 		EmitFullScreen();
 		Clear();

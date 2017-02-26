@@ -2314,9 +2314,10 @@ void idPlayer::InitTeleportTarget()
 {
 	idVec3 origin;
 	int targetAnim; 
-
 	idStr jointName;
 
+	skinTelepadCrouch = declManager->FindSkin( "skins/vr/padcrouch" );
+	
 	commonVr->teleportButtonCount = 0;
 
 	common->Printf( "Initializing teleport target\n" );
@@ -3506,14 +3507,15 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
 	headingBeamEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/headingbeam.lwo" );
 	
-	// re-init skins for heading indicator and crosshair
+	// re-init skins for heading indicator, crosshair, and telepad
 	skinHeadingSolid = declManager->FindSkin( "skins/models/headingbeamsolid" );
 	skinHeadingArrows = declManager->FindSkin( "skins/models/headingbeamarrows" );
 	skinHeadingArrowsScroll = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
 	skinCrosshairDot = declManager->FindSkin( "skins/vr/crosshairDot" );
 	skinCrosshairCircleDot = declManager->FindSkin( "skins/vr/crosshairCircleDot" );
 	skinCrosshairCross = declManager->FindSkin( "skins/vr/crosshairCross" );
-	
+	skinTelepadCrouch = declManager->FindSkin( "skins/vr/padcrouch" );
+		
 	const idDeclSkin* blag;
 	//koz begin
 	savefile->ReadBool( laserSightActive );
@@ -12424,19 +12426,19 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 			teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[0] = 1;
 			teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[1] = 1;
 			teleportTarget.GetEntity()->Show();
-			teleportTarget.GetEntity()->GetRenderEntity()->customSkin = declManager->FindSkin("skins/vr/padcrouch" );
+			teleportTarget.GetEntity()->GetRenderEntity()->customSkin = skinTelepadCrouch;
 			isShowing = true;
 
 			if ( !vr_teleportHint.GetBool() )
 			{
-				ShowTip( "Duck!", "If the teleport target turns red, there is limited headroom at the teleport destination. You must crouch before teleporting to this location.", false );
+				ShowTip( "Duck! Low Headroom!", "If the teleport target turns red, there is limited headroom at the teleport destination. You must crouch before you can teleport to this location.", false );
 				vr_teleportHint.SetBool( true );
 			}
 			//gameRenderWorld->DrawText( "Low Headroom\nPlease Duck", teleportPoint + idVec3( 0, 0, 18 ), 0.2f, colorOrange, viewAngles.ToMat3() );
 		}
 		else
 		{
-			teleportTarget.GetEntity()->GetRenderEntity()->customSkin = declManager->FindSkin( (va( "skins/vr/pad%d", vr_teleportSkin.GetInteger() + 1 )) );
+			teleportTarget.GetEntity()->GetRenderEntity()->customSkin = NULL;
 			teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[0] = 0;
 			teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[1] = 0;
 			teleportTarget.GetEntity()->Show();
@@ -12445,7 +12447,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	}
 	else
 	{
-		teleportTarget.GetEntity()->GetRenderEntity()->customSkin = declManager->FindSkin( (va( "skins/vr/pad%d", vr_teleportSkin.GetInteger() + 1 )) );
+		teleportTarget.GetEntity()->GetRenderEntity()->customSkin = NULL;
 		teleportDir = ( physicsObj.GetOrigin() - teleportPoint );
 		teleportDir.Normalize();
 		teleportTarget.GetEntity()->GetRenderEntity()->shaderParms[0] = 255;

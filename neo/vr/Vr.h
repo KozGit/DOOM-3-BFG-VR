@@ -506,7 +506,6 @@ extern idCVar	vr_stereoMirror;
 
 extern idCVar	vr_teleportSkipHandrails;
 extern idCVar	vr_teleportShowAimAssist;
-extern idCVar	vr_teleportSkin;
 extern idCVar	vr_teleportButtonMode;
 extern idCVar	vr_teleportHint;
 
