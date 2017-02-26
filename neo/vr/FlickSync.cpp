@@ -130,7 +130,7 @@ static const character_map_t entityArray[] = {
 // ROE, Erebus1: Intro
 	{ FLICK_TOWER, "erebus1_intro_scientist_1" },
 	{ FLICK_MCNEIL, "erebus1_intro_mcneil_1" },
-	{ FLICK_MCNEIL, "erebus1_intro_flash_1" },
+	{ FLICK_MARINE_TORCH, "erebus1_intro_flash_1" },
 	{ FLICK_NONE, "erebus1_intro_pda_1" },
 	{ FLICK_MARINE_PDA, "erebus1_intro_marine1_1" },
 	{ FLICK_MARINE_TORCH, "erebus1_intro_marine2_1" },
@@ -139,6 +139,9 @@ static const character_map_t entityArray[] = {
 	{ FLICK_MARINE_TORCH, "erebus1_intro_flash_1" },
 	{ FLICK_BETRUGER, "maledict_intro_cinematic_1" },
 	{ FLICK_BETRUGER, "bet_newreign_speaker" },
+	//{ FLICK_BETRUGER, "speaker_284" }, // laugh 07
+	//{ FLICK_BETRUGER, "speaker_264" }, // laugh 08
+	{ FLICK_MCNEIL, "speaker_273" }, // (Radio) "What's going on down there?"
 	{ FLICK_POINT, "erebus1_cinematic_marine_gravitygun_end_1" },
 	// ROE, Erebus2: Hunter
 	{ FLICK_BETRUGER, "speaker_betruger_taunt1" },
@@ -147,6 +150,11 @@ static const character_map_t entityArray[] = {
 
 // Phobos 2
 	{ FLICK_MCNEIL, "phobos2_cinematic_mcneil_1" },
+
+// ROE, Hell
+	{ FLICK_BETRUGER, "jay_hell_maledict_intro_cinematic_1" },
+	{ FLICK_BETRUGER, "maledict_death_cinematic_heart" },
+	{ FLICK_MCNEIL, "speaker_289" },
 	
 };
 
@@ -167,7 +175,7 @@ static const character_map_t shaderArray[] = {
 	{ FLICK_POINT, "e1_tango_chatter" },
 	{ FLICK_NONE, "e1_tango_garbled" },
 	{ FLICK_MARINE_PDA, "e1_mchatter_07" },
-	{ FLICK_NONE, "e1_mchatter_10" }, // Look at that.
+	//{ FLICK_NONE, "e1_mchatter_10" }, // Look at that.
 	{ FLICK_NONE, "e1_dscream_03" },
 
 	// LE
@@ -397,6 +405,11 @@ static const spoken_line_t lineArray[] = {
 	//Voice cpu1_camphunt_campbell_1: camphunt_d:
 	{ "cpu_campbell_hunt", "Where are you hiding?" },
 
+	// Hellhole
+	//Speaker speaker_240:
+	{ "sound/vo/hellhole/bet_so_you_made_it", "" },
+
+
 	// ROE Intro
 	{ "e1_sci01_thereclose", "Dr. McNeil, they're close." },
 	{ "e1_sci02_redteam", "" },
@@ -414,8 +427,11 @@ static const spoken_line_t lineArray[] = {
 	{ "e1_tango_garbled", "We have reached target and are now preparing to secure the area." },
 	{ "e1_mcneil_troublewithtransmission", "We're having trouble with your transmission. I need that stream brought back online now. Damn it. I can't see a thing." },
 	//{ "e1_sci_channel", "Frequency deviation in 2 and 3. Request comm channel move, delta 4." },
+	//Voice erebus1_intro_flash_1: intro_flash_s:
 	{ "e1_mchatter_08", "Go slowly." },
+	//Voice erebus1_intro_flash_1: intro_flash_u:
 	{ "e1_mchatter_04", "Do you hear that sound?" },
+	//Voice erebus1_intro_flash_1: intro_flash_v:
 	{ "e1_mchatter_07", "What the hell is that?" },
 	//Voice2 erebus1_intro_flash_1: intro_flash_w:
 	{ "e1_mchatter_10", "Look at that." },
@@ -435,6 +451,14 @@ static const spoken_line_t lineArray[] = {
 	{ "e1_bet_huntthemdown", "Hunt them down." },
 	//Speaker bet_newreign_speaker:
 	{ "sound/vo/erebus1/betruger_ournewreign", "Our new reign begins now." },
+
+	// Blood cutscene
+	//Speaker speaker_284:
+	{ "sound/xian/creepy/betruger_laughs/laugh_07", "" },
+	//Speaker speaker_264:
+	{ "sound/xian/creepy/betruger_laughs/laugh_08", "" },
+	//Speaker speaker_273: (McNeil)
+	{ "mc_polgergeist", "What's going on down there?" },
 
 	// Grabber cutscene
 	/*
@@ -472,7 +496,7 @@ static const spoken_line_t lineArray[] = {
 
 	// Erebus2
 	//Speaker speaker_betruger_taunt1:
-	{ "bet_welcomedeath", "Welcome to your death" }, // actually: "Welcome to your death, mortal." but last part is inaudible
+	{ "bet_welcomedeath", "Welcome to your death, mortal." },
 
 	//Voice2 erebus5_cloud_cinematic_1: e5_cloud_cinematic_a:
 	//{ "marscity_reception_type", "" },
@@ -552,6 +576,12 @@ static const spoken_line_t lineArray[] = {
 	//{ "mal_forgotten_summon", "" },
 	//Voice2 monster_boss_d3xp_maledict_1: forgotten:
 	//{ "mal_forgotten_summon", "" },
+
+	//Voice maledict_death_cinematic_heart: dragon_heart:
+	{ "hd_bet_returnwhatisours", "Return what is ours." },
+
+	//Speaker speaker_289:
+	{ "hell_mcneil_end", "" },
 
 	 //Voice enpro_soldier2_1: shot_a:
 	{ "enpro_move_in", "Bravo team. Entry secure. Move in and take positions." },
@@ -645,7 +675,7 @@ static const spoken_line_t lineArray[] = {
 
 */
 
-
+// The name of the first camera entity in each cutscene. Only used to identify current cutscene.
 static const cutscene_camera_t cameraArray[] = {
 	// Mars City 1
 	{ CUTSCENE_DARKSTAR, "marscity_cinematic_cam_2" },
@@ -687,7 +717,8 @@ static const cutscene_camera_t cameraArray[] = {
 	{ CUTSCENE_CPU_BOSS, "cin_cpu_boss_cam_1" },
 
 	// Hellhole
-	{ CUTSCENE_ENDING, "hellhole_cam_3" },
+	{ CUTSCENE_CYBERDEMON, "hellhole_cam_3" },
+	{ CUTSCENE_ENDING, "func_cameraview_5" },
 
 	// le_enpro1
 	//{ CUTSCENE_BRAVO_TEAM, "enpro_exit_cam_a" },
@@ -1569,6 +1600,13 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		relay = gameLocal.FindEntity("trigger_relay_54");
 		break;
 
+	case CUTSCENE_CYBERDEMON:
+		relay = gameLocal.FindEntity("trigger_once_40");
+		break;
+	case CUTSCENE_ENDING:
+		relay = gameLocal.FindEntity("startrescue");
+		break;
+
 	case CUTSCENE_BLOOD:
 		ent = gameLocal.FindEntity("trigger_once_56");
 		break;
@@ -1831,7 +1869,7 @@ t_cutscene Flicksync_GetNextCutscene()
 		return CUTSCENE_DELTA_HKINTRO;
 	case CUTSCENE_DELTA_HKINTRO:
 		if (scenes == SCENES_MINEONLY && c == FLICK_BETRUGER)
-			return CUTSCENE_ARTIFACT;
+			return CUTSCENE_ENDING;
 		else
 			return CUTSCENE_GUARDIAN_INTRO;
 
@@ -1849,8 +1887,10 @@ t_cutscene Flicksync_GetNextCutscene()
 		else
 			return CUTSCENE_CPU_BOSS;
 	case CUTSCENE_CPU_BOSS:
-		return CUTSCENE_ENDING;
+		return CUTSCENE_CYBERDEMON;
 
+	case CUTSCENE_CYBERDEMON:
+		return CUTSCENE_ENDING;
 	case CUTSCENE_ENDING:
 		if (scenes == SCENES_CHAPTER || ((scenes == SCENES_STORYLINE || scenes == SCENES_MINEONLY) && (c == FLICK_SWANN || c == FLICK_CAMPBELL || c == FLICK_SARGE || c == FLICK_BROOKS || c == FLICK_ROLAND || c == FLICK_DARKSTAR || c == FLICK_RECEPTION)))
 			return CUTSCENE_FLICKSYNC_COMPLETE;

@@ -123,6 +123,7 @@ typedef enum
 	CUTSCENE_CPU_BOSS, // Player
 
 	// Hellhole
+	CUTSCENE_CYBERDEMON, // Player
 	CUTSCENE_ENDING, // Player, Rescue Team, Betruger, Swann
 
 	// RoE: Erebus 1
