@@ -581,7 +581,7 @@ static const spoken_line_t lineArray[] = {
 	{ "hd_bet_returnwhatisours", "Return what is ours." },
 
 	//Speaker speaker_289:
-	{ "hell_mcneil_end", "" },
+	{ "hell_mcneil_end", "Marine, welcome home." },
 
 	 //Voice enpro_soldier2_1: shot_a:
 	{ "enpro_move_in", "Bravo team. Entry secure. Move in and take positions." },
@@ -1601,6 +1601,13 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		break;
 
 	case CUTSCENE_CYBERDEMON:
+		relay = gameLocal.FindEntity("trigger_once_43");
+		if (relay)
+		{
+			relay->Signal(SIG_TRIGGER);
+			relay->ProcessEvent(&EV_Activate, player);
+			relay->TriggerGuis();
+		}
 		relay = gameLocal.FindEntity("trigger_once_40");
 		break;
 	case CUTSCENE_ENDING:
@@ -1735,6 +1742,7 @@ t_cutscene Flicksync_GetNextCutscene()
 		return CUTSCENE_DARKSTAR;
 	case CUTSCENE_DARKSTAR:
 	case ACTING_BIOSCAN:
+		return CUTSCENE_CYBERDEMON;
 		if (c == FLICK_DARKSTAR && scenes == SCENES_MINEONLY)
 			return CUTSCENE_FLICKSYNC_COMPLETE;
 		else if ( c == FLICK_TOWER && scenes == SCENES_MINEONLY )
