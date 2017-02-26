@@ -468,8 +468,12 @@ void idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicksync::Adjus
 	}
 	case FLICKSYNC_FIELD_SPOILER:
 	{
-		static const int numValues = 17;
-		static const int values[numValues] = { 0, ACTING_HEY_YOURE_LOOKING, CUTSCENE_PINKY, CUTSCENE_ALPHALABS1, CUTSCENE_VAGARY, CUTSCENE_REVINTRO, CUTSCENE_MANCINTRO, CUTSCENE_MONORAIL_RAISE_COMMANDO, CUTSCENE_DELTA_SCIENTIST, CUTSCENE_DELTA_HKINTRO, CUTSCENE_GUARDIAN_INTRO, CUTSCENE_CAMPHUNT, CUTSCENE_CPU_BOSS, FMV_ROE, CUTSCENE_VULGARINTRO, CUTSCENE_ENVIROSUIT_ON, CUTSCENE_PHOBOS2 };
+		static const int numValues = 22;
+		static const int values[numValues] = { 0, ACTING_GEARUP, CUTSCENE_ADMIN, CUTSCENE_ALPHALABS1, CUTSCENE_VAGARY, CUTSCENE_ENPRO, CUTSCENE_REVINTRO, CUTSCENE_MANCINTRO,
+			CUTSCENE_MONORAIL_RAISE_COMMANDO, CUTSCENE_DELTA_SCIENTIST, CUTSCENE_DELTA_HKINTRO, CUTSCENE_GUARDIAN_INTRO, CUTSCENE_CAMPHUNT, CUTSCENE_CPU_BOSS, CUTSCENE_CYBERDEMON,
+			FMV_ROE, CUTSCENE_VULGARINTRO, CUTSCENE_CLOUD, CUTSCENE_EREBUS6_MONSTERS, CUTSCENE_PHOBOS2, CUTSCENE_HELL_MALEDICT,
+			FMV_LOST_MISSIONS };
+
 		vr_flicksyncSpoiler.SetInteger(AdjustOption(vr_flicksyncSpoiler.GetInteger(), values, numValues, adjustAmount));
 		break;
 
@@ -518,16 +522,18 @@ idSWFScriptVar idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicks
 		int n = vr_flicksyncSpoiler.GetInteger();
 		if (n == 0)
 			return "Allow Spoilers";
-		if (n <= ACTING_HEY_YOURE_LOOKING)
+		if (n <= ACTING_GEARUP)
 			return "Mars City 1";
-		if (n <= CUTSCENE_PINKY)
+		if (n <= CUTSCENE_ADMIN)
 			return "Mars City 2";
 		if (n <= CUTSCENE_ALPHALABS1)
 			return "Admin";
 		if (n <= CUTSCENE_VAGARY)
 			return "Alpha Labs 1";
-		if (n <= CUTSCENE_REVINTRO)
+		if (n <= CUTSCENE_ENPRO)
 			return "Alpha Labs 4";
+		if (n <= CUTSCENE_REVINTRO)
+			return "Enpro";
 		if (n <= CUTSCENE_MANCINTRO)
 			return "Recycling 1";
 		if (n <= CUTSCENE_MONORAIL_RAISE_COMMANDO)
@@ -537,21 +543,29 @@ idSWFScriptVar idMenuScreen_Shell_VR_Flicksync::idMenuDataSource_Shell_VR_Flicks
 		if (n <= CUTSCENE_DELTA_HKINTRO)
 			return "Delta Labs 2";
 		if (n <= CUTSCENE_GUARDIAN_INTRO)
-			return "Delta Labs 3";
+			return "Delta Labs 4";
 		if (n <= CUTSCENE_CAMPHUNT)
 			return "Hell 1";
 		if (n <= CUTSCENE_CPU_BOSS)
 			return "CPU";
-		if (n <= FMV_ROE)
+		if (n <= CUTSCENE_CYBERDEMON)
 			return "CPU Boss";
+		if (n <= FMV_ROE)
+			return "Doom 3 Complete";
 		if (n <= CUTSCENE_VULGARINTRO)
 			return "RoE: Erebus 1";
 		if (n <= CUTSCENE_CLOUD)
 			return "RoE: Erebus 2";
-		if (n <= CUTSCENE_PHOBOS2)
+		if (n <= CUTSCENE_EREBUS6_MONSTERS)
 			return "RoE: Erebus 5";
-		else
+				if (n <= CUTSCENE_PHOBOS2)
+			return "RoE: Erebus 6";
+		if (n <= CUTSCENE_HELL_MALEDICT)
 			return "RoE: Phobos 2";
+		if (n <= FMV_LOST_MISSIONS)
+			return "RoE: Hell";
+		else
+			return "LE: Enpro 1";
 	}
 	}
 	return false;
