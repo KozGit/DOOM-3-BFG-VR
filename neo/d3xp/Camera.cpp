@@ -715,9 +715,9 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 				ent = gameLocal.FindEntity("marscity_cinematic_swann_speech");
 			if (!ent)
 				ent = gameLocal.FindEntity("marscity_walking_swann_1");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("admin_overhear_swann_1");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("admin_overhear_swann_2");
 			if (!ent)
 				ent = gameLocal.FindEntity("enpro_swann_2");
@@ -744,10 +744,10 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 				ent = gameLocal.FindEntity("cpu1_camphunt_campbell_1");
 			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("cpu1_wounded_campbell_1");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("enpro_campbell_3");
-			if (!ent || ent->IsHidden())
+			if (!ent)
 				ent = gameLocal.FindEntity("enpro_campbell_2");
+			if (!ent)
+				ent = gameLocal.FindEntity("enpro_campbell_3");
 			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("char_campbell_bfg_1");
 			if (!ent || ent->IsHidden())
