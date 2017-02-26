@@ -4369,7 +4369,8 @@ void idPlayer::DrawHUDVR( idMenuHandler_HUD* _hudManager )
 {
 	SCOPED_PROFILE_EVENT( "idPlayer::DrawHUD" );
 	// Koz begin
-	
+	console->Draw( false );
+
 	if ( !GuiActive()  ) // only draw crosshairs if enabled in VR.
 	{
 		
@@ -4409,7 +4410,7 @@ void idPlayer::DrawHUDVR( idMenuHandler_HUD* _hudManager )
 		hud->UpdateCursorState();
 	}
 
-	renderSystem->CaptureRenderToImage( "_crosshairImage", true );
+	//renderSystem->CaptureRenderToImage( "_crosshairImage", true );
 	
 
 	if (!weapon.GetEntity())
@@ -4451,7 +4452,7 @@ void idPlayer::DrawHUDVR( idMenuHandler_HUD* _hudManager )
 
 	weapon.GetEntity()->UpdateGUI();
 	
-	console->Draw( false );
+	
 	
 	renderSystem->CaptureRenderToImage( "_hudImage", true );
 	
