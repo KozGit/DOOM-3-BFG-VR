@@ -319,7 +319,7 @@ bool idMenuScreen_Shell_Difficulty::HandleAction( idWidgetAction& action, const 
 			idMenuHandler_Shell* shellMgr = dynamic_cast< idMenuHandler_Shell* >( menuData );
 			if( shellMgr )
 			{
-				NotFlicksync_NewGame();
+				Flicksync_NewGame(true);
 				if( type == 0 )
 				{
 					shellMgr->ShowDoomIntro();
