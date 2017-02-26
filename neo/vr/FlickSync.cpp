@@ -950,11 +950,11 @@ void Flicksync_ResumeCutscene()
 	int character = 0;
 	if (hasPausedLine)
 		character = EntityToCharacter(pausedLine.entity.c_str(), pausedLine.shader);
-	if (character == vr_flicksyncCharacter.GetInteger())
+	if (character && character == vr_flicksyncCharacter.GetInteger())
 	{
 		// we already set CueLine to WaitingLine before calling ResumeCutscene
 		waitingLine = pausedLine;
-		hasWaitingLine = true;
+		hasWaitingLine = hasPausedLine;
 		previousLineName = waitingLine.text;
 		// adjust the start time to start now
 		SYSTEMTIME systime;
@@ -1178,10 +1178,16 @@ void Flicksync_HearLine( const char* line, int confidence, uint64 startTime, uin
 }
 
 // reset score to 0
-void Flicksync_NewGame()
+void Flicksync_NewGame(bool notFlicksync)
 {
 	if (g_debugCinematic.GetBool())
-		gameLocal.Printf("%d: Flicksync_NewGame()\n", gameLocal.framenum);
+		gameLocal.Printf("%d: Flicksync_NewGame(%d)\n", gameLocal.framenum, notFlicksync);
+	if (notFlicksync)
+	{
+		vr_flicksyncCharacter.SetInteger(0);
+		if (vr_cutscenesOnly.GetInteger() == 1)
+			vr_cutscenesOnly.SetInteger(0);
+	}
 	hasWaitingLine = false;
 	hasPausedLine = false;
 	hasCueLine = false;
@@ -1194,16 +1200,7 @@ void Flicksync_NewGame()
 	Flicksync_CueCardText = "";
 	Flicksync_complete = false;
 	Flicksync_GameOver = false;
-}
-
-void NotFlicksync_NewGame()
-{
-	if (g_debugCinematic.GetBool())
-		gameLocal.Printf("%d: NotFlicksync_NewGame()\n", gameLocal.framenum);
-	vr_flicksyncCharacter.SetInteger(0);
-	if (vr_cutscenesOnly.GetInteger() == 1)
-		vr_cutscenesOnly.SetInteger(0);
-	Flicksync_NewGame();
+	Flicksync_skipToCutscene = CUTSCENE_NONE;
 }
 
 bool Flicksync_EndCutscene()
@@ -1226,10 +1223,11 @@ bool Flicksync_EndCutscene()
 	{
 		if (g_debugCinematic.GetBool())
 			gameLocal.Printf("%d: Flicksync_EndCutscene()\n", gameLocal.framenum);
-		endAfterPause = false;
 		hasCueLine = false;
 		needCue = false;
-		Flicksync_ResumeCutscene();
+		if (!endAfterPause) // prevent recursion if we were called by ResumeCutscene!
+			Flicksync_ResumeCutscene();
+		endAfterPause = false;
 		lastLineHeard = -1; // empty ring buffer of heard lines
 		Flicksync_CueCardText = "";
 		timescale.SetFloat(1.0f);

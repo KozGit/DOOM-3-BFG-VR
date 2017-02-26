@@ -273,8 +273,8 @@ bool idMenuScreen_Shell_VR_Flicksync::HandleAction( idWidgetAction& action, cons
 			switch ( selectionIndex ) {
 			case idMenuDataSource_Shell_VR_Flicksync::FLICKSYNC_FIELD_NEWGAME:
 			{
-				// reset score to 0
-				Flicksync_NewGame();
+				// Reset score to 0, etc. This must be called before setting Flicksync_skipToCutscene.
+				Flicksync_NewGame(false);
 				Flicksync_skipToCutscene = CUTSCENE_NONE;
 				int scenes = vr_flicksyncScenes.GetInteger();
 				int c = vr_flicksyncCharacter.GetInteger();

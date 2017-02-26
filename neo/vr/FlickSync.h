@@ -167,8 +167,7 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 void Flicksync_AddVoiceLines();
 void Flicksync_HearLine( const char* line, int confidence, uint64 startTime, uint32 length );
 void Flicksync_StoppedTalking();
-void Flicksync_NewGame();
-void NotFlicksync_NewGame();
+void Flicksync_NewGame(bool notFlicksync);
 bool Flicksync_UseCueCard();
 void Flicksync_Cheat();
 void Flicksync_GiveUp();
