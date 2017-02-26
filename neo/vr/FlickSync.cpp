@@ -519,6 +519,40 @@ static const spoken_line_t lineArray[] = {
 	//Voice phobos2_cinematic_mcneil_1: mcn_k:
 	{ "p2_mcneil_meeting3", "Take this. You'll need it to get to the pumping station. Now go." },
 
+	//RoE: Hell Maledict
+	//Voice jay_hell_maledict_intro_cinematic_1: maledict_intro:
+	//{ "hell_arrival_scream", "roar" },
+	//Voice2 jay_hell_maledict_intro_cinematic_1: maledict_intro:
+	//{ "hell_awflap_02", "" },
+	//Voice2 jay_hell_maledict_intro_cinematic_1: maledict_intro:
+	//{ "hell_awflap_02", "" },
+	//Voice jay_hell_maledict_intro_cinematic_1: maledict_intro:
+	{ "xp_maledict_whatdid", "What did you hope to accomplish by coming here?" },
+	//Voice jay_hell_maledict_intro_cinematic_1: maledict_intro:
+	{ "xp_maledict_mortal2", "mortal" },
+	//Voice2 jay_hell_maledict_intro_cinematic_1: maledict_intro:
+	//{ "hell_swflap_01", "" },
+	//Voice jay_hell_maledict_intro_cinematic_1: maledict_intro:
+	{ "xp_maledict_iwantit", "You have something that belongs to me. And I want it." },
+	//Voice2 jay_hell_maledict_intro_cinematic_1: maledict_intro:
+	//{ "hell_depart", "" },
+	//Voice monster_boss_d3xp_maledict_1: charge:
+	//{ "mal_swoop", "roar" },
+	//Voice2 player1: soft_land:
+	//{ "player_sounds_fastlanding", "" },
+	//Voice2 monster_boss_d3xp_maledict_1: forgotten:
+	//{ "mal_forgotten_summon", "" }, // sound doesn't exist
+	//Voice monster_boss_d3xp_maledict_1: attack_a:
+	//{ "mal_scream", "roar" },
+	//Voice monster_boss_d3xp_maledict_1: attack_a:
+	//{ "mal_fire", "" },
+	//Voice2 monster_boss_d3xp_maledict_1: attack_a:
+	//{ "mal_fire", "" },
+	//Voice monster_boss_d3xp_maledict_1: forgotten:
+	//{ "mal_forgotten_summon", "" },
+	//Voice2 monster_boss_d3xp_maledict_1: forgotten:
+	//{ "mal_forgotten_summon", "" },
+
 	 //Voice enpro_soldier2_1: shot_a:
 	{ "enpro_move_in", "Bravo team. Entry secure. Move in and take positions." },
 	  //Voice enpro_soldier2_1: shot_c:
@@ -1573,10 +1607,10 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		ent = gameLocal.FindEntity("trigger_once_45");
 		break;
 	case CUTSCENE_HELL_MALEDICT:
-		relay = gameLocal.FindEntity("jay_intro_trigger_once");	// broken
+		relay = gameLocal.FindEntity("jay_intro_trigger_once");
 		break;
 	case CUTSCENE_HELL_MALEDICT_DEATH:
-		ent = gameLocal.FindEntity("trigger_once_flyin");
+		relay = gameLocal.FindEntity("trigger_once_flyin");
 		break;
 	}
 
@@ -1650,8 +1684,10 @@ t_cutscene Flicksync_GetNextCutscene()
 	bool player_storyline = c == FLICK_NONE || c == FLICK_PLAYER || c == FLICK_BETRUGER || c == FLICK_RECEPTION || c == FLICK_SARGE;
 
 	// if we're before our first cutscene, go to our first cutscene
-	if (Flicksync_currentCutscene < first && scenes == SCENES_MINEONLY || scenes == SCENES_MYSTART)
+	if (Flicksync_currentCutscene < first && (scenes == SCENES_MINEONLY || scenes == SCENES_MYSTART))
 	{
+		if (g_debugCinematic.GetBool())
+			gameLocal.Printf("Flicksync_currentCutscene %d < first %d, so next = first\n", Flicksync_currentCutscene, first);
 		return first;
 	}
 
@@ -1852,7 +1888,7 @@ t_cutscene Flicksync_GetNextCutscene()
 			return CUTSCENE_HUNTERINTRO;
 	case CUTSCENE_HUNTERINTRO:
 		if (scenes == SCENES_MINEONLY && c == FLICK_BETRUGER)
-			return CUTSCENE_HELL_MALEDICT_DEATH;	// should be CUTSCENE_HELL_MALEDICT, but it's currently broken
+			return CUTSCENE_HELL_MALEDICT;
 		else
 			return CUTSCENE_CLOUD;
 
@@ -1872,7 +1908,10 @@ t_cutscene Flicksync_GetNextCutscene()
 		return CUTSCENE_PHOBOS2;
 
 	case CUTSCENE_PHOBOS2:
-		return CUTSCENE_HELL_MALEDICT_DEATH; // fixme
+		if (c == FLICK_MCNEIL && scenes == SCENES_MINEONLY)
+			return CUTSCENE_HELL_MALEDICT_DEATH;
+		else
+			return CUTSCENE_HELL_MALEDICT;
 
 	case CUTSCENE_HELL_MALEDICT:
 		return CUTSCENE_HELL_MALEDICT_DEATH;
