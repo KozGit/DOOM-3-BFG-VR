@@ -164,8 +164,9 @@ typedef enum {
 	SCENES_MINEONLY = 4
 };
 
-bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length );
+bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, int channel, uint32 length );
 bool Flicksync_Speaker( const char* entity, const char* lineName, uint32 length );
+bool Flicksync_Radio( const char* entity, const char* lineName, uint32 length );
 bool Flicksync_Fade( const char* entity );
 
 void Flicksync_AddVoiceLines();
@@ -175,6 +176,7 @@ void Flicksync_NewGame(bool notFlicksync);
 bool Flicksync_UseCueCard();
 void Flicksync_Cheat();
 void Flicksync_GiveUp();
+void Flicksync_NewMap();
 void Flicksync_StartCutscene();
 bool Flicksync_EndCutscene();
 bool Flicksync_NextCutscene();

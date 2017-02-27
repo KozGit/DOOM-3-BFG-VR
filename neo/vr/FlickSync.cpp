@@ -103,8 +103,16 @@ static const character_map_t entityArray[] = {
 	{ FLICK_ROLAND, "marscity2_maint_ceiling_1_head" },
 
 	// Admin
+	{ FLICK_SWANN, "speaker_152" }, // I don't think you understand, Dr. Betruger.
+	{ FLICK_BETRUGER, "speaker_153" }, // No, I understand everything.
 	{ FLICK_SWANN, "admin_overhear_swann_1" },
 	{ FLICK_CAMPBELL, "admin_overhear_campbell_3" },
+
+	// Alpha Labs 1
+	{ FLICK_SARGE, "tim_func_radiochatter_6" },
+	// Alpha Labs 4
+	{ FLICK_SARGE, "func_radiochatter_1" },
+	//{ FLICK_SARGE, "tim_func_radiochatter_6" },
 
 	// enpro and le_enpro1: intro
 	{ FLICK_MARINE_PDA, "enpro_soldier2_1" },
@@ -126,6 +134,7 @@ static const character_map_t entityArray[] = {
 	{ FLICK_SCIENTIST, "delta2a_scientist_1" },
 
 	// Delta 4
+	{ FLICK_BETRUGER, "speaker_226" }, // You will never find the thing you seek. You will be trapped in Hell forever.
 	{ FLICK_BETRUGER, "delta4_betruger_1" },
 
 // ROE, Erebus1: Intro
@@ -140,10 +149,16 @@ static const character_map_t entityArray[] = {
 	{ FLICK_MARINE_TORCH, "erebus1_intro_flash_1" },
 	{ FLICK_BETRUGER, "maledict_intro_cinematic_1" },
 	{ FLICK_BETRUGER, "bet_newreign_speaker" },
+
+	// Erebus 1: Blood
 	//{ FLICK_BETRUGER, "speaker_284" }, // laugh 07
 	//{ FLICK_BETRUGER, "speaker_264" }, // laugh 08
-	{ FLICK_MCNEIL, "speaker_273" }, // (Radio) "What's going on down there?"
+	{ FLICK_MCNEIL, "func_radiochatter_6" }, // "sound/vo/erebus1/cc_redteam" (Radio) "Read team: What's going on down there?"
+	{ FLICK_POINT, "func_radiochatter_5" }, // "We've got major power loss reported throughout the facility."
+	{ FLICK_MARINE_PDA, "func_radiochatter_2" }, // "We've got a major cluster fuck here. Fall back to the RV."
+	// Erebus 1: Grabber
 	{ FLICK_POINT, "erebus1_cinematic_marine_gravitygun_end_1" },
+
 	// ROE, Erebus2: Hunter
 	{ FLICK_BETRUGER, "speaker_betruger_taunt1" },
 	// ROE, Erebus5: Cloud
@@ -159,6 +174,8 @@ static const character_map_t entityArray[] = {
 	
 };
 
+// The map makers are lazy and often assign voices to the wrong actors.
+// This converts a specific shoundshader name to a character, when we'd otherwise get the character wrong.
 static const character_map_t shaderArray[] = {
 	// Admin
 	{ FLICK_BETRUGER, "admin_betruger_operation_is_that" },
@@ -178,6 +195,13 @@ static const character_map_t shaderArray[] = {
 	{ FLICK_MARINE_PDA, "e1_mchatter_07" },
 	//{ FLICK_NONE, "e1_mchatter_10" }, // Look at that.
 	{ FLICK_NONE, "e1_dscream_03" },
+
+	// ROE, Erebus5: Cloud
+	{ FLICK_MCNEIL, "e5_mcneil_triggered1" },
+	{ FLICK_MCNEIL, "e5_mcneil_triggered2" },
+	{ FLICK_MCNEIL, "e5_mcneil_triggered3" },
+	{ FLICK_MCNEIL, "e5_mcneil_triggered4" },
+	{ FLICK_MCNEIL, "e5_mcneil_triggered5" },
 
 	// LE
 	{ FLICK_BRAVO_LEAD, "enpro_give_status" },
@@ -337,9 +361,9 @@ static const spoken_line_t lineArray[] = {
 
 	// Admin overheard
 	//Speaker speaker_152
-	{ "admin_swann_i_dont_think", "I don't think you understand" }, // ...
+	{ "admin_swann_i_dont_think", "I don't think you understand, Doctor Betroogger." },
 	//Speaker speaker_153
-	{ "admin_betruger_no_i_understand", "No, I understand" }, // ...
+	{ "admin_betruger_no_i_understand", "No, I understand everything." },
 	//Voice admin_overhear_swann_1: overhear_a:
 	{ "admin_swann_im_telling_you", "I'm telling you now, doctor. The UAC is taking over this operation." },
 	//Voice admin_overhear_swann_1: overhear_a:
@@ -358,6 +382,14 @@ static const spoken_line_t lineArray[] = {
 	//{ "bfgcase_unlock", NULL },
 	//Voice admin_overhear_campbell_3: overhear3:
 	{ "admin_campbell_planb", "OK. Plan B." },
+
+	// Alpha 1
+	//Radio tim_func_radiochatter_6: 11147ms
+	{ "alpha1_sarge_radio1", "Marine, I've received a report that you haven't reached Bravo team yet. You need to pick up the pace. They can't wait for you. Reaching the communication facility quickly is imperative." },
+	// Alpha 4
+	//{ "alpha4_sarge_radio1", "Marine, base schematics show all passages out of your area blocked." }, //... not used in cutscenes
+	//Radio tim_func_radiochatter_6: 16267ms
+	{ "alpha4_sarge_radio2", "Marine, I was able to locate your position. More comm systems are beginning to malfunction and shut down. Massive service disruptions throughout the entire base. I don't know how long I'll be able to track you. Bravo team has just entered the Enpro plant. Pick up the pace. You aren't far behind." },
 
 	//Enpro Escape
 	//Voice enpro_swann_2: escape_a:
@@ -390,6 +422,8 @@ static const spoken_line_t lineArray[] = {
 	"There. We don't have a lot of time. Please hurry." },
 
 	// Delta Labs 4
+	//Speaker speaker_226: 8471ms
+	{ "sound/vo/delta2b/bet_never_find_the_thing_you_seek", "You will never find the thing you seek. It is trapped in hell forever." },
 	//Voice delta4_betruger_1: laugh:
 	{ "delta4_betruger_escape", "You cannot escape." },
 	//Voice delta4_betruger_1: laugh:
@@ -412,7 +446,7 @@ static const spoken_line_t lineArray[] = {
 
 	// Hellhole
 	//Speaker speaker_240:
-	{ "sound/vo/hellhole/bet_so_you_made_it", "" },
+	//{ "sound/vo/hellhole/bet_so_you_made_it", "" },
 
 
 	// ROE Intro
@@ -458,12 +492,18 @@ static const spoken_line_t lineArray[] = {
 	{ "sound/vo/erebus1/betruger_ournewreign", "Our new reign begins now." },
 
 	// Blood cutscene
-	//Speaker speaker_284:
-	{ "sound/xian/creepy/betruger_laughs/laugh_07", "" },
-	//Speaker speaker_264:
-	{ "sound/xian/creepy/betruger_laughs/laugh_08", "" },
-	//Speaker speaker_273: (McNeil)
-	{ "mc_polgergeist", "What's going on down there?" },
+	//Speaker speaker_284: 8471ms
+	//{ "sound/xian/creepy/betruger_laughs/laugh_07", "" },
+	//Speaker speaker_264: 8407ms
+	//{ "sound/xian/creepy/betruger_laughs/laugh_08", "" },
+	//Radio func_radiochatter_6: 5416ms
+	{ "sound/vo/erebus1/cc_redteam", "Red team, what's going on down there?" },
+	//Speaker speaker_273: 4520ms
+	//{ "mc_polgergeist", "" },
+	//Radio func_radiochatter_5: 4747ms
+	{ "sound/vo/erebus1/cc_majorpowerloss", "We've got major power loss reported throughout the facility." },
+	//Radio func_radiochatter_2: 6074ms
+	{ "sound/vo/erebus1/cc_clusterfuck", "We've got a major cluster fuck here. Fall back to the RV." },
 
 	// Grabber cutscene
 	/*
@@ -507,23 +547,33 @@ static const spoken_line_t lineArray[] = {
 	//{ "marscity_reception_type", "" },
 	//Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_b:
 	{ "e5_cloud_triggered1", "Frankly, I don't know if our systems can handle too many more of these power surges. We're working with old equipment here. If I don't have the primitive soon, it will be too late." },
+	//Body erebus5_cloud_cinematic_1: e5_cloud_cinematic_d:
+	{ "e5_mcneil_triggered1", "See. Told you he'd make it." },
 	//Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_e:
 	{ "e5_cloud_triggered2", "Hm. Speak of the devil. Your marine has the primitive." },
+	//Body erebus5_cloud_cinematic_1: e5_cloud_cinematic_f:
+	{ "e5_mcneil_triggered2", "Let's get the computer started on the translation." },
 	//Voice2 erebus5_cloud_cinematic_1: e5_cloud_cinematic_g:
 	//{ "marscity_reception_type", "" },
  //Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_h:
 	{ "e5_cloud_triggered3", "Damn. Another surge." },
-//Voice2 erebus5_cloud_cinematic_1: e5_cloud_cinematic_i:
+	//Body erebus5_cloud_cinematic_1: e5_cloud_cinematic_h:
+	{ "e5_mcneil_triggered3", "Still there? Doctor Cloud, are you there?" },
+	//Voice2 erebus5_cloud_cinematic_1: e5_cloud_cinematic_i:
 //{ "typing", "" },
  //Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_j:
 	{ "e5_cloud_triggered4", "It's working. It's all here. Amazing. Everything is right here. The invasion, the demons, it's all exactly the same as the ancient writings." },
  //Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_l:
 	{ "e5_cloud_triggered5", "Doctor McNeil. Our assumptions were correct. The artifact is a weapon of unbelievable power." },
- //Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_o:
+	//Body erebus5_cloud_cinematic_1: e5_cloud_cinematic_n:
+	{ "e5_mcneil_triggered4", "That explains Betroogger's obsession with the ancient civilization." },
+	//Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_o:
 	{ "e5_cloud_triggered6", "Yes but, it looks like there's more to all of this than we had thought. The ancients write of three unstoppable beasts, horrific and powerful demons they called the hunters. Apparently a reference to their protection of the artifact. I'll contact you when I know more." },
 //Voice2 erebus5_cloud_cinematic_1: e5_cloud_cinematic_q:
 //{ "type", "" },
- //Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_u:
+	//Body erebus5_cloud_cinematic_1: e5_cloud_cinematic_t:
+	{ "e5_mcneil_triggered5", "Good luck. I'll be in the Phobos Labs." },
+	//Voice erebus5_cloud_cinematic_1: e5_cloud_cinematic_u:
 	{ "e5_cloud_triggered7", "This is starting to make some sense. Not only is the artifact a source of great power. It's also a gateway. A one way portal from hell to our dimension. I need to gather more information here, but Doctor McNeil is an expert on the ancient civilization. You must get the artifact to her if we're going to understand how to destroy it. Take the key to the armory. You may need some extra firepower." },
 
 	// Phobos 2
@@ -586,7 +636,7 @@ static const spoken_line_t lineArray[] = {
 	{ "hd_bet_returnwhatisours", "Return what is ours." },
 
 	//Speaker speaker_289:
-	{ "hell_mcneil_end", "Marine, welcome home." },
+	{ "hell_mcneil_end", "Marine, marine, welcome home." },
 
 	 //Voice enpro_soldier2_1: shot_a:
 	{ "enpro_move_in", "Bravo team. Entry secure. Move in and take positions." },
@@ -774,6 +824,20 @@ t_cutscene CameraToCutscene(idStr & name)
 			result = CUTSCENE_BRAVO_TEAM;
 	}
 	return result;
+}
+
+const char* CutsceneToCamera( t_cutscene scene )
+{
+	if( g_debugCinematic.GetBool() )
+		gameLocal.Printf( "%d: CutsceneToCamera(%d);\n", gameLocal.framenum, scene );
+	for( int i = 0; i < sizeof(cameraArray) / sizeof(*cameraArray); i++ )
+	{
+		if( scene == cameraArray[i].cutscene )
+		{
+			return cameraArray[i].camera;
+		}
+	}
+	return "";
 }
 
 void Flicksync_DoGameOver()
@@ -1079,7 +1143,7 @@ void Flicksync_ResumeCutscene()
 // The game is trying to make a character speak a line.
 // return true if the game is allowed to play this line, or false if the user is going to say it.
 // length is in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
-bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length )
+bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, int channel, uint32 length )
 {
 	SYSTEMTIME systime;
 	GetSystemTime(&systime);
@@ -1105,6 +1169,9 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 		return true;
 
 	int character = EntityToCharacter(entity, lineName);
+	// ignore it if the sound isn't a character speaking (usually just a background noise sound effect)
+	if( channel != SND_CHANNEL_VOICE && channel != SND_CHANNEL_VOICE2 && !character )
+		return true;
 
 	// If the next character tries to speak before we finished our line, pause the cutscene to wait for us.
 	if (Flicksync_WaitingOnLineThatIsLate(lineName, startTime, character))
@@ -1207,23 +1274,47 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 // length is in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
 bool Flicksync_Speaker( const char* entity, const char* lineName, uint32 length )
 {
-	// if we're not in flicksync mode, then don't even waste time checking if it's a character or debug printing
-	if( !vr_flicksyncCharacter.GetInteger() || ( !Flicksync_InCutscene && !gameLocal.inCinematic ) )
-		return true;
+	if( g_debugCinematic.GetBool() || vr_cutscenesOnly.GetInteger() == 1 || vr_flicksyncCharacter.GetInteger() )
+		common->Printf("\t//Speaker %s: %dms\n\t{ \"%s\", \"\" },\n", entity, length / 10000, lineName);
 
-	if( g_debugCinematic.GetBool() )
-		common->Printf( "\t//Speaker %s: %dms\n\t{ \"%s\", \"\" },\n", entity, length / 10000, lineName );
+	// if we're not in flicksync mode, then don't even waste time checking if it's a character
+	//if( !vr_flicksyncCharacter.GetInteger() || ( !Flicksync_InCutscene && !gameLocal.inCinematic ) )
+	//	return true;
 
 	// ignore it if the sound isn't a character speaking (usually just a background noise sound effect)
-	int character = EntityToCharacter(entity, lineName);
-	if( !character )
-		return true;
+	//int character = EntityToCharacter(entity, lineName);
+	//if( !character )
+	//	return true;
 
 	// if it's a character speaking, treat it like any other voice line (except there's no animation)
 	// the main difference is, there's no body for us to inhabit (but that's handled in Camera),
 	// and unpausing the line could be handled slightly differently if we notice entity is idSound (aka speaker)
 	// but currently we handle it the same.
-	return Flicksync_Voice( entity, "", lineName, length );
+	return Flicksync_Voice( entity, "", lineName, SND_CHANNEL_ANY, length );
+}
+
+// The game is trying to start radio chatter.
+// return true if the game is allowed to play this line, or false if the user is going to say it (or we play it on unpause).
+// length is in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
+bool Flicksync_Radio(const char* entity, const char* lineName, uint32 length)
+{
+	if( g_debugCinematic.GetBool() || vr_cutscenesOnly.GetInteger() == 1 || vr_flicksyncCharacter.GetInteger() )
+		common->Printf("\t//Radio %s: %dms\n\t{ \"%s\", \"\" },\n", entity, length / 10000, lineName);
+
+	// if we're not in flicksync mode, then don't even waste time checking if it's a character
+	//if (!vr_flicksyncCharacter.GetInteger() || (!Flicksync_InCutscene && !gameLocal.inCinematic))
+	//	return true;
+
+	// ignore it if the radio chatter isn't a character speaking
+	//int character = EntityToCharacter(entity, lineName);
+	//if (!character)
+	//	return true;
+
+	// if it's a character speaking, treat it like any other voice line (except there's no animation)
+	// the main difference is, there's no body for us to inhabit (but that's handled in Camera),
+	// and unpausing the line should be handled slightly differently if we notice entity is idRadioChatter aka func_radiochatter
+	// but currently we handle it the same.
+	return Flicksync_Voice(entity, "", lineName, SND_CHANNEL_RADIO, length);
 }
 
 // The game is trying to fade out the screen, but we may need to pause to wait for a line first.
@@ -1595,11 +1686,11 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		commonVoice->Say("Flick sync complete.");
 		if (vr_cutscenesOnly.GetInteger() == 1)
 		{
-			// delete all AIs, and unlock all doors
+			// delete all AIs and animated things, and unlock all doors
 			idEntity *ent = NULL;
 			for (ent = gameLocal.spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next())
 			{
-				if (ent->IsType(idAI::Type))
+				if (ent->IsType(idAI::Type) || ent->IsType(idAnimated::Type))
 					ent->PostEventMS(&EV_Remove, 0);
 				else if (ent->IsType(idDoor::Type))
 					((idDoor *)ent)->Lock(false);
@@ -1666,24 +1757,28 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 			{
 				door->Lock(0);
 				door->Open();
+				door->Hide();
 			}
 			door = (idDoor *)gameLocal.FindEntity("func_door_241");
 			if (door)
 			{
 				door->Lock(0);
 				door->Open();
+				door->Hide();
 			}
 			door = (idDoor *)gameLocal.FindEntity("func_door_242");
 			if (door)
 			{
 				door->Lock(0);
 				door->Open();
+				door->Hide();
 			}
 			door = (idDoor *)gameLocal.FindEntity("func_door_243");
 			if (door)
 			{
 				door->Lock(0);
 				door->Open();
+				door->Hide();
 			}
 			ent = gameLocal.FindEntity("trigger_once_21");
 		}
@@ -1791,19 +1886,35 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		break;
 	}
 
-	if (ent)
+	// Experimental: Set first camera immediately, so we catch every line we hear
+	// This can cause crashes when entities don't get created because things don't get triggered
+	if( scene == CUTSCENE_DELTA_HKINTRO )
 	{
-		angles.Zero();
-		angles.yaw = ent->GetPhysics()->GetAxis()[0].ToYaw();
-		player->GetPhysics()->SetOrigin(ent->GetPhysics()->GetOrigin());
-		player->GetFloorPos( 128, origin );
-		player->Teleport( origin, angles, NULL );
+		idCamera *cam = (idCamera *)gameLocal.FindEntity( CutsceneToCamera( scene ) );
+		if( cam && cam->IsType( idCamera::Type ) )
+		{
+			if( g_debugCinematic.GetBool() )
+				gameLocal.Printf( "%d: Flicksync, set camera early to %s\n", gameLocal.framenum, cam->name.c_str() );
+			gameLocal.SetCamera( cam );
+			// Trigger any initial events that we'll otherwise miss
+			player->TouchTriggers();
+		}
 	}
+
 	if (relay)
 	{
 		relay->Signal(SIG_TRIGGER);
 		relay->ProcessEvent(&EV_Activate, player);
 		relay->TriggerGuis();
+	}
+	if (ent)
+	{
+		angles.Zero();
+		angles.yaw = ent->GetPhysics()->GetAxis()[0].ToYaw();
+		player->GetPhysics()->SetOrigin( ent->GetPhysics()->GetOrigin() );
+		player->GetFloorPos( 128, origin );
+		player->Teleport( origin, angles, NULL );
+		player->TouchTriggers();
 	}
 }
 
@@ -2114,4 +2225,10 @@ t_cutscene Flicksync_GetNextCutscene()
 	default:
 		return CUTSCENE_FLICKSYNC_COMPLETE;
 	}
+}
+
+void Flicksync_NewMap()
+{
+	if( Flicksync_skipToCutscene )
+		Flicksync_GoToCutscene( Flicksync_skipToCutscene );
 }

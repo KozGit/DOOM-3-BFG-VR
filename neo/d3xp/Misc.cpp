@@ -3518,7 +3518,9 @@ void idFuncRadioChatter::Event_Activate( idEntity* activator )
 	{
 		const idSoundShader* shader = declManager->FindSound( sound );
 		int length = 0;
-		player->StartSoundShader( shader, SND_CHANNEL_RADIO, SSF_GLOBAL, false, &length );
+
+		if( Flicksync_Radio( name.c_str(), shader->base->GetName(), shader->GetLength() * 10000 ) )
+			player->StartSoundShader( shader, SND_CHANNEL_RADIO, SSF_GLOBAL, false, &length );
 		time = MS2SEC( length + 150 );
 	}
 	// we still put the hud up because this is used with no sound on
