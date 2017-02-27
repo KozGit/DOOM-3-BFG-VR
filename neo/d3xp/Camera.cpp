@@ -692,9 +692,9 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 			if (!ent)
 				ent = gameLocal.FindEntity("monster_boss_d3xp_maledict_1");
 			if (!ent)
-				ent = gameLocal.FindEntity("monster_boss_maledict_cinematic_1");
+				ent = gameLocal.FindEntity("monster_boss_maledict_cinematic_1"); // Doom 3 Hellhole
 			if (!ent)
-				ent = gameLocal.FindEntity("monster_boss_maledict_cinematic_2");
+				ent = gameLocal.FindEntity("monster_boss_maledict_cinematic_2"); // Doom 3 Hellhole
 			if (!ent)
 				ent = gameLocal.FindEntity("maledict_death_cinematic_1");
 			if (!ent)
@@ -879,7 +879,8 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 					actor->GetRenderEntity()->allowSurfaceInViewID = 666;
 				}
 				// Fix facing backwards as Betruger in the meeting cutscene.
-				if (actor->name == "marscity_cinematic_betruger_speech")
+				if( actor->name == "marscity_cinematic_betruger_speech" || actor->name == "monorail_raisecommando_betruger_1"
+					|| actor->name == "phobos2_cinematic_mcneil_1" || actor->name == "monster_boss_maledict_cinematic_1" || actor->name == "monster_boss_maledict_cinematic_2" )
 					view->viewaxis = idAngles(0, view->viewaxis.ToAngles().yaw + 180, 0).ToMat3();
 			}
 			else
