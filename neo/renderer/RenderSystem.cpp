@@ -1030,9 +1030,16 @@ void idRenderSystemLocal::CaptureRenderToImage( const char* imageName, bool clea
 	{
 		return;
 	}
-	guiModel->EmitFullScreen();
-	guiModel->Clear();
-	
+	if ( guiModel->SurfaceValid() )
+	{
+		guiModel->EmitFullScreen();
+		guiModel->Clear();
+	}
+	else
+	{
+		common->Printf( "CaptureRenderToImage called when guiMode->surf == NULL\n" );
+	}
+
 	if( common->WriteDemo() )
 	{
 		common->WriteDemo()->WriteInt( DS_RENDER );

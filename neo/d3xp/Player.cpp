@@ -65,12 +65,12 @@ idCVar vr_wipScale( "vr_wipScale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "" );
 idCVar vr_debugGui( "vr_debugGui", "0", CVAR_BOOL, "" );
 idCVar vr_guiFocusPitchAdj( "vr_guiFocusPitchAdj", "7", CVAR_FLOAT | CVAR_ARCHIVE, "View pitch adjust to help activate in game touch screens" );
 
-idCVar vr_bx1( "vr_bx1", "-5", CVAR_FLOAT, "");
+idCVar vr_bx1( "vr_bx1", "5", CVAR_FLOAT, "");
 idCVar vr_bx2( "vr_bx2", "5", CVAR_FLOAT, "" );
-idCVar vr_by1( "vr_by1", "-5", CVAR_FLOAT, "" );
-idCVar vr_by2( "vr_by1", "5", CVAR_FLOAT, "" );
-idCVar vr_bz1( "vr_bz1", "-5", CVAR_FLOAT, "" );
-idCVar vr_bz2( "vr_bz2", "5", CVAR_FLOAT, "" );
+idCVar vr_by1( "vr_by1", "1", CVAR_FLOAT, "" );
+idCVar vr_by2( "vr_by2", "0", CVAR_FLOAT, "" );
+idCVar vr_bz1( "vr_bz1", "0", CVAR_FLOAT, "" );
+idCVar vr_bz2( "vr_bz2", "0", CVAR_FLOAT, "" );
 
 idCVar vr_teleportVel( "vr_teleportVel", "650", CVAR_FLOAT,"" );
 idCVar vr_teleportDist( "vr_teleportDist", "60", CVAR_FLOAT,"" );
@@ -80,7 +80,7 @@ idCVar vr_teleportMaxDrop( "vr_teleportMaxDrop", "360", CVAR_FLOAT, "" );
 
 
 // for testing
-idCVar ftx( "ftx", "1.0", CVAR_FLOAT, "" );
+idCVar ftx( "ftx", "0", CVAR_FLOAT, "" );
 idCVar fty( "fty", "0", CVAR_FLOAT, "" );
 idCVar ftz( "ftz", "0", CVAR_FLOAT, "" );
 
@@ -6927,10 +6927,27 @@ void idPlayer::UpdateWeapon()
 	assert( !spectating );
 	
 	// Voice wakes up nearby monsters while you're speaking
-	if( vr_talkWakeMonsters.GetBool() && ( usercmd.buttons & BUTTON_CHATTING ) )
-		gameLocal.AlertAI( this );
+	if ( vr_talkWakeMonsters.GetBool() && (usercmd.buttons & BUTTON_CHATTING) )
+	{
+		idEntity* entityList[MAX_GENTITIES];
+		int listedEntities;
+		float radius = vr_talkWakeMonsterRadius.GetFloat();
+		listedEntities = gameLocal.EntitiesWithinRadius( GetPhysics()->GetOrigin(), radius, entityList, MAX_GENTITIES );
+		for ( int i = 0; i < listedEntities; i++ )
+		{
+			idEntity* ent = entityList[i];
+			if ( ent )
+			{
+				if ( ent->IsType( idAI::Type ) )
+				{
+					static_cast<idAI*>(ent)->TouchedByFlashlight( this );
+				}
+			}
+		}
+	}
 
-	if( common->IsClient() )
+		
+		if( common->IsClient() )
 	{
 		// clients need to wait till the weapon and it's world model entity
 		// are present and synchronized ( weapon.worldModel idEntityPtr to idAnimatedEntity )
@@ -15041,6 +15058,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 		if ( !PDAfixed && currentWeaponEnum == WEAPON_PDA )
 		{
 			// do the weapon hand first
+						
 			attacherToDefault = handWeaponAttacherToDefaultOffset[currentHand][currentWeapon];
 			originOffset = weapon->weaponHandDefaultPos[currentHand];
 			commonVr->MotionControlGetHand( currentHand, motionPosition, motionRotation );
@@ -15073,7 +15091,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 			motRot.yaw -= commonVr->bodyYawOffset;
 			motRot.Normalize180();
 			motionRotation = motRot.ToQuat();
-			
+		
 			SetHandIKPos( currentHand, weapOrigin, weapAxis, motionRotation, false );
 				
 			currentHand = 1 - currentHand;// now switch hands and fall through again.,
@@ -15102,30 +15120,9 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 		weapAxis = idAngles( 0.0, weapAxis.ToAngles().yaw - commonVr->bodyYawOffset, 0.0f ).ToMat3();
 
 		weapOrigin += weapAxis[0] * headPositionDelta.x + weapAxis[1] * headPositionDelta.y + weapAxis[2] * headPositionDelta.z;
-
-		//weapAxis = idAngles( 0.0, weapAxis.ToAngles().yaw - commonVr->bodyYawOffset, 0.0f ).ToMat3();
-	
 		
-		/* not needed as always showing body now, just suppressing draw via skins.
-		if ( currentWeaponEnum == WEAPON_FISTS && !vr_showBody.GetBool() )
-		{
-			fixPos = fixPosVec;
-			motionRotation = fixRot * motionRotation;
-			fixPos *= motionRotation.ToMat3();
-			fixPos *= viewAxis;
-		}
-		*/
-
-
 		weapOrigin += motionPosition * weapAxis;
 	
-		/* not needed as always showing body now, just suppressing draw via skins.
-		if ( currentWeaponEnum == WEAPON_FISTS && !vr_showBody.GetBool() )
-		{
-			weapOrigin += fixPos;
-		}
-		*/
-
 		if ( currentWeaponEnum != WEAPON_ARTIFACT && currentWeaponEnum != WEAPON_SOULCUBE )
 		{
 			weapAxis = motionRotation.ToMat3() * weapAxis;
@@ -15137,20 +15134,18 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 		{
 			TrackWeaponDirection( weapOrigin );
 			weapon->CalculateHideRise( weapOrigin, weapAxis );
-
-			// check for melee hit
-		//	idVec3 b1( vr_bx1.GetFloat(), vr_by1.GetFloat(), vr_bz1.GetFloat() );
-		//	idVec3 b2( vr_bx2.GetFloat(), vr_by2.GetFloat(), vr_bz2.GetFloat() );
-		//	idBounds colBound( b1, b2 );
-			//idClipModel* bClip;
-			
-			//bClip = new(TAG_PHYSICS_CLIP_ENTITY)idClipModel(weapon->renderEntity.bounds)
-			//bClip->Translate( weapOrigin );
-			//weapon->GetPhysics()->SetClipModel( bClip, 1.0f );
-			
-			//gameRenderWorld->DebugBounds( colorCyan, weapon->renderEntity., weapOrigin );
+			//check for melee hit?		
 		}
-
+		else if( !PDAfixed )
+		{
+			// Koz FIXME hack hack hack this is getting so ungodly ugly.
+			// Lovely.  I forgot to correct the origin for the PDA model when I switched
+			// to always showing the body, so now when holding the PDA it doesn't align with your controller.
+			// will fix the assets later but for now hack this correction in.
+			
+			const idVec3 pdaHackOrigin[2] { idVec3( 5.0f, -1.0f, 0.0f ), idVec3( 5.0f, 1.0f, 0.0f ) };
+			weapOrigin += pdaHackOrigin[currentHand] * weapAxis;
+		}
 	
 		idAngles motRot = motionRotation.ToAngles();
 		motRot.yaw -= commonVr->bodyYawOffset;
@@ -15404,7 +15399,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 	
 	if ( flashMode == FLASH_HAND )
 	{
-		if ( game->IsPDAOpen() || commonVr->PDAforcetoggle || currentWeapon == weapon_pda || (!commonVr->VR_USE_MOTION_CONTROLS /*&& !vr_showBody.GetBool()*/) || (commonVr->handInGui && flashMode == FLASH_GUN) )
+		if ( game->IsPDAOpen() || commonVr->PDAforcetoggle || currentWeapon == weapon_pda || !commonVr->VR_USE_MOTION_CONTROLS  || (commonVr->handInGui && flashMode == FLASH_GUN) )
 		{
 			flashMode = FLASH_HEAD;
 		}
@@ -15538,11 +15533,11 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 	
 	if ( game->IsPDAOpen() || commonVr->PDAforcetoggle || currentWeapon == weapon_pda) return; //dont dont anything with the left hand if motion controlling the PDA, only if fixed.
 	
-	if ( commonVr->VR_USE_MOTION_CONTROLS && ( !game->IsPDAOpen() || commonVr->PDAforcetoggle || currentWeapon == weapon_pda ) )
+	if ( commonVr->VR_USE_MOTION_CONTROLS ) // && ( !game->IsPDAOpen() || commonVr->PDAforcetoggle || currentWeapon == weapon_pda ) )
 	{
 		
 		static idVec3 motionPosition = vec3_zero;
-		static idQuat motionRotation;// = idQuat_zero;
+		static idQuat motionRotation;
 		static idVec3 originOffset = vec3_zero;
 		static int currentHand = 0;
 		static idAngles hmdAngles;
@@ -15583,11 +15578,18 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 		motRot.Normalize180();
 		motionRotation = motRot.ToQuat();
 		
+
+		// Koz fixme:
+		// Koz hack , the alignment isn't quite right, so do a quick hack here so the hand and flash align 
+		// better with the controllers.
+		// need to really fix this right, the whole body/viewweapon pose attacher code is a complete trainwreck now.
+		const idVec3 flashPosHack[2] = { idVec3( 0.0f, -1.0f, 0.5f ), idVec3( 0.0f, 0.85f, 0.5f ) };
+		viewOrigin += flashPosHack[currentHand] * viewAxis;
+		
 		SetHandIKPos( currentHand , viewOrigin, viewAxis, motionRotation, isFlash );
 		
 		if ( flashMode == FLASH_HAND   )
 		{
-			//common->Printf( "Flashlight originoffset = %s\n", originOffset.ToString() );
 			origin = viewOrigin;
 			origin -= originOffset * viewAxis;
 			

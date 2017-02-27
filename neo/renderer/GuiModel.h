@@ -56,6 +56,7 @@ public:
 	//Koz 
 	void	SetEye( int eye );
 	int		GetEye() { return renderEye; };
+	bool	SurfaceValid(){ return surf != NULL; }
 	// koz end
 
 	

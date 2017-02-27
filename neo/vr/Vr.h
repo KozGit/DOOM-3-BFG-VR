@@ -434,6 +434,7 @@ extern idCVar	vr_hudLowHealth;
 
 extern idCVar	vr_tweakTalkCursor;
 extern idCVar	vr_talkWakeMonsters;
+extern idCVar	vr_talkWakeMonsterRadius;
 extern idCVar	vr_talkMode;
 extern idCVar	vr_voiceCommands;
 

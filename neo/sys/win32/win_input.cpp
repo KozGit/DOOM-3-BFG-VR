@@ -1365,7 +1365,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 								else
 								{
 									lYcount++;
-									if ( lYcount > dupeThreshold ) common->Printf( "Defaulting left y axis val %f time %d\n", padY, Sys_Milliseconds() );
+									if ( lYcount > dupeThreshold ) common->Printf( "Defaulting left y axis val %f time %d \n", padY, Sys_Milliseconds() );
 								}
 							}
 							else
@@ -1387,7 +1387,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_Y, -padY * 32767.0f );
 						}
 						
-						//pad deadzone
+						
 						if ( !defaultX ) padAxisX[0] = padX;
 						if ( !defaultY ) padAxisY[0] = padY;
 						
@@ -1534,39 +1534,33 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 						{
 							if ( padX != 0.0f && padAxisX[1] == padX )
 							{
+								rXcount++;
 								if ( rXcount > dupeThreshold )
 								{
 									padX = 0;
 									defaultX = true;
-								}
-								else
-								{
-									rXcount++;
-									//common->Printf( "Dupe axis val detected right X axis val %f count %d time %d\n", padY, rXcount, Sys_Milliseconds() );
-									if ( rXcount > dupeThreshold ) common->Printf( "Defaulting right X axis val %f time %d\n", padX, Sys_Milliseconds() );
+									common->Printf( "Defaulting right X axis val %f time %d count %d\n", padX, Sys_Milliseconds(),rXcount );
 								}
 							}
 							else
 							{
+								if ( rXcount > dupeThreshold ) common->Printf( "rXcount reset to 0 from %d\n", rXcount );
 								rXcount = 0;
 							}
 
 							if ( padY != 0.0f && padAxisY[1] == padY )
 							{
+								rYcount++;
 								if ( rYcount > dupeThreshold )
 								{
 									padY = 0;
 									defaultY = true;
-								}
-								else
-								{
-									rYcount++;
-									//common->Printf( "Dupe axis val detected right Y axis val %f count %d time %d\n", padY, rYcount, Sys_Milliseconds() );
-									if ( rYcount > dupeThreshold ) common->Printf( "Defaulting right Y axis val %f time %d\n", padY, Sys_Milliseconds() );
+									common->Printf( "Defaulting right Y axis val %f time %d count %d\n", padY, Sys_Milliseconds(),rYcount );
 								}
 							}
 							else
 							{
+								if ( rYcount > dupeThreshold ) common->Printf( "rYcount reset to 0 from %d\n", rYcount );
 								rYcount = 0;
 							}
 						}
