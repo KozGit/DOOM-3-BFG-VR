@@ -2064,7 +2064,7 @@ void idWeapon::LowerWeapon()
 {
 		
 	if ( game->isVR && commonVr->handInGui ) return;// koz never lower weapon if hand is in gui
-	if ( commonVr->VR_USE_MOTION_CONTROLS && !owner->GuiActive() ) return;
+	if ( commonVr->VR_USE_MOTION_CONTROLS && !owner->GuiActive() && !gameLocal.inCinematic ) return;
 
 	if( !hide )
 	{
@@ -3362,14 +3362,14 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	// also show the viewmodel
 	if ( game->isVR ) 
 	{
-		
+		if ( (hide && disabled) ) // hide the weapon if in a cinematic
+		{
+			renderEntity.allowSurfaceInViewID = -1;
+			showViewModel = false;
+		}
 		//show the viewmodel in all views - flashlight visibilty set in calcViewFlashPosition
-		if (!isPlayerFlashlight && !commonVr->handInGui ) renderEntity.allowSurfaceInViewID = 0; // koz fixme
+		else if (!isPlayerFlashlight && !commonVr->handInGui  ) renderEntity.allowSurfaceInViewID = 0; // koz fixme
 		owner->GetRenderEntity()->suppressSurfaceInViewID = 0;
-	}
-	else if ( game->isVR )
-	{
-		if ( !isPlayerFlashlight ) renderEntity.allowSurfaceInViewID = 0;
 	}
 	else
 	{
