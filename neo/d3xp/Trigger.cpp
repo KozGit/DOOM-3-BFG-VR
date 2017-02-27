@@ -1262,8 +1262,13 @@ void idTrigger_Fade::Event_Trigger( idEntity* activator )
 	{
 		fadeColor = spawnArgs.GetVec4( "fadeColor", "0, 0, 0, 1" );
 		fadeTime = SEC2MS( spawnArgs.GetFloat( "fadeTime", "0.5" ) );
-		player->playerView.Fade( fadeColor, fadeTime );
-		PostEventMS( &EV_ActivateTargets, fadeTime, activator );
+		// Carl: Fading out can trigger a Flicksync to pause if waiting for a line first.
+		// It returns true if we're allowed to fade, or false if it will trigger the fade on unpause.
+		if( Flicksync_Fade( name.c_str() ) )
+		{
+			player->playerView.Fade( fadeColor, fadeTime );
+			PostEventMS( &EV_ActivateTargets, fadeTime, activator );
+		}
 	}
 }
 

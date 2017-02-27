@@ -165,6 +165,9 @@ typedef enum {
 };
 
 bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, uint32 length );
+bool Flicksync_Speaker( const char* entity, const char* lineName, uint32 length );
+bool Flicksync_Fade( const char* entity );
+
 void Flicksync_AddVoiceLines();
 void Flicksync_HearLine( const char* line, int confidence, uint64 startTime, uint32 length );
 void Flicksync_StoppedTalking();

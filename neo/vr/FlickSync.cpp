@@ -68,7 +68,8 @@ static timed_spoken_line_t waitingLine = {};
 static bool hasWaitingLine = false;
 
 static timed_spoken_line_t pausedLine = {};
-static bool hasPausedLine = false, endAfterPause = false;
+static bool hasPausedLine = false, hasPausedFade = false, endAfterPause = false;
+static idStr pausedFadeEntity;
 
 static timed_spoken_line_t cueLine = {};
 static bool hasCueLine = false, needCue = false;
@@ -786,7 +787,7 @@ void Flicksync_DoGameOver()
 	Flicksync_CueCardText = "";
 	Flicksync_CueCardActive = false;
 	needCue = false;
-	if (hasPausedLine)
+	if (hasPausedLine || hasPausedFade)
 		Flicksync_ResumeCutscene();
 	commonVoice->Say("Game Over");
 }
@@ -960,6 +961,27 @@ void Flicksync_SayPausedLine()
 	hasPausedLine = false;
 }
 
+void Flicksync_DoPausedFade()
+{
+	if (!hasPausedFade)
+	{
+		if (g_debugCinematic.GetBool())
+			gameLocal.Printf("%d: Flicksync_DoPausedFade() but there's no paused fade\n", gameLocal.framenum);
+		return;
+	}
+	if (g_debugCinematic.GetBool())
+		gameLocal.Printf("%d: Flicksync_DoPausedFade(\"%s\")\n", gameLocal.framenum, pausedFadeEntity.c_str());
+	idEntity* ent = NULL;
+	ent = gameLocal.FindEntity(pausedFadeEntity);
+	if (ent != NULL)
+	{
+		ent->Signal(SIG_TRIGGER);
+		ent->ProcessEvent(&EV_Activate, gameLocal.GetLocalPlayer());
+		ent->TriggerGuis();
+	}
+	hasPausedFade = false;
+}
+
 void Flicksync_SayCueLine()
 {
 	needCue = false;
@@ -1015,6 +1037,12 @@ void Flicksync_ResumeCutscene()
 	timescale.SetFloat(1.0f);
 	g_stopTime.SetBool(false);
 
+	if (hasPausedFade)
+	{
+		Flicksync_DoPausedFade();
+		hasPausedFade = false;
+	}
+
 	// If it was our next line that was paused, start waiting for it.
 	int character = 0;
 	if (hasPausedLine)
@@ -1061,10 +1089,11 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 
 	if (gameLocal.skipCinematic)
 	{
-		if (hasPausedLine)
+		if (hasPausedLine || hasPausedFade)
 			Flicksync_ResumeCutscene();
 		hasWaitingLine = false;
 		hasPausedLine = false;
+		hasPausedFade = false;
 		hasCueLine = false;
 		Flicksync_CueActive = false;
 		needCue = false;
@@ -1173,6 +1202,75 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 	return false;
 }
 
+// The game is trying to make a speaker entity either speak a line or play a sound effect.
+// return true if the game is allowed to play this line, or false if the user is going to say it (or we play it on unpause).
+// length is in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
+bool Flicksync_Speaker( const char* entity, const char* lineName, uint32 length )
+{
+	// if we're not in flicksync mode, then don't even waste time checking if it's a character or debug printing
+	if( !vr_flicksyncCharacter.GetInteger() || ( !Flicksync_InCutscene && !gameLocal.inCinematic ) )
+		return true;
+
+	if( g_debugCinematic.GetBool() )
+		common->Printf( "\t//Speaker %s: %dms\n\t{ \"%s\", \"\" },\n", entity, length / 10000, lineName );
+
+	// ignore it if the sound isn't a character speaking (usually just a background noise sound effect)
+	int character = EntityToCharacter(entity, lineName);
+	if( !character )
+		return true;
+
+	// if it's a character speaking, treat it like any other voice line (except there's no animation)
+	// the main difference is, there's no body for us to inhabit (but that's handled in Camera),
+	// and unpausing the line could be handled slightly differently if we notice entity is idSound (aka speaker)
+	// but currently we handle it the same.
+	return Flicksync_Voice( entity, "", lineName, length );
+}
+
+// The game is trying to fade out the screen, but we may need to pause to wait for a line first.
+// return true if the game is allowed to fade, or false if we do it on unpause.
+bool Flicksync_Fade( const char* entity )
+{
+	if( gameLocal.skipCinematic )
+	{
+		if( hasPausedLine || hasPausedFade )
+			Flicksync_ResumeCutscene();
+		hasWaitingLine = false;
+		hasPausedLine = false;
+		hasPausedFade = false;
+		hasCueLine = false;
+		Flicksync_CueActive = false;
+		needCue = false;
+		return true;
+	}
+
+	// if we're not in flicksync mode, then fade like normal
+	if( !vr_flicksyncCharacter.GetInteger() || ( !Flicksync_InCutscene && !gameLocal.inCinematic ) || Flicksync_complete || Flicksync_GameOver )
+		return true;
+
+	// If the next character tries to speak before we finished our line, pause the cutscene to wait for us.
+	if( hasWaitingLine )
+	{
+		if( g_debugCinematic.GetBool() )
+			gameLocal.Printf( "%d: Fade %s while waiting for line. Pausing to wait for \"%s\"\n", gameLocal.framenum, entity, waitingLine.text );
+		//commonVoice->Say("pausing to wait for %s", waitingLine.text);
+		// pause cutscene until we hear the line we are waiting for
+		pausedFadeEntity = entity;
+		hasPausedFade = true;
+		Flicksync_PauseCutscene();
+		if( commonVoice->GetTalkButton() )
+			needCue = true;
+		else
+			Flicksync_SayCueLine();
+		// don't let them fade until we have said our line.
+		return false;
+	}
+	if (g_debugCinematic.GetBool())
+		common->Printf( "\t//Fade %s\n", entity );
+
+	// we're in a Flicksync, but we're not waiting for a line, so we can fade
+	return true;
+}
+
 void Flicksync_AddVoiceLines()
 {
 	for (int i = 0; i < sizeof(lineArray) / sizeof(*lineArray); i++)
@@ -1259,6 +1357,7 @@ void Flicksync_NewGame(bool notFlicksync)
 	}
 	hasWaitingLine = false;
 	hasPausedLine = false;
+	hasPausedFade = false;
 	hasCueLine = false;
 	needCue = false;
 	lastLineHeard = -1; // empty ring buffer of heard lines
@@ -1278,7 +1377,8 @@ bool Flicksync_EndCutscene()
 	{
 		if (g_debugCinematic.GetBool())
 			gameLocal.Printf("%d: Flicksync_EndCutscene() while waiting for line\n", gameLocal.framenum);
-		hasPausedLine = false;
+		hasPausedLine = false; // for now, we set it in the next function
+		hasPausedFade = false; // it's impossible for a cutscene to end while waiting for us to fade
 		endAfterPause = true;
 		Flicksync_PauseCutscene();
 		if (commonVoice->GetTalkButton())
@@ -1349,6 +1449,7 @@ void Flicksync_StartCutscene()
 	Flicksync_InCutscene = true;
 	endAfterPause = false;
 	hasPausedLine = false;
+	hasPausedFade = false;
 	hasWaitingLine = false;
 	hasCueLine = false;
 	needCue = false;
@@ -1393,7 +1494,7 @@ void Flicksync_Cheat()
 
 void Flicksync_GiveUp()
 {
-	if ( hasPausedLine || g_stopTime.GetBool() )
+	if ( hasPausedLine || hasPausedFade || g_stopTime.GetBool() )
 	{
 		if (g_debugCinematic.GetBool())
 			gameLocal.Printf("%d: Flicksync_GiveUp() was paused\n", gameLocal.framenum);
