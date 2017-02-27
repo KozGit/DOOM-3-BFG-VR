@@ -2045,7 +2045,7 @@ idTarget_Checkpoint::Event_Activate
 void idTarget_Checkpoint::Event_Activate( idEntity* activator )
 {
 	extern idCVar g_demoMode; // no saving in demo mode
-	if( g_checkpoints.GetBool() && !g_demoMode.GetBool() )
+	if( g_checkpoints.GetBool() && !g_demoMode.GetBool() && vr_cutscenesOnly.GetInteger() != 1 )
 	{
 		cmdSystem->AppendCommandText( "savegame autosave\n" );
 	}

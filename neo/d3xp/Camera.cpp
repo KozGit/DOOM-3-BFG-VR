@@ -715,9 +715,9 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 				ent = gameLocal.FindEntity("marscity_cinematic_swann_speech");
 			if (!ent)
 				ent = gameLocal.FindEntity("marscity_walking_swann_1");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("admin_overhear_swann_1");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("admin_overhear_swann_2");
 			if (!ent)
 				ent = gameLocal.FindEntity("enpro_swann_2");
@@ -730,27 +730,27 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 			break;
 		case FLICK_CAMPBELL:
 			ent = gameLocal.FindEntity("marscity_cinematic_campbell_1");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("marscity_cinematic_campbell_2");
-			if (!ent)
-				ent = gameLocal.FindEntity("char_campbell_bfgcase_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("admin_overhear_campbell_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("admin_overhear_campbell_2");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("admin_overhear_campbell_3");
-			if (!ent)
+			if (!ent || ent->IsHidden())
+				ent = gameLocal.FindEntity("char_campbell_bfgcase_1");
+			if (!ent || ent->IsHidden())
+				ent = gameLocal.FindEntity("admin_overhear_campbell_1");
+			if (!ent || ent->IsHidden())
+				ent = gameLocal.FindEntity("admin_overhear_campbell_2");
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("cpu1_camphunt_campbell_1");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("cpu1_wounded_campbell_1");
 			if (!ent)
 				ent = gameLocal.FindEntity("enpro_campbell_2");
 			if (!ent)
 				ent = gameLocal.FindEntity("enpro_campbell_3");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("char_campbell_bfg_1");
-			if (!ent)
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("char_campbell_bfg_2");
 			break;
 			// 
@@ -758,10 +758,12 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 			ent = gameLocal.FindEntity("marscity_receptionist_full");
 			break;
 		case FLICK_SARGE:
-			ent = gameLocal.FindEntity("marscity_cinematic_sarge_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("marscity_cinematic_sarge2_1");
-			if (!ent)
+			ent = gameLocal.FindEntity("marscity_cinematic_sarge2_1");
+			if (!ent || ent->IsHidden())
+				ent = gameLocal.FindEntity("marscity_cinematic_sarge2_1_head");
+			if (!ent || ent->IsHidden())
+				ent = gameLocal.FindEntity("marscity_cinematic_sarge_1");
+			if (!ent || ent->IsHidden())
 				ent = gameLocal.FindEntity("sarge_secondary");
 			break;
 		case FLICK_SCIENTIST:
@@ -852,10 +854,10 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		}
 		static idEntity *last_ent = NULL;
 		// only use character if it's not hidden, and it's within range of current camera
-		if ( ent && ( ent == hiddenEnt || !ent->IsHidden() ) && ( ent->GetPhysics()->GetOrigin() - view->vieworg ).LengthSqr() <= 500*500 )
+		if ( ent && ( ent == hiddenEnt || !ent->IsHidden() ) && ( ent->GetPhysics()->GetOrigin() - view->vieworg ).LengthSqr() <= 550*550 )
 		{
 			if (g_debugCinematic.GetBool() && ent!=last_ent)
-				gameLocal.Printf("%d: Flicksync using character %s\n", gameLocal.framenum, ent->name.c_str());
+				gameLocal.Printf("%d: Flicksync using character %s (%s)\n", gameLocal.framenum, ent->name.c_str(), ent->GetClassname());
 			last_ent = ent;
 			idVec3 camPos = view->vieworg;
 			if (ent->GetPhysics()->IsType(idPhysics_Actor::Type))
@@ -876,6 +878,9 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 					//actor->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1; //view->viewID;
 					actor->GetRenderEntity()->allowSurfaceInViewID = 666;
 				}
+				// Fix facing backwards as Betruger in the meeting cutscene.
+				if (actor->name == "marscity_cinematic_betruger_speech")
+					view->viewaxis = idAngles(0, view->viewaxis.ToAngles().yaw + 180, 0).ToMat3();
 			}
 			else
 			{

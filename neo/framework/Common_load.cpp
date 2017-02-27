@@ -673,7 +673,9 @@ void idCommonLocal::ExecuteMapChange()
 		
 		if ( 1 /*!game->isVR*/ )
 		{
-			SaveGame( "autosave" );
+			// don't autosave if were only viewing cutscenes
+			if ( vr_cutscenesOnly.GetInteger() != 1 )
+				SaveGame( "autosave" );
 		}
 		else
 		{	
