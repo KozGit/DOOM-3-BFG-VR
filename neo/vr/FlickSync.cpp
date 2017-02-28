@@ -1728,7 +1728,7 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 			idEntity *ent = NULL;
 			for (ent = gameLocal.spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next())
 			{
-				if (ent->IsType(idAI::Type) || (ent->IsType(idAnimated::Type) && idStr::Cmp(ent->GetClassname(), "env_pcellgen_single")!=0) || ent->IsType(idAFEntity_Generic::Type))
+				if (ent->IsType(idAI::Type) || (ent->IsType(idAnimated::Type) && idStr::Cmp(ent->GetClassname(), "env_pcellgen_single") != 0) || ent->IsType(idAFEntity_Generic::Type) || ent->IsType(idAFEntity_WithAttachedHead::Type))
 					ent->PostEventMS(&EV_Remove, 0);
 				else if (ent->IsType(idDoor::Type))
 					((idDoor *)ent)->Lock(false);
