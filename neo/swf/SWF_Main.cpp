@@ -93,7 +93,20 @@ idSWF::idSWF( const char* filename_, idSoundWorld* soundWorld_ )
 	tooltipButtonImage.Append( keyButtonImages_t( "<R_STEAMVR_GRIP>", "guis/assets/hud/controller/rvive_grip.tga", "", 52, 34, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<L_STEAMVR_GRIP>", "guis/assets/hud/controller/lvive_grip.tga", "", 52, 34, 0 ) );
 
-	
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_TOUCH_U>", "guis/assets/hud/controller/rtouch_up.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_TOUCH_D>", "guis/assets/hud/controller/rtouch_down.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_TOUCH_L>", "guis/assets/hud/controller/rtouch_left.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_TOUCH_R>", "guis/assets/hud/controller/rtouch_right.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_TOUCHGRIP>", "guis/assets/hud/controller/rtouch_grip.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_TOUCHTRIG>", "guis/assets/hud/controller/rtouch_trig.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<R_TOUCHSTICK>", "guis/assets/hud/controller/rtouch_jpress.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCH_U>", "guis/assets/hud/controller/ltouch_up.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCH_D>", "guis/assets/hud/controller/ltouch_down.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCH_L>", "guis/assets/hud/controller/ltouch_left.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCH_R>", "guis/assets/hud/controller/ltouch_right.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCHGRIP>", "guis/assets/hud/controller/ltouch_grip.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCHTRIG>", "guis/assets/hud/controller/ltouch_trig.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCHSTICK>", "guis/assets/hud/controller/ltouch_jpress.tga", "", 67, 34, 0 ) );
 	
 	for( int index = 0; index < tooltipButtonImage.Num(); index++ )
 	{

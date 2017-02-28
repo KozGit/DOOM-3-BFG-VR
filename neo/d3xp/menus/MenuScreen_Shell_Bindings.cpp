@@ -297,6 +297,8 @@ void idMenuScreen_Shell_Bindings::UpdateBindingString()
 				{
 					"JOY1", "JOY2", "JOY3", "JOY4", "JOY5", "JOY6", "JOY9", "JOY10",
 					"R_TOUCHA", "R_TOUCHB", "L_TOUCHX", "L_TOUCHY", "L_TOUCHM",
+					"R_TOUCH_U", "R_TOUCH_D", "R_TOUCH_L", "R_TOUCH_R", "R_TOUCHGRIP", "R_TOUCHTRIG", "R_TOUCHSTICK",
+					"L_TOUCH_U", "L_TOUCH_D", "L_TOUCH_L", "L_TOUCH_R", "L_TOUCHGRIP", "L_TOUCHTRIG", "L_TOUCHSTICK",
 					"L_STEAMVR_APP", "R_STEAMVR_APP",
 					"L_STEAMVR_PAD", "R_STEAMVR_PAD",
 					"L_STEAMVR_U", "L_STEAMVR_D", "L_STEAMVR_L", "L_STEAMVR_R",
@@ -453,6 +455,8 @@ void idMenuScreen_Shell_Bindings::UpdateBindingDisplay()
 				{
 					"JOY1", "JOY2", "JOY3", "JOY4", "JOY5", "JOY6", "JOY9", "JOY10",
 					"R_TOUCHA", "R_TOUCHB", "L_TOUCHX", "L_TOUCHY", "L_TOUCHM",
+					"R_TOUCH_U", "R_TOUCH_D", "R_TOUCH_L", "R_TOUCH_R", "R_TOUCHGRIP", "R_TOUCHTRIG", "R_TOUCHSTICK",
+					"L_TOUCH_U", "L_TOUCH_D", "L_TOUCH_L", "L_TOUCH_R", "L_TOUCHGRIP", "L_TOUCHTRIG", "L_TOUCHSTICK",
 					"L_STEAMVR_APP", "R_STEAMVR_APP",
 					"L_STEAMVR_PAD", "R_STEAMVR_PAD",
 					"L_STEAMVR_U", "L_STEAMVR_D", "L_STEAMVR_L", "L_STEAMVR_R",

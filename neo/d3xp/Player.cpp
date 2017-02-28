@@ -2194,6 +2194,10 @@ void idPlayer::Init()
 	}
 
 	commonVr->currentFlashMode = vr_flashlightMode.GetInteger();
+
+	commonVr->thirdPersonMovement = false;
+	commonVr->thirdPersonDelta = 0.0f;
+
 	// koz end	
 
 	// initialize the script variables
@@ -3980,9 +3984,11 @@ void idPlayer::UpdateSkinSetup()
 			}
 		}
 
-
-		
-		if ( vr_playerBodyMode.GetInteger() == 1 || ( vr_playerBodyMode.GetInteger() == 2 && (currentWeapon == weapon_fists || commonVr->handInGui) ) )
+		if ( commonVr->thirdPersonMovement )
+		{
+			skinN += body;
+		}
+		else if ( vr_playerBodyMode.GetInteger() == 1 || ( vr_playerBodyMode.GetInteger() == 2 && (currentWeapon == weapon_fists || commonVr->handInGui) ) )
 		{
 			skinN += handsOnly;
 		}
@@ -6919,6 +6925,9 @@ idPlayer::UpdateWeapon
 */
 void idPlayer::UpdateWeapon()
 {
+	
+	static bool wasTalking = false;
+	bool talking = (usercmd.buttons & BUTTON_CHATTING) > 0;
 	if( health <= 0 )
 	{
 		return;
@@ -6926,28 +6935,38 @@ void idPlayer::UpdateWeapon()
 	
 	assert( !spectating );
 	
+	
+	//koz
 	// Voice wakes up nearby monsters while you're speaking
-	if ( vr_talkWakeMonsters.GetBool() && (usercmd.buttons & BUTTON_CHATTING) )
+	if ( vr_talkWakeMonsters.GetBool() )
 	{
-		idEntity* entityList[MAX_GENTITIES];
-		int listedEntities;
-		float radius = vr_talkWakeMonsterRadius.GetFloat();
-		listedEntities = gameLocal.EntitiesWithinRadius( GetPhysics()->GetOrigin(), radius, entityList, MAX_GENTITIES );
-		for ( int i = 0; i < listedEntities; i++ )
+		if ( !talking ) 
 		{
-			idEntity* ent = entityList[i];
-			if ( ent )
+			wasTalking = false;
+		}
+		else if ( !wasTalking )
+		{
+			wasTalking = true;
+			idEntity* entityList[MAX_GENTITIES];
+			int listedEntities;
+			float radius = vr_talkWakeMonsterRadius.GetFloat();
+			listedEntities = gameLocal.EntitiesWithinRadius( GetPhysics()->GetOrigin(), radius, entityList, MAX_GENTITIES );
+			for ( int i = 0; i < listedEntities; i++ )
 			{
-				if ( ent->IsType( idAI::Type ) )
+				idEntity* ent = entityList[i];
+				if ( ent )
 				{
-					static_cast<idAI*>(ent)->TouchedByFlashlight( this );
+					if ( ent->IsType( idAI::Type ) )
+					{
+						static_cast<idAI*>(ent)->TouchedByFlashlight( this );
+					}
 				}
 			}
 		}
 	}
-
+	//koz end
 		
-		if( common->IsClient() )
+	if( common->IsClient() )
 	{
 		// clients need to wait till the weapon and it's world model entity
 		// are present and synchronized ( weapon.worldModel idEntityPtr to idAnimatedEntity )
@@ -7862,7 +7881,7 @@ void idPlayer::UpdateFocus()
 	
 
 
-	if ( Flicksync_InCutscene || gameLocal.inCinematic )
+	if ( Flicksync_InCutscene || gameLocal.inCinematic || commonVr->thirdPersonMovement )
 	{
 		return;
 	}
@@ -13017,6 +13036,16 @@ void idPlayer::Think()
 		{
 			headRenderEnt->customSkin = NULL;
 		}
+
+		//koz show the head if the player is using third person movement mode && the model has moved more than 8 inches.
+		if ( commonVr->thirdPersonMovement && commonVr->thirdPersonDelta > 45.0f )
+		{
+			headRenderEnt->suppressSurfaceInViewID = 0;
+		}
+		else
+		{
+			headRenderEnt->suppressSurfaceInViewID = entityNumber + 1;
+		}
 	}
 	
 	if( common->IsMultiplayer() || g_showPlayerShadow.GetBool() )
@@ -16056,6 +16085,12 @@ void idPlayer::CalculateRenderView()
 	static bool wasCinematic = false;
 	static idVec3 cinematicOffset = vec3_zero;
 
+	static bool wasThirdPerson = false;
+	static idVec3 thirdPersonOffset = vec3_zero;
+	static idVec3 thirdPersonOrigin = vec3_zero;
+	static idMat3 thirdPersonAxis = mat3_identity;
+	static float thirdPersonBodyYawOffset = 0.0f;
+
 		
 	int i;
 	float range;
@@ -16162,6 +16197,10 @@ void idPlayer::CalculateRenderView()
 		bodyPositionDelta = commonVr->poseHmdBodyPositionDelta;
 		absolutePosition = commonVr->poseHmdAbsolutePosition;
 			
+		idVec3 origin = renderView->vieworg;
+		idAngles angles = renderView->viewaxis.ToAngles();
+		idMat3 axis = renderView->viewaxis;
+		float yawOffset = commonVr->bodyYawOffset;
 
 		if ( gameLocal.inCinematic )
 		{
@@ -16171,18 +16210,42 @@ void idPlayer::CalculateRenderView()
 				cinematicOffset = absolutePosition;
 			}
 			
-			headPositionDelta = absolutePosition - cinematicOffset;// *idAngles( 0.0f, commonVr->trackingOriginYawOffset, 0.0f ).ToMat3().Inverse();
-			//headPositionDelta.x = -headPositionDelta.x;
-			//headPositionDelta.y = -headPositionDelta.y;
+			headPositionDelta = absolutePosition - cinematicOffset;
 			bodyPositionDelta = vec3_zero;
 		}
 		else
 		{
 			wasCinematic = false;
+				
+			if ( commonVr->thirdPersonMovement )
+			{
+				if ( wasThirdPerson == false )
+				{
+					wasThirdPerson = true;
+					thirdPersonOffset = absolutePosition;
+					thirdPersonOrigin = origin;
+					thirdPersonAxis = axis;
+					thirdPersonBodyYawOffset = hmdAngles.yaw;// yawOffset;
+					
+				}
+				origin = thirdPersonOrigin;
+				axis = thirdPersonAxis;
+			//	yawOffset = thirdPersonBodyYawOffset ;
+				headPositionDelta = absolutePosition - thirdPersonOffset;
+				bodyPositionDelta = vec3_zero;
+			}
+			else
+			{
+				if ( wasThirdPerson )
+				{
+					commonVr->thirdPersonDelta = 0.0f;;
+					playerView.Flash( colorBlack, 140 );
+				}
+				wasThirdPerson = false;
+			}
 		}
-		idVec3 origin = renderView->vieworg;
-		idAngles angles = renderView->viewaxis.ToAngles(); 
-		idMat3 axis = renderView->viewaxis;
+				
+		
 		
 		
 		//move the head in relation to the body. 
@@ -16190,14 +16253,12 @@ void idPlayer::CalculateRenderView()
 		//e.g. when using movepoint and snapping the body to the view.
 		
 		idAngles bodyAng = axis.ToAngles();
-		idMat3 bodyAx = idAngles( bodyAng.pitch, bodyAng.yaw - commonVr->bodyYawOffset, bodyAng.roll ).Normalize180().ToMat3();
+		idMat3 bodyAx = idAngles( bodyAng.pitch, bodyAng.yaw - yawOffset, bodyAng.roll ).Normalize180().ToMat3();
 		origin = origin + bodyAx[0] * headPositionDelta.x + bodyAx[1] * headPositionDelta.y + bodyAx[2] * headPositionDelta.z;
 		
 		origin += commonVr->leanOffset;
-
-		//origin += bodyAx[0] * absolutePosition.x + bodyAx[1] * absolutePosition.y + bodyAx[2] * absolutePosition.z;
-
- 		angles.yaw += hmdAngles.yaw - commonVr->bodyYawOffset;    // add the current hmd orientation
+				
+		angles.yaw += hmdAngles.yaw - yawOffset;    // add the current hmd orientation
 		angles.pitch += hmdAngles.pitch;
 		angles.roll += hmdAngles.roll;
 		angles.Normalize180();
@@ -16211,6 +16272,23 @@ void idPlayer::CalculateRenderView()
 				
 		commonVr->lastHMDViewOrigin = origin;
 		commonVr->lastHMDViewAxis = axis;
+
+		if ( wasThirdPerson )
+		{
+			//axis = thirdPersonAxis;
+			angles = thirdPersonAxis.ToAngles();
+			angles.yaw += hmdAngles.yaw - thirdPersonBodyYawOffset;
+			//angles.yaw -= thirdPersonBodyYawOffset;
+			angles.pitch += hmdAngles.pitch;
+			angles.roll += hmdAngles.roll;
+			angles.Normalize180();
+			axis = angles.ToMat3();
+
+			commonVr->thirdPersonDelta = (origin - firstPersonViewOrigin).LengthSqr();
+			common->Printf("3rd person delta %f\n", commonVr->thirdPersonDelta); 
+
+		}
+		
 		commonVr->uncrouchedHMDViewOrigin = origin;
 		commonVr->uncrouchedHMDViewOrigin.z -= commonVr->headHeightDiff;
 				

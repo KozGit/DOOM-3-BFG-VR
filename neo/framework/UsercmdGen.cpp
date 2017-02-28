@@ -1756,6 +1756,10 @@ void idUsercmdGenLocal::MakeCurrent()
 	impulseSequence = cmd.impulseSequence;
 	impulse = cmd.impulse;
 	
+	if ( vr_moveThirdPerson.GetBool() )
+	{
+		commonVr->thirdPersonMovement = ( cmd.forwardmove != 0 || cmd.rightmove != 0 );
+	}
 }
 
 /*
