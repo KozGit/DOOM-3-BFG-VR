@@ -454,7 +454,7 @@ static const spoken_line_t lineArray[] = {
 	{ "e1_sci02_redteam", "" },
 	{ "e1_mcneil_redteam_alt", "Red Team, we're showing your position less than one hundred metres from the signal. There's no data suggesting any ancient civ development in that area." },
 	{ "e1_mchatter_01", "I think they're up to something they just don't want us to know about." },
-	{ "e1_mchatter_02", "Hmph. Some things never change around here." },
+	{ "e1_mchatter_02", "Some things never change around here." }, // hmph, some things never change around here.
 	{ "e1_marine_chamber", "There's some sort of chamber beyond this wall. Point, we need a charge here." },
 	{ "e1_marine_onmyway", "Roger that. On my way." },
 	{ "e1_marine_backitup", "OK, back it up." },
@@ -1728,7 +1728,8 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 			idEntity *ent = NULL;
 			for (ent = gameLocal.spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next())
 			{
-				if (ent->IsType(idAI::Type) || (ent->IsType(idAnimated::Type) && idStr::Cmp(ent->GetClassname(), "env_pcellgen_single") != 0) || ent->IsType(idAFEntity_Generic::Type) || ent->IsType(idAFEntity_WithAttachedHead::Type))
+				if (ent->IsType(idAI::Type) || (ent->IsType(idAnimated::Type) && idStr::Cmp(ent->GetClassname(), "env_pcellgen_single") != 0 && idStr::Cmp(ent->GetClassname(), "env_storagecabinet") != 0 )
+					|| ent->IsType(idAFEntity_Generic::Type) || ent->IsType(idAFEntity_WithAttachedHead::Type))
 					ent->PostEventMS(&EV_Remove, 0);
 				else if (ent->IsType(idDoor::Type))
 					((idDoor *)ent)->Lock(false);
