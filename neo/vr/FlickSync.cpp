@@ -1020,7 +1020,9 @@ void Flicksync_SayPausedLine()
 			ent->StartSound(pausedLine.shader, SND_CHANNEL_VOICE, 0, false, NULL);
 	}
 	// if our character has a line after this, then this becomes the cue line
-	cueLine = pausedLine;
+	// (if it has a usable subtitle, or we've got nothing elese to use)
+	if ( idStr::Cmp(pausedLine.text, "")!=0 || !hasCueLine )
+		cueLine = pausedLine;
 	hasCueLine = true;
 	hasPausedLine = false;
 }
@@ -1068,7 +1070,10 @@ void Flicksync_SayCueLine()
 		else
 			ent->StartSound(cueLine.shader, SND_CHANNEL_VOICE, 0, false, NULL);
 	}
-	Flicksync_CueText = Flicksync_LineNameToLine(cueLine.shader);
+	if ( idStr::Cmp(cueLine.shader, "")==0 )
+		Flicksync_CueText = cueLine.text;
+	else
+		Flicksync_CueText = Flicksync_LineNameToLine(cueLine.shader);
 	if (g_debugCinematic.GetBool())
 		gameLocal.Printf("%d: Flicksync_SayCueLine(\"%s\")\n", gameLocal.framenum, Flicksync_CueText.c_str());
 }
@@ -1200,6 +1205,8 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 		pausedLine.length = length;
 		hasPausedLine = true;
 		Flicksync_PauseCutscene();
+
+		// Repeat the cue line (the line spoken before ours) with subtitles
 		if ( commonVoice->GetTalkButton() )
 			needCue = true;
 		else
@@ -1214,11 +1221,16 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 		return character != vr_flicksyncCharacter.GetInteger();
 	previousLineName = lineName;
 
+	// this is a different character speaking
 	if (character != vr_flicksyncCharacter.GetInteger())
 	{
 		if (g_debugCinematic.GetBool())
 			gameLocal.Printf("%d: Flicksync_Voice(): This is a different character speaking, so set cue line\n", gameLocal.framenum);
-		// this is a different character speaking
+		// If it doesn't have a line, then it's probably just a sound, so don't change the cue.
+		if (!line)
+			line = Flicksync_LineNameToLine(lineName);
+		if (!line || idStr::Cmp(line, "") == 0)
+			return true;
 		cueLine.entity = entity;
 		cueLine.shader = lineName;
 		cueLine.startTime = startTime;
@@ -1272,6 +1284,21 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 		waitingLine.startTime = startTime;
 		waitingLine.shader = lineName;
 		hasWaitingLine = true;
+		// Check for special cases where we need to set the cue line manually:
+		if (idStr::Cmp(waitingLine.shader, "marscity_cin_marine1_1") == 0)
+		{
+			cueLine.entity = "";
+			cueLine.shader = "";
+			idStr::Copynz(cueLine.text, "Roger that, Tower.", 1024);
+			hasCueLine = true;
+		}
+		else if (idStr::Cmp(waitingLine.shader, "marscity_cin_swann1_1") == 0)
+		{
+			cueLine.entity = "marscity_sec_window_1";
+			cueLine.shader = "";
+			idStr::Copynz(cueLine.text, "We've got you, Darkstar, you are set for lockdown. Welcome back.", 1024);
+			hasCueLine = true;
+		}
 		// if we used up our cue card
 		if ( Flicksync_CueCardText != "" )
 			Flicksync_CueCardActive = false;
@@ -1697,11 +1724,11 @@ void Flicksync_GoToCutscene( t_cutscene scene )
 		commonVoice->Say("Flick sync complete.");
 		if (vr_cutscenesOnly.GetInteger() == 1)
 		{
-			// delete all AIs and animated things, and unlock all doors
+			// delete all AIs, dead bodies, and animated things (except generators), and unlock all doors
 			idEntity *ent = NULL;
 			for (ent = gameLocal.spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next())
 			{
-				if (ent->IsType(idAI::Type) || ent->IsType(idAnimated::Type))
+				if (ent->IsType(idAI::Type) || (ent->IsType(idAnimated::Type) && idStr::Cmp(ent->GetClassname(), "env_pcellgen_single")!=0) || ent->IsType(idAFEntity_Generic::Type))
 					ent->PostEventMS(&EV_Remove, 0);
 				else if (ent->IsType(idDoor::Type))
 					((idDoor *)ent)->Lock(false);
