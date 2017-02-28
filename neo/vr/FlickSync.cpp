@@ -1116,7 +1116,7 @@ void Flicksync_ResumeCutscene()
 	int character = 0;
 	if (hasPausedLine)
 		character = EntityToCharacter(pausedLine.entity.c_str(), pausedLine.shader);
-	if (character && character == vr_flicksyncCharacter.GetInteger())
+	if (character && character == vr_flicksyncCharacter.GetInteger() && !Flicksync_GameOver && !Flicksync_complete )
 	{
 		// we already set CueLine to WaitingLine before calling ResumeCutscene
 		waitingLine = pausedLine;
@@ -1502,7 +1502,7 @@ void Flicksync_NewGame(bool notFlicksync)
 
 bool Flicksync_EndCutscene()
 {
-	if (hasWaitingLine && !gameLocal.skipCinematic)
+	if (hasWaitingLine && !gameLocal.skipCinematic && !Flicksync_GameOver && !Flicksync_complete)
 	{
 		if (g_debugCinematic.GetBool())
 			gameLocal.Printf("%d: Flicksync_EndCutscene() while waiting for line\n", gameLocal.framenum);
