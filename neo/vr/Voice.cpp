@@ -611,7 +611,7 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 				break;
 			case SPEI_SR_AUDIO_LEVEL:
 				currentVolume = event.wParam / 100.0f;
-				common->Printf("$ SR Audio Level: %3d / 100\n", event.wParam);
+				//common->Printf("$ SR Audio Level: %3d / 100\n", event.wParam);
 				break;
 			case SPEI_SR_RETAINEDAUDIO:
 				common->Printf("$ SR Retained Audio\n");

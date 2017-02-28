@@ -1168,10 +1168,19 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 	if( Flicksync_complete || Flicksync_GameOver || !vr_flicksyncCharacter.GetInteger() || ( !Flicksync_InCutscene && !gameLocal.inCinematic ) )
 		return true;
 
+	const char *line = NULL;
+
 	int character = EntityToCharacter(entity, lineName);
 	// ignore it if the sound isn't a character speaking (usually just a background noise sound effect)
-	if( channel != SND_CHANNEL_VOICE && channel != SND_CHANNEL_VOICE2 && !character )
-		return true;
+	if( channel != SND_CHANNEL_VOICE && channel != SND_CHANNEL_VOICE2 )
+	{
+		if( !character )
+			return true;
+		// if it doesn't have a line, then it's probably just a sound like footsteps
+		line = Flicksync_LineNameToLine(lineName);
+		if( !line || idStr::Cmp( line, "" ) == 0 )
+			return true;
+	}
 
 	// If the next character tries to speak before we finished our line, pause the cutscene to wait for us.
 	if (Flicksync_WaitingOnLineThatIsLate(lineName, startTime, character))
@@ -1180,7 +1189,8 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 			gameLocal.Printf("%d: new Flicksync_Voice() while waiting for line. Pausing to wait for \"%s\"\n", gameLocal.framenum, waitingLine.text);
 		//commonVoice->Say("pausing to wait for %s", waitingLine.text);
 		// pause cutscene until we hear the line we are waiting for
-		const char *line = Flicksync_LineNameToLine(lineName);
+		if (!line)
+			line = Flicksync_LineNameToLine(lineName);
 		if (!line || idStr::Cmp(line, "")==0)
 			return true;
 		idStr::Copynz(pausedLine.text, line, 1024);
@@ -1225,7 +1235,8 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 	}
 #endif
 
-	const char *line = Flicksync_LineNameToLine(lineName);
+	if( !line )
+		line = Flicksync_LineNameToLine(lineName);
 
 	int index;
 	if ((index = Flicksync_AlreadyHeardLine(line)) > 0)
