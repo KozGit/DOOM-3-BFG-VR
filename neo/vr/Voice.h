@@ -59,6 +59,8 @@ public:
 
 	void		AddFlicksyncLine(const char* line);
 	void		AddFlicksyncLine(const wchar_t* line);
+
+	float currentVolume;
 	//---------------------------
 private:
 	

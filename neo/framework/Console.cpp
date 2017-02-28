@@ -339,17 +339,30 @@ idConsoleLocal::DrawFlicksync
 */
 void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 {
-	if ( gameLocal.inCinematic || Flicksync_InCutscene )
+	if ( ( gameLocal.inCinematic || Flicksync_InCutscene ) && !vr_hudPosLock.GetInteger() )
 		centerY += BIGCHAR_HEIGHT * 3;
 	if (leftY < centerY)
 		leftY = centerY;
 
-	const char* s = va("SCORE: %i", Flicksync_Score);
-	int w = strlen(s) * BIGCHAR_WIDTH;
-	renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, colorWhite, true);
-	centerY += BIGCHAR_HEIGHT + 4;
+	bool inFlicksync = gameLocal.inCinematic || Flicksync_InCutscene || Flicksync_complete || Flicksync_GameOver;
+	if ( inFlicksync )
+	{
+		const char* s = va("SCORE: %i", Flicksync_Score);
+		int w = strlen(s) * BIGCHAR_WIDTH;
+		renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, colorWhite, true);
+		centerY += BIGCHAR_HEIGHT + 4;
+	}
+	else
+	{
+		// Make score less intrusive during normal play between cutscenes
+		idVec4 color = idVec4( 0.5f, 0.5f, 0.5f, 0.5f );
+		const char* s = va("%i", Flicksync_Score);
+		int w = strlen(s) * SMALLCHAR_WIDTH;
+		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, colorWhite, true);
+		centerY += SMALLCHAR_HEIGHT + 4;
+	}
 
-	if (Flicksync_CueCards > 0)
+	if ( Flicksync_CueCards > 0 && inFlicksync )
 	{
 		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT, idMath::Ftoi(leftY) + 2, va("Cue cards: %i", Flicksync_CueCards), colorWhite, true);
 		leftY += SMALLCHAR_HEIGHT + 4;

@@ -103,6 +103,7 @@ iVoice::iVoice()
 */
 iVoice::iVoice()
 {
+	currentVolume = 0.0f;
 }
 
 static bool in_phrase = false, spoke = false, listening = true;
@@ -487,6 +488,7 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 					StoppedTalking();
 				//common->Printf("$ Sound end\n");
 				in_phrase = false;
+				currentVolume = 0;
 				break;
 			case SPEI_PHRASE_START:
 				in_phrase = true;
@@ -600,6 +602,7 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 				break;
 			case SPEI_START_SR_STREAM:
 				in_phrase = false;
+				currentVolume = 0;
 				common->Printf("$ Start SR Stream\n");
 				break;
 			case SPEI_RECO_OTHER_CONTEXT:
@@ -607,7 +610,8 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 				in_phrase = false;
 				break;
 			case SPEI_SR_AUDIO_LEVEL:
-				//common->Printf("$ SR Audio Level\n");
+				currentVolume = event.wParam / 100.0f;
+				//common->Printf("$ SR Audio Level: %3d / 100\n", event.wParam);
 				break;
 			case SPEI_SR_RETAINEDAUDIO:
 				common->Printf("$ SR Retained Audio\n");

@@ -14552,6 +14552,12 @@ bool idPlayer::CheckTeleportPath(const idVec3& target, int toAreaNum)
 		}
 		idVec3 currentPos = origin;
 		int currentArea = originAreaNum;
+
+		int lastAreas[4], lastAreaIndex;
+		lastAreas[0] = lastAreas[1] = lastAreas[2] = lastAreas[3] = currentArea;
+		lastAreaIndex = 0;
+
+
 		// Move along path
 		while (currentArea && currentArea != toAreaNum)
 		{
@@ -14561,14 +14567,35 @@ bool idPlayer::CheckTeleportPath(const idVec3& target, int toAreaNum)
 				return false;
 			}
 
+			lastAreas[lastAreaIndex] = currentArea;
+			lastAreaIndex = (lastAreaIndex + 1) & 3;
+
 			currentPos = path.moveGoal;
 			currentArea = path.moveAreaNum;
-			// Find next path segment. Sometimes it tells us to go to the current location and gets stuck in a loop, so check for that.
+
+			// Sometimes it tells us to go to the current location and gets stuck in a loop, so check for that.
 			// TODO: Work out why it gets stuck in a loop, and fix it. Currently we just go in a straight line from stuck point to destination.
-			if (!aas->WalkPathToGoal(path, currentArea, currentPos, toAreaNum, toPoint, travelFlags) || (path.moveAreaNum == currentArea /* && path.moveGoal == currentPos */))
+			if (currentArea == lastAreas[0] || currentArea == lastAreas[1] ||
+				currentArea == lastAreas[2] || currentArea == lastAreas[3])
+			{
+				common->Warning("CheckTeleportPath: local routing minimum going from area %d to area %d", currentArea, toAreaNum);
+				if (!CheckTeleportPathSegment(currentPos, toPoint, lastPos))
+				{
+					physicsObj.SetOrigin(trueOrigin);
+					return false;
+				}
+				currentPos = toPoint;
+				currentArea = toAreaNum;
+				break;
+			}
+
+			// Find next path segment.
+			if ( !aas->WalkPathToGoal(path, currentArea, currentPos, toAreaNum, toPoint, travelFlags) )
 			{
 				path.moveGoal = toPoint;
 				path.moveAreaNum = toAreaNum;
+				currentPos = toPoint;
+				currentArea = toAreaNum;
 			}
 		}
 		// Is this needed? Doesn't hurt.
