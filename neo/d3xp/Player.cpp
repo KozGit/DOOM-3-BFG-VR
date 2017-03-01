@@ -16132,7 +16132,7 @@ create the renderView for the current tic
 */
 void idPlayer::CalculateRenderView()
 {
-	  // koz add headtracking
+	// koz add headtracking
 	static idAngles hmdAngles = { 0.0, 0.0, 0.0 };
 	static idVec3 lastValidHmdTranslation = vec3_zero;
 	static idVec3 headPositionDelta = vec3_zero;
@@ -16147,7 +16147,7 @@ void idPlayer::CalculateRenderView()
 	static idMat3 thirdPersonAxis = mat3_identity;
 	static float thirdPersonBodyYawOffset = 0.0f;
 
-		
+
 	int i;
 	float range;
 
@@ -16181,11 +16181,11 @@ void idPlayer::CalculateRenderView()
 		{
 			// koz fixme this was in tmeks renderView->viewaxis = firstPersonViewAxis; shouldnt be needed, verify.
 			gameLocal.GetCamera()->GetViewParms( renderView );
-	
+
 			/*	if ( game->isVR && vr_interactiveCinematic.GetBool() ) // koz cinematic
 			{
-				renderView->vieworg = firstPersonViewOrigin;
-				renderView->viewaxis = firstPersonViewAxis;
+			renderView->vieworg = firstPersonViewOrigin;
+			renderView->viewaxis = firstPersonViewAxis;
 			}*/
 		}
 	}
@@ -16239,20 +16239,20 @@ void idPlayer::CalculateRenderView()
 	{
 		// koz headtracker does not modify the model rotations
 		// offsets to body rotation added here
-		
+
 		// body position based on neck model
 		// koz fixme fix this.
-				
+
 		// Koz begin : Add headtracking
 		static idVec3 absolutePosition;
-		
+
 		//commonVr->HMDGetOrientation( hmdAngles, headPositionDelta, bodyPositionDelta, absolutePosition, false );// gameLocal.inCinematic );
-			
+
 		hmdAngles = commonVr->poseHmdAngles;
 		headPositionDelta = commonVr->poseHmdHeadPositionDelta;
 		bodyPositionDelta = commonVr->poseHmdBodyPositionDelta;
 		absolutePosition = commonVr->poseHmdAbsolutePosition;
-			
+
 		idVec3 origin = renderView->vieworg;
 		idAngles angles = renderView->viewaxis.ToAngles();
 		idMat3 axis = renderView->viewaxis;
@@ -16265,92 +16265,114 @@ void idPlayer::CalculateRenderView()
 				wasCinematic = true;
 				cinematicOffset = absolutePosition;
 			}
-			
+
 			headPositionDelta = absolutePosition - cinematicOffset;
 			bodyPositionDelta = vec3_zero;
 		}
 		else
 		{
 			wasCinematic = false;
-				
-			if ( commonVr->thirdPersonMovement )
-			{
-				if ( wasThirdPerson == false )
-				{
-					wasThirdPerson = true;
-					thirdPersonOffset = absolutePosition;
-					thirdPersonOrigin = origin;
-					thirdPersonAxis = axis;
-					thirdPersonBodyYawOffset = hmdAngles.yaw;// yawOffset;
-					
-				}
-				origin = thirdPersonOrigin;
-				axis = thirdPersonAxis;
-			//	yawOffset = thirdPersonBodyYawOffset ;
-				headPositionDelta = absolutePosition - thirdPersonOffset;
-				bodyPositionDelta = vec3_zero;
-			}
-			else
-			{
-				if ( wasThirdPerson )
-				{
-					commonVr->thirdPersonDelta = 0.0f;;
-					playerView.Flash( colorBlack, 140 );
-				}
-				wasThirdPerson = false;
-			}
 		}
-				
-		
-		
-		
+
 		//move the head in relation to the body. 
 		//bodyYawOffsets are external rotations of the body where the head remains looking in the same direction
 		//e.g. when using movepoint and snapping the body to the view.
-		
+
 		idAngles bodyAng = axis.ToAngles();
 		idMat3 bodyAx = idAngles( bodyAng.pitch, bodyAng.yaw - yawOffset, bodyAng.roll ).Normalize180().ToMat3();
 		origin = origin + bodyAx[0] * headPositionDelta.x + bodyAx[1] * headPositionDelta.y + bodyAx[2] * headPositionDelta.z;
-		
+
 		origin += commonVr->leanOffset;
-				
+
 		angles.yaw += hmdAngles.yaw - yawOffset;    // add the current hmd orientation
 		angles.pitch += hmdAngles.pitch;
 		angles.roll += hmdAngles.roll;
 		angles.Normalize180();
-		
-	
+
+
 		commonVr->lastHMDYaw = hmdAngles.yaw;
 		commonVr->lastHMDPitch = hmdAngles.pitch;
 		commonVr->lastHMDRoll = hmdAngles.roll;
-	
+
 		axis = angles.ToMat3(); // this sets the actual view axis, separate from the body axis.
-				
+
 		commonVr->lastHMDViewOrigin = origin;
 		commonVr->lastHMDViewAxis = axis;
 
-		if ( wasThirdPerson )
+		commonVr->uncrouchedHMDViewOrigin = origin;
+		commonVr->uncrouchedHMDViewOrigin.z -= commonVr->headHeightDiff;
+
+
+		if ( commonVr->thirdPersonMovement )
 		{
+			if ( wasThirdPerson == false )
+			{
+				wasThirdPerson = true;
+				thirdPersonOffset = absolutePosition;
+				thirdPersonOrigin = commonVr->lastHMDViewOrigin;//origin;
+				thirdPersonAxis = idAngles( 0.0f, commonVr->lastHMDViewAxis.ToAngles().yaw, 0.0f ).ToMat3();//axis;
+				thirdPersonBodyYawOffset = hmdAngles.yaw;// -yawOffset;
+
+			}
+			origin = thirdPersonOrigin;
+			axis = thirdPersonAxis;
+			yawOffset = thirdPersonBodyYawOffset;
 			angles = thirdPersonAxis.ToAngles();
-			angles.yaw += hmdAngles.yaw - thirdPersonBodyYawOffset;
+			headPositionDelta = absolutePosition - thirdPersonOffset;
+			bodyPositionDelta = vec3_zero;
+
+			idAngles bodyAng = thirdPersonAxis.ToAngles();
+			idMat3 bodyAx = idAngles( bodyAng.pitch, bodyAng.yaw - yawOffset, bodyAng.roll ).Normalize180().ToMat3();
+			origin = thirdPersonOrigin + bodyAx[0] * headPositionDelta.x + bodyAx[1] * headPositionDelta.y + bodyAx[2] * headPositionDelta.z;
+
+			origin += commonVr->leanOffset;
+
+			angles.yaw += hmdAngles.yaw - thirdPersonBodyYawOffset;    // add the current hmd orientation
 			angles.pitch += hmdAngles.pitch;
 			angles.roll += hmdAngles.roll;
 			angles.Normalize180();
 			axis = angles.ToMat3();
-
 			commonVr->thirdPersonHudAxis = axis;
 			commonVr->thirdPersonHudPos = origin;
 
 			commonVr->thirdPersonDelta = (origin - firstPersonViewOrigin).LengthSqr();
-	
+
 		}
-		
-		commonVr->uncrouchedHMDViewOrigin = origin;
-		commonVr->uncrouchedHMDViewOrigin.z -= commonVr->headHeightDiff;
-				
+		else
+		{
+			if ( wasThirdPerson )
+			{
+				commonVr->thirdPersonDelta = 0.0f;;
+				playerView.Flash( colorBlack, 140 );
+			}
+			wasThirdPerson = false;
+		}
+
+		/*
+		if ( wasThirdPerson )
+		{
+		angles = thirdPersonAxis.ToAngles();
+		angles.yaw += hmdAngles.yaw - thirdPersonBodyYawOffset;
+		angles.pitch += hmdAngles.pitch;
+		angles.roll += hmdAngles.roll;
+		angles.Normalize180();
+		axis = angles.ToMat3();
+
+		commonVr->thirdPersonHudAxis = axis;
+		commonVr->thirdPersonHudPos = origin;
+
+		commonVr->thirdPersonDelta = (origin - firstPersonViewOrigin).LengthSqr();
+
+		}
+		*/
+
 		renderView->vieworg = origin;
 		renderView->viewaxis = axis;
-		
+
+
+
+
+
 		/* this will calc the distance from the view origin to the ground
 		idVec3 start;
 		idVec3 end;
@@ -16362,12 +16384,12 @@ void idPlayer::CalculateRenderView()
 
 		if ( gameLocal.clip.TracePoint( traceResults, start, end, MASK_SHOT_RENDERMODEL, this ) )
 		{
-			common->Printf("Eye HOG = %f         %f\n", 100.0f * traceResults.fraction, start.z - renderEntity.origin.z);
+		common->Printf("Eye HOG = %f         %f\n", 100.0f * traceResults.fraction, start.z - renderEntity.origin.z);
 		}
-		*/	
-		
-		
-		
+		*/
+
+
+
 		//UpdateVrHud();
 
 		// koz fixme pause - handle the PDA model if game is paused
@@ -16387,13 +16409,13 @@ void idPlayer::CalculateRenderView()
 			idPlayer* player = gameLocal.GetLocalPlayer();
 			player->SetupPDASlot( commonVr->PDAforced );
 			player->SetupHolsterSlot( commonVr->PDAforced );
-			if (!commonVr->PDAforced)
+			if ( !commonVr->PDAforced )
 			{
 				if ( weapon->IdentifyWeapon() != WEAPON_PDA )
 				{
 					//common->Printf( "idPlayer::CalculateRenderView calling SelectWeapon for PDA\nPDA Forced = %i, PDAForceToggle = %i\n",commonVr->PDAforced,commonVr->PDAforcetoggle );
 					SelectWeapon( weapon_pda, true );
-					
+
 					const function_t* func;
 					func = scriptObject.GetFunction( "SetWeaponHandPose" );
 					if ( func )
@@ -16408,7 +16430,7 @@ void idPlayer::CalculateRenderView()
 				}
 				else
 				{
-									
+
 					if ( weapon->status == WP_READY )
 					{
 						commonVr->PDAforced = true;
@@ -16418,7 +16440,7 @@ void idPlayer::CalculateRenderView()
 			}
 			else
 			{ // pda has been already been forced active, put it away.
-				
+
 				TogglePDA();
 				commonVr->PDAforcetoggle = false;
 				commonVr->PDAforced = false;

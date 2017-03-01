@@ -1653,7 +1653,7 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		return;
 	}
 
-	if ( commonVr->VR_USE_MOTION_CONTROLS && vr_movePoint.GetInteger() == 1 && ( abs( cmd.forwardmove ) >= .1 || abs( cmd.rightmove ) >= .1) ) // body will follow motion from move vector
+	if ( commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && vr_movePoint.GetInteger() == 1 && ( abs( cmd.forwardmove ) >= .1 || abs( cmd.rightmove ) >= .1) ) // body will follow motion from move vector
 	{
 		static idAngles controllerAng;
 
