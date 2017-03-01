@@ -36,6 +36,7 @@ vr_voiceAction_t voiceActionStrings[J_SAY_NUM] =
 	{ "TALK", J_TALK },
 	{ "MENU", J_SAY_MENU },
 	{ "CANCEL", J_SAY_CANCEL },
+	{ "RESETVIEW", J_SAY_RESET_VIEW },
 	{ "RELOAD", J_SAY_RELOAD },
 	{ "PDA", J_SAY_PDA },
 	{ "FIST", J_SAY_FIST },
@@ -245,6 +246,7 @@ void iVoice::HearWord(const char *w, int confidence)
 				Say( buildCmdString( J_SAY_RESUME ) );
 				Say( buildCmdString( J_SAY_EXIT ) );
 				Say( buildCmdString( J_SAY_MENU ) );
+				Say( buildCmdString( J_SAY_RESET_VIEW ) );
 				Say( buildCmdString( J_SAY_CANCEL ) );
 				Say( buildCmdString( J_SAY_PDA ) );
 				//Say( "pause game, resume game, exit game, menu, cancel, PDA." );

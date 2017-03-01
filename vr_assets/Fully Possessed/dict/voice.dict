@@ -101,6 +101,17 @@ action {
 
 action {
 
+	name RESETVIEW
+	entries 4
+	
+	"reset view"
+	"recenter view"
+	"reset HMD orientation"
+	"reset HMD view"
+}
+
+action {
+
 	name RELOAD
 	entries 1
 	

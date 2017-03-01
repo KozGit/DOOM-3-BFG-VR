@@ -1241,12 +1241,13 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
         if (vr_voiceCommands.GetInteger() > 0)
 		    {
 				  static bool oldSay[J_SAY_MAX - J_SAY_MIN + 1] = {};
-				  for ( int i = J_SAY_MIN; i <= J_SAY_MAX; ++i )
+				  int max = vr_voiceCommands.GetInteger() > 1 ? J_SAY_MAX : J_SAY_RELOAD;
+				  for ( int i = J_SAY_MIN; i <= max; ++i )
 				  {
 					  bool say = commonVoice->GetSayButton( i );
 					  if ( say != oldSay[i - J_SAY_MIN] )
 					  {
-						  common->Printf( "Posting say input event\n %d %d",i,say );
+						  common->Printf( "Posting say input event %d %d\n", i, say );
 						  PostInputEvent( inputDeviceNum, i, say );
 						  oldSay[i - J_SAY_MIN] = say;
 					  }

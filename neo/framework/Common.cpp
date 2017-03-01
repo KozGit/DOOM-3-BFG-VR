@@ -1471,7 +1471,9 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		cmdSystem->AppendCommandText( "bind SAY_BFG _impulse10\n" );
 		cmdSystem->AppendCommandText( "bind SAY_SOUL_CUBE _impulse12\n" );
 		cmdSystem->AppendCommandText( "bind SAY_ARTIFACT _impulse12\n" );
+		cmdSystem->AppendCommandText( "bind SAY_RESET_VIEW _impulse32\n" );
 		
+
 		//koz check for mod files:
 		findFile_t found = fileSystem->FindFile( "guis\\lookforward.tga" );
 		

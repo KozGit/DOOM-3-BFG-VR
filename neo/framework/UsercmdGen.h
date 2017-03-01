@@ -91,7 +91,7 @@ const int IMPULSE_39			= 39;			// freelook
 const int IMPULSE_40			= 40;			// system menu
 const int IMPULSE_41			= 41;     // click to move
 //koz end
-const int IMPULSE_42			= 42;			// Carl: Teleport
+const int IMPULSE_42			= 42;			// Carl: was teleport, but now there's a "_teleport" button instead.
 
 class usercmd_t
 {
@@ -216,7 +216,7 @@ typedef enum
 	UB_IMPULSE41, // click to move
 	// Koz end
 
-  UB_IMPULSE42, // Carl: Teleport
+  UB_IMPULSE42, // Carl: was teleport, but now we use UB_TELEPORT instead
 
 	UB_MAX_BUTTONS
 } usercmdButton_t;
