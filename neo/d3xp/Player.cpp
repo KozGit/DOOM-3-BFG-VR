@@ -9538,7 +9538,8 @@ void idPlayer::PerformImpulse( int impulse )
 		// Carl specific fists weapon
 		case IMPULSE_26:
 		{
-			SelectWeapon( weapon_fists, false, true );
+			if ( !isIntroMap )
+				SelectWeapon( weapon_fists, false, true );
 			break;
 		}
 		//Hack so the chainsaw will work in MP
