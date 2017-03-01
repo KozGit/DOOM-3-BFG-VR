@@ -153,6 +153,8 @@ public:
 	bool				wasSaved;
 	bool				wasLoaded;
 
+	bool				forceRun;
+
 	bool				forceLeftStick;
 	
 	int					currentFlashlightPosition;
@@ -442,6 +444,7 @@ extern idCVar	vr_talkWakeMonsters;
 extern idCVar	vr_talkWakeMonsterRadius;
 extern idCVar	vr_talkMode;
 extern idCVar	vr_voiceCommands;
+extern idCVar vr_voiceRepeat;
 
 extern idCVar	vr_listMonitorName;
 

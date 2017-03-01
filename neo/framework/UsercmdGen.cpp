@@ -1496,7 +1496,7 @@ void idUsercmdGenLocal::CmdButtons()
 
 	if ( !game->isVR || game->isVR && vr_moveClick.GetInteger() <= 2 ) // koz, do normal run if moveClick = 0
 	{
-		if ( toggled_run.on || (in_alwaysRun.GetBool() && common->IsMultiplayer()) )
+		if ( toggled_run.on || (in_alwaysRun.GetBool() && common->IsMultiplayer()) || commonVr->forceRun )
 		{
 			cmd.buttons |= BUTTON_RUN;
 		}

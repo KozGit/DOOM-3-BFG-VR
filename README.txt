@@ -337,6 +337,8 @@ You can use some Holodeck commands.
 
 You can also say:
 - Reload
+- Start running
+- Stop running, start walking
 - Menu, System
 - Cancel
 - pause game
@@ -354,6 +356,7 @@ To start listening again say either:
 For a (long) list of what you can say, say:
 - what can I say
 
+You can customize the voice commands by editing "Fully Possessed\dict\voice.dict"
 
 Flicksync:
 ----------
@@ -733,7 +736,8 @@ vr_hudNewItems vr_hudNewItems1 BOOL - Show new items acquired in Hud.
 vr_hudFlashlight vr_hudFlashlight1 BOOL - Show flashlight in Hud.
 vr_hudLowHealth vr_hudLowHealth0 INTEGER0 = Disable, otherwise force hud if heath below this value.
 
-vr_voiceCommands vr_voiceCommands2 INTEGER - Enable voice commands. 0 = none, 1 = menus, 2 = menus and weapons
+vr_voiceRepeat 0 BOOL - 1 = computer speaks back whatever commands or lines you say
+vr_voiceCommands 2 INTEGER - Enable voice commands. 0 = none, 1 = menus, 2 = menus and weapons
 vr_talkWakeMonsters 1 BOOL - Talking wakes monsters. 0 = no, 1 = yes
 vr_talkMode 2 INTEGER - Talk to NPC 0 = buttons, 1 = buttons or voice, 2 = voice only, 3 = voice no cursor
 vr_tweakTalkCursor 25 FLOAT - Tweak talk cursor y pos in VR. % val 0 to 99 
