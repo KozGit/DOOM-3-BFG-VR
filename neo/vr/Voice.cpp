@@ -37,6 +37,8 @@ vr_voiceAction_t voiceActionStrings[J_SAY_NUM] =
 	{ "MENU", J_SAY_MENU },
 	{ "CANCEL", J_SAY_CANCEL },
 	{ "RESETVIEW", J_SAY_RESET_VIEW },
+	{ "STARTRUNNING", J_SAY_START_RUNNING },
+	{ "STOPRUNNING", J_SAY_STOP_RUNNING },
 	{ "RELOAD", J_SAY_RELOAD },
 	{ "PDA", J_SAY_PDA },
 	{ "FIST", J_SAY_FIST },
@@ -207,9 +209,19 @@ void iVoice::HearWord(const char *w, int confidence)
 	if ( index == -1 ) return; // not found;
 	
 	int action = voiceCommandActions[index];
-		
-	if (action == J_SAY_LIST ) 
-	{		
+
+	if ( action == J_SAY_START_RUNNING && !commonVr->forceRun )
+	{
+		commonVr->forceRun = true;
+		Say("running");
+	}
+	else if ((action == J_SAY_STOP_RUNNING || action == J_SAY_START_RUNNING) && commonVr->forceRun)
+	{
+		commonVr->forceRun = false;
+		Say("walking");
+	}
+	else if (action == J_SAY_LIST ) 
+	{
 		common->Printf( "J_SAY_LIST parsed" );
 		Speed( 4 );
 		if ( vr_talkMode.GetInteger() > 0 )
@@ -249,6 +261,8 @@ void iVoice::HearWord(const char *w, int confidence)
 				Say( buildCmdString( J_SAY_RESET_VIEW ) );
 				Say( buildCmdString( J_SAY_CANCEL ) );
 				Say( buildCmdString( J_SAY_PDA ) );
+				Say( buildCmdString( J_SAY_START_RUNNING ) );
+				Say( buildCmdString( J_SAY_STOP_RUNNING ) );
 				//Say( "pause game, resume game, exit game, menu, cancel, PDA." );
 			}
 					
@@ -517,7 +531,8 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 					}
 					const char* confidences[3] = { "low", "medium", "high" };
 					hr = recoResult->GetText(SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL);
-					//voice.Say("%s: You said %S.", confidences[confidence + 1], text);
+					if (vr_voiceRepeat.GetBool())
+						voice.Say("%s: %S.", confidences[confidence + 1], text);
 					if (isLine)
 					{
 						if ( vr_flicksyncCharacter.GetInteger() )

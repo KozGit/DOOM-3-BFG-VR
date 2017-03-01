@@ -1253,6 +1253,8 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 					  }
 				  }
         }
+				else
+					commonVr->forceRun = false;
 
 				//=============================
 				// Koz begin add SteamVR controllers

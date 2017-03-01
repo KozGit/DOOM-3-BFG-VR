@@ -85,6 +85,7 @@ idCVar vr_hudNewItems( "vr_hudNewItems", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHI
 idCVar vr_hudFlashlight( "vr_hudFlashlight", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Show flashlight in Hud." );
 idCVar vr_hudLowHealth( "vr_hudLowHealth", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, " 0 = Disable, otherwise force hud if heath below this value." );
 
+idCVar vr_voiceRepeat( "vr_voiceRepeat", "0", CVAR_BOOL, "1 = computer speaks back whatever commands or lines you say" );
 idCVar vr_voiceCommands( "vr_voiceCommands", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Enable voice commands. 0 = none, 1 = menus, 2 = menus and weapons", 0, 2 );
 idCVar vr_talkWakeMonsters( "vr_talkWakeMonsters", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Talking wakes monsters. 0 = no, 1 = yes", 0, 1 );
 idCVar vr_talkWakeMonsterRadius( "vr_talkWakeMonsterRadius", "240", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Radius in inches within which talking can wake enemies." );
@@ -335,6 +336,8 @@ iVr::iVr()
 	swfRenderMode = RENDERING_NORMAL;
 
 	isWalking = false;
+
+	forceRun = false;
 
 	hmdBodyTranslation = vec3_zero;
 

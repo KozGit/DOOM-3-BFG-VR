@@ -1,4 +1,4 @@
-numActions 26
+numActions 29
 
 // these strings in quotes can be changed to localize these phrases if needed.
 // the 6 phrases must be all be present and listed in this order.
@@ -108,6 +108,23 @@ action {
 	"recenter view"
 	"reset HMD orientation"
 	"reset HMD view"
+}
+
+action {
+
+	name STARTRUNNING
+	entries 1
+	
+	"start running"
+}
+
+action {
+
+	name STOPRUNNING
+	entries 2
+	
+	"stop running"
+	"start walking"
 }
 
 action {
