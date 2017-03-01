@@ -318,6 +318,8 @@ iVr::iVr()
 
 	thirdPersonMovement = false;
 	thirdPersonDelta = 0.0f;
+	thirdPersonHudAxis = mat3_identity;
+	thirdPersonHudPos = vec3_zero;
 	
 	chestDefaultDefined = false;
 
@@ -1803,18 +1805,22 @@ void iVr::CalcAimMove( float &yawDelta, float &pitchDelta )
 		pitchDelta = 0.0f;
 		return;
 	}
+		
 
 	float pitchDeadzone = vr_deadzonePitch.GetFloat();
 	float yawDeadzone = vr_deadzoneYaw.GetFloat();
-
-
+	
 	commonVr->independentWeaponPitch += pitchDelta;
-	commonVr->independentWeaponYaw += yawDelta;
-
 
 	if ( commonVr->independentWeaponPitch >= pitchDeadzone ) commonVr->independentWeaponPitch = pitchDeadzone;
 	if ( commonVr->independentWeaponPitch < -pitchDeadzone ) commonVr->independentWeaponPitch = -pitchDeadzone;
 	pitchDelta = 0;
+
+	// if moving the character in third person, just turn immediately, no deadzones.
+	if ( commonVr->thirdPersonMovement ) return;
+
+	
+	commonVr->independentWeaponYaw += yawDelta;
 
 	if ( commonVr->independentWeaponYaw >= yawDeadzone )
 	{

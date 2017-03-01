@@ -1205,16 +1205,32 @@ float idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int ax
 			break;
 
 		case UB_IMPULSE34: // comfort turn right
-			ct  = fabs(jaxisValue);
-			if ( ct > vr_padToButtonThreshold.GetFloat() ) {
-				rVal = -vr_comfortDelta.GetFloat();
+			
+			if ( commonVr->thirdPersonMovement ) // allow normal stick movement of character if in 3rd person mode
+			{
+				mappedLook.x += jaxisValue;
+			}
+			else
+			{
+				ct = fabs( jaxisValue );
+				if ( ct > vr_padToButtonThreshold.GetFloat() ) {
+					rVal = -vr_comfortDelta.GetFloat();
+				}
 			}
 			break;
 	
 		case UB_IMPULSE35: // comfort turn left
-			ct = fabs( jaxisValue );
-			if ( ct > vr_padToButtonThreshold.GetFloat() ) {
-				rVal =  vr_comfortDelta.GetFloat();
+			
+			if ( commonVr->thirdPersonMovement ) // allow normal stick movement of character if in 3rd person mode
+			{
+				mappedLook.x -= jaxisValue;
+			}
+			else
+			{
+				ct = fabs( jaxisValue );
+				if ( ct > vr_padToButtonThreshold.GetFloat() ) {
+					rVal = vr_comfortDelta.GetFloat();
+				}
 			}
 			break;
 
@@ -1271,15 +1287,17 @@ void idUsercmdGenLocal::JoystickMove2()
 	idVec2 mappedMove = vec2_zero;
 	idVec2 mappedLook = vec2_zero;
 
-	float comfortTurn = 0.0 ;
+	float comfortTurn = 0.0f;
 	static int lastComfortTime = 0;
-
+		
+	if ( ButtonState( UB_IMPULSE34 ) ) comfortTurn = -vr_comfortDelta.GetFloat();
+	if ( ButtonState( UB_IMPULSE35 ) ) comfortTurn = vr_comfortDelta.GetFloat();
+	
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_X ); //koz remamp axis
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_Y );
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_X );
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_Y );
-
-	
+		
 	if ( comfortTurn != 0.0 && (Sys_Milliseconds() - lastComfortTime >= vr_comfortRepeat.GetInteger()) )
 	{
 		viewangles[YAW] += comfortTurn;

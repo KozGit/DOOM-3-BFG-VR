@@ -2197,6 +2197,8 @@ void idPlayer::Init()
 
 	commonVr->thirdPersonMovement = false;
 	commonVr->thirdPersonDelta = 0.0f;
+	commonVr->thirdPersonHudPos = vec3_zero;
+	commonVr->thirdPersonHudAxis = mat3_identity;
 
 	// koz end	
 
@@ -9565,11 +9567,12 @@ void idPlayer::PerformImpulse( int impulse )
 			// koz fixme
 			// this performs comfort turns for key input,
 			// really need to move this to usercmdgen
-
+			/*
 			static idAngles angles;
 			angles.Set( 0.0f, vr_comfortDelta.GetFloat(), 0.0f );
 			SetDeltaViewAngles( deltaViewAngles - angles );
 			break;
+			*/
 		}
 		
 		case IMPULSE_35: // comfort turn left
@@ -9577,10 +9580,12 @@ void idPlayer::PerformImpulse( int impulse )
 			// koz fixme
 			// this performs comfort turns for key input,
 			// really need to move this to usercmdgen
+			/*
 			static idAngles angles;
 			angles.Set( 0.0f, vr_comfortDelta.GetFloat(), 0.0f );
 			SetDeltaViewAngles( deltaViewAngles + angles );
 			break;
+			*/
 		}
 		
 		case IMPULSE_36: //  Toggle Hud
@@ -12599,7 +12604,7 @@ void idPlayer::UpdateVrHud()
 		else
 			hudEntity.allowSurfaceInViewID = entityNumber + 1;
 		
-		if ( vr_hudPosLock.GetInteger() == 1 ) // hud in fixed position in space
+		if ( vr_hudPosLock.GetInteger() == 1 && !commonVr->thirdPersonMovement ) // hud in fixed position in space, except if running in third person, then attach to face.
 		{
 			hudPitch = vr_hudType.GetInteger() == VR_HUD_LOOK_DOWN ? vr_hudPosAngle.GetFloat() : 10.0f;
 			
@@ -12622,9 +12627,16 @@ void idPlayer::UpdateVrHud()
 		}
 		else // hud locked to face
 		{
-			hudAxis = commonVr->lastHMDViewAxis;
-			hudOrigin = commonVr->lastHMDViewOrigin;
-
+			if ( commonVr->thirdPersonMovement )
+			{
+				hudAxis = commonVr->thirdPersonHudAxis;
+				hudOrigin = commonVr->thirdPersonHudPos;
+			}
+			else
+			{
+				hudAxis = commonVr->lastHMDViewAxis;
+				hudOrigin = commonVr->lastHMDViewOrigin;
+			}
 			hudOrigin += hudAxis[0] * vr_hudPosDis.GetFloat(); 
 			hudOrigin += hudAxis[1] * vr_hudPosHor.GetFloat();
 			hudOrigin += hudAxis[2] * vr_hudPosVer.GetFloat();
@@ -15532,8 +15544,14 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 				
 				flip = currentHand == 0 ? 1 : -1;
 				
-				origin += idVec3( vr_offHandPosX.GetFloat(), vr_offHandPosY.GetFloat() * flip, vr_offHandPosZ.GetFloat() ) * axis;
-						
+				if ( commonVr->thirdPersonMovement )// if running in third person, make sure the hand is somewhere sane.
+				{
+					origin += idVec3( 4.0f, -10.0f * flip, -20.0f );
+				}
+				else
+				{
+					origin += idVec3( vr_offHandPosX.GetFloat(), vr_offHandPosY.GetFloat() * flip, vr_offHandPosZ.GetFloat() ) * axis;
+				}
 				idMat3 fr = flashRot.ToMat3() * axis;
 				
 				SetHandIKPos( currentHand, origin, fr , flashRot, true );
@@ -15681,9 +15699,15 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 			handOrg = idAngles( 0.0, viewAngles.yaw, 0.0f ).ToMat3();
 
 			flip = currentHand == 0 ? 1 : -1;
-
-			handLoc += idVec3( vr_offHandPosX.GetFloat(), vr_offHandPosY.GetFloat() * flip, vr_offHandPosZ.GetFloat() ) * handOrg;
-
+			
+			if ( commonVr->thirdPersonMovement )// if running in third person, make sure the hand is somewhere sane.
+			{
+				handLoc += idVec3( 4.0f, -10.0f * flip, -20.0f ) * handOrg;
+			}
+			else
+			{
+				handLoc += idVec3( vr_offHandPosX.GetFloat(), vr_offHandPosY.GetFloat() * flip, vr_offHandPosZ.GetFloat() ) * handOrg;
+			}
 
 			idMat3 fr = flashRot.ToMat3() * handOrg;
 
@@ -16302,18 +16326,18 @@ void idPlayer::CalculateRenderView()
 
 		if ( wasThirdPerson )
 		{
-			//axis = thirdPersonAxis;
 			angles = thirdPersonAxis.ToAngles();
 			angles.yaw += hmdAngles.yaw - thirdPersonBodyYawOffset;
-			//angles.yaw -= thirdPersonBodyYawOffset;
 			angles.pitch += hmdAngles.pitch;
 			angles.roll += hmdAngles.roll;
 			angles.Normalize180();
 			axis = angles.ToMat3();
 
-			commonVr->thirdPersonDelta = (origin - firstPersonViewOrigin).LengthSqr();
-			common->Printf("3rd person delta %f\n", commonVr->thirdPersonDelta); 
+			commonVr->thirdPersonHudAxis = axis;
+			commonVr->thirdPersonHudPos = origin;
 
+			commonVr->thirdPersonDelta = (origin - firstPersonViewOrigin).LengthSqr();
+	
 		}
 		
 		commonVr->uncrouchedHMDViewOrigin = origin;

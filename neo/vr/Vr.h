@@ -192,6 +192,9 @@ public:
 	bool				isWalking;
 	bool				thirdPersonMovement;
 	float				thirdPersonDelta;
+	idVec3				thirdPersonHudPos;
+	idMat3				thirdPersonHudAxis;
+
 	
 	float				angles[3];
 	
