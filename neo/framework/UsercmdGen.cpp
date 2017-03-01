@@ -1774,9 +1774,16 @@ void idUsercmdGenLocal::MakeCurrent()
 	impulseSequence = cmd.impulseSequence;
 	impulse = cmd.impulse;
 	
-	if ( vr_moveThirdPerson.GetBool() )
+	if ( vr_motionSickness.GetInteger() == 10 )
 	{
-		commonVr->thirdPersonMovement = ( cmd.forwardmove != 0 || cmd.rightmove != 0 );
+		if ( cmd.forwardmove != 0 || cmd.rightmove != 0 )
+			commonVr->thirdPersonMovement = true;
+		// third person movement is switched off again in player.cpp
+		// once the speed hits zero and forwardmove and rightmove are 0
+	}
+	else
+	{
+		commonVr->thirdPersonMovement = false;
 	}
 }
 

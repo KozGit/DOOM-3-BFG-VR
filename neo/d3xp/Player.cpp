@@ -10868,10 +10868,14 @@ void idPlayer::Move()
 	if ( comfortMode < 2 || Flicksync_InCutscene || game->CheckInCinematic() ) 
 	{
 		this->playerView.EnableVrComfortVision( false );
+		commonVr->thirdPersonMovement = false;
 		return;
 	}
 
 	float speed = physicsObj.GetLinearVelocity().LengthFast();
+	if ( comfortMode == 10 && speed == 0 && usercmd.forwardmove == 0 && usercmd.rightmove == 0 )
+		commonVr->thirdPersonMovement = false;
+
 	if ((comfortMode == 2) || (comfortMode == 5) || (comfortMode == 8) || (comfortMode == 9))
 	{
 		if (speed == 0 && !blink)
