@@ -111,6 +111,7 @@ void idMenuScreen_Shell_VR_HUD_Options::Initialize( idMenuHandler * data ) {
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_HUD_Options::HUD_OPTIONS_FIELD_HUD_ADJUST_POSITION );
 	options->AddChild( control );
 		
+	/*
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_BUTTON_TEXT );
 	control->SetLabel( "Select HUD Elements" );
@@ -118,7 +119,7 @@ void idMenuScreen_Shell_VR_HUD_Options::Initialize( idMenuHandler * data ) {
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_HUD_Options::HUD_OPTIONS_FIELD_HUD_SELECT_ELEMENTS );
 	options->AddChild( control );
-	
+	*/
 
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
