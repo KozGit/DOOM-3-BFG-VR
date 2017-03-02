@@ -1684,7 +1684,9 @@ creates the current command for this frame
 void idUsercmdGenLocal::MakeCurrent()
 {
 	idVec3 oldAngles = viewangles;
-	
+	static int thirdPersonTime = Sys_Milliseconds();
+
+
 	if( !Inhibited() )
 	{
 		// update toggled key states
@@ -1777,9 +1779,20 @@ void idUsercmdGenLocal::MakeCurrent()
 	if ( vr_motionSickness.GetInteger() == 10 )
 	{
 		if ( cmd.forwardmove != 0 || cmd.rightmove != 0 )
+		{
 			commonVr->thirdPersonMovement = true;
-		// third person movement is switched off again in player.cpp
-		// once the speed hits zero and forwardmove and rightmove are 0
+			thirdPersonTime = Sys_Milliseconds();
+			// third person movement is switched off again in player.cpp
+			// once the speed hits zero and forwardmove and rightmove are 0
+		}
+		else
+		{
+			//in case the player has jumped on something moving in third person,
+			//put a timeout here so the view will snap back if the controls haven't been touched
+			//in a bit.
+			if ( commonVr->thirdPersonMovement == true && ( Sys_Milliseconds() - thirdPersonTime ) > 300 ) commonVr->thirdPersonMovement = false;
+
+		}
 	}
 	else
 	{
