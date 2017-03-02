@@ -88,7 +88,7 @@ idCVar vr_hudLowHealth( "vr_hudLowHealth", "0", CVAR_INTEGER | CVAR_GAME | CVAR_
 idCVar vr_voiceRepeat( "vr_voiceRepeat", "0", CVAR_BOOL, "1 = computer speaks back whatever commands or lines you say" );
 idCVar vr_voiceCommands( "vr_voiceCommands", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Enable voice commands. 0 = none, 1 = menus, 2 = menus and weapons", 0, 2 );
 idCVar vr_talkWakeMonsters( "vr_talkWakeMonsters", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Talking wakes monsters. 0 = no, 1 = yes", 0, 1 );
-idCVar vr_talkWakeMonsterRadius( "vr_talkWakeMonsterRadius", "240", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Radius in inches within which talking can wake enemies." );
+idCVar vr_talkWakeMonsterRadius( "vr_talkWakeMonsterRadius", "120", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Radius in inches within which talking can wake enemies." );
 idCVar vr_talkMode( "vr_talkMode", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Talk to NPC 0 = buttons, 1 = buttons or voice, 2 = voice only, 3 = voice no cursor", 0, 3 );
 idCVar vr_tweakTalkCursor( "vr_tweakTalkCursor", "25", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Tweak talk cursor y pos in VR. % val", 0, 99 );
 
