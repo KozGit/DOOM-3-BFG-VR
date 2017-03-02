@@ -390,12 +390,16 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 			static const int values[numValues] = { 0, 1, 10, 30, 45, 90, 180 };
 			int value = (int)(vr_comfortDelta.GetFloat() + 0.5f);
 			int comfortCount = 0, analogCount = 0;
-			for (int k = K_JOY1; k < K_JOY_DPAD_RIGHT; k++)
+			for (int k = K_JOY17; k < K_R_STEAMVRTRIG; k++)
 			{
-				if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_impulse34" ) == 0 || idStr::Icmp( idKeyInput::GetBinding( k ), "_impulse35" ) == 0 )
-					comfortCount++;
-				if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_right" ) == 0 || idStr::Icmp( idKeyInput::GetBinding( k ), "_left" ) == 0 )
-					analogCount++;
+				// Don't count gamepad, because it has both modes mapped at once
+				if (k < K_JOY_STICK1_UP || k > K_JOY_TRIGGER2)
+				{
+					if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_impulse34" ) == 0 || idStr::Icmp( idKeyInput::GetBinding( k ), "_impulse35" ) == 0 )
+						comfortCount++;
+					if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_right" ) == 0 || idStr::Icmp( idKeyInput::GetBinding( k ), "_left" ) == 0 )
+						analogCount++;
+				}
 			}
 			if ( analogCount > comfortCount )
 				value = 1;
@@ -417,12 +421,16 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 			{
 				// continuous: unbind comfort mode turns and rebind normal turns
 				vr_comfortDelta.SetFloat( 10.0f );
-				for (int k = 0; k < K_LAST_KEY; k++)
+				for (int k = K_JOY17; k < K_R_STEAMVRTRIG; k++)
 				{
-					if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_impulse34" ) == 0 )
-						idKeyInput::SetBinding( k, "_right" );
-					else if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_impulse35" ) == 0 )
-						idKeyInput::SetBinding( k, "_left" );
+					// Don't change gamepad, because it has both modes mapped at once
+					if (k < K_JOY_STICK1_UP || k > K_JOY_TRIGGER2)
+					{
+						if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_impulse34" ) == 0 )
+							idKeyInput::SetBinding( k, "_right" );
+						else if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_impulse35" ) == 0 )
+							idKeyInput::SetBinding( k, "_left" );
+					}
 				}
 			}
 			else
@@ -430,12 +438,16 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 				// enable snap turns
 				// unbind normal turns and rebind comfort mode turns
 				vr_comfortDelta.SetFloat( value );
-				for (int k = 0; k < K_LAST_KEY; k++)
+				for (int k = K_JOY17; k < K_R_STEAMVRTRIG; k++)
 				{
-					if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_right" ) == 0 )
-						idKeyInput::SetBinding( k, "_impulse34" );
-					else if ( idStr::Icmp(idKeyInput::GetBinding( k ), "_left" ) == 0 )
-						idKeyInput::SetBinding( k, "_impulse35" );
+					// Don't change gamepad, because it has both modes mapped at once
+					if (k < K_JOY_STICK1_UP || k > K_JOY_TRIGGER2)
+					{
+						if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_right" ) == 0 )
+							idKeyInput::SetBinding( k, "_impulse34" );
+						else if ( idStr::Icmp(idKeyInput::GetBinding( k ), "_left" ) == 0 )
+							idKeyInput::SetBinding( k, "_impulse35" );
+					}
 				}
 			}
 			break;
@@ -522,12 +534,16 @@ idSWFScriptVar idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR
 		{
 			float f = vr_comfortDelta.GetFloat();
 			int comfortCount = 0, analogCount = 0;
-			for (int k = K_JOY1; k < K_JOY_DPAD_RIGHT; k++)
+			for (int k = K_JOY17; k < K_R_STEAMVRTRIG; k++)
 			{
-				if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_impulse34" ) == 0 || idStr::Icmp( idKeyInput::GetBinding(k), "_impulse35" ) == 0 )
-					comfortCount++;
-				if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_right" ) == 0 || idStr::Icmp( idKeyInput::GetBinding(k), "_left" ) == 0 )
-					analogCount++;
+					// Don't count gamepad, because it has both modes mapped at once
+				if (k < K_JOY_STICK1_UP || k > K_JOY_TRIGGER2)
+				{
+					if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_impulse34" ) == 0 || idStr::Icmp( idKeyInput::GetBinding(k), "_impulse35" ) == 0 )
+						comfortCount++;
+					if ( idStr::Icmp( idKeyInput::GetBinding( k ), "_right" ) == 0 || idStr::Icmp( idKeyInput::GetBinding(k), "_left" ) == 0 )
+						analogCount++;
+				}
 			}
 
 			if (f < 0.5f || (analogCount==0 && comfortCount==0))
