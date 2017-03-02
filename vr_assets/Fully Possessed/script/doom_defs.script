@@ -13,7 +13,7 @@ This defines some variables needed by the game script.
 
 #define GAME_FRAMETIME	( 1.0f / GAME_FPS )
 
-#define NULL			0
+//#define NULL			0 			// original defintion but never used, new #define at end -Phrozo
 
 #define TRUE			1
 #define FALSE			0
@@ -103,6 +103,7 @@ This defines some variables needed by the game script.
 #define SHADERPARM_DIVERSITY		5	// random between 0.0 and 1.0 for some effects (muzzle flashes, etc)
 #define SHADERPARM_MODE				7	// for selecting which shader passes to enable
 #define SHADERPARM_TIME_OF_DEATH	7	// for the monster skin-burn-away effect enable and time offset
+#define SHADERPARM_INDICATOR		10	// new: used as a switch in weapon materials as a ammo indictor
 
 //
 // Contents flags	NOTE: make sure these are up to date with renderer/Material.h
@@ -178,5 +179,27 @@ This defines some variables needed by the game script.
 
 #define eachFrame		for( 0; 1; waitFrame() )
 #define waitUntil( x )	while( !( x ) ) { waitFrame(); }
+
+//
+// Phrozo
+//
+// color escape string ( from Doom 3 Source code )
+#define S_COLOR_DEFAULT				"^0"
+#define S_COLOR_RED					"^1"
+#define S_COLOR_GREEN				"^2"
+#define S_COLOR_YELLOW				"^3"
+#define S_COLOR_BLUE				"^4"
+#define S_COLOR_CYAN				"^5"
+#define S_COLOR_MAGENTA				"^6"
+#define S_COLOR_WHITE				"^7"
+#define S_COLOR_GRAY				"^8"
+#define S_COLOR_BLACK				"^9"
+
+#define NULL					$null_entity    // since this is never used, I decided to use it for entity references to equal null
+#define nullptr					$null_entity	// another way to check for null, like in C++ 11
+#define bool					boolean			// wish there was typedef in script but this will do
+#define this					self			// another way to reference self like in C/C++
+#define IS_NIGHTMARE			( sys.getcvar( "g_skill" ) == "3" )  // easy way to test if in nightmare
+#define SHADERPARM_POWER    	7				// for the BFG projectile
 
 #endif
