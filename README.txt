@@ -243,14 +243,13 @@ Native support for the Oculus Rift and Touch via the Oculus SDK when detected.
 		the game AAS system. Teleporting to a location will cause the player to activate all in game 'triggers'
 		along the path the player would walk to reach the destination.  This includes activating cutscenes, 
 		alerting or activating monsters, triggering any in game scripted events, and taking any environmental 
-		damage that the player would incur along this route. Players may not teleport through locked doors, or
+		damage that the player would incur along this route. Players may not teleport through closed doors, or
 		to areas the AAS system has marked as unreachable by the player.
 		
 		LIMITATIONS:  Doom 3 was not initially designed with the idea of teleportation in mind. Doom 3 uses an 
 		Area Awareness System (AAS) to determine if a location is reachable by a character in the game, and then
 		generate a path to that point. AAS files have been generated for the player for most of the levels in the 
-		game, but there are limitations. The AAS system may report an area is reachable by the player, but the object 
-		itself is marked as 'noclip' or unreachable.  This can happen for example if trying to teleport onto a desk -
+		game, but there are limitations. Issues can happen for example if trying to teleport onto a desk -
 		you will teleport to the desk but then be bounced to the floor, just as if you had tried to jump on the desk.
 		The AAS system is also currently unable to identify areas that are only reachable by ladder, so it is not 
 		currently possible to teleport to an area if the only way to reach it is via ladder. Additionally, there are 
@@ -393,6 +392,10 @@ __________________________________________
 		by pressing the System Menu button in game, and selecting the 'Settings->Controls->
 		Key	Bindings' menu on the PDA.
 		
+		Be careful not to speak when binding a control, or you will rebind what talking does.
+		You can't rebind specific voice commands. Edit the dict file instead.
+		The thumb rests on the Touch controllers can be bound, so be careful not to bump them.
+		
 		You can use the right joystick and trigger to highlight and select an action.
 		If you are in game and using the PDA to adjust settings, you may use motion controls 
 		and your virtual finger to access the menu as a touch screen.  Touch an entry once to 
@@ -464,7 +467,7 @@ Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 			Left Stick: 	The left stick controls player movement.  The default configuration is 
 							motion relative to the direction the controller is pointing ( Onward style ).  
 							
-							Artificial motion can induce VR sickness for many people, so teleportation
+							Artificial motion will induce VR sickness for most people, so teleportation
 							instead of stick control should be considered as a primary form of 
 							movement in these instances.
 							
@@ -493,6 +496,7 @@ Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 			
 			Left X:			Activate the PDA if it's in you inventory.
 							Left X also will skip the active cutscene.
+							In a Flicksync, this gives up on the current line.
 									
 					
 			Left ≡ (menu)	Brings up the in game Pause/System menu on the PDA.
@@ -516,6 +520,7 @@ Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 			Press:			Jump
 			
 			Right Trigger:	Attack / Fire
+							Use Cue Card Power-Up in Flicksync
 			
 			Right A:		Reload
 			
@@ -543,7 +548,7 @@ Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 			Left Pad: 		The left stick controls player movement.  The default configuration is 
 							motion relative to the direction the controller is pointing ( Onward style ).  
 							
-							Artificial motion can induce VR sickness for many people, so teleportation
+							Artificial motion will induce VR sickness for most people, so teleportation
 							instead of stick control should be considered as a primary form of 
 							movement in these instances.
 							
@@ -565,6 +570,7 @@ Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 					
 			Left ≡ (menu)	Activate the PDA if it's in you inventory.
 							Will skip the active cutscene.
+							In a Flicksync, this gives up on the current line.
 							
 						
 		
@@ -587,6 +593,7 @@ Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 			Press:			Teleport
 			
 			Right Trigger:	Attack / Fire
+							Use Cue Card Power-Up in Flicksync
 			
 			Right ≡ (menu): Brings up the in game Pause/System menu on the PDA.
 							( The PDA does not need to be in you inventory to use this function)
@@ -627,7 +634,7 @@ Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 			B = teleport
 			X = reload
 			Y = use
-			View / Back = PDA.
+			View / Back = PDA / Skip cutscene
 			≡ / Start = menu.
 			
 		
@@ -670,7 +677,7 @@ Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 		that the player would incur by walking the route to the destination.
 		
 		You can't teleport across gaps you have to jump across, or onto the tightrope in the Mars City 
-		Underground level.	There is a path length/complexity limit on how far you can teleport in one hop,
+		Underground level. There is a path length/complexity limit on how far you can teleport in one hop,
 		but it's fairly far. There are some bugs in the Player AAS files, and some levels are missing, so there are 
 		instances where you can't teleport places you should be able to. In these instances, walk in real life
 		or move forward with the stick/pad a little until you can teleport again. If you didn't install the Player
@@ -728,7 +735,7 @@ Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 	move the character forward. This will make your body face the correct direction.
 	If your body isn't attached to your neck properly, try jumping.  
 	If things just seem out of alignment, or to switch from seated to standing mode, Recenter view/reset height
-	with whichever button is defined.
+	with whichever button is defined (you must say "reset view" on Vive).
 
 
 	
@@ -990,6 +997,8 @@ Starting a Flicksync game:
 
 	Choose whether to play just the Flicksync cutscene parts, or play the normal Doom 3 game
 	with Flicksync mode for the cutscenes, or a non-Flicksync game with no cutscenes.
+	The "no cutscenes" mode carries over into regular games, so don't leave it set to no cutscenes
+	if you want cutscenes.
 	
 	Choose which scenes you want to play.
 		
@@ -998,8 +1007,11 @@ Starting a Flicksync game:
 						All the scenes starting from your character's first scene,
 						All the scenes related to your character's story arc
 						Just the scenes with your character in them.
-	
-		Then choose the highest level you have reached in the game if you want to avoid spoilers.
+		There's currently a bug where you must watch the first cutscene of a map if that
+		cutscene starts automatically on map startup, and you have a scene in a later
+		cutscene of that map.
+						
+	Then choose the highest level you have reached in the game if you want to avoid spoilers.
 
 	Choose Play.
 
@@ -1012,7 +1024,8 @@ Starting a Flicksync game:
 Flicksync settings carry over if you start a map from the DEV menu, so you may 
 want to change them back to normal first.
 
-Starting a new game from the Campaign / New game menu will clear the flicksync settings.
+Starting a new game from the Campaign / New game menu will clear the flicksync settings,
+except for the "no cutscenes" option.
 You will see SCORE: 0 on the menus if you are in Flicksync mode.
 
 
@@ -1049,6 +1062,8 @@ VR Related game changes can be made from the Settings->VR Options menu.
 					or hands.  ( Hands will be displayed if there is currently no weapon selected, if 
 					the fists are selected, or if interacting with a GUI.)
 					
+			Note that Body Mode also affects Flicksync. But in Flicksync you will be fully invisible
+			if you chose Hands + Weaps or Weapons Only.
 		
 		
 		Flashlight Mount:
@@ -1069,6 +1084,8 @@ VR Related game changes can be made from the Settings->VR Options menu.
 										( grenade, chainsaw, soul cube, etc ) the flashlight
 										will temporarily move to your head.
 										
+					You can change this in-game by manually grabbing your flashlight and placing
+					it where you want it (except for on the weapon), if Holster Slots are enabled.
 		
 		Weapon Hand
 				
@@ -1079,6 +1096,9 @@ VR Related game changes can be made from the Settings->VR Options menu.
 										
 								Left - 	The weapon will default to the left hand,
 										the flashlight / PDA will be in the right.
+										
+					You can change this in-game by manually grabbing the holster on the opposite
+					side, if Holster Slots are enabled.
 										
 		Holster Slots
 					
@@ -1310,10 +1330,13 @@ VR Related game changes can be made from the Settings->VR Options menu.
 				
 					Options:
 					
-							Motion Controllers-		Motion controls will be used 
+							Motion Controllers-		Motion controls will be used if present
 							
 							Standard Controller-	A gamepad will be the default control device.
 							
+				I recommend leaving it set on Motion Controllers, because in that mode it will switch
+				to gamepad automatically when you start using it, and switch back if you use motion.
+				
 		Move Mode:
 		
 				Select the default movement mode:
@@ -1782,6 +1805,8 @@ ___________________________________________________
 
 10) KNOWN ISSUES
 __________________________________________
+
+See https://github.com/KozGit/DOOM-3-BFG-VR/issues
 
 Doom 3 wasn't designed to work with shadow maps so:
 
