@@ -1154,6 +1154,8 @@ VR Related game changes can be made from the Settings->VR Options menu.
 					If you want to use a combination of Analog and Comfort turning, you can adjust the
 					control bindings yourself in Settings->Controls->Key Bindings.
 					
+					This setting only affects motion controllers. Set Key Bindings for keyboard or gamepad.
+					
 					Options:	Snap ( 10 - 180 ) - Comfort turning will be used. Each turn will move the view/reset
 													the selected number of degrees.
 													
