@@ -61,7 +61,7 @@ void idMenuScreen_Shell_VR_Settings::Initialize( idMenuHandler * data ) {
 	option.Append( "Character Options" );	
 	menuOptions.Append( option );
 	option.Clear();
-	option.Append( "Comfort + Safety Protocols" );
+	option.Append( "Comfort Options" );
 	menuOptions.Append( option );
 	option.Clear();
 	option.Append( "Control Options" );
