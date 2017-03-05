@@ -372,6 +372,9 @@ public:
 	
 	bool					noclip;
 	bool					godmode;
+	bool					warpMove;
+	idVec3					warpVel;
+	int						warpTime;
 	
 	bool					spawnAnglesSet;		// on first usercmd, we must set deltaAngles
 	idAngles				spawnAngles;
@@ -653,6 +656,9 @@ public:
 	int						AdjustDamageAmount( const int inputDamage );
 	
 	// use exitEntityNum to specify a teleport with private camera view and delayed exit
+	//virtual void			StopMove(moveStatus_t status);
+	//virtual bool			MoveToPosition(const idVec3& pos);
+
 	virtual void			Teleport( const idVec3& origin, const idAngles& angles, idEntity* destination );
 	virtual bool			TeleportPathSegment( const idVec3& start, const idVec3& end, idVec3& lastPos );
 	virtual void			TeleportPath( const idVec3& target );

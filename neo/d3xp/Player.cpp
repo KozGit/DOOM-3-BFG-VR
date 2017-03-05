@@ -1545,6 +1545,8 @@ idPlayer::idPlayer():
 	handGrabbingWorld[0] = false;
 	handGrabbingWorld[1] = false;
 
+	warpMove				= false;
+	warpVel					= vec3_zero;
 	noclip					= false;
 	godmode					= false;
 	
@@ -9776,14 +9778,22 @@ void idPlayer::EvaluateControls()
 	}
 	else
 	{
-
+	extern idCVar timescale;
 		if ( common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState )
 		{
+			if (vr_teleportMode.GetInteger() == 1) 
+			{
+				timescale.SetFloat(0.5f);
+			}
 			commonVr->teleportButtonCount++;
 		}
 
 		if ( usercmd.buttons & BUTTON_ATTACK )
 		{
+			if (vr_teleportMode.GetInteger() == 1)
+			{
+				timescale.SetFloat(1.0f);
+			}
 			commonVr->teleportButtonCount = 0; // let the fire button abort teleporting.
 		}
 
@@ -9791,6 +9801,10 @@ void idPlayer::EvaluateControls()
 			(commonVr->teleportButtonCount > 1) ||
 			((oldTeleportButtonState && !common->ButtonState( UB_TELEPORT )) && !vr_teleportButtonMode.GetBool()) )
 		{
+			if (vr_teleportMode.GetInteger() == 1)
+			{
+				timescale.SetFloat(1.0f);
+			}
 			doTeleport = true;  //common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState;
 		}
 
@@ -9808,10 +9822,14 @@ void idPlayer::EvaluateControls()
 			int t = vr_teleport.GetInteger();
 			if( t > 0 )
 			{
-				//if ( t == 1 )
-					playerView.Flash( colorBlack, 140 );
-				//else
-				//	playerView.Flash( colorWhite, 140 );
+				if (vr_teleportMode.GetInteger() == 0) 
+				{
+					if (t == 1)
+						playerView.Flash(colorBlack, 140);
+					else
+						playerView.Flash(colorWhite, 140);
+				}
+
 				TeleportPath( teleportPoint );
 				//if ( t == 1 )
 				
@@ -13152,6 +13170,21 @@ void idPlayer::Think()
 	UpdateLaserSight();
 	UpdateTeleportAim();
 
+	if (vr_teleportMode.GetInteger() == 1 && warpMove)
+	{
+		if (gameLocal.time > warpTime)
+		{
+			extern idCVar timescale;
+			warpTime = 0;
+			noclip = false;
+			warpMove = false;
+			warpVel = vec3_origin;
+			timescale.SetFloat(1.0f);
+			playerView.EnableBFGVision(false);
+		}
+		physicsObj.SetLinearVelocity(warpVel);
+	}
+
 	if ( game->isVR ) UpdateHeadingBeam(); // koz
 
 	// Show the respawn hud message if necessary.
@@ -14326,6 +14359,7 @@ void idPlayer::TeleportPath( const idVec3& target )
 	aasPath_t	path;
 	int	originAreaNum, toAreaNum;
 	idVec3 origin = physicsObj.GetOrigin();
+	idVec3 trueOrigin = physicsObj.GetOrigin();
 	idVec3 toPoint = target;
 	idVec3 lastPos = origin;
 	bool blocked = false;
@@ -14417,8 +14451,24 @@ void idPlayer::TeleportPath( const idVec3& target )
 			}
 		}
 	}
+	physicsObj.SetOrigin(trueOrigin);
 	// Actually teleport
-	Teleport(lastPos, viewAngles, NULL);
+
+	if (vr_teleportMode.GetInteger() == 0) 
+	{
+		Teleport(lastPos, viewAngles, NULL);
+	}
+	else 
+	{
+		extern idCVar timescale;
+		warpMove = true;
+		noclip = true;
+		warpVel = (lastPos - trueOrigin) / 0.075f;  // 75 ms
+		warpVel[2] = warpVel[2] + 50; // add a small fixed upwards velocity to handle noclip problem
+		warpTime = gameLocal.time + 75;
+		timescale.SetFloat(0.5f);
+		playerView.EnableBFGVision(true);
+	}
 }
 
 bool idPlayer::CheckTeleportPathSegment(const idVec3& start, const idVec3& end, idVec3& lastPos)
