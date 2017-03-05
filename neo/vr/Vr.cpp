@@ -159,7 +159,7 @@ idCVar vr_pdaPosZ( "vr_pdaPosZ", "-11", CVAR_FLOAT | CVAR_ARCHIVE, "" );
 
 idCVar vr_pdaPitch( "vr_pdaPitch", "30", CVAR_FLOAT | CVAR_ARCHIVE, "" );
 
-idCVar vr_movePoint( "vr_movePoint", "0", CVAR_INTEGER | CVAR_ARCHIVE, "If enabled, move in the direction the off hand is pointing." );
+idCVar vr_movePoint( "vr_movePoint", "4", CVAR_INTEGER | CVAR_ARCHIVE, "0: Standard Stick Move, 1: Off Hand = Forward, 2: Look = forward, 3: Weapon Hand = Forward, 4: Left Hand = Forward, 5: Right Hand = Forward", 0, 5 );
 idCVar vr_moveClick( "vr_moveClick", "0", CVAR_INTEGER | CVAR_ARCHIVE, " 0 = Normal movement.\n 1 = Click and hold to walk, run button to run.\n 2 = Click to start walking, then touch only. Run btn to run.\n 3 = Click to start walking, hold click to run.\n 4 = Click to start walking, then click toggles run\n" );
 idCVar vr_playerBodyMode( "vr_playerBodyMode", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Player body mode:\n0 = Display full body\n1 = Just Hands \n2 = Weapons only\n" );
 idCVar vr_bodyToMove( "vr_bodyToMove", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Lock body orientaion to movement direction." );

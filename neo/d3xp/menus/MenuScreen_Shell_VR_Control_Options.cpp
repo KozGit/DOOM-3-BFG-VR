@@ -396,8 +396,8 @@ void idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Op
 
 		case CONTROL_OPTIONS_FIELD_MOVE_MODE: 
 		{
-			static const int numValues = 3;
-			static const int values[numValues] = { 0, 1, 2 };
+			static const int numValues = 6;
+			static const int values[numValues] = { 0, 1, 3, 2, 4, 5 };
 			vr_movePoint.SetInteger( AdjustOption( vr_movePoint.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
@@ -492,6 +492,21 @@ idSWFScriptVar idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_
 			if ( mm == 2 )
 			{
 				return "Look = forward";
+			}
+
+			if ( mm == 3 )
+			{
+				return "Weapon = Forward";
+			}
+
+			if ( mm == 4 )
+			{
+				return "Left Hand = Forward";
+			}
+
+			if ( mm == 5 )
+			{
+				return "Right Hand = Forward";
 			}
 
 			return "Standard Stick Move";
