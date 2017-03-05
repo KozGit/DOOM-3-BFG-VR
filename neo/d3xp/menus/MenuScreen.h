@@ -2208,6 +2208,7 @@ public:
 		enum vrSafetyProtocols_t
 		{
 			SAFETY_PROTOCOLS_FIELD_TELEPORTATION,
+			SAFETY_PROTOCOLS_FIELD_TELEPORTATION_MODE,
 			SAFETY_PROTOCOLS_FIELD_SNAP_TURNS,
 			SAFETY_PROTOCOLS_FIELD_WALK_SPEED_ADJUST,
 			SAFETY_PROTOCOLS_FIELD_MOTION_SICKNESS,
@@ -2240,6 +2241,7 @@ public:
 	private:
 		int	originalChaperone;
 		int	originalTeleport;
+		int	originalTeleportMode;
 		int	originalMotionSickness;
 		float	originalWalkSpeedAdjust;
 		float originalComfortDelta;
