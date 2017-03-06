@@ -106,7 +106,7 @@ iVoice::iVoice()
 */
 iVoice::iVoice()
 {
-	currentVolume = 0.0f;
+	maxVolume = currentVolume = 0.0f;
 }
 
 static bool in_phrase = false, spoke = false, listening = true;
@@ -496,6 +496,7 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 				break;
 			case SPEI_SOUND_START:
 				in_phrase = false;
+				maxVolume = currentVolume;
 				MadeASound();
 				//common->Printf("$ Sound start\n");
 				break;
@@ -532,7 +533,7 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 					const char* confidences[3] = { "low", "medium", "high" };
 					hr = recoResult->GetText(SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL);
 					if (vr_voiceRepeat.GetBool())
-						voice.Say("%s: %S.", confidences[confidence + 1], text);
+						voice.Say("%s %d: %S.", confidences[confidence + 1], (int)(maxVolume * 100), text);
 					if (isLine)
 					{
 						if ( vr_flicksyncCharacter.GetInteger() )
@@ -628,6 +629,8 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 				break;
 			case SPEI_SR_AUDIO_LEVEL:
 				currentVolume = event.wParam / 100.0f;
+				if ( currentVolume > maxVolume )
+					maxVolume = currentVolume;
 				//common->Printf("$ SR Audio Level: %3d / 100\n", event.wParam);
 				break;
 			case SPEI_SR_RETAINEDAUDIO:

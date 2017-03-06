@@ -471,7 +471,7 @@ public:
 	
 	bool					RequirementMet( idEntity* activator, const idStr& requires, int removeItem );
 	
-	void					AlertAI( idEntity* ent );
+	void					AlertAI( idEntity* ent, float distanceAudible );
 	idActor* 				GetAlertEntity();
 	
 	bool					InPlayerPVS( idEntity* ent ) const;
@@ -643,6 +643,7 @@ private:
 	idMenuHandler_Shell* 	shellHandler;
 public:	
 	idStrList				aasNames;
+	float lastAIAlertDistanceAudibleSquared; // Carl: How far away the sound can be heard
 private:
 	idEntityPtr<idActor>	lastAIAlertEntity;
 	int						lastAIAlertTime;

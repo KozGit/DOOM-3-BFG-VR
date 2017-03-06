@@ -4356,13 +4356,17 @@ bool idGameLocal::RequirementMet( idEntity* activator, const idStr& requires, in
 idGameLocal::AlertAI
 ============
 */
-void idGameLocal::AlertAI( idEntity* ent )
+void idGameLocal::AlertAI( idEntity* ent, float distanceAudible )
 {
 	if( ent && ent->IsType( idActor::Type ) )
 	{
-		// alert them for the next frame
-		lastAIAlertTime = time + 1;
-		lastAIAlertEntity = static_cast<idActor*>( ent );
+		// alert them for the next frame, unless we already heard a louder sound this frame
+		if ( lastAIAlertTime != time + 1 || Square(distanceAudible) >= lastAIAlertDistanceAudibleSquared )
+		{
+			lastAIAlertTime = time + 1;
+			lastAIAlertEntity = static_cast<idActor*>( ent );
+			lastAIAlertDistanceAudibleSquared = Square( distanceAudible );
+		}
 	}
 }
 
