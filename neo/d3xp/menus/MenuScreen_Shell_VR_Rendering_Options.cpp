@@ -34,6 +34,7 @@ const static int NUM_VR_RENDERING_OPTIONS = 8;
 extern idCVar vr_pixelDensity;
 extern idCVar vr_3dgui;
 extern idCVar r_multiSamples;
+extern idCVar vr_asw;
 
 
 float LinearAdjust( const float input, const float currentMin, const float currentMax, const float desiredMin,  float desiredMax );
@@ -84,6 +85,14 @@ void idMenuScreen_Shell_VR_Rendering_Options::Initialize( idMenuHandler * data )
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_MSAALEVEL );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_MSAALEVEL );
+	options->AddChild( control );
+
+	control = new (TAG_SWF) idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "Asynchronous SpaceWarp" ); // Asynchronous SpaceWarp
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_ASW );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_ASW );
 	options->AddChild( control );
 
 	control = new (TAG_SWF) idMenuWidget_ControlButton();
@@ -310,6 +319,7 @@ void idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 	originalPixelDensity = vr_pixelDensity.GetFloat();
 	original3DGuis = vr_3dgui.GetBool();
 	originalMSAAlevel = r_multiSamples.GetInteger();
+	originalASW = vr_asw.GetInteger();
 	originalChaperone = vr_chaperone.GetInteger();
 
 }
@@ -363,6 +373,13 @@ void idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 			break;
 		}
 		
+		case RENDERING_OPTIONS_FIELD_ASW: {
+			static const int numValues = 4;
+			static const int values[numValues] = { 0, 1, 2, 3 };
+			vr_asw.SetInteger( AdjustOption( vr_asw.GetInteger(), values, numValues, adjustAmount ) );
+			break;
+		}
+
 		case RENDERING_OPTIONS_FIELD_3DGUIS: {
 			static const int numValues = 2;
 			static const int values[numValues] = { 0, 1 };
@@ -420,6 +437,14 @@ idSWFScriptVar idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_V
 			}
 		}
 
+		case RENDERING_OPTIONS_FIELD_ASW: {
+			const char* s[4] = { "#str_swf_disabled", "#str_swf_enabled", "45 FPS ATW", "45 FPS ASW" };
+			if (vr_asw.GetInteger() > 3)
+				return "error";
+			else
+				return s[vr_asw.GetInteger()];
+		}
+
 		case RENDERING_OPTIONS_FIELD_CHAPERONE:
 		{
 			const char* names[] = { "Near", "Throwing", "Melee", "Dodging", "Always" };
@@ -446,6 +471,10 @@ bool idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 	}
 
 	if ( originalMSAAlevel != r_multiSamples.GetInteger() ) {
+		return true;
+	}
+
+	if ( originalASW != vr_asw.GetInteger() ) {
 		return true;
 	}
 

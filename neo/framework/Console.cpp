@@ -37,8 +37,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "vr\Vr.h"
 
-idCVar vr_hmdPerfHud( "vr_hmdPerfHud", "0", CVAR_INTEGER, "Oculus Performance HUD.\n 0 Off\n 1 Latency Timing\n 2 RenderTiming\n 3 Perf Headroom\n 4 Version\n", 0, 4 );
+idCVar vr_hmdPerfHud( "vr_hmdPerfHud", "0", CVAR_INTEGER, "Oculus Performance HUD.\n 0 Off\n 1 Latency Timing\n 2 RenderTiming\n 3 Perf Headroom\n 4 Version\n 6 Async Timewarp\n", 0, 7 );
 // Koz end
+idCVar vr_asw( "vr_asw", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Oculus Asynchronous SpaceWarp. 0 = force off (hack), 1 = enabled", 0, 3 );
 
 #define	CON_TEXTSIZE			0x30000
 #define	NUM_CON_TIMES			4
@@ -1658,10 +1659,46 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 	// Enable the oculus performance hud
 	if ( vr_hmdPerfHud.IsModified() )
 	{
-		//ovr_SetInt( commonVr->hmdSession, "PerfHudMode", vr_hmdPerfHud.GetInteger() );
-		//vr_hmdPerfHud.ClearModified();
+		ovr_SetInt( commonVr->hmdSession, "PerfHudMode", vr_hmdPerfHud.GetInteger() );
+		vr_hmdPerfHud.ClearModified();
 	}
 	// Koz end
+	if (vr_asw.IsModified())
+	{
+		INPUT i[4];
+		i[0].type = INPUT_KEYBOARD;
+		i[0].ki.dwFlags = KEYEVENTF_SCANCODE;
+		i[0].ki.wVk = VK_LCONTROL;
+		i[0].ki.wScan = 0x1D; // Left Ctrl
+		i[0].ki.dwExtraInfo = 0;
+		i[0].ki.time = 0;
+		i[1] = i[0];
+		switch (vr_asw.GetInteger())
+		{
+		case 0:
+		default:
+			i[1].ki.wVk = VK_NUMPAD1;
+			i[1].ki.wScan = 0x4F;
+			break;
+		case 1:
+			i[1].ki.wVk = VK_NUMPAD4;
+			i[1].ki.wScan = 0x4B;
+			break;
+		case 2:
+			i[1].ki.wVk = VK_NUMPAD2;
+			i[1].ki.wScan = 0x50;
+			break;
+		case 3:
+			i[1].ki.wVk = VK_NUMPAD3;
+			i[1].ki.wScan = 0x51;
+			break;
+		}
+		i[2] = i[1];
+		i[2].ki.dwFlags |= KEYEVENTF_KEYUP;
+		i[3] = i[0];
+		i[3].ki.dwFlags |= KEYEVENTF_KEYUP;
+		SendInput(4, i, sizeof(INPUT));
+	}
 
 }
 

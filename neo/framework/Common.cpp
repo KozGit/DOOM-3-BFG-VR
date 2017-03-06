@@ -1686,6 +1686,8 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		com_engineHz_denominator = 100LL * commonVr->hmdHz;
 		com_engineHz_latched = commonVr->hmdHz;
 
+		extern idCVar vr_asw;
+		vr_asw.SetModified();
 	}
 
 }

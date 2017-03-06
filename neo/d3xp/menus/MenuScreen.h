@@ -1910,6 +1910,7 @@ public:
 			
 			RENDERING_OPTIONS_FIELD_PIXEL_DENSITY, 
 			RENDERING_OPTIONS_FIELD_MSAALEVEL,
+			RENDERING_OPTIONS_FIELD_ASW,
 			RENDERING_OPTIONS_FIELD_3DGUIS,
 			RENDERING_OPTIONS_FIELD_CHAPERONE,
 			MAX_RENDERING_OPTION_FIELDS
@@ -1937,6 +1938,7 @@ public:
 	private:
 		float	originalPixelDensity;
 		int		originalMSAAlevel;
+		int		originalASW;
 		int		original3DGuis;
 		int		originalChaperone;
 		
