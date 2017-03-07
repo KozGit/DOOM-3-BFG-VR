@@ -1109,8 +1109,11 @@ void idActor::Restore( idRestoreGame* savefile )
 	legsAnim.Restore( savefile );
 	
 	//koz begin
-	leftHandAnim.Restore( savefile );
-	rightHandAnim.Restore( savefile );
+	if( savefile->version >= BUILD_NUMBER_FULLY_POSSESSED )
+	{
+		leftHandAnim.Restore( savefile );
+		rightHandAnim.Restore( savefile );
+	}
 	//koz end
 
 	savefile->ReadBool( allowPain );

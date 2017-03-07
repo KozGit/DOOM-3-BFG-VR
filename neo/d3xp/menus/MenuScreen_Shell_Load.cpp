@@ -177,13 +177,17 @@ void idMenuScreen_Shell_Load::UpdateSaveEnumerations()
 				{
 					slotSaveName =  va( S_COLOR_RED "%s", idLocalization::GetString( "#str_swf_corrupt_file" ) );
 				}
-				else if( details.GetSaveVersion() > BUILD_NUMBER )
+				else if( details.GetSaveVersion() > BUILD_NUMBER_FULLY_POSSESSED )
 				{
 					slotSaveName =  va( S_COLOR_RED "%s", idLocalization::GetString( "#str_swf_wrong_version" ) );
 				}
 				else
 				{
-					if( details.slotName.Icmp( "autosave" ) == 0 )
+					if( details.GetSaveVersion() < BUILD_NUMBER_SAVE_VERSION_CHANGE )
+					{
+						slotSaveName.Append( S_COLOR_GRAY ); // old version
+					}
+					else if( details.slotName.Icmp( "autosave" ) == 0 )
 					{
 						slotSaveName.Append( S_COLOR_YELLOW );
 					}

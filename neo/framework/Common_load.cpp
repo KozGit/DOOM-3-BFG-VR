@@ -1288,11 +1288,16 @@ void idCommonLocal::OnLoadFilesCompleted( idSaveLoadParms& parms )
 		mapSpawnData.savegameFile->ReadString( gamename );
 		mapSpawnData.savegameFile->ReadString( mapname );
 		
+		if ( mapSpawnData.savegameVersion == BUILD_NUMBER_SAVE_VERSION_CHANGE && (gamename == "DOOM 3: BFG VR Edition" || gamename == "DOOM 3 BFG VR: Fully Possessed") )
+		{
+			mapSpawnData.savegameVersion = BUILD_NUMBER_FULLY_POSSESSED;
+		}
+
 		if( gamename != GAME_NAME )
 		{
 			common->Warning("Loading from \"%s\" instead of \"%s\".", gamename.c_str(), GAME_NAME);
 		}
-		if( ( mapname.IsEmpty() ) || ( parms.description.GetSaveVersion() > BUILD_NUMBER ) )
+		if( ( mapname.IsEmpty() ) || ( parms.description.GetSaveVersion() > BUILD_NUMBER_FULLY_POSSESSED ) )
 		{
 			// if this isn't a savegame for the correct game, abort loadgame
 			common->Warning( "Attempted to load an invalid savegame" );

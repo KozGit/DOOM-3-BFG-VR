@@ -767,13 +767,15 @@ void idWeapon::Restore( idRestoreGame* savefile )
 	}
 
 	// koz begin
-	for ( int i = 0; i < 2; i++ )
+	if( savefile->version >= BUILD_NUMBER_FULLY_POSSESSED )
 	{
-		savefile->ReadJoint( weaponHandAttacher[i] );
-		savefile->ReadVec3( weaponHandDefaultPos[i] );
-		savefile->ReadMat3( weaponHandDefaultAxis[i] );
+		for ( int i = 0; i < 2; i++ )
+		{
+			savefile->ReadJoint( weaponHandAttacher[i] );
+			savefile->ReadVec3( weaponHandDefaultPos[i] );
+			savefile->ReadMat3( weaponHandDefaultAxis[i] );
+		}
 	}
-
 	// gui for stats device on player wrist in VR. 
 	vrStatGui = uiManager->FindGui( "guis/weapons/vrstatgui.gui", true, false, true );
 	// Koz end

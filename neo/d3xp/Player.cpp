@@ -3135,17 +3135,20 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	savefile->ReadInt( weapon_bloodstone_active3 );
 
 	// koz
-	savefile->ReadInt( weapon_pistol );
-	savefile->ReadInt( weapon_shotgun );
-	savefile->ReadInt( weapon_shotgun_double );
-	savefile->ReadInt( weapon_machinegun );
-	savefile->ReadInt( weapon_chaingun );
-	savefile->ReadInt( weapon_handgrenade );
-	savefile->ReadInt( weapon_plasmagun );
-	savefile->ReadInt( weapon_rocketlauncher );
-	savefile->ReadInt( weapon_bfg );
-	savefile->ReadInt( weapon_flashlight_new );
-	savefile->ReadInt( weapon_grabber );
+	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
+	{
+		savefile->ReadInt( weapon_pistol );
+		savefile->ReadInt( weapon_shotgun );
+		savefile->ReadInt( weapon_shotgun_double );
+		savefile->ReadInt( weapon_machinegun );
+		savefile->ReadInt( weapon_chaingun );
+		savefile->ReadInt( weapon_handgrenade );
+		savefile->ReadInt( weapon_plasmagun );
+		savefile->ReadInt( weapon_rocketlauncher );
+		savefile->ReadInt( weapon_bfg );
+		savefile->ReadInt( weapon_flashlight_new );
+		savefile->ReadInt( weapon_grabber );
+	}
 	// koz end
 
 	
@@ -3212,30 +3215,33 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	savefile->ReadJoint( headJoint );
 
 	//koz begin
-	savefile->ReadJoint( neckJoint );
-	savefile->ReadJoint( chestPivotJoint );
-
-	for ( i = 0; i < 2; i++ )
+	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
 	{
-		savefile->ReadJoint( ik_hand[i] );
-		savefile->ReadJoint( ik_elbow[i] );
-		savefile->ReadJoint( ik_shoulder[i] );
-		savefile->ReadJoint( ik_handAttacher[i] );
-	}
+		savefile->ReadJoint( neckJoint );
+		savefile->ReadJoint( chestPivotJoint );
 
-	for ( i = 0; i < 2; i++ )
-	{
-		for ( int j = 0; j < 32; j++ )
+		for ( i = 0; i < 2; i++ )
 		{
-			savefile->ReadMat3( ik_handCorrectAxis[i][j] );
-			savefile->ReadVec3( handWeaponAttachertoWristJointOffset[i][j] );
-			savefile->ReadVec3( handWeaponAttacherToDefaultOffset[i][j] );
+			savefile->ReadJoint( ik_hand[i] );
+			savefile->ReadJoint( ik_elbow[i] );
+			savefile->ReadJoint( ik_shoulder[i] );
+			savefile->ReadJoint( ik_handAttacher[i] );
 		}
-	}
 
-	savefile->ReadBool( handLowered );
-	savefile->ReadBool( handRaised );
-	savefile->ReadBool( commonVr->handInGui );
+		for ( i = 0; i < 2; i++ )
+		{
+			for ( int j = 0; j < 32; j++ )
+			{
+				savefile->ReadMat3( ik_handCorrectAxis[i][j] );
+				savefile->ReadVec3( handWeaponAttachertoWristJointOffset[i][j] );
+				savefile->ReadVec3( handWeaponAttacherToDefaultOffset[i][j] );
+			}
+		}
+
+		savefile->ReadBool( handLowered );
+		savefile->ReadBool( handRaised );
+		savefile->ReadBool( commonVr->handInGui );
+	}
 	// koz end
 	
 	savefile->ReadStaticObject( physicsObj );
@@ -3533,48 +3539,50 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		
 	const idDeclSkin* blag;
 	//koz begin
-	savefile->ReadBool( laserSightActive );
-	savefile->ReadBool( headingBeamActive );
-	savefile->ReadBool( hudActive );
+	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
+	{
+		savefile->ReadBool( laserSightActive );
+		savefile->ReadBool( headingBeamActive );
+		savefile->ReadBool( hudActive );
 	
-	savefile->ReadInt( commonVr->currentFlashMode );
-//	savefile->ReadSkin( crosshairEntity.customSkin );
-	savefile->ReadSkin( blag );
+		savefile->ReadInt( commonVr->currentFlashMode );
+	//	savefile->ReadSkin( crosshairEntity.customSkin );
+		savefile->ReadSkin( blag );
 
-	savefile->ReadBool( PDAfixed );
-	savefile->ReadVec3( PDAorigin );
-	savefile->ReadMat3( PDAaxis );
+		savefile->ReadBool( PDAfixed );
+		savefile->ReadVec3( PDAorigin );
+		savefile->ReadMat3( PDAaxis );
 		
-	int tempInt;
-	float tempFloat;
-	bool tempBool;
-	idVec3 tempVec3;
-	idMat3 tempMat3;
+		int tempInt;
+		float tempFloat;
+		bool tempBool;
+		idVec3 tempVec3;
+		idMat3 tempMat3;
 
 
-	//blech.  Im going to pad the savegame file with a few diff var types,
-	// so if more changes are needed in the future, maybe save game compat can be preserved.
-	savefile->ReadInt( tempInt );
-	savefile->ReadInt( tempInt );
-	savefile->ReadInt( tempInt );
-	savefile->ReadInt( tempInt );
-	savefile->ReadFloat( tempFloat );
-	savefile->ReadFloat( tempFloat );
-	savefile->ReadFloat( tempFloat );
-	savefile->ReadFloat( tempFloat );
-	savefile->ReadBool( tempBool );
-	savefile->ReadBool( tempBool );
-	savefile->ReadBool( tempBool );
-	savefile->ReadBool( tempBool );
-	savefile->ReadVec3( tempVec3 );
-	savefile->ReadVec3( tempVec3 );
-	savefile->ReadVec3( tempVec3 );
-	savefile->ReadVec3( tempVec3 );
-	savefile->ReadMat3( tempMat3 );
-	savefile->ReadMat3( tempMat3 );
-	savefile->ReadMat3( tempMat3 );
-	savefile->ReadMat3( tempMat3 );
-
+		//blech.  Im going to pad the savegame file with a few diff var types,
+		// so if more changes are needed in the future, maybe save game compat can be preserved.
+		savefile->ReadInt( tempInt );
+		savefile->ReadInt( tempInt );
+		savefile->ReadInt( tempInt );
+		savefile->ReadInt( tempInt );
+		savefile->ReadFloat( tempFloat );
+		savefile->ReadFloat( tempFloat );
+		savefile->ReadFloat( tempFloat );
+		savefile->ReadFloat( tempFloat );
+		savefile->ReadBool( tempBool );
+		savefile->ReadBool( tempBool );
+		savefile->ReadBool( tempBool );
+		savefile->ReadBool( tempBool );
+		savefile->ReadVec3( tempVec3 );
+		savefile->ReadVec3( tempVec3 );
+		savefile->ReadVec3( tempVec3 );
+		savefile->ReadVec3( tempVec3 );
+		savefile->ReadMat3( tempMat3 );
+		savefile->ReadMat3( tempMat3 );
+		savefile->ReadMat3( tempMat3 );
+		savefile->ReadMat3( tempMat3 );
+	}
 
 	throwDirection = vec3_zero;
 	throwVelocity = 0.0f;
@@ -3583,7 +3591,6 @@ void idPlayer::Restore( idRestoreGame* savefile )
 
 	vr_weaponSight.SetModified(); // make sure these get initialized properly
 	vr_headingBeamMode.SetModified();
-
 	// Koz end
 
 }
