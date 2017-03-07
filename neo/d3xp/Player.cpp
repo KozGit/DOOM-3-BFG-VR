@@ -2339,6 +2339,13 @@ void idPlayer::InitTeleportTarget()
 	teleportTarget.GetEntity()->SetModel( "telepad1" );
 	teleportTarget.GetEntity()->SetOrigin( origin );
 	teleportTarget.GetEntity()->SetAxis( GetPhysics()->GetAxis() );
+
+	idAnimatedEntity *duplicate;
+	if (duplicate = (idAnimatedEntity*)gameLocal.FindEntity("vrTeleportTarget2"))
+	{
+		common->Warning("Loading game which had a duplicate vrTeleportTarget.");
+		duplicate->PostEventMS(&EV_Remove, 0);
+	}
 	
 	teleportTargetAnimator = teleportTarget.GetEntity()->GetAnimator();
 	targetAnim = teleportTargetAnimator->GetAnim( "idle" );
@@ -3578,7 +3585,6 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	vr_headingBeamMode.SetModified();
 
 	// Koz end
-	InitTeleportTarget();
 
 }
 

@@ -529,12 +529,13 @@ void idWeapon::Restore( idRestoreGame* savefile )
 	savefile->ReadInt( animDoneTime );
 	savefile->ReadBool( isLinked );
 
+	bool loadScriptFailed = false;
 	if (!thread)
 	{
+		loadScriptFailed = true;
 		thread = new idThread();
 		thread->ManualDelete();
 		thread->ManualControl();
-		ConstructScriptObject();
 	}
 
 
@@ -547,6 +548,9 @@ void idWeapon::Restore( idRestoreGame* savefile )
 	WEAPON_RAISEWEAPON.LinkTo(	scriptObject, "WEAPON_RAISEWEAPON" );
 	WEAPON_LOWERWEAPON.LinkTo(	scriptObject, "WEAPON_LOWERWEAPON" );
 	
+	if (loadScriptFailed)
+		ConstructScriptObject();
+
 	savefile->ReadObject( reinterpret_cast<idClass*&>( owner ) );
 	worldModel.Restore( savefile );
 	

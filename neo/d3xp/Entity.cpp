@@ -801,7 +801,10 @@ void idEntity::Restore( idRestoreGame* savefile )
 	// spawnNode and activeNode are restored by gameLocal
 	savefile->ReadDict( &spawnArgs );
 	savefile->ReadString( name );
-	SetName( name );
+	if ( name == "vrTeleportTarget" && gameLocal.FindEntity("vrTeleportTarget") )
+		SetName( "vrTeleportTarget2" );
+	else
+		SetName( name );
 	
 	scriptObject.Restore( savefile );
 	

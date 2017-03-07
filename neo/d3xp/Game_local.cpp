@@ -1341,13 +1341,14 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	// Create the list of all objects in the game
 	savegame.CreateObjects();
 
-	bool loadScriptFailed = false;
+	loadScriptFailed = false;
 
 	// Load the idProgram, also checking to make sure scripting hasn't changed since the savegame
 	if( program.Restore( &savegame ) == false )
 	{
 		// Carl: Keep loading even if the scripts have changed since we saved.
 		loadScriptFailed = true;
+		common->Warning( "Game was saved with different scripts (a different mod). All scripts will be reset." );
 		// if we can't use the script, then all the thread objects need to be destroyed and replaced
 		for (i = 1; i < savegame.objects.Num(); i++)
 		{
@@ -1592,7 +1593,25 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	
 	// free up any unused animations
 	animationLib.FlushUnusedAnims();
-	
+
+	// Carl: InitTeleportTarget here instead of in idPlayer::Restore so it is always done AFTER the teleport target is loaded
+	if (GetLocalPlayer())
+	{
+		idPlayer *player = GetLocalPlayer();
+		player->InitTeleportTarget();
+		// if we autosaved while teleporting QuakeCon style, stop the QuakeCon style effect
+		if (player->noclip && player->playerView.bfgVision)
+		{
+			extern idCVar timescale;
+			player->warpTime = 0;
+			player->noclip = false;
+			player->warpMove = false;
+			player->warpVel = vec3_origin;
+			timescale.SetFloat(1.0f);
+			player->playerView.EnableBFGVision(false);
+		}
+	}
+
 	gamestate = GAMESTATE_ACTIVE;
 	
 	Printf( "--------------------------------------\n" );

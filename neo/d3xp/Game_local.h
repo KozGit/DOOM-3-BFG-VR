@@ -588,6 +588,7 @@ public:
 	// VR State
 	bool						isVR;
 	// Koz end
+	bool						loadScriptFailed;
 	
 	virtual bool				IsPlayerChatting() const;
 	
