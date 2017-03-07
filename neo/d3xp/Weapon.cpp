@@ -528,7 +528,16 @@ void idWeapon::Restore( idRestoreGame* savefile )
 	savefile->ReadInt( animBlendFrames );
 	savefile->ReadInt( animDoneTime );
 	savefile->ReadBool( isLinked );
-	
+
+	if (!thread)
+	{
+		thread = new idThread();
+		thread->ManualDelete();
+		thread->ManualControl();
+		ConstructScriptObject();
+	}
+
+
 	// Re-link script fields
 	WEAPON_ATTACK.LinkTo(	scriptObject, "WEAPON_ATTACK" );
 	WEAPON_RELOAD.LinkTo(	scriptObject, "WEAPON_RELOAD" );

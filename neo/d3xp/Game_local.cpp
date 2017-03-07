@@ -1340,16 +1340,32 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	
 	// Create the list of all objects in the game
 	savegame.CreateObjects();
-	
+
+	bool loadScriptFailed = false;
+
 	// Load the idProgram, also checking to make sure scripting hasn't changed since the savegame
 	if( program.Restore( &savegame ) == false )
 	{
-	
+		// Carl: Keep loading even if the scripts have changed since we saved.
+		loadScriptFailed = true;
+		// if we can't use the script, then all the thread objects need to be destroyed and replaced
+		for (i = 1; i < savegame.objects.Num(); i++)
+		{
+			if (savegame.objects[i]->IsType(idThread::Type))
+			{
+				delete (idThread*)(savegame.objects[i]);
+				savegame.objects[i] = NULL;
+			}
+		}
+		program.Startup(SCRIPT_DEFAULT);
+		program.Restart();
+#if 0
 		// Abort the load process, and let the session know so that it can restart the level
 		// with the player persistent data.
 		savegame.DeleteObjects();
 		program.Restart();
 		return false;
+#endif
 	}
 	
 	savegame.ReadInt( i );
@@ -1441,7 +1457,16 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	savegame.ReadInt( i );
 	random.SetSeed( i );
 	
-	savegame.ReadObject( reinterpret_cast<idClass*&>( frameCommandThread ) );
+	if (loadScriptFailed)
+	{
+		idThread *temp = new idThread();
+		savegame.ReadObject(reinterpret_cast<idClass*&>(temp));
+		InitScriptForMap();
+	}
+	else
+	{
+		savegame.ReadObject( reinterpret_cast<idClass*&>( frameCommandThread ) );
+	}
 	
 	// clip
 	// push

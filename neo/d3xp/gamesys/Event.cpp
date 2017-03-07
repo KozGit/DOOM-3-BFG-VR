@@ -645,8 +645,9 @@ void idEvent::ServiceEvents()
 		// the event is removed from its list so that if then object
 		// is deleted, the event won't be freed twice
 		event->eventNode.Remove();
-		assert( event->object );
-		event->object->ProcessEventArgPtr( ev, args );
+		//assert( event->object );
+		if (event->object)
+			event->object->ProcessEventArgPtr( ev, args );
 		
 #if 0
 		// event functions may never leave return values on the FPU stack

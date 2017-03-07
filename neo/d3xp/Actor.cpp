@@ -106,7 +106,15 @@ void idAnimState::Restore( idRestoreGame* savefile )
 	}
 	
 	savefile->ReadObject( reinterpret_cast<idClass*&>( thread ) );
-	
+	// Carl: for old savegames with invalid scripts
+	if (!thread)
+	{
+		thread = new idThread();
+		thread->ManualDelete();
+		thread->EndThread();
+		thread->ManualControl();
+	}
+
 	savefile->ReadString( state );
 	
 	savefile->ReadInt( animBlendFrames );
@@ -1120,6 +1128,10 @@ void idActor::Restore( idRestoreGame* savefile )
 	
 	savefile->ReadBool( finalBoss );
 	
+	// Carl: When loading saved games from versions with different scripts, the threads will all be null, and need to be created like on spawn
+	if (!scriptThread)
+		FinishSetup();
+
 	idStr statename;
 	
 	savefile->ReadString( statename );
