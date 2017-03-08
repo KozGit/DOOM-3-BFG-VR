@@ -1022,9 +1022,12 @@ void idRestoreGame::RestoreObjects()
 	// restore all the objects
 	for( i = 1; i < objects.Num(); i++ )
 	{
+		int start = file->Tell(); //Carl debug
 		if (objects[i])
 		{
 			CallRestore_r( objects[ i ]->GetType(), objects[ i ] );
+			int end = file->Tell(); //Carl debug
+			common->Printf("%d: %s::Restore() %d bytes, %d\n", i, objects[i]->GetType()->classname, end - start, start); //Carl debug
 		}
 		else
 		{
@@ -1105,6 +1108,8 @@ void idRestoreGame::RestoreObjects()
 			ReadInt(creationTime);
 
 			ReadBool(manualControl);
+			int end = file->Tell(); //Carl debug
+			common->Printf("%d: Dummy idThread::Restore(NULL) %d bytes, %d\n", i, end - start, start); //Carl debug
 		}
 	}
 	
@@ -1270,6 +1275,7 @@ void idRestoreGame::ReadString( idStr& string )
 {
 	string.Empty();
 	
+	int start = file->Tell(); //Carl debug
 	int offset = -1;
 	ReadInt( offset );
 	
@@ -1280,7 +1286,9 @@ void idRestoreGame::ReadString( idStr& string )
 	
 	stringFile->Seek( offset, FS_SEEK_SET );
 	stringFile->ReadString( string );
-	
+
+	common->Printf("ReadString(\"%s\") 4 bytes, %d\n", string.c_str(), start ); //Carl debug
+
 	return;
 }
 
@@ -1378,6 +1386,7 @@ idRestoreGame::ReadObject
 */
 void idRestoreGame::ReadObject( idClass*& obj )
 {
+	int start = file->Tell(); //Carl debug
 	int index;
 	
 	ReadInt( index );
@@ -1386,6 +1395,10 @@ void idRestoreGame::ReadObject( idClass*& obj )
 		Error( "idRestoreGame::ReadObject: invalid object index" );
 	}
 	obj = objects[ index ];
+	if (obj)
+		common->Printf("ReadObject(%s) 4 bytes, %d\n", obj->GetClassname(), start); //Carl debug
+	else
+		common->Printf("ReadObject(NULL) 4 bytes, %d\n", start); //Carl debug
 }
 
 /*
@@ -1405,6 +1418,7 @@ idRestoreGame::ReadDict
 */
 void idRestoreGame::ReadDict( idDict* dict )
 {
+	int start = file->Tell(); //Carl debug
 	int num;
 	int i;
 	idStr key;
@@ -1426,6 +1440,9 @@ void idRestoreGame::ReadDict( idDict* dict )
 			dict->Set( key, value );
 		}
 	}
+	int end = file->Tell();
+	common->Printf("ReadDict() %d bytes, %d\n", end-start, start); //Carl debug
+	dict->Print();
 }
 
 /*

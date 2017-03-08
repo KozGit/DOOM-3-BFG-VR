@@ -102,7 +102,8 @@ public:
 	// to the fact that there are two blocks in each buffer.
 	static const int COMPRESSED_BLOCK_SIZE		= 128 * 1024;
 	static const int UNCOMPRESSED_BLOCK_SIZE	= 256 * 1024;
-	
+
+	int offset; //Carl debug
 	
 	idFile_SaveGamePipelined();
 	virtual					~idFile_SaveGamePipelined();
@@ -166,8 +167,8 @@ public:
 	}
 	virtual int				Tell() const
 	{
-		assert( 0 );
-		return 0;
+		//assert( 0 );
+		return offset;
 	}
 	virtual int				Seek( long offset, fsOrigin_t origin )
 	{
