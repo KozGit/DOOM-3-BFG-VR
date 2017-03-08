@@ -3149,6 +3149,19 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		savefile->ReadInt( weapon_flashlight_new );
 		savefile->ReadInt( weapon_grabber );
 	}
+	else
+	{
+		weapon_grabber = 1;
+		weapon_pistol = 2;
+		weapon_shotgun = 3;
+		weapon_shotgun_double = 4;
+		weapon_machinegun = 5;
+		weapon_chaingun = 6;
+		weapon_handgrenade = 7;
+		weapon_plasmagun = 8;
+		weapon_bfg = 9;
+		weapon_flashlight_new = 17;
+	}
 	// koz end
 
 	
@@ -3241,6 +3254,154 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		savefile->ReadBool( handLowered );
 		savefile->ReadBool( handRaised );
 		savefile->ReadBool( commonVr->handInGui );
+	}
+	else
+	{
+		idStr value = spawnArgs.GetString("bone_neck", "");
+		neckJoint = animator.GetJointHandle(value);
+		if (neckJoint == INVALID_JOINT)
+		{
+			gameLocal.Error("Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str());
+		}
+
+		value = spawnArgs.GetString("bone_chest_pivot", "");
+		chestPivotJoint = animator.GetJointHandle(value);
+		if (chestPivotJoint == INVALID_JOINT)
+		{
+			gameLocal.Error("Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str());
+		}
+
+		// we need to load the starting joint orientations for the hands so we can compute correct offsets later
+		value = spawnArgs.GetString("ik_hand1", ""); // right hand
+		ik_hand[0] = animator.GetJointHandle(value);
+		if (ik_hand[0] == INVALID_JOINT)
+		{
+			value = "Rhand1";
+			ik_hand[0] = animator.GetJointHandle(value);
+			if (ik_hand[0] == INVALID_JOINT)
+			{
+				gameLocal.Error("Joint '%s' not found for 'ik_hand1' on '%s'", value, name.c_str());
+			}
+		}
+
+		value = spawnArgs.GetString("ik_hand2", "");// left hand
+		ik_hand[1] = animator.GetJointHandle(value);
+		if (ik_hand[1] == INVALID_JOINT)
+		{
+			value = "Lhand1";
+			ik_hand[1] = animator.GetJointHandle(value);
+			if (ik_hand[1] == INVALID_JOINT)
+			{
+				gameLocal.Error("Joint '%s' not found for 'ik_hand2' on '%s'", value, name.c_str());
+			}
+		}
+
+		ik_handAttacher[0] = animator.GetJointHandle("RhandWeap");
+		if (ik_handAttacher[0] == INVALID_JOINT)
+		{
+			gameLocal.Error("Joint RhandWeap not found for player anim default\n");
+		}
+
+		ik_handAttacher[1] = animator.GetJointHandle("LhandWeap");
+
+		if (ik_handAttacher[1] == INVALID_JOINT)
+		{
+			gameLocal.Error("Joint LhandWeap not found for player anim default\n");
+		}
+
+		idStr animPre = "default";// this is the anim that has the default/normal hand and weapon attacher orientations (relationsh
+
+		int animNo = animator.GetAnim(animPre.c_str());
+		if (animNo == 0)
+		{
+			gameLocal.Error("Player default animation not found\n");
+		}
+
+		int numJoints = animator.NumJoints();
+
+		idJointMat* joints = (idJointMat*)_alloca16(numJoints * sizeof(joints[0]));
+
+		// create the idle default pose ( in this case set to default which should tranlsate to pistol_idle )
+		gameEdit->ANIM_CreateAnimFrame(animator.ModelHandle(), animator.GetAnim(animNo)->MD5Anim(0), numJoints, joints, 1, animator.ModelDef()->GetVisualOffset() + modelOffset, animator.RemoveOrigin());
+
+
+
+		static idVec3 defaultWeapAttachOff[2]; // the default distance between the weapon attacher and the hand joint;
+		defaultWeapAttachOff[0] = joints[ik_handAttacher[0]].ToVec3() - joints[ik_hand[0]].ToVec3(); // default 
+		defaultWeapAttachOff[1] = joints[ik_handAttacher[1]].ToVec3() - joints[ik_hand[1]].ToVec3();
+
+		jointHandle_t j1;
+		value = spawnArgs.GetString("ik_elbow1", "");// right
+		j1 = animator.GetJointHandle(value);
+		if (j1 == INVALID_JOINT)
+		{
+			value = "Rloarm";
+			j1 = animator.GetJointHandle(value);
+			if (j1 == INVALID_JOINT)
+			{
+				gameLocal.Error("Joint ik_elbow1 not found for player anim default\n");
+			}
+		}
+		ik_elbowCorrectAxis[0] = joints[j1].ToMat3();
+
+		value = spawnArgs.GetString("ik_elbow2", "");// left 
+		j1 = animator.GetJointHandle(value);
+		if (j1 == INVALID_JOINT)
+		{
+			value = "Lloarm";
+			j1 = animator.GetJointHandle(value);
+			if (j1 == INVALID_JOINT)
+			{
+				gameLocal.Error("Joint ik_elbow2 not found for player anim default\n");
+			}
+		}
+		ik_elbowCorrectAxis[1] = joints[j1].ToMat3();
+
+		chestPivotCorrectAxis = joints[chestPivotJoint].ToMat3();
+		chestPivotDefaultPos = joints[chestPivotJoint].ToVec3();
+		commonVr->chestDefaultDefined = true;
+
+
+
+		common->Printf("Animpre hand 0 default offset = %s\n", defaultWeapAttachOff[0].ToString());
+		common->Printf("Animpre hand 1 default offset = %s\n", defaultWeapAttachOff[1].ToString());
+
+		// now calc the weapon attacher offsets
+		for (int hand = 0; hand < 2; hand++)
+		{
+			for (int weap = 0; weap < 32; weap++) // should be max weapons
+			{
+
+				idStr animPre = spawnArgs.GetString(va("def_weapon%d", weap));
+				animPre.Strip("weapon_");
+				animPre += "_idle";
+
+				int animNo = animator.GetAnim(animPre.c_str());
+				int numJoints = animator.NumJoints();
+
+				if (animNo == 0) continue;
+
+				//	common->Printf( "Animpre = %s animNo = %d\n", animPre.c_str(), animNo );
+
+				// create the idle pose for this weapon
+				gameEdit->ANIM_CreateAnimFrame(animator.ModelHandle(), animator.GetAnim(animNo)->MD5Anim(0), numJoints, joints, 1, animator.ModelDef()->GetVisualOffset() + modelOffset, animator.RemoveOrigin());
+
+				ik_handCorrectAxis[hand][weap] = joints[ik_hand[hand]].ToMat3();
+				//	common->Printf( "Hand %d weap %d anim %s attacher pos %s   default pos %s\n", hand, weap, animPre.c_str(), joints[ik_handAttacher[hand]].ToVec3().ToString(), defaultWeapAttachOff[hand].ToString() );
+
+				//this is the translation between the hand joint ( the wrist ) and the attacher joint.  The attacher joint is 
+				//the location in space where the motion control is locating the weapon / hand, but IK is using the 'wrist' to 
+				//drive animation, so use this offset to derive the wrist position from the attacher joint orientation
+				handWeaponAttachertoWristJointOffset[hand][weap] = joints[ik_handAttacher[hand]].ToVec3() - joints[ik_hand[hand]].ToVec3();
+
+				// the is the delta if the attacher joint was moved from the position in the default animation to aid with alignment in 
+				// different weapon animations.  To keep the hand in a consistant location when weapon is changed, 
+				// the weapon and hand positions will need to be adjusted by this amount when presented
+				handWeaponAttacherToDefaultOffset[hand][weap] = handWeaponAttachertoWristJointOffset[hand][weap] - defaultWeapAttachOff[hand];
+
+				//	common->Printf( "Hand %d weap %d anim %s attacher offset = %s\n", hand, weap, animPre.c_str(), handWeaponAttacherToDefaultOffset[hand][weap].ToString() );
+			}
+		}
 	}
 	// koz end
 	
@@ -3605,6 +3766,10 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		savefile->ReadMat3( tempMat3 );
 		savefile->ReadMat3( tempMat3 );
 		savefile->ReadMat3( tempMat3 );
+	}
+	else
+	{
+		spawnArgs.SetInt("ik_numArms", 2);
 	}
 
 	throwDirection = vec3_zero;

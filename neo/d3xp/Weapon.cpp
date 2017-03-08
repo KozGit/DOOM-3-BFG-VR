@@ -778,6 +778,26 @@ void idWeapon::Restore( idRestoreGame* savefile )
 	}
 	else
 	{
+		// koz get jointhandles for hand attachers
+		if (game->isVR)
+		{
+			weaponHandAttacher[0] = animator.GetJointHandle("RhandAttacher");
+			if (weaponHandAttacher[0] != INVALID_JOINT)
+			{
+				// koz debug common->Printf( "Weapon %s RhandAttacherJoint Found\n", objectname );
+				animator.GetJointTransform(weaponHandAttacher[0], gameLocal.time, weaponHandDefaultPos[0], weaponHandDefaultAxis[0]);
+				// koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[0].ToString(), weaponHandDefaultAxis[0].ToAngles().ToString() );
+			}
+
+			weaponHandAttacher[1] = animator.GetJointHandle("LhandAttacher");
+			if (weaponHandAttacher[1] != INVALID_JOINT)
+			{
+				// koz debug common->Printf( "Weapon %s LhandAttacherJoint Found\n", objectname );
+				animator.GetJointTransform(weaponHandAttacher[1], gameLocal.time, weaponHandDefaultPos[1], weaponHandDefaultAxis[1]);
+				// koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[1].ToString(), weaponHandDefaultAxis[1].ToAngles().ToString() );
+			}
+		}
+
 		// re-init the weapon model if we're loading this savegame from a different mod
 		memset(&renderEntity, 0, sizeof(renderEntity));
 			renderEntity.numJoints = animator.NumJoints();

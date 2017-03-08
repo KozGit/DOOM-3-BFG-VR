@@ -6210,14 +6210,15 @@ void idAnimatedEntity::Restore( idRestoreGame* savefile )
 {
 	// If it's from RBDoom, then the spawnArgs are missing values that we need.
 	// So add the values from our mod that are missing in the restored spawnArgs
-	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED)
+	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED && IsType(idPlayer::Type))
 	{
-		const idDict* modSpawnArgs = gameLocal.FindEntityDefDict(GetEntityDefName());
+		common->Printf("Player GetEntityDefName = %s\n", GetEntityDefName());
+		const idDict* modSpawnArgs = gameLocal.FindEntityDefDict("player_doommarine");
 		if (modSpawnArgs)
 		{
 			idDict newSpawnArgs;
-			newSpawnArgs = spawnArgs;
-			newSpawnArgs.Copy(*modSpawnArgs);
+			newSpawnArgs = *modSpawnArgs;
+			newSpawnArgs.Copy(spawnArgs);
 			spawnArgs = newSpawnArgs;
 		}
 	}

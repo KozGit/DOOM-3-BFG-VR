@@ -1243,7 +1243,12 @@ bool idIK_Reach::Init( idEntity* self, const char* anim, const idVec3& modelOffs
 		handJoints[i] = animator->GetJointHandle( jointName );
 		if( handJoints[i] == INVALID_JOINT )
 		{
-			gameLocal.Error( "idIK_Reach::Init: invalid hand joint '%s'", jointName );
+			jointName = i ? "Lhand1" : "Rhand1";
+			handJoints[i] = animator->GetJointHandle( jointName );
+			if( handJoints[i] == INVALID_JOINT )
+			{
+				gameLocal.Error( "idIK_Reach::Init: invalid hand joint '%s'", jointName );
+			}
 		}
 		
 		jointName = self->spawnArgs.GetString( va( "ik_elbow%d", i + 1 ) );

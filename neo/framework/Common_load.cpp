@@ -1288,6 +1288,7 @@ void idCommonLocal::OnLoadFilesCompleted( idSaveLoadParms& parms )
 		mapSpawnData.savegameFile->ReadString( gamename );
 		mapSpawnData.savegameFile->ReadString( mapname );
 		
+		// Carl: Hack to change the savegame version internally if it's our mod.
 		if ( mapSpawnData.savegameVersion == BUILD_NUMBER_SAVE_VERSION_CHANGE && (gamename == "DOOM 3: BFG VR Edition" || gamename == "DOOM 3 BFG VR: Fully Possessed") )
 		{
 			mapSpawnData.savegameVersion = BUILD_NUMBER_FULLY_POSSESSED;

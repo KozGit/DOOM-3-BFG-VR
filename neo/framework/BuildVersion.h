@@ -28,7 +28,7 @@ If you have questions concerning this license or the applicable additional terms
 
 const int BUILD_NUMBER_SAVE_VERSION_BEFORE_SKIP_CINEMATIC = 1400;
 const int BUILD_NUMBER_SAVE_VERSION_CHANGE			= 1401;		// Altering saves so that the version goes in the Details file that we read in during the enumeration phase
-const int BUILD_NUMBER_FULLY_POSSESSED = 1402; // Doom 3 BFG VR: Fully Possessed
+const int BUILD_NUMBER_FULLY_POSSESSED = 1402; // Doom 3 BFG VR: Fully Possessed, not saved in file but generated based on gamename
 
 const int BUILD_NUMBER = BUILD_NUMBER_SAVE_VERSION_CHANGE;
 const int BUILD_NUMBER_MINOR = 0;
