@@ -4107,6 +4107,14 @@ void idAnimator::Restore( idRestoreGame* savefile )
 		}
 	}
 	// Carl: koz end
+
+	// Carl: if this is from RBDoom, then everything we just restored is bullshit, except perhaps the model name
+	// Try clearing it all and loading the model again.
+	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED)
+	{
+		idStr modelName = modelDef->GetName();
+		SetModel( modelName.c_str() );
+	}
 }
 
 /*

@@ -6208,6 +6208,20 @@ unarchives object from save game file
 */
 void idAnimatedEntity::Restore( idRestoreGame* savefile )
 {
+	// If it's from RBDoom, then the spawnArgs are missing values that we need.
+	// So add the values from our mod that are missing in the restored spawnArgs
+	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED)
+	{
+		const idDict* modSpawnArgs = gameLocal.FindEntityDefDict(GetEntityDefName());
+		if (modSpawnArgs)
+		{
+			idDict newSpawnArgs;
+			newSpawnArgs = spawnArgs;
+			newSpawnArgs.Copy(*modSpawnArgs);
+			spawnArgs = newSpawnArgs;
+		}
+	}
+
 	animator.Restore( savefile );
 	
 	// check if the entity has an MD5 model

@@ -3502,6 +3502,29 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	{
 		gameLocal.Warning( "Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str() );
 	}
+
+	// re-init the player render model if we're loading this savegame from a different mod
+	if( savefile->version < BUILD_NUMBER_FULLY_POSSESSED )
+	{
+		memset(&renderEntity, 0, sizeof(renderEntity));
+			renderEntity.numJoints = animator.NumJoints();
+		animator.GetJoints(&renderEntity.numJoints, &renderEntity.joints);
+		renderEntity.hModel = animator.ModelHandle();
+		if (renderEntity.hModel)
+		{
+			renderEntity.hModel->Reset();
+			renderEntity.bounds = renderEntity.hModel->Bounds(&renderEntity);
+		}
+		renderEntity.shaderParms[SHADERPARM_RED] = 1.0f;
+		renderEntity.shaderParms[SHADERPARM_GREEN] = 1.0f;
+		renderEntity.shaderParms[SHADERPARM_BLUE] = 1.0f;
+		renderEntity.shaderParms[3] = 1.0f;
+		renderEntity.shaderParms[SHADERPARM_TIMEOFFSET] = 0.0f;
+		renderEntity.shaderParms[5] = 0.0f;
+		renderEntity.shaderParms[6] = 0.0f;
+		renderEntity.shaderParms[7] = 0.0f;
+	}
+
 	//re-init the VR ui models
 	laserSightHandle = -1;
 	headingBeamHandle = -1;

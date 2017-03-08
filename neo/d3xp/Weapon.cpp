@@ -776,6 +776,48 @@ void idWeapon::Restore( idRestoreGame* savefile )
 			savefile->ReadMat3( weaponHandDefaultAxis[i] );
 		}
 	}
+	else
+	{
+		// re-init the weapon model if we're loading this savegame from a different mod
+		memset(&renderEntity, 0, sizeof(renderEntity));
+			renderEntity.numJoints = animator.NumJoints();
+		animator.GetJoints(&renderEntity.numJoints, &renderEntity.joints);
+		renderEntity.hModel = animator.ModelHandle();
+		if (renderEntity.hModel)
+		{
+			renderEntity.hModel->Reset();
+			renderEntity.bounds = renderEntity.hModel->Bounds(&renderEntity);
+		}
+		renderEntity.shaderParms[SHADERPARM_RED] = 1.0f;
+		renderEntity.shaderParms[SHADERPARM_GREEN] = 1.0f;
+		renderEntity.shaderParms[SHADERPARM_BLUE] = 1.0f;
+		renderEntity.shaderParms[3] = 1.0f;
+		renderEntity.shaderParms[SHADERPARM_TIMEOFFSET] = 0.0f;
+		renderEntity.shaderParms[5] = 0.0f;
+		renderEntity.shaderParms[6] = 0.0f;
+		renderEntity.shaderParms[7] = 0.0f;
+
+		// re-init the weapon model if we're loading this savegame from a different mod
+		renderEntity_t &r = *(worldModel->GetRenderEntity());
+		memset(&r, 0, sizeof(r));
+		r.numJoints = animator.NumJoints();
+		animator.GetJoints(&r.numJoints, &r.joints);
+		r.hModel = animator.ModelHandle();
+		if (r.hModel)
+		{
+			r.hModel->Reset();
+			r.bounds = r.hModel->Bounds(&r);
+		}
+		r.shaderParms[SHADERPARM_RED] = 1.0f;
+		r.shaderParms[SHADERPARM_GREEN] = 1.0f;
+		r.shaderParms[SHADERPARM_BLUE] = 1.0f;
+		r.shaderParms[3] = 1.0f;
+		r.shaderParms[SHADERPARM_TIMEOFFSET] = 0.0f;
+		r.shaderParms[5] = 0.0f;
+		r.shaderParms[6] = 0.0f;
+		r.shaderParms[7] = 0.0f;
+	}
+
 	// gui for stats device on player wrist in VR. 
 	vrStatGui = uiManager->FindGui( "guis/weapons/vrstatgui.gui", true, false, true );
 	// Koz end
