@@ -683,13 +683,14 @@ bool idAF::LoadBody( const idDeclAF_Body* fb, const idJointMat* joints )
 	animator->GetJointList( fb->containedJoints, jointList );
 	for( i = 0; i < jointList.Num(); i++ )
 	{
-		if( jointBody[ jointList[ i ] ] != -1 )
+		if( false && jointBody[ jointList[ i ] ] != -1 )	// Carl debug
 		{
 			gameLocal.Warning( "%s: joint '%s' is already contained by body '%s'",
 							   name.c_str(), animator->GetJointName( ( jointHandle_t )jointList[i] ),
 							   physicsObj.GetBody( jointBody[ jointList[ i ] ] )->GetName().c_str() );
 		}
-		jointBody[ jointList[ i ] ] = id;
+		if (jointList[i] >= 0 && jointList[i] < jointBody.Num()) // Carl debug
+			jointBody[ jointList[ i ] ] = id;
 	}
 	
 	return true;

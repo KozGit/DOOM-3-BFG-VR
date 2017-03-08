@@ -4083,14 +4083,30 @@ void idAnimator::Restore( idRestoreGame* savefile )
 	savefile->ReadInt( AFPoseTime );
 	
 	savefile->ReadBool( removeOriginOffset );
-	
-	for( i = ANIMCHANNEL_ALL; i < ANIM_NumAnimChannels; i++ )
+
+	// Carl: koz
+	int numChannels; // ANIM_NumAnimChannels is different in this mod
+	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
+		numChannels = 7;
+	else
+		numChannels = 5;
+
+	for( i = ANIMCHANNEL_ALL; i < numChannels; i++ )
 	{
 		for( j = 0; j < ANIM_MaxAnimsPerChannel; j++ )
 		{
 			channels[ i ][ j ].Restore( savefile, modelDef );
 		}
 	}
+	// Carl: Reset the remaining animation channels not in the save file? Is this right?
+	for( i = numChannels; i < ANIM_NumAnimChannels; i++ )
+	{
+		for( j = 0; j < ANIM_MaxAnimsPerChannel; j++ )
+		{
+			channels[ i ][ j ].Reset( modelDef );
+		}
+	}
+	// Carl: koz end
 }
 
 /*
@@ -6080,7 +6096,8 @@ void idGameEdit::ANIM_CreateAnimFrame( const idRenderModel* model, const idMD5An
 	
 	if( numJoints != model->NumJoints() )
 	{
-		gameLocal.Error( "ANIM_CreateAnimFrame: different # of joints in renderEntity_t than in model (%s)", model->Name() );
+		// Carl: This happens when trying to load a savegame from a different mod. Try ignoring it for now.
+		gameLocal.Warning( "ANIM_CreateAnimFrame: different # of joints in renderEntity_t than in model (%s)", model->Name() );
 	}
 	
 	if( !model->NumJoints() )

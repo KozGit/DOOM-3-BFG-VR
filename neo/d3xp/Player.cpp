@@ -3492,7 +3492,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	neckJoint = animator.GetJointHandle( value );
 	if ( neckJoint == INVALID_JOINT )
 	{
-		gameLocal.Error( "Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str() );
+		gameLocal.Warning( "Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str() );
 	}
 		
 
@@ -3500,7 +3500,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	chestPivotJoint = animator.GetJointHandle( value );
 	if ( chestPivotJoint == INVALID_JOINT )
 	{
-		gameLocal.Error( "Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str() );
+		gameLocal.Warning( "Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str() );
 	}
 	//re-init the VR ui models
 	laserSightHandle = -1;
