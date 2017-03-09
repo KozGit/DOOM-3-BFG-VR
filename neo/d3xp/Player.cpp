@@ -13389,6 +13389,7 @@ void idPlayer::Think()
 			warpVel = vec3_origin;
 			timescale.SetFloat(1.0f);
 			playerView.EnableBFGVision(false);
+			Teleport( warpDest, viewAngles, NULL ); //Carl: get the destination exact
 		}
 		physicsObj.SetLinearVelocity(warpVel);
 	}
@@ -14671,8 +14672,10 @@ void idPlayer::TeleportPath( const idVec3& target )
 		extern idCVar timescale;
 		warpMove = true;
 		noclip = true;
-		warpVel = (lastPos - trueOrigin) / 0.075f;  // 75 ms
-		warpVel[2] = warpVel[2] + 50; // add a small fixed upwards velocity to handle noclip problem
+		warpDest = lastPos;
+		//warpDest.z += 1;
+		warpVel = (warpDest - trueOrigin) / 0.075f;  // 75 ms
+		//warpVel[2] = warpVel[2] + 50; // add a small fixed upwards velocity to handle noclip problem
 		warpTime = gameLocal.time + 75;
 		timescale.SetFloat(0.5f);
 		playerView.EnableBFGVision(true);
