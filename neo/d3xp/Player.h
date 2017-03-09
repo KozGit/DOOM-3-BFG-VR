@@ -372,7 +372,7 @@ public:
 	
 	bool					noclip;
 	bool					godmode;
-	bool					warpMove;
+	bool					warpMove, warpAim;
 	idVec3					warpVel;
 	int						warpTime;
 	

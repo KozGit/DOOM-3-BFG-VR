@@ -1606,6 +1606,7 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 			player->warpTime = 0;
 			player->noclip = false;
 			player->warpMove = false;
+			player->warpAim = false;
 			player->warpVel = vec3_origin;
 			timescale.SetFloat(1.0f);
 			player->playerView.EnableBFGVision(false);

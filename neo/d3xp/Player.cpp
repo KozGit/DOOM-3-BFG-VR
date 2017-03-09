@@ -1546,6 +1546,7 @@ idPlayer::idPlayer():
 	handGrabbingWorld[1] = false;
 
 	warpMove				= false;
+	warpAim					= false;
 	warpVel					= vec3_zero;
 	noclip					= false;
 	godmode					= false;
@@ -9961,7 +9962,7 @@ void idPlayer::EvaluateControls()
 					commonVr->playerDead = true;
 					extern idCVar timescale;
 					int comfortMode = vr_motionSickness.GetInteger();
-					if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9))
+					if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9) || warpAim || warpMove)
 						timescale.SetFloat(1);
 				}
 		
@@ -9988,8 +9989,9 @@ void idPlayer::EvaluateControls()
 	extern idCVar timescale;
 		if ( common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState )
 		{
-			if (vr_teleportMode.GetInteger() == 1) 
+			if (vr_teleportMode.GetInteger() == 1) // QuakeCon style
 			{
+				warpAim = true;
 				timescale.SetFloat(0.5f);
 			}
 			commonVr->teleportButtonCount++;
@@ -9999,6 +10001,7 @@ void idPlayer::EvaluateControls()
 		{
 			if (vr_teleportMode.GetInteger() == 1)
 			{
+				warpAim = false;
 				timescale.SetFloat(1.0f);
 			}
 			commonVr->teleportButtonCount = 0; // let the fire button abort teleporting.
@@ -10010,6 +10013,7 @@ void idPlayer::EvaluateControls()
 		{
 			if (vr_teleportMode.GetInteger() == 1)
 			{
+				warpAim = false;
 				timescale.SetFloat(1.0f);
 			}
 			doTeleport = true;  //common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState;
@@ -11081,7 +11085,7 @@ void idPlayer::Move()
 
 	// Handling vr_comfortMode
 	extern idCVar timescale;
-	if (vr_motionSickness.IsModified())
+	if (vr_motionSickness.IsModified() && !warpMove && !warpAim)
 	{
 		timescale.SetFloat(1);
 		vr_motionSickness.ClearModified();
@@ -11113,7 +11117,7 @@ void idPlayer::Move()
 	else
 		this->playerView.EnableVrComfortVision(false);
 
-	if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9))
+	if (((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9)) && !warpAim && !warpMove)
 	{
 		float speedFactor = ((pm_runspeed.GetFloat() - speed) / pm_runspeed.GetFloat());
 		if (speedFactor < 0)
