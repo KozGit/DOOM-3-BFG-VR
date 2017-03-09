@@ -53,7 +53,7 @@ idSaveGameProcessorLoadFiles
 idSaveGameProcessorLoadFiles::InitLoadFiles
 ========================
 */
-bool idSaveGameProcessorLoadFiles::InitLoadFiles( const char* folder_, const saveFileEntryList_t& files, idSaveGameManager::packageType_t type )
+bool idSaveGameProcessorLoadFiles::InitLoadFiles( const char* folder_, bool isRBDoom, const saveFileEntryList_t& files, idSaveGameManager::packageType_t type )
 {
 	if( !idSaveGameProcessor::Init() )
 	{
@@ -62,6 +62,7 @@ bool idSaveGameProcessorLoadFiles::InitLoadFiles( const char* folder_, const sav
 	
 	parms.directory = AddSaveFolderPrefix( folder_, type );
 	parms.description.slotName = folder_;
+	parms.description.isRBDoom = isRBDoom;
 	parms.mode = SAVEGAME_MBF_LOAD;
 	
 	for( int i = 0; i < files.Num(); ++i )
@@ -352,7 +353,7 @@ idSessionLocal::LoadGameSync
 We still want to use the savegame manager because we could have file system operations in flight and need to
 ========================
 */
-saveGameHandle_t idSessionLocal::LoadGameSync( const char* name, saveFileEntryList_t& files )
+saveGameHandle_t idSessionLocal::LoadGameSync( const char* name, saveFileEntryList_t& files, bool isRBDoom )
 {
 	idSaveLoadParms& parms = processorLoadFiles->GetParmsNonConst();
 	saveGameHandle_t handle = 0;
@@ -393,9 +394,9 @@ saveGameHandle_t idSessionLocal::LoadGameSync( const char* name, saveFileEntryLi
 		const saveGameDetailsList_t details = GetSaveGameManager().GetEnumeratedSavegames();
 		for( int i = 0; i < details.Num(); ++i )
 		{
-			if( idStr::Cmp( name, details[i].slotName ) == 0 )
+			if( idStr::Cmp( name, details[i].slotName ) == 0 && isRBDoom == details[i].isRBDoom )
 			{
-				if( details[i].GetSaveVersion() > BUILD_NUMBER )
+				if( details[i].GetSaveVersion() > BUILD_NUMBER_FULLY_POSSESSED )
 				{
 					parms.errorCode = SAVEGAME_E_INCOMPATIBLE_NEWER_VERSION;
 					return 0;
@@ -404,7 +405,7 @@ saveGameHandle_t idSessionLocal::LoadGameSync( const char* name, saveFileEntryLi
 		}
 		
 		// Synchronous load
-		if( processorLoadFiles->InitLoadFiles( name, filesWithDetails ) )
+		if( processorLoadFiles->InitLoadFiles( name, isRBDoom, filesWithDetails ) )
 		{
 			handle = GetSaveGameManager().ExecuteProcessorAndWait( processorLoadFiles );
 		}
@@ -424,7 +425,8 @@ saveGameHandle_t idSessionLocal::LoadGameSync( const char* name, saveFileEntryLi
 		{
 			return 0;
 		}
-		
+		parms.description.isRBDoom = isRBDoom;
+
 		// Checks to see if loaded map is from a DLC map and if that DLC is active
 		if( !IsDLCAvailable( parms.description.GetMapName() ) )
 		{

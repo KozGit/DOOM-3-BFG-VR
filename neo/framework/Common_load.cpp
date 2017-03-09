@@ -1057,7 +1057,7 @@ bool idCommonLocal::SaveGame( const char* saveName )
 idCommonLocal::LoadGame
 ===============
 */
-bool idCommonLocal::LoadGame( const char* saveName )
+bool idCommonLocal::LoadGame( const char* saveName, bool isRBDoom )
 {
 	// Koz begin
 	// koz fixme do this right.
@@ -1101,7 +1101,7 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	const saveGameDetailsList_t& sgdl = session->GetSaveGameManager().GetEnumeratedSavegames();
 	for( int i = 0; i < sgdl.Num(); i++ )
 	{
-		if( sgdl[i].slotName == saveName )
+		if( sgdl[i].slotName == saveName && sgdl[i].isRBDoom == isRBDoom )
 		{
 			if( false && sgdl[i].GetLanguage() != sys_lang.GetString() ) // Carl: try to load games saved in other languages
 			{
@@ -1145,7 +1145,7 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	stringsFile.Clear( false );
 	
 
-	saveGameHandle_t loadGameHandle = session->LoadGameSync( slotName, files );
+	saveGameHandle_t loadGameHandle = session->LoadGameSync( slotName, files, isRBDoom );
 	if( loadGameHandle != 0 )
 	{
 		return true;
@@ -1384,7 +1384,7 @@ LoadGame_f
 CONSOLE_COMMAND_SHIP( loadGame, "loads a game", idCmdSystem::ArgCompletion_SaveGame )
 {
 	console->Close();
-	commonLocal.LoadGame( ( args.Argc() > 1 ) ? args.Argv( 1 ) : "quick" );
+	commonLocal.LoadGame( ( args.Argc() > 1 ) ? args.Argv( 1 ) : "quick", ( args.Argc() > 2 ) && idStr::Cmp( args.Argv( 2 ), "0" )!=0 );
 	
 	//koz
 	vr_headingBeamMode.SetModified();

@@ -548,7 +548,7 @@ public:
 	//=====================================================================================================
 	virtual saveGameHandle_t	SaveGameSync( const char* name, const saveFileEntryList_t& files, const idSaveGameDetails& description );
 	virtual saveGameHandle_t	SaveGameAsync( const char* name, const saveFileEntryList_t& files, const idSaveGameDetails& description );
-	virtual saveGameHandle_t	LoadGameSync( const char* name, saveFileEntryList_t& files );
+	virtual saveGameHandle_t	LoadGameSync( const char* name, saveFileEntryList_t& files, bool isRBDoom );
 	virtual saveGameHandle_t	EnumerateSaveGamesSync();
 	virtual saveGameHandle_t	EnumerateSaveGamesAsync();
 	virtual saveGameHandle_t	DeleteSaveGameSync( const char* name );

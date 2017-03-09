@@ -183,7 +183,7 @@ void idMenuScreen_Shell_Load::UpdateSaveEnumerations()
 				}
 				else
 				{
-					if( details.GetSaveVersion() < BUILD_NUMBER_SAVE_VERSION_CHANGE )
+					if( details.GetSaveVersion() < BUILD_NUMBER_SAVE_VERSION_CHANGE || details.isRBDoom )
 					{
 						slotSaveName.Append( S_COLOR_GRAY ); // old version
 					}
@@ -388,10 +388,11 @@ void idMenuScreen_Shell_Load::LoadGame( int index )
 		class idSWFScriptFunction_LoadDialog : public idSWFScriptFunction_RefCounted
 		{
 		public:
-			idSWFScriptFunction_LoadDialog( gameDialogMessages_t _msg, bool _accept, const char* _name )
+			idSWFScriptFunction_LoadDialog( gameDialogMessages_t _msg, bool _accept, const char* _name, bool isRBDoom )
 			{
 				msg = _msg;
 				accept = _accept;
+				isRBDoom = isRBDoom;
 				name = _name;
 			}
 			idSWFScriptVar Call( idSWFScriptObject* thisObject, const idSWFParmList& parms )
@@ -400,20 +401,20 @@ void idMenuScreen_Shell_Load::LoadGame( int index )
 				if( accept && name != NULL )
 				{
 				
-					cmdSystem->AppendCommandText( va( "loadgame %s\n", name ) );
+					cmdSystem->AppendCommandText( va( "loadgame %s %d\n", name, isRBDoom ) );
 				}
 				return idSWFScriptVar();
 			}
 		private:
 			gameDialogMessages_t msg;
-			bool accept;
+			bool accept, isRBDoom;
 			const char* name;
 		};
 		
 		if( index < sortedSaves.Num() )
 		{
 			const idStr& name = sortedSaves[ index ].slotName;
-			common->Dialog().AddDialog( GDM_SP_LOAD_SAVE, DIALOG_ACCEPT_CANCEL, new idSWFScriptFunction_LoadDialog( GDM_SP_LOAD_SAVE, true, name.c_str() ), new idSWFScriptFunction_LoadDialog( GDM_SP_LOAD_SAVE, false, name.c_str() ), false );
+			common->Dialog().AddDialog( GDM_SP_LOAD_SAVE, DIALOG_ACCEPT_CANCEL, new idSWFScriptFunction_LoadDialog( GDM_SP_LOAD_SAVE, true, name.c_str(), sortedSaves[ index ].isRBDoom ), new idSWFScriptFunction_LoadDialog( GDM_SP_LOAD_SAVE, false, name.c_str(), sortedSaves[ index ].isRBDoom ), false );
 		}
 		
 	}
@@ -422,8 +423,7 @@ void idMenuScreen_Shell_Load::LoadGame( int index )
 		if( index < sortedSaves.Num() )
 		{
 			const idStr& name = sortedSaves[ index ].slotName;
-			
-			cmdSystem->AppendCommandText( va( "loadgame %s\n", name.c_str() ) );
+			cmdSystem->AppendCommandText( va("loadgame %s %d\n", name.c_str(), sortedSaves[ index ].isRBDoom) );
 		}
 	}
 }
