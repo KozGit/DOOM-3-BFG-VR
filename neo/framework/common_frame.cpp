@@ -64,7 +64,7 @@ which should also be nicely contained.
 
 */
 #define DEFAULT_FIXED_TIC "0"
-#define DEFAULT_NO_SLEEP "0"
+#define DEFAULT_NO_SLEEP "1"
 
 idCVar com_deltaTimeClamp( "com_deltaTimeClamp", "50", CVAR_INTEGER, "don't process more than this time in a single frame" );
 
@@ -771,7 +771,7 @@ void idCommonLocal::Frame()
 
 			
 			// debug cvar to force multiple game tics
-			if( com_fixedTic.GetInteger() > 0 )
+			if( com_fixedTic.GetInteger() > 0 && timescale.GetFloat() == 1.0f ) // Carl: Don't fix tics if we're in slow motion mode
 			{
 				numGameFrames = com_fixedTic.GetInteger();
 				gameFrame += numGameFrames;
@@ -806,11 +806,14 @@ void idCommonLocal::Frame()
 			
 			if( numGameFrames > 0 )
 			{
+				// Leyland's debt forgiveness code. For me, it just makes things worse.
+#if 0
 				// debt forgiveness
 				if( gameTimeResidual < frameDelay/4.0f )
 				{
 					gameTimeResidual = 0;
 				}
+#endif
 
 				// ready to actually run them
 				break;
@@ -819,7 +822,8 @@ void idCommonLocal::Frame()
 			// if we are vsyncing, we always want to run at least one game
 			// frame and never sleep, which might happen due to scheduling issues
 			// if we were just looking at real time.
-			if( com_noSleep.GetBool() )
+			// Carl: Unless we're in slow-motion mode (timescale).
+			if( com_noSleep.GetBool()  && timescale.GetFloat() == 1.0f )
 			{
 				numGameFrames = 1;
 				gameFrame += numGameFrames;
@@ -827,6 +831,18 @@ void idCommonLocal::Frame()
 				break;
 			}
 			
+			// Carl: if we're in slow motion mode (timescale)
+			// always run at least one drawing frame even if there's no game frame
+			// Unfortunately, these frames have bad headtracking, so I disabled it.
+#if 0
+			if( com_noSleep.GetBool() && timescale.GetFloat() < 1.0f )
+			{
+				numGameFrames = 0;
+				gameFrame++;
+				break;
+			}
+#endif
+
 			// not enough time has passed to run a frame, as might happen if
 			// we don't have vsync on, or the monitor is running at 120hz while
 			// com_engineHz is 60, so sleep a bit and check again

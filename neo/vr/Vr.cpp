@@ -534,7 +534,7 @@ bool iVr::OculusInit( void )
 	ovr_RecenterTrackingOrigin( hmdSession );
 	hmdWidth = hmdDesc.Resolution.w;
 	hmdHeight = hmdDesc.Resolution.h;
-	hmdHz = hmdDesc.DisplayRefreshRate;
+	hmdHz = hmdDesc.DisplayRefreshRate + 0.5f; // Carl: This was 89 because we were rounding down when converting to int
 	com_engineHz.SetInteger( hmdHz );
 	common->Printf( "Hmd: %s .\n", hmdDesc.ProductName );
 	common->Printf( "Hmd HZ %d, width %d, height %d\n", hmdHz, hmdWidth, hmdHeight );
@@ -670,7 +670,7 @@ bool iVr::OpenVRInit(void)
 	// get this here so we have a resolution starting point for gl initialization.
 	m_pHMD->GetRecommendedRenderTargetSize( &hmdWidth, &hmdHeight );
 
-	commonVr->hmdHz = (int)m_pHMD->GetFloatTrackedDeviceProperty( vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_DisplayFrequency_Float );
+	commonVr->hmdHz = (int)(m_pHMD->GetFloatTrackedDeviceProperty( vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_DisplayFrequency_Float ) + 0.5f);
 
 	officialIPD = m_pHMD->GetFloatTrackedDeviceProperty( vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_UserIpdMeters_Float ) * 100;
 
