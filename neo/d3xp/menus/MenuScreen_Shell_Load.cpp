@@ -314,7 +314,7 @@ idMenuScreen_Shell_Load::LoadDamagedGame
 void idMenuScreen_Shell_Load::LoadDamagedGame( int index )
 {
 
-	if( index >= sortedSaves.Num() )
+	if( index >= sortedSaves.Num() || sortedSaves[index].isRBDoom )
 	{
 		return;
 	}
@@ -388,11 +388,11 @@ void idMenuScreen_Shell_Load::LoadGame( int index )
 		class idSWFScriptFunction_LoadDialog : public idSWFScriptFunction_RefCounted
 		{
 		public:
-			idSWFScriptFunction_LoadDialog( gameDialogMessages_t _msg, bool _accept, const char* _name, bool isRBDoom )
+			idSWFScriptFunction_LoadDialog( gameDialogMessages_t _msg, bool _accept, const char* _name, bool isRBDoom3 )
 			{
 				msg = _msg;
 				accept = _accept;
-				isRBDoom = isRBDoom;
+				isRBDoom = isRBDoom3;
 				name = _name;
 			}
 			idSWFScriptVar Call( idSWFScriptObject* thisObject, const idSWFParmList& parms )
@@ -436,6 +436,9 @@ idMenuScreen_Shell_Save::DeleteGame
 */
 void idMenuScreen_Shell_Load::DeleteGame( int index )
 {
+	// Don't delete games from other mods!
+	if( index >= GetSortedSaves().Num() || GetSortedSaves()[index].isRBDoom )
+		return;
 
 	class idSWFScriptFunction_DeleteGame : public idSWFScriptFunction_RefCounted
 	{
