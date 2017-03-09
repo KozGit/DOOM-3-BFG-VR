@@ -4090,7 +4090,7 @@ void idAnimator::Restore( idRestoreGame* savefile )
 		numChannels = 7;
 	else
 		numChannels = 5;
-
+	
 	for( i = ANIMCHANNEL_ALL; i < numChannels; i++ )
 	{
 		for( j = 0; j < ANIM_MaxAnimsPerChannel; j++ )

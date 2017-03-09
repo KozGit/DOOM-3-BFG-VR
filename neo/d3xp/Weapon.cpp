@@ -528,7 +528,7 @@ void idWeapon::Restore( idRestoreGame* savefile )
 	savefile->ReadInt( animBlendFrames );
 	savefile->ReadInt( animDoneTime );
 	savefile->ReadBool( isLinked );
-
+	
 	bool loadScriptFailed = false;
 	if (!thread)
 	{

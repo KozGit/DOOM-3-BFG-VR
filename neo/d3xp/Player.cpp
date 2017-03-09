@@ -3772,6 +3772,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		spawnArgs.SetInt("ik_numArms", 2);
 	}
 
+
 	throwDirection = vec3_zero;
 	throwVelocity = 0.0f;
 
@@ -3779,6 +3780,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 
 	vr_weaponSight.SetModified(); // make sure these get initialized properly
 	vr_headingBeamMode.SetModified();
+
 	// Koz end
 
 }

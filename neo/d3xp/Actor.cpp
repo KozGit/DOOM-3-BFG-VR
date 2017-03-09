@@ -1162,7 +1162,7 @@ void idActor::Restore( idRestoreGame* savefile )
 	savefile->ReadJoint( soundJoint );
 	
 	walkIK.Restore( savefile );
-
+	
 	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED)
 	{
 		// koz begin

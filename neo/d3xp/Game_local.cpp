@@ -1593,7 +1593,7 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	
 	// free up any unused animations
 	animationLib.FlushUnusedAnims();
-
+	
 	// Carl: InitTeleportTarget here instead of in idPlayer::Restore so it is always done AFTER the teleport target is loaded
 	if (GetLocalPlayer())
 	{

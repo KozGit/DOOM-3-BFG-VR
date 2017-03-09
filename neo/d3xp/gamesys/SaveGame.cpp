@@ -1022,7 +1022,7 @@ void idRestoreGame::RestoreObjects()
 	// restore all the objects
 	for( i = 1; i < objects.Num(); i++ )
 	{
-		int start = file->Tell(); //Carl debug
+		//int start = file->Tell(); //Carl debug
 		if (objects[i])
 		{
 			CallRestore_r( objects[ i ]->GetType(), objects[ i ] );
@@ -1275,7 +1275,7 @@ void idRestoreGame::ReadString( idStr& string )
 {
 	string.Empty();
 	
-	int start = file->Tell(); //Carl debug
+	//int start = file->Tell(); //Carl debug
 	int offset = -1;
 	ReadInt( offset );
 	
@@ -1286,7 +1286,7 @@ void idRestoreGame::ReadString( idStr& string )
 	
 	stringFile->Seek( offset, FS_SEEK_SET );
 	stringFile->ReadString( string );
-
+	
 	//common->Printf("ReadString(\"%s\") 4 bytes, %d\n", string.c_str(), start ); //Carl debug
 
 	return;
@@ -1418,7 +1418,7 @@ idRestoreGame::ReadDict
 */
 void idRestoreGame::ReadDict( idDict* dict )
 {
-	int start = file->Tell(); //Carl debug
+	//int start = file->Tell(); //Carl debug
 	int num;
 	int i;
 	idStr key;
@@ -1440,7 +1440,7 @@ void idRestoreGame::ReadDict( idDict* dict )
 			dict->Set( key, value );
 		}
 	}
-	int end = file->Tell();
+	//int end = file->Tell();
 	//common->Printf("ReadDict() %d bytes, %d\n", end-start, start); //Carl debug
 	//dict->Print();
 }

@@ -102,7 +102,7 @@ public:
 	// to the fact that there are two blocks in each buffer.
 	static const int COMPRESSED_BLOCK_SIZE		= 128 * 1024;
 	static const int UNCOMPRESSED_BLOCK_SIZE	= 256 * 1024;
-
+	
 	int offset; //Carl debug
 	
 	idFile_SaveGamePipelined();

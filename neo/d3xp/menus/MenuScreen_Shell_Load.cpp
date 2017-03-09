@@ -423,7 +423,8 @@ void idMenuScreen_Shell_Load::LoadGame( int index )
 		if( index < sortedSaves.Num() )
 		{
 			const idStr& name = sortedSaves[ index ].slotName;
-			cmdSystem->AppendCommandText( va("loadgame %s %d\n", name.c_str(), sortedSaves[ index ].isRBDoom) );
+			
+			cmdSystem->AppendCommandText( va( "loadgame %s %d\n", name.c_str(), sortedSaves[ index ].isRBDoom ) );
 		}
 	}
 }
