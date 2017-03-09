@@ -13,15 +13,12 @@ DOOM3-BFG VR : Fully Possessed
 Includes support for the HTC Vive via OpenVR, and the Oculus Rift and Touch motion controls via the Oculus SDK or OpenVR.
 
 VR Implementation: /u/Samson-
-Major Contributions - Teleportation, Voice Commands, Flicksync, Bink videos, code improvements: Carl Kenner
+Major Contributions - Teleportation, Voice Commands, Flicksync, Bink videos, Loading other savegames, code improvements: Carl Kenner
 Holster slots, Crawl Space Head Collision, minor fixes: Leyland
-Slow Mo and Tunnel vision motion sickness fixes: jckhng
+QuakeCon teleporting, Slow Mo and Tunnel vision motion sickness fixes: jckhng
 Originally inspired by: tmek
 
 DOOM-3-BFG-VR Readme - https://github.com/KozGit/DOOM-3-BFG-VR
-
-Please note this readme has not been fully updated for the VR port yet.  See readme in binary download for more information.
-Readme will be updated with VR specific documentation shortly.
 
 DOOM-3-BFG-VR was built using an older version of the RBDOOM3-BFG port.
 RBDOOM-3-BFG Readme - https://github.com/RobertBeckebans/RBDOOM-3-BFG
@@ -81,7 +78,7 @@ Minimum system requirements:
 
 	CPU: 3 GHz + Intel compatible
 	System Memory: 8 GB
-	Graphics card: Geforce GTX 960 or higher, with recent drivers
+	Graphics card: Nvidia Geforce GTX 960 or higher, with recent drivers
 	OS: Windows 7 64 bit or above?
 	VR: SteamVR compatible HMD or Oculus Rift DK2 or above
 
@@ -89,7 +86,7 @@ Recommended system requirements:
 
 	CPU: 3 GHz + Intel compatible
 	System Memory: 8 GB
-	Graphics card: Geforce GTX 970 or higher, with latest drivers
+	Graphics card: Nvidia Geforce GTX 970 or higher, with latest drivers
 	OS: Windows 10 64 bit
 	VR: HTC Vive or Oculus Rift CV1 with Touch and roomscale sensors
 	
@@ -163,7 +160,7 @@ __________________________________________
 3. In the unlikely event that you don't have the Visual C++ 2013 redistributable installed, get it here:
 	https://www.microsoft.com/en-au/download/details.aspx?id=40784
 
-4. Previous versions of this mod installed assets directly into the BASE directory of the Doom 3 BFG
+4. Old version 0.015 of this mod installed assets directly into the BASE directory of the Doom 3 BFG
    installation.  All assets are now installed into a separate mod folder named 'Fully Possessed'
    located in the Doom 3 BFG directory. An installer is now provided that will automatically remove files from old
    versions of this mod if present, and install the updated mod.  The installer doesn't add any files to the base 
@@ -179,7 +176,7 @@ __________________________________________
 
 5. Installing the mod:
 
-   Start the Doom3BFGVR_Fully_Possessed_Alpha020.exe installer.
+   Start the Doom3BFGVR_Fully_Possessed_Alpha021.exe installer.
 
    If Doom 3 BFG was not originally installed on your main Steam hard-drive, change the install path to reflect
    the Doom 3 BFG installation directory. If you have enough disk space, it is recommended to select to install 
@@ -211,6 +208,17 @@ ___________________________________________________
 4) NEW FEATURES
 __________________________________________
 
+New in 0.21:
+	Talking waking monsters is fixed.
+	Loading all saved games from 0.020 is fixed.
+	You can now load most saved games from RBDoom 3 BFG (with minor issues).
+	You can now load all saved games from version 0.015 (with minor issues).
+	There's a menu option for Asynchronous SpaceWarp.
+	You can now chose to walk in the direction of either hand when walking.
+	Language is now detected based on sound files not .lang files.
+	Added QuakeCon style teleport option. http://www.gamespot.com/articles/doom-may-have-solved-vrs-traversal-problem/1100-6442439/
+
+
 DOOM3-BFG VR : Fully Possessed offers many new features:
 
 Native support for the HTC Vive via OpenVR when detected.
@@ -238,48 +246,48 @@ Native support for the Oculus Rift and Touch via the Oculus SDK when detected.
 - Locomotion:  Multiple locomotion options are supported.
 
 	Teleportation support:
-		
-		A parabolic aiming beam identifies areas the player can teleport to, as identified by
-		the game AAS system. Teleporting to a location will cause the player to activate all in game 'triggers'
-		along the path the player would walk to reach the destination.  This includes activating cutscenes, 
-		alerting or activating monsters, triggering any in game scripted events, and taking any environmental 
-		damage that the player would incur along this route. Players may not teleport through closed doors, or
-		to areas the AAS system has marked as unreachable by the player.
-		
-		LIMITATIONS:  Doom 3 was not initially designed with the idea of teleportation in mind. Doom 3 uses an 
-		Area Awareness System (AAS) to determine if a location is reachable by a character in the game, and then
-		generate a path to that point. AAS files have been generated for the player for most of the levels in the 
-		game, but there are limitations. Issues can happen for example if trying to teleport onto a desk -
-		you will teleport to the desk but then be bounced to the floor, just as if you had tried to jump on the desk.
-		The AAS system is also currently unable to identify areas that are only reachable by ladder, so it is not 
-		currently possible to teleport to an area if the only way to reach it is via ladder. Additionally, there are 
-		a few small	areas in the game the AAS system is not aware of, and therefore cannot be teleported to. In these
-		instances, the player will need to use normal locomotion to reach these areas and continue the game.
+	  
+	  A parabolic aiming beam identifies areas the player can teleport to, as identified by
+	  the game AAS system. Teleporting to a location will cause the player to activate all in game 'triggers'
+	  along the path the player would walk to reach the destination.  This includes activating cutscenes, 
+	  alerting or activating monsters, triggering any in game scripted events, and taking any environmental 
+	  damage that the player would incur along this route. Players may not teleport through closed doors, or
+	  to areas the AAS system has marked as unreachable by the player.
+	  
+	  LIMITATIONS:  Doom 3 was not initially designed with the idea of teleportation in mind. Doom 3 uses an 
+	  Area Awareness System (AAS) to determine if a location is reachable by a character in the game, and then
+	  generate a path to that point. AAS files have been generated for the player for most of the levels in the 
+	  game, but there are limitations. Issues can happen for example if trying to teleport onto a desk -
+	  you will teleport to the desk but then be bounced to the floor, just as if you had tried to jump on the desk.
+	  The AAS system is also currently unable to identify areas that are only reachable by ladder, so it is not 
+	  currently possible to teleport to an area if the only way to reach it is via ladder. Additionally, there are 
+	  a few small	areas in the game the AAS system is not aware of, and therefore cannot be teleported to. In these
+	  instances, the player will need to use normal locomotion to reach these areas and continue the game.
 
 	Full room-scale support.
-		
-		Your character can walk around and crouch using your real life motion. Walking in real life allows you to 
-		walk around in the game, including walking up and down stairs or off ledges.  You can push small shipping
-		containers and other items with real life motion. Solid objects cannot be walked through, but they can be
-		leaned over to some degree. Jumping via real life motion is not supported.
+	  
+	  Your character can walk around and crouch using your real life motion. Walking in real life allows you to 
+	  walk around in the game, including walking up and down stairs or off ledges.  You can push small shipping
+	  containers and other items with real life motion. Solid objects cannot be walked through, but they can be
+	  leaned over to some degree. Jumping via real life motion is not supported.
 
 	Gamepad and Motion Controller locomotion:
 	
-		Gamepad or Motion Controller Pads, Sticks, or Buttons can be used for artificial locomotion.
-		Options are included for controller relative movement ( Onward style ), and normal 
-		gamepad style movement controls.  There are a variety of options available to the player, including
-		smooth turning, comfort (snap) turning, and multiple comfort options to reduce the effects of 
-		VR sickness when using artificial movement.  All of the controls can be rebound or disabled 
-		( for example, turning or strafe can be removed completely from the controllers ), and the various
-		comfort options enabled or disabled.  These changes can be easily made in game via touch screen
-		access to VR specific game menus using the PDA.
+	  Gamepad or Motion Controller Pads, Sticks, or Buttons can be used for artificial locomotion.
+	  Options are included for controller relative movement ( Onward style ), and normal 
+	  gamepad style movement controls.  There are a variety of options available to the player, including
+	  smooth turning, comfort (snap) turning, and multiple comfort options to reduce the effects of 
+	  VR sickness when using artificial movement.  All of the controls can be rebound or disabled 
+	  ( for example, turning or strafe can be removed completely from the controllers ), and the various
+	  comfort options enabled or disabled.  These changes can be easily made in game via touch screen
+	  access to VR specific game menus using the PDA.
 
 	Comfort Options:
 	
-		There are various locomotion options available to assist in preventing motion sickness, including comfort 
-		( snap ) turning, third person movement, movement based FOV reduction, slow motion movement, and using the
-		Chaperone boundaries to provide a static reference.
-		
+	  There are various locomotion options available to assist in preventing motion sickness, including comfort 
+	  ( snap ) turning, third person movement, movement based FOV reduction, slow motion movement, and using the
+	  Chaperone boundaries to provide a static reference.
+	  
 - Voice Commands:
 
 	DOOM3-BFG VR : Fully Possessed supports voice commands via the Windows speech recognition engine.
@@ -386,52 +394,52 @@ __________________________________________
 
 	Un-Binding or Binding controls:
 	
-		Any axis or button can be re-mapped to any movement or control function.
-		Rebinding controls is accomplished through the 'Settings->Controls->Key Bindings' menu.
-		This menu is available from the Main Menu when the game is first launched, or
-		by pressing the System Menu button in game, and selecting the 'Settings->Controls->
-		Key	Bindings' menu on the PDA.
-		
-		Be careful not to speak when binding a control, or you will rebind what talking does.
-		You can't rebind specific voice commands. Edit the dict file instead.
-		The thumb rests on the Touch controllers can be bound, so be careful not to bump them.
-		
-		You can use the right joystick and trigger to highlight and select an action.
-		If you are in game and using the PDA to adjust settings, you may use motion controls 
-		and your virtual finger to access the menu as a touch screen.  Touch an entry once to 
-		highlight, and touch again to select.
-		
-		Use the joystick or touch controls to highlight a command and see its current bindings.
-		If available, button graphics will identify a bound control, otherwise a text descriptor is 
-		used. If the list of bindings is longer than the available space in the menu, the full binding
-		list for the selected action is listed (without	button graphics) at the bottom of the screen.
-		
-		Select the highlighted action with the trigger or by tapping. Once selected, you can unbind a 
-		currently bound control or add a new binding. To unbind a control, simply press the axis
-		or button you would like to unbind and it will be removed from the list. To bind a control,
-		simply press the desired button or axis and it will be added to the binding list.  If the 
-		desired button/axis	is currently bound to another action, you will be asked if you want to 
-		continue and reassign it to this command ( removing the existing binding ), or to cancel.
-		
-		Changing comfort ( snap ) turning:
-			
-			By default, the game is configured to use comfort or snap turning.
-			This can be easily changed via the Settings->VR Options->Comfort + Safety Protocols
-			menu, under the Turning option.  Cycle through the various options to select the turning
-			mode you prefer.  ( Analog mode provides the typical smooth turning function - however this 
-			is one of the most common cause of VR sickness.)
-			
-			Alternative, you may manually rebind Turn Left, Turn Right, Comfort Turn Left, and Comfort Turn
-			Right in the Settings->Controls->Key Bindings menu.
-				
-		
-		
+	  Any axis or button can be re-mapped to any movement or control function.
+	  Rebinding controls is accomplished through the 'Settings->Controls->Key Bindings' menu.
+	  This menu is available from the Main Menu when the game is first launched, or
+	  by pressing the System Menu button in game, and selecting the 'Settings->Controls->
+	  Key	Bindings' menu on the PDA.
+	  
+	  Be careful not to speak when binding a control, or you will rebind what talking does.
+	  You can't rebind specific voice commands. Edit the dict file instead.
+	  The thumb rests on the Touch controllers can be bound, so be careful not to bump them.
+	  
+	  You can use the right joystick and trigger to highlight and select an action.
+	  If you are in game and using the PDA to adjust settings, you may use motion controls 
+	  and your virtual finger to access the menu as a touch screen.  Touch an entry once to 
+	  highlight, and touch again to select.
+	  
+	  Use the joystick or touch controls to highlight a command and see its current bindings.
+	  If available, button graphics will identify a bound control, otherwise a text descriptor is 
+	  used. If the list of bindings is longer than the available space in the menu, the full binding
+	  list for the selected action is listed (without	button graphics) at the bottom of the screen.
+	  
+	  Select the highlighted action with the trigger or by tapping. Once selected, you can unbind a 
+	  currently bound control or add a new binding. To unbind a control, simply press the axis
+	  or button you would like to unbind and it will be removed from the list. To bind a control,
+	  simply press the desired button or axis and it will be added to the binding list.  If the 
+	  desired button/axis	is currently bound to another action, you will be asked if you want to 
+	  continue and reassign it to this command ( removing the existing binding ), or to cancel.
+	  
+	  Changing comfort ( snap ) turning:
+	    
+	    By default, the game is configured to use comfort or snap turning.
+	    This can be easily changed via the Settings->VR Options->Comfort Options
+	    menu, under the Turning option.  Cycle through the various options to select the turning
+	    mode you prefer.  ( Analog mode provides the typical smooth turning function - however this 
+	    is one of the most common cause of VR sickness.)
+	    
+	    Alternative, you may manually rebind Turn Left, Turn Right, Comfort Turn Left, and Comfort Turn
+	    Right in the Settings->Controls->Key Bindings menu.
+	      
+	  
+	  
 Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 
 *	Read each section carefully. The controls behave differently depending
 	on if you are playing the game or using a menu or the PDA. *
-		
-		
+	  
+	  
 	Walking and crouching in real life are reflected in the game. You can
 	walk up and down steps, over ledges, or push small objects by walking in
 	real life.  Crouching can also be controlled via button, see below.
@@ -445,162 +453,162 @@ Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 	the trigger to start the throw, swing your arm and release the trigger to throw.
 	
 	
-  _________________________________________		
+  _________________________________________	  
   Default Control Bindings: Oculus Touch
 
 	*IN MENUS OR PDA:
 	
-		Use either stick to highlight menu entries.
-		Press either trigger to select.
-		Press Y or Grip to go back/exit.
-		
-		If you are using the PDA, or the System Menus on the PDA in game,
-		you can use your virtual finger to select menu items just like using
-		a touch screen.
+	  Use either stick to highlight menu entries.
+	  Press either trigger to select.
+	  Press Y or Grip to go back/exit.
+	  
+	  If you are using the PDA, or the System Menus on the PDA in game,
+	  you can use your virtual finger to select menu items just like using
+	  a touch screen.
 	
 	*GAMEPLAY CONTROLS.
 
-		LEFT Controller:
-		
-			By default, the LEFT controller/hand will aim the flashlight, once equipped.
-			
-			Left Stick: 	The left stick controls player movement.  The default configuration is 
-							motion relative to the direction the controller is pointing ( Onward style ).  
-							
-							Artificial motion will induce VR sickness for most people, so teleportation
-							instead of stick control should be considered as a primary form of 
-							movement in these instances.
-							
-							For those who find teleportation immersion breaking or uncomfortable,
-							there are a variety of ( optional ) comfort modes available in the VR menus.
-							These modes include FOV reduction, Slo-Motion, Black Screen and Chaperone 
-							effects to reduce the discomfort caused by mismatched vection. See the 
-							VR MENUS section for more details.
-						 
-			Left Grip:  	Crouch.
-								
-			
-			Left Stick 
-			Press: 			Press the left stick down to toggle the flashlight on and off.
-			
-			
-			Left Trigger:	Hold to run.
-			
-			Left Y:			Recenter view/reset height.
-							If you stand up or sit down while playing, press this to adjust the
-							game to your new position.
-							
-							If the player body is visible, use this to reset the body to face the
-							current view direction.
-							
-			
-			Left X:			Activate the PDA if it's in you inventory.
-							Left X also will skip the active cutscene.
-							In a Flicksync, this gives up on the current line.
-									
-					
-			Left ≡ (menu)	Brings up the in game Pause/System menu on the PDA.
-							( The PDA does not need to be in you inventory to use this function)
-							
-						
-		
-		RIGHT CONTROLLER:
+	  LEFT Controller:
+	  
+	    By default, the LEFT controller/hand will aim the flashlight, once equipped.
+	    
+	    Left Stick: 	The left stick controls player movement.  The default configuration is 
+	            motion relative to the direction the controller is pointing ( Onward style ).  
+	            
+	            Artificial motion will induce VR sickness for most people, so teleportation
+	            instead of stick control should be considered as a primary form of 
+	            movement in these instances.
+	            
+	            For those who find teleportation immersion breaking or uncomfortable,
+	            there are a variety of ( optional ) comfort modes available in the VR menus.
+	            These modes include FOV reduction, Slo-Motion, Black Screen and Chaperone 
+	            effects to reduce the discomfort caused by mismatched vection. See the 
+	            VR MENUS section for more details.
+	           
+	    Left Grip:  	Crouch.
+	              
+	    
+	    Left Stick 
+	    Press: 	    Press the left stick down to toggle the flashlight on and off.
+	    
+	    
+	    Left Trigger:	Hold to run.
+	    
+	    Left Y:	    Recenter view/reset height.
+	            If you stand up or sit down while playing, press this to adjust the
+	            game to your new position.
+	            
+	            If the player body is visible, use this to reset the body to face the
+	            current view direction.
+	            
+	    
+	    Left X:	    Activate the PDA if it's in you inventory.
+	            Left X also will skip the active cutscene.
+	            In a Flicksync, this gives up on the current line.
+	                
+	        
+	    Left ≡ (menu)	Brings up the in game Pause/System menu on the PDA.
+	            ( The PDA does not need to be in you inventory to use this function)
+	            
+	          
+	  
+	  RIGHT CONTROLLER:
 
-			By default the RIGHT controller controls the right hand and the weapon 
-			
-			Right Stick
-			Up/Down:		Next / Previous Weapon
-			
-			Right Stick
-			Left/Right:		Snap turn 45 degrees left or right.
-			
-			Right Grip:		Reload
-						
-			Right Stick
-			Press:			Jump
-			
-			Right Trigger:	Attack / Fire
-							Use Cue Card Power-Up in Flicksync
-			
-			Right A:		Reload
-			
-			Right B: 		Teleport		
-					 
-  _________________________________________		
+	    By default the RIGHT controller controls the right hand and the weapon 
+	    
+	    Right Stick
+	    Up/Down:	  Next / Previous Weapon
+	    
+	    Right Stick
+	    Left/Right:	  Snap turn 45 degrees left or right.
+	    
+	    Right Grip:	  Reload
+	          
+	    Right Stick
+	    Press:	    Jump
+	    
+	    Right Trigger:	Attack / Fire
+	            Use Cue Card Power-Up in Flicksync
+	    
+	    Right A:	  Reload
+	    
+	    Right B: 	  Teleport	  
+	         
+  _________________________________________	  
   Default Control Bindings: HTC Vive
 
 	*IN MENUS OR PDA:
 	
-		Use either pad to highlight menu entries.
-		Press either trigger to select.
-		Press either grip to go back/exit.
-		
-		If you are using the PDA, or the System Menus on the PDA in game,
-		you can use your virtual finger to select menu items just like using
-		a touch screen.
+	  Use either pad to highlight menu entries.
+	  Press either trigger to select.
+	  Press either grip to go back/exit.
+	  
+	  If you are using the PDA, or the System Menus on the PDA in game,
+	  you can use your virtual finger to select menu items just like using
+	  a touch screen.
 	
 	*GAMEPLAY CONTROLS.
 
-		LEFT Controller:
-		
-			By default, the LEFT controller/hand will aim the flashlight, once equipped.
-			
-			Left Pad: 		The left stick controls player movement.  The default configuration is 
-							motion relative to the direction the controller is pointing ( Onward style ).  
-							
-							Artificial motion will induce VR sickness for most people, so teleportation
-							instead of stick control should be considered as a primary form of 
-							movement in these instances.
-							
-							For those who find teleportation immersion breaking or uncomfortable,
-							there are a variety of ( optional ) comfort modes available in the VR menus.
-							These modes include FOV reduction, Slo-Motion, Black Screen and Chaperone 
-							effects to reduce the discomfort caused by mismatched vection. See the 
-							VR MENUS section for more details.
-						 
-			Left Grip:  	Crouch.
-								
-			
-			Left Pad 
-			Press: 			Press the left pad down to toggle the flashlight on and off.
-			
-			
-			Left Trigger:	Jump
-												
-					
-			Left ≡ (menu)	Activate the PDA if it's in you inventory.
-							Will skip the active cutscene.
-							In a Flicksync, this gives up on the current line.
-							
-						
-		
-		RIGHT CONTROLLER:
+	  LEFT Controller:
+	  
+	    By default, the LEFT controller/hand will aim the flashlight, once equipped.
+	    
+	    Left Pad: 	  The left stick controls player movement.  The default configuration is 
+	            motion relative to the direction the controller is pointing ( Onward style ).  
+	            
+	            Artificial motion will induce VR sickness for most people, so teleportation
+	            instead of stick control should be considered as a primary form of 
+	            movement in these instances.
+	            
+	            For those who find teleportation immersion breaking or uncomfortable,
+	            there are a variety of ( optional ) comfort modes available in the VR menus.
+	            These modes include FOV reduction, Slo-Motion, Black Screen and Chaperone 
+	            effects to reduce the discomfort caused by mismatched vection. See the 
+	            VR MENUS section for more details.
+	           
+	    Left Grip:  	Crouch.
+	              
+	    
+	    Left Pad 
+	    Press: 	    Press the left pad down to toggle the flashlight on and off.
+	    
+	    
+	    Left Trigger:	Jump
+	                      
+	        
+	    Left ≡ (menu)	Activate the PDA if it's in you inventory.
+	            Will skip the active cutscene.
+	            In a Flicksync, this gives up on the current line.
+	            
+	          
+	  
+	  RIGHT CONTROLLER:
 
-			By default the RIGHT controller controls the right hand and the weapon 
-			
-			Right Pad
-			Up:				Next Weapon
-			
-			Right Pad
-			Down:			Previous Weapon
-			
-			Right Pad
-			Left/Right:		Snap turn 45 degrees left or right.
-			
-			Right Grip:		Reload
-						
-			Right Pad
-			Press:			Teleport
-			
-			Right Trigger:	Attack / Fire
-							Use Cue Card Power-Up in Flicksync
-			
-			Right ≡ (menu): Brings up the in game Pause/System menu on the PDA.
-							( The PDA does not need to be in you inventory to use this function)
+	    By default the RIGHT controller controls the right hand and the weapon 
+	    
+	    Right Pad
+	    Up:	      Next Weapon
+	    
+	    Right Pad
+	    Down:	    Previous Weapon
+	    
+	    Right Pad
+	    Left/Right:	  Snap turn 45 degrees left or right.
+	    
+	    Right Grip:	  Reload
+	          
+	    Right Pad
+	    Press:	    Teleport
+	    
+	    Right Trigger:	Attack / Fire
+	            Use Cue Card Power-Up in Flicksync
+	    
+	    Right ≡ (menu): Brings up the in game Pause/System menu on the PDA.
+	            ( The PDA does not need to be in you inventory to use this function)
 	
 
 
- _________________________________________		
+ _________________________________________	  
   Default Control Bindings: Gamepad
 
 
@@ -608,120 +616,122 @@ Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 	The game will automatically switch to gamepad mode when you start using the gamepad.
 	You can use the gamepad for room-scale if you want.
 
-			Left Stick: Movement. This can cause motion sickness, So it's recommended to 
-						teleport by holding B, looking where you want to go, and letting go.
+	    Left Stick: Movement. This can cause motion sickness, So it's recommended to 
+	          teleport by holding B, looking where you want to go, and letting go.
 	
-			Push left
-			stick in:	Run
-			
-			Left
-			trigger:	Toggle Flashlight
+	    Push left
+	    stick in:	Run
+	    
+	    Left
+	    trigger:	Toggle Flashlight
 
 	
-			Right 
-			stick:		Aim weapon, and will turn you if you aim past the deadzone threshold.
-			
-			Push right
-			stick in:	Crouch
-			
-			Right
-			trigger: 	Attack / Fire weapon
-			
-			Shoulder
-			buttons:	Switch weapons
+	    Right 
+	    stick:	  Aim weapon, and will turn you if you aim past the deadzone threshold.
+	    
+	    Push right
+	    stick in:	Crouch
+	    
+	    Right
+	    trigger: 	Attack / Fire weapon
+	    
+	    Shoulder
+	    buttons:	Switch weapons
 
-			A = jump
-			B = teleport
-			X = reload
-			Y = use
-			View / Back = PDA / Skip cutscene
-			≡ / Start = menu.
-			
-		
-	_________________________________________		
+	    A = jump
+	    B = teleport
+	    X = reload
+	    Y = use
+	    View / Back = PDA / Skip cutscene
+	    ≡ / Start = menu.
+	    
+	  
+	_________________________________________	  
 	Using the PDA: 
-		
-		You can move the PDA around in your hand, while using your right finger to touch the screen
-		to select entries or scroll bars. You can also use the sticks/pads and buttons on each hand 
-		to select options.
+	  
+	  You can move the PDA around in your hand, while using your right finger to touch the screen
+	  to select entries or scroll bars. You can also use the sticks/pads and buttons on each hand 
+	  to select options.
 
-		Use Y or grip to put your PDA away again.
+	  Use Y or grip to put your PDA away again.
 
-		If the tracking glitches, your PDA can end up far away. If this occurs,  repeatedly press Y or Grip 
-		to close the PDA. ( This is a known issue that will be addressed )
-		
-		You can also manually grab the PDA from your left hip using motion controls.
-		When you move the left controller over the correct spot, the right controller vibrates.
-		Use the grip button to pick up the PDA. Your flashlight will be temporarily holstered on your
-		hip while using the PDA.
+	  If the tracking glitches, your PDA can end up far away. If this occurs,  repeatedly press Y or Grip 
+	  to close the PDA. ( This is a known issue that will be addressed )
+	  
+	  You can also manually grab the PDA from your left hip using motion controls.
+	  When you move the left controller over the correct spot, the right controller vibrates.
+	  Use the grip button to pick up the PDA. Your flashlight will be temporarily holstered on your
+	  hip while using the PDA.
 
-		When you are finished with the PDA, you can place it back the same way, and grab your flashlight.
-		( Grabbing the PDA before you collect it from Reception brings up the pause menu instead of the PDA. )
-		
-	_________________________________________		
+	  When you are finished with the PDA, you can place it back the same way, and grab your flashlight.
+	  ( Grabbing the PDA before you collect it from Reception brings up the pause menu instead of the PDA. )
+	  
+	_________________________________________	  
 	Using the System/Pause menu:
 	
-		Activating the System/Pause menu ( Press ≡ (menu) on the left Touch or Right Vive ) will pause the game
-		and display the system menus on the PDA as above. You can load/save/exit the game, Change the control
-		bindings via System->Controls->Key Bindings, or adjust the various VR options via VR Options. See the 
-		section on VR options for more details.
+	  Activating the System/Pause menu ( Press ≡ (menu) on the left Touch or Right Vive ) will pause the game
+	  and display the system menus on the PDA as above. You can load/save/exit the game, Change the control
+	  bindings via System->Controls->Key Bindings, or adjust the various VR options via VR Options. See the 
+	  section on VR options for more details.
 
-		Touch the 'Back' options, or press Y or the Grips to go back/exit.
-		
-		
-	_________________________________________		
+	  Touch the 'Back' options, or press Y or the Grips to go back/exit.
+	  
+	  
+	_________________________________________	  
 	Teleporting:
 	
-		You can teleport anywhere you could normally reach by walking, ducking, or jumping onto things.
-		When you teleport, your character will trigger any in game events and take any environmental damage
-		that the player would incur by walking the route to the destination.
-		
-		You can't teleport across gaps you have to jump across, or onto the tightrope in the Mars City 
-		Underground level. There is a path length/complexity limit on how far you can teleport in one hop,
-		but it's fairly far. There are some bugs in the Player AAS files, and some levels are missing, so there are 
-		instances where you can't teleport places you should be able to. In these instances, walk in real life
-		or move forward with the stick/pad a little until you can teleport again. If you didn't install the Player
-		AAS files at install, you will only be able to teleport places a Zombie can go.
-		
-		To teleport, push in the right touchpad, or hold down B on Touch, then move your hand to aim the parabola
-		where you want to go. Release the stick or touchpad to teleport there. Pressing the trigger while the aiming
-		beam is active will cancel the teleport. If the teleport target is red, you will need to duck/crouch before
-		teleporting to the destination.	If there's no circle, that means you can't teleport there from your current
-		location.
-		
-	_________________________________________		
+	  You can teleport anywhere you could normally reach by walking, ducking, or jumping onto things.
+	  When you teleport, your character will trigger any in game events and take any environmental damage
+	  that the player would incur by walking the route to the destination.
+	  
+	  You can't teleport across gaps you have to jump across, or onto the tightrope in the Mars City 
+	  Underground level. There is a path length/complexity limit on how far you can teleport in one hop,
+	  but it's fairly far. There are some bugs in the Player AAS files, and some levels are missing, so there are 
+	  instances where you can't teleport places you should be able to. In these instances, walk in real life
+	  or move forward with the stick/pad a little until you can teleport again. If you didn't install the Player
+	  AAS files at install, you will only be able to teleport places a Zombie can go.
+	  
+	  To teleport, push in the right touchpad, or hold down B on Touch, then move your hand to aim the parabola
+	  where you want to go. Release the stick or touchpad to teleport there. Pressing the trigger while the aiming
+	  beam is active will cancel the teleport. If the teleport target is red, you will need to duck/crouch before
+	  teleporting to the destination.	If there's no circle, that means you can't teleport there from your current
+	  location.
+	  
+	  There are two teleportation modes. "Blink" teleports you instantly. "QuakeCon" slows time and warps you there.
+	  
+	_________________________________________	  
 	Using Slots:
 	
-		Slots are locations defined on the player body you can stash or retrieve weapons, the PDA, or 
-		the flashlight by using motion controls to grab/stash them.	When a motion controller is inside
-		of a slot area, the right controller will vibrate.  When the controller vibrates, press the 
-		grip button on the controller in the slot to grab/place/swap the item.
-				
-		You can manually place the flashlight on your left shoulder or your head using the slots, And then 
-		later retrieve it from those places the same way.
+	  Slots are locations defined on the player body you can stash or retrieve weapons, the PDA, or 
+	  the flashlight by using motion controls to grab/stash them.	When a motion controller is inside
+	  of a slot area, the right controller will vibrate.  When the controller vibrates, press the 
+	  grip button on the controller in the slot to grab/place/swap the item.
+	      
+	  You can manually place the flashlight on your left shoulder or your head using the slots, And then 
+	  later retrieve it from those places the same way.
 
-		You can swap your hands by grabbing the holster on your right hip with your left hand. This will
-		transfer the flashlight to your right side and pick up any holstered weapon in your left.
-		Swapping hands will swap most of the controls, but does not swap the analog sticks/touchpads.
+	  You can swap your hands by grabbing the holster on your right hip with your left hand. This will
+	  transfer the flashlight to your right side and pick up any holstered weapon in your left.
+	  Swapping hands will swap most of the controls, but does not swap the analog sticks/touchpads.
 
 
-		You can manually grab the holster on your right hip to holster your weapon.
-		If there's already a weapon holstered there, the weapons will swap.
+	  You can manually grab the holster on your right hip to holster your weapon.
+	  If there's already a weapon holstered there, the weapons will swap.
 
-		You can grab behind your weapon hand's shoulder to switch to the next weapon.
-		You can grab behind your weapon hand's lower back for previous weapon.
+	  You can grab behind your weapon hand's shoulder to switch to the next weapon.
+	  You can grab behind your weapon hand's lower back for previous weapon.
 
-		You can also grab the PDA on your left hip with your right hand, if you prefer.
-		You can then put it back on the same side like normal, or holster PDA on the right to switch hands.
-		
+	  You can also grab the PDA on your left hip with your right hand, if you prefer.
+	  You can then put it back on the same side like normal, or holster PDA on the right to switch hands.
+	  
 	_________________________________________	
 	Interacting with Guis:
 	
-		To use a touchscreen/gui, walk up to the screen and look at it.  When you have focused on the gui, 
-		your weapon will lower and your hand will point a finger and raise to the gui. You can now reach out
-		and use the gui like a normal touchscreen.
-		
-		To exit the gui, walk backwards or teleport.
+	  To use a touchscreen/gui, walk up to the screen and look at it.  When you have focused on the gui, 
+	  your weapon will lower and your hand will point a finger and raise to the gui. You can now reach out
+	  and use the gui like a normal touchscreen.
+	  
+	  To exit the gui, walk backwards or teleport.
 
 
 	
@@ -757,189 +767,189 @@ Voice Controls:
 	
 	Talk:
 	
-			Speak to other people by walking up to them and speaking.
-			You can say whatever you want. After you finish talking, they will respond.
-			They will briefly look at you when you first start speaking.
-			Speaking can wake up nearby monsters, so be careful!
-			
-		Say: Anything
-		
+	    Speak to other people by walking up to them and speaking.
+	    You can say whatever you want. After you finish talking, they will respond.
+	    They will briefly look at you when you first start speaking.
+	    Speaking can wake up nearby monsters, so be careful!
+	    
+	  Say: Anything
+	  
 	
 	Recenter view:
 	
-			This resets the view height to you current view position,
-			and makes the player and the view face your current view direction.
-			Useful for switching between sitting and standing mode of if the 
-			player body becomes disoriented.
-			
-		Say:
-				Reset View
-				Recenter View
-				Reset HMD Orientation
-				Reset HMD View
-				
+	    This resets the view height to you current view position,
+	    and makes the player and the view face your current view direction.
+	    Useful for switching between sitting and standing mode of if the 
+	    player body becomes disoriented.
+	    
+	  Say:
+	      Reset View
+	      Recenter View
+	      Reset HMD Orientation
+	      Reset HMD View
+	      
 	Run:
-		
-		Say:	Start Running
-				
-				
+	  
+	  Say:	Start Running
+	      
+	      
 	Walk/Stop Running:
 	
-		Say:	stop running
-				start walking
+	  Say:	stop running
+	      start walking
 	
 	Reload:
 	
-		Say:	Reload
-		
+	  Say:	Reload
+	  
 	Flashlight:
 	
-		Say:	Flashlight
-				Torch
-				
+	  Say:	Flashlight
+	      Torch
+	      
 	PDA Select:
 
-		Say:	PDA
-				personal data assistant
-				
+	  Say:	PDA
+	      personal data assistant
+	      
 	
 	System/Pause Menu
 	
-		Say:	menu
-				system
-				pause game
-				
+	  Say:	menu
+	      system
+	      pause game
+	      
 	Weapon Selection:
-		
-		You can switch to a specific weapon by saying the name of that weapon.
-		Available Weapons:
-		
-		Fists:
-		
-			Say:	Fist
-					Fists
-					Hands
-					
-		Pistol:
+	  
+	  You can switch to a specific weapon by saying the name of that weapon.
+	  Available Weapons:
+	  
+	  Fists:
+	  
+	    Say:	Fist
+	        Fists
+	        Hands
+	        
+	  Pistol:
 
-			Say:	Pistol
-			
-		Chainsaw
-		
-			Say:	Chainsaw
-					Beaver tooth
-					Beaver tooth chainsaw
-					Mixom beaver tooth
-					Mixom beaver tooth chainsaw
-				
-		Shotgun:
-		
-			say:	Shotgun
-					Pump action shotgun
-					Single barrel shotgun
-					
-		SuperShotgun:
-		
-			say:	Super shotgun
-					Double barrel shotgun
-					Combat shotgun
-					
-		Machine Gun:
-		
-			say:	Machine gun
-					Enforcer
-					M G 88
-					M G 88 enforcer
-					M G
-					
-		Chain Gun:
-		
-			say:	Chain gun
-					Mach 2 chain gun
-					UAC weapons division mach 2 chain gun
-					Saw
-					Mini gun
-					Gatling gun
-					
-		Grenade:
-		
-			say:	Grenade
-					Grenades
-					
-		Plasma Gun:
-		
-			Say:	Plasma gun 
-					Plasma rifle
-					
-		Rocket Launcher:
-		
-			say:	Rocket Launcher
-			
-		BFG:
-		
-			Say:	BFG
-					BFG-9000
-					Bio force gun
-					Big fragging gun
-					Big freaking gun
-					Big fucking gun
-					
-		Soul Cube:
-		
-			Say:	Soul cube
-			
-		Artifact
-		
-			Say:	Artifact
-					The artifact
-					Heart of hell
-					Blood stone
-					
-		Grabber:
-		
-			say:	Grabber
-					Ionized plasma levitator
-					IPL unit
-					Gravity gun
+	    Say:	Pistol
+	    
+	  Chainsaw
+	  
+	    Say:	Chainsaw
+	        Beaver tooth
+	        Beaver tooth chainsaw
+	        Mixom beaver tooth
+	        Mixom beaver tooth chainsaw
+	      
+	  Shotgun:
+	  
+	    say:	Shotgun
+	        Pump action shotgun
+	        Single barrel shotgun
+	        
+	  SuperShotgun:
+	  
+	    say:	Super shotgun
+	        Double barrel shotgun
+	        Combat shotgun
+	        
+	  Machine Gun:
+	  
+	    say:	Machine gun
+	        Enforcer
+	        M G 88
+	        M G 88 enforcer
+	        M G
+	        
+	  Chain Gun:
+	  
+	    say:	Chain gun
+	        Mach 2 chain gun
+	        UAC weapons division mach 2 chain gun
+	        Saw
+	        Mini gun
+	        Gatling gun
+	        
+	  Grenade:
+	  
+	    say:	Grenade
+	        Grenades
+	        
+	  Plasma Gun:
+	  
+	    Say:	Plasma gun 
+	        Plasma rifle
+	        
+	  Rocket Launcher:
+	  
+	    say:	Rocket Launcher
+	    
+	  BFG:
+	  
+	    Say:	BFG
+	        BFG-9000
+	        Bio force gun
+	        Big fragging gun
+	        Big freaking gun
+	        Big fucking gun
+	        
+	  Soul Cube:
+	  
+	    Say:	Soul cube
+	    
+	  Artifact
+	  
+	    Say:	Artifact
+	        The artifact
+	        Heart of hell
+	        Blood stone
+	        
+	  Grabber:
+	  
+	    say:	Grabber
+	        Ionized plasma levitator
+	        IPL unit
+	        Gravity gun
 	
 
-			
+	    
 	Holodeck Commands:
 
-		Say:	Cancel
-				
-				Pause Game
-				Computer, Freeze Program
-				
-				Exit Game
-				Computer, End Program
-				Computer, Exit
-				Computer, Program Complete
-				Computer, Cancel Program
-				
-				Resume Game
-				Unpause Game
-				Computer, Resume Program
-				Computer, Play Program
-				Computer, Run Program
-				Computer, Continue Program
-					
+	  Say:	Cancel
+	      
+	      Pause Game
+	      Computer, Freeze Program
+	      
+	      Exit Game
+	      Computer, End Program
+	      Computer, Exit
+	      Computer, Program Complete
+	      Computer, Cancel Program
+	      
+	      Resume Game
+	      Unpause Game
+	      Computer, Resume Program
+	      Computer, Play Program
+	      Computer, Run Program
+	      Computer, Continue Program
+	        
 	
 	Speech Recognition Control:
 
-		Say:	What Can I Say
-				
-				Start Listening
-				Consecution
-				
-				Stop Listening
-				Consentient
-		
-		
+	  Say:	What Can I Say
+	      
+	      Start Listening
+	      Consecution
+	      
+	      Stop Listening
+	      Consentient
+	  
+	  
 
 
 
-		
+	  
 ___________________________________________________
 
 7) FLICKSYNC
@@ -1001,16 +1011,16 @@ Starting a Flicksync game:
 	if you want cutscenes.
 	
 	Choose which scenes you want to play.
-		
-		You can play: 	All the cutscenes
-						Just the cutscenes for your character's expansion
-						All the scenes starting from your character's first scene,
-						All the scenes related to your character's story arc
-						Just the scenes with your character in them.
-		There's currently a bug where you must watch the first cutscene of a map if that
-		cutscene starts automatically on map startup, and you have a scene in a later
-		cutscene of that map.
-						
+	  
+	  You can play: 	All the cutscenes
+	          Just the cutscenes for your character's expansion
+	          All the scenes starting from your character's first scene,
+	          All the scenes related to your character's story arc
+	          Just the scenes with your character in them.
+	  There's currently a bug where you must watch the first cutscene of a map if that
+	  cutscene starts automatically on map startup, and you have a scene in a later
+	  cutscene of that map.
+	          
 	Then choose the highest level you have reached in the game if you want to avoid spoilers.
 
 	Choose Play.
@@ -1040,567 +1050,592 @@ VR Related game changes can be made from the Settings->VR Options menu.
 
 	Menu: Character Options:
 	
-		Body Mode:  
-		
-			Full Body + Arms:
-				
-					The full player body will be displayed in game, with 
-					( very ) basic IK for the arms.  While playing,
-					if the arms seem misaligned with the body, move in any direction
-					to align the body direction with the movement direction.  Alternatively,
-					you can press or say the button/command to reset the view. ( Left Y on Touch,
-					or say Reset View)
-					
-			Hands + Weaps:
-			
-					If you do not wish to see the player body ( perhaps the basic arm IK
-					is too basic :) ), select this option to display your hands and weapons only.
-					
-			Weapons Only:
-			
-					Selection this option will display only the weapons in game, no player body
-					or hands.  ( Hands will be displayed if there is currently no weapon selected, if 
-					the fists are selected, or if interacting with a GUI.)
-					
-			Note that Body Mode also affects Flicksync. But in Flicksync you will be fully invisible
-			if you chose Hands + Weaps or Weapons Only.
-		
-		
-		Flashlight Mount:
-		
-					Select where the flashlight will be mounted during the game.
-					
-					Options: 	Hand - 	Hold the flashlight in the non weapon hand.
-										Flashlight can be aimed with motion controls.
-								
-								Body - 	The flashlight will be mounted to the body,
-										and shine in the direction the body is facing.
-									
-								Head - 	The flashlight will be mounted to the head
-										and shine where you are looking.
-										
-								Weapon-	The flashlight will be mounted to the muzzle of
-										your weapon.  In the event the weapon has no muzzle
-										( grenade, chainsaw, soul cube, etc ) the flashlight
-										will temporarily move to your head.
-										
-					You can change this in-game by manually grabbing your flashlight and placing
-					it where you want it (except for on the weapon), if Holster Slots are enabled.
-		
-		Weapon Hand
-				
-					Select the handedness of the game.
-					
-					Options:	Right - The weapon will default to the right hand,
-										flashlight / PDA will be in the left.
-										
-								Left - 	The weapon will default to the left hand,
-										the flashlight / PDA will be in the right.
-										
-					You can change this in-game by manually grabbing the holster on the opposite
-					side, if Holster Slots are enabled.
-										
-		Holster Slots
-					
-					Enable or Disable the ability to use the holster slots located on your body.
-					
-					Options:	Enable
-					
-								Disable
-								
-		View Height
-		
-					Change the height of the player view.
-					Use this option if you are taller or shorter than the default view.
-					Measured in inches.
-					
+	  Body Mode:  
+	  
+	    Full Body + Arms:
+	      
+	        The full player body will be displayed in game, with 
+	        ( very ) basic IK for the arms.  While playing,
+	        if the arms seem misaligned with the body, move in any direction
+	        to align the body direction with the movement direction.  Alternatively,
+	        you can press or say the button/command to reset the view. ( Left Y on Touch,
+	        or say Reset View)
+	        
+	    Hands + Weaps:
+	    
+	        If you do not wish to see the player body ( perhaps the basic arm IK
+	        is too basic :) ), select this option to display your hands and weapons only.
+	        
+	    Weapons Only:
+	    
+	        Selection this option will display only the weapons in game, no player body
+	        or hands.  ( Hands will be displayed if there is currently no weapon selected, if 
+	        the fists are selected, or if interacting with a GUI.)
+	        
+	    Note that Body Mode also affects Flicksync. But in Flicksync you will be fully invisible
+	    if you chose Hands + Weaps or Weapons Only.
+	  
+	  
+	  Flashlight Mount:
+	  
+	        Select where the flashlight will be mounted during the game.
+	        
+	        Options: 	Hand - 	Hold the flashlight in the non weapon hand.
+	                  Flashlight can be aimed with motion controls.
+	              
+	              Body - 	The flashlight will be mounted to the body,
+	                  and shine in the direction the body is facing.
+	                
+	              Head - 	The flashlight will be mounted to the head
+	                  and shine where you are looking.
+	                  
+	              Weapon-	The flashlight will be mounted to the muzzle of
+	                  your weapon.  In the event the weapon has no muzzle
+	                  ( grenade, chainsaw, soul cube, etc ) the flashlight
+	                  will temporarily move to your head.
+	                  
+	        You can change this in-game by manually grabbing your flashlight and placing
+	        it where you want it (except for on the weapon), if Holster Slots are enabled.
+	  
+	  Weapon Hand
+	      
+	        Select the handedness of the game.
+	        
+	        Options:	Right - The weapon will default to the right hand,
+	                  flashlight / PDA will be in the left.
+	                  
+	              Left - 	The weapon will default to the left hand,
+	                  the flashlight / PDA will be in the right.
+	                  
+	        You can change this in-game by manually grabbing the holster on the opposite
+	        side, if Holster Slots are enabled.
+	                  
+	  Holster Slots
+	        
+	        Enable or Disable the ability to use the holster slots located on your body.
+	        
+	        Options:	Enable
+	        
+	              Disable
+	              
+	  View Height
+	  
+	        Change the height of the player view.
+	        Use this option if you are taller or shorter than the default view.
+	        Measured in inches.
+	        
 	
-	Menu: Comfort + Safety Protocols
+	Menu: Comfort Options
 
-		This menu allows the player select options intended to combat motion sickness, either due
-		to locomotion or game effects. There are also options to help prevent damage to your controllers
-		when using motion controls by activating the Guardian or Chaperone grids as needed.
-		
-		
-		Teleport:
-		
-					Change teleport behavior
-					
-					Options:	Right Hand - 	The teleport aiming beam will originate from the 
-												right hand, or device in the right hand.
-												
-								Left Hand - 	The teleport aiming beam will originate from the 
-												left hand, or device in the left hand.
-												
-								Head - 			Use you view to aim the teleport beam.
-								
-								Disabled -		Disable teleport and teleport aiming.
-								
-								Gun Sight - 	Do not use the parabolic teleport aiming beam, instead
-												use the weapon sight.  The laser reticle will change to 
-												indicate if you are able to teleport to a location.
-												You must set the weapon sight to dot mode to use this option.
-												This option may also hurt frame rate, as the teleport destination
-												is always being scanned.
-												
-					If you swap hands using the weapons slots, the teleport aiming will swap as well.
-					
-					
-					
-		Turning:
-				
-					Change the turning mode. Changing the turning menu option will remap your control 
-					bindings for whatever controls you assigned to turning to support the selected mode.
-					If you want to use a combination of Analog and Comfort turning, you can adjust the
-					control bindings yourself in Settings->Controls->Key Bindings.
-					
-					This setting only affects motion controllers. Set Key Bindings for keyboard or gamepad.
-					
-					Options:	Snap ( 10 - 180 ) - Comfort turning will be used. Each turn will move the view/reset
-													the selected number of degrees.
-													
-								Real Life -			No artificial turning will be used, the player will need to turn
-													in real life to turn in the game. 
-													
-								Analog - 			The analog stick can be used to turn the player smoothly.
-													This option is guaranteed to cause the most motion sickness.
-													It is not recommended for the regular user, and should only be
-													considered by people who absolutely never get VR sickness.
-													
-													
-								
-		Walk Speed Adjust:
-		
-					Adjust the movement speed of the player.
-					
-					This value can be changed to increase or decrease the maximum walk speed
-					of the player from the normal value of 140. Negative values slow movement,
-					positive values will increase it. This value persists throughout the game.
-					There's an alternative to "Walk Speed Adjust" in the next option, which slows
-					time instead. If you opt to use that, you can set Walk Speed Adjust here to 0.
-					
-		
-		Motion Sickness Aid:
+	  This menu allows the player select options intended to combat motion sickness, either due
+	  to locomotion or game effects. There are also options to help prevent damage to your controllers
+	  when using motion controls by activating the Guardian or Chaperone grids as needed.
+	  
+	  
+	  Teleport:
+	  
+	        Change teleport aiming
+	        
+	        Options:	Right Hand - 	The teleport aiming beam will originate from the 
+	                      right hand, or device in the right hand.
+	                      
+	              Left Hand - 	The teleport aiming beam will originate from the 
+	                      left hand, or device in the left hand.
+	                      
+	              Head - 	    Use you view to aim the teleport beam.
+	              
+	              Disabled -	  Disable teleport and teleport aiming.
+	              
+	              Gun Sight - 	Do not use the parabolic teleport aiming beam, instead
+	                      use the weapon sight.  The laser reticle will change to 
+	                      indicate if you are able to teleport to a location.
+	                      You must set the weapon sight to dot mode to use this option.
+	                      This option may also hurt frame rate, as the teleport destination
+	                      is always being scanned.
+	                      
+	        If you swap hands using the weapons slots, the teleport aiming will swap as well.
+	        
+	        
+	        
+	  Teleport Mode:
+	  
+	        Choose whether to teleport instantly, or slow time and warp along the path.
+	        
+	        Options:
+	              Blink - 	Aiming is like normal, teleporting is instant and covered by a blink.
+	                      
+	              QuakeCon - 	Time is slowed while aiming. Teleport by moving at warp speed to the destination.
+				             This style was used in a Doom (2016) VR demo at QuakeCon.
+							 http://www.gamespot.com/articles/doom-may-have-solved-vrs-traversal-problem/1100-6442439/
+	                      
+	  Turning:
+	      
+	        Change the turning mode. Changing the turning menu option will remap your control 
+	        bindings for whatever controls you assigned to turning to support the selected mode.
+	        If you want to use a combination of Analog and Comfort turning, you can adjust the
+	        control bindings yourself in Settings->Controls->Key Bindings.
+	        
+	        This setting only affects motion controllers. Set Key Bindings for keyboard or gamepad.
+	        
+	        Options:	Snap ( 10 - 180 ) - Comfort turning will be used. Each turn will move the view/reset
+	                      	the selected number of degrees.
+	                      	
+	              Real Life -	    No artificial turning will be used, the player will need to turn
+	                      	in real life to turn in the game. 
+	                      	
+	              Analog - 	    The analog stick can be used to turn the player smoothly.
+	                      	This option is guaranteed to cause the most motion sickness.
+	                      	It is not recommended for the regular user, and should only be
+	                      	considered by people who absolutely never get VR sickness.
+	                      	
+	                      	
+	              
+	  Walk Speed Adjust:
+	  
+	        Adjust the movement speed of the player.
+	        
+	        This value can be changed to increase or decrease the maximum walk speed
+	        of the player from the normal value of 140. Negative values slow movement,
+	        positive values will increase it. This value persists throughout the game.
+	        There's an alternative to "Walk Speed Adjust" in the next option, which slows
+	        time instead. If you opt to use that, you can set Walk Speed Adjust here to 0.
+	        
+	  
+	  Motion Sickness Aid:
 
-					If you experience any form of VR sickness, this is one of the most important options
-					to experiment with. It applies an effect whenever you're moving artificially, whether 
-					using the joystick, jumping, crouching, or because you were pushed by something in the
-					game, or you fell off a ledge, or you tried to walk in real life through a solid virtual
-					object. Some effects can work in combination with other effects.
-										
-					There are a variety of options to ( hopefully ) assist in preventing motion sickness 
-					during player movement. The best way to avoid motion sickness is to play standing up,
-					walking, turning, and crouching in real life, while using teleportation and third person 
-					mode for all artificial movement. You can play this way even if using a gamepad.
-		
-					The most common cause of motion sickness is using the analog stick to turn the view, so 
-					this should be avoided whenever possible if you are susceptible to VR sickness. There
-					are some places where you have to use artificial movement though, such as climbing ladders,
-					jumping across gaps, and some glitchy areas not accessible via teleport, so hopefully 
-					these menu options can help.
-					
-					Options:	Third Person - 		When artificial motion is used, the player view will remain
-													stationary, and the player character will be controlled
-													in the third person via analog controls.  When the character
-													stops moving, the player view will fade to the new character
-													location. This is a very effective way to combat motion 
-													sickness.  There is	currently one drawback: Moving backwards
-													is not well implemented	(yet).  If you move backwards, you 
-													will not be able to see the character you are controlling 
-													unless you turn around, so it is recommended to	only move 
-													backwards in short hops.
-													
-								None - 				If you are fortunate enough to never experience motion sickness,
-													you can select this option to disable all motion sickness aids.
-													Be warned, this is only for those who truly have 'VR legs'.
-													
-								Chaperone - 		Turns on the Chaperone ( or Guardian ) grid whenever you are
-													moving artificially. Any grid that's solidly locked to the real
-													world is supposed to help with motion sickness. The other methods
-													may be more effective or less intrusive. Chaperone can be combined
-													with other effects ( including "Black Screen" if you don't like the
-													empty void).
+	        If you experience any form of VR sickness, this is one of the most important options
+	        to experiment with. It applies an effect whenever you're moving artificially, whether 
+	        using the joystick, jumping, crouching, or because you were pushed by something in the
+	        game, or you fell off a ledge, or you tried to walk in real life through a solid virtual
+	        object. Some effects can work in combination with other effects.
+	                  
+	        There are a variety of options to ( hopefully ) assist in preventing motion sickness 
+	        during player movement. The best way to avoid motion sickness is to play standing up,
+	        walking, turning, and crouching in real life, while using teleportation and third person 
+	        mode for all artificial movement. You can play this way even if using a gamepad.
+	  
+	        The most common cause of motion sickness is using the analog stick to turn the view, so 
+	        this should be avoided whenever possible if you are susceptible to VR sickness. There
+	        are some places where you have to use artificial movement though, such as climbing ladders,
+	        jumping across gaps, and some glitchy areas not accessible via teleport, so hopefully 
+	        these menu options can help.
+	        
+	        Options:	Third Person - 	  When artificial motion is used, the player view will remain
+	                      	stationary, and the player character will be controlled
+	                      	in the third person via analog controls.  When the character
+	                      	stops moving, the player view will fade to the new character
+	                      	location. This is a very effective way to combat motion 
+	                      	sickness.  There is	currently one drawback: Moving backwards
+	                      	is not well implemented	(yet).  If you move backwards, you 
+	                      	will not be able to see the character you are controlling 
+	                      	unless you turn around, so it is recommended to	only move 
+	                      	backwards in short hops.
+	                      	
+	              None - 	      If you are fortunate enough to never experience motion sickness,
+	                      	you can select this option to disable all motion sickness aids.
+	                      	Be warned, this is only for those who truly have 'VR legs'.
+	                      	
+	              Chaperone - 	  Turns on the Chaperone ( or Guardian ) grid whenever you are
+	                      	moving artificially. Any grid that's solidly locked to the real
+	                      	world is supposed to help with motion sickness. The other methods
+	                      	may be more effective or less intrusive. Chaperone can be combined
+	                      	with other effects ( including "Black Screen" if you don't like the
+	                      	empty void).
 
-								Reduce Fov - 		Reduce FOV, or "Tunnel vision" will block out your peripheral vision
-													when moving, which for some people is where most motion sickness comes
-													from. It can be combined with other effects such as Chaperone.
-													
-								
-								Black Screen - 		The only 100% effect mode, it completely blacks out your view while
-													moving artificially, so there's no vection and no motion sickness.
-													It will strobe a brief frame a couple of times per second. ( The 
-													strobe time can be adjusted with the console variable vr_strobeTime
-													which is in ms). Obviously blacking out the screen makes it harder
-													to navigate and see what you're doing, but if you are not using 
-													artificial navigation much ( only when you cant teleport ) it can be 
-													useful.
-													
-								Black + Chaperone-	Combine the Black Screen and Chaperone aids.
-								
-								FOV + Chaperone- 	Combine FOV Reduction and Chaperone aids.
-								
-								Slo Mo-				Slows time while you are moving, to make it feel like you are moving
-													slower, but without harming your ability to dodge and escape from 
-													monsters. The faster you move, the more time is slowed. The downside
-													of this mode is that all the sound and voices are slowed down. This
-													effect can be combined with Chaperone and/or Reduce FOV.
+	              Reduce Fov - 	  Reduce FOV, or "Tunnel vision" will block out your peripheral vision
+	                      	when moving, which for some people is where most motion sickness comes
+	                      	from. It can be combined with other effects such as Chaperone.
+	                      	
+	              
+	              Black Screen - 	  The only 100% effect mode, it completely blacks out your view while
+	                      	moving artificially, so there's no vection and no motion sickness.
+	                      	It will strobe a brief frame a couple of times per second. ( The 
+	                      	strobe time can be adjusted with the console variable vr_strobeTime
+	                      	which is in ms). Obviously blacking out the screen makes it harder
+	                      	to navigate and see what you're doing, but if you are not using 
+	                      	artificial navigation much ( only when you cant teleport ) it can be 
+	                      	useful.
+	                      	
+	              Black + Chaperone-	Combine the Black Screen and Chaperone aids.
+	              
+	              FOV + Chaperone- 	Combine FOV Reduction and Chaperone aids.
+	              
+	              Slo Mo-	      Slows time while you are moving, to make it feel like you are moving
+	                      	slower, but without harming your ability to dodge and escape from 
+	                      	monsters. The faster you move, the more time is slowed. The downside
+	                      	of this mode is that all the sound and voices are slowed down. This
+	                      	effect can be combined with Chaperone and/or Reduce FOV.
 
-								SloMo + Chaperone-	Combine Slo-Mo with Chaperone.
-								
-								Slo Mo + FOV-		Combine Slo-Mo with FOV Reduction.
-								
-								Slo+FOV+Chaperone-	Combine Slo-Mo, FOV Reduction, and Chaperone effects.
-								
-								
-		Chaperone:
-				
-				This setting is more about safety than motion sickness. It lets you turn the Chaperone or Guardian
-				grid on all the time, or only when you're throwing grenades, or when you're swinging around virtual
-				Melee weapons. The grid can't be disabled completely, but it can be set to "Near" for normal chaperone
-				behaviour. I broke my TV throwing things in Budget Cuts, so I recommend forcing the chaperone on when
-				throwing, at least. The options from most reckless to most safe are: "Near", "Throw", "Melee", or "Always".
-				The default is "Melee", which means the grid will be on whenever you're using grenades, the grabber,
-				the chainsaw, or fists.
-				
-					Options:	Melee-				The Chaperone or Guardian grid will be on when using melee 
-													weapons. ( Grenades, grabber, chainsaw, or fists.)
-													
-								Always-				The Chaperone or Guardian grid will always be on.
-								
-								Near-				Normal Chaperone or Guardian behavior, the grid will
-													appear when you or your controllers are too close to
-													the virtual boundary.
-													
-								Throwing- 			On when throwing grenades.
-								
-								
-		Knockback and Head Kick:
-		
-				Knockback and Headkick are Doom 3's effects that push your view. Knockback is when 
-				your entire player body is moved due to impact. Head Kick is when your view 'Kicks'
-				due to an impulse such as firing a weapon or being struck. They don't work well in VR,
-				and can contribute to motion sickness, so they are disabled by default. They can be 
-				enabled if desired.
-				
-					Options:	Knockback Only-		The player body will be knocked back due to impacts.
-					
-								Headkick Only-		The player view can kick due to impulses.
-								
-								Enabled-			Both Knockback and Headkick will be enabled.
-								
-								Disabled-			Neither Knockback or Headkick are enabled.
-								
-		Step Smooth and Jump Bounce:
-		
-				Affect the player view when going up and down steps, or after landing from a jump or fall.
-				
-					Options:
-					
-								Step Smooth Only-	Step Smooth makes climbing stairs smooth instead of jarring.
-													Smooth motion increases motion sickness, but in this case can 
-													be jarring without it. Enabled by default, but can be turned 
-													off if you prefer. This option enables smooth steps and 
-													disables jump bouncing.
-													
-								Jump Bounce Only-	Jump Bounce is when your view bounces when landing after jumping.
-													It can be uncomfortable, so it's disabled by default, but this option
-													enables the jump bounce but not smooth stepping.
-													
-								Enabled-			Steps will be smooth and the view will bounce when landing.
-								
-								Disabled-			Steps will be instant, and the view will not bounce when landing.
-								
-		Shake Amplitude:
-		
-				Doom 3 has screen shaking effects in some areas of the game. You can adjust this amplitude of these
-				effects. Moving the slider all the way to the left disables the effect completely, and moving the slider
-				to the right will increase the effect until it reaches full power.
-				
-				This effect can be very uncomfortable, so it is disabled by default.
-				
-				
-				
-								
+	              SloMo + Chaperone-	Combine Slo-Mo with Chaperone.
+	              
+	              Slo Mo + FOV-	  Combine Slo-Mo with FOV Reduction.
+	              
+	              Slo+FOV+Chaperone-	Combine Slo-Mo, FOV Reduction, and Chaperone effects.
+	              
+	              
+	  [Chaperone:]
+	      
+		  This setting has moved to the VR Options > Rendering Options menu.
+		  
+	  Knockback and Head Kick:
+	  
+	      Knockback and Headkick are Doom 3's effects that push your view. Knockback is when 
+	      your entire player body is moved due to impact. Head Kick is when your view 'Kicks'
+	      due to an impulse such as firing a weapon or being struck. They don't work well in VR,
+	      and can contribute to motion sickness, so they are disabled by default. They can be 
+	      enabled if desired.
+	      
+	        Options:	Knockback Only-	  The player body will be knocked back due to impacts.
+	        
+	              Headkick Only-	  The player view can kick due to impulses.
+	              
+	              Enabled-	    Both Knockback and Headkick will be enabled.
+	              
+	              Disabled-	    Neither Knockback or Headkick are enabled.
+	              
+	  Step Smooth and Jump Bounce:
+	  
+	      Affect the player view when going up and down steps, or after landing from a jump or fall.
+	      
+	        Options:
+	        
+	              Step Smooth Only-	Step Smooth makes climbing stairs smooth instead of jarring.
+	                      	Smooth motion increases motion sickness, but in this case can 
+	                      	be jarring without it. Enabled by default, but can be turned 
+	                      	off if you prefer. This option enables smooth steps and 
+	                      	disables jump bouncing.
+	                      	
+	              Jump Bounce Only-	Jump Bounce is when your view bounces when landing after jumping.
+	                      	It can be uncomfortable, so it's disabled by default, but this option
+	                      	enables the jump bounce but not smooth stepping.
+	                      	
+	              Enabled-	    Steps will be smooth and the view will bounce when landing.
+	              
+	              Disabled-	    Steps will be instant, and the view will not bounce when landing.
+	              
+	  Shake Amplitude:
+	  
+	      Doom 3 has screen shaking effects in some areas of the game. You can adjust this amplitude of these
+	      effects. Moving the slider all the way to the left disables the effect completely, and moving the slider
+	      to the right will increase the effect until it reaches full power.
+	      
+	      This effect can be very uncomfortable, so it is disabled by default.
+	      
+	      
+	      
+	              
 	Menu: Control Options:
 	
 	
-		Options for how the player controls the game.
-		
-		Controller Type:
-		
-				Select the default controller type.
-				
-					Options:
-					
-							Motion Controllers-		Motion controls will be used if present
-							
-							Standard Controller-	A gamepad will be the default control device.
-							
-				I recommend leaving it set on Motion Controllers, because in that mode it will switch
-				to gamepad automatically when you start using it, and switch back if you use motion.
-				
-		Move Mode:
-		
-				Select the default movement mode:
-				
-					Options:
-					
-							Standard Stick Move-	The joysticks or pads will control the character
-													like a standard gamepad.  Pressing forward will move
-													the player forward in relation to the body.
-													
-							Off Hand = Forward-		Forward motion is relative to the direction the off hand
-													controller is pointing. ( 'Onward' style movement. )
-													
-							Look = Forward-			Forward motion is relative to the direction the player is 
-													looking.
-													
-		Crouch Mode:
-		
-				Select the default crouch mode.  Note that at any time crouching may be accomplished by using
-				the button assigned to crouch.
-				
-					Options:
-					
-							Full Motion Crouching-  The player can crouch in real life to crawl through ducts
-													or narrow passages.
-													
-							Crouch Trigger-			If the player in real life crouches a distance greater than
-													the number of inches defined by 'Crouch Trigger', it will act
-													as if the crouch button has been pressed.
-													
-		Crouch Trigger Dist:	The number of inches they player must crouch in real life to/from
-								trigger a full in game crouch when using 'Crouch Trigger' mode.
-								
-		Weapon Pitch:			You can change this value to adjust the default pitch of the 
-								weapon to suit your preference.
-								
-		Flashlight Pitch:		You can change this value to adjust the default pitch of the 
-								flashlight to suit your preference.
-		
-		Talk Mode:
+	  Options for how the player controls the game.
+	  
+	  Controller Type:
+	  
+	      Select the default controller type.
+	      
+	        Options:
+	        
+	            Motion Controllers-	  Motion controls will be used if present
+	            
+	            Standard Controller-	A gamepad will be the default control device.
+	            
+	      I recommend leaving it set on Motion Controllers, because in that mode it will switch
+	      to gamepad automatically when you start using it, and switch back if you use motion.
+	      
+	  Move Mode:
+	  
+	      Select the default movement mode:
+	      
+	        Options:
+	        
+	            Standard Stick Move-	The joysticks or pads will control the character
+	                      	like a standard gamepad.  Pressing forward will move
+	                      	the player forward in relation to the body.
+	                      	
+	            Off Hand = Forward-	  Forward motion is relative to the direction the off hand
+	                      	controller is pointing. ( 'Onward' style movement. )
+	                      	
+	            Look = Forward-	    Forward motion is relative to the direction the player is 
+	                      	looking.
+	                      	
+	  Crouch Mode:
+	  
+	      Select the default crouch mode.  Note that at any time crouching may be accomplished by using
+	      the button assigned to crouch.
+	      
+	        Options:
+	        
+	            Full Motion Crouching-  The player can crouch in real life to crawl through ducts
+	                      	or narrow passages.
+	                      	
+	            Crouch Trigger-	    If the player in real life crouches a distance greater than
+	                      	the number of inches defined by 'Crouch Trigger', it will act
+	                      	as if the crouch button has been pressed.
+	                      	
+	  Crouch Trigger Dist:	The number of inches they player must crouch in real life to/from
+	              trigger a full in game crouch when using 'Crouch Trigger' mode.
+	              
+	  Weapon Pitch:	    You can change this value to adjust the default pitch of the 
+	              weapon to suit your preference.
+	              
+	  Flashlight Pitch:	  You can change this value to adjust the default pitch of the 
+	              flashlight to suit your preference.
+	  
+	  Talk Mode:
 
-				Select how the player interacts with NPCs.
-				
-					Options:
-							
-							Voice Only - 			The player must speak in real life to talk to NPCs.
-													The focus cursor will be displayed.
-													
-							Voice, No Cursor-		The player must speak in real life to talk to NPCs.
-													The focus cursor will not be displayed.
-													
-							Buttons Only-			The player must use buttons ( attack ) to talk to NPCs.
-							
-							Buttons or Voice-		The player may speak in real life or use buttons to 
-													speak with NPCs.
-													
-		Voice Commands:
-		
-				Select how Speech Recognition will be used to implement commands.
-				
-					Options:
-					
-							Menus and Weapons-		Speaking will allow the player to enter and exit menus,
-													as well as select menus.
-													
-							Disabled-				Voice Commands will not be utilized.
-							
-							Menus Only-				Voice Commands will only activate menus, weapons will 
-													need to be selected manually.
-													
+	      Select how the player interacts with NPCs.
+	      
+	        Options:
+	            
+	            Voice Only - 	    The player must speak in real life to talk to NPCs.
+	                      	The focus cursor will be displayed.
+	                      	
+	            Voice, No Cursor-	  The player must speak in real life to talk to NPCs.
+	                      	The focus cursor will not be displayed.
+	                      	
+	            Buttons Only-	    The player must use buttons ( attack ) to talk to NPCs.
+	            
+	            Buttons or Voice-	  The player may speak in real life or use buttons to 
+	                      	speak with NPCs.
+	                      	
+	  Voice Commands:
+	  
+	      Select how Speech Recognition will be used to implement commands.
+	      
+	        Options:
+	        
+	            Menus and Weapons-	  Speaking will allow the player to enter and exit menus,
+	                      	as well as select menus.
+	                      	
+	            Disabled-	      Voice Commands will not be utilized.
+	            
+	            Menus Only-	      Voice Commands will only activate menus, weapons will 
+	                      	need to be selected manually.
+	                      	
 	Menu: UI Options:
 
-		Select user interface options.
-		
-		HUD Options Menu:
-		
-			Modify how the HUD is displayed.
-			
-			Location:					
-					
-				Where the HUD will be positioned.
-													
-					Options:
+	  Select user interface options.
+	  
+	  HUD Options Menu:
+	  
+	    Modify how the HUD is displayed.
+	    
+	    Location:	        
+	        
+	      Where the HUD will be positioned.
+	                      	
+	        Options:
 
-							Lock to Body-			The hud position is relative to the player body.
-							
-							Lock to View-			The hud position is relative to the player view.
-							
-			Hud Mode:
-			
-				When the hud is displayed.
-				
-					Options:
-					
-							Pitch Activate-			The HUD will remain invisible until the player tilts their
-													head ( looks down ) beyond the angle defined by Reveal Angle.
-									
-							Disabled-				The HUD will not be displayed.	
-							
-							Full On-				The HUD will always be displayed.
-							
-			Reveal Angle:
-			
-					If the HUD is in Pitch Activate mode, tilting your head beyond this angle 
-					will cause the hud to be displayed.
-					
-			Low Health Reveal:
-			
-					If the HUD is in Pitch Activate mode, it will be switched on regardless of tilt if
-					player health drops below the value defined here. ( 0 = Disabled ) 
-					
-			Menu: Adjust Hud Position:
+	            Lock to Body-	    The hud position is relative to the player body.
+	            
+	            Lock to View-	    The hud position is relative to the player view.
+	            
+	    Hud Mode:
+	    
+	      When the hud is displayed.
+	      
+	        Options:
+	        
+	            Pitch Activate-	    The HUD will remain invisible until the player tilts their
+	                      	head ( looks down ) beyond the angle defined by Reveal Angle.
+	                
+	            Disabled-	      The HUD will not be displayed.	
+	            
+	            Full On-	      The HUD will always be displayed.
+	            
+	    Reveal Angle:
+	    
+	        If the HUD is in Pitch Activate mode, tilting your head beyond this angle 
+	        will cause the hud to be displayed.
+	        
+	    Low Health Reveal:
+	    
+	        If the HUD is in Pitch Activate mode, it will be switched on regardless of tilt if
+	        player health drops below the value defined here. ( 0 = Disabled ) 
+	        
+	    Menu: Adjust Hud Position:
 
-					Options for changing the location and size of the HUD.
-					Values are in inches
-					
-					HUD Position Dist:  How far in front of the view or body the HUD will be displayed.
-					
-					HUD Position Vert: 	How far up or down from default in relation to the view or body
-										the HUD will be displayed.
-										
-					HUD Position Horiz:	How far to the left or right from default in relation to the view
-										or body the HUD will be displayed.
-										
-					HUD Pitch:			The pitch of the HUD screen.
-					
-					HUD Scale:			Size of the Hud
-					
-					Talk Cursor Adj:    Adjust the position of the Talk Cursor ( Cursor that identified the
-										names of NPC as a % of HUD vertical size.)
-										
-							
-		PDA Options Menu:
+	        Options for changing the location and size of the HUD.
+	        Values are in inches
+	        
+	        HUD Position Dist:  How far in front of the view or body the HUD will be displayed.
+	        
+	        HUD Position Vert: 	How far up or down from default in relation to the view or body
+	                  the HUD will be displayed.
+	                  
+	        HUD Position Horiz:	How far to the left or right from default in relation to the view
+	                  or body the HUD will be displayed.
+	                  
+	        HUD Pitch:	    The pitch of the HUD screen.
+	        
+	        HUD Scale:	    Size of the Hud
+	        
+	        Talk Cursor Adj:    Adjust the position of the Talk Cursor ( Cursor that identified the
+	                  names of NPC as a % of HUD vertical size.)
+	                  
+	            
+	  PDA Options Menu:
 
-			Modify the PDA position.
-			
-			PDA Location:
-			
-				Where the PDA will be displayed
-					
-					Options:
-					
-						Hold in Hand-		When active, the PDA will be held in the non weapon hand,
-											and can be moved via motion controls.
-						
-						Fix in Space-		When Active, the PDA will be fixed in space in front of
-											the player and will not move.
-											
-						PDA Position Dist:  How far in front of the view or body the PDA will be displayed
-											if Fix In Space is selected.
-					
-						PDA Position Vert: 	How far up or down from default in relation to the view or body
-											the PDA will be displayed if Fix In Space is selected.
-										
-						PDA Position Horiz:	How far to the left or right from default in relation to the view
-											or body the PDA will be displayed if Fix In Space is selected.
-										
-						PDA Pitch:			The pitch of the PDA screen if Fix In Space is selected.
-													
-							
-							
+	    Modify the PDA position.
+	    
+	    PDA Location:
+	    
+	      Where the PDA will be displayed
+	        
+	        Options:
+	        
+	          Hold in Hand-	  When active, the PDA will be held in the non weapon hand,
+	                    and can be moved via motion controls.
+	          
+	          Fix in Space-	  When Active, the PDA will be fixed in space in front of
+	                    the player and will not move.
+	                    
+	          PDA Position Dist:  How far in front of the view or body the PDA will be displayed
+	                    if Fix In Space is selected.
+	        
+	          PDA Position Vert: 	How far up or down from default in relation to the view or body
+	                    the PDA will be displayed if Fix In Space is selected.
+	                  
+	          PDA Position Horiz:	How far to the left or right from default in relation to the view
+	                    or body the PDA will be displayed if Fix In Space is selected.
+	                  
+	          PDA Pitch:	    The pitch of the PDA screen if Fix In Space is selected.
+	                      	
+	            
+	            
 
-		Heading Beam:
-		
-			The heading beam is an optional directional indicator that may aid the player when controlling the
-			character.
-			
-				Options:
-				
-						Disabled-			The heading beam will not be displayed.
-						
-						Solid-				A solid heading beam will be displayed.
-						
-						Arrows-				A heading beam with arrows will be displayed.
-						
-						Scrolling Arrows-	A heading beam will scrolling arrows will be displayed.
-						
-		Weapon Sight:
-		
-			Various weapon sights are available.
-			
-				Options:
-				
-						Laser Sight- 		A laser beam will emit from the weapon to aim with.
-						
-						Red Dot-			A red laser dot will be projected into the world to aim with.
-						
-						Circle Dot-			A reticle with a red circle with a dot in the center will
-											be projected into the world to aim with.
-						
-						Crosshair-			A red crosshair will be projected into the world to aim with.
-						
-		Sight to Surface:
-		
-			If using one of the reticles instead of the Laser Sight, enabling this will align the 
-			reticle to the surface it hits.
-			
-		Haptic Feedback:
-		
-			Enable or disable haptic feedback on the game controller.
-			
-		GUI mode:
-		
-			Select how in game GUIS will be interacted with.
-			
-				Options:
-				
-						Touch Activated-	When the player gets close to a GUI and looks at it,
-											the weapon will lower and the weapon hand will change
-											to a pointer finger.  The GUI can be used as a virtual 
-											touchscreen.
-											
-						Aim Activated-		When the player approaches a GUI and aims the weapon at it,
-											the weapon will lower, but aiming the weapon will control the
-											cursor on the GUI screen.  Fire will click the screen.  If the 
-											current weapon doesn't have a muzzle ( grenade, fists, chainsaw,
-											soul cube, artifact), the player gaze will control the cursor.
-											
-						Look Activated-		When the player approaches a GUI and looks at it, the weapon will
-											lower and the player look direction will be used to control the cursor.
-											
-											
+	  Heading Beam:
+	  
+	    The heading beam is an optional directional indicator that may aid the player when controlling the
+	    character.
+	    
+	      Options:
+	      
+	          Disabled-	    The heading beam will not be displayed.
+	          
+	          Solid-	      A solid heading beam will be displayed.
+	          
+	          Arrows-	      A heading beam with arrows will be displayed.
+	          
+	          Scrolling Arrows-	A heading beam will scrolling arrows will be displayed.
+	          
+	  Weapon Sight:
+	  
+	    Various weapon sights are available.
+	    
+	      Options:
+	      
+	          Laser Sight- 	  A laser beam will emit from the weapon to aim with.
+	          
+	          Red Dot-	    A red laser dot will be projected into the world to aim with.
+	          
+	          Circle Dot-	    A reticle with a red circle with a dot in the center will
+	                    be projected into the world to aim with.
+	          
+	          Crosshair-	    A red crosshair will be projected into the world to aim with.
+	          
+	  Sight to Surface:
+	  
+	    If using one of the reticles instead of the Laser Sight, enabling this will align the 
+	    reticle to the surface it hits.
+	    
+	  Haptic Feedback:
+	  
+	    Enable or disable haptic feedback on the game controller.
+	    
+	  GUI mode:
+	  
+	    Select how in game GUIS will be interacted with.
+	    
+	      Options:
+	      
+	          Touch Activated-	When the player gets close to a GUI and looks at it,
+	                    the weapon will lower and the weapon hand will change
+	                    to a pointer finger.  The GUI can be used as a virtual 
+	                    touchscreen.
+	                    
+	          Aim Activated-	  When the player approaches a GUI and aims the weapon at it,
+	                    the weapon will lower, but aiming the weapon will control the
+	                    cursor on the GUI screen.  Fire will click the screen.  If the 
+	                    current weapon doesn't have a muzzle ( grenade, fists, chainsaw,
+	                    soul cube, artifact), the player gaze will control the cursor.
+	                    
+	          Look Activated-	  When the player approaches a GUI and looks at it, the weapon will
+	                    lower and the player look direction will be used to control the cursor.
+	                    
+	                    
 	Menu: Rendering Options:
 	
-		Options that affect VR graphics.
+	  Options that affect VR graphics.
 
-		Pixel Density - A multiplier used to increase the resolution of the rendered image.
-						Increasing this setting will dramatically impact performance.
-						Note that this setting will be used ON TOP OF any setting in your HMD
-						drivers.  If you are using some form of supersampling by default in 
-						your HMD software, you may want to set this to 1.
-						
-		MSAA Level-		Disable MSAA, or set the desired level of sampling.
-		
-		3D Guis-		The in game GUIS can look flat - enabling this setting adds some
-						depth.  May be disabled if effect is disagreeable.
-						
-						
-								
+	  Pixel Density - A multiplier used to increase the resolution of the rendered image.
+	          Increasing this setting will dramatically impact performance.
+	          Note that this setting will be used ON TOP OF any setting in your HMD
+	          drivers.  If you are using some form of supersampling by default in 
+	          your HMD software, you may want to set this to 1.
+	          
+	  MSAA Level-	  Disable MSAA, or set the desired level of sampling.
+	  
+	  Chaperone:
+	      
+		  This setting has moved here from the VR Options > Comfort + Safety Protocols.
+		  
+	      This setting is more about safety than motion sickness. It lets you turn the Chaperone or Guardian
+	      grid on all the time, or only when you're throwing grenades, or when you're swinging around virtual
+	      Melee weapons. The grid can't be disabled completely, but it can be set to "Near" for normal chaperone
+	      behaviour. I broke my TV throwing things in Budget Cuts, so I recommend forcing the chaperone on when
+	      throwing, at least. The options from most reckless to most safe are: "Near", "Throw", "Melee", or "Always".
+	      The default is "Melee", which means the grid will be on whenever you're using grenades, the grabber,
+	      the chainsaw, or fists.
+	      
+	        Options:	Melee-	      The Chaperone or Guardian grid will be on when using melee 
+	                      	weapons. ( Grenades, grabber, chainsaw, or fists.)
+	                      	
+	              Always-	      The Chaperone or Guardian grid will always be on.
+	              
+	              Near-	      Normal Chaperone or Guardian behavior, the grid will
+	                      	appear when you or your controllers are too close to
+	                      	the virtual boundary.
+	                      	
+	              Throwing- 	    On when throwing grenades.
+
+	  Asynchronous SpaceWarp:
+	
+	  Oculus only! Adjust how the game handles low framerates.
+		  
+			Options:
+			      Disabled - use Asynchronous TimeWarp (works at any FPS) instead of Asynchronous SpaceWarp (recommended).
+				  Enabled - use Asynchronous SpaceWarp at 45 FPS whenever FPS drops below 90 FPS.
+				  45 FPS ATW - Always use Asynchronous TimeWarp, locked to 45 FPS
+				  45 FPS ASW - Always use Asynchronous SpaceWarp, locked to 45 FPS
+	              
+	  3D Guis-	  The in game GUIS can look flat - enabling this setting adds some
+	          depth.  May be disabled if effect is disagreeable.
+	          
+	          
+	              
 	Menu: VR Profile Options:
 
-		Active Profile:
-		
-			Select profile.
-			
-				Options:
-				
-						Oculus Profile-		*Needs to be renamed* Used the IPD and height provided by
-											the HMD runtime.
-											
-						Manual Profile-		Use the IPD and Height defined in the Manual Profile entries.
-						
-		Oculus Profile IPD:	* Needs to be renamed* The IPD reported by the HMD runtime. 
-		
-		Oculus Profile Height: * Needs to be renamed* The Height reported by the HMD runtime. 
-		
-		Manual Profile IPD:  This IPD will be used if Active Profile is set to Manual.
-		
-		Manual Profile Height: This height will be used if Active Profile is set to Manual.
-		
-		World Scale Adjust:	Not yet implemented.
-		
+	  Active Profile:
+	  
+	    Select profile.
+	    
+	      Options:
+	      
+	          Official Profile-	Use the IPD and height provided by the HMD runtime.
+	                    
+	          Manual Profile-	Use the IPD and Height defined in the Manual Profile entries.
+	          
+	  Oculus Profile IPD:	The IPD reported by the HMD runtime. 
+	  
+	  Oculus Profile Height:	The Height reported by the HMD runtime. 
+	  
+	  Manual Profile IPD:	This IPD will be used if Active Profile is set to Manual.
+	  
+	  Manual Profile Height:	This height will be used if Active Profile is set to Manual.
+	  
+	  World Scale Adjust:	Not yet implemented.
+	  
 
 ___________________________________________
 
@@ -1620,6 +1655,9 @@ Commands:
 
 
 Below are some console variables used by the game.  Many of these can be adjusted via the in game menus.
+
+com_fixedTic 0 BOOL - run a single game frame per render frame. Fixes frame dropping in VR.
+vr_asw 0 INTEGER - Oculus Asynchronous SpaceWarp. 0 = force off (hack), 1 = enabled, 2 = 45 FPS ATW, 3 = 45 FPS ASW
 
 com_showFPS 0,1,2 : Show frames rendered per second. 0: off 1: default bfg values, 2: only show FPS (classic view)
 vr_comfortRepeat 100 INTEGER - Delay in MS between repeating comfort snap turns.
@@ -1648,7 +1686,7 @@ vr_vignette 1 INTEGER - unused
 vr_enable 1 INTEGER - Enable VR mode. 0 = Disabled 1 = Enabled.
 vr_FBOscale 1.0 FLOAT - unused
 vr_scale 1.0 FLOAT - unused
-vr_useOculusProfile 1 INTEGER - Use Oculus Profile values. 0 = use user defined profile, 1 = use Oculus profile.
+vr_useOculusProfile 1 INTEGER - Use official Profile values. 0 = use user defined profile, 1 = use official profile.
 vr_manualIPDEnable 0 INTEGER - Override the HMD provided IPD value with value in vr_manualIPD 0 = disable 1= use manual iPD 
 vr_manualIPD 64 FLOAT - User defined IPD value in MM
 vr_manualHeight 70 FLOAT - User defined player height in inches
@@ -1699,15 +1737,16 @@ vr_hudWeap 1 BOOL - Show weapon pickup/change icons in Hud.
 vr_hudNewItems 1 BOOL - Show new items acquired in Hud.
 vr_hudFlashlight 1 BOOL - Show flashlight in Hud.
 vr_hudLowHealth 0 INTEGER0 = Disable, otherwise force hud if heath below this value.
+
 vr_voiceRepeat 0 BOOL - 1 = computer speaks back whatever commands or lines you say
 vr_voiceCommands 2 INTEGER - Enable voice commands. 0 = none, 1 = menus, 2 = menus and weapons
-vr_talkWakeMonsters 1 BOOL - Talking wakes monsters. 0 = no, 1 = yes
-vr_talkWakeMonstersRadius - radius in inches within which talking will wake monsters.
+vr_talkWakeMonsters 1 INTEGER - Talking wakes monsters. 0 = no, 1 = both methods, 2 = like flashlight, 3 = like weapon. This was broken before but is now fixed.
+vr_talkWakeMonstersRadius - radius in inches within which talking quietly will wake enemies. Talking louder wakes monsters further than this.
 vr_talkMode 2 INTEGER - Talk to NPC 0 = buttons, 1 = buttons or voice, 2 = voice only, 3 = voice no cursor
 vr_tweakTalkCursor 25 FLOAT - Tweak talk cursor y pos in VR. % val 0 to 99 ( talk cursor is NPC name display ) 
 vr_flicksyncCharacter 0 INTEGER - Flicksync character. 0 = none, 1 = Betruger, 2 = Swan,
 					3 = Campbell, 4 = DarkStar, 5 = Tower, 6 = Reception, 7 = Kelly, 8 = Brooks, 
-					9 = Mark 	Ryan, 10 = Ishii, 11 = Roland, 12 = McNeil, 13 = Marine w PDA, 
+					9 = Mark Ryan, 10 = Ishii, 11 = Roland, 12 = McNeil, 13 = Marine w PDA, 
 					14 = Marine w Torch, 15 = Point, 16 = Bravo Lead, 17 = Player
 
 vr_flicksyncCueCards 0 INTEGER - How many Cue Card Power-Ups to start with. Default = 0, max = 5
@@ -1715,6 +1754,7 @@ vr_cutscenesOnly 0 INTEGER - Skip action and only show cutscenes. 0 = normal gam
 vr_flicksyncScenes 1, INTEGER - 0 = all scenes, 1 = my chapter, 2 = from my start, 3 = my storyline, 4 = my scenes only
 vr_flicksyncSpoiler 0 INTEGER - Don't show any cutscene past this point. 0 = allow spoilers, cutscene number = limit
 g_stopTime 0 BOOL - Freeze time. This is used by the Flicksync to pause cutscenes. If there's a bug and everything is frozen try setting it to 0.
+
 vr_wristStatMon 1 INTEGER - Use wrist status monitor. 0 = Disable 1 = Right Wrist 2 = Left Wrist 
 vr_listMonitorName 0 BOOL - List monitor name with resolution. ( no longer as useful with direct mode)
 vr_disableWeaponAnimation 1 BOOL - Disable weapon idle animations in VR. ( 1 = disabled )
@@ -1776,6 +1816,7 @@ vr_forceOculusAudio 1 BOOL - Request openAL to search for Rift headphones instea
 vr_stereoMirror 1 BOOL - Render mirror window with stereo views. 0 = Mono , 1 = Stereo Warped
 vr_APISelect 0 INTEGER - VR API Select:  0 = Autodetect ( Oculus Native then OpenVR ) ,  1 = Oculus Native Only  2 = OpenVR only 
 vr_teleport 2 INTEGER - Player can teleport at will. 0 = disabled, 1 = gun sight, 2 = right hand, 3 = left hand, 4 = head 0, 4 
+vr_teleportMode 0 INTEGER - Teleport Mode. 0 = Blink (default), 1 = QuakeCon style (slow time and warp speed)
 vr_teleportMaxTravel 950 INTEGER - Maximum teleport path length/complexity/time. About 250 or 500 are good choices, 
 									but must be >= about 950 to use tightrope in MC Underground. 150, 5000 
 vr_teleportThroughDoors 0 BOOL - Player can teleport somewhere visible even if the path to get there takes them through closed (but not locked) doors.

@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 idCVar vr_hmdPerfHud( "vr_hmdPerfHud", "0", CVAR_INTEGER, "Oculus Performance HUD.\n 0 Off\n 1 Latency Timing\n 2 RenderTiming\n 3 Perf Headroom\n 4 Version\n 6 Async Timewarp\n", 0, 7 );
 // Koz end
-idCVar vr_asw( "vr_asw", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Oculus Asynchronous SpaceWarp. 0 = force off (hack), 1 = enabled", 0, 3 );
+idCVar vr_asw( "vr_asw", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Oculus Asynchronous SpaceWarp. 0 = force off (hack), 1 = enabled, 2 = 45 FPS ATW, 3 = 45 FPS ASW", 0, 3 );
 
 #define	CON_TEXTSIZE			0x30000
 #define	NUM_CON_TIMES			4

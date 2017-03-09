@@ -77,7 +77,7 @@ void idMenuScreen_Shell_VR_Profile_Options::Initialize( idMenuHandler * data ) {
 	
 	control = new (TAG_SWF) idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Oculus Profile IPD" );
+	control->SetLabel( "Official Profile IPD" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Profile_Options::VR_OCULUS_IPD );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Profile_Options::VR_OCULUS_IPD );
@@ -85,7 +85,7 @@ void idMenuScreen_Shell_VR_Profile_Options::Initialize( idMenuHandler * data ) {
 
 	control = new (TAG_SWF) idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Oculus Profile Height" );
+	control->SetLabel( "Official Profile Height" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Profile_Options::VR_OCULUS_HEIGHT );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Profile_Options::VR_OCULUS_HEIGHT );
@@ -397,7 +397,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Profile_Options::idMenuDataSource_Shell_VR_
 			if ( vr_useOculusProfile.GetInteger() == 0 ) {
 				return "Manual Profile";
 			} else {
-				return "Oculus Profile";
+				return "Official Profile";
 			}
 		
 		case VR_OCULUS_IPD:
