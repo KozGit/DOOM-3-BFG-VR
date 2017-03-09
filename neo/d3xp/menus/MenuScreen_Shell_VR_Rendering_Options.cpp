@@ -374,8 +374,8 @@ void idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 		}
 		
 		case RENDERING_OPTIONS_FIELD_ASW: {
-			static const int numValues = 4;
-			static const int values[numValues] = { 0, 1, 2, 3 };
+			static const int numValues = 5;
+			static const int values[numValues] = { 0, -1, 1, 2, 3 };
 			vr_asw.SetInteger( AdjustOption( vr_asw.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
@@ -438,11 +438,11 @@ idSWFScriptVar idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_V
 		}
 
 		case RENDERING_OPTIONS_FIELD_ASW: {
-			const char* s[4] = { "#str_swf_disabled", "#str_swf_enabled", "45 FPS ATW", "45 FPS ASW" };
+			const char* s[5] = { "#str_swf_disabled", "Default", "#str_swf_enabled", "45 FPS ATW", "45 FPS ASW" };
 			if (vr_asw.GetInteger() > 3)
 				return "error";
 			else
-				return s[vr_asw.GetInteger()];
+				return s[vr_asw.GetInteger() + 1];
 		}
 
 		case RENDERING_OPTIONS_FIELD_CHAPERONE:

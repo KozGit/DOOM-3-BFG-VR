@@ -217,6 +217,7 @@ New in 0.21:
 	You can now chose to walk in the direction of either hand when walking.
 	Language is now detected based on sound files not .lang files.
 	Added QuakeCon style teleport option. http://www.gamespot.com/articles/doom-may-have-solved-vrs-traversal-problem/1100-6442439/
+	Added vr_hmdPerfHud console variable to debug framerate issues.
 
 
 DOOM3-BFG VR : Fully Possessed offers many new features:
@@ -1601,13 +1602,14 @@ VR Related game changes can be made from the Settings->VR Options menu.
 
 	  Asynchronous SpaceWarp:
 	
-	  Oculus only! Adjust how the game handles low framerates.
-		  
-			Options:
-			      Disabled - use Asynchronous TimeWarp (works at any FPS) instead of Asynchronous SpaceWarp (recommended).
-				  Enabled - use Asynchronous SpaceWarp at 45 FPS whenever FPS drops below 90 FPS.
-				  45 FPS ATW - Always use Asynchronous TimeWarp, locked to 45 FPS
-				  45 FPS ASW - Always use Asynchronous SpaceWarp, locked to 45 FPS
+	    Oculus only! Adjust how the game handles low framerates.
+	      
+	        Options:
+	              Default - Don't mess with the Oculus default.
+	              Disabled - use Asynchronous TimeWarp (works at any FPS) instead of Asynchronous SpaceWarp (recommended).
+	              Enabled - use Asynchronous SpaceWarp at 45 FPS whenever FPS drops below 90 FPS.
+	              45 FPS ATW - Always use Asynchronous TimeWarp, locked to 45 FPS
+	              45 FPS ASW - Always use Asynchronous SpaceWarp, locked to 45 FPS
 	              
 	  3D Guis-	  The in game GUIS can look flat - enabling this setting adds some
 	          depth.  May be disabled if effect is disagreeable.

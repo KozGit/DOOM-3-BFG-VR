@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 idCVar vr_hmdPerfHud( "vr_hmdPerfHud", "0", CVAR_INTEGER, "Oculus Performance HUD.\n 0 Off\n 1 Latency Timing\n 2 RenderTiming\n 3 Perf Headroom\n 4 Version\n 6 Async Timewarp\n", 0, 7 );
 // Koz end
-idCVar vr_asw( "vr_asw", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Oculus Asynchronous SpaceWarp. 0 = force off (hack), 1 = enabled, 2 = 45 FPS ATW, 3 = 45 FPS ASW", 0, 3 );
+idCVar vr_asw( "vr_asw", "0", CVAR_INTEGER | CVAR_ARCHIVE, "Oculus Asynchronous SpaceWarp. -1 = force off (hack), 0 = default (don't interfere), 1 = enabled (hack), 2 = 45 FPS ATW (hack), 3 = 45 FPS ASW (hack)", -1, 3 );
 
 #define	CON_TEXTSIZE			0x30000
 #define	NUM_CON_TIMES			4
@@ -1596,6 +1596,7 @@ ForceFullScreen is used by the editor
 */
 void idConsoleLocal::Draw( bool forceFullScreen )
 {
+
 	Resize();
 	
 	if( forceFullScreen )
@@ -1663,8 +1664,9 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 		vr_hmdPerfHud.ClearModified();
 	}
 	// Koz end
-	if (vr_asw.IsModified())
+	if ( vr_asw.IsModified() )
 	{
+		vr_asw.ClearModified();
 		INPUT i[4];
 		i[0].type = INPUT_KEYBOARD;
 		i[0].ki.dwFlags = KEYEVENTF_SCANCODE;
@@ -1675,12 +1677,12 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 		i[1] = i[0];
 		switch (vr_asw.GetInteger())
 		{
-		case 0:
-		default:
+		case -1:
 			i[1].ki.wVk = VK_NUMPAD1;
 			i[1].ki.wScan = 0x4F;
 			break;
 		case 1:
+		default:
 			i[1].ki.wVk = VK_NUMPAD4;
 			i[1].ki.wScan = 0x4B;
 			break;
