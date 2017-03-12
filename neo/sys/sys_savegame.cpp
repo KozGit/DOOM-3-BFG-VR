@@ -247,6 +247,7 @@ void idSaveGameDetails::Clear()
 {
 	descriptors.Clear();
 	damaged = false;
+	isRBDoom = false; // Carl
 	date = 0;
 	slotName[0] = '\0';
 }
