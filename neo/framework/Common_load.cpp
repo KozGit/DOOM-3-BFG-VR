@@ -1013,6 +1013,7 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	gameDetails.descriptors.Set( SAVEGAME_DETAIL_FIELD_LANGUAGE, sys_lang.GetString() );
 	gameDetails.descriptors.SetInt( SAVEGAME_DETAIL_FIELD_CHECKSUM, ( int )gameDetails.descriptors.Checksum() );
 	
+	gameDetails.isRBDoom = false; // Carl
 	gameDetails.slotName = saveName;
 	ScrubSaveGameFileName( gameDetails.slotName );
 	
