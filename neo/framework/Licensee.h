@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 ===============================================================================
 */
 
-#define GAME_NAME						"DOOM 3 BFG VR: Fully Possessed"		// appears on window titles and errors
+#define GAME_NAME						"DOOM 3 BFG VR: Fully Possessed"		// appears on window titles and errors, and identifies saved game versions
 
 // RB: changed home folder so we don't break the savegame of the original game
 // Koz: changed to indicate VR version of game.

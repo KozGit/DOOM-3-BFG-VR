@@ -1022,13 +1022,101 @@ void idRestoreGame::RestoreObjects()
 	// restore all the objects
 	for( i = 1; i < objects.Num(); i++ )
 	{
-		CallRestore_r( objects[ i ]->GetType(), objects[ i ] );
+		//int start = file->Tell(); //Carl debug
+		if (objects[i])
+		{
+			CallRestore_r( objects[ i ]->GetType(), objects[ i ] );
+			//int end = file->Tell(); //Carl debug
+			//common->Printf("%d: %s::Restore() %d bytes, %d\n", i, objects[i]->GetType()->classname, end - start, start); //Carl debug
+		}
+		else
+		{
+			// Carl: If the object was a thread that we had to delete due to loading old savegame with bad scripts, read the dummy information manually
+			// copied from idScript::Restore
+			//common->Warning("objects[%d] is NULL\n", i);
+			int threadNum, waitingFor, waitingUntil, lastExecuteTime, creationTime;
+			idClass* waitingForThread;
+			idInterpreter interpreter;
+			idDict spawnArgs;
+			idStr threadName;
+			bool manualControl;
+
+
+			ReadInt(threadNum);
+
+			ReadObject(reinterpret_cast<idClass*&>(waitingForThread));
+			ReadInt(waitingFor);
+			ReadInt(waitingUntil);
+
+			// interpreter.Restore(this);
+			prstack_t			callStack[MAX_STACK_DEPTH];
+			int 				callStackDepth;
+			int 				maxStackDepth;
+			int i;
+			idStr funcname;
+			int func_index;
+			byte				localstack[LOCALSTACK_SIZE];
+			int 				localstackUsed;
+			int 				localstackBase;
+			int 				maxLocalstackUsed;
+			int 				instructionPointer;
+			int					popParms;
+			idClass*			eventEntity;
+			idClass*			thread;
+			bool				doneProcessing;
+			bool				threadDying;
+			bool				terminateOnExit;
+			bool				debug;
+
+			ReadInt(callStackDepth);
+			for (i = 0; i < callStackDepth; i++)
+			{
+				ReadInt(callStack[i].s);
+
+				ReadInt(func_index);
+
+				ReadInt(callStack[i].stackbase);
+			}
+			ReadInt(maxStackDepth);
+
+			ReadInt(localstackUsed);
+			Read(&localstack, localstackUsed);
+
+			ReadInt(localstackBase);
+			ReadInt(maxLocalstackUsed);
+
+			ReadInt(func_index);
+			ReadInt(instructionPointer);
+
+			ReadInt(popParms);
+
+			ReadString(funcname);
+
+			ReadObject(reinterpret_cast<idClass*&>(eventEntity));
+			ReadObject(reinterpret_cast<idClass*&>(thread));
+
+			ReadBool(doneProcessing);
+			ReadBool(threadDying);
+			ReadBool(terminateOnExit);
+			ReadBool(debug);
+			// end interpreter.Restore(this);
+
+			ReadDict(&spawnArgs);
+			ReadString(threadName);
+
+			ReadInt(lastExecuteTime);
+			ReadInt(creationTime);
+
+			ReadBool(manualControl);
+			//int end = file->Tell(); //Carl debug
+			//common->Printf("%d: Dummy idThread::Restore(NULL) %d bytes, %d\n", i, end - start, start); //Carl debug
+		}
 	}
 	
 	// regenerate render entities and render lights because are not saved
 	for( i = 1; i < objects.Num(); i++ )
 	{
-		if( objects[ i ]->IsType( idEntity::Type ) )
+		if( objects[ i ] != NULL && objects[ i ]->IsType( idEntity::Type ) )
 		{
 			idEntity* ent = static_cast<idEntity*>( objects[ i ] );
 			ent->UpdateVisuals();
@@ -1187,6 +1275,7 @@ void idRestoreGame::ReadString( idStr& string )
 {
 	string.Empty();
 	
+	//int start = file->Tell(); //Carl debug
 	int offset = -1;
 	ReadInt( offset );
 	
@@ -1198,6 +1287,8 @@ void idRestoreGame::ReadString( idStr& string )
 	stringFile->Seek( offset, FS_SEEK_SET );
 	stringFile->ReadString( string );
 	
+	//common->Printf("ReadString(\"%s\") 4 bytes, %d\n", string.c_str(), start ); //Carl debug
+
 	return;
 }
 
@@ -1295,6 +1386,7 @@ idRestoreGame::ReadObject
 */
 void idRestoreGame::ReadObject( idClass*& obj )
 {
+	int start = file->Tell(); //Carl debug
 	int index;
 	
 	ReadInt( index );
@@ -1303,6 +1395,10 @@ void idRestoreGame::ReadObject( idClass*& obj )
 		Error( "idRestoreGame::ReadObject: invalid object index" );
 	}
 	obj = objects[ index ];
+	//if (obj)
+	//	common->Printf("ReadObject(%s) 4 bytes, %d\n", obj->GetClassname(), start); //Carl debug
+	//else
+	//	common->Printf("ReadObject(NULL) 4 bytes, %d\n", start); //Carl debug
 }
 
 /*
@@ -1322,6 +1418,7 @@ idRestoreGame::ReadDict
 */
 void idRestoreGame::ReadDict( idDict* dict )
 {
+	//int start = file->Tell(); //Carl debug
 	int num;
 	int i;
 	idStr key;
@@ -1343,6 +1440,9 @@ void idRestoreGame::ReadDict( idDict* dict )
 			dict->Set( key, value );
 		}
 	}
+	//int end = file->Tell();
+	//common->Printf("ReadDict() %d bytes, %d\n", end-start, start); //Carl debug
+	//dict->Print();
 }
 
 /*

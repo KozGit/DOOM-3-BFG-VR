@@ -268,7 +268,7 @@ void idMenuScreen_Shell_Singleplayer::ContinueGame()
 		else
 		{
 			const idStr& name = sortedSaves[ 0 ].slotName;
-			cmdSystem->AppendCommandText( va( "loadgame %s\n", name.c_str() ) );
+			cmdSystem->AppendCommandText( va( "loadgame %s %d\n", name.c_str(), sortedSaves[ 0 ].isRBDoom ) );
 		}
 	}
 }

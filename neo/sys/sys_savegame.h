@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 
 #define DEFINE_CLASS( x )					virtual const char * Name() const { return #x; }
-#define MAX_SAVEGAMES						16
+#define MAX_SAVEGAMES						32
 #define MAX_FILES_WITHIN_SAVEGAME			10
 #define MIN_SAVEGAME_SIZE_BYTES				( 4 * 1024 * 1024 )
 #define MAX_SAVEGAME_STRING_TABLE_SIZE		400 * 1024	// 400 kB max string table size
@@ -161,6 +161,7 @@ public:
 		descriptors.Clear();
 		descriptors = other.descriptors;
 		damaged = other.damaged;
+		isRBDoom = other.isRBDoom;
 		date = other.date;
 		slotName = other.slotName;
 		return *this;
@@ -202,7 +203,7 @@ public:
 	
 public:
 	idDict				descriptors;						// [in] Descriptors available to be shown on the save/load screen.  Each game can define their own, e.g. Difficulty, level, map, score, time.
-	bool				damaged;							// [out]
+	bool				damaged, isRBDoom;			// [out]
 	time_t				date;								// [out] read from the filesystem, not set by client
 	idStrStatic< MAX_FOLDER_NAME_LENGTH >	slotName;		// [out] folder/slot name, e.g. AUTOSAVE
 };

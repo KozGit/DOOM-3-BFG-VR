@@ -135,7 +135,8 @@ idFile_SaveGamePipelined::idFile_SaveGamePipelined() :
 	compressThread( NULL ),
 	blockFinished( true ),
 	buildVersion( "" ),
-	saveFormatVersion( 0 )
+	saveFormatVersion( 0 ),
+	offset( 0 ) //Carl debug
 {
 
 	memset( &zStream, 0, sizeof( zStream ) );
@@ -377,6 +378,7 @@ bool idFile_SaveGamePipelined::OpenForWriting( const char* const filename, bool 
 	mode = WRITE;
 	nativeFile = NULL;
 	numChecksums = 0;
+	offset = 0; //Carl debug
 	
 	if( useNativeFile )
 	{
@@ -445,6 +447,7 @@ bool idFile_SaveGamePipelined::OpenForWriting( idFile* file )
 	mode = WRITE;
 	nativeFile = file;
 	numChecksums = 0;
+	offset = 0;
 	
 	
 	// raw deflate with no header / checksum
@@ -767,6 +770,7 @@ int idFile_SaveGamePipelined::Write( const void* buffer, int length )
 			FlushUncompressedBlock();
 		}
 	}
+	offset += length;
 	return length;
 }
 
@@ -792,6 +796,7 @@ bool idFile_SaveGamePipelined::OpenForReading( const char* const filename, bool 
 	mode = READ;
 	nativeFile = NULL;
 	numChecksums = 0;
+	offset = 0;
 	
 	if( useNativeFile )
 	{
@@ -851,6 +856,7 @@ bool idFile_SaveGamePipelined::OpenForReading( idFile* file )
 	mode = READ;
 	nativeFile = file;
 	numChecksums = 0;
+	offset = 0;
 	
 	// init zlib for raw inflate with a 32k dictionary
 	//mem.PushHeap();
@@ -1192,6 +1198,7 @@ int idFile_SaveGamePipelined::Read( void* buffer, int length )
 		ioCount += copyFromBlock;
 		lengthRemaining -= copyFromBlock;
 	}
+	offset += ioCount;
 	return ioCount;
 }
 

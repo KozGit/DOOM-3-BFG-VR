@@ -187,6 +187,7 @@ public:
 private:
 	idFile* 		file;
 	idFile* 		stringFile;
+public:
 	idList<idClass*, TAG_SAVEGAMES>		objects;
 	int						version;
 	int						stringTableOffset;

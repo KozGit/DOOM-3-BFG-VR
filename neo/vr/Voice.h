@@ -60,7 +60,8 @@ public:
 	void		AddFlicksyncLine(const char* line);
 	void		AddFlicksyncLine(const wchar_t* line);
 
-	float currentVolume;
+	float currentVolume; // 0 to 1
+	float maxVolume; // max volume since sound started: 0 to 1
 	//---------------------------
 private:
 	

@@ -1910,7 +1910,9 @@ public:
 			
 			RENDERING_OPTIONS_FIELD_PIXEL_DENSITY, 
 			RENDERING_OPTIONS_FIELD_MSAALEVEL,
+			RENDERING_OPTIONS_FIELD_ASW,
 			RENDERING_OPTIONS_FIELD_3DGUIS,
+			RENDERING_OPTIONS_FIELD_CHAPERONE,
 			MAX_RENDERING_OPTION_FIELDS
 		};
 
@@ -1936,7 +1938,9 @@ public:
 	private:
 		float	originalPixelDensity;
 		int		originalMSAAlevel;
+		int		originalASW;
 		int		original3DGuis;
+		int		originalChaperone;
 		
 	};
 
@@ -2212,7 +2216,6 @@ public:
 			SAFETY_PROTOCOLS_FIELD_SNAP_TURNS,
 			SAFETY_PROTOCOLS_FIELD_WALK_SPEED_ADJUST,
 			SAFETY_PROTOCOLS_FIELD_MOTION_SICKNESS,
-			SAFETY_PROTOCOLS_FIELD_CHAPERONE,
 			SAFETY_PROTOCOLS_FIELD_KNOCKBACK,
 			SAFETY_PROTOCOLS_FIELD_HEADBOB,
 			SAFETY_PROTOCOLS_FIELD_SHAKE_AMPLITUDE,
@@ -2239,7 +2242,6 @@ public:
 		bool						IsRestartRequired() const;
 
 	private:
-		int	originalChaperone;
 		int	originalTeleport;
 		int	originalTeleportMode;
 		int	originalMotionSickness;

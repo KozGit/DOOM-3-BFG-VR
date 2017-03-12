@@ -34,6 +34,7 @@ const static int NUM_VR_RENDERING_OPTIONS = 8;
 extern idCVar vr_pixelDensity;
 extern idCVar vr_3dgui;
 extern idCVar r_multiSamples;
+extern idCVar vr_asw;
 
 
 float LinearAdjust( const float input, const float currentMin, const float currentMax, const float desiredMin,  float desiredMax );
@@ -88,12 +89,28 @@ void idMenuScreen_Shell_VR_Rendering_Options::Initialize( idMenuHandler * data )
 
 	control = new (TAG_SWF) idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "Asynchronous SpaceWarp" ); // Asynchronous SpaceWarp
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_ASW );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_ASW );
+	options->AddChild( control );
+
+	control = new (TAG_SWF) idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "3D Guis" ); // Antialiasing
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_3DGUIS );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_3DGUIS );
 	options->AddChild( control );
-		
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType(OPTION_SLIDER_TEXT);
+	control->SetLabel("Chaperone");
+	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_CHAPERONE);
+	control->SetupEvents(DEFAULT_REPEAT_TIME, options->GetChildren().Num());
+	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Rendering_Options::RENDERING_OPTIONS_FIELD_CHAPERONE);
+	options->AddChild(control);
+
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN_RELEASE ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_STOP_REPEATER, WIDGET_EVENT_SCROLL_DOWN_RELEASE ) );
@@ -302,7 +319,9 @@ void idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 	originalPixelDensity = vr_pixelDensity.GetFloat();
 	original3DGuis = vr_3dgui.GetBool();
 	originalMSAAlevel = r_multiSamples.GetInteger();
-			
+	originalASW = vr_asw.GetInteger();
+	originalChaperone = vr_chaperone.GetInteger();
+
 }
 
 /*
@@ -354,12 +373,28 @@ void idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 			break;
 		}
 		
+		case RENDERING_OPTIONS_FIELD_ASW: {
+			static const int numValues = 5;
+			static const int values[numValues] = { 0, -1, 1, 2, 3 };
+			vr_asw.SetInteger( AdjustOption( vr_asw.GetInteger(), values, numValues, adjustAmount ) );
+			break;
+		}
+
 		case RENDERING_OPTIONS_FIELD_3DGUIS: {
 			static const int numValues = 2;
 			static const int values[numValues] = { 0, 1 };
 			vr_3dgui.SetInteger( AdjustOption( vr_3dgui.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
+
+		case RENDERING_OPTIONS_FIELD_CHAPERONE:
+		{
+			static const int numValues = 4;
+			static const int values[numValues] = { 0, 1, 2, 4 };
+			vr_chaperone.SetInteger( AdjustOption( vr_chaperone.GetInteger(), values, numValues, adjustAmount ) );
+			break;
+		}
+
 	}
 	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
 }
@@ -388,7 +423,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_V
 			
 		}
 		
-		case RENDERING_OPTIONS_FIELD_MSAALEVEL:
+		case RENDERING_OPTIONS_FIELD_MSAALEVEL: {
 			
 			const int lev = r_multiSamples.GetInteger();
 
@@ -400,7 +435,22 @@ idSWFScriptVar idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_V
 			{
 				return va( "%dx", r_multiSamples.GetInteger() );
 			}
-		
+		}
+
+		case RENDERING_OPTIONS_FIELD_ASW: {
+			const char* s[5] = { "#str_swf_disabled", "Default", "#str_swf_enabled", "45 FPS ATW", "45 FPS ASW" };
+			if (vr_asw.GetInteger() > 3)
+				return "error";
+			else
+				return s[vr_asw.GetInteger() + 1];
+		}
+
+		case RENDERING_OPTIONS_FIELD_CHAPERONE:
+		{
+			const char* names[] = { "Near", "Throwing", "Melee", "Dodging", "Always" };
+			return names[vr_chaperone.GetInteger()];
+		}
+
 	}
 	return false;
 }
@@ -423,6 +473,14 @@ bool idMenuScreen_Shell_VR_Rendering_Options::idMenuDataSource_Shell_VR_Renderin
 	if ( originalMSAAlevel != r_multiSamples.GetInteger() ) {
 		return true;
 	}
-			
+
+	if ( originalASW != vr_asw.GetInteger() ) {
+		return true;
+	}
+
+	if ( originalChaperone != vr_chaperone.GetInteger() ) {
+		return true;
+	}
+
 	return false;
 }

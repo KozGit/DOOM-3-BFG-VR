@@ -529,6 +529,16 @@ void idWeapon::Restore( idRestoreGame* savefile )
 	savefile->ReadInt( animDoneTime );
 	savefile->ReadBool( isLinked );
 	
+	bool loadScriptFailed = false;
+	if (!thread)
+	{
+		loadScriptFailed = true;
+		thread = new idThread();
+		thread->ManualDelete();
+		thread->ManualControl();
+	}
+
+
 	// Re-link script fields
 	WEAPON_ATTACK.LinkTo(	scriptObject, "WEAPON_ATTACK" );
 	WEAPON_RELOAD.LinkTo(	scriptObject, "WEAPON_RELOAD" );
@@ -538,6 +548,9 @@ void idWeapon::Restore( idRestoreGame* savefile )
 	WEAPON_RAISEWEAPON.LinkTo(	scriptObject, "WEAPON_RAISEWEAPON" );
 	WEAPON_LOWERWEAPON.LinkTo(	scriptObject, "WEAPON_LOWERWEAPON" );
 	
+	if (loadScriptFailed)
+		ConstructScriptObject();
+
 	savefile->ReadObject( reinterpret_cast<idClass*&>( owner ) );
 	worldModel.Restore( savefile );
 	
@@ -754,11 +767,75 @@ void idWeapon::Restore( idRestoreGame* savefile )
 	}
 
 	// koz begin
-	for ( int i = 0; i < 2; i++ )
+	if( savefile->version >= BUILD_NUMBER_FULLY_POSSESSED )
 	{
-		savefile->ReadJoint( weaponHandAttacher[i] );
-		savefile->ReadVec3( weaponHandDefaultPos[i] );
-		savefile->ReadMat3( weaponHandDefaultAxis[i] );
+		for ( int i = 0; i < 2; i++ )
+		{
+			savefile->ReadJoint( weaponHandAttacher[i] );
+			savefile->ReadVec3( weaponHandDefaultPos[i] );
+			savefile->ReadMat3( weaponHandDefaultAxis[i] );
+		}
+	}
+	else
+	{
+		// koz get jointhandles for hand attachers
+		if (game->isVR)
+		{
+			weaponHandAttacher[0] = animator.GetJointHandle("RhandAttacher");
+			if (weaponHandAttacher[0] != INVALID_JOINT)
+			{
+				// koz debug common->Printf( "Weapon %s RhandAttacherJoint Found\n", objectname );
+				animator.GetJointTransform(weaponHandAttacher[0], gameLocal.time, weaponHandDefaultPos[0], weaponHandDefaultAxis[0]);
+				// koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[0].ToString(), weaponHandDefaultAxis[0].ToAngles().ToString() );
+			}
+
+			weaponHandAttacher[1] = animator.GetJointHandle("LhandAttacher");
+			if (weaponHandAttacher[1] != INVALID_JOINT)
+			{
+				// koz debug common->Printf( "Weapon %s LhandAttacherJoint Found\n", objectname );
+				animator.GetJointTransform(weaponHandAttacher[1], gameLocal.time, weaponHandDefaultPos[1], weaponHandDefaultAxis[1]);
+				// koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[1].ToString(), weaponHandDefaultAxis[1].ToAngles().ToString() );
+			}
+		}
+
+		// re-init the weapon model if we're loading this savegame from a different mod
+		memset(&renderEntity, 0, sizeof(renderEntity));
+			renderEntity.numJoints = animator.NumJoints();
+		animator.GetJoints(&renderEntity.numJoints, &renderEntity.joints);
+		renderEntity.hModel = animator.ModelHandle();
+		if (renderEntity.hModel)
+		{
+			renderEntity.hModel->Reset();
+			renderEntity.bounds = renderEntity.hModel->Bounds(&renderEntity);
+		}
+		renderEntity.shaderParms[SHADERPARM_RED] = 1.0f;
+		renderEntity.shaderParms[SHADERPARM_GREEN] = 1.0f;
+		renderEntity.shaderParms[SHADERPARM_BLUE] = 1.0f;
+		renderEntity.shaderParms[3] = 1.0f;
+		renderEntity.shaderParms[SHADERPARM_TIMEOFFSET] = 0.0f;
+		renderEntity.shaderParms[5] = 0.0f;
+		renderEntity.shaderParms[6] = 0.0f;
+		renderEntity.shaderParms[7] = 0.0f;
+
+		// re-init the weapon model if we're loading this savegame from a different mod
+		renderEntity_t &r = *(worldModel->GetRenderEntity());
+		memset(&r, 0, sizeof(r));
+		r.numJoints = animator.NumJoints();
+		animator.GetJoints(&r.numJoints, &r.joints);
+		r.hModel = animator.ModelHandle();
+		if (r.hModel)
+		{
+			r.hModel->Reset();
+			r.bounds = r.hModel->Bounds(&r);
+		}
+		r.shaderParms[SHADERPARM_RED] = 1.0f;
+		r.shaderParms[SHADERPARM_GREEN] = 1.0f;
+		r.shaderParms[SHADERPARM_BLUE] = 1.0f;
+		r.shaderParms[3] = 1.0f;
+		r.shaderParms[SHADERPARM_TIMEOFFSET] = 0.0f;
+		r.shaderParms[5] = 0.0f;
+		r.shaderParms[6] = 0.0f;
+		r.shaderParms[7] = 0.0f;
 	}
 
 	// gui for stats device on player wrist in VR. 
@@ -4793,7 +4870,7 @@ void idWeapon::Event_LaunchProjectiles( int num_projectiles, float spread, float
 	if( !silent_fire )
 	{
 		// wake up nearby monsters
-		gameLocal.AlertAI( owner );
+		gameLocal.AlertAI( owner, AI_HEARING_RANGE );
 	}
 	
 	// set the shader parm to the time of last projectile firing,
@@ -5030,7 +5107,7 @@ void idWeapon::Event_LaunchProjectilesEllipse( int num_projectiles, float spread
 		if( !silent_fire )
 		{
 			// wake up nearby monsters
-			gameLocal.AlertAI( owner );
+			gameLocal.AlertAI( owner, AI_HEARING_RANGE );
 		}
 		
 	}

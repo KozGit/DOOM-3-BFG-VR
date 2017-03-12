@@ -1109,10 +1109,16 @@ void idScriptObject::Restore( idRestoreGame* savefile )
 	// RB end
 	if( size != type->Size() )
 	{
-		savefile->Error( "idScriptObject::Restore: size of object '%s' doesn't match size in save game.", typeName.c_str() );
+		void *temp = malloc( size );
+		savefile->Read( temp, size );
+		free( temp );
+		common->Warning( "idScriptObject::Restore: size of object '%s' (%d) doesn't match size in save game (%d). Script object will be zeroed.", typeName.c_str(), type->Size(), size );
+	}
+	else
+	{
+		savefile->Read( data, size );
 	}
 	
-	savefile->Read( data, size );
 }
 
 /*

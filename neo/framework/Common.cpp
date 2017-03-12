@@ -1678,15 +1678,22 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		Sys_Error( "Error during initialization" );
 	}
 
+	extern idCVar vr_asw;
 	// koz
-	if ( game->isVR ) // koz override these for VR
+	if (game->isVR) // koz override these for VR
 	{
-		cvarSystem->SetCVarString( "r_swapInterval", "0" );
-		cvarSystem->SetCVarInteger( "com_engineHz", commonVr->hmdHz );
+		cvarSystem->SetCVarString("r_swapInterval", "0");
+		cvarSystem->SetCVarInteger("com_engineHz", commonVr->hmdHz);
 		com_engineHz_denominator = 100LL * commonVr->hmdHz;
 		com_engineHz_latched = commonVr->hmdHz;
 
+		if (vr_asw.GetInteger() != 0)
+			vr_asw.SetModified();
+		else
+			vr_asw.ClearModified();
 	}
+	else
+		vr_asw.ClearModified();
 
 }
 

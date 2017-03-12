@@ -801,7 +801,10 @@ void idEntity::Restore( idRestoreGame* savefile )
 	// spawnNode and activeNode are restored by gameLocal
 	savefile->ReadDict( &spawnArgs );
 	savefile->ReadString( name );
-	SetName( name );
+	if ( name == "vrTeleportTarget" && gameLocal.FindEntity("vrTeleportTarget") )
+		SetName( "vrTeleportTarget2" );
+	else
+		SetName( name );
 	
 	scriptObject.Restore( savefile );
 	
@@ -6205,6 +6208,21 @@ unarchives object from save game file
 */
 void idAnimatedEntity::Restore( idRestoreGame* savefile )
 {
+	// If it's from RBDoom, then the spawnArgs are missing values that we need.
+	// So add the values from our mod that are missing in the restored spawnArgs
+	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED && IsType(idPlayer::Type))
+	{
+		common->Printf("Player GetEntityDefName = %s\n", GetEntityDefName());
+		const idDict* modSpawnArgs = gameLocal.FindEntityDefDict("player_doommarine");
+		if (modSpawnArgs)
+		{
+			idDict newSpawnArgs;
+			newSpawnArgs = *modSpawnArgs;
+			newSpawnArgs.Copy(spawnArgs);
+			spawnArgs = newSpawnArgs;
+		}
+	}
+
 	animator.Restore( savefile );
 	
 	// check if the entity has an MD5 model

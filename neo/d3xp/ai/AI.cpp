@@ -3777,7 +3777,7 @@ bool idAI::Pain( idEntity* inflictor, idEntity* attacker, int damage, const idVe
 			actor = ( idActor* )attacker;
 			if( ReactionTo( actor ) & ATTACK_ON_DAMAGE )
 			{
-				gameLocal.AlertAI( actor );
+				gameLocal.AlertAI( actor, AI_HEARING_RANGE );
 				SetEnemy( actor );
 			}
 		}
@@ -3930,7 +3930,7 @@ void idAI::Killed( idEntity* inflictor, idEntity* attacker, int damage, const id
 	
 	if( attacker && attacker->IsType( idActor::Type ) )
 	{
-		gameLocal.AlertAI( ( idActor* )attacker );
+		gameLocal.AlertAI( ( idActor* )attacker, AI_HEARING_RANGE );
 	}
 	
 	// activate targets
@@ -4519,7 +4519,7 @@ void idAI::UpdateEnemyPosition()
 		if( enemyEnt == gameLocal.GetAlertEntity() )
 		{
 			float dist = ( enemyEnt->GetPhysics()->GetOrigin() - org ).LengthSqr();
-			if( dist < Square( AI_HEARING_RANGE ) )
+			if( dist < gameLocal.lastAIAlertDistanceAudibleSquared )
 			{
 				SetEnemyPosition();
 			}

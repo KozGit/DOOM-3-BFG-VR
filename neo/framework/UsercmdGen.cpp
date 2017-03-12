@@ -1653,11 +1653,27 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		return;
 	}
 
-	if ( commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && vr_movePoint.GetInteger() == 1 && ( abs( cmd.forwardmove ) >= .1 || abs( cmd.rightmove ) >= .1) ) // body will follow motion from move vector
+	if ( commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && ( vr_movePoint.GetInteger() == 1 || vr_movePoint.GetInteger() > 2 ) && ( abs( cmd.forwardmove ) >= .1 || abs( cmd.rightmove ) >= .1) ) // body will follow motion from move vector
 	{
 		static idAngles controllerAng;
+		int hand;
+		switch( vr_movePoint.GetInteger() )
+		{
+			case 1: // off hand
+				hand = 1 - vr_weaponHand.GetInteger();
+				break;
+			case 3: // weapon hand
+				hand = vr_weaponHand.GetInteger();
+				break;
+			case 4:
+				hand = 1; // left hand
+				break;
+			case 5:
+				hand = 0; // right hand
+				break;
+		}
 
-		controllerAng = commonVr->poseHandRotationAngles[1 - vr_weaponHand.GetInteger()];
+		controllerAng = commonVr->poseHandRotationAngles[hand];
 
 		viewangles[YAW] += controllerAng.yaw - commonVr->bodyMoveAng;
 		commonVr->bodyMoveAng = controllerAng.yaw;

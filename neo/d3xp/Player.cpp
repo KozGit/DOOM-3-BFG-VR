@@ -1546,6 +1546,7 @@ idPlayer::idPlayer():
 	handGrabbingWorld[1] = false;
 
 	warpMove				= false;
+	warpAim					= false;
 	warpVel					= vec3_zero;
 	noclip					= false;
 	godmode					= false;
@@ -2339,6 +2340,13 @@ void idPlayer::InitTeleportTarget()
 	teleportTarget.GetEntity()->SetModel( "telepad1" );
 	teleportTarget.GetEntity()->SetOrigin( origin );
 	teleportTarget.GetEntity()->SetAxis( GetPhysics()->GetAxis() );
+
+	idAnimatedEntity *duplicate;
+	if (duplicate = (idAnimatedEntity*)gameLocal.FindEntity("vrTeleportTarget2"))
+	{
+		common->Warning("Loading game which had a duplicate vrTeleportTarget.");
+		duplicate->PostEventMS(&EV_Remove, 0);
+	}
 	
 	teleportTargetAnimator = teleportTarget.GetEntity()->GetAnimator();
 	targetAnim = teleportTargetAnimator->GetAnim( "idle" );
@@ -3128,17 +3136,33 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	savefile->ReadInt( weapon_bloodstone_active3 );
 
 	// koz
-	savefile->ReadInt( weapon_pistol );
-	savefile->ReadInt( weapon_shotgun );
-	savefile->ReadInt( weapon_shotgun_double );
-	savefile->ReadInt( weapon_machinegun );
-	savefile->ReadInt( weapon_chaingun );
-	savefile->ReadInt( weapon_handgrenade );
-	savefile->ReadInt( weapon_plasmagun );
-	savefile->ReadInt( weapon_rocketlauncher );
-	savefile->ReadInt( weapon_bfg );
-	savefile->ReadInt( weapon_flashlight_new );
-	savefile->ReadInt( weapon_grabber );
+	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
+	{
+		savefile->ReadInt( weapon_pistol );
+		savefile->ReadInt( weapon_shotgun );
+		savefile->ReadInt( weapon_shotgun_double );
+		savefile->ReadInt( weapon_machinegun );
+		savefile->ReadInt( weapon_chaingun );
+		savefile->ReadInt( weapon_handgrenade );
+		savefile->ReadInt( weapon_plasmagun );
+		savefile->ReadInt( weapon_rocketlauncher );
+		savefile->ReadInt( weapon_bfg );
+		savefile->ReadInt( weapon_flashlight_new );
+		savefile->ReadInt( weapon_grabber );
+	}
+	else
+	{
+		weapon_grabber = 1;
+		weapon_pistol = 2;
+		weapon_shotgun = 3;
+		weapon_shotgun_double = 4;
+		weapon_machinegun = 5;
+		weapon_chaingun = 6;
+		weapon_handgrenade = 7;
+		weapon_plasmagun = 8;
+		weapon_bfg = 9;
+		weapon_flashlight_new = 17;
+	}
 	// koz end
 
 	
@@ -3205,30 +3229,181 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	savefile->ReadJoint( headJoint );
 
 	//koz begin
-	savefile->ReadJoint( neckJoint );
-	savefile->ReadJoint( chestPivotJoint );
-
-	for ( i = 0; i < 2; i++ )
+	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
 	{
-		savefile->ReadJoint( ik_hand[i] );
-		savefile->ReadJoint( ik_elbow[i] );
-		savefile->ReadJoint( ik_shoulder[i] );
-		savefile->ReadJoint( ik_handAttacher[i] );
-	}
+		savefile->ReadJoint( neckJoint );
+		savefile->ReadJoint( chestPivotJoint );
 
-	for ( i = 0; i < 2; i++ )
-	{
-		for ( int j = 0; j < 32; j++ )
+		for ( i = 0; i < 2; i++ )
 		{
-			savefile->ReadMat3( ik_handCorrectAxis[i][j] );
-			savefile->ReadVec3( handWeaponAttachertoWristJointOffset[i][j] );
-			savefile->ReadVec3( handWeaponAttacherToDefaultOffset[i][j] );
+			savefile->ReadJoint( ik_hand[i] );
+			savefile->ReadJoint( ik_elbow[i] );
+			savefile->ReadJoint( ik_shoulder[i] );
+			savefile->ReadJoint( ik_handAttacher[i] );
+		}
+
+		for ( i = 0; i < 2; i++ )
+		{
+			for ( int j = 0; j < 32; j++ )
+			{
+				savefile->ReadMat3( ik_handCorrectAxis[i][j] );
+				savefile->ReadVec3( handWeaponAttachertoWristJointOffset[i][j] );
+				savefile->ReadVec3( handWeaponAttacherToDefaultOffset[i][j] );
+			}
+		}
+
+		savefile->ReadBool( handLowered );
+		savefile->ReadBool( handRaised );
+		savefile->ReadBool( commonVr->handInGui );
+	}
+	else
+	{
+		idStr value = spawnArgs.GetString("bone_neck", "");
+		neckJoint = animator.GetJointHandle(value);
+		if (neckJoint == INVALID_JOINT)
+		{
+			gameLocal.Error("Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str());
+		}
+
+		value = spawnArgs.GetString("bone_chest_pivot", "");
+		chestPivotJoint = animator.GetJointHandle(value);
+		if (chestPivotJoint == INVALID_JOINT)
+		{
+			gameLocal.Error("Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str());
+		}
+
+		// we need to load the starting joint orientations for the hands so we can compute correct offsets later
+		value = spawnArgs.GetString("ik_hand1", ""); // right hand
+		ik_hand[0] = animator.GetJointHandle(value);
+		if (ik_hand[0] == INVALID_JOINT)
+		{
+			value = "Rhand1";
+			ik_hand[0] = animator.GetJointHandle(value);
+			if (ik_hand[0] == INVALID_JOINT)
+			{
+				gameLocal.Error("Joint '%s' not found for 'ik_hand1' on '%s'", value, name.c_str());
+			}
+		}
+
+		value = spawnArgs.GetString("ik_hand2", "");// left hand
+		ik_hand[1] = animator.GetJointHandle(value);
+		if (ik_hand[1] == INVALID_JOINT)
+		{
+			value = "Lhand1";
+			ik_hand[1] = animator.GetJointHandle(value);
+			if (ik_hand[1] == INVALID_JOINT)
+			{
+				gameLocal.Error("Joint '%s' not found for 'ik_hand2' on '%s'", value, name.c_str());
+			}
+		}
+
+		ik_handAttacher[0] = animator.GetJointHandle("RhandWeap");
+		if (ik_handAttacher[0] == INVALID_JOINT)
+		{
+			gameLocal.Error("Joint RhandWeap not found for player anim default\n");
+		}
+
+		ik_handAttacher[1] = animator.GetJointHandle("LhandWeap");
+
+		if (ik_handAttacher[1] == INVALID_JOINT)
+		{
+			gameLocal.Error("Joint LhandWeap not found for player anim default\n");
+		}
+
+		idStr animPre = "default";// this is the anim that has the default/normal hand and weapon attacher orientations (relationsh
+
+		int animNo = animator.GetAnim(animPre.c_str());
+		if (animNo == 0)
+		{
+			gameLocal.Error("Player default animation not found\n");
+		}
+
+		int numJoints = animator.NumJoints();
+
+		idJointMat* joints = (idJointMat*)_alloca16(numJoints * sizeof(joints[0]));
+
+		// create the idle default pose ( in this case set to default which should tranlsate to pistol_idle )
+		gameEdit->ANIM_CreateAnimFrame(animator.ModelHandle(), animator.GetAnim(animNo)->MD5Anim(0), numJoints, joints, 1, animator.ModelDef()->GetVisualOffset() + modelOffset, animator.RemoveOrigin());
+
+
+
+		static idVec3 defaultWeapAttachOff[2]; // the default distance between the weapon attacher and the hand joint;
+		defaultWeapAttachOff[0] = joints[ik_handAttacher[0]].ToVec3() - joints[ik_hand[0]].ToVec3(); // default 
+		defaultWeapAttachOff[1] = joints[ik_handAttacher[1]].ToVec3() - joints[ik_hand[1]].ToVec3();
+
+		jointHandle_t j1;
+		value = spawnArgs.GetString("ik_elbow1", "");// right
+		j1 = animator.GetJointHandle(value);
+		if (j1 == INVALID_JOINT)
+		{
+			value = "Rloarm";
+			j1 = animator.GetJointHandle(value);
+			if (j1 == INVALID_JOINT)
+			{
+				gameLocal.Error("Joint ik_elbow1 not found for player anim default\n");
+			}
+		}
+		ik_elbowCorrectAxis[0] = joints[j1].ToMat3();
+
+		value = spawnArgs.GetString("ik_elbow2", "");// left 
+		j1 = animator.GetJointHandle(value);
+		if (j1 == INVALID_JOINT)
+		{
+			value = "Lloarm";
+			j1 = animator.GetJointHandle(value);
+			if (j1 == INVALID_JOINT)
+			{
+				gameLocal.Error("Joint ik_elbow2 not found for player anim default\n");
+			}
+		}
+		ik_elbowCorrectAxis[1] = joints[j1].ToMat3();
+
+		chestPivotCorrectAxis = joints[chestPivotJoint].ToMat3();
+		chestPivotDefaultPos = joints[chestPivotJoint].ToVec3();
+		commonVr->chestDefaultDefined = true;
+
+
+
+		common->Printf("Animpre hand 0 default offset = %s\n", defaultWeapAttachOff[0].ToString());
+		common->Printf("Animpre hand 1 default offset = %s\n", defaultWeapAttachOff[1].ToString());
+
+		// now calc the weapon attacher offsets
+		for (int hand = 0; hand < 2; hand++)
+		{
+			for (int weap = 0; weap < 32; weap++) // should be max weapons
+			{
+
+				idStr animPre = spawnArgs.GetString(va("def_weapon%d", weap));
+				animPre.Strip("weapon_");
+				animPre += "_idle";
+
+				int animNo = animator.GetAnim(animPre.c_str());
+				int numJoints = animator.NumJoints();
+
+				if (animNo == 0) continue;
+
+				//	common->Printf( "Animpre = %s animNo = %d\n", animPre.c_str(), animNo );
+
+				// create the idle pose for this weapon
+				gameEdit->ANIM_CreateAnimFrame(animator.ModelHandle(), animator.GetAnim(animNo)->MD5Anim(0), numJoints, joints, 1, animator.ModelDef()->GetVisualOffset() + modelOffset, animator.RemoveOrigin());
+
+				ik_handCorrectAxis[hand][weap] = joints[ik_hand[hand]].ToMat3();
+				//	common->Printf( "Hand %d weap %d anim %s attacher pos %s   default pos %s\n", hand, weap, animPre.c_str(), joints[ik_handAttacher[hand]].ToVec3().ToString(), defaultWeapAttachOff[hand].ToString() );
+
+				//this is the translation between the hand joint ( the wrist ) and the attacher joint.  The attacher joint is 
+				//the location in space where the motion control is locating the weapon / hand, but IK is using the 'wrist' to 
+				//drive animation, so use this offset to derive the wrist position from the attacher joint orientation
+				handWeaponAttachertoWristJointOffset[hand][weap] = joints[ik_handAttacher[hand]].ToVec3() - joints[ik_hand[hand]].ToVec3();
+
+				// the is the delta if the attacher joint was moved from the position in the default animation to aid with alignment in 
+				// different weapon animations.  To keep the hand in a consistant location when weapon is changed, 
+				// the weapon and hand positions will need to be adjusted by this amount when presented
+				handWeaponAttacherToDefaultOffset[hand][weap] = handWeaponAttachertoWristJointOffset[hand][weap] - defaultWeapAttachOff[hand];
+
+				//	common->Printf( "Hand %d weap %d anim %s attacher offset = %s\n", hand, weap, animPre.c_str(), handWeaponAttacherToDefaultOffset[hand][weap].ToString() );
+			}
 		}
 	}
-
-	savefile->ReadBool( handLowered );
-	savefile->ReadBool( handRaised );
-	savefile->ReadBool( commonVr->handInGui );
 	// koz end
 	
 	savefile->ReadStaticObject( physicsObj );
@@ -3479,7 +3654,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	neckJoint = animator.GetJointHandle( value );
 	if ( neckJoint == INVALID_JOINT )
 	{
-		gameLocal.Error( "Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str() );
+		gameLocal.Warning( "Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str() );
 	}
 		
 
@@ -3487,8 +3662,31 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	chestPivotJoint = animator.GetJointHandle( value );
 	if ( chestPivotJoint == INVALID_JOINT )
 	{
-		gameLocal.Error( "Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str() );
+		gameLocal.Warning( "Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str() );
 	}
+
+	// re-init the player render model if we're loading this savegame from a different mod
+	if( savefile->version < BUILD_NUMBER_FULLY_POSSESSED )
+	{
+		memset(&renderEntity, 0, sizeof(renderEntity));
+			renderEntity.numJoints = animator.NumJoints();
+		animator.GetJoints(&renderEntity.numJoints, &renderEntity.joints);
+		renderEntity.hModel = animator.ModelHandle();
+		if (renderEntity.hModel)
+		{
+			renderEntity.hModel->Reset();
+			renderEntity.bounds = renderEntity.hModel->Bounds(&renderEntity);
+		}
+		renderEntity.shaderParms[SHADERPARM_RED] = 1.0f;
+		renderEntity.shaderParms[SHADERPARM_GREEN] = 1.0f;
+		renderEntity.shaderParms[SHADERPARM_BLUE] = 1.0f;
+		renderEntity.shaderParms[3] = 1.0f;
+		renderEntity.shaderParms[SHADERPARM_TIMEOFFSET] = 0.0f;
+		renderEntity.shaderParms[5] = 0.0f;
+		renderEntity.shaderParms[6] = 0.0f;
+		renderEntity.shaderParms[7] = 0.0f;
+	}
+
 	//re-init the VR ui models
 	laserSightHandle = -1;
 	headingBeamHandle = -1;
@@ -3526,47 +3724,54 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		
 	const idDeclSkin* blag;
 	//koz begin
-	savefile->ReadBool( laserSightActive );
-	savefile->ReadBool( headingBeamActive );
-	savefile->ReadBool( hudActive );
+	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
+	{
+		savefile->ReadBool( laserSightActive );
+		savefile->ReadBool( headingBeamActive );
+		savefile->ReadBool( hudActive );
 	
-	savefile->ReadInt( commonVr->currentFlashMode );
-//	savefile->ReadSkin( crosshairEntity.customSkin );
-	savefile->ReadSkin( blag );
+		savefile->ReadInt( commonVr->currentFlashMode );
+	//	savefile->ReadSkin( crosshairEntity.customSkin );
+		savefile->ReadSkin( blag );
 
-	savefile->ReadBool( PDAfixed );
-	savefile->ReadVec3( PDAorigin );
-	savefile->ReadMat3( PDAaxis );
+		savefile->ReadBool( PDAfixed );
+		savefile->ReadVec3( PDAorigin );
+		savefile->ReadMat3( PDAaxis );
 		
-	int tempInt;
-	float tempFloat;
-	bool tempBool;
-	idVec3 tempVec3;
-	idMat3 tempMat3;
+		int tempInt;
+		float tempFloat;
+		bool tempBool;
+		idVec3 tempVec3;
+		idMat3 tempMat3;
 
 
-	//blech.  Im going to pad the savegame file with a few diff var types,
-	// so if more changes are needed in the future, maybe save game compat can be preserved.
-	savefile->ReadInt( tempInt );
-	savefile->ReadInt( tempInt );
-	savefile->ReadInt( tempInt );
-	savefile->ReadInt( tempInt );
-	savefile->ReadFloat( tempFloat );
-	savefile->ReadFloat( tempFloat );
-	savefile->ReadFloat( tempFloat );
-	savefile->ReadFloat( tempFloat );
-	savefile->ReadBool( tempBool );
-	savefile->ReadBool( tempBool );
-	savefile->ReadBool( tempBool );
-	savefile->ReadBool( tempBool );
-	savefile->ReadVec3( tempVec3 );
-	savefile->ReadVec3( tempVec3 );
-	savefile->ReadVec3( tempVec3 );
-	savefile->ReadVec3( tempVec3 );
-	savefile->ReadMat3( tempMat3 );
-	savefile->ReadMat3( tempMat3 );
-	savefile->ReadMat3( tempMat3 );
-	savefile->ReadMat3( tempMat3 );
+		//blech.  Im going to pad the savegame file with a few diff var types,
+		// so if more changes are needed in the future, maybe save game compat can be preserved.
+		savefile->ReadInt( tempInt );
+		savefile->ReadInt( tempInt );
+		savefile->ReadInt( tempInt );
+		savefile->ReadInt( tempInt );
+		savefile->ReadFloat( tempFloat );
+		savefile->ReadFloat( tempFloat );
+		savefile->ReadFloat( tempFloat );
+		savefile->ReadFloat( tempFloat );
+		savefile->ReadBool( tempBool );
+		savefile->ReadBool( tempBool );
+		savefile->ReadBool( tempBool );
+		savefile->ReadBool( tempBool );
+		savefile->ReadVec3( tempVec3 );
+		savefile->ReadVec3( tempVec3 );
+		savefile->ReadVec3( tempVec3 );
+		savefile->ReadVec3( tempVec3 );
+		savefile->ReadMat3( tempMat3 );
+		savefile->ReadMat3( tempMat3 );
+		savefile->ReadMat3( tempMat3 );
+		savefile->ReadMat3( tempMat3 );
+	}
+	else
+	{
+		spawnArgs.SetInt("ik_numArms", 2);
+	}
 
 
 	throwDirection = vec3_zero;
@@ -3578,7 +3783,6 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	vr_headingBeamMode.SetModified();
 
 	// Koz end
-	InitTeleportTarget();
 
 }
 
@@ -6929,9 +7133,6 @@ idPlayer::UpdateWeapon
 */
 void idPlayer::UpdateWeapon()
 {
-	
-	static bool wasTalking = false;
-	bool talking = (usercmd.buttons & BUTTON_CHATTING) > 0;
 	if( health <= 0 )
 	{
 		return;
@@ -6939,12 +7140,18 @@ void idPlayer::UpdateWeapon()
 	
 	assert( !spectating );
 	
-	
-	//koz
+
+	static bool wasTalking = false;
+	bool talking = (usercmd.buttons & BUTTON_CHATTING) > 0;
+
 	// Voice wakes up nearby monsters while you're speaking
-	if ( vr_talkWakeMonsters.GetBool() )
+	// Carl: weapon method (voice wakes up monsters that respond to weapon sound)
+	if ( (vr_talkWakeMonsters.GetInteger() & 1) && talking )
+		gameLocal.AlertAI( this, 788 * commonVoice->currentVolume * (vr_talkWakeMonsterRadius.GetFloat() / 120) ); // maximum mic volume = 20 metres, normal volume = 5 m
+	//koz (voice wakes up monsters that respond to flashlight)
+	if ( vr_talkWakeMonsters.GetInteger() > 0 && vr_talkWakeMonsters.GetInteger() <= 2 )
 	{
-		if ( !talking ) 
+		if ( !talking || commonVoice->maxVolume == 0 ) 
 		{
 			wasTalking = false;
 		}
@@ -6953,12 +7160,13 @@ void idPlayer::UpdateWeapon()
 			wasTalking = true;
 			idEntity* entityList[MAX_GENTITIES];
 			int listedEntities;
-			float radius = vr_talkWakeMonsterRadius.GetFloat();
+			float radius = 788 * commonVoice->maxVolume * (vr_talkWakeMonsterRadius.GetFloat() / 120);
+
 			listedEntities = gameLocal.EntitiesWithinRadius( GetPhysics()->GetOrigin(), radius, entityList, MAX_GENTITIES );
 			for ( int i = 0; i < listedEntities; i++ )
 			{
 				idEntity* ent = entityList[i];
-				if ( ent )
+				if ( ent && !ent->IsHidden() )
 				{
 					if ( ent->IsType( idAI::Type ) )
 					{
@@ -9754,7 +9962,7 @@ void idPlayer::EvaluateControls()
 					commonVr->playerDead = true;
 					extern idCVar timescale;
 					int comfortMode = vr_motionSickness.GetInteger();
-					if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9))
+					if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9) || warpAim || warpMove)
 						timescale.SetFloat(1);
 				}
 		
@@ -9781,8 +9989,9 @@ void idPlayer::EvaluateControls()
 	extern idCVar timescale;
 		if ( common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState )
 		{
-			if (vr_teleportMode.GetInteger() == 1) 
+			if (vr_teleportMode.GetInteger() == 1) // QuakeCon style
 			{
+				warpAim = true;
 				timescale.SetFloat(0.5f);
 			}
 			commonVr->teleportButtonCount++;
@@ -9792,6 +10001,7 @@ void idPlayer::EvaluateControls()
 		{
 			if (vr_teleportMode.GetInteger() == 1)
 			{
+				warpAim = false;
 				timescale.SetFloat(1.0f);
 			}
 			commonVr->teleportButtonCount = 0; // let the fire button abort teleporting.
@@ -9803,6 +10013,7 @@ void idPlayer::EvaluateControls()
 		{
 			if (vr_teleportMode.GetInteger() == 1)
 			{
+				warpAim = false;
 				timescale.SetFloat(1.0f);
 			}
 			doTeleport = true;  //common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState;
@@ -9824,10 +10035,7 @@ void idPlayer::EvaluateControls()
 			{
 				if (vr_teleportMode.GetInteger() == 0) 
 				{
-					if (t == 1)
-						playerView.Flash(colorBlack, 140);
-					else
-						playerView.Flash(colorWhite, 140);
+					playerView.Flash(colorBlack, 140);
 				}
 
 				TeleportPath( teleportPoint );
@@ -10877,7 +11085,7 @@ void idPlayer::Move()
 
 	// Handling vr_comfortMode
 	extern idCVar timescale;
-	if (vr_motionSickness.IsModified())
+	if (vr_motionSickness.IsModified() && !warpMove && !warpAim)
 	{
 		timescale.SetFloat(1);
 		vr_motionSickness.ClearModified();
@@ -10909,7 +11117,7 @@ void idPlayer::Move()
 	else
 		this->playerView.EnableVrComfortVision(false);
 
-	if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9))
+	if (((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9)) && !warpAim && !warpMove)
 	{
 		float speedFactor = ((pm_runspeed.GetFloat() - speed) / pm_runspeed.GetFloat());
 		if (speedFactor < 0)
@@ -13181,6 +13389,7 @@ void idPlayer::Think()
 			warpVel = vec3_origin;
 			timescale.SetFloat(1.0f);
 			playerView.EnableBFGVision(false);
+			Teleport( warpDest, viewAngles, NULL ); //Carl: get the destination exact
 		}
 		physicsObj.SetLinearVelocity(warpVel);
 	}
@@ -14463,8 +14672,10 @@ void idPlayer::TeleportPath( const idVec3& target )
 		extern idCVar timescale;
 		warpMove = true;
 		noclip = true;
-		warpVel = (lastPos - trueOrigin) / 0.075f;  // 75 ms
-		warpVel[2] = warpVel[2] + 50; // add a small fixed upwards velocity to handle noclip problem
+		warpDest = lastPos;
+		//warpDest.z += 1;
+		warpVel = (warpDest - trueOrigin) / 0.075f;  // 75 ms
+		//warpVel[2] = warpVel[2] + 50; // add a small fixed upwards velocity to handle noclip problem
 		warpTime = gameLocal.time + 75;
 		timescale.SetFloat(0.5f);
 		playerView.EnableBFGVision(true);

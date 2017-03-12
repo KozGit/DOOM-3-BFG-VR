@@ -372,8 +372,8 @@ public:
 	
 	bool					noclip;
 	bool					godmode;
-	bool					warpMove;
-	idVec3					warpVel;
+	bool					warpMove, warpAim;
+	idVec3					warpVel, warpDest;
 	int						warpTime;
 	
 	bool					spawnAnglesSet;		// on first usercmd, we must set deltaAngles

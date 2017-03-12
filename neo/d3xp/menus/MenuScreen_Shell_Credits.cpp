@@ -77,7 +77,7 @@ void idMenuScreen_Shell_Credits::SetupCreditList()
 	creditList.Append( creditInfo_t( 0, "    Holster slots, Crawl Space Head Collision, minor fixes." ) );
 	creditList.Append( creditInfo_t() );
 	creditList.Append( creditInfo_t( 0, "jckhng:" ) );
-	creditList.Append( creditInfo_t( 0, "    Slow Mo and Tunnel vision motion sickness fixes." ) );
+	creditList.Append( creditInfo_t( 0, "    QuakeCon style teleporting. Slow Mo and Tunnel vision motion sickness fixes." ) );
 	creditList.Append( creditInfo_t() );
 	creditList.Append( creditInfo_t( 0, "tmek:" ) );
 	creditList.Append( creditInfo_t( 0, "    Original inspiration." ) );

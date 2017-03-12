@@ -106,7 +106,15 @@ void idAnimState::Restore( idRestoreGame* savefile )
 	}
 	
 	savefile->ReadObject( reinterpret_cast<idClass*&>( thread ) );
-	
+	// Carl: for old savegames with invalid scripts
+	if (!thread)
+	{
+		thread = new idThread();
+		thread->ManualDelete();
+		thread->EndThread();
+		thread->ManualControl();
+	}
+
 	savefile->ReadString( state );
 	
 	savefile->ReadInt( animBlendFrames );
@@ -1068,22 +1076,111 @@ void idActor::Restore( idRestoreGame* savefile )
 	head.Restore( savefile );
 	
 	savefile->ReadInt( num );
-	copyJoints.SetNum( num );
-	for( i = 0; i < num; i++ )
+	if ( true || savefile->version >= BUILD_NUMBER_FULLY_POSSESSED )
 	{
-		int val;
-		savefile->ReadInt( val );
-		copyJoints[i].mod = static_cast<jointModTransform_t>( val );
-		savefile->ReadJoint( copyJoints[i].from );
-		savefile->ReadJoint( copyJoints[i].to );
+		copyJoints.SetNum( num );
+		for( i = 0; i < num; i++ )
+		{
+			int val;
+			savefile->ReadInt( val );
+			copyJoints[i].mod = static_cast<jointModTransform_t>( val );
+			savefile->ReadJoint( copyJoints[i].from );
+			savefile->ReadJoint( copyJoints[i].to );
+		}
 	}
-	
+	else
+	{
+		// If we're loading from RBDoom, the restored copyjoints are wrong.
+		// So create the copyjoints the same way we do when spawning
+		idStr			jointName;
+		copyJoints_t	copyJoint;
+		const idKeyValue* kv;
+		copyJoints.Clear();
+
+		for (i = 0; i < num; i++)
+		{
+			int val;
+			savefile->ReadInt(val);
+			savefile->ReadJoint(copyJoint.from);
+			savefile->ReadJoint(copyJoint.to);
+		}
+		idEntity* headEnt = head.GetEntity();
+		idAnimator* headAnimator;
+		if (headEnt)
+		{
+			headAnimator = headEnt->GetAnimator();
+		}
+		else
+		{
+			headAnimator = &animator;
+		}
+
+		if (headEnt)
+		{
+			// set up the list of joints to copy to the head
+			for (kv = spawnArgs.MatchPrefix("copy_joint", NULL); kv != NULL; kv = spawnArgs.MatchPrefix("copy_joint", kv))
+			{
+				if (kv->GetValue() == "")
+				{
+					// probably clearing out inherited key, so skip it
+					continue;
+				}
+
+				jointName = kv->GetKey();
+				if (jointName.StripLeadingOnce("copy_joint_world "))
+				{
+					copyJoint.mod = JOINTMOD_WORLD_OVERRIDE;
+				}
+				else
+				{
+					jointName.StripLeadingOnce("copy_joint ");
+					copyJoint.mod = JOINTMOD_LOCAL_OVERRIDE;
+				}
+
+				copyJoint.from = animator.GetJointHandle(jointName);
+				if (copyJoint.from == INVALID_JOINT)
+				{
+					gameLocal.Warning("Unknown copy_joint '%s' on entity %s", jointName.c_str(), name.c_str());
+					continue;
+				}
+
+				jointName = kv->GetValue();
+				copyJoint.to = headAnimator->GetJointHandle(jointName);
+				if (copyJoint.to == INVALID_JOINT)
+				{
+					gameLocal.Warning("Unknown copy_joint '%s' on head of entity %s", jointName.c_str(), name.c_str());
+					continue;
+				}
+
+				copyJoints.Append(copyJoint);
+			}
+		}
+		SetupHead();
+	}
 	savefile->ReadJoint( leftEyeJoint );
 	savefile->ReadJoint( rightEyeJoint );
 	savefile->ReadJoint( soundJoint );
 	
 	walkIK.Restore( savefile );
 	
+	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED)
+	{
+		// koz begin
+		armIK.Init( this, IK_ANIM, modelOffset );
+	
+		if ( armIK.IsInitialized() ) {
+			common->Printf( "ArmIK initialized for %s.\n",name.c_str() );
+		}
+	
+		// koz end
+	
+		// the animation used to be set to the IK_ANIM at this point, but that was fixed, resulting in
+		// attachments not binding correctly, so we're stuck setting the IK_ANIM before attaching things.
+		animator.ClearAllAnims( gameLocal.time, 0 );
+		animator.SetFrame( ANIMCHANNEL_ALL, animator.GetAnim( IK_ANIM ), 0, 0, 0 );
+
+	}
+
 	savefile->ReadString( animPrefix );
 	savefile->ReadString( painAnim );
 	
@@ -1101,8 +1198,16 @@ void idActor::Restore( idRestoreGame* savefile )
 	legsAnim.Restore( savefile );
 	
 	//koz begin
-	leftHandAnim.Restore( savefile );
-	rightHandAnim.Restore( savefile );
+	if( savefile->version >= BUILD_NUMBER_FULLY_POSSESSED )
+	{
+		leftHandAnim.Restore( savefile );
+		rightHandAnim.Restore( savefile );
+	}
+	else
+	{
+		leftHandAnim.Init( this, &animator, ANIMCHANNEL_LEFTHAND );
+		rightHandAnim.Init( this, &animator, ANIMCHANNEL_RIGHTHAND );
+	}
 	//koz end
 
 	savefile->ReadBool( allowPain );
@@ -1120,6 +1225,10 @@ void idActor::Restore( idRestoreGame* savefile )
 	
 	savefile->ReadBool( finalBoss );
 	
+	// Carl: When loading saved games from versions with different scripts, the threads will all be null, and need to be created like on spawn
+	if( !scriptThread || savefile->version < BUILD_NUMBER_FULLY_POSSESSED )
+		FinishSetup();
+
 	idStr statename;
 	
 	savefile->ReadString( statename );

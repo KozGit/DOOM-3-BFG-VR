@@ -1340,16 +1340,33 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	
 	// Create the list of all objects in the game
 	savegame.CreateObjects();
-	
+
+	loadScriptFailed = false;
+
 	// Load the idProgram, also checking to make sure scripting hasn't changed since the savegame
 	if( program.Restore( &savegame ) == false )
 	{
-	
+		// Carl: Keep loading even if the scripts have changed since we saved.
+		loadScriptFailed = true;
+		common->Warning( "Game was saved with different scripts (a different mod). All scripts will be reset." );
+		// if we can't use the script, then all the thread objects need to be destroyed and replaced
+		for (i = 1; i < savegame.objects.Num(); i++)
+		{
+			if (savegame.objects[i]->IsType(idThread::Type))
+			{
+				delete (idThread*)(savegame.objects[i]);
+				savegame.objects[i] = NULL;
+			}
+		}
+		program.Startup(SCRIPT_DEFAULT);
+		program.Restart();
+#if 0
 		// Abort the load process, and let the session know so that it can restart the level
 		// with the player persistent data.
 		savegame.DeleteObjects();
 		program.Restart();
 		return false;
+#endif
 	}
 	
 	savegame.ReadInt( i );
@@ -1441,7 +1458,16 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	savegame.ReadInt( i );
 	random.SetSeed( i );
 	
-	savegame.ReadObject( reinterpret_cast<idClass*&>( frameCommandThread ) );
+	if (loadScriptFailed)
+	{
+		idThread *temp = new idThread();
+		savegame.ReadObject(reinterpret_cast<idClass*&>(temp));
+		InitScriptForMap();
+	}
+	else
+	{
+		savegame.ReadObject( reinterpret_cast<idClass*&>( frameCommandThread ) );
+	}
 	
 	// clip
 	// push
@@ -1568,6 +1594,25 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	// free up any unused animations
 	animationLib.FlushUnusedAnims();
 	
+	// Carl: InitTeleportTarget here instead of in idPlayer::Restore so it is always done AFTER the teleport target is loaded
+	if (GetLocalPlayer())
+	{
+		idPlayer *player = GetLocalPlayer();
+		player->InitTeleportTarget();
+		// if we autosaved while teleporting QuakeCon style, stop the QuakeCon style effect
+		if (player->noclip && player->playerView.bfgVision)
+		{
+			extern idCVar timescale;
+			player->warpTime = 0;
+			player->noclip = false;
+			player->warpMove = false;
+			player->warpAim = false;
+			player->warpVel = vec3_origin;
+			timescale.SetFloat(1.0f);
+			player->playerView.EnableBFGVision(false);
+		}
+	}
+
 	gamestate = GAMESTATE_ACTIVE;
 	
 	Printf( "--------------------------------------\n" );
@@ -4356,13 +4401,17 @@ bool idGameLocal::RequirementMet( idEntity* activator, const idStr& requires, in
 idGameLocal::AlertAI
 ============
 */
-void idGameLocal::AlertAI( idEntity* ent )
+void idGameLocal::AlertAI( idEntity* ent, float distanceAudible )
 {
 	if( ent && ent->IsType( idActor::Type ) )
 	{
-		// alert them for the next frame
-		lastAIAlertTime = time + 1;
-		lastAIAlertEntity = static_cast<idActor*>( ent );
+		// alert them for the next frame, unless we already heard a louder sound this frame
+		if ( lastAIAlertTime != time + 1 || Square(distanceAudible) >= lastAIAlertDistanceAudibleSquared )
+		{
+			lastAIAlertTime = time + 1;
+			lastAIAlertEntity = static_cast<idActor*>( ent );
+			lastAIAlertDistanceAudibleSquared = Square( distanceAudible );
+		}
 	}
 }
 
