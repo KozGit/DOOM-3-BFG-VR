@@ -76,6 +76,14 @@ void idMenuScreen_Shell_VR_Safety_Protocols::Initialize( idMenuHandler * data ) 
 	options->AddChild( control );
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType(OPTION_SLIDER_TEXT);
+	control->SetLabel("Teleport Mode");
+	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_TELEPORTATION_MODE);
+	control->SetupEvents(DEFAULT_REPEAT_TIME, options->GetChildren().Num());
+	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_TELEPORTATION_MODE);
+	options->AddChild(control);
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "Turning" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_SNAP_TURNS );
@@ -340,6 +348,7 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 	originalComfortDelta = vr_comfortDelta.GetFloat();
 	originalChaperone = vr_chaperone.GetInteger();
 	originalTeleport = vr_teleport.GetInteger();
+	originalTeleportMode = vr_teleportMode.GetInteger();
 	originalMotionSickness = vr_motionSickness.GetInteger();
 	originalWalkSpeedAdjust = vr_walkSpeedAdjust.GetFloat();
 	originalKnockBack = vr_knockBack.GetInteger();
@@ -381,6 +390,14 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 			static const int numValues = 5;
 			static const int values[numValues] = { 0, 1, 2, 3, 4 };
 			vr_teleport.SetInteger( AdjustOption( vr_teleport.GetInteger(), values, numValues, adjustAmount ) );
+			break;
+		}
+
+		case SAFETY_PROTOCOLS_FIELD_TELEPORTATION_MODE:
+		{
+			static const int numValues = 2;
+			static const int values[numValues] = { 0, 1};
+			vr_teleportMode.SetInteger(AdjustOption(vr_teleportMode.GetInteger(), values, numValues, adjustAmount));
 			break;
 		}
 
@@ -530,6 +547,12 @@ idSWFScriptVar idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR
 			return names[vr_teleport.GetInteger()];
 		}
 
+		case SAFETY_PROTOCOLS_FIELD_TELEPORTATION_MODE:
+		{
+			const char* names[] = { "Blink", "QuakeCon"};
+			return names[vr_teleportMode.GetInteger()];
+		}
+
 		case SAFETY_PROTOCOLS_FIELD_SNAP_TURNS:
 		{
 			float f = vr_comfortDelta.GetFloat();
@@ -608,6 +631,10 @@ idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Gameplay_Optio
 bool idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Protocols::IsDataChanged() const {
 	
 	if ( originalTeleport != vr_teleport.GetInteger() )
+	{
+		return true;
+	}
+	if (originalTeleportMode != vr_teleportMode.GetInteger())
 	{
 		return true;
 	}

@@ -520,6 +520,7 @@ extern idCVar	vr_teleportButtonMode;
 extern idCVar	vr_teleportHint;
 
 extern idCVar	vr_teleport;
+extern idCVar	vr_teleportMode;
 extern idCVar	vr_teleportMaxTravel;
 extern idCVar	vr_teleportThroughDoors;
 extern idCVar	vr_motionSickness;
