@@ -2363,13 +2363,16 @@ bool idProgram::Restore( idRestoreGame* savefile )
 	bool result = true;
 	idStr scriptname;
 	
+	int start = savefile->file->Tell(); //Carl debug
 	savefile->ReadInt( num );
+	common->Printf("idProgram::Restore() Compile scripts start num=%d, %d\n", num, start); //Carl debug
 	for( i = 0; i < num; i++ )
 	{
 		savefile->ReadString( scriptname );
 		CompileFile( scriptname );
 	}
 	
+	common->Printf("idProgram::Restore() Read Variables, %d\n", savefile->file->Tell()); //Carl debug
 	savefile->ReadInt( index );
 	while( index >= 0 )
 	{
@@ -2378,6 +2381,7 @@ bool idProgram::Restore( idRestoreGame* savefile )
 	}
 	
 	savefile->ReadInt( num );
+	common->Printf("idProgram::Restore() Read Variable defaults, num=%d, %d\n", num, savefile->file->Tell()-4); //Carl debug
 	for( i = variableDefaults.Num(); i < num; i++ )
 	{
 		savefile->ReadByte( variables[i] );
@@ -2386,6 +2390,7 @@ bool idProgram::Restore( idRestoreGame* savefile )
 	int saved_checksum, checksum;
 	
 	savefile->ReadInt( saved_checksum );
+	common->Printf("idProgram::Restore(), %d bytes, %d\n", num, savefile->file->Tell() - start, start); //Carl debug
 	checksum = CalculateChecksum();
 	
 	if( saved_checksum != checksum )

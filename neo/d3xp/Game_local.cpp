@@ -1378,7 +1378,9 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	savegame.ReadDict( &si );
 	SetServerInfo( si );
 	
+	int start = savegame.file->Tell();
 	savegame.ReadInt( numClients );
+	common->Printf("idGameLocal::InitFromSaveGame() Read Clients start, num=%d, %d\n", numClients, start); //Carl debug
 	for( i = 0; i < numClients; i++ )
 	{
 		//savegame.ReadUsercmd( usercmds[ i ] );
@@ -1389,6 +1391,8 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 		savegame.ReadDict( &persistentPlayerInfo[ i ] );
 	}
 	
+	start = savegame.file->Tell();
+	common->Printf("idGameLocal::InitFromSaveGame() Read GENTITIES start, num=%d, %d\n", MAX_GENTITIES, start); //Carl debug
 	for( i = 0; i < MAX_GENTITIES; i++ )
 	{
 		savegame.ReadObject( reinterpret_cast<idClass*&>( entities[ i ] ) );
@@ -1423,18 +1427,29 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	
 	savegame.ReadObject( reinterpret_cast<idClass*&>( world ) );
 	
+	start = savegame.file->Tell();
 	savegame.ReadInt( num );
+	common->Printf("idGameLocal::InitFromSaveGame() Read Spawned Entities start, num=%d, %d\n", num, start); //Carl debug
 	for( i = 0; i < num; i++ )
 	{
-		savegame.ReadObject( reinterpret_cast<idClass*&>( ent ) );
-		assert( ent );
+		bool wasntNull = savegame.ReadObject( reinterpret_cast<idClass*&>( ent ) );
+		//assert( ent );
 		if( ent )
 		{
 			ent->spawnNode.AddToEnd( spawnedEntities );
 		}
+		//else if ( wasntNull )
+		//{
+		//	// was originally an idThread entity
+		//	ent = new idEntity();
+		//	ent->SetName( va("ThreadDummyEntity%d", i) );
+		//	ent->spawnNode.AddToEnd( spawnedEntities );
+		//}
 	}
 	
+	start = savegame.file->Tell();
 	savegame.ReadInt( num );
+	common->Printf("idGameLocal::InitFromSaveGame() Read Active Entities start, num=%d, %d\n", num, start); //Carl debug
 	for( i = 0; i < num; i++ )
 	{
 		savegame.ReadObject( reinterpret_cast<idClass*&>( ent ) );
@@ -1460,7 +1475,7 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	
 	if (loadScriptFailed)
 	{
-		idThread *temp = new idThread();
+		idThread *temp = NULL;
 		savegame.ReadObject(reinterpret_cast<idClass*&>(temp));
 		InitScriptForMap();
 	}
@@ -1516,6 +1531,8 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	savegame.ReadBool( isNewFrame );
 	savegame.ReadFloat( clientSmoothing );
 	
+	start = savegame.file->Tell();
+	common->Printf("idGameLocal::InitFromSaveGame() Read PortalSkyEnt start, %d\n", start); //Carl debug
 	portalSkyEnt.Restore( &savegame );
 	savegame.ReadBool( portalSkyActive );
 	
@@ -1539,7 +1556,9 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	savegame.ReadBool( mapCycleLoaded );
 	savegame.ReadInt( spawnCount );
 	
+	start = savegame.file->Tell();
 	savegame.ReadInt( num );
+	common->Printf("idGameLocal::InitFromSaveGame() Read Areas start, num=%d, %d\n", num, start); //Carl debug
 	if( num )
 	{
 		if( num != gameRenderWorld->NumAreas() )
@@ -1561,6 +1580,8 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	lastAIAlertEntity.Restore( &savegame );
 	savegame.ReadInt( lastAIAlertTime );
 	
+	start = savegame.file->Tell();
+	common->Printf("idGameLocal::InitFromSaveGame() Read spawnArgs, %d\n", start); //Carl debug
 	savegame.ReadDict( &spawnArgs );
 	
 	savegame.ReadInt( playerPVS.i );
