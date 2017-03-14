@@ -4112,7 +4112,9 @@ void idAnimator::Restore( idRestoreGame* savefile )
 	// Try clearing it all and loading the model again.
 	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED)
 	{
-		idStr modelName = modelDef->GetName();
+		idStr modelName = "";
+		if( modelDef )
+			modelName = modelDef->GetName();
 		SetModel( modelName.c_str() );
 	}
 }

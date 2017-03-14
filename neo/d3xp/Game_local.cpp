@@ -1343,8 +1343,11 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 
 	loadScriptFailed = false;
 
+	int i_skill;
+	idStr first_decl_string;
+
 	// Load the idProgram, also checking to make sure scripting hasn't changed since the savegame
-	if( program.Restore( &savegame ) == false )
+	if( program.Restore( &savegame, i_skill, first_decl_string) == false )
 	{
 		// Carl: Keep loading even if the scripts have changed since we saved.
 		loadScriptFailed = true;
@@ -1369,8 +1372,7 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 #endif
 	}
 	
-	savegame.ReadInt( i );
-	g_skill.SetInteger( i );
+	g_skill.SetInteger( i_skill );
 	
 	// precache any media specified in the map
 	savegame.ReadDecls();

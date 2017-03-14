@@ -2333,7 +2333,9 @@ void idProgram::Save( idSaveGame* savefile ) const
 	
 	for( i = 0; i < variableDefaults.Num(); i++ )
 	{
-		if( variables[i] != variableDefaults[i] )
+		// Carl: We never save variableDefaults.Num(), and it depends on scripts, but it affects offsets in the file.
+		// To fix that without breaking compatibility, from v022 onwards always save variableDefaults.Num()-1 even if it hasn't changed.
+		if( variables[i] != variableDefaults[i] || i == variableDefaults.Num()-1 )
 		{
 			savefile->WriteInt( i );
 			savefile->WriteByte( variables[i] );
@@ -2343,6 +2345,7 @@ void idProgram::Save( idSaveGame* savefile ) const
 	savefile->WriteInt( -1 );
 	
 	savefile->WriteInt( numVariables );
+	// Carl: See how we're using variableDefaults.Num() to determine the number of bytes to write? That's a problem.
 	for( i = variableDefaults.Num(); i < numVariables; i++ )
 	{
 		savefile->WriteByte( variables[i] );
@@ -2357,7 +2360,7 @@ void idProgram::Save( idSaveGame* savefile ) const
 idProgram::Restore
 ================
 */
-bool idProgram::Restore( idRestoreGame* savefile )
+bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first_decl_string )
 {
 	int i, num, index;
 	bool result = true;
@@ -2374,23 +2377,90 @@ bool idProgram::Restore( idRestoreGame* savefile )
 	
 	common->Printf("idProgram::Restore() Read Variables, %d\n", savefile->file->Tell()); //Carl debug
 	savefile->ReadInt( index );
+	int minVariableDefaultsNum = 0;
 	while( index >= 0 )
 	{
 		savefile->ReadByte( variables[index] );
 		savefile->ReadInt( index );
+		if( index + 1 > minVariableDefaultsNum )
+			minVariableDefaultsNum = index + 1;
 	}
 	
 	savefile->ReadInt( num );
-	common->Printf("idProgram::Restore() Read Variable defaults, num=%d, %d\n", num, savefile->file->Tell()-4); //Carl debug
-	for( i = variableDefaults.Num(); i < num; i++ )
+
+	common->Printf("idProgram::Restore() Read variables after defaults, num=%d, %d\n", num, savefile->file->Tell() - 4); //Carl debug
+
+	// Carl: now for the hard part... we don't know how many bytes we need to read. The minimum is zero, the maximum is (num - minVariableDefaultsNum).
+	// All we know is, it's followed by a 4-byte integer between 0 and 3, then a 4-byte integer pointing to a valid string in the strings file.
+	// And we're not allowed to seek ahead or behind in the save file to check what's next.
+	int maxCount = num - minVariableDefaultsNum;
+	// What we're actually trying to read
+	byte *temp = (byte *)Mem_Alloc16(maxCount, TAG_SAVEGAMES);
+	int skill, stringPointer, stringLength;
+	idStr actualString = "";
+	// a buffer large enough to hold the two 4-byte values after our bytes
+	byte circleBuffer[8];
+	int circleBufferIndex = 0;
+	// prime the buffer
+	for (i = 0; i < 8; i++)
+		savefile->ReadByte(circleBuffer[i]);
+	i = 0;
+	while (i < maxCount)
 	{
-		savefile->ReadByte( variables[i] );
+		// check if we reached the end (marked by the skill level followed by a string)
+		skill = circleBuffer[circleBufferIndex] | (circleBuffer[(circleBufferIndex + 1) % 8] << 8) | (circleBuffer[(circleBufferIndex + 2) % 8] << 16) | (circleBuffer[(circleBufferIndex + 3) % 8] << 24);
+		skill = BigLong(skill);
+		if (skill >= 0 && skill <= 3) // 1 = marine, 3 = nightmare
+		{
+			stringPointer = circleBuffer[(circleBufferIndex + 4) % 8] | (circleBuffer[(circleBufferIndex + 5) % 8] << 8) | (circleBuffer[(circleBufferIndex + 6) % 8] << 16) | (circleBuffer[(circleBufferIndex + 7) % 8] << 24);
+			stringPointer = BigLong(stringPointer);
+			if (stringPointer > 12 && stringPointer <= savefile->stringFile->Length() - 4)
+			{
+				savefile->stringFile->Seek(stringPointer, FS_SEEK_SET);
+				savefile->stringFile->ReadInt(stringLength);
+				if (stringLength >= 2 && stringLength <= 255) //Carl: I'm ASSUMING the first table name won't be longer than 255 chars
+				{
+					actualString.Fill(' ', stringLength);
+					savefile->stringFile->Read(&actualString[0], stringLength);
+					// we've read everything
+					break;
+				}
+			}
+		}
+		skill = -1;
+		// process byte value at index
+		temp[i] = circleBuffer[circleBufferIndex];
+		// read replacement byte value into index
+		savefile->ReadByte(circleBuffer[i]);
+		// increment index
+		circleBufferIndex = (circleBufferIndex + 1) % 8;
+		i++;
 	}
-	
+	// go through temp
+	maxCount = i;
+	for (i = 0; i < maxCount; i++)
+		variables[i + num - maxCount] = temp[i];
+	Mem_Free16(temp);
+	// set our values
+	if (skill == -1)
+	{
+		skill = circleBuffer[circleBufferIndex] | (circleBuffer[(circleBufferIndex + 1) % 8] << 8) | (circleBuffer[(circleBufferIndex + 2) % 8] << 16) | (circleBuffer[(circleBufferIndex + 3) % 8] << 24);
+		skill = BigLong(skill);
+		stringPointer = circleBuffer[(circleBufferIndex + 4) % 8] | (circleBuffer[(circleBufferIndex + 5) % 8] << 8) | (circleBuffer[(circleBufferIndex + 6) % 8] << 16) | (circleBuffer[(circleBufferIndex + 7) % 8] << 24);
+		stringPointer = BigLong(stringPointer);
+		savefile->stringFile->Seek(stringPointer, FS_SEEK_SET);
+		savefile->stringFile->ReadInt(stringLength);
+		actualString.Fill(' ', stringLength);
+		savefile->stringFile->Read(&actualString[0], stringLength);
+	}
+	// copy them into our parameters
+	skill_level = skill;
+	first_decl_string = actualString;
+
 	int saved_checksum, checksum;
 	
 	savefile->ReadInt( saved_checksum );
-	common->Printf("idProgram::Restore(), %d bytes, %d\n", num, savefile->file->Tell() - start, start); //Carl debug
+	common->Printf("idProgram::Restore(), num=%d, %d bytes, %d\n", maxCount, savefile->file->Tell() - start - 8, start); //Carl debug
 	checksum = CalculateChecksum();
 	
 	if( saved_checksum != checksum )
@@ -2398,6 +2468,9 @@ bool idProgram::Restore( idRestoreGame* savefile )
 		result = false;
 	}
 	
+	common->Printf("idProgram::Restore() g_skill=%d\n", skill_level);
+	common->Printf("idProgram::Restore() first_decl_string=\"%s\"\n", first_decl_string.c_str());
+
 	return result;
 }
 

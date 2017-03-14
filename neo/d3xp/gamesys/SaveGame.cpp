@@ -1018,7 +1018,7 @@ void idRestoreGame::RestoreObjects
 */
 void idRestoreGame::RestoreObjects()
 {
-	int i;
+	int i = 0;
 	
 	int start = file->Tell(); //Carl debug
 	common->Printf("%d: ReadSoundCommands() start, %d\n", i, start); //Carl debug
