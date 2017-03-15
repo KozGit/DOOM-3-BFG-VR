@@ -2396,6 +2396,9 @@ bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first
 	int maxCount = num - minVariableDefaultsNum;
 	// What we're actually trying to read
 	byte *temp = (byte *)Mem_Alloc16(maxCount, TAG_SAVEGAMES);
+	bool malloc_failed = !temp;
+	if (malloc_failed)
+		temp = &variables[minVariableDefaultsNum];
 	int skill, stringPointer, stringLength;
 	idStr actualString = "";
 	// a buffer large enough to hold the two 4-byte values after our bytes
@@ -2431,7 +2434,7 @@ bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first
 		// process byte value at index
 		temp[i] = circleBuffer[circleBufferIndex];
 		// read replacement byte value into index
-		savefile->ReadByte(circleBuffer[i]);
+		savefile->ReadByte(circleBuffer[circleBufferIndex]);
 		// increment index
 		circleBufferIndex = (circleBufferIndex + 1) % 8;
 		i++;
@@ -2440,7 +2443,8 @@ bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first
 	maxCount = i;
 	for (i = 0; i < maxCount; i++)
 		variables[i + num - maxCount] = temp[i];
-	Mem_Free16(temp);
+	if (!malloc_failed)
+		Mem_Free16(temp);
 	// set our values
 	if (skill == -1)
 	{
