@@ -1375,7 +1375,7 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	g_skill.SetInteger( i_skill );
 	
 	// precache any media specified in the map
-	savegame.ReadDecls();
+	savegame.ReadDecls( first_decl_string );
 	
 	savegame.ReadDict( &si );
 	SetServerInfo( si );

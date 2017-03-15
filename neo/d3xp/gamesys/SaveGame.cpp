@@ -953,17 +953,27 @@ idRestoreGame::~idRestoreGame()
 ================
 idRestoreGame::ReadDecls
 ================
+Carl: We already read the first declName in the list while reading the script variables.
 */
-void idRestoreGame::ReadDecls()
+void idRestoreGame::ReadDecls( idStr& first_decl_string )
 {
 	idStr declName;
-	int start = file->Tell();
+	bool first = true;
+	int start = file->Tell() - 4;
 	common->Printf("idRestoreGame::ReadDecls() start, num=%d, %d\n", declManager->GetNumDeclTypes(), start); //Carl debug
 	for( int t = 0; t < declManager->GetNumDeclTypes(); t++ )
 	{
 		while( true )
 		{
-			ReadString( declName );
+			if (first)
+			{
+				declName = first_decl_string;
+				first = false;
+			}
+			else
+			{
+				ReadString(declName);
+			}
 			if( declName.IsEmpty() )
 			{
 				break;

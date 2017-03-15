@@ -131,7 +131,7 @@ public:
 	idRestoreGame( idFile* savefile, idFile* stringTableFile, int saveVersion );
 	~idRestoreGame();
 	
-	void					ReadDecls();
+	void					ReadDecls( idStr& first_decl_string );
 	
 	void					CreateObjects();
 	void					RestoreObjects();
