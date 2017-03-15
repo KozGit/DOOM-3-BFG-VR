@@ -1,0 +1,147 @@
+windowDef Desktop {
+	rect	0 ,0 ,640 ,480 
+	matcolor	1 ,1 ,1 ,1 
+	background	"gui/weapons/chaingun/background"
+	visible	1
+
+	onEvent {
+		if ("gui::player_clip_low" == 1) {
+			set "cliplow::visible" "1" ;
+			set "clipempty::visible" "0" ;
+			set "ammoempty::visible" "0" ;
+			set "ammovalue::forecolor" "1 0.5 0 1" ;
+		}
+		if ("gui::player_clip_empty" == 1) {
+			set "clipempty::visible" "1" ;
+			set "ammovalue::forecolor" "1 0.1 0 0.5" ;
+			set "cliplow::visible" "0" ;
+			set "ammoempty::visible" "0" ;
+		}
+		if ("gui::player_ammo_empty" == 1) {
+			set "ammoempty::visible" "1" ;
+			set "clipempty::visible" "1" ;
+			set "cliplow::visible" "0" ;
+			set "ammovalue3::forecolor" "1 0.5 0 1" ;
+		}
+		if ("gui::player_clip_empty" == 0) {
+			set "clipempty::visible" "0" ;
+		}
+		if ("gui::player_clip_low" == 0) {
+			set "clipempty::visible" "0" ;
+			set "ammovalue::forecolor" "0.6 0.8 1 1" ;
+		}
+		if ("gui::player_ammo_empty" == 0) {
+			set "ammoempty::visible" "0" ;
+			set "ammovalue3::forecolor" "0.6 0.8 1 1" ;
+		}
+
+		if ("gui::player_totalammo" <= 200) {
+			set "ammoempty::visible" "1" ;
+			set "ammovalue3::forecolor" "1 0.5 0 1" ;
+		}
+		if ("gui::player_totalammo" >= 201) {
+			set "ammoempty::visible" "0" ;
+			set "ammovalue3::forecolor" "0.6 0.9 1 1" ;
+		}
+	} 
+
+	windowDef gridscroll {
+		rect		0 ,0 ,640 ,480 
+		background	"gui/weapons/chaingun/gridscroll"
+		matcolor	1 ,1 ,1 ,0.05
+		visible		1
+	}
+
+	windowDef Ammofill {
+		rect		182 ,480 ,("gui::player_totalammo" * 0.225) ,480		// => for totalammo 600		// 182 ,480 ,("gui::player_totalammo" * 0.16) ,480
+		invertrect 1
+
+		windowDef AmmofillBG {
+		//	rect		0-("gui::player_totalammo" * 0.16) ,0 ,160 ,480 
+			rect		("gui::player_totalammo" * 0.225) ,480 ,160 ,480	// => for totalammo 600		// ("gui::player_totalammo" * 0.16) ,480 ,160 ,480
+			background	"guis/assets/chaingun/ammofill"
+			matcolor	0.6 ,0.9 ,1 ,0.3
+			invertrect 1
+		}
+	}
+
+	windowDef Clipfill {
+		rect		440 ,0 ,("gui::player_ammo" * 0.534) ,480	// => for clipsize 300		//440 ,0 ,("gui::player_ammo" * 2.67) ,480 // => for original clipsize 60 // formular: (60*2,67) / wanted_clipsize
+
+		windowDef ClipfillBG {
+			rect		0 ,0 ,160 ,480 
+			background	"guis/assets/chaingun/clipfill"
+			matcolor	0.6 ,0.9 ,1 ,0.3
+			visible		1
+		}
+	}
+
+	windowDef Ammoempty {
+		rect		0 ,0 ,320 ,480 
+		background	"gui/weapons/chaingun/ammoborder"
+		matcolor	1 ,1 ,1 ,1
+		visible		0
+	}
+
+	windowDef Cliplow {
+		rect		320 ,0 ,320 ,480 
+		background	"gui/weapons/chaingun/clipbordero"
+		matcolor	1 ,1 ,1 ,1
+		visible		0
+	}
+
+	windowDef Clipempty {
+		rect		320 ,0 ,320 ,480 
+		background	"gui/weapons/chaingun/clipborder"
+		matcolor	1 ,1 ,1 ,1
+		visible		0
+	}
+
+	windowDef ammovalue {
+		text		"gui::player_ammo"
+		rect		190 ,123 ,250 ,220 
+		forecolor	0.6 ,0.8 ,1 ,1
+		visible		1
+		textscale	2.2000001	//3.5
+		textalign	2
+		textalignx	-14			//added		
+		textaligny	41			//added
+	//	shear -0.25, -0.1
+	}
+
+	windowDef ammovalue3 {
+		text		"gui::player_totalammo"
+	//	rect		460,215 ,300 ,220 
+		rect		30,215 ,153 ,220 
+		forecolor	0.6 ,0.9 ,1 ,1 
+		visible		1
+		textscale	1.4
+		textalign	2
+		textaligny	5			//added
+	//	shear 0.55, 0.02
+	}
+
+	windowDef Raster {
+		rect		0 ,0 ,640 ,480 
+		background	"guis/assets/machinegun/raster2"
+		matcolor	0 ,0 ,0 ,1
+		visible		0
+	}
+
+	windowDef NumTest3 {
+		rect		191 ,150 ,140 ,150 
+		background	"gui/weapons/machinegun/num"
+	//	background	"guis/assets/machinegun/numtest"
+		matcolor	1 ,1 ,1 ,1
+		visible		0	// [0 off / 1 on] deactivated to get rid of those wrong aligned LED segments
+	}
+
+	windowDef NumTest4 {
+		rect		306 ,150 ,140 ,150 
+		background	"gui/weapons/machinegun/num"
+	//	background	"guis/assets/machinegun/numtest"
+		matcolor	1 ,1 ,1 ,1
+		visible		0	// [0 off / 1 on] deactivated to get rid of those wrong aligned LED segments
+	}
+	*/
+}
