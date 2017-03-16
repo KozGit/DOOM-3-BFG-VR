@@ -123,7 +123,7 @@ idRenderWorldLocal::ReadBinaryShadowModel
 */
 idRenderModel* idRenderWorldLocal::ReadBinaryModel( idFile* fileIn )
 {
-	idStrStatic< MAX_OSPATH > name;
+	idStr name;
 	fileIn->ReadString( name );
 	idRenderModel* model = renderModelManager->AllocModel();
 	model->InitEmpty( name );
@@ -313,7 +313,7 @@ idRenderWorldLocal::ReadBinaryShadowModel
 */
 idRenderModel* idRenderWorldLocal::ReadBinaryShadowModel( idFile* fileIn )
 {
-	idStrStatic< MAX_OSPATH > name;
+	idStr name;
 	fileIn->ReadString( name );
 	idRenderModel* model = renderModelManager->AllocModel();
 	model->InitEmpty( name );
@@ -818,11 +818,11 @@ bool idRenderWorldLocal::InitFromMap( const char* name )
 	}
 	
 	// load it
-	idStrStatic< MAX_OSPATH > filename = name;
+	idStr filename = name;
 	filename.SetFileExtension( PROC_FILE_EXT );
 	
 	// check for generated file
-	idStrStatic< MAX_OSPATH > generatedFileName = filename;
+	idStr generatedFileName = filename;
 	generatedFileName.Insert( "generated/", 0 );
 	generatedFileName.SetFileExtension( "bproc" );
 	
@@ -864,7 +864,7 @@ bool idRenderWorldLocal::InitFromMap( const char* name )
 			loaded = true;
 			for( int i = 0; i < numEntries; i++ )
 			{
-				idStrStatic< MAX_OSPATH > type;
+				idStr type;
 				file->ReadString( type );
 				type.ToLower();
 				if( type == "model" )

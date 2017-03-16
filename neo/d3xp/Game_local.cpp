@@ -694,7 +694,7 @@ void idGameLocal::GetSaveGameDetails( idSaveGameDetails& gameDetails )
 	idLocationEntity* locationEnt = LocationForPoint( gameLocal.GetLocalPlayer()->GetEyePosition() );
 	const char* locationStr = locationEnt ? locationEnt->GetLocation() : idLocalization::GetString( "#str_02911" );
 	
-	idStrStatic< MAX_OSPATH > shortMapName = mapFileName;
+	idStr shortMapName = mapFileName;
 	shortMapName.StripFileExtension();
 	shortMapName.StripLeading( "maps/" );
 	
@@ -1744,7 +1744,7 @@ void idGameLocal::MapShutdown()
 	
 	ShutdownAsyncNetwork();
 	
-	idStrStatic< MAX_OSPATH > mapName = mapFileName;
+	idStr mapName = mapFileName;
 	mapName.StripPath();
 	mapName.StripFileExtension();
 	fileSystem->UnloadMapResources( mapName );

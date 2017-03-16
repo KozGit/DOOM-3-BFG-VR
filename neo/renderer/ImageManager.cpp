@@ -378,7 +378,7 @@ idImage*	idImageManager::GetImageWithParameters( const char* _name, textureFilte
 		usage = TD_LIGHT;
 	}
 	// strip any .tga file extensions from anywhere in the _name, including image program parameters
-	idStrStatic< MAX_OSPATH > name = _name;
+	idStr name = _name;
 	name.Replace( ".tga", "" );
 	name.BackSlashesToSlashes();
 	int hash = name.FileNameHash();
@@ -439,7 +439,7 @@ idImage*	idImageManager::ImageFromFile( const char* _name, textureFilter_t filte
 	}
 	
 	// strip any .tga file extensions from anywhere in the _name, including image program parameters
-	idStrStatic< MAX_OSPATH > name = _name;
+	idStr name = _name;
 	name.Replace( ".tga", "" );
 	name.BackSlashesToSlashes();
 	
@@ -843,7 +843,7 @@ idImageManager::ExcludePreloadImage
 */
 bool idImageManager::ExcludePreloadImage( const char* name )
 {
-	idStrStatic< MAX_OSPATH > imgName = name;
+	idStr imgName = name;
 	imgName.ToLower();
 	if( imgName.Find( "newfonts/", false ) >= 0 )
 	{

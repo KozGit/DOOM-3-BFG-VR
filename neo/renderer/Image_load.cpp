@@ -394,7 +394,7 @@ void idImage::ActuallyLoadImage( bool fromBackEnd )
 	// Figure out opts.colorFormat and opts.format so we can make sure the binary image is up to date
 	DeriveOpts();
 	
-	idStrStatic< MAX_OSPATH > generatedName = GetName();
+	idStr generatedName = GetName();
 	GetGeneratedName( generatedName, usage, cubeFiles );
 	
 	idBinaryImage im( generatedName );
@@ -584,7 +584,7 @@ void idImage::ActuallySaveImage() {
 	// Figure out opts.colorFormat and opts.format so we can make sure the binary image is up to date
 	DeriveOpts();
 
-	idStrStatic< MAX_OSPATH > generatedName = GetName();
+	idStr generatedName = GetName();
 	GetGeneratedName( generatedName, usage, cubeFiles );
 
 	idBinaryImage im( generatedName );
