@@ -452,7 +452,7 @@ idSoundSystemLocal::LoadSample
 */
 idSoundSample* idSoundSystemLocal::LoadSample( const char* name )
 {
-	idStrStatic< MAX_OSPATH > canonical = name;
+	idStr canonical = name;
 	canonical.ToLower();
 	canonical.BackSlashesToSlashes();
 	canonical.StripFileExtension();
@@ -567,7 +567,7 @@ idSoundSystemLocal::Preload
 void idSoundSystemLocal::Preload( idPreloadManifest& manifest )
 {
 
-	idStrStatic< MAX_OSPATH > filename;
+	idStr filename;
 	
 	int	start = Sys_Milliseconds();
 	int numLoaded = 0;
@@ -654,7 +654,7 @@ void idSoundSystemLocal::EndLevelLoad()
 		}
 		if( samples[i]->GetLevelLoadReferenced() )
 		{
-			idStrStatic< MAX_OSPATH > filename  = "generated/";
+			idStr filename  = "generated/";
 			filename += samples[ i ]->GetName();
 			filename.SetFileExtension( "idwav" );
 			preloadSort_t ps = {};

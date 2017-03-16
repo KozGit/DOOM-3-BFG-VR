@@ -488,7 +488,23 @@ idFileHandle idFileSystemLocal::OpenOSFile( const char* fileName, fsMode_t mode 
 		dwFlags = FILE_ATTRIBUTE_NORMAL;
 	}
 	
-	fp = CreateFile( fileName, dwAccess, dwShare, NULL, dwCreate, dwFlags, NULL );
+	// Carl: Support paths longer than 260 characters (MAX_PATH)
+	// see https://msdn.microsoft.com/en-us/library/windows/desktop/aa363855(v=vs.85).aspx
+	int len = strlen( fileName );
+	wchar_t *w;
+	w = (wchar_t*)malloc( ( 4 + len + 1 ) * 2 );
+	w[0] = '\\';
+	w[1] = '\\';
+	w[2] = '?';
+	w[3] = '\\';
+	for( int i = 0; i <= len; i++ )
+	{
+		char c = fileName[ i ];
+		w[ 4 + i ] = (c=='/') ? '\\' : c;
+	}
+	//common->Printf("CreateFileW(\"%S\")\n", w);
+	fp = CreateFileW( w, dwAccess, dwShare, NULL, dwCreate, dwFlags, NULL );
+	free( w );
 	if( fp == INVALID_HANDLE_VALUE )
 	{
 		return NULL;
@@ -635,7 +651,7 @@ void idFileSystemLocal::CreateOSPath( const char* OSPath )
 		return;
 	}
 	
-	idStrStatic< MAX_OSPATH > path( OSPath );
+	idStr path( OSPath );
 	
 	// RB begin
 #if defined(_WIN32)
@@ -768,7 +784,7 @@ void idFileSystemLocal::EndLevelLoad()
 			delete outFile;
 		}
 		
-		idStrStatic< MAX_OSPATH > preloadName = manifestName;
+		idStr preloadName = manifestName;
 		preloadName.Insert( "maps/", 0 );
 		preloadName += ".preload";
 		idFile* fileOut = fileSystem->OpenFileWrite( preloadName, "fs_savepath" );
@@ -1529,6 +1545,11 @@ Copy a fully specified file from one place to another`
 */
 void idFileSystemLocal::CopyFile( const char* fromOSPath, const char* toOSPath )
 {
+	if (idStr::Icmp(fromOSPath, toOSPath) == 0)
+	{
+		// same file can happen during build games
+		return;
+	}
 
 	idFile* src = OpenExplicitFileRead( fromOSPath );
 	if( src == NULL )
@@ -1537,19 +1558,13 @@ void idFileSystemLocal::CopyFile( const char* fromOSPath, const char* toOSPath )
 		return;
 	}
 	
-	if( idStr::Icmp( fromOSPath, toOSPath ) == 0 )
-	{
-		// same file can happen during build games
-		return;
-	}
-	
 	CopyFile( src, toOSPath );
 	delete src;
 	
 	if( strstr( fromOSPath, ".wav" ) != NULL )
 	{
-		idStrStatic< MAX_OSPATH > newFromPath = fromOSPath;
-		idStrStatic< MAX_OSPATH > newToPath = toOSPath;
+		idStr newFromPath = fromOSPath;
+		idStr newToPath = toOSPath;
 		
 		idLib::Printf( "Copying console samples for %s\n", newFromPath.c_str() );
 		newFromPath.SetFileExtension( "xma" );
@@ -1898,7 +1913,23 @@ void idFileSystemLocal::RemoveFile( const char* relativePath )
 		
 		// RB begin
 #if defined(_WIN32)
-		::DeleteFile( OSPath );
+		// Carl: Support paths longer than 260 characters (MAX_PATH)
+		// see https://msdn.microsoft.com/en-us/library/windows/desktop/aa363855(v=vs.85).aspx
+		int len = strlen( OSPath );
+		wchar_t *w;
+		w = (wchar_t*)malloc( ( 4 + len + 1 ) * 2 );
+		w[0] = '\\';
+		w[1] = '\\';
+		w[2] = '?';
+		w[3] = '\\';
+		for( int i = 0; i <= len; i++ )
+		{
+			char c = OSPath[ i ];
+			w[ 4 + i ] = (c == '/') ? '\\' : c;
+		}
+		//common->Printf("DeleteFileW(\"%S\")\n", w);
+		::DeleteFileW( w );
+		free( w );
 #else
 		remove( OSPath );
 #endif
@@ -2251,7 +2282,7 @@ int idFileSystemLocal::GetFileList( const char* relativePath, const idStrList& e
 		pathLength++;	// for the trailing '/'
 	}
 	
-	idStrStatic< MAX_OSPATH > strippedName;
+	idStr strippedName;
 	if( resourceFiles.Num() > 0 )
 	{
 		int idx = resourceFiles.Num() - 1;
@@ -2869,7 +2900,7 @@ int idFileSystemLocal::AddResourceFile( const char* resourceFileName )
 	}
 	// RB end
 	
-	idStrStatic< MAX_OSPATH > resourceFile = va( "maps/%s", resourceFileName );
+	idStr resourceFile = va( "maps/%s", resourceFileName );
 	idResourceContainer* rc = new idResourceContainer();
 	if( rc->Init( resourceFile, resourceFiles.Num() ) )
 	{
@@ -3232,7 +3263,7 @@ Returns false if the entry isn't found
 */
 bool idFileSystemLocal::GetResourceCacheEntry( const char* fileName, idResourceCacheEntry& rc )
 {
-	idStrStatic< MAX_OSPATH > canonical;
+	idStr canonical;
 	if( strstr( fileName, ":" ) != NULL )
 	{
 		// os path, convert to relative? scripts can pass in an OS path
@@ -3443,13 +3474,13 @@ idFile* idFileSystemLocal::OpenFileReadFlags( const char* relativePath, int sear
 				
 				if( fs_buildResources.GetBool() )
 				{
-					idStrStatic< MAX_OSPATH > relativePath = OSPathToRelativePath( copypath );
+					idStr relativePath = OSPathToRelativePath( copypath );
 					relativePath.BackSlashesToSlashes();
 					relativePath.ToLower();
 					
 					if( IsSoundSample( relativePath ) )
 					{
-						idStrStatic< MAX_OSPATH > samplePath = relativePath;
+						idStr samplePath = relativePath;
 						samplePath.SetFileExtension( "idwav" );
 						if( samplePath.Find( "generated/" ) == -1 )
 						{
@@ -3489,7 +3520,7 @@ idFile* idFileSystemLocal::OpenFileReadFlags( const char* relativePath, int sear
 								fileManifest.Append( relativePath );
 								continue;
 							}
-							idStrStatic< MAX_OSPATH > guiPath = relativePath;
+							idStr guiPath = relativePath;
 							guiPath.Replace( "guis/", va( "guis/%s/", lang ) );
 							fileManifest.Append( guiPath );
 						}

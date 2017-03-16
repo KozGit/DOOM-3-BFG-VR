@@ -283,12 +283,12 @@ void idCommonLocal::LoadLoadingGui( const char* mapName, bool& hellMap )
 	}
 	
 	// load / program a gui to stay up on the screen while loading
-	idStrStatic< MAX_OSPATH > stripped = mapName;
+	idStr stripped = mapName;
 	stripped.StripFileExtension();
 	stripped.StripPath();
 	
 	// use default load screen for demo
-	idStrStatic< MAX_OSPATH > matName = "guis/assets/loadscreens/";
+	idStr matName = "guis/assets/loadscreens/";
 	matName.Append( stripped );
 	const idMaterial* mat = declManager->FindMaterial( matName );
 	
@@ -468,7 +468,7 @@ void idCommonLocal::ExecuteMapChange()
 	currentMapName = matchParameters.mapName;
 	currentMapName.StripFileExtension();
 	
-	idStrStatic< MAX_OSPATH > fullMapName = "maps/";
+	idStr fullMapName = "maps/";
 	fullMapName += currentMapName;
 	fullMapName.SetFileExtension( "map" );
 	
@@ -518,7 +518,7 @@ void idCommonLocal::ExecuteMapChange()
 	
 	if( fileSystem->UsingResourceFiles() )
 	{
-		idStrStatic< MAX_OSPATH > manifestName = currentMapName;
+		idStr manifestName = currentMapName;
 		manifestName.Replace( "game/", "maps/" );
 		manifestName.Replace( "/mp/", "/" );
 		manifestName += ".preload";

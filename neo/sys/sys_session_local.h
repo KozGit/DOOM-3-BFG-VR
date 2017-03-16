@@ -300,8 +300,8 @@ protected:
 	{
 		bool						isMounted;
 		idStrStatic<128>			displayName;
-		idStrStatic< MAX_OSPATH >	packageFileName;
-		idStrStatic< MAX_OSPATH >	rootPath;
+		idStr	packageFileName;
+		idStr	rootPath;
 		int							dlcID;
 	};
 	
