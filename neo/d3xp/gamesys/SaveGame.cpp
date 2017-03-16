@@ -959,8 +959,8 @@ void idRestoreGame::ReadDecls( idStr& first_decl_string )
 {
 	idStr declName;
 	bool first = true;
-	int start = file->Tell() - 4;
-	common->Printf("idRestoreGame::ReadDecls() start, num=%d, %d\n", declManager->GetNumDeclTypes(), start); //Carl debug
+	//int start = file->Tell() - 4;
+	//common->Printf("idRestoreGame::ReadDecls() start, num=%d, %d\n", declManager->GetNumDeclTypes(), start); //Carl debug
 	for( int t = 0; t < declManager->GetNumDeclTypes(); t++ )
 	{
 		while( true )
@@ -981,7 +981,7 @@ void idRestoreGame::ReadDecls( idStr& first_decl_string )
 			declManager->FindType( ( declType_t )t, declName );
 		}
 	}
-	common->Printf("idRestoreGame::ReadDecls() %d bytes, %d\n", file->Tell() - start, start); //Carl debug
+	//common->Printf("idRestoreGame::ReadDecls() %d bytes, %d\n", file->Tell() - start, start); //Carl debug
 }
 
 /*
@@ -995,9 +995,9 @@ void idRestoreGame::CreateObjects()
 	idStr classname;
 	idTypeInfo* type;
 	
-	int start = file->Tell(); //Carl debug
+	//int start = file->Tell(); //Carl debug
 	ReadInt( num );
-	common->Printf("idRestoreGame::CreateObjects() start num=%d, %d\n", num, start); //Carl debug
+	//common->Printf("idRestoreGame::CreateObjects() start num=%d, %d\n", num, start); //Carl debug
 	
 	// create all the objects
 	objects.SetNum( num + 1 );
@@ -1018,7 +1018,7 @@ void idRestoreGame::CreateObjects()
 		InitTypeVariables( objects[i], type->classname, 0xce );
 #endif
 	}
-	common->Printf("idRestoreGame::CreateObjects(), num=%d, %d bytes, %d\n",  num, file->Tell()-start, start); //Carl debug
+	//common->Printf("idRestoreGame::CreateObjects(), num=%d, %d bytes, %d\n",  num, file->Tell()-start, start); //Carl debug
 }
 
 /*
@@ -1030,35 +1030,35 @@ void idRestoreGame::RestoreObjects()
 {
 	int i = 0;
 	
-	int start = file->Tell(); //Carl debug
-	common->Printf("%d: ReadSoundCommands() start, %d\n", i, start); //Carl debug
+	//int start = file->Tell(); //Carl debug
+	//common->Printf("%d: ReadSoundCommands() start, %d\n", i, start); //Carl debug
 	ReadSoundCommands();
-	int end = file->Tell(); //Carl debug
-	common->Printf("%d: ReadSoundCommands() %d bytes, %d\n", i, end - start, start); //Carl debug
+	//int end = file->Tell(); //Carl debug
+	//common->Printf("%d: ReadSoundCommands() %d bytes, %d\n", i, end - start, start); //Carl debug
 	
 	// read trace models
-	start = end; //Carl debug
-	common->Printf("%d: idClipModel::RestoreTraceModels() start, %d\n", i, start); //Carl debug
+	//start = end; //Carl debug
+	//common->Printf("%d: idClipModel::RestoreTraceModels() start, %d\n", i, start); //Carl debug
 	idClipModel::RestoreTraceModels( this );
-	common->Printf("%d: idClipModel::RestoreTraceModels() %d bytes, %d\n", i, file->Tell() - start, start); //Carl debug
+	//common->Printf("%d: idClipModel::RestoreTraceModels() %d bytes, %d\n", i, file->Tell() - start, start); //Carl debug
 	
 	// restore all the objects
 	for( i = 1; i < objects.Num(); i++ )
 	{
-		start = file->Tell(); //Carl debug
+		//start = file->Tell(); //Carl debug
 		if (objects[i])
 		{
-			common->Printf("%d: %s::Restore() start, %d\n", i, objects[i]->GetType()->classname, start); //Carl debug
+			//common->Printf("%d: %s::Restore() start, %d\n", i, objects[i]->GetType()->classname, start); //Carl debug
 			CallRestore_r( objects[ i ]->GetType(), objects[ i ] );
-			end = file->Tell(); //Carl debug
-			common->Printf("%d: %s::Restore() %d bytes, %d\n", i, objects[i]->GetType()->classname, end - start, start); //Carl debug
+			//end = file->Tell(); //Carl debug
+			//common->Printf("%d: %s::Restore() %d bytes, %d\n", i, objects[i]->GetType()->classname, end - start, start); //Carl debug
 		}
 		else
 		{
 			// Carl: If the object was a thread that we had to delete due to loading old savegame with bad scripts, read the dummy information manually
 			// copied from idScript::Restore
 			//common->Warning("objects[%d] is NULL\n", i);
-			common->Printf("%d: Dummy idThread::Restore(NULL) start, %d\n", i, start); //Carl debug
+			//common->Printf("%d: Dummy idThread::Restore(NULL) start, %d\n", i, start); //Carl debug
 
 			int threadNum, waitingFor, waitingUntil, lastExecuteTime, creationTime;
 			idClass* waitingForThread;
@@ -1133,8 +1133,8 @@ void idRestoreGame::RestoreObjects()
 			ReadInt(creationTime);
 
 			ReadBool(manualControl);
-			end = file->Tell(); //Carl debug
-			common->Printf("%d: Dummy idThread::Restore(NULL) %d bytes, %d\n", i, end - start, start); //Carl debug
+			//end = file->Tell(); //Carl debug
+			//common->Printf("%d: Dummy idThread::Restore(NULL) %d bytes, %d\n", i, end - start, start); //Carl debug
 		}
 	}
 	
@@ -1300,7 +1300,7 @@ void idRestoreGame::ReadString( idStr& string )
 {
 	string.Empty();
 	
-	int start = file->Tell(); //Carl debug
+	//int start = file->Tell(); //Carl debug
 	int offset = -1;
 	ReadInt( offset );
 	
@@ -1312,7 +1312,7 @@ void idRestoreGame::ReadString( idStr& string )
 	stringFile->Seek( offset, FS_SEEK_SET );
 	stringFile->ReadString( string );
 	
-	common->Printf("  ReadString(\"%s\") 4 bytes, %d\n", string.c_str(), start ); //Carl debug
+	//common->Printf("  ReadString(\"%s\") 4 bytes, %d\n", string.c_str(), start ); //Carl debug
 
 	return;
 }
@@ -1411,7 +1411,7 @@ idRestoreGame::ReadObject
 */
 bool idRestoreGame::ReadObject( idClass*& obj )
 {
-	int start = file->Tell(); //Carl debug
+	//int start = file->Tell(); //Carl debug
 	int index;
 	
 	ReadInt( index );
@@ -1420,10 +1420,10 @@ bool idRestoreGame::ReadObject( idClass*& obj )
 		Error( "idRestoreGame::ReadObject: invalid object index" );
 	}
 	obj = objects[ index ];
-	if (obj)
-		common->Printf("  ReadObject(%s) 4 bytes, %d\n", obj->GetClassname(), start); //Carl debug
-	else
-		common->Printf("  ReadObject(NULL) 4 bytes, %d\n", start); //Carl debug
+	//if (obj)
+	//	common->Printf("  ReadObject(%s) 4 bytes, %d\n", obj->GetClassname(), start); //Carl debug
+	//else
+	//	common->Printf("  ReadObject(NULL) 4 bytes, %d\n", start); //Carl debug
 	return index > 0;
 }
 
@@ -1444,7 +1444,7 @@ idRestoreGame::ReadDict
 */
 void idRestoreGame::ReadDict( idDict* dict )
 {
-	int start = file->Tell(); //Carl debug
+	//int start = file->Tell(); //Carl debug
 	int num;
 	int i;
 	idStr key;
@@ -1466,9 +1466,9 @@ void idRestoreGame::ReadDict( idDict* dict )
 			dict->Set( key, value );
 		}
 	}
-	int end = file->Tell();
-	common->Printf("  ReadDict() %d bytes, %d\n", end-start, start); //Carl debug
-	dict->Print();
+	//int end = file->Tell();
+	//common->Printf("  ReadDict() %d bytes, %d\n", end-start, start); //Carl debug
+	//dict->Print();
 }
 
 /*
