@@ -1016,7 +1016,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 							length = soundShader->GetLength() * 10000;
 						else
 							sound = command.string->c_str();
-						common->Printf( "\t//Voice %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), sound);
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), sound, SND_CHANNEL_VOICE, length ) )
 						{
 							if( !ent->StartSound( command.string->c_str(), SND_CHANNEL_VOICE, 0, false, NULL ) )
@@ -1028,7 +1027,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					}
 					else
 					{
-						common->Printf( "\t//Voice %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.soundShader->base->GetName() );
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName(), SND_CHANNEL_VOICE, command.soundShader->GetLength() * 10000 ) )
 							ent->StartSoundShader( command.soundShader, SND_CHANNEL_VOICE, 0, false, NULL );
 					}
@@ -1047,7 +1045,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 							length = soundShader->GetLength() * 10000;
 						else
 							sound = command.string->c_str();
-						common->Printf( "\t//Voice2 %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), sound);
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), sound, SND_CHANNEL_VOICE2, length ) )
 						{
 							if( !ent->StartSound( command.string->c_str(), SND_CHANNEL_VOICE2, 0, false, NULL ) )
@@ -1059,7 +1056,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					}
 					else
 					{
-						common->Printf( "\t//Voice2 %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.soundShader->base->GetName() );
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName(), SND_CHANNEL_VOICE2, command.soundShader->GetLength() * 10000 ) )
 							ent->StartSoundShader( command.soundShader, SND_CHANNEL_VOICE2, 0, false, NULL );
 					}
@@ -1078,7 +1074,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 							length = soundShader->GetLength() * 10000;
 						else
 							sound = command.string->c_str();
-						common->Printf("\t//Body %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), sound);
 						if (Flicksync_Voice(ent->name.c_str(), FullName(), sound, SND_CHANNEL_BODY, length))
 						{
 							if( !ent->StartSound( command.string->c_str(), SND_CHANNEL_BODY, 0, false, NULL ) )
@@ -1090,7 +1085,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					}
 					else
 					{
-						common->Printf( "\t//Body %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.soundShader->base->GetName() );
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName(), SND_CHANNEL_BODY, command.soundShader->GetLength() * 10000 ) )
 							ent->StartSoundShader( command.soundShader, SND_CHANNEL_BODY, 0, false, NULL );
 					}
@@ -1108,7 +1102,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					}
 					else
 					{
-						common->Printf( "\t//Body2 %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.soundShader->base->GetName() );
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName(), SND_CHANNEL_BODY2, command.soundShader->GetLength() * 10000 ) )
 							ent->StartSoundShader( command.soundShader, SND_CHANNEL_BODY2, 0, false, NULL );
 					}
@@ -1126,7 +1119,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					}
 					else
 					{
-						common->Printf( "\t//Body3 %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.soundShader->base->GetName() );
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName(), SND_CHANNEL_BODY3, command.soundShader->GetLength() * 10000 ) )
 							ent->StartSoundShader( command.soundShader, SND_CHANNEL_BODY3, 0, false, NULL );
 					}
