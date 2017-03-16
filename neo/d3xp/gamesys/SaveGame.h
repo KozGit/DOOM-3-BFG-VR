@@ -131,7 +131,7 @@ public:
 	idRestoreGame( idFile* savefile, idFile* stringTableFile, int saveVersion );
 	~idRestoreGame();
 	
-	void					ReadDecls();
+	void					ReadDecls( idStr& first_decl_string );
 	
 	void					CreateObjects();
 	void					RestoreObjects();
@@ -156,7 +156,7 @@ public:
 	void					ReadBounds( idBounds& bounds );
 	void					ReadMat3( idMat3& mat );
 	void					ReadAngles( idAngles& angles );
-	void					ReadObject( idClass*& obj );
+	bool					ReadObject( idClass*& obj );
 	void					ReadStaticObject( idClass& obj );
 	void					ReadDict( idDict* dict );
 	void					ReadMaterial( const idMaterial*& material );
@@ -184,7 +184,7 @@ public:
 		return version;
 	}
 	
-private:
+public: //Carl debug
 	idFile* 		file;
 	idFile* 		stringFile;
 public:
