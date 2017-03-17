@@ -2335,7 +2335,7 @@ void idPlayer::InitTeleportTarget()
 	if ( !( teleportTarget = (idAnimatedEntity*)gameLocal.FindEntity( "vrTeleportTarget" ) ) )
 	{
 		teleportTarget = (idAnimatedEntity*)gameLocal.SpawnEntityType( idAnimatedEntity::Type, NULL );
-		teleportTarget->name = "vrTeleportTarget";
+		teleportTarget->SetName( "vrTeleportTarget" );
 	}
 	teleportTarget.GetEntity()->SetModel( "telepad1" );
 	teleportTarget.GetEntity()->SetOrigin( origin );

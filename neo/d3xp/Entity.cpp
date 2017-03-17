@@ -856,6 +856,18 @@ void idEntity::Restore( idRestoreGame* savefile )
 		savefile->ReadInt( PVSAreas[ i ] );
 	}
 	
+	// setup script object
+	const char*			scriptObjectName;
+	if( !scriptObject.wasRestored && ShouldConstructScriptObjectAtSpawn() && spawnArgs.GetString( "scriptobject", NULL, &scriptObjectName ) )
+	{
+		if( !scriptObject.SetType( scriptObjectName ) )
+		{
+			common->Warning( "Script object '%s' not found on entity '%s'.", scriptObjectName, name.c_str() );
+		}
+
+		ConstructScriptObject();
+	}
+	
 	bool readsignals;
 	savefile->ReadBool( readsignals );
 	if( readsignals )

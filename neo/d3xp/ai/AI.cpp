@@ -709,7 +709,19 @@ void idAI::Restore( idRestoreGame* savefile )
 	savefile->ReadFloat( eyeFocusRate );
 	savefile->ReadFloat( headFocusRate );
 	savefile->ReadInt( focusAlignTime );
-	
+
+	// Carl: When loading NPCs with different scripts, their eyes end up wall-eyed, so we need to fix them
+	if( !scriptObject.wasRestored )
+	{
+		eyeMin = spawnArgs.GetAngles("eye_turn_min", "-10 -30 0");
+		eyeMax = spawnArgs.GetAngles("eye_turn_max", "10 30 0");
+		eyeVerticalOffset = spawnArgs.GetFloat("eye_verticle_offset", "5");
+		eyeHorizontalOffset = spawnArgs.GetFloat("eye_horizontal_offset", "-8");
+		eyeFocusRate = spawnArgs.GetFloat("eye_focus_rate", "0.5");
+		headFocusRate = spawnArgs.GetFloat("head_focus_rate", "0.1");
+		focusAlignTime = SEC2MS(spawnArgs.GetFloat("focus_align_time", "1"));
+	}
+
 	savefile->ReadJoint( flashJointWorld );
 	savefile->ReadInt( muzzleFlashEnd );
 	

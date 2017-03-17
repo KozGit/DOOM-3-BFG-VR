@@ -164,6 +164,7 @@ private:
 	
 public:
 	byte*						data;
+	bool						wasRestored;
 	
 	idScriptObject();
 	~idScriptObject();
