@@ -3782,6 +3782,8 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	throwVelocity = 0.0f;
 
 	armIK.Init( this, IK_ANIM, modelOffset );
+	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED)
+		NextWeapon();
 
 	vr_weaponSight.SetModified(); // make sure these get initialized properly
 	vr_headingBeamMode.SetModified();
