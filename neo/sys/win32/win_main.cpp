@@ -440,7 +440,7 @@ void Sys_Mkdir( const char *path ) {
 		char c = path[i];
 		w[ 4 + i ] = (c == '/') ? '\\' : c;
 	}
-	common->Printf("CreateDirectoryW(\"%S\")\n", w);
+	//common->Printf("CreateDirectoryW(\"%S\")\n", w);
 	CreateDirectoryW( w, NULL );
 	free( w );
 	//_mkdir (path);
@@ -506,7 +506,7 @@ bool Sys_Rmdir( const char *path ) {
 		w[ 4 + i ] = (c == '/') ? '\\' : c;
 	}
 	common->Printf("RemoveDirectoryW(\"%S\")\n", w);
-	bool result = ::RemoveDirectoryW(w);
+	bool result = ::RemoveDirectoryW( w ) != 0;
 	free( w );
 
 	return result;

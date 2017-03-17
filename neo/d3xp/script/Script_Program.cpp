@@ -1026,6 +1026,7 @@ idScriptObject::idScriptObject()
 {
 	data = NULL;
 	type = &type_object;
+	wasRestored = false;
 }
 
 /*
@@ -1052,6 +1053,7 @@ void idScriptObject::Free()
 	
 	data = NULL;
 	type = &type_object;
+	wasRestored = false;
 }
 
 /*
@@ -1096,6 +1098,7 @@ void idScriptObject::Restore( idRestoreGame* savefile )
 	// Empty string signals uninitialized object
 	if( typeName.Length() == 0 )
 	{
+		wasRestored = true;
 		return;
 	}
 	
@@ -1113,10 +1116,12 @@ void idScriptObject::Restore( idRestoreGame* savefile )
 		savefile->Read( temp, size );
 		free( temp );
 		common->Warning( "idScriptObject::Restore: size of object '%s' (%d) doesn't match size in save game (%d). Script object will be zeroed.", typeName.c_str(), type->Size(), size );
+		wasRestored = false;
 	}
 	else
 	{
 		savefile->Read( data, size );
+		wasRestored = true;
 	}
 	
 }

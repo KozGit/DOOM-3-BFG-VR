@@ -1191,6 +1191,46 @@ void idActor::Restore( idRestoreGame* savefile )
 	
 	savefile->ReadObject( reinterpret_cast<idClass*&>( scriptThread ) );
 	
+	// Carl: When loading saved games from versions with different scripts, the threads will all be null, and need to be created like on spawn
+#if 1
+	if( !scriptThread || !scriptObject.wasRestored || savefile->version < BUILD_NUMBER_FULLY_POSSESSED )
+	{
+		const char*	scriptObjectName;
+
+		// setup script object
+		if( spawnArgs.GetString( "scriptobject", NULL, &scriptObjectName ) )
+		{
+			if( !scriptObject.SetType( scriptObjectName ) )
+			{
+				gameLocal.Error( "Script object '%s' not found on entity '%s'.", scriptObjectName, name.c_str() );
+			}
+
+			ConstructScriptObject();
+		}
+	}
+#else
+	// This technique didn't work. NPCs wouldn't talk
+	if (!scriptThread )
+	{
+		// create script thread
+		scriptThread = new idThread();
+		scriptThread->ManualDelete();
+		scriptThread->ManualControl();
+		scriptThread->SetThreadName( name.c_str() );
+	}
+	if ( !scriptObject.constructed || savefile->version < BUILD_NUMBER_FULLY_POSSESSED )
+	{
+		// call script object's constructor
+		const function_t* constructor = scriptObject.GetConstructor();
+		if (!constructor)
+		{
+			gameLocal.Error("Missing constructor on '%s' for entity '%s'", scriptObject.GetTypeName(), name.c_str());
+		}
+		// just set the current function on the script.  we'll execute in the subclasses.
+		scriptThread->CallFunction(this, constructor, true);
+	}
+#endif
+
 	savefile->ReadString( waitState );
 	
 	headAnim.Restore( savefile );
@@ -1225,9 +1265,10 @@ void idActor::Restore( idRestoreGame* savefile )
 	
 	savefile->ReadBool( finalBoss );
 	
-	// Carl: When loading saved games from versions with different scripts, the threads will all be null, and need to be created like on spawn
-	if( !scriptThread || savefile->version < BUILD_NUMBER_FULLY_POSSESSED )
-		FinishSetup();
+	// Carl: When loading from RBDoom, we need to call this or all monsters
+	// will be stuck in a T-Pose.
+	if( savefile->version < BUILD_NUMBER_FULLY_POSSESSED )
+		animator.ClearAllAnims(gameLocal.time, 0);
 
 	idStr statename;
 	
