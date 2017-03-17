@@ -323,7 +323,8 @@ public:
 	renderEntity_t			holsterRenderEntity;					// used to present a model to the renderer
 	qhandle_t				holsterModelDefHandle;					// handle to static renderer model
 	idMat3					holsterAxis;
-	int						holsteredWeapon;
+	int						holsteredWeapon, extraHolsteredWeapon;
+	const char*		extraHolsteredWeaponModel;
 
 	renderEntity_t			hudEntity; // koz add a model to place the hud into the world
 	qhandle_t				hudHandle;
