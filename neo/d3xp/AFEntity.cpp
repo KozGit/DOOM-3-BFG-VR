@@ -3093,6 +3093,26 @@ void idAFEntity_ClawFourFingers::Restore( idRestoreGame* savefile )
 	
 	SetCombatModel();
 	LinkCombat();
+	
+	// Carl: Fix the crane when loading Alpha Labs 3 from other mods
+	if( gameLocal.loadScriptFailed || savefile->version < BUILD_NUMBER_FULLY_POSSESSED )
+	{
+		af.GetPhysics()->LockWorldConstraints( true );
+		af.GetPhysics()->SetForcePushable( true );
+		SetPhysics( af.GetPhysics() );
+
+		fl.takedamage = true;
+
+		for( i = 0; i < 4; i++ )
+		{
+			fingers[i] = static_cast<idAFConstraint_Hinge*>( af.GetPhysics()->GetConstraint( clawConstraintNames[i] ) );
+			if ( !fingers[i] )
+			{
+				gameLocal.Error( "idClaw_FourFingers '%s': can't find claw constraint '%s'", name.c_str(), clawConstraintNames[i] );
+			}
+		}
+		return;
+	}
 }
 
 /*
