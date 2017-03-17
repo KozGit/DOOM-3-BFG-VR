@@ -2396,7 +2396,7 @@ bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first
 	common->Printf("idProgram::Restore() Read variables after defaults, num=%d, %d\n", num, savefile->file->Tell() - 4); //Carl debug
 
 	// Carl: now for the hard part... we don't know how many bytes we need to read. The minimum is zero, the maximum is (num - minVariableDefaultsNum).
-	// All we know is, it's followed by a 4-byte integer between 0 and 3, then a 4-byte integer pointing to a valid string in the strings file.
+	// All we know is, it's followed by a 4-byte hash, then a 4-byte integer between 0 and 3, then a 4-byte integer pointing to a valid string in the strings file.
 	// And we're not allowed to seek ahead or behind in the save file to check what's next.
 
 	// This code will fail if: this is an old save and the first table name is longer than 255 characters or only 1 character long (highly unlikely) or missing
@@ -2411,23 +2411,25 @@ bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first
 	bool malloc_failed = !temp;
 	if (malloc_failed)
 		temp = &variables[minVariableDefaultsNum];
-	int skill, stringPointer, stringLength;
+	int saved_checksum, skill = -1, stringPointer, stringLength;
 	idStr actualString = "";
 	// a buffer large enough to hold the two 4-byte values after our bytes
-	byte circleBuffer[8];
+	byte circleBuffer[12];
 	int circleBufferIndex = 0;
 	// prime the buffer
-	for (i = 0; i < 8; i++)
+	for (i = 0; i < 12; i++)
 		savefile->ReadByte(circleBuffer[i]);
 	i = 0;
 	while (i < maxCount)
 	{
-		// check if we reached the end (marked by the skill level followed by a string)
-		skill = circleBuffer[circleBufferIndex] | (circleBuffer[(circleBufferIndex + 1) % 8] << 8) | (circleBuffer[(circleBufferIndex + 2) % 8] << 16) | (circleBuffer[(circleBufferIndex + 3) % 8] << 24);
+		// check if we reached the end (marked by the saved checksum then skill level followed by a string)
+		saved_checksum = circleBuffer[circleBufferIndex] | (circleBuffer[(circleBufferIndex + 1) % 12] << 8) | (circleBuffer[(circleBufferIndex + 2) % 12] << 16) | (circleBuffer[(circleBufferIndex + 3) % 12] << 24);
+		saved_checksum = BigLong(saved_checksum);
+		skill = circleBuffer[(circleBufferIndex + 4) % 12] | (circleBuffer[(circleBufferIndex + 5) % 12] << 8) | (circleBuffer[(circleBufferIndex + 6) % 12] << 16) | (circleBuffer[(circleBufferIndex + 7) % 12] << 24);
 		skill = BigLong(skill);
 		if (skill >= 0 && skill <= 3) // 1 = marine, 3 = nightmare
 		{
-			stringPointer = circleBuffer[(circleBufferIndex + 4) % 8] | (circleBuffer[(circleBufferIndex + 5) % 8] << 8) | (circleBuffer[(circleBufferIndex + 6) % 8] << 16) | (circleBuffer[(circleBufferIndex + 7) % 8] << 24);
+			stringPointer = circleBuffer[(circleBufferIndex + 8) % 12] | (circleBuffer[(circleBufferIndex + 9) % 12] << 8) | (circleBuffer[(circleBufferIndex + 10) % 12] << 16) | (circleBuffer[(circleBufferIndex + 11) % 12] << 24);
 			stringPointer = BigLong(stringPointer);
 			if (stringPointer > 12 && stringPointer <= savefile->stringFile->Length() - 4)
 			{
@@ -2448,7 +2450,7 @@ bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first
 		// read replacement byte value into index
 		savefile->ReadByte(circleBuffer[circleBufferIndex]);
 		// increment index
-		circleBufferIndex = (circleBufferIndex + 1) % 8;
+		circleBufferIndex = (circleBufferIndex + 1) % 12;
 		i++;
 	}
 	// go through temp
@@ -2460,9 +2462,11 @@ bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first
 	// set our values
 	if (skill == -1)
 	{
-		skill = circleBuffer[circleBufferIndex] | (circleBuffer[(circleBufferIndex + 1) % 8] << 8) | (circleBuffer[(circleBufferIndex + 2) % 8] << 16) | (circleBuffer[(circleBufferIndex + 3) % 8] << 24);
+		saved_checksum = circleBuffer[circleBufferIndex] | (circleBuffer[(circleBufferIndex + 1) % 12] << 8) | (circleBuffer[(circleBufferIndex + 2) % 12] << 16) | (circleBuffer[(circleBufferIndex + 3) % 12] << 24);
+		saved_checksum = BigLong(saved_checksum);
+		skill = circleBuffer[(circleBufferIndex + 4) % 12] | (circleBuffer[(circleBufferIndex + 5) % 12] << 8) | (circleBuffer[(circleBufferIndex + 6) % 12] << 16) | (circleBuffer[(circleBufferIndex + 7) % 12] << 24);
 		skill = BigLong(skill);
-		stringPointer = circleBuffer[(circleBufferIndex + 4) % 8] | (circleBuffer[(circleBufferIndex + 5) % 8] << 8) | (circleBuffer[(circleBufferIndex + 6) % 8] << 16) | (circleBuffer[(circleBufferIndex + 7) % 8] << 24);
+		stringPointer = circleBuffer[(circleBufferIndex + 8) % 12] | (circleBuffer[(circleBufferIndex + 9) % 12] << 8) | (circleBuffer[(circleBufferIndex + 10) % 12] << 16) | (circleBuffer[(circleBufferIndex + 11) % 12] << 24);
 		stringPointer = BigLong(stringPointer);
 		savefile->stringFile->Seek(stringPointer, FS_SEEK_SET);
 		savefile->stringFile->ReadInt(stringLength);
@@ -2473,11 +2477,8 @@ bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first
 	skill_level = skill;
 	first_decl_string = actualString;
 
-	int saved_checksum, checksum;
-	
-	savefile->ReadInt( saved_checksum );
-	common->Printf("idProgram::Restore(), num=%d, %d bytes, %d\n", maxCount, savefile->file->Tell() - start - 8, start); //Carl debug
-	checksum = CalculateChecksum();
+	common->Printf("idProgram::Restore(), num=%d, %d bytes, %d\n", maxCount, savefile->file->Tell() - start - 12, start); //Carl debug
+	int checksum = CalculateChecksum();
 	
 	if( saved_checksum != checksum )
 	{
