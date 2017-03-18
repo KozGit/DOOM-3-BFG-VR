@@ -1469,8 +1469,8 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		cmdSystem->AppendCommandText( "bind SAY_GRENADES _impulse7\n" );
 		cmdSystem->AppendCommandText( "bind SAY_PLASMA_GUN _impulse8\n" );
 		cmdSystem->AppendCommandText( "bind SAY_BFG _impulse10\n" );
-		cmdSystem->AppendCommandText( "bind SAY_SOUL_CUBE _impulse12\n" );
-		cmdSystem->AppendCommandText( "bind SAY_ARTIFACT _impulse12\n" );
+		cmdSystem->AppendCommandText( "bind SAY_SOUL_CUBE _soulcube\n" );
+		cmdSystem->AppendCommandText( "bind SAY_ARTIFACT _artifact\n" );
 		cmdSystem->AppendCommandText( "bind SAY_RESET_VIEW _impulse32\n" );
 		
 
