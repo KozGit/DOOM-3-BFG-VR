@@ -1,6 +1,6 @@
 !define BASE_INSTALL_DIR "$PROGRAMFILES32\Steam\steamapps\common\DOOM 3 BFG Edition"
 !define PRODUCT_NAME "Doom 3 BFG VR Fully Possessed"
-!define PRODUCT_VERSION 0.021
+!define PRODUCT_VERSION 0.022
 
 !define BUILD_DIR "Build\Release"
 
@@ -110,7 +110,7 @@ SetCompressorDictSize 64
 
 Name "${PRODUCT_NAME}"
 !define UN_NAME "Uninstall $(^Name)"
-OutFile "Doom3BFGVR_Fully_Possessed_Alpha021.exe"
+OutFile "Doom3BFGVR_Fully_Possessed_Alpha022.exe"
 InstallDir "${BASE_INSTALL_DIR}"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
