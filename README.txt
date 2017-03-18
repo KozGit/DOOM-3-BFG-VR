@@ -79,14 +79,17 @@ Minimum system requirements:
 	CPU: 3 GHz + Intel compatible
 	System Memory: 8 GB
 	Graphics card: Nvidia Geforce GTX 960 or higher, with recent drivers
+	               or AMD 290 or above
 	OS: Windows 7 64 bit or above?
 	VR: SteamVR compatible HMD or Oculus Rift DK2 or above
+	A microphone or HMD containing a microphone
 
 Recommended system requirements:
 
 	CPU: 3 GHz + Intel compatible
 	System Memory: 8 GB
 	Graphics card: Nvidia Geforce GTX 970 or higher, with latest drivers
+	               or AMD 290 or above
 	OS: Windows 10 64 bit
 	VR: HTC Vive or Oculus Rift CV1 with Touch and roomscale sensors
 	
@@ -106,6 +109,23 @@ You should patch the game to the latest version. If using Steam, this will happe
 
 Note that Doom 3 BFG Edition is available from the Steam store at
 http://store.steampowered.com/app/208200/
+
+
+Saved games:
+------------
+The saved game folder is:
+%UserProfile%\Saved Games\id Software\DOOM 3 BFG\Fully Possessed
+
+Your settings are also saved there as vr_oculus.cfg and vr_openvr.cfg
+You can delte the those setting files to return to default settings.
+
+It will also try to load games (with partial success) from:
+%UserProfile%\Saved Games\id Software\DOOM 3 BFG\base
+%UserProfile%\Saved Games\id Software\RBDOOM 3 BFG\base
+
+Games loaded from other versions, other mods, or different texture packs
+will have some glitches until you complete the level (which may not always be
+possible without cheats).
 
 
 Steam:
@@ -176,7 +196,7 @@ __________________________________________
 
 5. Installing the mod:
 
-   Start the Doom3BFGVR_Fully_Possessed_Alpha021.exe installer.
+   Start the Doom3BFGVR_Fully_Possessed_Alpha022.exe installer.
 
    If Doom 3 BFG was not originally installed on your main Steam hard-drive, change the install path to reflect
    the Doom 3 BFG installation directory. If you have enough disk space, it is recommended to select to install 
@@ -190,29 +210,39 @@ __________________________________________
    under 'Speech recognition.' At a minimum run 'Set up microphone', and for optimal performance 'Train your 
    computer to better understand you' 
 
-7. Run the shortcut on your desktop, or run the Doom3BFGVR.exe file in your Doom 3 BFG folder to launch the game.
+7. If you have an Oculus Rift: In the Oculus Home window, turn on: (cog), Settings, General, Unknown Sources
+
+8. Run the shortcut on your desktop, or run the Doom3BFGVR.exe file in your Doom 3 BFG folder to launch the game.
    (SteamVR will be automatically activated if needed)
 
    To play the game, you need the game data from a legal copy of the game, which 
    requires Steam for Windows. Currently, Doom 3 BFG: Fully Possessed is only compatible with Windows.
 
+9. Enjoy
 
-
-
-8. Enjoy
-
-9. If you run into bugs, please report them. ( see section 9 )
+10. If you run into bugs, please report them. ( see section 9 )
 
 ___________________________________________________
 
 4) NEW FEATURES
 __________________________________________
 
+New in 0.22:
+	REALLY fix loading saved games from other versions and mods.
+	ATI / AMD graphics card support.
+	Head tracking in the main menu.
+	Holster slots work better with the PDA and QuickSave.
+	Allow path names longer than 260 chars (fixes crash?).
+	Slightly improve voice commands.
+	Default keyboard / mouse controls.
+	Less debug prints for sound effects.
+
 New in 0.21:
 	Talking waking monsters is fixed.
 	Loading all saved games from 0.020 is fixed.
-	You can now load most saved games from RBDoom 3 BFG (with minor issues).
-	You can now load all saved games from version 0.015 (with minor issues).
+	You can now load most saved games from RBDoom 3 BFG (with major issues).
+	You can now load all saved games from version 0.015 (with major issues).
+	Improved performance.
 	There's a menu option for Asynchronous SpaceWarp.
 	You can now chose to walk in the direction of either hand when walking.
 	Language is now detected based on sound files not .lang files.
@@ -647,6 +677,49 @@ Default controls for the Oculus Touch, HTC Vive, and Gamepad :
 	    ≡ / Start = menu.
 	    
 	  
+ _________________________________________
+  Default Control Bindings: Keyboard / Mouse
+
+
+	You can play the game in VR using keyboard and mouse if you don't have motion controllers.
+	The game will NOT automatically switch to gamepad mode when you start using the keyboard,
+	so you might need to turn on gamepad mode manually in the VR options if your arms are weird.
+	You can't use the mouse for room-scale yet because we haven't implemented head aiming.
+
+	    WASD: Movement. This can cause motion sickness, So it's recommended to 
+	          teleport by holding RMB, looking where you want to go, and letting go.
+	    
+	    Z/X:	Comfort turn 45 degrees left or right
+	    C:	  	Crouch
+	    Space:	Jump
+	
+	    Shift:	Run
+
+	    E:	Use (not really needed)
+	    R:  Reload
+	    F:	Toggle Flashlight
+	
+	    Arrow 
+	    Keys:	Aim weapon, and will turn you if you aim past the deadzone threshold.
+	    
+	    NumPad:	Comfort turn left/right 45 degrees
+	    NumPad0:	Teleport
+	    
+	    LMB: 	Attack / Fire weapon
+	    RMB:	Teleport (aim with head, not mouse)
+	    MMB:	Reload
+	    Mouse
+	    Wheel:	Switch weapons
+	    
+	    ~:		Console
+	    Q:		Soul Cube / Artifact
+	    1-0:	Switch weapons
+	    
+	    Tab:	PDA / Skip cutscene
+	    Esc:	menu
+	    Pause:	Freeze program
+	    F5:		Quick Save
+	  
 	_________________________________________	  
 	Using the PDA: 
 	  
@@ -813,12 +886,19 @@ Voice Controls:
 	  Say:	PDA
 	      personal data assistant
 	      
-	
+	  Say:	Cancel
+		  
 	System/Pause Menu
 	
 	  Say:	menu
 	      system
-	      pause game
+	      system menu
+	      computer, menu
+	      computer, arch		  
+
+	  Say:	Cancel
+	      Exit Game
+	      Return To Game
 	      
 	Weapon Selection:
 	  
@@ -884,7 +964,7 @@ Voice Controls:
 	        
 	  Rocket Launcher:
 	  
-	    say:	Rocket Launcher
+	    Say:	Rocket Launcher
 	    
 	  BFG:
 	  
@@ -901,14 +981,16 @@ Voice Controls:
 	    
 	  Artifact
 	  
-	    Say:	Artifact
+	    Say:
+		    Artifact
 	        The artifact
 	        Heart of hell
 	        Blood stone
 	        
 	  Grabber:
 	  
-	    say:	Grabber
+	    Say:
+		    Grabber
 	        Ionized plasma levitator
 	        IPL unit
 	        Gravity gun
@@ -917,25 +999,26 @@ Voice Controls:
 	    
 	Holodeck Commands:
 
-	  Say:	Cancel
-	      
-	      Pause Game
+	  Say:
 	      Computer, Freeze Program
-	      
-	      Exit Game
-	      Computer, End Program
-	      Computer, Exit
-	      Computer, Program Complete
-	      Computer, Cancel Program
-	      
-	      Resume Game
-	      Unpause Game
 	      Computer, Resume Program
 	      Computer, Play Program
 	      Computer, Run Program
 	      Computer, Continue Program
-	        
-	
+
+	      Pause Game
+	      Resume Game
+	      Unpause Game
+	      
+		  Computer, Arch		  
+	      Computer, Menu
+
+	      Computer, End Program
+	      Computer, Exit
+	      Computer, Program Complete
+	      Computer, Cancel Program
+
+	      
 	Speech Recognition Control:
 
 	  Say:	What Can I Say
