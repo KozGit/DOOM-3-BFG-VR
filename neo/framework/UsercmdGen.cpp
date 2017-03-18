@@ -193,6 +193,8 @@ userCmdString_t	userCmdStrings[] =
 	// koz end
 	{ "_soulcube", UB_IMPULSE_SOULCUBE }, // new impulse for Soul Cube
 	{ "_artifact", UB_IMPULSE_ARTIFACT }, // new impulse for The Artifact
+	{ "_pause", UB_IMPULSE_PAUSE }, // new impulse for Computer, Freeze Program
+	{ "_resume", UB_IMPULSE_RESUME }, // new impulse for Computer, Resume Program
 
 	{ NULL,				UB_NONE },
 };

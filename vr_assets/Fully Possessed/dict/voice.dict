@@ -47,10 +47,11 @@ action {
 action {
 
 	name RESUME
-	entries 6
+	entries 7
 	
 	"resume game"
 	"unpause game"
+	"return to game"
 	"computer, resume program"
 	"computer, play program"
 	"computer, run program"
@@ -86,10 +87,13 @@ action {
 action {
 
 	name MENU
-	entries 2
+	entries 5
 	
 	"menu"
 	"system"
+	"system menu"
+	"computer, menu"
+	"computer, arch"
 }
 
 action {

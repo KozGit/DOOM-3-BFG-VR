@@ -95,6 +95,10 @@ const int IMPULSE_42			= 42;			// Carl: soul cube
 const int IMPULSE_SOULCUBE = IMPULSE_42;
 const int IMPULSE_43			= 43;			// Carl: the artifact
 const int IMPULSE_ARTIFACT = IMPULSE_43;
+const int IMPULSE_44			= 44;			// Carl: computer, freeze program
+const int IMPULSE_PAUSE = IMPULSE_44;
+const int IMPULSE_45			= 45;			// Carl: computer, resume program
+const int IMPULSE_RESUME = IMPULSE_45;
 
 class usercmd_t
 {
@@ -223,6 +227,10 @@ typedef enum
 	UB_IMPULSE_SOULCUBE = UB_IMPULSE42,
 	UB_IMPULSE43, // Carl: The Artifact
 	UB_IMPULSE_ARTIFACT = UB_IMPULSE43,
+	UB_IMPULSE44, // Carl: Freeze Program
+	UB_IMPULSE_PAUSE = UB_IMPULSE44,
+	UB_IMPULSE45, // Carl: Resume Program
+	UB_IMPULSE_RESUME = UB_IMPULSE45,
 
 	UB_MAX_BUTTONS
 } usercmdButton_t;
