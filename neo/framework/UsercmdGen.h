@@ -91,7 +91,10 @@ const int IMPULSE_39			= 39;			// freelook
 const int IMPULSE_40			= 40;			// system menu
 const int IMPULSE_41			= 41;     // click to move
 //koz end
-const int IMPULSE_42			= 42;			// Carl: was teleport, but now there's a "_teleport" button instead.
+const int IMPULSE_42			= 42;			// Carl: soul cube
+const int IMPULSE_SOULCUBE = IMPULSE_42;
+const int IMPULSE_43			= 43;			// Carl: the artifact
+const int IMPULSE_ARTIFACT = IMPULSE_43;
 
 class usercmd_t
 {
@@ -150,7 +153,7 @@ typedef enum
 typedef enum
 {
 	UB_NONE,
-	
+
 	UB_MOVEUP,
 	UB_MOVEDOWN,
 	UB_LOOKLEFT,
@@ -161,7 +164,7 @@ typedef enum
 	UB_LOOKDOWN,
 	UB_MOVELEFT,
 	UB_MOVERIGHT,
-	
+
 	UB_ATTACK,
 	UB_SPEED,
 	UB_ZOOM,
@@ -169,7 +172,7 @@ typedef enum
 	UB_USE,
 	UB_TALK,
 	UB_TELEPORT,
-	
+
 	UB_IMPULSE0,
 	UB_IMPULSE1,
 	UB_IMPULSE2,
@@ -202,7 +205,7 @@ typedef enum
 	UB_IMPULSE29,
 	UB_IMPULSE30,
 	UB_IMPULSE31, // escape to access menu
-	
+
 	// Koz begin
 	UB_IMPULSE32, // HMD/Body orientation reset
 	UB_IMPULSE33, // lasersight toggle
@@ -216,7 +219,10 @@ typedef enum
 	UB_IMPULSE41, // click to move
 	// Koz end
 
-  UB_IMPULSE42, // Carl: was teleport, but now we use UB_TELEPORT instead
+	UB_IMPULSE42, // Carl: Soul Cube
+	UB_IMPULSE_SOULCUBE = UB_IMPULSE42,
+	UB_IMPULSE43, // Carl: The Artifact
+	UB_IMPULSE_ARTIFACT = UB_IMPULSE43,
 
 	UB_MAX_BUTTONS
 } usercmdButton_t;

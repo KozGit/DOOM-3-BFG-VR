@@ -93,6 +93,8 @@ static bindInfo_t keyboardBinds[] =
 	{ "#str_00100184", "_impulse9" },			// ROCKETS
 	{ "#str_00100185", "_impulse10" },			// BFG
 	{ "#str_swf_soulcube_artifact", "_impulse12" },	// SOULCUBE / ARTIFACT	
+	{ "Soul Cube", "_soulcube" }, // Carl: Soul Cube
+	{ "The Artifact", "_artifact" }, // Carl: Artifact
 
 
 	{ "                                ", "" }, // koz divider

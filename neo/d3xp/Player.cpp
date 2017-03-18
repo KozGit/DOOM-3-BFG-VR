@@ -9766,6 +9766,21 @@ void idPlayer::PerformImpulse( int impulse )
 			SelectWeapon( weapon_chainsaw, false, true );
 			break;
 		}
+		// Carl:
+		case IMPULSE_SOULCUBE:
+		{
+			if (!isIntroMap)
+				SelectWeapon(weapon_soulcube, false, true);
+			break;
+		}
+		// Carl:
+		case IMPULSE_ARTIFACT:
+		{
+			// The Artifact
+			if (!isIntroMap)
+				SelectWeapon(weapon_bloodstone, false, false); // we want it to toggle through to the correct active version
+			break;
+		}
 
 				
 		// Koz Begin
@@ -9837,28 +9852,6 @@ void idPlayer::PerformImpulse( int impulse )
 			break;
 		}
 		// Koz end
-
-		// Carl: Teleport
-		case IMPULSE_42:
-		{
-			// teleport
-			if (aimValidForTeleport)
-			{
-				aimValidForTeleport = false;
-				int t = vr_teleport.GetInteger();
-				if (t > 0)
-				{
-					if (t == 1)
-						playerView.Flash(colorBlack, 140);
-					else
-						playerView.Flash(colorWhite, 140);
-					Teleport(teleportAimPoint, viewAngles, NULL);
-					if (t == 1)
-						PlayFootStepSound();
-				}
-			}
-			break;
-		}
 
 	}
 }

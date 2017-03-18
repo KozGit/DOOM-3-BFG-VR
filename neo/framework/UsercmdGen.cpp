@@ -191,7 +191,9 @@ userCmdString_t	userCmdStrings[] =
 	{ "_impulse40", UB_IMPULSE40 }, // new impulse for system menu;
 	{ "_impulse41", UB_IMPULSE41 }, // new impulse for click to move;
 	// koz end
-		
+	{ "_soulcube", UB_IMPULSE_SOULCUBE }, // new impulse for Soul Cube
+	{ "_artifact", UB_IMPULSE_ARTIFACT }, // new impulse for The Artifact
+
 	{ NULL,				UB_NONE },
 };
 
