@@ -9852,6 +9852,41 @@ void idPlayer::PerformImpulse( int impulse )
 			break;
 		}
 		// Koz end
+		// Carl:
+		case IMPULSE_PAUSE:
+		{
+			if (gameLocal.inCinematic || Flicksync_InCutscene)
+			{
+
+			}
+			else if (commonVr->PDAforced && !commonVr->PDAforcetoggle)
+			{
+				// If we're in the menu, just exit
+				PerformImpulse( 40 );
+			}
+			else
+			{
+				g_stopTime.SetBool( !g_stopTime.GetBool() );
+			}
+			break;
+		}
+		case IMPULSE_RESUME:
+		{
+			if (gameLocal.inCinematic || Flicksync_InCutscene)
+			{
+
+			}
+			else
+			{
+				g_stopTime.SetBool(false);
+				if (objectiveSystemOpen || (commonVr->PDAforced && !commonVr->PDAforcetoggle))
+				{
+					// If we're in the menu, just exit
+					PerformImpulse(40);
+				}
+			}
+			break;
+		}
 
 	}
 }

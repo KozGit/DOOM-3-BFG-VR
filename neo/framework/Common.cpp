@@ -1448,8 +1448,8 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 
 		// Carl talking should always be bound to _talk
 		cmdSystem->AppendCommandText( "bind TALK _talk\n" );
-		cmdSystem->AppendCommandText( "bind SAY_PAUSE _impulse40\n" );
-		//cmdSystem->AppendCommandText("bind SAY_RESUME _impulse40\n");
+		cmdSystem->AppendCommandText( "bind SAY_PAUSE _pause\n" );
+		cmdSystem->AppendCommandText("bind SAY_RESUME _resume\n");
 		cmdSystem->AppendCommandText( "bind SAY_EXIT _impulse40\n" );
 		cmdSystem->AppendCommandText( "bind SAY_MENU _impulse40\n" );
 		//	cmdSystem->AppendCommandText("bind SAY_CANCEL _impulse\n");

@@ -99,6 +99,8 @@ static bindInfo_t keyboardBinds[] =
 
 	{ "                                ", "" }, // koz divider
 	{ "#str_04065", "" },						// HEADING
+	{ "Pause Game", "_pause" },			// Carl: Computer, Freeze Program
+	{ "Resume Game", "_resume" },			// Carl: Computer, Resume Program
 	{ "#str_04067", "savegame quick" },			// QUICK SAVE
 	{ "#str_04068", "loadgame quick" },			// QUICK LOAD
 	{ "#str_04069", "screenshot" },				// SCREENSHOT
