@@ -2270,7 +2270,7 @@ void idPlayer::Init()
 	SetupPDASlot( true );
 	holsteredWeapon = weapon_fists;
 	extraHolsteredWeapon = weapon_fists;
-	const char* extraHolsteredWeaponModel = NULL;
+	extraHolsteredWeaponModel = NULL;
 
 	// Koz begin
 	
@@ -3610,7 +3610,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	SetupPDASlot( true );
 	holsteredWeapon = weapon_fists;
 	extraHolsteredWeapon = weapon_fists;
-	const char* extraHolsteredWeaponModel = NULL;
+	extraHolsteredWeaponModel = NULL;
 
 	for( int i = 0; i < MAX_PLAYER_PDA; i++ )
 	{
