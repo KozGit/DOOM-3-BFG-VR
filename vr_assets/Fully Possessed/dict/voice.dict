@@ -87,10 +87,11 @@ action {
 action {
 
 	name MENU
-	entries 4
+	entries 5
 	
 	"menu"
 	"system"
+	"system menu"
 	"computer, menu"
 	"computer, arch"
 }
