@@ -125,7 +125,12 @@ It will also try to load games (with partial success) from:
 
 Games loaded from other versions, other mods, or different texture packs
 will have some glitches until you complete the level (which may not always be
-possible without cheats).
+possible without cheats). You should use the "restartMap" console command after
+loading if you are near the start or you get stuck due to a glitch. It will
+restart the map with your current inventory but without any glitches. You can
+also use the "endLevel" console command to win the level and continue to the
+next level (without any glitches) if you get stuck near the end. But that is
+sort of cheating.
 
 
 Steam:
@@ -1727,8 +1732,18 @@ ___________________________________________
 9) CONSOLE VARIABLES AND COMMANDS
 __________________________________________
 
+Access the console with the ~` key, or you can add these to your config file in:
+%UserProfile%\Saved Games\id Software\DOOM 3 BFG\Fully Possessed\vr_oculus.cfg
+(or vr_openvr.cfg)
 
 Commands:
+
+	restartMap - Restart the map, preserving your inventory. Use this if you get stuck, or you load a game from another mod
+	             and you were near the start, to get rid of the glitches. Or use this if the glitches make it impossible to
+	             continue.
+
+	endLevel - Win this map and continue to the next level, with all your inventory and the level's important items.
+	           Use this if you get stuck near the end of a map, due to glitches. I consider this to be sort of cheating.
 
 	noclip - Toggle no-clipping mode, in case you accidentally teleport somewhere you can't get out of
 
