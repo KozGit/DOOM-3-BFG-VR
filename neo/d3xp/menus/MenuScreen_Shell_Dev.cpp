@@ -141,6 +141,8 @@ void idMenuScreen_Shell_Dev::SetupDevOptions()
 	devOptions.Append( devOption_t( "game/le_exis2", "Exis 2" ) );
 	devOptions.Append( devOption_t( "game/le_hell", "Hell" ) );
 	devOptions.Append( devOption_t( "game/le_hell_post", "Hell Post" ) );
+	devOptions.Append( devOption_t( NULL, "-Texture Pack-" ) );
+	devOptions.Append( devOption_t( "range", "Gun Range" ) );
 	//devOptions.Append( devOption_t( NULL, "-Test Maps-" ) );
 	//devOptions.Append( devOption_t( "game/pdas", "PDAs" ) );
 	//devOptions.Append( devOption_t( "testmaps/test_box", "Box" ) );
