@@ -1448,13 +1448,39 @@ CONSOLE_COMMAND_SHIP( map, "loads a map", idCmdSystem::ArgCompletion_MapName )
 ==================
 Common_RestartMap_f
 ==================
+Carl: Restart the current map with your inventory intact. 
 */
-CONSOLE_COMMAND_SHIP( restartMap, "restarts the current map", NULL )
+CONSOLE_COMMAND_SHIP( restartMap, "Restarts the current map, preserving your inventory. Use this if you get stuck, or loaded a bad saved game.", NULL )
 {
 	if( g_demoMode.GetBool() )
 	{
 		cmdSystem->AppendCommandText( va( "devmap %s %d\n", commonLocal.GetCurrentMapName(), 0 ) );
 	}
+	else
+	{
+		gameLocal.sessionCommand = "map ";
+		gameLocal.sessionCommand.Append( commonLocal.GetCurrentMapName() );
+	}
+}
+
+/*
+==================
+Common_EndLevel_f
+==================
+Carl: Cheat! Use this if you get stuck.
+*/
+CONSOLE_COMMAND_SHIP( endLevel, "Cheat. Win the level and continue to the next map with your inventory.", NULL )
+{
+	for( idEntity *ent = gameLocal.spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next() )
+	{
+		if( ent->IsType( idTarget_EndLevel::Type ) )
+		{
+			ent->Signal( SIG_TRIGGER );
+			ent->ProcessEvent( &EV_Activate, gameLocal.GetLocalPlayer() );
+			ent->TriggerGuis();
+		}
+	}
+	common->Warning( "idTarget_EndLevel not found. Can't end the level." );
 }
 
 /*
