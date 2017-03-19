@@ -1475,8 +1475,69 @@ CONSOLE_COMMAND_SHIP( endLevel, "Cheat. Win the level and continue to the next m
 	{
 		if( ent->IsType( idTarget_EndLevel::Type ) )
 		{
+			idStr mapName = commonLocal.GetCurrentMapName();
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			if (player)
+			{
+				if (mapName.Cmp("game/mars_city1") == 0)
+				{
+					if ( player->inventory.pdas.Num() == 0 )
+						player->GivePDA(NULL, NULL);
+				}
+				if (mapName.Cmp("game/mars_city2") == 0)
+				{
+					player->GiveInventoryItem("weapon_pistol");
+					player->GiveInventoryItem("weapon_flashlight_new");
+				}
+				if (mapName.Cmp("game/admin") == 0)
+				{
+					player->GiveInventoryItem("weapon_chaingun");
+				}
+				if (mapName.Cmp("game/cpuboss") == 0 || mapName.Cmp("game/delta2a") == 0 || mapName.Cmp("game/phobos4") == 0 || mapName.Cmp("game/le_hell") == 0)
+				{
+					if (player->weapon_bfg < 0 || !(player->inventory.weapons & (1 << player->weapon_bfg)))
+						player->GiveInventoryItem("weapon_bfg");
+				}
+				if (mapName.Cmp("game/hell1") == 0)
+				{
+					if (player->weapon_soulcube < 0 || !(player->inventory.weapons & (1 << player->weapon_soulcube)))
+						player->GiveInventoryItem("weapon_soulcube");
+				}
+				else if (mapName.Cmp("game/le_enpro2") == 0)
+				{
+					if (player->weapon_grabber < 0 || !(player->inventory.weapons & (1 << player->weapon_grabber)))
+						player->GiveInventoryItem("weapon_grabber");
+				}
+				else if (mapName.Cmp("game/erebus1") == 0)
+				{
+					if (player->weapon_bloodstone < 0 || !(player->inventory.weapons & (1 << player->weapon_bloodstone)))
+						player->GiveInventoryItem("weapon_bloodstone_passive");
+					if (player->weapon_grabber < 0 || !(player->inventory.weapons & (1 << player->weapon_grabber)))
+						player->GiveInventoryItem("weapon_grabber");
+				}
+				else if (mapName.Cmp("game/erebus2") == 0)
+				{
+					if (player->weapon_bloodstone_active1 < 0 || !(player->inventory.weapons & (1 << player->weapon_bloodstone_active1)))
+						player->GiveInventoryItem("weapon_bloodstone_active1");
+				}
+				else if (mapName.Cmp("game/erebus3") == 0)
+				{
+					if (player->weapon_shotgun_double < 0 || !(player->inventory.weapons & (1 << player->weapon_shotgun_double)))
+						player->GiveInventoryItem("weapon_shotgun_double");
+				}
+				else if (mapName.Cmp("game/erebus6") == 0)
+				{
+					if (player->weapon_bloodstone_active2 < 0 || !(player->inventory.weapons & (1 << player->weapon_bloodstone_active2)))
+						player->GiveInventoryItem("weapon_bloodstone_active2");
+				}
+				else if (mapName.Cmp("game/phobos2") == 0)
+				{
+					if (player->weapon_bloodstone_active3 < 0 || !(player->inventory.weapons & (1 << player->weapon_bloodstone_active3)))
+						player->GiveInventoryItem( "weapon_bloodstone_active3" );
+				}
+			}
 			ent->Signal( SIG_TRIGGER );
-			ent->ProcessEvent( &EV_Activate, gameLocal.GetLocalPlayer() );
+			ent->ProcessEvent( &EV_Activate, player );
 			ent->TriggerGuis();
 		}
 	}
