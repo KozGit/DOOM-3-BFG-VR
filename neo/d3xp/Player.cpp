@@ -4599,25 +4599,9 @@ void idPlayer::DrawHUDVR( idMenuHandler_HUD* _hudManager )
 		{
 
 			idMenuScreen_HUD* hud = _hudManager->GetHud();
-
-			if ( weapon.GetEntity()->ShowCrosshair() && vr_weaponSight.GetInteger() == 4 )
-			{
-				if ( weapon.GetEntity()->GetGrabberState() == 1 || weapon.GetEntity()->GetGrabberState() == 2 )
-				{
-					hud->SetCursorState( this, CURSOR_GRABBER, 1 );
-					hud->SetCursorState( this, CURSOR_IN_COMBAT, 0 );
-				}
-				else
-				{
-					hud->SetCursorState( this, CURSOR_GRABBER, 0 );
-					hud->SetCursorState( this, CURSOR_IN_COMBAT, 1 );
-				}
-			}
-			else
-			{
-				hud->SetCursorState( this, CURSOR_NONE, 1 );
-			}
-
+			
+			// we don't want the 2d crosshair in vr
+			hud->SetCursorState( this, CURSOR_NONE, 1 );
 			hud->UpdateCursorState();
 
 		}
@@ -11927,9 +11911,13 @@ void idPlayer::UpdateLaserSight()
 	
 	float beamLength = g_laserSightLength.GetFloat(); // max length to run trace.
 	static int lastCrosshairMode = -1;
-		
-	bool hideSight = false;
 	
+	int sightMode = vr_weaponSight.GetInteger();
+
+	bool hideSight = false;
+
+	bool traceHit = false;
+		
 
 	// In Multiplayer, weapon might not have been spawned yet.
 	if( weapon.GetEntity() ==  NULL )
@@ -11945,6 +11933,7 @@ void idPlayer::UpdateLaserSight()
 	// check if lasersight should be hidden
 	if ( !IsGameStereoRendered() ||
 		!laserSightActive ||							// koz allow user to toggle lasersight.
+		sightMode == -1 ||
 		!weapon.GetEntity()->ShowCrosshair() ||		
 		AI_DEAD ||
 		weapon->IsHidden() ||												
@@ -11958,17 +11947,28 @@ void idPlayer::UpdateLaserSight()
 	{
 		hideSight = !showTeleport;
 	}
+
 	if (showTeleport)
 	{
 		GetHandOrHeadPositionWithHacks( vr_teleport.GetInteger(), muzzleOrigin, muzzleAxis );
 	}
 	
-	if ( vr_weaponSight.GetInteger() == 0 && !showTeleport ) // using the lasersight
-
+	
+	if ( hideSight == true || ( sightMode != 0 && sightMode < 4 ) )
 	{
-		// common->Printf( "Using lasersight  hidesight = %i\n", hideSight );
-		
-		// hide the crosshair model
+		laserSightRenderEntity.allowSurfaceInViewID = -1;
+		if ( laserSightHandle == -1 )
+		{
+			laserSightHandle = gameRenderWorld->AddEntityDef( &laserSightRenderEntity );
+		}
+		else
+		{
+			gameRenderWorld->UpdateEntityDef( laserSightHandle, &laserSightRenderEntity );
+		}
+	}
+
+	if ( !showTeleport && ( hideSight == true || sightMode == 0 ) )
+	{
 		crosshairEntity.allowSurfaceInViewID = -1;
 		if ( crosshairHandle == -1 )
 		{
@@ -11978,45 +11978,37 @@ void idPlayer::UpdateLaserSight()
 		{
 			gameRenderWorld->UpdateEntityDef( crosshairHandle, &crosshairEntity );
 		}
+	}
+		
+	// calculate the beam origin and length.
+	start = muzzleOrigin - muzzleAxis[0] * 2.0f;
+	
+	if ( vr_laserSightUseOffset.GetBool() ) start += weapon->laserSightOffset * muzzleAxis;
 
-		if ( hideSight == true )
-		{
+	end = start + muzzleAxis[0] * beamLength;
 
-			// hide laser sight
-			laserSightRenderEntity.allowSurfaceInViewID = -1;
-			if ( laserSightHandle == -1 )
-			{
-				laserSightHandle = gameRenderWorld->AddEntityDef( &laserSightRenderEntity );
-			}
-			else
-			{
-				gameRenderWorld->UpdateEntityDef( laserSightHandle, &laserSightRenderEntity );
-			}
-			return;
-		}
+	// Koz begin : Keep the lasersight from clipping through everything. 
 
+	traceHit = gameLocal.clip.TracePoint( traceResults, start, end, MASK_SHOT_RENDERMODEL, this );
+	if ( traceHit )
+	{
+		beamLength *= traceResults.fraction;
+	}
+	
+	
+	if ( (vr_weaponSight.GetInteger() == 0 || vr_weaponSight.GetInteger() > 3 )  && !showTeleport && !hideSight ) // using the lasersight
 
+	{
 		// only show in the player's view
 		// koz - changed show lasersight shows up in all views/reflections in VR
 		laserSightRenderEntity.allowSurfaceInViewID = 0;// entityNumber + 1;
 		laserSightRenderEntity.axis.Identity();
-		laserSightRenderEntity.origin = muzzleOrigin - muzzleAxis[0] * 2.0f;
-
-		if ( vr_laserSightUseOffset.GetBool()) laserSightRenderEntity.origin += weapon->laserSightOffset * muzzleAxis;
-
-		// Koz begin : Keep the lasersight from clipping through everything. 
-
-		start = laserSightRenderEntity.origin;
-		end = start + muzzleAxis[0] * beamLength;
-
-		if ( gameLocal.clip.TracePoint( traceResults, start, end, MASK_SOLID, this ) )
-		{
-			beamLength *= traceResults.fraction;
-		}
+		laserSightRenderEntity.origin = start;
+		
 
 		// program the beam model
 		idVec3&	target = *reinterpret_cast<idVec3*>(&laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_END_X]);
-		target = laserSightRenderEntity.origin + muzzleAxis[0] * beamLength;
+		target = start + muzzleAxis[0] * beamLength;
 
 		laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_WIDTH] = g_laserSightWidth.GetFloat();
 
@@ -12028,85 +12020,43 @@ void idPlayer::UpdateLaserSight()
 		{
 			gameRenderWorld->UpdateEntityDef( laserSightHandle, &laserSightRenderEntity );
 		}
-		
-		return;
-	
 	}
 	
-	// using the crosshair model instead of the lasersight
-
-	// hide the lasersight model
-	laserSightRenderEntity.allowSurfaceInViewID = -1;
-	if ( laserSightHandle == -1 )
-	{
-		laserSightHandle = gameRenderWorld->AddEntityDef( &laserSightRenderEntity );
-	}
-	else
-	{
-		gameRenderWorld->UpdateEntityDef( laserSightHandle, &laserSightRenderEntity );
-	}
-	
-	// set the crosshair skin
-		
-	//int mode = vr_weaponSight.GetInteger();
-	//if ( mode != lastCrosshairMode )
-
 	if ( vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS && vr_weaponSight.GetInteger() == 0 )
 		vr_weaponSight.SetInteger( 1 );
 
-	if ( vr_weaponSight.IsModified() || ( oldTeleport && !showTeleport) )
-	{
-		
-		//lastCrosshairMode = mode;
-		int mode = vr_weaponSight.GetInteger();
-		vr_weaponSight.ClearModified();
+	sightMode = vr_weaponSight.GetInteger();
+	vr_weaponSight.ClearModified();
 
-		switch ( mode )
-		{
-			case 0:
-				hideSight = true;
-				break;
+	if ( !showTeleport && ( sightMode < 1 || hideSight )) return;
 
-			case 1:
-				crosshairEntity.customSkin = skinCrosshairDot;
-				break;
-
-			case 2:
-				crosshairEntity.customSkin = skinCrosshairCircleDot;
-				break;
-
-			case 3:
-				crosshairEntity.customSkin = skinCrosshairCross;
-				break;
-
-			default:
-				crosshairEntity.customSkin = skinCrosshairDot;
-
-		}
-	}
-		
-	if ( hideSight )
-	{
-
-		// hide crosshair model
-		crosshairEntity.allowSurfaceInViewID = -1;
-		if ( crosshairHandle == -1 )
-		{
-			crosshairHandle = gameRenderWorld->AddEntityDef( &crosshairEntity );
-		}
-		else
-		{
-			gameRenderWorld->UpdateEntityDef( crosshairHandle, &crosshairEntity );
-		}
-		return;
-	}
-		
-	crosshairEntity.allowSurfaceInViewID = entityNumber + 1;
-	crosshairEntity.axis.Identity();
-	crosshairEntity.origin = muzzleOrigin - muzzleAxis[0] * 2.0f;
+	// update the crosshair model
+	// set the crosshair skin
 	
-	start = crosshairEntity.origin;
-	end = start + muzzleAxis[0] * beamLength;
+	switch ( sightMode )
+	{
+		case 4:
+		case 1:
+			crosshairEntity.customSkin = skinCrosshairDot;
+			break;
+
+		case 5:
+		case 2:
+			crosshairEntity.customSkin = skinCrosshairCircleDot;
+			break;
+
+		case 6:
+		case 3:
+			crosshairEntity.customSkin = skinCrosshairCross;
+			break;
+
+		default:
+			crosshairEntity.customSkin = skinCrosshairDot;
+
+	}
+		
+	if ( showTeleport || sightMode > 0 ) crosshairEntity.allowSurfaceInViewID = entityNumber + 1;
+	crosshairEntity.axis.Identity();
 	
 	static float muzscale = 0.0f ;
 
@@ -12114,10 +12064,11 @@ void idPlayer::UpdateLaserSight()
 	crosshairEntity.axis = muzzleAxis * muzscale;
 
 	bool aimLadder = false, aimActor = false, aimElevator = false;
+	
 	static idAngles surfaceAngle = ang_zero;
-	if (gameLocal.clip.TracePoint(traceResults, start, end, MASK_SHOT_RENDERMODEL, this))
+	
+	if ( traceHit )
 	{
-		beamLength *= traceResults.fraction;
 		muzscale = 1 + beamLength / 100;
 
 		if ( showTeleport || vr_weaponSightToSurface.GetBool() )
@@ -12192,7 +12143,6 @@ void idPlayer::UpdateLaserSight()
 		if ( aimValidForTeleport )
 		{
 			crosshairEntity.origin = teleportPoint;
-			//crosshairEntity.origin = aimPoint;
 			crosshairEntity.customSkin = skinCrosshairCircleDot;
 		}
 		else if ( pitchValid )

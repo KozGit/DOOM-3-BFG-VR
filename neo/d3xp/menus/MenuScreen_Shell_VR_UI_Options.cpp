@@ -387,8 +387,8 @@ void idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::AdjustFie
 			break;
 		}
 		case UI_OPTIONS_FIELD_WEAPON_SIGHT: {
-			static const int numValues = 4;
-			static const int values[numValues] = { 0, 1, 2, 3 };
+			static const int numValues = 8;
+			static const int values[numValues] = { -1, 0, 1, 2, 3, 4, 5, 6 };
 			vr_weaponSight.SetInteger( AdjustOption( vr_weaponSight.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
@@ -448,9 +448,14 @@ idSWFScriptVar idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options:
 		case UI_OPTIONS_FIELD_WEAPON_SIGHT:
 		{
 			const int ws = vr_weaponSight.GetInteger();
+			
+			if ( ws == -1 )
+			{
+				return "Disabled";
+			}
 			if ( ws == 0 )
 			{
-				return "Laser SIght";
+				return "Laser Sight";
 			}
 			if ( ws == 1 )
 			{
@@ -463,6 +468,18 @@ idSWFScriptVar idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options:
 			if ( ws == 3 )
 			{
 				return "Crosshair";
+			}
+			if ( ws == 4 )
+			{
+				return "Laser + Dot";
+			}
+			if ( ws == 5 )
+			{
+				return "Laser + Circle";
+			}
+			if ( ws == 6 )
+			{
+				return "Laser + Cross";
 			}
 		}
 		case UI_OPTIONS_FIELD_SIGHT_TO_SURFACE:
