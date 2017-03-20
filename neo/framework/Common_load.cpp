@@ -1448,13 +1448,100 @@ CONSOLE_COMMAND_SHIP( map, "loads a map", idCmdSystem::ArgCompletion_MapName )
 ==================
 Common_RestartMap_f
 ==================
+Carl: Restart the current map with your inventory intact. 
 */
-CONSOLE_COMMAND_SHIP( restartMap, "restarts the current map", NULL )
+CONSOLE_COMMAND_SHIP( restartMap, "Restarts the current map, preserving your inventory. Use this if you get stuck, or loaded a bad saved game.", NULL )
 {
 	if( g_demoMode.GetBool() )
 	{
 		cmdSystem->AppendCommandText( va( "devmap %s %d\n", commonLocal.GetCurrentMapName(), 0 ) );
 	}
+	else
+	{
+		gameLocal.sessionCommand = "map ";
+		gameLocal.sessionCommand.Append( commonLocal.GetCurrentMapName() );
+	}
+}
+
+/*
+==================
+Common_EndLevel_f
+==================
+Carl: Cheat! Use this if you get stuck.
+*/
+CONSOLE_COMMAND_SHIP( endLevel, "Cheat. Win the level and continue to the next map with your inventory.", NULL )
+{
+	for( idEntity *ent = gameLocal.spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next() )
+	{
+		if( ent->IsType( idTarget_EndLevel::Type ) )
+		{
+			idStr mapName = commonLocal.GetCurrentMapName();
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			if (player)
+			{
+				if (mapName.Cmp("game/mars_city1") == 0)
+				{
+					if ( player->inventory.pdas.Num() == 0 )
+						player->GivePDA(NULL, NULL);
+				}
+				if (mapName.Cmp("game/mars_city2") == 0)
+				{
+					player->GiveInventoryItem("weapon_pistol");
+					player->GiveInventoryItem("weapon_flashlight_new");
+				}
+				if (mapName.Cmp("game/admin") == 0)
+				{
+					player->GiveInventoryItem("weapon_chaingun");
+				}
+				if (mapName.Cmp("game/cpuboss") == 0 || mapName.Cmp("game/delta2a") == 0 || mapName.Cmp("game/phobos4") == 0 || mapName.Cmp("game/le_hell") == 0)
+				{
+					if (player->weapon_bfg < 0 || !(player->inventory.weapons & (1 << player->weapon_bfg)))
+						player->GiveInventoryItem("weapon_bfg");
+				}
+				if (mapName.Cmp("game/hell1") == 0)
+				{
+					if (player->weapon_soulcube < 0 || !(player->inventory.weapons & (1 << player->weapon_soulcube)))
+						player->GiveInventoryItem("weapon_soulcube");
+				}
+				else if (mapName.Cmp("game/le_enpro2") == 0)
+				{
+					if (player->weapon_grabber < 0 || !(player->inventory.weapons & (1 << player->weapon_grabber)))
+						player->GiveInventoryItem("weapon_grabber");
+				}
+				else if (mapName.Cmp("game/erebus1") == 0)
+				{
+					if (player->weapon_bloodstone < 0 || !(player->inventory.weapons & (1 << player->weapon_bloodstone)))
+						player->GiveInventoryItem("weapon_bloodstone_passive");
+					if (player->weapon_grabber < 0 || !(player->inventory.weapons & (1 << player->weapon_grabber)))
+						player->GiveInventoryItem("weapon_grabber");
+				}
+				else if (mapName.Cmp("game/erebus2") == 0)
+				{
+					if (player->weapon_bloodstone_active1 < 0 || !(player->inventory.weapons & (1 << player->weapon_bloodstone_active1)))
+						player->GiveInventoryItem("weapon_bloodstone_active1");
+				}
+				else if (mapName.Cmp("game/erebus3") == 0)
+				{
+					if (player->weapon_shotgun_double < 0 || !(player->inventory.weapons & (1 << player->weapon_shotgun_double)))
+						player->GiveInventoryItem("weapon_shotgun_double");
+				}
+				else if (mapName.Cmp("game/erebus6") == 0)
+				{
+					if (player->weapon_bloodstone_active2 < 0 || !(player->inventory.weapons & (1 << player->weapon_bloodstone_active2)))
+						player->GiveInventoryItem("weapon_bloodstone_active2");
+				}
+				else if (mapName.Cmp("game/phobos2") == 0)
+				{
+					if (player->weapon_bloodstone_active3 < 0 || !(player->inventory.weapons & (1 << player->weapon_bloodstone_active3)))
+						player->GiveInventoryItem( "weapon_bloodstone_active3" );
+				}
+			}
+			ent->Signal( SIG_TRIGGER );
+			ent->ProcessEvent( &EV_Activate, player );
+			ent->TriggerGuis();
+		}
+	}
+	common->Warning( "idTarget_EndLevel not found. Can't end the level." );
 }
 
 /*

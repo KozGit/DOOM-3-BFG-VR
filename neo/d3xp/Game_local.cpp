@@ -1609,7 +1609,46 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	idEvent::Restore( &savegame );
 	
 	savegame.RestoreObjects();
+	// now everything has been loaded from the file
 	
+	// loop through and delete any objects spawned by constructors before they will be created again by calling constructors again
+	if( loadScriptFailed )
+	{
+		for( idEntity *parent = spawnedEntities.Next(); parent != NULL; parent = parent->spawnNode.Next() )
+		{
+			const char* s;
+			if( parent->IsType(idAI::Type) && (s = parent->scriptObject.GetTypeName()) )
+			{
+				if( idStr::Cmp(s, "char_sentry") == 0 || idStr::Cmp(s, "monster_boss_guardian") == 0 || idStr::Cmp(s, "monster_boss_guardian2") == 0
+					|| idStr::Cmp(s, "monster_boss_guardian_spawner") == 0 || idStr::Cmp(s, "monster_boss_guardian2_spawner_obj") == 0 || idStr::Cmp(s, "monster_boss_guardian_seeker") == 0
+					|| idStr::Cmp(s, "monster_demon_sentry") == 0 || idStr::Cmp(s, "monster_flying_forgotten") == 0 || idStr::Cmp(s, "monster_turret") == 0 )
+				{
+					idEntity *ent;
+					if( ent = FindEntity( parent->name + "_light" ) )
+						ent->PostEventMS( &EV_Remove, 0 );
+					if( ent = FindEntity( parent->name + "_light1" ) )
+						ent->PostEventMS( &EV_Remove, 0 );
+					if( ent = FindEntity( parent->name + "_light2" ) )
+						ent->PostEventMS( &EV_Remove, 0 );
+					if( ent = FindEntity( parent->name + "_lightbeam" ) )
+						ent->PostEventMS( &EV_Remove, 0 );
+					if( ent = FindEntity( parent->name + "light" ) )
+						ent->PostEventMS( &EV_Remove, 0 );
+					if( ent = FindEntity( parent->name + "beam" ) )
+						ent->PostEventMS( &EV_Remove, 0 );
+					if( ent = FindEntity( parent->name + "beam_target" ) )
+						ent->PostEventMS( &EV_Remove, 0 );
+					if( ent = FindEntity( parent->name + "_lightning" ) )
+						ent->PostEventMS( &EV_Remove, 0 );
+					if( ent = FindEntity( parent->name + "_spawn" ) )
+						ent->PostEventMS( &EV_Remove, 0 );
+				}
+			}
+		}
+
+	}
+
+
 	mpGame.Reset();
 	
 	mpGame.Precache();
