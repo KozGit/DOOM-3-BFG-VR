@@ -406,6 +406,9 @@ private:
 	jointHandle_t			weaponHandAttacher[2];
 	idVec3					weaponHandDefaultPos[2];
 	idMat3					weaponHandDefaultAxis[2];
+	
+	idVec3					laserSightOffset;
+	
 	// koz end
 	
 	idHashTable<WeaponParticle_t>	weaponParticles;

@@ -101,6 +101,9 @@ entityDef weapon_rocketlauncher {
 	"controllerShakeHighTime"	"500"
 	"controllerShakeLowMag"		"0.9"
 	"controllerShakeLowTime"	"750"
+	
+	//koz
+	"laserSightOffset"			"-5.4 4.1 -1.15"
 }
 
 

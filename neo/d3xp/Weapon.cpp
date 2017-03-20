@@ -1275,7 +1275,7 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 			// koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[1].ToString(), weaponHandDefaultAxis[1].ToAngles().ToString() );
 		}
 
-		
+		laserSightOffset = weaponDef->dict.GetVector( "laserSightOffset" );
 
 	}
 	// find some joints in the model for locating effects

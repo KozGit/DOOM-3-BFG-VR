@@ -104,6 +104,9 @@ entityDef weapon_shotgun {
 	"controllerShakeHighTime"	"120"
 	"controllerShakeLowMag"		"10.9"
 	"controllerShakeLowTime"	"250"
+	
+	//koz
+	"laserSightOffset"			"0 -2.05 0"
 }
 
 entityDef moveable_item_shotgun {

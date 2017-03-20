@@ -77,6 +77,7 @@ idCVar vr_teleportDist( "vr_teleportDist", "60", CVAR_FLOAT,"" );
 idCVar vr_teleportMaxPoints( "vr_teleportMaxPoints", "24", CVAR_FLOAT, "" );
 idCVar vr_teleportMaxDrop( "vr_teleportMaxDrop", "360", CVAR_FLOAT, "" );
 
+idCVar vr_laserSightUseOffset( "vr_laserSightUseOffset", "1", CVAR_BOOL | CVAR_ARCHIVE, " 0 = lasersight emits straight from barrel.\n 1 = use offsets from weapon def" );
 
 
 // for testing
@@ -12001,6 +12002,8 @@ void idPlayer::UpdateLaserSight()
 		laserSightRenderEntity.axis.Identity();
 		laserSightRenderEntity.origin = muzzleOrigin - muzzleAxis[0] * 2.0f;
 
+		if ( vr_laserSightUseOffset.GetBool()) laserSightRenderEntity.origin += weapon->laserSightOffset * muzzleAxis;
+
 		// Koz begin : Keep the lasersight from clipping through everything. 
 
 		start = laserSightRenderEntity.origin;
@@ -12013,7 +12016,7 @@ void idPlayer::UpdateLaserSight()
 
 		// program the beam model
 		idVec3&	target = *reinterpret_cast<idVec3*>(&laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_END_X]);
-		target = muzzleOrigin + muzzleAxis[0] * beamLength;
+		target = laserSightRenderEntity.origin + muzzleAxis[0] * beamLength;
 
 		laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_WIDTH] = g_laserSightWidth.GetFloat();
 
