@@ -263,20 +263,6 @@ bool idMenuScreen_Shell_VR_UI_Options::HandleAction( idWidgetAction & action, co
 			return true;
 		}
 		
-		case WIDGET_ACTION_PRESS_FOCUSED:
-			
-			common->Printf( "Source Field Index = %d\n", options->GetFocusIndex() );
-			if ( options->GetFocusIndex()  == 0 ) { // bullshit hard coded ref to hud options
-				menuData->SetNextScreen( SHELL_AREA_VR_HUD_OPTIONS, MENU_TRANSITION_SIMPLE );
-				return true;
-			}
-
-			if ( options->GetFocusIndex() == 1 ) { // bullshit hard coded ref to pda options
-				menuData->SetNextScreen( SHELL_AREA_VR_PDA_OPTIONS, MENU_TRANSITION_SIMPLE );
-				return true;
-			}
-			break; 
-
 		case WIDGET_ACTION_COMMAND: {
 
 			if ( options == NULL ) {
@@ -294,8 +280,13 @@ bool idMenuScreen_Shell_VR_UI_Options::HandleAction( idWidgetAction & action, co
 			}
 
 			switch ( parms[0].ToInteger() ) {
-				
-				case 1:
+				case 0: // bullshit hard coded ref to hud options
+					menuData->SetNextScreen(SHELL_AREA_VR_HUD_OPTIONS, MENU_TRANSITION_SIMPLE);
+					break;
+
+				case 1: // bullshit hard coded ref to pda options
+					menuData->SetNextScreen(SHELL_AREA_VR_PDA_OPTIONS, MENU_TRANSITION_SIMPLE);
+					break;
 
 				default: {
 					systemData.AdjustField( parms[0].ToInteger(), 1 );
