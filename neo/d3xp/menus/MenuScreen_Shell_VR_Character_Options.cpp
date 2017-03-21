@@ -107,6 +107,14 @@ void idMenuScreen_Shell_VR_Character_Options::Initialize( idMenuHandler * data )
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT );
 	options->AddChild( control );
 
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "Use Floor Height" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction(WIDGET_EVENT_PRESS).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT );
+	options->AddChild( control );
+
 			
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
@@ -317,6 +325,7 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	originalFlashMode = vr_flashlightMode.GetInteger();
 	originalWeaponHand = vr_weaponHand.GetInteger();
 	originalViewHeight = pm_normalviewheight.GetFloat();
+	originalUseFloorHeight = vr_useFloorHeight.GetBool();
 	originalSlotDisable = vr_slotDisable.GetInteger();
 }
 
@@ -388,6 +397,13 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 			break;
 		}
 	
+		case CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT:
+		{
+			static const int numValues = 2;
+			static const int values[numValues] = { 1, 0 };
+			vr_useFloorHeight.SetInteger( AdjustOption( vr_useFloorHeight.GetInteger(), values, numValues, adjustAmount ) );
+			break;
+		}
 	}
 	cvarSystem->ClearModifiedFlags( CVAR_ARCHIVE );
 }
@@ -464,11 +480,11 @@ idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_V
 		{
 			if (vr_slotDisable.GetInteger() == 0)
 			{
-				return "Enabled";
+				return "#str_swf_enabled";
 			}
 			else
 			{
-				return "Disabled";
+				return "#str_swf_disabled";
 			}
 		}
 
@@ -477,6 +493,18 @@ idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_V
 			
 			return va( "%.1f", pm_normalviewheight.GetFloat() );
 		}	
+
+		case CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT:
+		{
+			if (vr_useFloorHeight.GetBool())
+			{
+				return "#str_swf_enabled";
+			}
+			else
+			{
+				return "#str_swf_disabled";
+			}
+		}
 
 	}
 	return false;
@@ -509,6 +537,10 @@ bool idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	{
 		return true;
 	}
-	
+	if ( originalUseFloorHeight != vr_useFloorHeight.GetBool() )
+	{
+		return true;
+	}
+
 	return false;
 }

@@ -381,6 +381,7 @@ extern idCVar	vr_useOculusProfile;
 extern idCVar	vr_manualIPDEnable;
 extern idCVar	vr_manualIPD;
 extern idCVar	vr_manualHeight;
+extern idCVar	vr_useFloorHeight;
 
 //extern idCVar	vr_viewModelArms;
 extern idCVar	vr_wristStatMon;
