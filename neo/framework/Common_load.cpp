@@ -784,6 +784,39 @@ void idCommonLocal::ExecuteMapChange()
 
   commonVr->isLoading = false;
 
+	// Carl: Warning message
+	if( gameLocal.loadScriptFailed )
+	{
+		class idSWFScriptFunction_LoadNeedsRestart : public idSWFScriptFunction_RefCounted
+		{
+		public:
+			idSWFScriptFunction_LoadNeedsRestart(gameDialogMessages_t _msg, bool _accept)
+			{
+				msg = _msg;
+				accept = _accept;
+			}
+			idSWFScriptVar Call(idSWFScriptObject* thisObject, const idSWFParmList& parms)
+			{
+				common->Dialog().ClearDialog(msg);
+				if (accept)
+				{
+					cmdSystem->AppendCommandText("restartMap\n");
+				}
+				return idSWFScriptVar();
+			}
+		private:
+			gameDialogMessages_t msg;
+			bool accept;
+		};
+
+		idStaticList< idSWFScriptFunction*, 4 > callbacks;
+		callbacks.Append(new(TAG_SWF)idSWFScriptFunction_LoadNeedsRestart(GDM_RESTORE_CORRUPT_SAVEGAME, true));
+		callbacks.Append(new(TAG_SWF)idSWFScriptFunction_LoadNeedsRestart(GDM_RESTORE_CORRUPT_SAVEGAME, false));
+		idStaticList< idStrId, 4 > optionText;
+		optionText.Append(idStrId("#str_02487")); // Restart Now
+		optionText.Append(idStrId("#str_00100113")); // Continue
+		common->Dialog().AddDynamicDialog(GDM_RESTORE_CORRUPT_SAVEGAME, callbacks, optionText, true, "Warning: This game was loaded from a different mod. Would you like to restart this map (preserving your inventory) to prevent glitches? If you continue but get stuck due to glitches, use restartMap or endLevel console commands.");
+	}
 }
 
 /*
