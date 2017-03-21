@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../Game_local.h"
 
 extern idCVar vr_rumbleEnable;
+extern idCVar vr_laserSightUseOffset;
 
 const static int NUM_VR_UI_OPTIONS_OPTIONS = 8;
 
@@ -109,6 +110,14 @@ void idMenuScreen_Shell_VR_UI_Options::Initialize( idMenuHandler * data ) {
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_SIGHT_TO_SURFACE );
 	options->AddChild( control );
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType(OPTION_SLIDER_TEXT);
+	control->SetLabel("Laser Sight Source");
+	control->SetDataSource(&systemData, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_LASER_SOURCE);
+	control->SetupEvents(DEFAULT_REPEAT_TIME, options->GetChildren().Num());
+	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_VR_UI_Options::UI_OPTIONS_FIELD_LASER_SOURCE);
+	options->AddChild(control);
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
@@ -334,10 +343,11 @@ idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::LoadData
 ========================
 */
 void idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::LoadData() {
-		
+	
 	originalHeadingBeam = vr_headingBeamMode.GetInteger();
 	originalWeaponSight = vr_weaponSight.GetInteger();
 	originalWeaponSightSurface = vr_weaponSightToSurface.GetInteger();
+	originalLaserSightUseOffset = vr_laserSightUseOffset.GetInteger();
 	originalHaptics = vr_rumbleEnable.GetInteger();
 	originalGuiMode = vr_guiMode.GetInteger();
 }
@@ -388,6 +398,11 @@ void idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::AdjustFie
 			static const int values[numValues] = { 0, 1 };
 			vr_weaponSightToSurface.SetInteger( AdjustOption( vr_weaponSightToSurface.GetInteger(), values, numValues, adjustAmount ) );
 			break;
+		}
+		case UI_OPTIONS_FIELD_LASER_SOURCE: {
+			static const int numValues = 2;
+			static const int values[numValues] = { 0, 1 };
+			vr_laserSightUseOffset.SetBool( AdjustOption( vr_laserSightUseOffset.GetBool(), values, numValues, adjustAmount ) );
 		}
 		case UI_OPTIONS_FIELD_HAPTICS: {
 			static const int numValues = 2;
@@ -446,7 +461,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options:
 			}
 			if ( ws == 0 )
 			{
-				return "Laser Sight";
+				return "Laser Beam";
 			}
 			if ( ws == 1 )
 			{
@@ -474,13 +489,19 @@ idSWFScriptVar idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options:
 			}
 		}
 		case UI_OPTIONS_FIELD_SIGHT_TO_SURFACE:
-			
-			if ( vr_weaponSightToSurface.GetInteger() == 0 ) {
+						if ( vr_weaponSightToSurface.GetInteger() == 0 ) {
 				return "#str_swf_disabled";
 			} else {
 				return "#str_swf_enabled";
 			}
-		
+		case UI_OPTIONS_FIELD_LASER_SOURCE:
+			if (vr_laserSightUseOffset.GetBool()) {
+				return "Laser Emitter";
+			}
+			else {
+				return "Barrel";
+			}
+
 		case UI_OPTIONS_FIELD_HAPTICS:
 			if ( vr_rumbleEnable.GetInteger() == 0 ) {
 				return "#str_swf_disabled";
@@ -533,6 +554,11 @@ bool idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::IsDataCha
 	{
 		return true;
 	}
+	if (originalLaserSightUseOffset != vr_laserSightUseOffset.GetBool())
+	{
+		return true;
+	}
+
 
 	if ( originalHaptics != vr_rumbleEnable.GetInteger() )
 	{

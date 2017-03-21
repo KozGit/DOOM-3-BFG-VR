@@ -1986,6 +1986,7 @@ public:
 			UI_OPTIONS_FIELD_HEADING_BEAM,
 			UI_OPTIONS_FIELD_WEAPON_SIGHT,
 			UI_OPTIONS_FIELD_SIGHT_TO_SURFACE,
+			UI_OPTIONS_FIELD_LASER_SOURCE,
 			UI_OPTIONS_FIELD_HAPTICS,
 			UI_OPTIONS_FIELD_GUI_MODE,
 			MAX_UI_OPTION_FIELDS
@@ -2015,6 +2016,7 @@ public:
 		int		originalHeadingBeam;
 		int		originalWeaponSight;
 		int		originalWeaponSightSurface;
+		bool		originalLaserSightUseOffset;
 		int		originalHaptics;
 		int		originalGuiMode;
 
