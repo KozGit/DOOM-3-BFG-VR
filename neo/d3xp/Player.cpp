@@ -15530,6 +15530,75 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 	}
 }
 
+
+/*
+==============
+koz idPlayer::RecreateCopyJoints()
+After restoring from a savegame with different player models, the copyjoints for the head are wrong.
+This will recreate a working copyJoint list.
+==============
+*/
+void idPlayer::RecreateCopyJoints()
+{
+	idEntity* headEnt = head.GetEntity();
+	idAnimator* headAnimator;
+	const idKeyValue* kv;
+	idStr jointName;
+	copyJoints_t	copyJoint;
+
+	copyJoints.Clear();
+	if ( headEnt )
+	{
+		headAnimator = headEnt->GetAnimator();
+	}
+	else
+	{
+		headAnimator = &animator;
+	}
+
+	if ( headEnt )
+	{
+		// set up the list of joints to copy to the head
+		for ( kv = spawnArgs.MatchPrefix( "copy_joint", NULL ); kv != NULL; kv = spawnArgs.MatchPrefix( "copy_joint", kv ) )
+		{
+			if ( kv->GetValue() == "" )
+			{
+				// probably clearing out inherited key, so skip it
+				continue;
+			}
+
+			jointName = kv->GetKey();
+			if ( jointName.StripLeadingOnce( "copy_joint_world " ) )
+			{
+				copyJoint.mod = JOINTMOD_WORLD_OVERRIDE;
+			}
+			else
+			{
+				jointName.StripLeadingOnce( "copy_joint " );
+				copyJoint.mod = JOINTMOD_LOCAL_OVERRIDE;
+			}
+
+			copyJoint.from = animator.GetJointHandle( jointName );
+			if ( copyJoint.from == INVALID_JOINT )
+			{
+				gameLocal.Warning( "Unknown copy_joint '%s' on entity %s", jointName.c_str(), name.c_str() );
+				continue;
+			}
+
+			jointName = kv->GetValue();
+			copyJoint.to = headAnimator->GetJointHandle( jointName );
+			if ( copyJoint.to == INVALID_JOINT )
+			{
+				gameLocal.Warning( "Unknown copy_joint '%s' on head of entity %s", jointName.c_str(), name.c_str() );
+				continue;
+			}
+
+			copyJoints.Append( copyJoint );
+		}
+	}
+}
+
+
 /*
 ==============
 koz idPlayer::UpdateNeckPose
@@ -15540,8 +15609,16 @@ void idPlayer::UpdateNeckPose()
 {
 	static idAngles headAngles, lastView = ang_zero;
 	
+	static bool setuphead = false;
+		
 	if ( !game->isVR ) return;
-
+	
+	if ( !setuphead )
+	{
+		setuphead = true;
+		RecreateCopyJoints();
+	}
+	
 	// if showing the player body, move the head/neck based on HMD 
 	lastView = commonVr->lastHMDViewAxis.ToAngles();
 	headAngles.roll = lastView.pitch;
@@ -15549,7 +15626,6 @@ void idPlayer::UpdateNeckPose()
 	headAngles.yaw = lastView.roll;
 	headAngles.Normalize360();
 	animator.SetJointAxis( neckJoint, JOINTMOD_LOCAL, headAngles.ToMat3() );
-	
 }
 
 /*

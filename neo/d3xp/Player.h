@@ -584,6 +584,7 @@ public:
 	void					ToggleHeadingBeam();
 	void					UpdateVrHud();
 	void					ToggleHud();
+	void					RecreateCopyJoints();
 	void					UpdateNeckPose();
 	void					TrackWeaponDirection( idVec3 origin );
 	bool					IsCrouching()
