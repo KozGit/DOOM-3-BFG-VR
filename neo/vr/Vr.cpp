@@ -26,6 +26,7 @@ idCVar vr_manualIPDEnable( "vr_manualIPDEnable", "0", CVAR_INTEGER | CVAR_ARCHIV
 idCVar vr_manualIPD( "vr_manualIPD", "64", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined IPD value in MM" );
 idCVar vr_manualHeight( "vr_manualHeight", "70", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined player height in inches" );
 idCVar vr_minLoadScreenTime( "vr_minLoadScreenTime", "6000", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Min time to display load screens in ms.", 0.0f, 10000.0f );
+idCVar vr_useFloorHeight( "vr_useFloorHeight", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Make the floor be where it's supposed to be, instead of making the eyes be where they're supposed to be." );
 
 idCVar vr_weaponHand( "vr_weaponHand", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Which hand holds weapon.\n 0 = Right hand\n 1 = Left Hand\n", 0, 1 );
 
@@ -531,6 +532,7 @@ bool iVr::OculusInit( void )
 
 	common->Printf( "\n\nOculus Rift HMD Initialized\n" );
 	//ovr_RecenterPose( hmdSession ); // lets start looking forward.
+	ovr_SetTrackingOriginType( hmdSession, ovrTrackingOrigin_FloorLevel );
 	ovr_RecenterTrackingOrigin( hmdSession );
 	hmdWidth = hmdDesc.Resolution.w;
 	hmdHeight = hmdDesc.Resolution.h;
@@ -1279,6 +1281,8 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 		{
 
 			trackingOriginOffset = lastHmdPosition;
+			if (vr_useFloorHeight.GetBool())
+				trackingOriginOffset.z = pm_normalviewheight.GetFloat() + CM_CLIP_EPSILON;
 			common->Printf( "Resetting tracking yaw offset.\n Yaw = %f old offset = %f ", hmdAngles.yaw, trackingOriginYawOffset );
 			trackingOriginYawOffset = hmdAngles.yaw;
 			common->Printf( "New Tracking yaw offset %f\n", hmdAngles.yaw, trackingOriginYawOffset );
@@ -1396,6 +1400,8 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 	{
 
 		trackingOriginOffset = lastHmdPosition;
+		if (vr_useFloorHeight.GetBool())
+			trackingOriginOffset.z = pm_normalviewheight.GetFloat() + CM_CLIP_EPSILON;
 		common->Printf( "Resetting tracking yaw offset.\n Yaw = %f old offset = %f ", hmdAngles.yaw, trackingOriginYawOffset );
 		trackingOriginYawOffset = hmdAngles.yaw;
 		common->Printf( "New Tracking yaw offset %f\n", hmdAngles.yaw, trackingOriginYawOffset );
@@ -1430,7 +1436,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 	//hmdAxis = hmd2.ToMat3();
 	hmdAxis = hmdAngles.ToMat3();
 
-	currentNeckPosition = hmdPosition + hmdAxis[0] * vr_nodalX.GetFloat() /*+ hmdAxis[1] * 0.0f */ + hmdAxis[2] * vr_nodalZ.GetFloat();
+	currentNeckPosition = hmdPosition + hmdAxis[0] * vr_nodalX.GetFloat() / vr_scale.GetFloat() /*+ hmdAxis[1] * 0.0f */ + hmdAxis[2] * vr_nodalZ.GetFloat() / vr_scale.GetFloat();
 
 //	currentNeckPosition.z = pm_normalviewheight.GetFloat() - (vr_nodalZ.GetFloat() + currentNeckPosition.z);
 
@@ -1479,6 +1485,8 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 	{
 		lastNeckPosition = currentNeckPosition;
 		initialNeckPosition = currentNeckPosition;
+		if (vr_useFloorHeight.GetBool())
+			initialNeckPosition.z = vr_nodalZ.GetFloat() / vr_scale.GetFloat();
 		neckInitialized = true;
 	}
 	
@@ -1663,14 +1671,14 @@ void iVr::MotionControlGetHand( int hand, idVec3 &motionPosition, idQuat &motion
 	
 	if ( hand == vr_weaponHand.GetInteger() && vr_mountedWeaponController.GetBool() )
 	{
-		idVec3 controlToHand = idVec3( vr_mountx.GetFloat(), vr_mounty.GetFloat(), vr_mountz.GetFloat() );
-		idVec3 controlCenter = idVec3( vr_vcx.GetFloat(), vr_vcy.GetFloat(), vr_vcz.GetFloat() );
+		idVec3 controlToHand = idVec3( vr_mountx.GetFloat() / vr_scale.GetFloat(), vr_mounty.GetFloat() / vr_scale.GetFloat(), vr_mountz.GetFloat()  / vr_scale.GetFloat() );
+		idVec3 controlCenter = idVec3( vr_vcx.GetFloat() / vr_scale.GetFloat(), vr_vcy.GetFloat() / vr_scale.GetFloat(), vr_vcz.GetFloat()  / vr_scale.GetFloat() );
 
 		motionPosition += ( controlToHand - controlCenter ) * motionRotation; // pivot around the new point
 	}
 	else
 	{
-		motionPosition += idVec3( vr_vcx.GetFloat(), vr_vcy.GetFloat(), vr_vcz.GetFloat() ) * motionRotation;
+		motionPosition += idVec3( vr_vcx.GetFloat()  / vr_scale.GetFloat(), vr_vcy.GetFloat() / vr_scale.GetFloat(), vr_vcz.GetFloat() / vr_scale.GetFloat() ) * motionRotation;
 	}
 }
 
