@@ -20,7 +20,7 @@
 
 idCVar vr_pixelDensity( "vr_pixelDensity", "1.25", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "" );
 idCVar vr_enable( "vr_enable", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Enable VR mode. 0 = Disabled 1 = Enabled." );
-idCVar vr_scale( "vr_scale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "unused" );
+idCVar vr_scale( "vr_scale", "0.93", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "World scale. Everything virtual is this times as big." );
 idCVar vr_useOculusProfile( "vr_useOculusProfile", "1", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Use official profile values. 0 = use user defined profile, 1 = use official profile." );
 idCVar vr_manualIPDEnable( "vr_manualIPDEnable", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, " Override the HMD provided IPD value with value in vr_manualIPD 0 = disable 1= use manual iPD\n" );
 idCVar vr_manualIPD( "vr_manualIPD", "64", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined IPD value in MM" );
@@ -1341,17 +1341,17 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 
 	if (hasOculusRift)
 	{
-		hmdPosition.x = -translationPose.Position.z * 39.3701f; // koz convert position (in meters) to inch (1 id unit = 1 inch).   
-		hmdPosition.y = -translationPose.Position.x * 39.3701f;
-		hmdPosition.z = translationPose.Position.y * 39.3701f;
+		hmdPosition.x = -translationPose.Position.z * (100.0f / 2.54f) / vr_scale.GetFloat(); // koz convert position (in meters) to inch (1 id unit = 1 inch).   
+		hmdPosition.y = -translationPose.Position.x * (100.0f / 2.54f) / vr_scale.GetFloat();
+		hmdPosition.z = translationPose.Position.y * (100.0f / 2.54f) / vr_scale.GetFloat();
 	}
 	else
 	{
 		m_rmat4DevicePose[vr::k_unTrackedDeviceIndex_Hmd] = ConvertSteamVRMatrixToidMat4( m_rTrackedDevicePose[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking );
 
-		hmdPosition.x = -m_rmat4DevicePose[vr::k_unTrackedDeviceIndex_Hmd][3][2] * 39.3701;
-		hmdPosition.y = -m_rmat4DevicePose[vr::k_unTrackedDeviceIndex_Hmd][3][0] * 39.3701; // meters to inches
-		hmdPosition.z = m_rmat4DevicePose[vr::k_unTrackedDeviceIndex_Hmd][3][1] * 39.3701;
+		hmdPosition.x = -m_rmat4DevicePose[vr::k_unTrackedDeviceIndex_Hmd][3][2] * (100.0f / 2.54f) / vr_scale.GetFloat();
+		hmdPosition.y = -m_rmat4DevicePose[vr::k_unTrackedDeviceIndex_Hmd][3][0] * (100.0f / 2.54f) / vr_scale.GetFloat(); // meters to inches
+		hmdPosition.z = m_rmat4DevicePose[vr::k_unTrackedDeviceIndex_Hmd][3][1] * (100.0f / 2.54f) / vr_scale.GetFloat();
 	}
 
 	lastHmdPosition = hmdPosition;
@@ -1580,9 +1580,9 @@ void iVr::MotionControlGetOpenVrController( vr::TrackedDeviceIndex_t deviceNum, 
 	static idAngles poseAngles = ang_zero;
 	static idAngles angTemp = ang_zero;
 
-	motionPosition.x = -m_rmat4DevicePose[3][2] * 39.3701;
-	motionPosition.y = -m_rmat4DevicePose[3][0] * 39.3701; // meters to inches
-	motionPosition.z = m_rmat4DevicePose[3][1] * 39.3701;
+	motionPosition.x = -m_rmat4DevicePose[3][2] * (100.0f / 2.54f) / vr_scale.GetFloat();
+	motionPosition.y = -m_rmat4DevicePose[3][0] * (100.0f / 2.54f) / vr_scale.GetFloat(); // meters to inches
+	motionPosition.z = m_rmat4DevicePose[3][1] * (100.0f / 2.54f) / vr_scale.GetFloat();
 
 	motionPosition -= trackingOriginOffset;
 	motionPosition *= idAngles( 0.0f, (-trackingOriginYawOffset ) , 0.0f ).ToMat3();// .Inverse();
@@ -1615,11 +1615,11 @@ void iVr::MotionControlGetTouchController( int hand, idVec3 &motionPosition, idQ
 	static idAngles poseAngles = ang_zero;
 	static idAngles angTemp = ang_zero;
 
-	motionPosition.x = -handPose[hand].Position.z * 39.3701f;// koz convert position (in meters) to inch (1 id unit = 1 inch).   
+	motionPosition.x = -handPose[hand].Position.z * (100.0f / 2.54f) / vr_scale.GetFloat();// koz convert position (in meters) to inch (1 id unit = 1 inch).   
 	
-	motionPosition.y = -handPose[hand].Position.x * 39.3701f;
+	motionPosition.y = -handPose[hand].Position.x * (100.0f / 2.54f) / vr_scale.GetFloat();
 	
-	motionPosition.z = handPose[hand].Position.y * 39.3701f;
+	motionPosition.z = handPose[hand].Position.y * (100.0f / 2.54f) / vr_scale.GetFloat();
 			
 	motionPosition -= trackingOriginOffset;
 	

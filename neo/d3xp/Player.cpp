@@ -7140,7 +7140,7 @@ void idPlayer::UpdateWeapon()
 	// Voice wakes up nearby monsters while you're speaking
 	// Carl: weapon method (voice wakes up monsters that respond to weapon sound)
 	if ( (vr_talkWakeMonsters.GetInteger() & 1) && talking )
-		gameLocal.AlertAI( this, 788 * commonVoice->currentVolume * (vr_talkWakeMonsterRadius.GetFloat() / 120) ); // maximum mic volume = 20 metres, normal volume = 5 m
+		gameLocal.AlertAI( this, 788 * commonVoice->currentVolume * (vr_talkWakeMonsterRadius.GetFloat() / 120 / vr_scale.GetFloat()) ); // maximum mic volume = 20 metres, normal volume = 5 m
 	//koz (voice wakes up monsters that respond to flashlight)
 	if ( vr_talkWakeMonsters.GetInteger() > 0 && vr_talkWakeMonsters.GetInteger() <= 2 )
 	{
@@ -7153,7 +7153,7 @@ void idPlayer::UpdateWeapon()
 			wasTalking = true;
 			idEntity* entityList[MAX_GENTITIES];
 			int listedEntities;
-			float radius = 788 * commonVoice->maxVolume * (vr_talkWakeMonsterRadius.GetFloat() / 120);
+			float radius = 788 * commonVoice->maxVolume * (vr_talkWakeMonsterRadius.GetFloat() / 120 / vr_scale.GetFloat());
 
 			listedEntities = gameLocal.EntitiesWithinRadius( GetPhysics()->GetOrigin(), radius, entityList, MAX_GENTITIES );
 			for ( int i = 0; i < listedEntities; i++ )

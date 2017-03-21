@@ -789,7 +789,7 @@ float CentimetersToInches( const float cm )
 float CentimetersToWorldUnits( const float cm )
 {
 	// In Doom 3, one world unit == one inch
-	return CentimetersToInches( cm );
+	return cm / ( 2.54f * vr_scale.GetFloat() );
 }
 
 float	CalculateWorldSeparation(
@@ -817,7 +817,7 @@ stereoDistances_t	CaclulateStereoDistances(
     if( convergenceWorldUnits == 0.0f || game->isVR ) // koz
 	{
 		// head mounted display mode
-		dists.worldSeparation = CentimetersToInches( interOcularCentimeters * 0.5 );
+		dists.worldSeparation = CentimetersToWorldUnits( interOcularCentimeters * 0.5 );
 		//dists.screenSeparation = 0.0f;
 		dists.screenSeparation = commonVr->VRScreenSeparation;
 		return dists;
@@ -855,7 +855,7 @@ float	GetScreenSeparationForGuis()
 	if ( game->isVR )
 	{
 		extern idCVar vr_guiSeparation;
-		return vr_guiSeparation.GetFloat();
+		return vr_guiSeparation.GetFloat() * vr_scale.GetFloat();
 	}
 
 	return dists.screenSeparation;
