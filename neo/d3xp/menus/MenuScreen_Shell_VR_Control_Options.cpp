@@ -521,13 +521,13 @@ idSWFScriptVar idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_
 			return "Motion Triggered";
 
 		case CONTROL_OPTIONS_FIELD_CROUCH_TRIGGER_DIST:
-			return va( "%.0f", vr_crouchTriggerDist.GetFloat() );
+			return va( "%.0f inches", vr_crouchTriggerDist.GetFloat() );
 
 		case CONTROL_OPTIONS_FIELD_WEAPON_PITCH:
-			return va( "%.0f", vr_motionWeaponPitchAdj.GetFloat() );
+			return va( "%.0f degrees", vr_motionWeaponPitchAdj.GetFloat() );
 
 		case CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH:
-			return va( "%.0f", vr_motionFlashPitchAdj.GetFloat() );
+			return va( "%.0f degrees", vr_motionFlashPitchAdj.GetFloat() );
 
 		case CONTROL_OPTIONS_FIELD_TALK_MODE:
 		{

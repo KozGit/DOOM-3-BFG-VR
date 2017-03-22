@@ -301,6 +301,7 @@ public:
 	
 	idVec3				trackingOriginOffset;
 	float				trackingOriginYawOffset;
+	float				trackingOriginHeight;
 	bool				chestDefaultDefined;
 	idVec3				hmdBodyTranslation;
 	
@@ -348,6 +349,7 @@ public:
 	idVec3				poseHmdBodyPositionDelta;
 	idVec3				remainingMoveHmdBodyPositionDelta;
 	idVec3				poseHmdAbsolutePosition;
+	float					userDuckingAmount; // how many game units the user has physically ducked in real life from their calibrated position
 
 	idVec3				poseHandPos[2];
 	idQuat				poseHandRotationQuat[2];

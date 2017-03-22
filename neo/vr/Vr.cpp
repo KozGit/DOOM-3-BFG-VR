@@ -167,7 +167,7 @@ idCVar vr_bodyToMove( "vr_bodyToMove", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE
 idCVar vr_moveThirdPerson( "vr_moveThirdPerson", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Artifical movement will user 3rd person perspective." );
 
 idCVar vr_crouchMode( "vr_crouchMode", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Crouch Mode:\n 0 = Full motion crouch (In game matches real life)\n 1 = Crouch anim triggered by smaller movement." );
-idCVar vr_crouchTriggerDist( "vr_crouchTriggerDist", "10", CVAR_FLOAT | CVAR_ARCHIVE, " Distance ( in inches ) player must crouch in real life to toggle crouch\n" );
+idCVar vr_crouchTriggerDist( "vr_crouchTriggerDist", "7", CVAR_FLOAT | CVAR_ARCHIVE, " Distance ( in real-world inches ) player must crouch in real life to toggle crouch\n" );
 
 idCVar vr_frameCheck( "vr_frameCheck", "0", CVAR_INTEGER | CVAR_ARCHIVE, "0 = bypass frame check" );
 
@@ -1290,6 +1290,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 		{
 
 			trackingOriginOffset = lastHmdPosition;
+			trackingOriginHeight = trackingOriginOffset.z;
 			if (vr_useFloorHeight.GetBool())
 				trackingOriginOffset.z = pm_normalviewheight.GetFloat() + 5 + CM_CLIP_EPSILON;
 			common->Printf( "Resetting tracking yaw offset.\n Yaw = %f old offset = %f ", hmdAngles.yaw, trackingOriginYawOffset );
@@ -1409,6 +1410,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 	{
 
 		trackingOriginOffset = lastHmdPosition;
+		trackingOriginHeight = trackingOriginOffset.z;
 		if (vr_useFloorHeight.GetBool())
 			trackingOriginOffset.z = pm_normalviewheight.GetFloat() + 5 + CM_CLIP_EPSILON;
 		common->Printf( "Resetting tracking yaw offset.\n Yaw = %f old offset = %f ", hmdAngles.yaw, trackingOriginYawOffset );
@@ -1512,6 +1514,8 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 	//headPositionDelta = hmdPosition - currentChestPosition;
 	headPositionDelta.z = hmdPosition.z;
 	//bodyPositionDelta.z = 0;
+	// how many game units the user has physically ducked in real life from their calibrated position
+	userDuckingAmount = (trackingOriginHeight - trackingOriginOffset.z) - hmdPosition.z;
 
 	lastBodyPositionDelta = bodyPositionDelta;
 	lastHeadPositionDelta = headPositionDelta;

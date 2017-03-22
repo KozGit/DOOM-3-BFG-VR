@@ -557,7 +557,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR
 			if ( analogCount >= comfortCount )
 				return "Analog";
 			else
-				return va( "Snap %.1f°", f );
+				return va( "Snap %.0f degrees", f );
 		}	
 
 		case SAFETY_PROTOCOLS_FIELD_WALK_SPEED_ADJUST:

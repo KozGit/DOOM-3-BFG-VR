@@ -1523,7 +1523,7 @@ void idUsercmdGenLocal::CmdButtons()
 	}
 	
 	//koz begin crouch trigger
-	if ( commonVr->poseHmdHeadPositionDelta.z < -vr_crouchTriggerDist.GetFloat() && vr_crouchMode.GetInteger() == 1 ) cmd.buttons |= BUTTON_CROUCH;
+	if ( commonVr->userDuckingAmount > vr_crouchTriggerDist.GetFloat() / vr_scale.GetFloat() && vr_crouchMode.GetInteger() == 1 ) cmd.buttons |= BUTTON_CROUCH;
 	
 }
 
