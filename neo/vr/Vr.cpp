@@ -26,7 +26,7 @@ idCVar vr_manualIPDEnable( "vr_manualIPDEnable", "0", CVAR_INTEGER | CVAR_ARCHIV
 idCVar vr_manualIPD( "vr_manualIPD", "64", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined IPD value in MM" );
 idCVar vr_manualHeight( "vr_manualHeight", "70", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined player height in inches" );
 idCVar vr_minLoadScreenTime( "vr_minLoadScreenTime", "6000", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Min time to display load screens in ms.", 0.0f, 10000.0f );
-idCVar vr_useFloorHeight( "vr_useFloorHeight", "1", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Make the floor be where it's supposed to be, instead of making the eyes be where they're supposed to be." );
+idCVar vr_useFloorHeight( "vr_useFloorHeight", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Make the floor be where it's supposed to be, instead of making the eyes be where they're supposed to be." );
 
 idCVar vr_weaponHand( "vr_weaponHand", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Which hand holds weapon.\n 0 = Right hand\n 1 = Left Hand\n", 0, 1 );
 
@@ -532,7 +532,16 @@ bool iVr::OculusInit( void )
 
 	common->Printf( "\n\nOculus Rift HMD Initialized\n" );
 	//ovr_RecenterPose( hmdSession ); // lets start looking forward.
-	ovr_SetTrackingOriginType( hmdSession, ovrTrackingOrigin_FloorLevel );
+	
+	if ( vr_useFloorHeight.GetBool() )
+	{
+		ovr_SetTrackingOriginType( hmdSession, ovrTrackingOrigin_FloorLevel );
+	}
+	else
+	{
+		ovr_SetTrackingOriginType( hmdSession, ovrTrackingOrigin_EyeLevel );
+	}
+
 	ovr_RecenterTrackingOrigin( hmdSession );
 	hmdWidth = hmdDesc.Resolution.w;
 	hmdHeight = hmdDesc.Resolution.h;

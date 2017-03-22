@@ -13237,25 +13237,7 @@ void idPlayer::Think()
 	//koz turn body on or off in vr, update hand poses/skins if body or weapon hand changes.
 	if ( game->isVR )
 	{
-		
-		if ( vr_playerBodyMode.GetInteger() == 2 )
-		{
-			//do some bullshit so we have fists when the body and hands are not shown.
-			if ( currentWeapon == weapon_fists )
-			{
-
-			}
-		}
 				
-		/*
-		if ( vr_viewModelArms.GetBool() != lastViewArms )
-		{
-			lastViewArms = vr_viewModelArms.GetBool();
-			UpdatePlayerSkinsPoses();
-			
-		}
-		*/
-		
 		if ( vr_weaponHand.IsModified()  )
 		{
 			UpdatePlayerSkinsPoses();
@@ -15610,17 +15592,9 @@ In Vr, if viewing the player body, update the neck joint with the orientation of
 void idPlayer::UpdateNeckPose()
 {
 	static idAngles headAngles, lastView = ang_zero;
-	
-	static bool setuphead = false;
-		
+			
 	if ( !game->isVR ) return;
-	
-	if ( !setuphead )
-	{
-		setuphead = true;
-		RecreateCopyJoints();
-	}
-	
+		
 	// if showing the player body, move the head/neck based on HMD 
 	lastView = commonVr->lastHMDViewAxis.ToAngles();
 	headAngles.roll = lastView.pitch;
@@ -16246,7 +16220,7 @@ void idPlayer::GetViewPosVR( idVec3 &origin, idMat3 &axis ) const {
 	float eyeHeightAboveRotationPoint;
 	float eyeShiftRight = 0;
 	
-	eyeHeightAboveRotationPoint = 5;
+	eyeHeightAboveRotationPoint = 5;//
 	
 	origin = GetEyePosition(); // +viewBob;
 	// Carl: No view bobbing unless knockback is enabled. This isn't strictly a knockback, but close enough.

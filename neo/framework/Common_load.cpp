@@ -780,6 +780,18 @@ void idCommonLocal::ExecuteMapChange()
 		
 	vr_headingBeamMode.SetModified();
 	vr_weaponSight.SetModified();
+	
+	
+	//if the game was loaded from a different version of doom 3 ( vanilla, rbdoom, etc) 
+	//the copyJoint list is wrong for the head animatons, because our player model has a different joint layout
+	//to support fingers.  Rebuild the joint list once after loading each map to ensure the head anims
+	//work correctly.
+	idPlayer* player = gameLocal.GetLocalPlayer();
+	if ( player )
+	{
+		player->RecreateCopyJoints();
+	}
+		
 	// koz end
 
   commonVr->isLoading = false;
