@@ -55,6 +55,7 @@ entityDef weapon_pistol {
 	"editor_rotatable"		"1"
 
 	"spawnclass"				"idItem"
+	"scale"						"0.75"
 	"size"						"32 32 32"
 	"model"						"models/weapons/pistol/w_pistol.lwo"
 	"model_view" 				"viewmodel_pistol_vr"

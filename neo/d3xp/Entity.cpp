@@ -484,6 +484,8 @@ idEntity::idEntity():
 	xraySkin = NULL;
 	
 	noGrab = false;
+
+	scale = 1.0f;
 }
 
 /*
@@ -527,6 +529,8 @@ void idEntity::Spawn()
 		entityDefNumber = def->Index();
 	}
 	
+	scale = spawnArgs.GetFloat("scale", 1.0f);
+
 	FixupLocalizedStrings();
 	
 	// parse static models the same way the editor display does
@@ -897,6 +901,8 @@ void idEntity::Restore( idRestoreGame* savefile )
 	{
 		modelDefHandle = gameRenderWorld->AddEntityDef( &renderEntity );
 	}
+
+	scale = spawnArgs.GetFloat( "scale", 1.0f );
 }
 
 /*
@@ -3487,6 +3493,12 @@ idEntity::GetPhysicsToVisualTransform
 */
 bool idEntity::GetPhysicsToVisualTransform( idVec3& origin, idMat3& axis )
 {
+	if (scale != 1.0f)
+	{
+		axis = mat3_identity * scale;
+		origin = vec3_zero;
+		return true;
+	}
 	return false;
 }
 

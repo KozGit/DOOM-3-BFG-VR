@@ -45,6 +45,7 @@ entityDef weapon_plasmagun {
 	"editor_rotatable"		"1"
 
 	"spawnclass"				"idItem"
+	"scale"						"0.75"
 	"size"						"32 32 32"
 	"model" 					"models/weapons/plasmagun/plasmagun_world.lwo"
 	"model_view"				"viewmodel_plasmagun_vr"

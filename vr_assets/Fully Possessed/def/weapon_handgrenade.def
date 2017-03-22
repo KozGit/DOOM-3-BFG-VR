@@ -35,6 +35,7 @@ entityDef weapon_handgrenade {
 	"editor_rotatable"			"1"
 
 	"spawnclass"				"idItem"
+	"scale"						"0.58"
 	"size"						"32 32 32"
 	"model"						"models/items/grenade_ammo/grenade.lwo"
 	"model_view"				"viewmodel_grenade_vr"

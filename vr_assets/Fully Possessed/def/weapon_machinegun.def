@@ -39,6 +39,7 @@ entityDef weapon_machinegun {
 	"editor_rotatable"			"1"
 
 	"spawnclass"				"idItem"
+	"scale"						"0.75"
 	"size"						"32 32 32"
 	"model"						"models/weapons/machinegun/w_machinegun.lwo"
 	"model_view" 				"viewmodel_machinegun_vr"

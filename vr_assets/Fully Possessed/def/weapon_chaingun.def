@@ -35,6 +35,7 @@ entityDef weapon_chaingun {
 	"editor_rotatable"			"1"
 
 	"spawnclass"				"idItem"
+	"scale"						"0.9"
 	"size"						"32 32 32"
 	"model"						"models/weapons/chaingun/w_chaingun.lwo"
 	"model_view" 				"viewmodel_chaingun_vr"
