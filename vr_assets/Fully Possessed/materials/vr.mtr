@@ -22,6 +22,25 @@ gui/weapons/statwatch/background
 
 // materials so hands/arms/fists/stats watch can be enabled/disabled thru skins in vr
 // overridden by skin assigned in weapon scripts to hide inactive elements
+
+vr/soldierarm
+{
+        noselfShadow
+		//noShadows
+		clamp
+	renderbump  -size 1024 2048 -trace 0.1 -colorMap   models/characters/player/arm2_local.tga models/characters/player/arm1_hi.lwo
+
+
+
+        	diffusemap	models/characters/player/arm2.tga
+		{
+ 		  blend bumpmap
+          map  addnormals(models/characters/player/arm2_local.tga, heightmap(models/characters/player/arm2_h.tga, 3 ) )
+ 		  
+     	}
+                  specularmap	models/characters/player/arm2_s.tga
+}
+
 vr/rightarm
 {
         noselfShadow
@@ -246,6 +265,7 @@ vr/weaponsight
 {
 	qer_editorimage	textures/zaphod/shotgun_laser.TGA
 	translucent
+	twoSided
 	noShadows
 	{
 		blend add
@@ -258,6 +278,7 @@ vr/weaponsightCircleDot
 {
 	qer_editorimage	textures/zaphod/shotgun_laser.TGA
 	translucent
+	twoSided
 	noShadows
 	{
 		blend add
@@ -270,6 +291,7 @@ vr/weaponsightCross
 {
 	qer_editorimage	textures/zaphod/shotgun_laser.TGA
 	translucent
+	twoSided
 	noShadows
 	{
 		blend add
