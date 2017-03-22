@@ -235,6 +235,11 @@ __________________________________________
 New in 0.22:
 	REALLY fix loading saved games from other versions and mods.
 	ATI / AMD graphics card support.
+	Scaled ammo, weapons, and keycards to correct sizes.
+	Option to use floor height.
+	World Scale option.
+	vr_chibi head scale console command.
+	More laser sight options.
 	Head tracking in the main menu.
 	Holster slots work better with the PDA and QuickSave.
 	Allow path names longer than 260 chars (fixes crash?).
@@ -244,7 +249,7 @@ New in 0.22:
 
 New in 0.21:
 	Talking waking monsters is fixed.
-	Loading all saved games from 0.020 is fixed.
+	Loading all saved games from 0.020 is fixed (not really).
 	You can now load most saved games from RBDoom 3 BFG (with major issues).
 	You can now load all saved games from version 0.015 (with major issues).
 	Improved performance.
@@ -1211,8 +1216,17 @@ VR Related game changes can be made from the Settings->VR Options menu.
 	  
 	        Change the height of the player view.
 	        Use this option if you are taller or shorter than the default view.
-	        Measured in inches.
+	        Measured in game units (approximately inches).
+	        The actual height is five more than this.
+	        This setting is now saved between maps and sessions.
+	
+	  Use Floor Height
 	        
+	        Enable:	The virtual floor will always be at the same height as the real floor.
+	                This might make you feel like you're not as tall as a space marine should be.
+	
+	        Disable:	The player's view height (specified above) will be the same height as your real eyes.
+	                    This might make you feel like you're floating above the floor.
 	
 	Menu: Comfort Options
 
@@ -1426,7 +1440,7 @@ VR Related game changes can be made from the Settings->VR Options menu.
 	        
 	            Motion Controllers-	  Motion controls will be used if present
 	            
-	            Standard Controller-	A gamepad will be the default control device.
+	            Standard Controller-	A gamepad (or keyboard and mouse) will be the default control device.
 	            
 	      I recommend leaving it set on Motion Controllers, because in that mode it will switch
 	      to gamepad automatically when you start using it, and switch back if you use motion.
@@ -1613,8 +1627,9 @@ VR Related game changes can be made from the Settings->VR Options menu.
 	    Various weapon sights are available.
 	    
 	      Options:
+	          Disabled-	  No laser sight.
 	      
-	          Laser Sight- 	  A laser beam will emit from the weapon to aim with.
+	          Laser Beam- 	  A laser beam will emit from the weapon to aim with.
 	          
 	          Red Dot-	    A red laser dot will be projected into the world to aim with.
 	          
@@ -1623,10 +1638,29 @@ VR Related game changes can be made from the Settings->VR Options menu.
 	          
 	          Crosshair-	    A red crosshair will be projected into the world to aim with.
 	          
+	          Laser + Dot-	    Both the dot and the laser beam.
+	          
+	          Laser + Circle-	    Both the circle dot and the laser beam.
+	          
+	          Crosshair + Circle-	    Both the crosshair and the laser beam.
+	          
 	  Sight to Surface:
 	  
 	    If using one of the reticles instead of the Laser Sight, enabling this will align the 
 	    reticle to the surface it hits.
+	
+	  Laser Sight Source:
+	    
+	    Choose whether the laser sight comes out of the barrel, or an emitter elsewhere on the weapon.
+	    If the sight comes from somewhere else, you have to manually compensate an inch or two when you aim.
+	    
+	      Options:
+	        Laser Emitter-	  The laser sight comes from a different part of the gun, but is parallel to where the bullets will go.
+	                          You must take note of where the barrel is actually aiming relative to the laser for perfect shots.
+	 
+	        Barrel-	The laser comes out of the gun's barrel and shows exactly
+	                where the bullets will go. This makes aiming easier, but
+	                is less realistic.
 	    
 	  Haptic Feedback:
 	  
@@ -1724,7 +1758,7 @@ VR Related game changes can be made from the Settings->VR Options menu.
 	  
 	  Manual Profile Height:	This height will be used if Active Profile is set to Manual.
 	  
-	  World Scale Adjust:	Not yet implemented.
+	  World Scale Adjust:	This works now. Multiply the size of the world by this. 
 	  
 
 ___________________________________________
@@ -1756,6 +1790,12 @@ Commands:
 
 Below are some console variables used by the game.  Many of these can be adjusted via the in game menus.
 
+vr_chibi 1 FLOAT - changes the size of human heads (sometimes good if you change the world scale but it makes heads look weird).
+vr_scale 0.93 FLOAT - scale of the virtual world. 1 = scale of previous version and original Doom 3.
+vr_useFloorHeight 0 BOOL - keep the virtual floor level with the real floor.
+pm_normalviewheight 68 FLOAT - 5 game-inches less than the player view height.
+vr_laserSightUseOffset 1 BOOL - Emit laser sight from the gun's laser sight emitter instead of the gun's barrel.
+
 com_fixedTic 0 BOOL - run a single game frame per render frame. Fixes frame dropping in VR.
 vr_asw 0 INTEGER - Oculus Asynchronous SpaceWarp. 0 = force off (hack), 1 = enabled, 2 = 45 FPS ATW, 3 = 45 FPS ASW
 
@@ -1785,7 +1825,6 @@ vr_pixelDensity 1.25 FLOAT - VR supersampling level.  If the Oculus Runtime or O
 vr_vignette 1 INTEGER - unused
 vr_enable 1 INTEGER - Enable VR mode. 0 = Disabled 1 = Enabled.
 vr_FBOscale 1.0 FLOAT - unused
-vr_scale 1.0 FLOAT - unused
 vr_useOculusProfile 1 INTEGER - Use official Profile values. 0 = use user defined profile, 1 = use official profile.
 vr_manualIPDEnable 0 INTEGER - Override the HMD provided IPD value with value in vr_manualIPD 0 = disable 1= use manual iPD 
 vr_manualIPD 64 FLOAT - User defined IPD value in MM
