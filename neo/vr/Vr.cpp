@@ -1291,7 +1291,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 
 			trackingOriginOffset = lastHmdPosition;
 			if (vr_useFloorHeight.GetBool())
-				trackingOriginOffset.z = pm_normalviewheight.GetFloat() + CM_CLIP_EPSILON;
+				trackingOriginOffset.z = pm_normalviewheight.GetFloat() + 5 + CM_CLIP_EPSILON;
 			common->Printf( "Resetting tracking yaw offset.\n Yaw = %f old offset = %f ", hmdAngles.yaw, trackingOriginYawOffset );
 			trackingOriginYawOffset = hmdAngles.yaw;
 			common->Printf( "New Tracking yaw offset %f\n", hmdAngles.yaw, trackingOriginYawOffset );
@@ -1410,7 +1410,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 
 		trackingOriginOffset = lastHmdPosition;
 		if (vr_useFloorHeight.GetBool())
-			trackingOriginOffset.z = pm_normalviewheight.GetFloat() + CM_CLIP_EPSILON;
+			trackingOriginOffset.z = pm_normalviewheight.GetFloat() + 5 + CM_CLIP_EPSILON;
 		common->Printf( "Resetting tracking yaw offset.\n Yaw = %f old offset = %f ", hmdAngles.yaw, trackingOriginYawOffset );
 		trackingOriginYawOffset = hmdAngles.yaw;
 		common->Printf( "New Tracking yaw offset %f\n", hmdAngles.yaw, trackingOriginYawOffset );
