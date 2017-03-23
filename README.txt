@@ -1212,12 +1212,10 @@ VR Related game changes can be made from the Settings->VR Options menu.
 	        
 	              Disable
 	              
-	  View Height
+	  Eye View Height
 	  
-	        Change the height of the player view.
+	        Change the height of the player view, measured in real world units.
 	        Use this option if you are taller or shorter than the default view.
-	        Measured in game units (approximately inches).
-	        The actual height is five more than this.
 	        This setting is now saved between maps and sessions.
 	
 	  Use Floor Height
