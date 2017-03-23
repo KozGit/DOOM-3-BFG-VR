@@ -545,7 +545,8 @@ void iVoice::Event(WPARAM wParam, LPARAM lParam)
 					}
 					else
 					{
-						HearWord(text, confidence);
+						if (maxVolume * 100 >= vr_voiceMinVolume.GetInteger())
+							HearWord(text, confidence);
 						Flicksync_StoppedTalking();
 					}
 					CoTaskMemFree(text);

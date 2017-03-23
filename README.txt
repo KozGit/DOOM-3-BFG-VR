@@ -235,8 +235,10 @@ __________________________________________
 New in 0.22:
 	REALLY fix loading saved games from other versions and mods.
 	ATI / AMD graphics card support.
+	Voice command for "fists" has changed to "weapon fists" to prevent false recognitions.
+	vr_voiceMinVolume console variable to prevent false recognitions.
 	Scaled ammo, weapons, and keycards to correct sizes.
-	Option to use floor height.
+	Option to use floor height and other view heights.
 	World Scale option.
 	vr_chibi head scale console command.
 	More laser sight options.
@@ -917,9 +919,12 @@ Voice Controls:
 	  
 	  Fists:
 	  
-	    Say:	Fist
-	        Fists
+	    Say:	Weapon fist
+	        Weapon fists
+			Weapon hands
+	        Use fists
 	        Hands
+			Punching
 	        
 	  Pistol:
 

@@ -88,6 +88,7 @@ idCVar vr_hudFlashlight( "vr_hudFlashlight", "1", CVAR_BOOL | CVAR_GAME | CVAR_A
 idCVar vr_hudLowHealth( "vr_hudLowHealth", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, " 0 = Disable, otherwise force hud if heath below this value." );
 
 idCVar vr_voiceRepeat( "vr_voiceRepeat", "0", CVAR_BOOL, "1 = computer speaks back whatever commands or lines you say" );
+idCVar vr_voiceMinVolume( "vr_voiceMinVolume", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Minimum volume required to recognise voice commands. Out of 100. Set this higher if background sounds trigger voice commands.", 0, 100 );
 idCVar vr_voiceCommands( "vr_voiceCommands", "2", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Enable voice commands. 0 = none, 1 = menus, 2 = menus and weapons", 0, 2 );
 idCVar vr_talkWakeMonsters( "vr_talkWakeMonsters", "1", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Talking wakes monsters. 0 = no, 1 = both methods, 2 = like flashlight, 3 = like weapon", 0, 3 );
 idCVar vr_talkWakeMonsterRadius( "vr_talkWakeMonsterRadius", "120", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Radius in inches within which talking quietly can wake enemies. Talking louder wakes monsters further than this." );
