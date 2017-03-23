@@ -2146,6 +2146,7 @@ public:
 			CHARACTER_OPTIONS_FIELD_HOLSTER_SLOTS,
 			CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT,
 			CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT,
+			CHARACTER_OPTIONS_FIELD_SCALE,
 			MAX_CHARACTER_OPTION_FIELDS
 		};
 
@@ -2172,9 +2173,10 @@ public:
 		int		originalBodyMode;
 		int		originalFlashMode;
 		int		originalWeaponHand;
+		int		originalSlotDisable;
 		float	originalViewHeight;
 		int	originalUseFloorHeight;
-		int		originalSlotDisable;
+		float originalScale;
 	};
 
 	idMenuScreen_Shell_VR_Character_Options() :
@@ -2299,10 +2301,9 @@ public:
 		{
 			VR_PROFILE_USE_OCULUS_PROFILE,
 			VR_OCULUS_IPD,
-			VR_OCULUS_HEIGHT,
 			VR_PROFILE_IPD,
+			VR_OCULUS_HEIGHT,
 			VR_PROFILE_HEIGHT,
-			VR_PROFILE_SCALE,
 			MAX_VR_PROFILE_OPTION_FIELDS
 		};
 
@@ -2329,7 +2330,6 @@ public:
 
 		float originalUseOculusProfile;
 		float originalIPD;
-		float originalScale;
 		float originalHeight;
 
 	};

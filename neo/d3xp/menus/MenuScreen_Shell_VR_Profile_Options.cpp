@@ -83,7 +83,16 @@ void idMenuScreen_Shell_VR_Profile_Options::Initialize( idMenuHandler * data ) {
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Profile_Options::VR_OCULUS_IPD );
 	options->AddChild( control );
 
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType(OPTION_SLIDER_TEXT);
+	control->SetLabel("Manual Profile IPD");
+	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Profile_Options::VR_PROFILE_IPD);
+	control->SetupEvents(DEFAULT_REPEAT_TIME, options->GetChildren().Num());
+	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Profile_Options::VR_PROFILE_IPD);
+	options->AddChild(control);
+
+#if 0
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "Official Profile Height" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Profile_Options::VR_OCULUS_HEIGHT );
@@ -93,28 +102,13 @@ void idMenuScreen_Shell_VR_Profile_Options::Initialize( idMenuHandler * data ) {
 
 	control = new (TAG_SWF) idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Manual Profile IPD" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Profile_Options::VR_PROFILE_IPD );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Profile_Options::VR_PROFILE_IPD );
-	options->AddChild( control );
-
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "Manual Profile Height" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Profile_Options::VR_PROFILE_HEIGHT );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Profile_Options::VR_PROFILE_HEIGHT );
 	options->AddChild( control );
-	
-	control = new (TAG_SWF) idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "World Scale Adjust" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Profile_Options::VR_PROFILE_SCALE );
-	control->SetupEvents( 2, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Profile_Options::VR_PROFILE_SCALE );
-	options->AddChild( control );
-		
+#endif
+
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN_RELEASE ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_STOP_REPEATER, WIDGET_EVENT_SCROLL_DOWN_RELEASE ) );
@@ -322,7 +316,6 @@ void idMenuScreen_Shell_VR_Profile_Options::idMenuDataSource_Shell_VR_Profile_Op
 	originalUseOculusProfile = vr_useOculusProfile.GetInteger();
 	originalIPD = vr_manualIPD.GetFloat();
 	originalHeight = vr_manualHeight.GetFloat();
-	originalScale = vr_scale.GetFloat();
 }
 
 /*
@@ -352,13 +345,6 @@ idMenuScreen_Shell_VR_Profile_Options::idMenuDataSource_Shell_VR_Profile_Options
 void idMenuScreen_Shell_VR_Profile_Options::idMenuDataSource_Shell_VR_Profile_Options::AdjustField( const int fieldIndex, const int adjustAmount ) {
 	switch ( fieldIndex ) {
 		
-		case VR_PROFILE_SCALE: {
-			const float percent = vr_scale.GetFloat();
-			const float adjusted = percent + (float) adjustAmount * .01;
-			const float clamped = idMath::ClampFloat( 0.2f, 2.0f, adjusted );
-			vr_scale.SetFloat( clamped );
-			break;
-		}
 		case VR_PROFILE_USE_OCULUS_PROFILE : {
 			static const int numValues = 2;
 			static const int values[numValues] = { 0, 1 };
@@ -411,9 +397,6 @@ idSWFScriptVar idMenuScreen_Shell_VR_Profile_Options::idMenuDataSource_Shell_VR_
 			
 		case VR_PROFILE_HEIGHT:
 			return va( "%.1f In, ( %.2f M )", vr_manualHeight.GetFloat(), ( vr_manualHeight.GetFloat() * .0254 ) );
-		
-		case VR_PROFILE_SCALE:
-			return va( "%.2f", vr_scale.GetFloat() );
 	}
 	return false;
 }
@@ -432,9 +415,6 @@ bool idMenuScreen_Shell_VR_Profile_Options::idMenuDataSource_Shell_VR_Profile_Op
 		return true;
 	}
 	if ( originalHeight != vr_manualHeight.GetFloat() ) {
-		return true;
-	}
-	if ( originalScale != vr_scale.GetFloat()) {
 		return true;
 	}
 		

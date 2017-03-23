@@ -1212,24 +1212,32 @@ VR Related game changes can be made from the Settings->VR Options menu.
 	        
 	              Disable
 	              
-	  Eye View Height
-	  
-	        Change the height of the player view, measured in real world units.
-	        Use this option if you are taller or shorter than the default view.
-	        This setting is now saved between maps and sessions.
-	        It has no effect in "Scale to your height" mode.
-	
 	  Use Height
-	        
+	
+	        Custom Eye Height:	The player's view height (specified above) will be the same height as your real eyes.
+	                          	This might make you feel like you're floating above the floor.
+
+	        Marine eye height:	Your eyes will be at the Doom marine's eye height.
+	                          	This is 5 inches higher than the view height in the original Doom 3.
+	
+	        Normal view height:	Your eyes will be at the original height specified by the game.
+
 	        Crouch to your height:	The virtual floor will always be at the same height as the real floor.
 	                             	The Doom marine crouches if you're shorter than he is.
 	
 	        Scale to your height:	The virtual floor will always be at the same height as the real floor.
 	                             	The whole world is scaled to make the Doom marine your height.
 	
-	        Use Eye Height:	The player's view height (specified above) will be the same height as your real eyes.
-	                    This might make you feel like you're floating above the floor.
+	  Custom Eye Height
+	  
+	        Change the height of the player view, measured in real world units.
+	        Use this option if you are taller or shorter than the default view.
+	        This setting is now saved between maps and sessions.
+	        It has no effect in "Scale to your height" mode.
 	
+	  World Scale Adjust:	This works now. Multiply the size of the world by this. 
+	  
+
 	Menu: Comfort Options
 
 	  This menu allows the player select options intended to combat motion sickness, either due
@@ -1744,7 +1752,7 @@ VR Related game changes can be made from the Settings->VR Options menu.
 
 	  Active Profile:
 	  
-	    Select profile.
+	    This works now. Select profile.
 	    
 	      Options:
 	      
@@ -1754,15 +1762,8 @@ VR Related game changes can be made from the Settings->VR Options menu.
 	          
 	  Oculus Profile IPD:	The IPD reported by the HMD runtime. 
 	  
-	  Oculus Profile Height:	The Height reported by the HMD runtime. 
-	  
 	  Manual Profile IPD:	This IPD will be used if Active Profile is set to Manual.
 	  
-	  Manual Profile Height:	This height will be used if Active Profile is set to Manual.
-	  
-	  World Scale Adjust:	This works now. Multiply the size of the world by this. 
-	  
-
 ___________________________________________
 
 9) CONSOLE VARIABLES AND COMMANDS

@@ -833,7 +833,7 @@ stereoDistances_t	CaclulateStereoDistances(
 
 float GetIPD()
 {
-	if ( game->isVR && !vr_manualIPDEnable.GetInteger() )
+	if ( game->isVR && !vr_manualIPDEnable.GetInteger() && vr_useOculusProfile.GetInteger() )
 	{ 
 		if ( commonVr->hasOculusRift )
 			return ( fabs(commonVr->hmdEye[0].viewOffset.x)  + fabs( commonVr->hmdEye[1].viewOffset.x)) * 100.0f; // ipd in cm

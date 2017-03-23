@@ -115,6 +115,13 @@ void idMenuScreen_Shell_VR_Character_Options::Initialize( idMenuHandler * data )
 	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT);
 	options->AddChild(control);
 
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType(OPTION_SLIDER_TEXT);
+	control->SetLabel("World Scale Adjust");
+	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_SCALE);
+	control->SetupEvents(2, options->GetChildren().Num());
+	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_SCALE);
+	options->AddChild(control);
 
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
@@ -324,9 +331,10 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	originalBodyMode = vr_playerBodyMode.GetInteger();
 	originalFlashMode = vr_flashlightMode.GetInteger();
 	originalWeaponHand = vr_weaponHand.GetInteger();
+	originalSlotDisable = vr_slotDisable.GetInteger();
 	originalViewHeight = vr_normalViewHeight.GetFloat();
 	originalUseFloorHeight = vr_useFloorHeight.GetInteger();
-	originalSlotDisable = vr_slotDisable.GetInteger();
+	originalScale = vr_scale.GetFloat();
 }
 
 /*
@@ -402,6 +410,14 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 			static const int numValues = 5;
 			static const int values[numValues] = { 0, 1, 2, 3, 4 };
 			vr_useFloorHeight.SetInteger( AdjustOption( vr_useFloorHeight.GetInteger(), values, numValues, adjustAmount ) );
+			break;
+		}
+
+		case CHARACTER_OPTIONS_FIELD_SCALE: {
+			const float percent = vr_scale.GetFloat();
+			const float adjusted = percent + (float)adjustAmount * .01f;
+			const float clamped = idMath::ClampFloat( 0.2f, 2.0f, adjusted );
+			vr_scale.SetFloat( clamped );
 			break;
 		}
 	}
@@ -516,6 +532,8 @@ idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_V
 				return "Custom eye height";
 			}
 		}
+		case CHARACTER_OPTIONS_FIELD_SCALE:
+			return va("%.2f", vr_scale.GetFloat());
 
 	}
 	return false;
@@ -549,6 +567,10 @@ bool idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 		return true;
 	}
 	if ( originalUseFloorHeight != vr_useFloorHeight.GetInteger() )
+	{
+		return true;
+	}
+	if ( originalScale != vr_scale.GetFloat() )
 	{
 		return true;
 	}
