@@ -1217,13 +1217,17 @@ VR Related game changes can be made from the Settings->VR Options menu.
 	        Change the height of the player view, measured in real world units.
 	        Use this option if you are taller or shorter than the default view.
 	        This setting is now saved between maps and sessions.
+	        It has no effect in "Scale to your height" mode.
 	
-	  Use Floor Height
+	  Use Height
 	        
-	        Enable:	The virtual floor will always be at the same height as the real floor.
-	                This might make you feel like you're not as tall as a space marine should be.
+	        Crouch to your height:	The virtual floor will always be at the same height as the real floor.
+	                             	The Doom marine crouches if you're shorter than he is.
 	
-	        Disable:	The player's view height (specified above) will be the same height as your real eyes.
+	        Scale to your height:	The virtual floor will always be at the same height as the real floor.
+	                             	The whole world is scaled to make the Doom marine your height.
+	
+	        Use Eye Height:	The player's view height (specified above) will be the same height as your real eyes.
 	                    This might make you feel like you're floating above the floor.
 	
 	Menu: Comfort Options

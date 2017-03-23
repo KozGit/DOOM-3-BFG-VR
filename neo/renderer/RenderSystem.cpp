@@ -245,7 +245,10 @@ static void R_CheckCvars()
 			vr_normalViewHeight.ClearModified();
 			vr_scale.ClearModified();
 			extern idCVar pm_normalviewheight;
-			pm_normalviewheight.SetFloat( vr_normalViewHeight.GetFloat() / vr_scale.GetFloat() - 5 - CM_CLIP_EPSILON );
+			if (vr_useFloorHeight.GetInteger() == 2)
+				pm_normalviewheight.SetFloat( 68.0f );
+			else
+				pm_normalviewheight.SetFloat( vr_normalViewHeight.GetFloat() / vr_scale.GetFloat() - 5 - CM_CLIP_EPSILON );
 		}
 
 		if ( vr_useFloorHeight.IsModified() )

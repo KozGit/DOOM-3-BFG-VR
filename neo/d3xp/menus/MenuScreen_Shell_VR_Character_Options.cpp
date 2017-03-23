@@ -109,7 +109,7 @@ void idMenuScreen_Shell_VR_Character_Options::Initialize( idMenuHandler * data )
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Use Floor Height" );
+	control->SetLabel( "Use Height" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction(WIDGET_EVENT_PRESS).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT );
@@ -325,7 +325,7 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	originalFlashMode = vr_flashlightMode.GetInteger();
 	originalWeaponHand = vr_weaponHand.GetInteger();
 	originalViewHeight = vr_normalViewHeight.GetFloat();
-	originalUseFloorHeight = vr_useFloorHeight.GetBool();
+	originalUseFloorHeight = vr_useFloorHeight.GetInteger();
 	originalSlotDisable = vr_slotDisable.GetInteger();
 }
 
@@ -399,8 +399,8 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	
 		case CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT:
 		{
-			static const int numValues = 2;
-			static const int values[numValues] = { 1, 0 };
+			static const int numValues = 3;
+			static const int values[numValues] = { 0, 1, 2 };
 			vr_useFloorHeight.SetInteger( AdjustOption( vr_useFloorHeight.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
@@ -495,13 +495,17 @@ idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_V
 
 		case CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT:
 		{
-			if (vr_useFloorHeight.GetBool())
+			if (vr_useFloorHeight.GetInteger() == 1)
 			{
-				return "#str_swf_enabled";
+				return "Crouch to your height";
+			}
+			if (vr_useFloorHeight.GetInteger() == 2)
+			{
+				return "Scale to your height";
 			}
 			else
 			{
-				return "#str_swf_disabled";
+				return "Use eye height";
 			}
 		}
 

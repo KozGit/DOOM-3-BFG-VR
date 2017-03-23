@@ -2173,7 +2173,7 @@ public:
 		int		originalFlashMode;
 		int		originalWeaponHand;
 		float	originalViewHeight;
-		bool	originalUseFloorHeight;
+		int	originalUseFloorHeight;
 		int		originalSlotDisable;
 	};
 
