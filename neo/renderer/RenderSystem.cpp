@@ -240,6 +240,14 @@ static void R_CheckCvars()
 	if ( game->isVR )
 	{
 
+		if ( vr_normalViewHeight.IsModified() || vr_scale.IsModified() )
+		{
+			vr_normalViewHeight.ClearModified();
+			vr_scale.ClearModified();
+			extern idCVar pm_normalviewheight;
+			pm_normalviewheight.SetFloat( vr_normalViewHeight.GetFloat() / vr_scale.GetFloat() - 5 - CM_CLIP_EPSILON );
+		}
+
 		if ( vr_useFloorHeight.IsModified() )
 		{
 			vr_useFloorHeight.ClearModified();

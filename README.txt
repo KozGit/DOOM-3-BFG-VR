@@ -1790,10 +1790,10 @@ Commands:
 
 Below are some console variables used by the game.  Many of these can be adjusted via the in game menus.
 
-vr_chibi 1 FLOAT - changes the size of human heads (sometimes good if you change the world scale but it makes heads look weird).
-vr_scale 0.93 FLOAT - scale of the virtual world. 1 = scale of previous version and original Doom 3.
+vr_chibi 1 FLOAT - changes the size of human heads (sometimes good to change if you changing the world scale made heads look weird).
+vr_scale 1 FLOAT - scale of the virtual world. 1 = scale of previous version and original Doom 3. 0.93 = slightly smaller and more comfortable size (like in Leyland's mod).
 vr_useFloorHeight 0 BOOL - keep the virtual floor level with the real floor.
-pm_normalviewheight 68 FLOAT - 5 game-inches less than the player view height.
+vr_normalViewHeight 73 FLOAT - The player view height in real world inches.
 vr_laserSightUseOffset 1 BOOL - Emit laser sight from the gun's laser sight emitter instead of the gun's barrel.
 
 com_fixedTic 0 BOOL - run a single game frame per render frame. Fixes frame dropping in VR.

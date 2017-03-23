@@ -324,7 +324,7 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	originalBodyMode = vr_playerBodyMode.GetInteger();
 	originalFlashMode = vr_flashlightMode.GetInteger();
 	originalWeaponHand = vr_weaponHand.GetInteger();
-	originalViewHeight = pm_normalviewheight.GetFloat();
+	originalViewHeight = vr_normalViewHeight.GetFloat();
 	originalUseFloorHeight = vr_useFloorHeight.GetBool();
 	originalSlotDisable = vr_slotDisable.GetInteger();
 }
@@ -390,10 +390,10 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 		}
 
 		case CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT: {
-			const float percent = pm_normalviewheight.GetFloat();;
-			const float adjusted = percent + (float) adjustAmount * .5f;
+			const float value = vr_normalViewHeight.GetFloat();
+			const float adjusted = value + (float) adjustAmount * .5f;
 			const float clamped = idMath::ClampFloat( 40.0f, 80.0f, adjusted );
-			pm_normalviewheight.SetFloat( clamped );
+			vr_normalViewHeight.SetFloat( clamped );
 			break;
 		}
 	
@@ -490,9 +490,8 @@ idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_V
 
 		case CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT:
 		{
-			
-			return va( "%.1f", pm_normalviewheight.GetFloat() );
-		}	
+			return va("%.1f\" %d'%.1f\" %.1fcm", vr_normalViewHeight.GetFloat(), ((int)vr_normalViewHeight.GetFloat()) / 12, vr_normalViewHeight.GetFloat() - 12 * (((int)vr_normalViewHeight.GetFloat()) / 12), vr_normalViewHeight.GetFloat() * 2.54f);
+		}
 
 		case CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT:
 		{
@@ -533,7 +532,7 @@ bool idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	{
 		return true;
 	}
-	if ( originalViewHeight != pm_normalviewheight.GetFloat() )
+	if ( originalViewHeight != vr_normalViewHeight.GetFloat() )
 	{
 		return true;
 	}
