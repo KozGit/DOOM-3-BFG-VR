@@ -101,21 +101,21 @@ void idMenuScreen_Shell_VR_Character_Options::Initialize( idMenuHandler * data )
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Eye View Height" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT );
-	options->AddChild( control );
-
-	control = new (TAG_SWF)idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "Use Height" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction(WIDGET_EVENT_PRESS).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT );
 	options->AddChild( control );
 
-			
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType(OPTION_SLIDER_TEXT);
+	control->SetLabel("Custom Eye Height");
+	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT);
+	control->SetupEvents(DEFAULT_REPEAT_TIME, options->GetChildren().Num());
+	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT);
+	options->AddChild(control);
+
+
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN_RELEASE ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_STOP_REPEATER, WIDGET_EVENT_SCROLL_DOWN_RELEASE ) );
@@ -399,8 +399,8 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	
 		case CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT:
 		{
-			static const int numValues = 3;
-			static const int values[numValues] = { 0, 1, 2 };
+			static const int numValues = 5;
+			static const int values[numValues] = { 0, 1, 2, 3, 4 };
 			vr_useFloorHeight.SetInteger( AdjustOption( vr_useFloorHeight.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
@@ -497,15 +497,23 @@ idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_V
 		{
 			if (vr_useFloorHeight.GetInteger() == 1)
 			{
+				return "Marine eye height";
+			}
+			else if (vr_useFloorHeight.GetInteger() == 2)
+			{
+				return "Normal view height";
+			}
+			else if (vr_useFloorHeight.GetInteger() == 3)
+			{
 				return "Crouch to your height";
 			}
-			if (vr_useFloorHeight.GetInteger() == 2)
+			else if (vr_useFloorHeight.GetInteger() == 4)
 			{
 				return "Scale to your height";
 			}
 			else
 			{
-				return "Use eye height";
+				return "Custom eye height";
 			}
 		}
 
@@ -540,7 +548,7 @@ bool idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	{
 		return true;
 	}
-	if ( originalUseFloorHeight != vr_useFloorHeight.GetBool() )
+	if ( originalUseFloorHeight != vr_useFloorHeight.GetInteger() )
 	{
 		return true;
 	}

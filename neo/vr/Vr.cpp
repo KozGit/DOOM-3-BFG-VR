@@ -26,7 +26,7 @@ idCVar vr_manualIPDEnable( "vr_manualIPDEnable", "0", CVAR_INTEGER | CVAR_ARCHIV
 idCVar vr_manualIPD( "vr_manualIPD", "64", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined IPD value in MM" );
 idCVar vr_manualHeight( "vr_manualHeight", "70", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "User defined player height in inches" );
 idCVar vr_minLoadScreenTime( "vr_minLoadScreenTime", "6000", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Min time to display load screens in ms.", 0.0f, 10000.0f );
-idCVar vr_useFloorHeight( "vr_useFloorHeight", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "0 = make eyes line up. 1 = make floor line up by Doomguy crouching. 2 = make everything line up by scaling world to your height." );
+idCVar vr_useFloorHeight( "vr_useFloorHeight", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "0 = Custom eye height. 1 = Marine Eye Height. 2 = Normal View Height. 3 = make floor line up by Doomguy crouching. 4 = make everything line up by scaling world to your height.", 0, 4 );
 idCVar vr_normalViewHeight( "vr_normalViewHeight", "73", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Height of player's view while standing, in real world inches." );
 
 idCVar vr_weaponHand( "vr_weaponHand", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Which hand holds weapon.\n 0 = Right hand\n 1 = Left Hand\n", 0, 1 );
@@ -279,6 +279,7 @@ iVr::iVr()
 	lastSaveTime = Sys_Milliseconds();
 	wasSaved = false;
 	wasLoaded = false;
+	shouldRecenter = false;
 
 	PDAclipModelSet = false;
 	useFBO = false;
@@ -534,7 +535,7 @@ bool iVr::OculusInit( void )
 	common->Printf( "\n\nOculus Rift HMD Initialized\n" );
 	//ovr_RecenterPose( hmdSession ); // lets start looking forward.
 	
-	if ( vr_useFloorHeight.GetInteger() )
+	if ( vr_useFloorHeight.GetInteger() >= 3 )
 	{
 		ovr_SetTrackingOriginType( hmdSession, ovrTrackingOrigin_FloorLevel );
 	}
@@ -1292,9 +1293,13 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 
 			trackingOriginOffset = lastHmdPosition;
 			trackingOriginHeight = trackingOriginOffset.z;
-			if (vr_useFloorHeight.GetInteger() == 1)
-				trackingOriginOffset.z = pm_normalviewheight.GetFloat() + 5 + CM_CLIP_EPSILON;
+			if (vr_useFloorHeight.GetInteger() == 0)
+				trackingOriginOffset.z += pm_normalviewheight.GetFloat() + 5 + CM_CLIP_EPSILON - vr_normalViewHeight.GetFloat() / vr_scale.GetFloat();
 			else if (vr_useFloorHeight.GetInteger() == 2)
+				trackingOriginOffset.z += 5;
+			else if (vr_useFloorHeight.GetInteger() == 3)
+				trackingOriginOffset.z = pm_normalviewheight.GetFloat() + 5 + CM_CLIP_EPSILON;
+			else if (vr_useFloorHeight.GetInteger() == 4)
 			{
 				float oldScale = vr_scale.GetFloat();
 				float h = trackingOriginHeight * oldScale;
@@ -1421,13 +1426,17 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 
 		trackingOriginOffset = lastHmdPosition;
 		trackingOriginHeight = trackingOriginOffset.z;
-		if (vr_useFloorHeight.GetInteger() == 1)
-			trackingOriginOffset.z = pm_normalviewheight.GetFloat() + 5 + CM_CLIP_EPSILON;
+		if (vr_useFloorHeight.GetInteger() == 0)
+			trackingOriginOffset.z += pm_normalviewheight.GetFloat() + 5 + CM_CLIP_EPSILON - vr_normalViewHeight.GetFloat() / vr_scale.GetFloat();
 		else if (vr_useFloorHeight.GetInteger() == 2)
+			trackingOriginOffset.z += 5;
+		else if (vr_useFloorHeight.GetInteger() == 3)
+			trackingOriginOffset.z = pm_normalviewheight.GetFloat() + 5 + CM_CLIP_EPSILON;
+		else if (vr_useFloorHeight.GetInteger() == 4)
 		{
 			float oldScale = vr_scale.GetFloat();
 			float h = trackingOriginHeight * oldScale;
-			float newScale = h / 73.0f;
+			float newScale = h / (pm_normalviewheight.GetFloat() + 5 + CM_CLIP_EPSILON);
 			trackingOriginHeight *= oldScale / newScale;
 			trackingOriginOffset *= oldScale / newScale;
 			vr_scale.SetFloat(newScale);
@@ -1515,7 +1524,7 @@ void iVr::HMDGetOrientation( idAngles &hmdAngles, idVec3 &headPositionDelta, idV
 	{
 		lastNeckPosition = currentNeckPosition;
 		initialNeckPosition = currentNeckPosition;
-		if (vr_useFloorHeight.GetBool())
+		if ( vr_useFloorHeight.GetInteger() != 1 )
 			initialNeckPosition.z = vr_nodalZ.GetFloat() / vr_scale.GetFloat();
 		neckInitialized = true;
 	}
@@ -1971,7 +1980,7 @@ bool iVr::ShouldQuit()
 		if (ss.ShouldQuit)
 			return true;
 		if (ss.ShouldRecenter)
-			ovr_RecenterTrackingOrigin(hmdSession);
+			shouldRecenter = true;
 	}
 	return false;
 }

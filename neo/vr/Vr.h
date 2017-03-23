@@ -162,6 +162,8 @@ public:
 	bool				handInGui;
 
 	bool				vrIsBackgroundSaving;
+
+	bool				shouldRecenter;
 		
 	int					vrFrameNumber;
 	int					lastPostFrame;

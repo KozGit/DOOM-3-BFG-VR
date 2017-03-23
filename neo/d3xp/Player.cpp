@@ -1988,11 +1988,7 @@ void idPlayer::Init()
 		kv = spawnArgs.MatchPrefix( "pm_", NULL );
 		while( kv )
 		{
-			// Don't read pm_normalviewheight from map if we're in VR. It's a menu option.
-			if (game->isVR && vr_useFloorHeight.GetInteger() != 2 && kv->GetKey() == "pm_normalviewheight")
-				pm_normalviewheight.SetFloat( vr_normalViewHeight.GetFloat() / vr_scale.GetFloat() - 5 - CM_CLIP_EPSILON );
-			else
-				cvarSystem->SetCVarString( kv->GetKey(), kv->GetValue() );
+			cvarSystem->SetCVarString( kv->GetKey(), kv->GetValue() );
 			kv = spawnArgs.MatchPrefix( "pm_", kv );
 		}
 	}
