@@ -6341,7 +6341,7 @@ idPlayer::Reload
 */
 void idPlayer::Reload()
 {
-	if( spectating || gameLocal.inCinematic || Flicksync_InCutscene || influenceActive )
+	if( spectating || gameLocal.inCinematic || Flicksync_InCutscene || influenceActive || commonVr->handInGui ) // koz don't reload when in gui
 	{
 		return;
 	}
@@ -6411,8 +6411,8 @@ idPlayer::NextWeapon
 */
 void idPlayer::NextWeapon()
 {
-
-	if( !weaponEnabled || spectating || hiddenWeapon || gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || health < 0 )
+	//koz dont change weapon if in gui
+	if( commonVr->handInGui || !weaponEnabled || spectating || hiddenWeapon || gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || health < 0 )
 	{
 		return;
 	}
@@ -6475,8 +6475,8 @@ idPlayer::PrevWeapon
 */
 void idPlayer::PrevWeapon()
 {
-
-	if( !weaponEnabled || spectating || hiddenWeapon || gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || health < 0 )
+	//koz dont change weapon if in gui
+	if( commonVr->handInGui || !weaponEnabled || spectating || hiddenWeapon || gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || health < 0 )
 	{
 		return;
 	}
@@ -9590,7 +9590,7 @@ void idPlayer::PerformImpulse( int impulse )
 	bool isIntroMap = ( idStr::FindText( gameLocal.GetMapFileName(), "mars_city1" ) >= 0 );
 
 	// Normal 1 - 0 Keys.
-	if ( impulse >= IMPULSE_0 && impulse <= IMPULSE_12 && !isIntroMap )
+	if ( impulse >= IMPULSE_0 && impulse <= IMPULSE_12 && !isIntroMap ) // koz dont change weapons if in gui
 	{
 		// Carl: impulse 1, 4, and 11 were unbound, so I'm using them for specific versions of weapons
 		if (impulse == 1)
