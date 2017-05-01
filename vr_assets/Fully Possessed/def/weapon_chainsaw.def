@@ -42,6 +42,7 @@ entityDef weapon_chainsaw {
 	"editor_rotatable"			"1"
 
 	"spawnclass"				"idItem"
+	"scale"						"0.9"
 	"size"						"32 32 32"
 	"model"						"models/weapons/chainsaw/w_chainsaw.lwo"
 	"model_view" 				"viewmodel_chainsaw_vr"

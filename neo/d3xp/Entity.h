@@ -232,6 +232,8 @@ public:
 	renderEntity_t			xrayEntity;
 	qhandle_t				xrayEntityHandle;
 	const idDeclSkin* 		xraySkin;
+
+	float scale;
 	
 	void					DetermineTimeGroup( bool slowmo );
 	
@@ -508,7 +510,7 @@ public:
 	{
 		return snapshotsReceived;
 	}
-	
+
 protected:
 	renderEntity_t			renderEntity;						// used to present a model to the renderer
 	int						modelDefHandle;						// handle to static renderer model

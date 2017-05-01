@@ -152,11 +152,14 @@ action {
 action {
 
 	name FIST
-	entries 3
+	entries 6
 	
-	"fist"
-	"fists"
+	"weapon fist"
+	"weapon fists"
+	"weapon hands"
+	"use fists"
 	"hands"
+	"punching"
 }
 
 action {

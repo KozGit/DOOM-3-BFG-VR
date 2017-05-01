@@ -240,12 +240,11 @@ static void R_CheckCvars()
 	if ( game->isVR )
 	{
 
-		if ( vr_useFloorHeight.IsModified() )
+		if ( vr_useFloorHeight.IsModified() || ( vr_normalViewHeight.IsModified() && vr_useFloorHeight.GetInteger() == 0 ) || vr_scale.IsModified() || commonVr->shouldRecenter )
 		{
-			vr_useFloorHeight.ClearModified();
-			if ( commonVr->hasOculusRift )
+			if (commonVr->hasOculusRift)
 			{
-				if ( vr_useFloorHeight.GetBool() )
+				if ( vr_useFloorHeight.GetInteger() >= 3 )
 				{
 					ovr_SetTrackingOriginType( commonVr->hmdSession, ovrTrackingOrigin_FloorLevel );
 				}
@@ -256,6 +255,10 @@ static void R_CheckCvars()
 				ovr_RecenterTrackingOrigin( commonVr->hmdSession );
 				commonVr->HMDResetTrackingOriginOffset();
 			}
+			vr_useFloorHeight.ClearModified();
+			vr_normalViewHeight.ClearModified();
+			vr_scale.ClearModified();
+			commonVr->shouldRecenter = false;
 		}
 	}
 	

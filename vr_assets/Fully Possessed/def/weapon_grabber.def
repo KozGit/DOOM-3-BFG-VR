@@ -60,6 +60,7 @@ entityDef weapon_grabber {
 	"editor_usage"			"Grabber"
 
 	"spawnclass"			"idItem"
+	"scale"					"0.5"
 	"size"					"32 32 32"
 	"model" 				"models/weapons/grabber/grabber_world.ase"
 	"model_view"			"viewmodel_grabber_vr"

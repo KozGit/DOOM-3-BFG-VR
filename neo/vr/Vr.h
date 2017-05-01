@@ -167,6 +167,8 @@ public:
 	bool				handInGui;
 
 	bool				vrIsBackgroundSaving;
+
+	bool				shouldRecenter;
 		
 	int					vrFrameNumber;
 	int					lastPostFrame;
@@ -386,6 +388,7 @@ private:
 #endif
 
 extern idCVar	vr_scale;
+extern idCVar	vr_normalViewHeight;
 extern idCVar	vr_useOculusProfile;
 extern idCVar	vr_manualIPDEnable;
 extern idCVar	vr_manualIPD;
@@ -454,7 +457,8 @@ extern idCVar	vr_talkWakeMonsters;
 extern idCVar	vr_talkWakeMonsterRadius;
 extern idCVar	vr_talkMode;
 extern idCVar	vr_voiceCommands;
-extern idCVar vr_voiceRepeat;
+extern idCVar	vr_voiceRepeat;
+extern idCVar	vr_voiceMinVolume;
 
 extern idCVar	vr_listMonitorName;
 

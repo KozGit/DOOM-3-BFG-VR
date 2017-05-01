@@ -575,7 +575,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 
 			ovr_CalcEyePoses( commonVr->hmdTrackingState.HeadPose.ThePose, viewOffset, eyeRenderPose );
 
-			viewScaleDesc.HmdSpaceToWorldScaleInMeters = 0.0254f; // inches to meters
+			viewScaleDesc.HmdSpaceToWorldScaleInMeters = 0.0254f * vr_scale.GetFloat(); // inches to meters
 			viewScaleDesc.HmdToEyeOffset[0] = hmdEye[0].eyeRenderDesc.HmdToEyeOffset;
 			viewScaleDesc.HmdToEyeOffset[1] = hmdEye[1].eyeRenderDesc.HmdToEyeOffset;
 
@@ -730,7 +730,6 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 		static ovrLayerHeader	*layers = &oculusLayer.Header;
 		static ovrPosef			eyeRenderPose[2];
 		static ovrVector3f		viewOffset[2] = { hmdEye[0].eyeRenderDesc.HmdToEyeOffset, hmdEye[1].eyeRenderDesc.HmdToEyeOffset };
-		static ovrViewScaleDesc viewScaleDesc;
 
 		if (commonVr->useFBO) // if using FBOs, bind them, otherwise bind the default frame buffer.
 		{
