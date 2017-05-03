@@ -187,8 +187,8 @@ __________________________________________
 
 4. Old version 0.015 of this mod installed assets directly into the BASE directory of the Doom 3 BFG
    installation.  All assets are now installed into a separate mod folder named 'Fully Possessed'
-   located in the Doom 3 BFG directory. An installer is now provided that will automatically remove files from old
-   versions of this mod if present, and install the updated mod.  The installer doesn't add any files to the base 
+   located in the Doom 3 BFG directory. An installer is now provided that will automatically remove files from
+   old versions of this mod if present, and install the updated mod.  The installer doesn't add any files to the base
    folder, but it will remove files installed by mods that have the same names as files used by this mod ( mostly 
    weapons and player models ). This will NOT affect the base game, but could possibly break other mods installed.
 
@@ -248,6 +248,11 @@ New in 0.22:
 	Slightly improve voice commands.
 	Default keyboard / mouse controls.
 	Less debug prints for sound effects.
+	Improved player hand models.
+	Initial optional oculus touch hand pose support ( Defaults to off - 
+		optionally enabled  via vr_useHandPoses cvar. This is not fully implemented 
+		yet. Currently limited to when hands are empty or when the player hand is
+		in a gui.  Object manipulation is not implemented yet. )
 
 New in 0.21:
 	Talking waking monsters is fixed.
@@ -258,7 +263,8 @@ New in 0.21:
 	There's a menu option for Asynchronous SpaceWarp.
 	You can now chose to walk in the direction of either hand when walking.
 	Language is now detected based on sound files not .lang files.
-	Added QuakeCon style teleport option. http://www.gamespot.com/articles/doom-may-have-solved-vrs-traversal-problem/1100-6442439/
+	Added QuakeCon style teleport option. 
+	http://www.gamespot.com/articles/doom-may-have-solved-vrs-traversal-problem/1100-6442439/
 	Added vr_hmdPerfHud console variable to debug framerate issues.
 
 
