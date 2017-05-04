@@ -158,8 +158,8 @@ Mods:
 The Doom 3 BFG Edition GPL Source Code release allows mod editing. In order for it to accept any change in your
 mod directory, you should first specify your mod directory adding the following command to the launcher:
 
-The fs_game mod directory is used exclusively by DOOM3-BFG VR : Fully Possessed and should not be used by other mods.
-Additional mods can my use the fs_game_base directory
+The fs_game mod directory is used exclusively by DOOM3-BFG VR : Fully Possessed and should not be used by other
+mods. Additional mods can my use the fs_game_base directory
 
 "+set fs_game_base modDirectoryName"
 
@@ -249,12 +249,13 @@ New in 0.22:
 	More laser sight options.
 	Head tracking in the main menu.
 	Holster slots work better with the PDA and QuickSave.
-	Allow path names longer than 260 chars (fixes crash?).
+	Allow path names longer than 260 chars ( fixes some crashes on start/level load ).
 	Slightly improve voice commands.
 	Default keyboard / mouse controls.
 	Less debug prints for sound effects.
 	Improved player hand models.
-	Initial optional oculus touch hand pose support ( Defaults to off - 
+	Basic mirrow window resizing via mouse drag.
+	Initial optional oculus touch hand pose support ( Off by default - 
 		optionally enabled  via vr_useHandPoses cvar. This is not fully implemented 
 		yet. Currently limited to when hands are empty or when the player hand is
 		in a gui.  Object manipulation is not implemented yet. )
