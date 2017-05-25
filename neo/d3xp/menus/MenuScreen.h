@@ -2063,6 +2063,7 @@ public:
 			CONTROL_OPTIONS_FIELD_CONTROLLER_TYPE,
 			CONTROL_OPTIONS_FIELD_MOVE_MODE,
 			CONTROL_OPTIONS_FIELD_CROUCH_MODE,
+			CONTROL_OPTIONS_FIELD_CROUCH_HIDE,
 			CONTROL_OPTIONS_FIELD_CROUCH_TRIGGER_DIST,
 			CONTROL_OPTIONS_FIELD_WEAPON_PITCH,
 			CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH,
@@ -2094,6 +2095,7 @@ public:
 		int		originalControlType;
 		int		originalMoveMode;
 		int		originalCrouchMode;
+		int		originalCrouchHide;
 		float	originalCrouchTriggerDistance;
 		float	originalWeaponPitch;
 		float	originalFlashPitch;

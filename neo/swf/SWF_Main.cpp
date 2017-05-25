@@ -108,6 +108,30 @@ idSWF::idSWF( const char* filename_, idSoundWorld* soundWorld_ )
 	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCHTRIG>", "guis/assets/hud/controller/ltouch_trig.tga", "", 67, 34, 0 ) );
 	tooltipButtonImage.Append( keyButtonImages_t( "<L_TOUCHSTICK>", "guis/assets/hud/controller/ltouch_jpress.tga", "", 67, 34, 0 ) );
 	
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY17>", "guis/assets/hud/controller/touch_x.tga", "", 38, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY18>", "guis/assets/hud/controller/touch_y.tga", "", 38, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY19>", "guis/assets/hud/controller/touch_menu.tga", "", 38, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY20>", "guis/assets/hud/controller/ltouch_jpress.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY22>", "guis/assets/hud/controller/ltouch_grip.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY23>", "guis/assets/hud/controller/ltouch_trig.tga", "", 67, 34, 0 ) );
+
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY24>", "guis/assets/hud/controller/touch_a.tga", "", 38, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY25>", "guis/assets/hud/controller/touch_b.tga", "", 38, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY27>", "guis/assets/hud/controller/rtouch_jpress.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY29>", "guis/assets/hud/controller/rtouch_grip.tga", "", 67, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY30>", "guis/assets/hud/controller/rtouch_trig.tga", "", 67, 34, 0 ) );
+	
+		
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY32>", "guis/assets/hud/controller/lvive_menu.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY33>", "guis/assets/hud/controller/lvive_grip.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY39>", "guis/assets/hud/controller/lvive_pad.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY40>", "guis/assets/hud/controller/lvive_trig.tga", "", 52, 34, 0 ) );
+
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY50>", "guis/assets/hud/controller/rvive_menu.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY51>", "guis/assets/hud/controller/rvive_grip.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY57>", "guis/assets/hud/controller/rvive_pad.tga", "", 52, 34, 0 ) );
+	tooltipButtonImage.Append( keyButtonImages_t( "<JOY58>", "guis/assets/hud/controller/rvive_trig.tga", "", 52, 34, 0 ) );
+	
 	for( int index = 0; index < tooltipButtonImage.Num(); index++ )
 	{
 		if( ( tooltipButtonImage[index].xbImage != NULL ) && ( tooltipButtonImage[index].xbImage[0] != '\0' ) )

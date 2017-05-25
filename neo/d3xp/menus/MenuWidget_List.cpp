@@ -129,6 +129,8 @@ bool idMenuWidget_List::HandleAction( idWidgetAction& action, const idWidgetEven
 		{
 			ScrollOffset( parms[ 0 ].ToInteger() * 999 );
 		}
+
+		widget->GetParent()->Update(); // widget repeater doesn't update the screen - force an update so we can dynamically scroll meny lists
 		return true;
 	}
 	

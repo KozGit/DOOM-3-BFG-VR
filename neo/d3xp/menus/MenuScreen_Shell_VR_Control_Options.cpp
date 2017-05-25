@@ -34,7 +34,18 @@ enum settingMenuCmds_t
 	SETTING_CMD_BINDINGS,
 };
 
-const static int NUM_SYSTEM_VR_CONTROL_OPTIONS = 8;
+
+const static int NUM_SYSTEM_VR_CONTROL_OPTIONS = 9;
+const static int NUM_DISPLAY_LINES = 8;
+
+static int currentOffset = 0;
+static int lastIndex = 0;
+
+
+idStr cmdName[NUM_SYSTEM_VR_CONTROL_OPTIONS] = { "Controller Type", "Move Mode", "Crouch Mode", "Crouch Hide Body", "Crouch Trig Distance", "Weapon Pitch", "Flashlight Pitch", "Talk Mode", "Voice Commands" };
+menuOption_t cmdType[NUM_SYSTEM_VR_CONTROL_OPTIONS] = { OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT };
+
+
 
 float LinearAdjust( const float input, const float currentMin, const float currentMax, const float desiredMin,  float desiredMax );
 int	AdjustOption( const int currentValue, const int values[], const int numValues, const int adjustment );
@@ -47,16 +58,19 @@ idMenuScreen_Shell_VR_Control_Options::Initialize
 void idMenuScreen_Shell_VR_Control_Options::Initialize( idMenuHandler * data ) {
 	idMenuScreen::Initialize( data );
 
+	currentOffset = 0;
+	lastIndex = 0;
+
 	if ( data != NULL ) {
 		menuGUI = data->GetGUI();
 	}
 
 	SetSpritePath( "menuSystemOptions" );
-	
+		
 	options = new (TAG_SWF) idMenuWidget_DynamicList();
 	options->SetNumVisibleOptions( NUM_SYSTEM_VR_CONTROL_OPTIONS );
 	options->SetSpritePath( GetSpritePath(), "info", "options" );
-	options->SetWrappingAllowed( true );
+	options->SetWrappingAllowed( false );
 	options->SetControlList( true );
 	options->Initialize( data );
 
@@ -70,7 +84,21 @@ void idMenuScreen_Shell_VR_Control_Options::Initialize( idMenuHandler * data ) {
 	AddChild( btnBack );
 
 	idMenuWidget_ControlButton * control;
-			
+		
+	for ( int ctrl = 0; ctrl < NUM_SYSTEM_VR_CONTROL_OPTIONS; ctrl++ )
+	{
+		control = new (TAG_SWF)idMenuWidget_ControlButton();
+		control->SetOptionType( cmdType[ctrl] );
+		control->SetLabel( cmdName[ctrl] );
+		control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CONTROLLER_TYPE + ctrl );
+		control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+		control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CONTROLLER_TYPE + ctrl );
+		control->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CONTROLLER_TYPE + ctrl );
+		control->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CONTROLLER_TYPE + ctrl );
+
+		options->AddChild( control );
+	}
+	/*
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "Controller Type" );
@@ -93,6 +121,14 @@ void idMenuScreen_Shell_VR_Control_Options::Initialize( idMenuHandler * data ) {
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CROUCH_MODE );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CROUCH_MODE );
+	options->AddChild( control );
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType( OPTION_SLIDER_TEXT );
+	control->SetLabel( "Crouch Hide Body" );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CROUCH_HIDE );
+	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CROUCH_HIDE );
 	options->AddChild( control );
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
@@ -134,6 +170,8 @@ void idMenuScreen_Shell_VR_Control_Options::Initialize( idMenuHandler * data ) {
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
 	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_VOICE_COMMANDS );
 	options->AddChild( control );
+	*/
+
 
 	options->AddEventAction( WIDGET_EVENT_SCROLL_DOWN ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_DOWN_START_REPEATER, WIDGET_EVENT_SCROLL_DOWN ) );
 	options->AddEventAction( WIDGET_EVENT_SCROLL_UP ).Set( new (TAG_SWF) idWidgetActionHandler( options, WIDGET_ACTION_EVENT_SCROLL_UP_START_REPEATER, WIDGET_EVENT_SCROLL_UP ) );
@@ -151,6 +189,8 @@ idMenuScreen_Shell_VR_Control_Options::Update
 ========================
 */
 void idMenuScreen_Shell_VR_Control_Options::Update() {
+
+	
 
 	if ( menuData != NULL ) {
 		idMenuWidget_CommandBar * cmdBar = menuData->GetCmdBar();
@@ -185,7 +225,58 @@ void idMenuScreen_Shell_VR_Control_Options::Update() {
 	if ( btnBack != NULL ) {
 		btnBack->BindSprite( root );
 	}
+	
 
+
+	if ( NUM_SYSTEM_VR_CONTROL_OPTIONS > NUM_DISPLAY_LINES )
+	{
+		int activeIndex = options->GetFocusIndex();
+	
+		if ( lastIndex == 0 && activeIndex == NUM_SYSTEM_VR_CONTROL_OPTIONS - 1 ) // we wrapped off the top of the screen.
+		{
+			currentOffset--;
+			activeIndex = 0;
+		}
+		else if ( lastIndex == NUM_DISPLAY_LINES - 1 && activeIndex == NUM_DISPLAY_LINES )// wrapped off bottom of screen.
+		{
+			currentOffset++;
+			activeIndex = NUM_DISPLAY_LINES - 1;
+		}
+		
+		if ( currentOffset < 0 ){
+			currentOffset = 0;
+			activeIndex = 0;
+		}
+
+		if ( currentOffset > NUM_SYSTEM_VR_CONTROL_OPTIONS - NUM_DISPLAY_LINES )
+		{
+			currentOffset = NUM_SYSTEM_VR_CONTROL_OPTIONS - NUM_DISPLAY_LINES;
+			activeIndex = NUM_DISPLAY_LINES-1;
+		}
+
+		if ( currentOffset > 0 && lastIndex == 0 && activeIndex == 0 ) currentOffset --;// if this is the case, the user tried
+		
+				
+		for ( int ctrl = 0; ctrl < NUM_DISPLAY_LINES ; ctrl++ )
+		{
+			if ( options != NULL && options->GetTotalNumberOfOptions() > 0 )
+			{
+				idMenuWidget_ControlButton* button = dynamic_cast<idMenuWidget_ControlButton*>(&options->GetChildByIndex( ctrl ));
+				if ( button != NULL )
+				{
+					button->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_CONTROLLER_TYPE + ctrl + currentOffset );
+					button->SetOptionType( cmdType[ctrl + currentOffset] );
+					button->SetLabel( cmdName[ctrl + currentOffset] );
+				}
+			}
+		}
+		common->Printf( "lastIndex%d CurrentOffset %d activeIndex %d\n", lastIndex,currentOffset, activeIndex );
+		options->SetFocusIndex( activeIndex );
+		lastIndex = activeIndex;
+	}
+
+
+	common->Printf( "Update %d\n", Sys_Milliseconds() );
 	idMenuScreen::Update();
 }
 
@@ -195,9 +286,8 @@ idMenuScreen_Shell_VR_Control_Options::ShowScreen
 ========================
 */
 void idMenuScreen_Shell_VR_Control_Options::ShowScreen( const mainMenuTransition_t transitionType ) {
-	
+		
 	systemData.LoadData();
-	
 	idMenuScreen::ShowScreen( transitionType );
 }
 
@@ -263,6 +353,7 @@ bool idMenuScreen_Shell_VR_Control_Options::HandleAction( idWidgetAction & actio
 
 	widgetAction_t actionType = action.GetType();
 	const idSWFParmList & parms = action.GetParms();
+
 	switch ( actionType ) {
 		case WIDGET_ACTION_GO_BACK: {
 			if ( menuData != NULL ) {
@@ -270,17 +361,7 @@ bool idMenuScreen_Shell_VR_Control_Options::HandleAction( idWidgetAction & actio
 			}
 			return true;
 		}
-
-		/*
-		case WIDGET_ACTION_PRESS_FOCUSED:
-			if ( widget->GetDataSourceFieldIndex() == idMenuDataSource_Shell_VR_Control_Options::CONTROL_OPTIONS_FIELD_BINDINGS ) {
-				menuData->SetNextScreen( SHELL_AREA_KEYBOARD, MENU_TRANSITION_SIMPLE );
-				common->Printf( "Trying to transition\n" );
-				return true;
-			}
-			break; 
-		*/
-
+	
 		case WIDGET_ACTION_COMMAND: {
 
 			if ( options == NULL ) {
@@ -316,15 +397,16 @@ bool idMenuScreen_Shell_VR_Control_Options::HandleAction( idWidgetAction & actio
 
 			if ( parms.Num() == 4 ) {
 				int selectionIndex = parms[3].ToInteger();
+				
 				if ( selectionIndex != options->GetFocusIndex() ) {
 					options->SetViewIndex( options->GetViewOffset() + selectionIndex );
 					options->SetFocusIndex( selectionIndex );
+
 				}
 			}
 			break;
 		}
 	}
-
 	return idMenuWidget::HandleAction( action, event, widget, forceHandled );
 }
 
@@ -350,6 +432,7 @@ void idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Op
 	originalControlType = vr_controllerStandard.GetInteger();
 	originalMoveMode = vr_movePoint.GetInteger();
 	originalCrouchMode = vr_crouchMode.GetInteger();
+	originalCrouchHide = vr_crouchHideBody.GetBool();
 	originalCrouchTriggerDistance = vr_crouchTriggerDist.GetFloat();
 	originalWeaponPitch = vr_motionWeaponPitchAdj.GetFloat();
 	originalFlashPitch = vr_motionFlashPitchAdj.GetFloat();
@@ -410,6 +493,13 @@ void idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Op
 			break;
 		}
 
+		case CONTROL_OPTIONS_FIELD_CROUCH_HIDE:
+		{
+			static const int numValues = 2;
+			static const int values[numValues] = { 0, 1 };
+			vr_crouchHideBody.SetInteger( AdjustOption( vr_crouchHideBody.GetInteger(), values, numValues, adjustAmount ) );
+			break;
+		}
 		case CONTROL_OPTIONS_FIELD_CROUCH_TRIGGER_DIST: 
 		{
 			float td = vr_crouchTriggerDist.GetFloat();
@@ -519,6 +609,13 @@ idSWFScriptVar idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_
 			}
 
 			return "Motion Triggered";
+
+		case CONTROL_OPTIONS_FIELD_CROUCH_HIDE:
+			if ( vr_crouchHideBody.GetInteger() == 0 )
+			{
+				return "Diasbled";
+			}
+			return "Enabled";
 
 		case CONTROL_OPTIONS_FIELD_CROUCH_TRIGGER_DIST:
 			return va( "%.0f inches", vr_crouchTriggerDist.GetFloat() );

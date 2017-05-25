@@ -3265,14 +3265,14 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		neckJoint = animator.GetJointHandle(value);
 		if (neckJoint == INVALID_JOINT)
 		{
-			gameLocal.Error("Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str());
+			gameLocal.Error("Joint '%s' not found for 'bone_neck' on '%s'", value.c_str(), name.c_str());
 		}
 
 		value = spawnArgs.GetString("bone_chest_pivot", "");
 		chestPivotJoint = animator.GetJointHandle(value);
 		if (chestPivotJoint == INVALID_JOINT)
 		{
-			gameLocal.Error("Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str());
+			gameLocal.Error( "Joint '%s' not found for 'bone_chest_pivot' on '%s'", value.c_str(), name.c_str() );
 		}
 
 		// we need to load the starting joint orientations for the hands so we can compute correct offsets later
@@ -3284,7 +3284,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 			ik_hand[0] = animator.GetJointHandle(value);
 			if (ik_hand[0] == INVALID_JOINT)
 			{
-				gameLocal.Error("Joint '%s' not found for 'ik_hand1' on '%s'", value, name.c_str());
+				gameLocal.Error( "Joint '%s' not found for 'ik_hand1' on '%s'", value.c_str(), name.c_str() );
 			}
 		}
 
@@ -3296,7 +3296,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 			ik_hand[1] = animator.GetJointHandle(value);
 			if (ik_hand[1] == INVALID_JOINT)
 			{
-				gameLocal.Error("Joint '%s' not found for 'ik_hand2' on '%s'", value, name.c_str());
+				gameLocal.Error( "Joint '%s' not found for 'ik_hand2' on '%s'", value.c_str(), name.c_str() );
 			}
 		}
 
@@ -4213,7 +4213,15 @@ void idPlayer::UpdateSkinSetup()
 		}
 		else
 		{
-			skinN += body;
+			// if crouched more than 16 inches hide the body if enabled.
+			if ( (commonVr->headHeightDiff < -16.0f || IsCrouching()) && vr_crouchHideBody.GetBool() )
+			{
+				skinN += handsOnly;
+			}
+			else
+			{
+				skinN += body;
+			}
 		}
 		
 		skin = declManager->FindSkin( skinN.c_str(), false );
@@ -10627,7 +10635,7 @@ idPlayer::Move_Interpolated
 void idPlayer::Move_Interpolated( float fraction )
 {
 
-	float newEyeOffset;
+	float newEyeOffset = 0.0f;
 	idVec3 oldOrigin;
 	idVec3 oldVelocity;
 	idVec3 pushVelocity;
@@ -11947,13 +11955,7 @@ void idPlayer::UpdateLaserSight()
 	{
 		hideSight = !showTeleport;
 	}
-
-	if (showTeleport)
-	{
-		GetHandOrHeadPositionWithHacks( vr_teleport.GetInteger(), muzzleOrigin, muzzleAxis );
-	}
-	
-	
+		
 	if ( hideSight == true || ( sightMode != 0 && sightMode < 4 ) )
 	{
 		laserSightRenderEntity.allowSurfaceInViewID = -1;
@@ -11979,7 +11981,15 @@ void idPlayer::UpdateLaserSight()
 			gameRenderWorld->UpdateEntityDef( crosshairHandle, &crosshairEntity );
 		}
 	}
-		
+
+
+	if ( hideSight && !showTeleport ) return;
+
+	if ( showTeleport )
+	{
+		GetHandOrHeadPositionWithHacks(vr_teleport.GetInteger(), muzzleOrigin, muzzleAxis);
+	}
+
 	// calculate the beam origin and length.
 	start = muzzleOrigin - muzzleAxis[0] * 2.0f;
 	
@@ -13277,11 +13287,20 @@ void idPlayer::Think()
 		//koz show the head if the player is using third person movement mode && the model has moved more than 8 inches.
 		if ( commonVr->thirdPersonMovement && commonVr->thirdPersonDelta > 45.0f )
 		{
-			headRenderEnt->suppressSurfaceInViewID = 0;
+			headRenderEnt->suppressSurfaceInViewID = 0; // show head
+			headRenderEnt->allowSurfaceInViewID = 0;
 		}
 		else
 		{
-			headRenderEnt->suppressSurfaceInViewID = entityNumber + 1;
+			if ( vr_playerBodyMode.GetInteger() != 0 ) // not showing the body
+			{
+				headRenderEnt->allowSurfaceInViewID = -1; // hide the head, even in mirror views.
+			}
+			else
+			{
+				//headRenderEnt->suppressSurfaceInViewID = entityNumber + 1;
+				headRenderEnt->allowSurfaceInViewID = 0; // show the head.
+			}
 		}
 	}
 	

@@ -251,7 +251,7 @@ void idSoundHardware_OpenAL::Init()
 		
 		if ( !list || *list == '\0' )
 		{
-			common->Printf( "Sound device (s_device) specified as %d , but unable to obtain device list.\n Attempting to open default sound device.\n" );
+			common->Printf( "Sound device (s_device) specified as %d , but unable to obtain device list.\n Attempting to open default sound device.\n", desiredDev );
 			openalDevice = alcOpenDevice( NULL );
 		}
 		else

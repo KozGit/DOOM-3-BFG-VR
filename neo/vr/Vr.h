@@ -505,6 +505,7 @@ extern idCVar	vr_movePoint;
 
 extern idCVar	vr_crouchTriggerDist;
 extern idCVar	vr_crouchMode;
+extern idCVar	vr_crouchHideBody;
 
 extern idCVar	vr_wipPeriodMin;
 extern idCVar	vr_wipPeriodMax;
