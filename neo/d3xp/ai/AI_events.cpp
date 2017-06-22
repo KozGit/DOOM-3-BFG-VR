@@ -547,7 +547,7 @@ void idAI::Event_HeardSound( int ignore_team )
 		idVec3 pos = actor->GetPhysics()->GetOrigin();
 		idVec3 org = physicsObj.GetOrigin();
 		float dist = ( pos - org ).LengthSqr();
-		if( dist < Square( AI_HEARING_RANGE ) )
+		if( dist < gameLocal.lastAIAlertDistanceAudibleSquared )
 		{
 			idThread::ReturnEntity( actor );
 			return;

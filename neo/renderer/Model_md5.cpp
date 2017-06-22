@@ -1542,7 +1542,7 @@ idRenderModel* idRenderModelMD5::InstantiateDynamicModel( const struct renderEnt
 	}
 	else if( ent->numJoints != joints.Num() )
 	{
-		common->Printf( "idRenderModelMD5::InstantiateDynamicModel: renderEntity has different number of joints than model for '%s'\n", Name() );
+		common->Printf( "idRenderModelMD5::InstantiateDynamicModel: renderEntity has different number of joints (%d) than model (%d) for '%s'\n", ent->numJoints, joints.Num(), Name() );
 		delete cachedModel;
 		return NULL;
 	}

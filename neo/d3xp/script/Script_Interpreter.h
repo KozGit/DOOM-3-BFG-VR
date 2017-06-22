@@ -138,7 +138,8 @@ ID_INLINE void idInterpreter::PopParms( int numParms )
 	// pop our parms off the stack
 	if( localstackUsed < numParms )
 	{
-		Error( "locals stack underflow\n" );
+		Warning( "locals stack underflow\n" ); // Carl: was, and should be, error. But our scripts have changed.
+		localstackUsed = 0;
 	}
 	
 	localstackUsed -= numParms;

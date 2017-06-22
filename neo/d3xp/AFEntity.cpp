@@ -507,6 +507,25 @@ void idAFAttachment::Think()
 
 /*
 ================
+idAfAttachment::GetPhysicsToVisualTransform
+================
+*/
+idCVar vr_chibi("vr_chibi", "1", CVAR_FLOAT | CVAR_ARCHIVE, "changes the size of human heads.");
+bool idAFAttachment::GetPhysicsToVisualTransform( idVec3& origin, idMat3& axis )
+{
+	const float scale = vr_chibi.GetFloat();
+	if( scale > 0.f && scale != 1.0f )
+	{
+		static const idVec3 offset( -1.8f, 0, -8.f);
+		axis = mat3_identity * scale;
+		origin = (scale - 1.f) / scale * offset;
+		return true;
+	}
+	return false;
+}
+
+/*
+================
 idAFAttachment::SetCombatModel
 ================
 */
@@ -3093,6 +3112,26 @@ void idAFEntity_ClawFourFingers::Restore( idRestoreGame* savefile )
 	
 	SetCombatModel();
 	LinkCombat();
+	
+	// Carl: Fix the crane when loading Alpha Labs 3 from other mods
+	if( gameLocal.loadScriptFailed || savefile->version < BUILD_NUMBER_FULLY_POSSESSED )
+	{
+		af.GetPhysics()->LockWorldConstraints( true );
+		af.GetPhysics()->SetForcePushable( true );
+		SetPhysics( af.GetPhysics() );
+
+		fl.takedamage = true;
+
+		for( i = 0; i < 4; i++ )
+		{
+			fingers[i] = static_cast<idAFConstraint_Hinge*>( af.GetPhysics()->GetConstraint( clawConstraintNames[i] ) );
+			if ( !fingers[i] )
+			{
+				gameLocal.Error( "idClaw_FourFingers '%s': can't find claw constraint '%s'", name.c_str(), clawConstraintNames[i] );
+			}
+		}
+		return;
+	}
 }
 
 /*

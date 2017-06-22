@@ -616,10 +616,10 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile( const char* name, uns
 	unsigned int crc;
 	
 	// load it
-	idStrStatic< MAX_OSPATH > fileName = name;
+	idStr fileName = name;
 	
 	// check for generated file
-	idStrStatic< MAX_OSPATH > generatedFileName = fileName;
+	idStr generatedFileName = fileName;
 	generatedFileName.Insert( "generated/", 0 );
 	generatedFileName.SetFileExtension( CM_BINARYFILE_EXT );
 	

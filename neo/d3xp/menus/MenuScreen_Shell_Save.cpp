@@ -188,7 +188,7 @@ void idMenuScreen_Shell_Save::UpdateSaveEnumerations()
 			for( int slot = 0; slot < sortedSaves.Num(); ++slot )
 			{
 				const idSaveGameDetails& details = sortedSaves[slot];
-				if( details.slotName.Icmp( "autosave" ) == 0 )
+				if( details.slotName.Icmp( "autosave" ) == 0 || details.isRBDoom )
 				{
 					sortedSaves.RemoveIndex( slot );
 					slot--;
@@ -210,7 +210,11 @@ void idMenuScreen_Shell_Save::UpdateSaveEnumerations()
 				}
 				else
 				{
-					if( details.slotName.Icmp( "autosave" ) == 0 )
+					if( details.GetSaveVersion() < BUILD_NUMBER_SAVE_VERSION_CHANGE || details.isRBDoom )
+					{
+						slotSaveName.Append( S_COLOR_GRAY ); // old version
+					}
+					else if( details.slotName.Icmp( "autosave" ) == 0 )
 					{
 						slotSaveName.Append( S_COLOR_YELLOW );
 					}
@@ -370,7 +374,7 @@ void idMenuScreen_Shell_Save::SaveGame( int index )
 		{
 			const idSaveGameDetails& details = saveGameInfo[slot];
 			
-			if( details.slotName.Icmp( "autosave" ) == 0 )
+			if( details.slotName.Icmp( "autosave" ) == 0 || details.isRBDoom )
 			{
 				continue;
 			}

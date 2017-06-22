@@ -1169,11 +1169,46 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 		return true;
 	}
 
+	const char *line = NULL;
+
+	if (g_debugCinematic.GetBool())
+	{
+		const char *s = "?";
+		switch (channel)
+		{
+		case SND_CHANNEL_ANY:
+			s = "Speaker";
+			break;
+		case SND_CHANNEL_VOICE:
+			s = "Voice";
+			break;
+		case SND_CHANNEL_VOICE2:
+			s = "Voice2";
+			break;
+		case SND_CHANNEL_BODY:
+			s = "Body";
+			break;
+		case SND_CHANNEL_BODY2:
+			s = "Body2";
+			break;
+		case SND_CHANNEL_BODY3:
+			s = "Body3";
+			break;
+		case SND_CHANNEL_RADIO:
+			s = "Radio";
+			break;
+		}
+
+		line = Flicksync_LineNameToLine(lineName);
+		if (line)
+			common->Printf("\t//%s %s: %s: %dms\n\t{ \"%s\", \"%s\" },\n", s, entity, animation, length / 10000, lineName, line);
+		else
+			common->Printf("\t//%s %s: %s: %dms\n\t{ \"%s\", \"\" },\n", s, entity, animation, length / 10000, lineName);
+	}
+
 	// if we're not in flicksync mode, then play it like normal
 	if( Flicksync_complete || Flicksync_GameOver || !vr_flicksyncCharacter.GetInteger() || ( !Flicksync_InCutscene && !gameLocal.inCinematic ) )
 		return true;
-
-	const char *line = NULL;
 
 	int character = EntityToCharacter(entity, lineName);
 	// ignore it if the sound isn't a character speaking (usually just a background noise sound effect)
@@ -1182,7 +1217,8 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 		if( !character )
 			return true;
 		// if it doesn't have a line, then it's probably just a sound like footsteps
-		line = Flicksync_LineNameToLine(lineName);
+		if (!line)
+			line = Flicksync_LineNameToLine(lineName);
 		if( !line || idStr::Cmp( line, "" ) == 0 )
 			return true;
 	}
@@ -1312,22 +1348,6 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 // length is in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
 bool Flicksync_Speaker( const char* entity, const char* lineName, uint32 length )
 {
-	if( g_debugCinematic.GetBool() || vr_cutscenesOnly.GetInteger() == 1 || vr_flicksyncCharacter.GetInteger() )
-		common->Printf("\t//Speaker %s: %dms\n\t{ \"%s\", \"\" },\n", entity, length / 10000, lineName);
-
-	// if we're not in flicksync mode, then don't even waste time checking if it's a character
-	//if( !vr_flicksyncCharacter.GetInteger() || ( !Flicksync_InCutscene && !gameLocal.inCinematic ) )
-	//	return true;
-
-	// ignore it if the sound isn't a character speaking (usually just a background noise sound effect)
-	//int character = EntityToCharacter(entity, lineName);
-	//if( !character )
-	//	return true;
-
-	// if it's a character speaking, treat it like any other voice line (except there's no animation)
-	// the main difference is, there's no body for us to inhabit (but that's handled in Camera),
-	// and unpausing the line could be handled slightly differently if we notice entity is idSound (aka speaker)
-	// but currently we handle it the same.
 	return Flicksync_Voice( entity, "", lineName, SND_CHANNEL_ANY, length );
 }
 
@@ -1336,22 +1356,6 @@ bool Flicksync_Speaker( const char* entity, const char* lineName, uint32 length 
 // length is in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
 bool Flicksync_Radio(const char* entity, const char* lineName, uint32 length)
 {
-	if( g_debugCinematic.GetBool() || vr_cutscenesOnly.GetInteger() == 1 || vr_flicksyncCharacter.GetInteger() )
-		common->Printf("\t//Radio %s: %dms\n\t{ \"%s\", \"\" },\n", entity, length / 10000, lineName);
-
-	// if we're not in flicksync mode, then don't even waste time checking if it's a character
-	//if (!vr_flicksyncCharacter.GetInteger() || (!Flicksync_InCutscene && !gameLocal.inCinematic))
-	//	return true;
-
-	// ignore it if the radio chatter isn't a character speaking
-	//int character = EntityToCharacter(entity, lineName);
-	//if (!character)
-	//	return true;
-
-	// if it's a character speaking, treat it like any other voice line (except there's no animation)
-	// the main difference is, there's no body for us to inhabit (but that's handled in Camera),
-	// and unpausing the line should be handled slightly differently if we notice entity is idRadioChatter aka func_radiochatter
-	// but currently we handle it the same.
 	return Flicksync_Voice(entity, "", lineName, SND_CHANNEL_RADIO, length);
 }
 

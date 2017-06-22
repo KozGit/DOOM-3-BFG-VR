@@ -1910,7 +1910,9 @@ public:
 			
 			RENDERING_OPTIONS_FIELD_PIXEL_DENSITY, 
 			RENDERING_OPTIONS_FIELD_MSAALEVEL,
+			RENDERING_OPTIONS_FIELD_ASW,
 			RENDERING_OPTIONS_FIELD_3DGUIS,
+			RENDERING_OPTIONS_FIELD_CHAPERONE,
 			MAX_RENDERING_OPTION_FIELDS
 		};
 
@@ -1936,7 +1938,9 @@ public:
 	private:
 		float	originalPixelDensity;
 		int		originalMSAAlevel;
+		int		originalASW;
 		int		original3DGuis;
+		int		originalChaperone;
 		
 	};
 
@@ -1982,6 +1986,7 @@ public:
 			UI_OPTIONS_FIELD_HEADING_BEAM,
 			UI_OPTIONS_FIELD_WEAPON_SIGHT,
 			UI_OPTIONS_FIELD_SIGHT_TO_SURFACE,
+			UI_OPTIONS_FIELD_LASER_SOURCE,
 			UI_OPTIONS_FIELD_HAPTICS,
 			UI_OPTIONS_FIELD_GUI_MODE,
 			MAX_UI_OPTION_FIELDS
@@ -2011,6 +2016,7 @@ public:
 		int		originalHeadingBeam;
 		int		originalWeaponSight;
 		int		originalWeaponSightSurface;
+		bool		originalLaserSightUseOffset;
 		int		originalHaptics;
 		int		originalGuiMode;
 
@@ -2138,7 +2144,9 @@ public:
 			CHARACTER_OPTIONS_FIELD_FLASH_MODE,
 			CHARACTER_OPTIONS_FIELD_WEAPON_HAND,
 			CHARACTER_OPTIONS_FIELD_HOLSTER_SLOTS,
+			CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT,
 			CHARACTER_OPTIONS_FIELD_VIEW_HEIGHT,
+			CHARACTER_OPTIONS_FIELD_SCALE,
 			MAX_CHARACTER_OPTION_FIELDS
 		};
 
@@ -2165,8 +2173,10 @@ public:
 		int		originalBodyMode;
 		int		originalFlashMode;
 		int		originalWeaponHand;
-		float	originalViewHeight;
 		int		originalSlotDisable;
+		float	originalViewHeight;
+		int	originalUseFloorHeight;
+		float originalScale;
 	};
 
 	idMenuScreen_Shell_VR_Character_Options() :
@@ -2212,7 +2222,6 @@ public:
 			SAFETY_PROTOCOLS_FIELD_SNAP_TURNS,
 			SAFETY_PROTOCOLS_FIELD_WALK_SPEED_ADJUST,
 			SAFETY_PROTOCOLS_FIELD_MOTION_SICKNESS,
-			SAFETY_PROTOCOLS_FIELD_CHAPERONE,
 			SAFETY_PROTOCOLS_FIELD_KNOCKBACK,
 			SAFETY_PROTOCOLS_FIELD_HEADBOB,
 			SAFETY_PROTOCOLS_FIELD_SHAKE_AMPLITUDE,
@@ -2239,7 +2248,6 @@ public:
 		bool						IsRestartRequired() const;
 
 	private:
-		int	originalChaperone;
 		int	originalTeleport;
 		int	originalTeleportMode;
 		int	originalMotionSickness;
@@ -2293,10 +2301,9 @@ public:
 		{
 			VR_PROFILE_USE_OCULUS_PROFILE,
 			VR_OCULUS_IPD,
-			VR_OCULUS_HEIGHT,
 			VR_PROFILE_IPD,
+			VR_OCULUS_HEIGHT,
 			VR_PROFILE_HEIGHT,
-			VR_PROFILE_SCALE,
 			MAX_VR_PROFILE_OPTION_FIELDS
 		};
 
@@ -2323,7 +2330,6 @@ public:
 
 		float originalUseOculusProfile;
 		float originalIPD;
-		float originalScale;
 		float originalHeight;
 
 	};

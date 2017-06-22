@@ -109,14 +109,6 @@ void idMenuScreen_Shell_VR_Safety_Protocols::Initialize( idMenuHandler * data ) 
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
-	control->SetLabel( "Chaperone" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_CHAPERONE );
-	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_CHAPERONE );
-	options->AddChild( control );
-
-	control = new (TAG_SWF)idMenuWidget_ControlButton();
-	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "KnockBack & Head Kick" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_KNOCKBACK );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
@@ -346,7 +338,6 @@ idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Gameplay_Optio
 void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Protocols::LoadData() {
 	
 	originalComfortDelta = vr_comfortDelta.GetFloat();
-	originalChaperone = vr_chaperone.GetInteger();
 	originalTeleport = vr_teleport.GetInteger();
 	originalTeleportMode = vr_teleportMode.GetInteger();
 	originalMotionSickness = vr_motionSickness.GetInteger();
@@ -489,14 +480,6 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 			break;
 		}
 
-		case SAFETY_PROTOCOLS_FIELD_CHAPERONE:
-		{
-			static const int numValues = 4;
-			static const int values[numValues] = { 0, 1, 2, 4 };
-			vr_chaperone.SetInteger(AdjustOption(vr_chaperone.GetInteger(), values, numValues, adjustAmount));
-			break;
-		}
-
 		case SAFETY_PROTOCOLS_FIELD_KNOCKBACK:
 		{
 			static const int numValues = 4;
@@ -574,7 +557,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR
 			if ( analogCount >= comfortCount )
 				return "Analog";
 			else
-				return va( "Snap %.1f°", f );
+				return va( "Snap %.0f degrees", f );
 		}	
 
 		case SAFETY_PROTOCOLS_FIELD_WALK_SPEED_ADJUST:
@@ -584,12 +567,6 @@ idSWFScriptVar idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR
 		{
 			const char* names[] = { "None", "Chaperone", "Reduce FOV", "Black Screen", "Black + Chaperone", "FOV + Chaperone", "Slow Mo", "Slow Mo + Chaperone", "Slow Mo + FOV", "Slow+FOV+Chaperone", "Third Person", "Particles", "Particles & Chaperone" };
 			return names[vr_motionSickness.GetInteger()];
-		}
-
-		case SAFETY_PROTOCOLS_FIELD_CHAPERONE:
-		{
-			const char* names[] = { "Near", "Throwing", "Melee", "Dodging", "Always" };
-			return names[vr_chaperone.GetInteger()];
 		}
 
 		case SAFETY_PROTOCOLS_FIELD_KNOCKBACK:
@@ -643,10 +620,6 @@ bool idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 		return true;
 	}
 	if ( originalMotionSickness != vr_motionSickness.GetInteger() )
-	{
-		return true;
-	}
-	if ( originalChaperone != vr_chaperone.GetInteger() )
 	{
 		return true;
 	}

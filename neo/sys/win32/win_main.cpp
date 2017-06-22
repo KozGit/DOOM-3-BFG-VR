@@ -426,7 +426,24 @@ Sys_Mkdir
 ==============
 */
 void Sys_Mkdir( const char *path ) {
-	_mkdir (path);
+	// Carl: Support paths longer than 260 characters (MAX_PATH)
+	// see https://msdn.microsoft.com/en-us/library/windows/desktop/aa363855(v=vs.85).aspx
+	int len = strlen( path );
+	wchar_t *w;
+	w = (wchar_t*)malloc( ( 4 + len + 1 ) * 2 );
+	w[0] = '\\';
+	w[1] = '\\';
+	w[2] = '?';
+	w[3] = '\\';
+	for( int i = 0; i <= len; i++ )
+	{
+		char c = path[i];
+		w[ 4 + i ] = (c == '/') ? '\\' : c;
+	}
+	//common->Printf("CreateDirectoryW(\"%S\")\n", w);
+	CreateDirectoryW( w, NULL );
+	free( w );
+	//_mkdir (path);
 }
 
 /*
@@ -474,7 +491,25 @@ Sys_Rmdir
 ========================
 */
 bool Sys_Rmdir( const char *path ) {
-	return _rmdir( path ) == 0;
+	// Carl: Support paths longer than 260 characters (MAX_PATH)
+	// see https://msdn.microsoft.com/en-us/library/windows/desktop/aa363855(v=vs.85).aspx
+	int len = strlen( path );
+	wchar_t *w;
+	w = (wchar_t*)malloc( ( 4 + len + 1 ) * 2 );
+	w[0] = '\\';
+	w[1] = '\\';
+	w[2] = '?';
+	w[3] = '\\';
+	for( int i = 0; i <= len; i++ )
+	{
+		char c = path[i];
+		w[ 4 + i ] = (c == '/') ? '\\' : c;
+	}
+	common->Printf("RemoveDirectoryW(\"%S\")\n", w);
+	bool result = ::RemoveDirectoryW( w ) != 0;
+	free( w );
+
+	return result;
 }
 
 /*
@@ -509,10 +544,11 @@ Sys_Cwd
 ==============
 */
 const char *Sys_Cwd() {
-	static char cwd[MAX_OSPATH];
+	static char cwd[512];
 
+	// Carl: TODO support paths > 260
 	_getcwd( cwd, sizeof( cwd ) - 1 );
-	cwd[MAX_OSPATH-1] = 0;
+	cwd[sizeof(cwd) - 1] = 0;
 
 	return cwd;
 }
@@ -589,7 +625,7 @@ Sys_EXEPath
 ==============
 */
 const char *Sys_EXEPath() {
-	static char exe[ MAX_OSPATH ];
+	static char exe[ 512 ];
 	GetModuleFileName( NULL, exe, sizeof( exe ) - 1 );
 	return exe;
 }
@@ -620,9 +656,20 @@ int Sys_ListFiles( const char *directory, const char *extension, idStrList &list
 	}
 
 	sprintf( search, "%s\\*%s", directory, extension );
+	char* s;
+
+	for (s = &search[0]; *s; s++)
+	{
+		if (*s == '/' || *s == '\\')
+		{
+			*s = '\\';
+		}
+	}
 
 	// search
 	list.Clear();
+
+	// Carl: TODO Support paths longer than 260 characters (MAX_PATH)
 
 	findhandle = _findfirst( search, &findinfo );
 	if ( findhandle == -1 ) {

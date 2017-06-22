@@ -55,6 +55,7 @@ entityDef weapon_pistol {
 	"editor_rotatable"		"1"
 
 	"spawnclass"				"idItem"
+	"scale"						"0.75"
 	"size"						"32 32 32"
 	"model"						"models/weapons/pistol/w_pistol.lwo"
 	"model_view" 				"viewmodel_pistol_vr"
@@ -109,6 +110,9 @@ entityDef weapon_pistol {
 	"controllerShakeHighTime"	"80"
 	"controllerShakeLowMag"		"0.4"
 	"controllerShakeLowTime"	"120"
+	
+	//koz
+	"laserSightOffset"			"0 -2 0"
 }
 
 entityDef moveable_item_pistol {

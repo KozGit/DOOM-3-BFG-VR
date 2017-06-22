@@ -1016,7 +1016,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 							length = soundShader->GetLength() * 10000;
 						else
 							sound = command.string->c_str();
-						common->Printf( "\t//Voice %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), sound);
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), sound, SND_CHANNEL_VOICE, length ) )
 						{
 							if( !ent->StartSound( command.string->c_str(), SND_CHANNEL_VOICE, 0, false, NULL ) )
@@ -1028,7 +1027,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					}
 					else
 					{
-						common->Printf( "\t//Voice %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.soundShader->base->GetName() );
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName(), SND_CHANNEL_VOICE, command.soundShader->GetLength() * 10000 ) )
 							ent->StartSoundShader( command.soundShader, SND_CHANNEL_VOICE, 0, false, NULL );
 					}
@@ -1047,7 +1045,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 							length = soundShader->GetLength() * 10000;
 						else
 							sound = command.string->c_str();
-						common->Printf( "\t//Voice2 %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), sound);
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), sound, SND_CHANNEL_VOICE2, length ) )
 						{
 							if( !ent->StartSound( command.string->c_str(), SND_CHANNEL_VOICE2, 0, false, NULL ) )
@@ -1059,7 +1056,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					}
 					else
 					{
-						common->Printf( "\t//Voice2 %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.soundShader->base->GetName() );
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName(), SND_CHANNEL_VOICE2, command.soundShader->GetLength() * 10000 ) )
 							ent->StartSoundShader( command.soundShader, SND_CHANNEL_VOICE2, 0, false, NULL );
 					}
@@ -1078,7 +1074,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 							length = soundShader->GetLength() * 10000;
 						else
 							sound = command.string->c_str();
-						common->Printf("\t//Body %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), sound);
 						if (Flicksync_Voice(ent->name.c_str(), FullName(), sound, SND_CHANNEL_BODY, length))
 						{
 							if( !ent->StartSound( command.string->c_str(), SND_CHANNEL_BODY, 0, false, NULL ) )
@@ -1090,7 +1085,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					}
 					else
 					{
-						common->Printf( "\t//Body %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.soundShader->base->GetName() );
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName(), SND_CHANNEL_BODY, command.soundShader->GetLength() * 10000 ) )
 							ent->StartSoundShader( command.soundShader, SND_CHANNEL_BODY, 0, false, NULL );
 					}
@@ -1108,7 +1102,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					}
 					else
 					{
-						common->Printf( "\t//Body2 %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.soundShader->base->GetName() );
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName(), SND_CHANNEL_BODY2, command.soundShader->GetLength() * 10000 ) )
 							ent->StartSoundShader( command.soundShader, SND_CHANNEL_BODY2, 0, false, NULL );
 					}
@@ -1126,7 +1119,6 @@ void idAnim::CallFrameCommands( idEntity* ent, int from, int to ) const
 					}
 					else
 					{
-						common->Printf( "\t//Body3 %s: %s:\n\t{ \"%s\", \"\" },\n", ent->name.c_str(), FullName(), command.soundShader->base->GetName() );
 						if( Flicksync_Voice( ent->name.c_str(), FullName(), command.soundShader->base->GetName(), SND_CHANNEL_BODY3, command.soundShader->GetLength() * 10000 ) )
 							ent->StartSoundShader( command.soundShader, SND_CHANNEL_BODY3, 0, false, NULL );
 					}
@@ -4083,13 +4075,39 @@ void idAnimator::Restore( idRestoreGame* savefile )
 	savefile->ReadInt( AFPoseTime );
 	
 	savefile->ReadBool( removeOriginOffset );
+
+	// Carl: koz
+	int numChannels; // ANIM_NumAnimChannels is different in this mod
+	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
+		numChannels = 7;
+	else
+		numChannels = 5;
 	
-	for( i = ANIMCHANNEL_ALL; i < ANIM_NumAnimChannels; i++ )
+	for( i = ANIMCHANNEL_ALL; i < numChannels; i++ )
 	{
 		for( j = 0; j < ANIM_MaxAnimsPerChannel; j++ )
 		{
 			channels[ i ][ j ].Restore( savefile, modelDef );
 		}
+	}
+	// Carl: Reset the remaining animation channels not in the save file? Is this right?
+	for( i = numChannels; i < ANIM_NumAnimChannels; i++ )
+	{
+		for( j = 0; j < ANIM_MaxAnimsPerChannel; j++ )
+		{
+			channels[ i ][ j ].Reset( modelDef );
+		}
+	}
+	// Carl: koz end
+
+	// Carl: if this is from RBDoom, then everything we just restored is bullshit, except perhaps the model name
+	// Try clearing it all and loading the model again.
+	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED)
+	{
+		idStr modelName = "";
+		if( modelDef )
+			modelName = modelDef->GetName();
+		SetModel( modelName.c_str() );
 	}
 }
 
@@ -6080,7 +6098,8 @@ void idGameEdit::ANIM_CreateAnimFrame( const idRenderModel* model, const idMD5An
 	
 	if( numJoints != model->NumJoints() )
 	{
-		gameLocal.Error( "ANIM_CreateAnimFrame: different # of joints in renderEntity_t than in model (%s)", model->Name() );
+		// Carl: This happens when trying to load a savegame from a different mod. Try ignoring it for now.
+		gameLocal.Warning( "ANIM_CreateAnimFrame: different # of joints in renderEntity_t than in model (%s)", model->Name() );
 	}
 	
 	if( !model->NumJoints() )

@@ -46,6 +46,11 @@ If you have questions concerning this license or the applicable additional terms
 #define HAND_RIGHT 0
 #define HAND_LEFT 1
 
+#define POSE_FINGER 8
+#define POSE_INDEX 1
+#define POSE_THUMB 2
+#define POSE_GRIP 4
+
 typedef enum
 {
 	MOTION_NONE,
@@ -162,6 +167,8 @@ public:
 	bool				handInGui;
 
 	bool				vrIsBackgroundSaving;
+
+	bool				shouldRecenter;
 		
 	int					vrFrameNumber;
 	int					lastPostFrame;
@@ -172,7 +179,9 @@ public:
 	ovrPosef            EyeRenderPose[2];
 
 	ovrPosef			handPose[2];
-			
+
+	int					fingerPose[2];
+				
 	idVec3				lastViewOrigin;
 	idMat3				lastViewAxis;
 	
@@ -301,6 +310,7 @@ public:
 	
 	idVec3				trackingOriginOffset;
 	float				trackingOriginYawOffset;
+	float				trackingOriginHeight;
 	bool				chestDefaultDefined;
 	idVec3				hmdBodyTranslation;
 	
@@ -348,6 +358,7 @@ public:
 	idVec3				poseHmdBodyPositionDelta;
 	idVec3				remainingMoveHmdBodyPositionDelta;
 	idVec3				poseHmdAbsolutePosition;
+	float					userDuckingAmount; // how many game units the user has physically ducked in real life from their calibrated position
 
 	idVec3				poseHandPos[2];
 	idQuat				poseHandRotationQuat[2];
@@ -377,10 +388,12 @@ private:
 #endif
 
 extern idCVar	vr_scale;
+extern idCVar	vr_normalViewHeight;
 extern idCVar	vr_useOculusProfile;
 extern idCVar	vr_manualIPDEnable;
 extern idCVar	vr_manualIPD;
 extern idCVar	vr_manualHeight;
+extern idCVar	vr_useFloorHeight;
 
 //extern idCVar	vr_viewModelArms;
 extern idCVar	vr_wristStatMon;
@@ -444,7 +457,8 @@ extern idCVar	vr_talkWakeMonsters;
 extern idCVar	vr_talkWakeMonsterRadius;
 extern idCVar	vr_talkMode;
 extern idCVar	vr_voiceCommands;
-extern idCVar vr_voiceRepeat;
+extern idCVar	vr_voiceRepeat;
+extern idCVar	vr_voiceMinVolume;
 
 extern idCVar	vr_listMonitorName;
 
@@ -535,6 +549,8 @@ extern idCVar vr_slotDisable;
 
 extern idCVar vr_handSwapsAnalogs;
 extern idCVar vr_autoSwitchControllers;
+
+extern idCVar vr_useHandPoses;
 
 extern iVr* commonVr;
 extern iVoice* commonVoice;

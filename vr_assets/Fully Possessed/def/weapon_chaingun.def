@@ -35,6 +35,7 @@ entityDef weapon_chaingun {
 	"editor_rotatable"			"1"
 
 	"spawnclass"				"idItem"
+	"scale"						"0.9"
 	"size"						"32 32 32"
 	"model"						"models/weapons/chaingun/w_chaingun.lwo"
 	"model_view" 				"viewmodel_chaingun_vr"
@@ -106,6 +107,9 @@ entityDef weapon_chaingun {
 	"controllerShakeHighTime"	"100"
 	"controllerShakeLowMag"		"0.9"
 	"controllerShakeLowTime"	"250"
+	
+	//koz
+	"laserSightOffset"			"0 -2.3 0"
 }
 
 entityDef moveable_item_chaingun {

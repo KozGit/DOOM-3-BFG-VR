@@ -47,10 +47,11 @@ action {
 action {
 
 	name RESUME
-	entries 6
+	entries 7
 	
 	"resume game"
 	"unpause game"
+	"return to game"
 	"computer, resume program"
 	"computer, play program"
 	"computer, run program"
@@ -72,7 +73,7 @@ action {
 action {
 
 	name TALK
-	entries 6
+	entries 7
 	
 	"hey"
 	"talk"
@@ -80,15 +81,19 @@ action {
 	"goodbye"
 	"greets"
 	"hey dickwad"
+	"hiss"
 }
 
 action {
 
 	name MENU
-	entries 2
+	entries 5
 	
 	"menu"
 	"system"
+	"system menu"
+	"computer, menu"
+	"computer, arch"
 }
 
 action {
@@ -147,11 +152,14 @@ action {
 action {
 
 	name FIST
-	entries 3
+	entries 6
 	
-	"fist"
-	"fists"
+	"weapon fist"
+	"weapon fists"
+	"weapon hands"
+	"use fists"
 	"hands"
+	"punching"
 }
 
 action {

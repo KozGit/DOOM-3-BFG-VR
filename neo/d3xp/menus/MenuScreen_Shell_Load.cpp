@@ -177,13 +177,17 @@ void idMenuScreen_Shell_Load::UpdateSaveEnumerations()
 				{
 					slotSaveName =  va( S_COLOR_RED "%s", idLocalization::GetString( "#str_swf_corrupt_file" ) );
 				}
-				else if( details.GetSaveVersion() > BUILD_NUMBER )
+				else if( details.GetSaveVersion() > BUILD_NUMBER_FULLY_POSSESSED )
 				{
 					slotSaveName =  va( S_COLOR_RED "%s", idLocalization::GetString( "#str_swf_wrong_version" ) );
 				}
 				else
 				{
-					if( details.slotName.Icmp( "autosave" ) == 0 )
+					if( details.GetSaveVersion() < BUILD_NUMBER_SAVE_VERSION_CHANGE || details.isRBDoom )
+					{
+						slotSaveName.Append( S_COLOR_GRAY ); // old version
+					}
+					else if( details.slotName.Icmp( "autosave" ) == 0 )
 					{
 						slotSaveName.Append( S_COLOR_YELLOW );
 					}
@@ -310,7 +314,7 @@ idMenuScreen_Shell_Load::LoadDamagedGame
 void idMenuScreen_Shell_Load::LoadDamagedGame( int index )
 {
 
-	if( index >= sortedSaves.Num() )
+	if( index >= sortedSaves.Num() || sortedSaves[index].isRBDoom )
 	{
 		return;
 	}
@@ -384,10 +388,11 @@ void idMenuScreen_Shell_Load::LoadGame( int index )
 		class idSWFScriptFunction_LoadDialog : public idSWFScriptFunction_RefCounted
 		{
 		public:
-			idSWFScriptFunction_LoadDialog( gameDialogMessages_t _msg, bool _accept, const char* _name )
+			idSWFScriptFunction_LoadDialog( gameDialogMessages_t _msg, bool _accept, const char* _name, bool isRBDoom3 )
 			{
 				msg = _msg;
 				accept = _accept;
+				isRBDoom = isRBDoom3;
 				name = _name;
 			}
 			idSWFScriptVar Call( idSWFScriptObject* thisObject, const idSWFParmList& parms )
@@ -396,20 +401,20 @@ void idMenuScreen_Shell_Load::LoadGame( int index )
 				if( accept && name != NULL )
 				{
 				
-					cmdSystem->AppendCommandText( va( "loadgame %s\n", name ) );
+					cmdSystem->AppendCommandText( va( "loadgame %s %d\n", name, isRBDoom ) );
 				}
 				return idSWFScriptVar();
 			}
 		private:
 			gameDialogMessages_t msg;
-			bool accept;
+			bool accept, isRBDoom;
 			const char* name;
 		};
 		
 		if( index < sortedSaves.Num() )
 		{
 			const idStr& name = sortedSaves[ index ].slotName;
-			common->Dialog().AddDialog( GDM_SP_LOAD_SAVE, DIALOG_ACCEPT_CANCEL, new idSWFScriptFunction_LoadDialog( GDM_SP_LOAD_SAVE, true, name.c_str() ), new idSWFScriptFunction_LoadDialog( GDM_SP_LOAD_SAVE, false, name.c_str() ), false );
+			common->Dialog().AddDialog( GDM_SP_LOAD_SAVE, DIALOG_ACCEPT_CANCEL, new idSWFScriptFunction_LoadDialog( GDM_SP_LOAD_SAVE, true, name.c_str(), sortedSaves[ index ].isRBDoom ), new idSWFScriptFunction_LoadDialog( GDM_SP_LOAD_SAVE, false, name.c_str(), sortedSaves[ index ].isRBDoom ), false );
 		}
 		
 	}
@@ -419,7 +424,7 @@ void idMenuScreen_Shell_Load::LoadGame( int index )
 		{
 			const idStr& name = sortedSaves[ index ].slotName;
 			
-			cmdSystem->AppendCommandText( va( "loadgame %s\n", name.c_str() ) );
+			cmdSystem->AppendCommandText( va( "loadgame %s %d\n", name.c_str(), sortedSaves[ index ].isRBDoom ) );
 		}
 	}
 }
@@ -431,6 +436,9 @@ idMenuScreen_Shell_Save::DeleteGame
 */
 void idMenuScreen_Shell_Load::DeleteGame( int index )
 {
+	// Don't delete games from other mods!
+	if( index >= GetSortedSaves().Num() || GetSortedSaves()[index].isRBDoom )
+		return;
 
 	class idSWFScriptFunction_DeleteGame : public idSWFScriptFunction_RefCounted
 	{

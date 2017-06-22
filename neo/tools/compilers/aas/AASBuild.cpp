@@ -132,7 +132,7 @@ idAASBuild::ReadBinaryShadowModel
 */
 idRenderModel* idAASBuild::ReadBinaryModel(idFile* fileIn, ID_TIME_T minFileTime)
 {
-	idStrStatic< MAX_OSPATH > name;
+	idStr name;
 	fileIn->ReadString( name );
 	idRenderModel* model = renderModelManager->AllocModel();
 	model->InitEmpty( name );
@@ -202,7 +202,7 @@ idAASBuild::LoadBProcBSP
 bool idAASBuild::LoadBProcBSP( const char* name, ID_TIME_T minFileTime )
 {
 	// check for generated file
-	idStrStatic< MAX_OSPATH > generatedFileName = name;
+	idStr generatedFileName = name;
 	generatedFileName.Insert("generated/", 0);
 	generatedFileName.SetFileExtension("bproc");
 
@@ -224,7 +224,7 @@ bool idAASBuild::LoadBProcBSP( const char* name, ID_TIME_T minFileTime )
 			file->ReadBig( mapTimeStamp );
 			for (int i = 0; i < numEntries; i++)
 			{
-				idStrStatic< MAX_OSPATH > type;
+				idStr type;
 				file->ReadString(type);
 				type.ToLower();
 				if (type == "model" || type == "shadowmodel")

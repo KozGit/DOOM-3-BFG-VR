@@ -532,7 +532,7 @@ bool idDeclParticle::Parse( const char* text, const int textLength, bool allowBi
 	idToken	token;
 	
 	unsigned int sourceChecksum = 0;
-	idStrStatic< MAX_OSPATH > generatedFileName;
+	idStr generatedFileName;
 	if( allowBinaryVersion )
 	{
 		// Try to load the generated version of it

@@ -3800,7 +3800,7 @@ cm_model_t* idCollisionModelManagerLocal::LoadRenderModel( const char* fileName 
 		return NULL;
 	}
 	
-	idStrStatic< MAX_OSPATH > generatedFileName = "generated/collision/";
+	idStr generatedFileName = "generated/collision/";
 	generatedFileName.AppendPath( fileName );
 	generatedFileName.SetFileExtension( CMODEL_BINARYFILE_EXT );
 	
@@ -4215,7 +4215,7 @@ void idCollisionModelManagerLocal::Preload( const char* mapName )
 	{
 		return;
 	}
-	idStrStatic< MAX_OSPATH > manifestName = mapName;
+	idStr manifestName = mapName;
 	manifestName.Replace( "game/", "maps/" );
 	manifestName.Replace( "maps/maps/", "maps/" );
 	manifestName.SetFileExtension( ".preload" );
@@ -4451,7 +4451,7 @@ cmHandle_t idCollisionModelManagerLocal::LoadModel( const char* modelName )
 		return 0;
 	}
 	
-	idStrStatic< MAX_OSPATH > generatedFileName = "generated/collision/";
+	idStr generatedFileName = "generated/collision/";
 	generatedFileName.AppendPath( modelName );
 	generatedFileName.SetFileExtension( CMODEL_BINARYFILE_EXT );
 	

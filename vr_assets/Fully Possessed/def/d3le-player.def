@@ -95,18 +95,19 @@ model model_d3le_sp_marine {
 	channel torso						( *Waist )
 	channel legs						( *origin -*Waist SPINNER eyecontrol)
 
-	anim shotgun_double_raise					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim shotgun_double_idle					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim shotgun_double_aim						models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim shotgun_double_fire1					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim shotgun_double_reload					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim shotgun_double_lower					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
+	anim shotgun_double_raise					models/md5/characters/npcs/playermoves/ik_doublebarrel_idle_vrik.md5anim
+	anim shotgun_double_idle					models/md5/characters/npcs/playermoves/ik_doublebarrel_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_doublebarrel_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_doublebarrel_idle_vrik.md5anim
+	anim shotgun_double_aim						models/md5/characters/npcs/playermoves/ik_doublebarrel_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_doublebarrel_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_doublebarrel_idle_vrik.md5anim
+	anim shotgun_double_fire1					models/md5/characters/npcs/playermoves/ik_doublebarrel_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_doublebarrel_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_doublebarrel_fire_vrik.md5anim
+	anim shotgun_double_reload					models/md5/characters/npcs/playermoves/ik_doublebarrel_idle_vrik.md5anim
+	anim shotgun_double_lower					models/md5/characters/npcs/playermoves/ik_doublebarrel_idle_vrik.md5anim
 
-	anim grabber_raise					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim grabber_idle					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim grabber_aim					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim grabber_fire1					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
-	anim grabber_lower					models/md5/characters/npcs/playermoves/ik_idle_vrik.md5anim
+	anim grabber_raise					models/md5/characters/npcs/playermoves/ik_grabber_fire_vrik.md5anim
+	anim grabber_idle					models/md5/characters/npcs/playermoves/ik_grabber_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grabber_idle_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grabber_idle_vrik.md5anim
+	anim grabber_aim					models/md5/characters/npcs/playermoves/ik_grabber_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grabber_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grabber_fire_vrik.md5anim
+	anim grabber_fire					models/md5/characters/npcs/playermoves/ik_grabber_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grabber_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grabber_fire_vrik.md5anim
+	anim grabber_fire1					models/md5/characters/npcs/playermoves/ik_grabber_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grabber_fire_vrik.md5anim, models/md5/characters/npcs/playermoves/ik_grabber_fire_vrik.md5anim
+	anim grabber_lower					models/md5/characters/npcs/playermoves/ik_grabber_idle_vrik.md5anim
 }
 
 entityDef player_id_base_d3le {

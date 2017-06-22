@@ -1,12 +1,12 @@
 !define BASE_INSTALL_DIR "$PROGRAMFILES32\Steam\steamapps\common\DOOM 3 BFG Edition"
 !define PRODUCT_NAME "Doom 3 BFG VR Fully Possessed"
-!define PRODUCT_VERSION 0.020
+!define PRODUCT_VERSION 0.022
 
 !define BUILD_DIR "Build\Release"
 
 ; HM NIS Edit Wizard helper defines
-!define PRODUCT_PUBLISHER "Samson"
-!define PRODUCT_WEB_SITE "https://github.com/KozGit/DOOM-3-BFG-VR"
+!define PRODUCT_PUBLISHER "Carl Kenner"
+!define PRODUCT_WEB_SITE "https://github.com/KozGit/DOOM-3-BFG-VR/pull/110"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -110,7 +110,7 @@ SetCompressorDictSize 64
 
 Name "${PRODUCT_NAME}"
 !define UN_NAME "Uninstall $(^Name)"
-OutFile "Doom3BFGVR_Fully_Possessed_Alpha020.exe"
+OutFile "Doom3BFGVR_Fully_Possessed_Alpha022.exe"
 InstallDir "${BASE_INSTALL_DIR}"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show

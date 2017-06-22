@@ -297,10 +297,10 @@ idRenderModel* idRenderModelManagerLocal::GetModel( const char* _modelName, bool
 		return NULL;
 	}
 	
-	idStrStatic< MAX_OSPATH > canonical = _modelName;
+	idStr canonical = _modelName;
 	canonical.ToLower();
 	
-	idStrStatic< MAX_OSPATH > extension;
+	idStr extension;
 	canonical.ExtractFileExtension( extension );
 	
 	// see if it is already present
@@ -374,7 +374,7 @@ idRenderModel* idRenderModelManagerLocal::GetModel( const char* _modelName, bool
 		model = new( TAG_MODEL ) idRenderModelLiquid;
 	}
 	
-	idStrStatic< MAX_OSPATH > generatedFileName;
+	idStr generatedFileName;
 	
 	if( model != NULL )
 	{
@@ -670,7 +670,7 @@ void idRenderModelManagerLocal::Preload( const idPreloadManifest& manifest )
 		{
 			const preloadEntry_s& p = manifest.GetPreloadByIndex( i );
 			idResourceCacheEntry rc;
-			idStrStatic< MAX_OSPATH > filename;
+			idStr filename;
 			if( p.resType == PRELOAD_MODEL )
 			{
 				filename = "generated/rendermodels/";

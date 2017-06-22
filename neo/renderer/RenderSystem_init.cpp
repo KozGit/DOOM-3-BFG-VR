@@ -3048,7 +3048,7 @@ idRenderSystemLocal::RegisterFont
 idFont* idRenderSystemLocal::RegisterFont( const char* fontName )
 {
 
-	idStrStatic< MAX_OSPATH > baseFontName = fontName;
+	idStr baseFontName = fontName;
 	baseFontName.Replace( "fonts/", "" );
 	for( int i = 0; i < fonts.Num(); i++ )
 	{

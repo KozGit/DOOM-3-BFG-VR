@@ -1763,9 +1763,9 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							PostInputEvent( inputDeviceNum, J_LT_REST, (inputState.Touches & ovrTouch_LThumbRest) );
 						}
 
-						if ( (inputState.HandTrigger[ovrHand_Left] > 0.25f) != (oldInputState.HandTrigger[ovrHand_Left] > 0.25f) )
+						if ( (inputState.HandTrigger[ovrHand_Left] > 0.9f) != (oldInputState.HandTrigger[ovrHand_Left] > 0.9f) )
 						{
-							PostInputEvent(inputDeviceNum, J_LT_GRIP, inputState.HandTrigger[ovrHand_Left] > 0.25f);
+							PostInputEvent(inputDeviceNum, J_LT_GRIP, inputState.HandTrigger[ovrHand_Left] > 0.9f);
 						}
 
 						if ( (inputState.IndexTrigger[ovrHand_Left] > 0.25f) != (oldInputState.IndexTrigger[ovrHand_Left] > 0.25f) )
@@ -1773,9 +1773,9 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							PostInputEvent( inputDeviceNum, J_LT_TRIGGER, inputState.IndexTrigger[ovrHand_Left] > 0.25f );
 						}
 
-						if ( (inputState.HandTrigger[ovrHand_Right] > 0.25f) != (oldInputState.HandTrigger[ovrHand_Right] > 0.25f) )
+						if ( (inputState.HandTrigger[ovrHand_Right] > 0.9f) != (oldInputState.HandTrigger[ovrHand_Right] > 0.9f) )
 						{
-							PostInputEvent(inputDeviceNum, J_RT_GRIP, inputState.HandTrigger[ovrHand_Right] > 0.25f);
+							PostInputEvent(inputDeviceNum, J_RT_GRIP, inputState.HandTrigger[ovrHand_Right] > 0.9f);
 						}
 
 						if ( (inputState.IndexTrigger[ovrHand_Right] > 0.25f) != (oldInputState.IndexTrigger[ovrHand_Right] > 0.25f) )
@@ -1791,6 +1791,29 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 						oldInputState = inputState;
 
+						// add finger poses
+						
+						int fingerPose = POSE_FINGER;
+						
+						// left hand
+						//if ( inputState.Touches & ovrTouch_LThumb ) fingerPose |= POSE_THUMB;
+						if ( inputState.Touches & ovrTouch_LThumbRest) fingerPose |= POSE_THUMB;
+						if ( inputState.Touches & ovrTouch_X ) fingerPose |= POSE_THUMB;
+						if ( inputState.Touches & ovrTouch_Y ) fingerPose |= POSE_THUMB;
+						if ( inputState.Touches & ovrTouch_LIndexTrigger ) fingerPose |= POSE_INDEX;
+						if ( inputState.HandTrigger[ovrHand_Left] > 0.015f ) fingerPose |= POSE_GRIP;
+						commonVr->fingerPose[HAND_LEFT] = fingerPose;
+						
+						//right hand
+						fingerPose = POSE_FINGER;
+						//if ( inputState.Touches & ovrTouch_RThumb ) fingerPose |= POSE_THUMB;
+						if ( inputState.Touches & ovrTouch_RThumbRest ) fingerPose |= POSE_THUMB;
+						if ( inputState.Touches & ovrTouch_A ) fingerPose |= POSE_THUMB;
+						if ( inputState.Touches & ovrTouch_B ) fingerPose |= POSE_THUMB;
+						if ( inputState.Touches & ovrTouch_RIndexTrigger ) fingerPose |= POSE_INDEX;
+						if ( inputState.HandTrigger[ovrHand_Right] > 0.015f ) fingerPose |= POSE_GRIP;
+						commonVr->fingerPose[HAND_RIGHT] = fingerPose;
+												
 					}
 				}
 			} // end if inputdeviceno == 0

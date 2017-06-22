@@ -235,6 +235,34 @@ See if some cvars that we watch have changed
 */
 static void R_CheckCvars()
 {
+	
+	//koz
+	if ( game->isVR )
+	{
+
+		if ( vr_useFloorHeight.IsModified() || ( vr_normalViewHeight.IsModified() && vr_useFloorHeight.GetInteger() == 0 ) || vr_scale.IsModified() || commonVr->shouldRecenter )
+		{
+			if (commonVr->hasOculusRift)
+			{
+				if ( vr_useFloorHeight.GetInteger() >= 3 )
+				{
+					ovr_SetTrackingOriginType( commonVr->hmdSession, ovrTrackingOrigin_FloorLevel );
+				}
+				else
+				{
+					ovr_SetTrackingOriginType( commonVr->hmdSession, ovrTrackingOrigin_EyeLevel );
+				}
+				ovr_RecenterTrackingOrigin( commonVr->hmdSession );
+				commonVr->HMDResetTrackingOriginOffset();
+			}
+			vr_useFloorHeight.ClearModified();
+			vr_normalViewHeight.ClearModified();
+			vr_scale.ClearModified();
+			commonVr->shouldRecenter = false;
+		}
+	}
+	
+	
 	// gamma stuff
 	if( r_gamma.IsModified() || r_brightness.IsModified() )
 	{

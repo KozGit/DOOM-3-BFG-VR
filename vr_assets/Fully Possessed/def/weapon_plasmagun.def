@@ -45,6 +45,7 @@ entityDef weapon_plasmagun {
 	"editor_rotatable"		"1"
 
 	"spawnclass"				"idItem"
+	"scale"						"0.75"
 	"size"						"32 32 32"
 	"model" 					"models/weapons/plasmagun/plasmagun_world.lwo"
 	"model_view"				"viewmodel_plasmagun_vr"
@@ -114,6 +115,9 @@ entityDef weapon_plasmagun {
 	"controllerShakeHighTime"	"25"
 	"controllerShakeLowMag"		"0.5"
 	"controllerShakeLowTime"	"75"
+	
+	//koz
+	"laserSightOffset"			"0 -3.5 0"
 }
 
 entityDef moveable_item_plasmagun {

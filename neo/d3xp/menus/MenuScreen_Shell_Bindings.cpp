@@ -93,10 +93,14 @@ static bindInfo_t keyboardBinds[] =
 	{ "#str_00100184", "_impulse9" },			// ROCKETS
 	{ "#str_00100185", "_impulse10" },			// BFG
 	{ "#str_swf_soulcube_artifact", "_impulse12" },	// SOULCUBE / ARTIFACT	
+	{ "Soul Cube", "_soulcube" }, // Carl: Soul Cube
+	{ "The Artifact", "_artifact" }, // Carl: Artifact
 
 
 	{ "                                ", "" }, // koz divider
 	{ "#str_04065", "" },						// HEADING
+	{ "Pause Game", "_pause" },			// Carl: Computer, Freeze Program
+	{ "Resume Game", "_resume" },			// Carl: Computer, Resume Program
 	{ "#str_04067", "savegame quick" },			// QUICK SAVE
 	{ "#str_04068", "loadgame quick" },			// QUICK LOAD
 	{ "#str_04069", "screenshot" },				// SCREENSHOT

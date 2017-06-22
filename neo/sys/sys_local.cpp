@@ -279,6 +279,13 @@ const char* Sys_Lang( int idx )
 
 const char* Sys_DefaultLanguage()
 {
+	// Carl: new language detection rules!
+	// If there's no .lang file -> english
+	// If there's only one .lang file -> that language
+	// If there's an unrecognised language .lang file -> that unrecognised language (eg. russian.lang)
+	// If there's a language with a sound file -> first sound language in order Japanese, French, German, Italian, Spanish, English
+	// Otherwise -> chose first .lang file in order Japanese, French, German, Italian, Spanish, English
+
 	// sku breakdowns are as follows
 	//  EFIGS	Digital
 	//  EF  S	North America
@@ -310,12 +317,27 @@ const char* Sys_DefaultLanguage()
 	idStrList currentLangList = langList;
 	
 	idStr temp;
+	bool hasUnrecognised = false;
 	for( int i = 0; i < currentLangList.Num(); i++ )
 	{
 		temp = currentLangList[i];
 		temp = temp.Right( temp.Length() - strlen( "strings/" ) );
 		temp = temp.Left( temp.Length() - strlen( ".lang" ) );
 		currentLangList[i] = temp;
+		bool unrecognised = true;
+		for (int j = 0; j < numLanguages; j++)
+		{
+			if( temp.Icmpn(sysLanguageNames[j], strlen(sysLanguageNames[j]))==0 )
+			{
+				unrecognised = false;
+				break;
+			}
+		}
+		if (unrecognised && !hasUnrecognised)
+		{
+			sys_lang.SetString(temp);
+			hasUnrecognised = true;
+		}
 	}
 	
 	if( currentLangList.Num() <= 0 )
@@ -327,9 +349,53 @@ const char* Sys_DefaultLanguage()
 	{
 		sys_lang.SetString( currentLangList[0] );
 	}
-	else
+	else if (!hasUnrecognised)
 	{
-		if( currentLangList.Find( ID_LANG_JAPANESE ) )
+		extern idFileSystemLocal* fileSystemLocal;
+
+		// check sound files
+		extern idCVar fs_basepath;
+		idStr path = fs_basepath.GetString();
+		path += "\\base";
+		idStrList resourceFiles;
+		Sys_ListFiles(path, ".resources", resourceFiles);
+		for (int i = 0; i < resourceFiles.Num(); i++)
+		{
+			Sys_Printf("$$$: %s", resourceFiles[i].c_str());
+		}
+
+		bool hasSounds = false;
+		if (resourceFiles.Find("_sound_pc_ja.resources"))
+		{
+			sys_lang.SetString(ID_LANG_JAPANESE);
+			hasSounds = true;
+		}
+		else if (resourceFiles.Find("_sound_pc_fr.resources"))
+		{
+			sys_lang.SetString(ID_LANG_FRENCH);
+			hasSounds = true;
+		}
+		else if (resourceFiles.Find("_sound_pc_gr.resources"))
+		{
+			sys_lang.SetString(ID_LANG_GERMAN);
+			hasSounds = true;
+		}
+		else if (resourceFiles.Find("_sound_pc_it.resources"))
+		{
+			sys_lang.SetString(ID_LANG_ITALIAN);
+			hasSounds = true;
+		}
+		else if (resourceFiles.Find("_sound_pc_sp.resources"))
+		{
+			sys_lang.SetString(ID_LANG_SPANISH);
+			hasSounds = true;
+		}
+		else if (resourceFiles.Find("_sound_pc_en.resources"))
+		{
+			sys_lang.SetString(ID_LANG_ENGLISH);
+			hasSounds = true;
+		}
+		else if( currentLangList.Find( ID_LANG_JAPANESE ) )
 		{
 			sys_lang.SetString( ID_LANG_JAPANESE );
 		}

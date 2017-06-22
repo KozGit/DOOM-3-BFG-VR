@@ -95,6 +95,9 @@ entityDef weapon_bfg {
 	"controllerShakeHighTime"	"750"
 	"controllerShakeLowMag"		"1.0"
 	"controllerShakeLowTime"	"750"
+	
+	//koz
+	"laserSightOffset"			"0 1 .4"
 }
 
 entityDef env_bfg_overcharge {

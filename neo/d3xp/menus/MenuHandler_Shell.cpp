@@ -605,7 +605,7 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 	}
 	else
 	{
-		idStrStatic< MAX_OSPATH > shortMapName = gameLocal.GetMapFileName();
+		idStr shortMapName = gameLocal.GetMapFileName();
 		shortMapName.StripFileExtension();
 		shortMapName.StripLeading( "maps/" );
 		shortMapName.StripLeading( "game/" );

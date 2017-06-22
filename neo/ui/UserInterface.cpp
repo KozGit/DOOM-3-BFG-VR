@@ -265,6 +265,18 @@ void idUserInterfaceManagerLocal::DeAlloc( idUserInterface* gui )
 
 idUserInterface* idUserInterfaceManagerLocal::FindGui( const char* qpath, bool autoLoad, bool needUnique, bool forceNOTUnique )
 {
+	// Carl: Fix crash if we're loading a savegame that used the texture pack, without the texture pack.
+	// The only problem is this one missing GUI for the chaingun.
+	// The reason I'm renaming it, rather than just including it, is I don't want to override any modified versions
+	// if someone uses a different version texture pack.
+	if (idStr::Cmp(qpath, "guis/weapons/chaingun_300.gui") == 0)
+	{
+		findFile_t found = fileSystem->FindFile(qpath);
+		if (found == FIND_NO)
+		{
+			qpath = "guis/weapons/chaingun_300_loadgame.gui";
+		}
+	}
 	int c = guis.Num();
 	
 	for( int i = 0; i < c; i++ )

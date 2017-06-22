@@ -323,7 +323,8 @@ public:
 	renderEntity_t			holsterRenderEntity;					// used to present a model to the renderer
 	qhandle_t				holsterModelDefHandle;					// handle to static renderer model
 	idMat3					holsterAxis;
-	int						holsteredWeapon;
+	int						holsteredWeapon, extraHolsteredWeapon;
+	const char*		extraHolsteredWeaponModel;
 
 	renderEntity_t			hudEntity; // koz add a model to place the hud into the world
 	qhandle_t				hudHandle;
@@ -372,8 +373,8 @@ public:
 	
 	bool					noclip;
 	bool					godmode;
-	bool					warpMove;
-	idVec3					warpVel;
+	bool					warpMove, warpAim;
+	idVec3					warpVel, warpDest;
 	int						warpTime;
 	
 	bool					spawnAnglesSet;		// on first usercmd, we must set deltaAngles
@@ -583,6 +584,7 @@ public:
 	void					ToggleHeadingBeam();
 	void					UpdateVrHud();
 	void					ToggleHud();
+	void					RecreateCopyJoints();
 	void					UpdateNeckPose();
 	void					TrackWeaponDirection( idVec3 origin );
 	bool					IsCrouching()

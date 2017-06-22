@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Common_local.h"
 #include "../sys/sys_lobby_backend.h"
 
+#include "d3xp/Game_local.h"
+
 // Koz begin
 #include "vr\BackgroundSave.h"
 #include "vr\Vr.h"
@@ -281,12 +283,12 @@ void idCommonLocal::LoadLoadingGui( const char* mapName, bool& hellMap )
 	}
 	
 	// load / program a gui to stay up on the screen while loading
-	idStrStatic< MAX_OSPATH > stripped = mapName;
+	idStr stripped = mapName;
 	stripped.StripFileExtension();
 	stripped.StripPath();
 	
 	// use default load screen for demo
-	idStrStatic< MAX_OSPATH > matName = "guis/assets/loadscreens/";
+	idStr matName = "guis/assets/loadscreens/";
 	matName.Append( stripped );
 	const idMaterial* mat = declManager->FindMaterial( matName );
 	
@@ -466,7 +468,7 @@ void idCommonLocal::ExecuteMapChange()
 	currentMapName = matchParameters.mapName;
 	currentMapName.StripFileExtension();
 	
-	idStrStatic< MAX_OSPATH > fullMapName = "maps/";
+	idStr fullMapName = "maps/";
 	fullMapName += currentMapName;
 	fullMapName.SetFileExtension( "map" );
 	
@@ -516,7 +518,7 @@ void idCommonLocal::ExecuteMapChange()
 	
 	if( fileSystem->UsingResourceFiles() )
 	{
-		idStrStatic< MAX_OSPATH > manifestName = currentMapName;
+		idStr manifestName = currentMapName;
 		manifestName.Replace( "game/", "maps/" );
 		manifestName.Replace( "/mp/", "/" );
 		manifestName += ".preload";
@@ -580,6 +582,7 @@ void idCommonLocal::ExecuteMapChange()
 	}
 	else
 	{
+		gameLocal.loadScriptFailed = false;
 		if( !IsMultiplayer() )
 		{
 			assert( game->GetLocalClientNum() == 0 );
@@ -777,10 +780,55 @@ void idCommonLocal::ExecuteMapChange()
 		
 	vr_headingBeamMode.SetModified();
 	vr_weaponSight.SetModified();
+	
+	
+	//if the game was loaded from a different version of doom 3 ( vanilla, rbdoom, etc) 
+	//the copyJoint list is wrong for the head animatons, because our player model has a different joint layout
+	//to support fingers.  Rebuild the joint list once after loading each map to ensure the head anims
+	//work correctly.
+	idPlayer* player = gameLocal.GetLocalPlayer();
+	if ( player )
+	{
+		player->RecreateCopyJoints();
+	}
+		
 	// koz end
 
   commonVr->isLoading = false;
 
+	// Carl: Warning message
+	if( gameLocal.loadScriptFailed )
+	{
+		class idSWFScriptFunction_LoadNeedsRestart : public idSWFScriptFunction_RefCounted
+		{
+		public:
+			idSWFScriptFunction_LoadNeedsRestart(gameDialogMessages_t _msg, bool _accept)
+			{
+				msg = _msg;
+				accept = _accept;
+			}
+			idSWFScriptVar Call(idSWFScriptObject* thisObject, const idSWFParmList& parms)
+			{
+				common->Dialog().ClearDialog(msg);
+				if (accept)
+				{
+					cmdSystem->AppendCommandText("restartMap\n");
+				}
+				return idSWFScriptVar();
+			}
+		private:
+			gameDialogMessages_t msg;
+			bool accept;
+		};
+
+		idStaticList< idSWFScriptFunction*, 4 > callbacks;
+		callbacks.Append(new(TAG_SWF)idSWFScriptFunction_LoadNeedsRestart(GDM_RESTORE_CORRUPT_SAVEGAME, true));
+		callbacks.Append(new(TAG_SWF)idSWFScriptFunction_LoadNeedsRestart(GDM_RESTORE_CORRUPT_SAVEGAME, false));
+		idStaticList< idStrId, 4 > optionText;
+		optionText.Append(idStrId("#str_04271")); // Restart Map
+		optionText.Append(idStrId("#str_00100113")); // Continue
+		common->Dialog().AddDynamicDialog(GDM_RESTORE_CORRUPT_SAVEGAME, callbacks, optionText, true, "Warning: This game was loaded from a different mod. Would you like to restart this map (preserving your inventory) to prevent glitches? If you continue but get stuck due to glitches, use restartMap or endLevel console commands.");
+	}
 }
 
 /*
@@ -1010,6 +1058,7 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	gameDetails.descriptors.Set( SAVEGAME_DETAIL_FIELD_LANGUAGE, sys_lang.GetString() );
 	gameDetails.descriptors.SetInt( SAVEGAME_DETAIL_FIELD_CHECKSUM, ( int )gameDetails.descriptors.Checksum() );
 	
+	gameDetails.isRBDoom = false; // Carl
 	gameDetails.slotName = saveName;
 	ScrubSaveGameFileName( gameDetails.slotName );
 	
@@ -1054,7 +1103,7 @@ bool idCommonLocal::SaveGame( const char* saveName )
 idCommonLocal::LoadGame
 ===============
 */
-bool idCommonLocal::LoadGame( const char* saveName )
+bool idCommonLocal::LoadGame( const char* saveName, bool isRBDoom )
 {
 	// Koz begin
 	// koz fixme do this right.
@@ -1098,9 +1147,9 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	const saveGameDetailsList_t& sgdl = session->GetSaveGameManager().GetEnumeratedSavegames();
 	for( int i = 0; i < sgdl.Num(); i++ )
 	{
-		if( sgdl[i].slotName == saveName )
+		if( sgdl[i].slotName == saveName && sgdl[i].isRBDoom == isRBDoom )
 		{
-			if( sgdl[i].GetLanguage() != sys_lang.GetString() )
+			if( false && sgdl[i].GetLanguage() != sys_lang.GetString() ) // Carl: try to load games saved in other languages
 			{
 				idStaticList< idSWFScriptFunction*, 4 > callbacks;
 				idStaticList< idStrId, 4 > optionText;
@@ -1142,7 +1191,7 @@ bool idCommonLocal::LoadGame( const char* saveName )
 	stringsFile.Clear( false );
 	
 
-	saveGameHandle_t loadGameHandle = session->LoadGameSync( slotName, files );
+	saveGameHandle_t loadGameHandle = session->LoadGameSync( slotName, files, isRBDoom );
 	if( loadGameHandle != 0 )
 	{
 		return true;
@@ -1285,7 +1334,17 @@ void idCommonLocal::OnLoadFilesCompleted( idSaveLoadParms& parms )
 		mapSpawnData.savegameFile->ReadString( gamename );
 		mapSpawnData.savegameFile->ReadString( mapname );
 		
-		if( ( gamename != GAME_NAME ) || ( mapname.IsEmpty() ) || ( parms.description.GetSaveVersion() > BUILD_NUMBER ) )
+		// Carl: Hack to change the savegame version internally if it's our mod.
+		if ( mapSpawnData.savegameVersion == BUILD_NUMBER_SAVE_VERSION_CHANGE && (gamename == "DOOM 3: BFG VR Edition" || gamename == "DOOM 3 BFG VR: Fully Possessed") )
+		{
+			mapSpawnData.savegameVersion = BUILD_NUMBER_FULLY_POSSESSED;
+		}
+
+		if( gamename != GAME_NAME )
+		{
+			common->Warning("Loading from \"%s\" instead of \"%s\".", gamename.c_str(), GAME_NAME);
+		}
+		if( ( mapname.IsEmpty() ) || ( parms.description.GetSaveVersion() > BUILD_NUMBER_FULLY_POSSESSED ) )
 		{
 			// if this isn't a savegame for the correct game, abort loadgame
 			common->Warning( "Attempted to load an invalid savegame" );
@@ -1371,7 +1430,7 @@ LoadGame_f
 CONSOLE_COMMAND_SHIP( loadGame, "loads a game", idCmdSystem::ArgCompletion_SaveGame )
 {
 	console->Close();
-	commonLocal.LoadGame( ( args.Argc() > 1 ) ? args.Argv( 1 ) : "quick" );
+	commonLocal.LoadGame( ( args.Argc() > 1 ) ? args.Argv( 1 ) : "quick", ( args.Argc() > 2 ) && idStr::Cmp( args.Argv( 2 ), "0" )!=0 );
 	
 	//koz
 	vr_headingBeamMode.SetModified();
@@ -1434,13 +1493,100 @@ CONSOLE_COMMAND_SHIP( map, "loads a map", idCmdSystem::ArgCompletion_MapName )
 ==================
 Common_RestartMap_f
 ==================
+Carl: Restart the current map with your inventory intact. 
 */
-CONSOLE_COMMAND_SHIP( restartMap, "restarts the current map", NULL )
+CONSOLE_COMMAND_SHIP( restartMap, "Restarts the current map, preserving your inventory. Use this if you get stuck, or loaded a bad saved game.", NULL )
 {
 	if( g_demoMode.GetBool() )
 	{
 		cmdSystem->AppendCommandText( va( "devmap %s %d\n", commonLocal.GetCurrentMapName(), 0 ) );
 	}
+	else
+	{
+		gameLocal.sessionCommand = "map ";
+		gameLocal.sessionCommand.Append( commonLocal.GetCurrentMapName() );
+	}
+}
+
+/*
+==================
+Common_EndLevel_f
+==================
+Carl: Cheat! Use this if you get stuck.
+*/
+CONSOLE_COMMAND_SHIP( endLevel, "Cheat. Win the level and continue to the next map with your inventory.", NULL )
+{
+	for( idEntity *ent = gameLocal.spawnedEntities.Next(); ent != NULL; ent = ent->spawnNode.Next() )
+	{
+		if( ent->IsType( idTarget_EndLevel::Type ) )
+		{
+			idStr mapName = commonLocal.GetCurrentMapName();
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			if (player)
+			{
+				if (mapName.Cmp("game/mars_city1") == 0)
+				{
+					if ( player->inventory.pdas.Num() == 0 )
+						player->GivePDA(NULL, NULL);
+				}
+				if (mapName.Cmp("game/mars_city2") == 0)
+				{
+					player->GiveInventoryItem("weapon_pistol");
+					player->GiveInventoryItem("weapon_flashlight_new");
+				}
+				if (mapName.Cmp("game/admin") == 0)
+				{
+					player->GiveInventoryItem("weapon_chaingun");
+				}
+				if (mapName.Cmp("game/cpuboss") == 0 || mapName.Cmp("game/delta2a") == 0 || mapName.Cmp("game/phobos4") == 0 || mapName.Cmp("game/le_hell") == 0)
+				{
+					if (player->weapon_bfg < 0 || !(player->inventory.weapons & (1 << player->weapon_bfg)))
+						player->GiveInventoryItem("weapon_bfg");
+				}
+				if (mapName.Cmp("game/hell1") == 0)
+				{
+					if (player->weapon_soulcube < 0 || !(player->inventory.weapons & (1 << player->weapon_soulcube)))
+						player->GiveInventoryItem("weapon_soulcube");
+				}
+				else if (mapName.Cmp("game/le_enpro2") == 0)
+				{
+					if (player->weapon_grabber < 0 || !(player->inventory.weapons & (1 << player->weapon_grabber)))
+						player->GiveInventoryItem("weapon_grabber");
+				}
+				else if (mapName.Cmp("game/erebus1") == 0)
+				{
+					if (player->weapon_bloodstone < 0 || !(player->inventory.weapons & (1 << player->weapon_bloodstone)))
+						player->GiveInventoryItem("weapon_bloodstone_passive");
+					if (player->weapon_grabber < 0 || !(player->inventory.weapons & (1 << player->weapon_grabber)))
+						player->GiveInventoryItem("weapon_grabber");
+				}
+				else if (mapName.Cmp("game/erebus2") == 0)
+				{
+					if (player->weapon_bloodstone_active1 < 0 || !(player->inventory.weapons & (1 << player->weapon_bloodstone_active1)))
+						player->GiveInventoryItem("weapon_bloodstone_active1");
+				}
+				else if (mapName.Cmp("game/erebus3") == 0)
+				{
+					if (player->weapon_shotgun_double < 0 || !(player->inventory.weapons & (1 << player->weapon_shotgun_double)))
+						player->GiveInventoryItem("weapon_shotgun_double");
+				}
+				else if (mapName.Cmp("game/erebus6") == 0)
+				{
+					if (player->weapon_bloodstone_active2 < 0 || !(player->inventory.weapons & (1 << player->weapon_bloodstone_active2)))
+						player->GiveInventoryItem("weapon_bloodstone_active2");
+				}
+				else if (mapName.Cmp("game/phobos2") == 0)
+				{
+					if (player->weapon_bloodstone_active3 < 0 || !(player->inventory.weapons & (1 << player->weapon_bloodstone_active3)))
+						player->GiveInventoryItem( "weapon_bloodstone_active3" );
+				}
+			}
+			ent->Signal( SIG_TRIGGER );
+			ent->ProcessEvent( &EV_Activate, player );
+			ent->TriggerGuis();
+		}
+	}
+	common->Warning( "idTarget_EndLevel not found. Can't end the level." );
 }
 
 /*

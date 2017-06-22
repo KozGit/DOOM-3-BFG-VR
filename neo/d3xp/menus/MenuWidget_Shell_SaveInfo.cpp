@@ -67,6 +67,10 @@ void idMenuWidget_Shell_SaveInfo::Update()
 	if( loadIndex >= 0 && sortedSaves.Num() != 0 && loadIndex < sortedSaves.Num() )
 	{
 		const idSaveGameDetails& details = sortedSaves[ loadIndex ];
+		if (details.isRBDoom)
+			info.Append( "RB Doom 3 BFG - " );
+		info.Append( details.slotName );
+		info.Append( "\n" );
 		
 		info.Append( Sys_TimeStampToStr( details.date ) );
 		info.Append( "\n" );
@@ -121,6 +125,7 @@ void idMenuWidget_Shell_SaveInfo::Update()
 			info.Append( "\n" );
 			info.Append( va( "^1%s^0", idLocalization::GetString( "#str_swf_wrong_version" ) ) );
 		}
+		info.Append( idLocalization::GetString( details.GetLocation() ) );
 	}
 	
 	idSWFTextInstance* infoSprite = GetSprite()->GetScriptObject()->GetNestedText( "txtDesc" );

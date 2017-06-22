@@ -8160,7 +8160,8 @@ idAFBody* idPhysics_AF::GetBody( const int id ) const
 {
 	if( id < 0 || id >= bodies.Num() )
 	{
-		gameLocal.Error( "GetBody: no body with id %d exists\n", id );
+		// Carl debug
+		gameLocal.Warning( "GetBody: no body with id %d exists\n", id );
 		return NULL;
 	}
 	return bodies[id];
