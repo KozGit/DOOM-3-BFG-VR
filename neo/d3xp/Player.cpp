@@ -1551,7 +1551,16 @@ idPlayer::idPlayer():
 	warpVel					= vec3_zero;
 	noclip					= false;
 	godmode					= false;
-	
+
+	jetForward				= false;
+	jetBack					= false;
+	jetForwardVel			= vec3_zero;
+	jetBackVel				= vec3_zero;
+	jetLeft					= false;
+	jetRight				= false;
+	jetLeftVel				= vec3_zero;
+	jetRightVel				= vec3_zero;
+
 	spawnAnglesSet			= false;
 	spawnAngles				= ang_zero;
 	viewAngles				= ang_zero;
@@ -10000,6 +10009,10 @@ void idPlayer::EvaluateControls()
 	// if we released the teleport button
 	static int oldTeleportButtonState = false;
 	bool doTeleport = false;
+	bool doJetForward = false;
+	bool doJetBack = false;
+	bool doJetLeft = false;
+	bool doJetRight = false;
 
 	if ( game->IsPDAOpen() || commonVr->VR_GAME_PAUSED || currentWeapon == weapon_pda || commonVr->PDAforcetoggle ) // no teleporting in these cases
 	{
@@ -10007,7 +10020,7 @@ void idPlayer::EvaluateControls()
 	}
 	else
 	{
-	extern idCVar timescale;
+		extern idCVar timescale;
 		if ( common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState )
 		{
 			if (vr_teleportMode.GetInteger() == 1) // QuakeCon style
@@ -10018,13 +10031,9 @@ void idPlayer::EvaluateControls()
 			commonVr->teleportButtonCount++;
 		}
 
-		if ( usercmd.buttons & BUTTON_ATTACK )
+		// Jack: do not cancel if quakecon style
+		if (usercmd.buttons & BUTTON_ATTACK && vr_teleportMode.GetInteger() != 1)
 		{
-			if (vr_teleportMode.GetInteger() == 1)
-			{
-				warpAim = false;
-				timescale.SetFloat(1.0f);
-			}
 			commonVr->teleportButtonCount = 0; // let the fire button abort teleporting.
 		}
 
@@ -10042,6 +10051,37 @@ void idPlayer::EvaluateControls()
 
 		oldTeleportButtonState = common->ButtonState( UB_TELEPORT );
 	}
+
+	if (commonVr->jetForwardButtonCount != 0) {
+		commonVr->jetForwardButtonCount = 0;
+		jetForward = true;
+		jetForwardVel = (physicsObj.viewForward * (5.0f)) / 0.010f;  // 10 ms
+		jetForwardTime = gameLocal.time + 10;
+		physicsObj.SetLinearVelocity(jetForwardVel);
+	}
+	if (commonVr->jetBackButtonCount != 0) {
+		commonVr->jetBackButtonCount = 0;
+		jetBack = true;
+		jetBackVel = (physicsObj.viewForward * (-5.0f)) / 0.010f;  // 10 ms
+		jetBackTime = gameLocal.time + 10;
+		physicsObj.SetLinearVelocity(jetBackVel);
+	}
+	if (commonVr->jetLeftButtonCount != 0) {
+		commonVr->jetLeftButtonCount = 0;
+		jetLeft = true;
+		jetLeftVel = (physicsObj.viewRight * (-5.0f)) / 0.010f;  // 10 ms
+		jetLeftTime = gameLocal.time + 10;
+		physicsObj.SetLinearVelocity(jetLeftVel);
+	}
+	if (commonVr->jetRightButtonCount != 0) {
+		commonVr->jetRightButtonCount = 0;
+		jetRight = true;
+		jetRightVel = (physicsObj.viewRight * (5.0f)) / 0.010f;  // 10 ms
+		jetRightTime = gameLocal.time + 10;
+		physicsObj.SetLinearVelocity(jetRightVel);
+	}
+
+
 	
 	if( doTeleport )
 	{
@@ -13371,20 +13411,59 @@ void idPlayer::Think()
 	UpdateLaserSight();
 	UpdateTeleportAim();
 
-	if (vr_teleportMode.GetInteger() == 1 && warpMove)
+	if (vr_teleportMode.GetInteger() == 1)
 	{
-		if (gameLocal.time > warpTime)
-		{
-			extern idCVar timescale;
-			warpTime = 0;
-			noclip = false;
-			warpMove = false;
-			warpVel = vec3_origin;
-			timescale.SetFloat(1.0f);
-			playerView.EnableBFGVision(false);
-			Teleport( warpDest, viewAngles, NULL ); //Carl: get the destination exact
+		if (warpMove) {
+			if (gameLocal.time > warpTime)
+			{
+				extern idCVar timescale;
+				warpTime = 0;
+				noclip = false;
+				warpMove = false;
+				warpVel = vec3_origin;
+				timescale.SetFloat(1.0f);
+				//playerView.EnableBFGVision(false);
+				Teleport(warpDest, viewAngles, NULL); //Carl: get the destination exact
+			}
+			physicsObj.SetLinearVelocity(warpVel);
 		}
-		physicsObj.SetLinearVelocity(warpVel);
+
+		if (jetForward) {
+			if (gameLocal.time > jetForwardTime)
+			{
+				jetForwardTime = 0;
+				jetForward = false;
+				jetForwardVel = vec3_origin;
+			}
+			physicsObj.SetLinearVelocity(jetForwardVel);
+		}
+		if (jetBack) {
+			if (gameLocal.time > jetBackTime)
+			{
+				jetBackTime = 0;
+				jetBack = false;
+				jetBackVel = vec3_origin;
+			}
+			physicsObj.SetLinearVelocity(jetBackVel);
+		}
+		if (jetLeft) {
+			if (gameLocal.time > jetLeftTime)
+			{
+				jetLeftTime = 0;
+				jetLeft = false;
+				jetLeftVel = vec3_origin;
+			}
+			physicsObj.SetLinearVelocity(jetLeftVel);
+		}
+		if (jetRight) {
+			if (gameLocal.time > jetRightTime)
+			{
+				jetRightTime = 0;
+				jetRight = false;
+				jetRightVel = vec3_origin;
+			}
+			physicsObj.SetLinearVelocity(jetRightVel);
+		}
 	}
 
 	if ( game->isVR ) UpdateHeadingBeam(); // koz
@@ -14671,7 +14750,7 @@ void idPlayer::TeleportPath( const idVec3& target )
 		//warpVel[2] = warpVel[2] + 50; // add a small fixed upwards velocity to handle noclip problem
 		warpTime = gameLocal.time + 75;
 		timescale.SetFloat(0.5f);
-		playerView.EnableBFGVision(true);
+		//playerView.EnableBFGVision(true);
 	}
 }
 

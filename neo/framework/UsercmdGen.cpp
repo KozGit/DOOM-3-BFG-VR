@@ -1434,10 +1434,22 @@ void idUsercmdGenLocal::JoystickMove2()
 		leftMapped = mappedMove;
 		rightMapped = mappedLook;
 
-		cmd.forwardmove = idMath::ClampChar( cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y );
-		cmd.rightmove = idMath::ClampChar( cmd.rightmove + KEY_MOVESPEED * leftMapped.x );
+		if (vr_teleportMode.GetInteger() == 1) {
+			if (leftMapped.y < -0.8)
+				commonVr->jetForwardButtonCount++;
+			if (leftMapped.y > 0.8)
+				commonVr->jetBackButtonCount++;
+			if (leftMapped.x > 0.8)
+				commonVr->jetRightButtonCount++;
+			if (leftMapped.x < -0.8)
+				commonVr->jetLeftButtonCount++;
+		}
+		else {
+			cmd.forwardmove = idMath::ClampChar(cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y);
+			cmd.rightmove = idMath::ClampChar(cmd.rightmove + KEY_MOVESPEED * leftMapped.x);
+		}
 
-		pitchDelta = MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed;;
+		pitchDelta = MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed;
 		yawDelta = MS2SEC( pollTime - lastPollTime ) * -rightMapped.x * yawSpeed;
 
 		if ( game->isVR )
@@ -1650,6 +1662,10 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		}
 	}
 
+	// okToMove is true if jet strafing
+	if (commonVr->jetBackButtonCount != 0 || commonVr->jetForwardButtonCount != 0 || commonVr->jetLeftButtonCount != 0 || commonVr->jetRightButtonCount != 0)
+		okToMove = true;
+
 	if ( !okToMove )
 	{
 		cmd.forwardmove = 0.0f;
@@ -1657,7 +1673,8 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		return;
 	}
 
-	if ( commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && ( vr_movePoint.GetInteger() == 1 || vr_movePoint.GetInteger() > 2 ) && ( abs( cmd.forwardmove ) >= .1 || abs( cmd.rightmove ) >= .1) ) // body will follow motion from move vector
+	if (commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && (vr_movePoint.GetInteger() == 1 || vr_movePoint.GetInteger() > 2) && 
+		(abs(cmd.forwardmove) >= .1 || abs(cmd.rightmove) >= .1) || (commonVr->jetBackButtonCount != 0 || commonVr->jetForwardButtonCount != 0 || commonVr->jetLeftButtonCount != 0 || commonVr->jetRightButtonCount != 0)) // body will follow motion from move vector
 	{
 		static idAngles controllerAng;
 		int hand;

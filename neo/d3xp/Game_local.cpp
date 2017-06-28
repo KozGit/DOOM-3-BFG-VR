@@ -1662,7 +1662,7 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 		idPlayer *player = GetLocalPlayer();
 		player->InitTeleportTarget();
 		// if we autosaved while teleporting QuakeCon style, stop the QuakeCon style effect
-		if (player->noclip && player->playerView.bfgVision)
+		if (player->noclip)// && player->playerView.bfgVision)
 		{
 			extern idCVar timescale;
 			player->warpTime = 0;
@@ -1670,8 +1670,16 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 			player->warpMove = false;
 			player->warpAim = false;
 			player->warpVel = vec3_origin;
+			player->jetForward = false;
+			player->jetBack = false;
+			player->jetForwardVel = vec3_origin;
+			player->jetBackVel = vec3_origin;
+			player->jetLeft = false;
+			player->jetRight = false;
+			player->jetLeftVel = vec3_origin;
+			player->jetRightVel = vec3_origin;
 			timescale.SetFloat(1.0f);
-			player->playerView.EnableBFGVision(false);
+			//player->playerView.EnableBFGVision(false);
 		}
 	}
 

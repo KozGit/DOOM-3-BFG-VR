@@ -320,6 +320,10 @@ public:
 	idVec3				fixedPDAMoveDelta;
 
 	int					teleportButtonCount;
+	int					jetForwardButtonCount;
+	int					jetBackButtonCount;
+	int					jetLeftButtonCount;
+	int					jetRightButtonCount;
 
 	float				independentWeaponYaw;
 	float				independentWeaponPitch;
