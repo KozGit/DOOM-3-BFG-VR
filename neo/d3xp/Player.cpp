@@ -1552,14 +1552,8 @@ idPlayer::idPlayer():
 	noclip					= false;
 	godmode					= false;
 
-	jetForward				= false;
-	jetBack					= false;
-	jetForwardVel			= vec3_zero;
-	jetBackVel				= vec3_zero;
-	jetLeft					= false;
-	jetRight				= false;
-	jetLeftVel				= vec3_zero;
-	jetRightVel				= vec3_zero;
+	jetMove					= false;
+	jetMoveVel				= vec3_zero;
 
 	spawnAnglesSet			= false;
 	spawnAngles				= ang_zero;
@@ -10005,14 +9999,7 @@ void idPlayer::EvaluateControls()
 		PerformImpulse( usercmd.impulse );
 	}
 	
-	// handle teleporting
-	// if we released the teleport button
-	static int oldTeleportButtonState = false;
 	bool doTeleport = false;
-	bool doJetForward = false;
-	bool doJetBack = false;
-	bool doJetLeft = false;
-	bool doJetRight = false;
 
 	if ( game->IsPDAOpen() || commonVr->VR_GAME_PAUSED || currentWeapon == weapon_pda || commonVr->PDAforcetoggle ) // no teleporting in these cases
 	{
@@ -10021,17 +10008,54 @@ void idPlayer::EvaluateControls()
 	else
 	{
 		extern idCVar timescale;
-		if ( common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState )
+		if ( common->ButtonState( UB_TELEPORT ) && !commonVr->oldTeleportButtonState ) // on transit from no press to press.
 		{
-			if (vr_teleportMode.GetInteger() == 1) // QuakeCon style
+			if (vr_teleportMode.GetInteger() == 1) // Doom VFR style
 			{
-				warpAim = true;
-				timescale.SetFloat(0.5f);
+				if ((commonVr->leftMapped.x > -0.5f) && (commonVr->leftMapped.x < 0.5f) && (commonVr->leftMapped.y > -0.5f) && (commonVr->leftMapped.y < 0.5f))
+				{
+					warpAim = true;
+					timescale.SetFloat(0.5f);
+					commonVr->teleportButtonCount++;
+				} 
+				else 
+				{
+					if (!jetMove && gameLocal.time > jetMoveCoolDownTime) {
+						// tie to the teleport button
+						if (commonVr->leftMapped.y < -0.6f && commonVr->leftMapped.x > -0.3 && commonVr->leftMapped.x < 0.3)
+						{
+							jetMove = true;
+							jetMoveTime = gameLocal.time + 60;
+							jetMoveVel = (physicsObj.viewForward * (100.0f)) / 0.060f;  // 60 ms
+						}
+						else if (commonVr->leftMapped.y > 0.6f && commonVr->leftMapped.x > -0.3 && commonVr->leftMapped.x < 0.3)
+						{
+							jetMove = true;
+							jetMoveTime = gameLocal.time + 60;
+							jetMoveVel = (physicsObj.viewForward * (-100.0f)) / 0.060f;  // 60 ms
+						}
+						else if (commonVr->leftMapped.x < -0.6f && commonVr->leftMapped.y > -0.3 && commonVr->leftMapped.y < 0.3)
+						{
+							jetMove = true;
+							jetMoveTime = gameLocal.time + 60;
+							jetMoveVel = (physicsObj.viewRight * (-100.0f)) / 0.060f;  // 60 ms
+						}
+						else if (commonVr->leftMapped.x > 0.6f && commonVr->leftMapped.y > -0.3 && commonVr->leftMapped.y < 0.3)
+						{
+							jetMove = true;
+							jetMoveTime = gameLocal.time + 60;
+							jetMoveVel = (physicsObj.viewRight * (100.0f)) / 0.060f;  // 60 ms
+						}
+					}
+				}
 			}
-			commonVr->teleportButtonCount++;
+			else
+			{
+				commonVr->teleportButtonCount++;
+			}
 		}
 
-		// Jack: do not cancel if quakecon style
+		// Jack: do not cancel if Doom VFR style
 		if (usercmd.buttons & BUTTON_ATTACK && vr_teleportMode.GetInteger() != 1)
 		{
 			commonVr->teleportButtonCount = 0; // let the fire button abort teleporting.
@@ -10039,49 +10063,26 @@ void idPlayer::EvaluateControls()
 
 		if ( (vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS && commonVr->teleportButtonCount != 0) ||
 			(commonVr->teleportButtonCount > 1) ||
-			((oldTeleportButtonState && !common->ButtonState( UB_TELEPORT )) && !vr_teleportButtonMode.GetBool()) )
+			((commonVr->oldTeleportButtonState && !common->ButtonState( UB_TELEPORT )) && !vr_teleportButtonMode.GetBool()) ) // on transit from press to release
 		{
 			if (vr_teleportMode.GetInteger() == 1)
 			{
 				warpAim = false;
 				timescale.SetFloat(1.0f);
+				// if touch within the map teleport boundary
+				if ((commonVr->leftMapped.x > -0.5f) && (commonVr->leftMapped.x < 0.5f) && (commonVr->leftMapped.y > -0.5f) && (commonVr->leftMapped.y < 0.5f)) {
+					doTeleport = true;  //common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState;
+					jetMoveCoolDownTime = 0;
+				}
+				commonVr->teleportButtonCount = 0;
+			} 
+			else
+			{
+				doTeleport = true;  //common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState;
 			}
-			doTeleport = true;  //common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState;
 		}
-
-		oldTeleportButtonState = common->ButtonState( UB_TELEPORT );
+		commonVr->oldTeleportButtonState = common->ButtonState(UB_TELEPORT);
 	}
-
-	if (commonVr->jetForwardButtonCount != 0) {
-		commonVr->jetForwardButtonCount = 0;
-		jetForward = true;
-		jetForwardVel = (physicsObj.viewForward * (5.0f)) / 0.010f;  // 10 ms
-		jetForwardTime = gameLocal.time + 10;
-		physicsObj.SetLinearVelocity(jetForwardVel);
-	}
-	if (commonVr->jetBackButtonCount != 0) {
-		commonVr->jetBackButtonCount = 0;
-		jetBack = true;
-		jetBackVel = (physicsObj.viewForward * (-5.0f)) / 0.010f;  // 10 ms
-		jetBackTime = gameLocal.time + 10;
-		physicsObj.SetLinearVelocity(jetBackVel);
-	}
-	if (commonVr->jetLeftButtonCount != 0) {
-		commonVr->jetLeftButtonCount = 0;
-		jetLeft = true;
-		jetLeftVel = (physicsObj.viewRight * (-5.0f)) / 0.010f;  // 10 ms
-		jetLeftTime = gameLocal.time + 10;
-		physicsObj.SetLinearVelocity(jetLeftVel);
-	}
-	if (commonVr->jetRightButtonCount != 0) {
-		commonVr->jetRightButtonCount = 0;
-		jetRight = true;
-		jetRightVel = (physicsObj.viewRight * (5.0f)) / 0.010f;  // 10 ms
-		jetRightTime = gameLocal.time + 10;
-		physicsObj.SetLinearVelocity(jetRightVel);
-	}
-
-
 	
 	if( doTeleport )
 	{
@@ -13428,41 +13429,15 @@ void idPlayer::Think()
 			physicsObj.SetLinearVelocity(warpVel);
 		}
 
-		if (jetForward) {
-			if (gameLocal.time > jetForwardTime)
+		if (jetMove) {
+			if (gameLocal.time > jetMoveTime)
 			{
-				jetForwardTime = 0;
-				jetForward = false;
-				jetForwardVel = vec3_origin;
+				jetMoveTime = 0;
+				jetMove = false;
+				jetMoveVel = vec3_origin;
+				jetMoveCoolDownTime = gameLocal.time + 30;
 			}
-			physicsObj.SetLinearVelocity(jetForwardVel);
-		}
-		if (jetBack) {
-			if (gameLocal.time > jetBackTime)
-			{
-				jetBackTime = 0;
-				jetBack = false;
-				jetBackVel = vec3_origin;
-			}
-			physicsObj.SetLinearVelocity(jetBackVel);
-		}
-		if (jetLeft) {
-			if (gameLocal.time > jetLeftTime)
-			{
-				jetLeftTime = 0;
-				jetLeft = false;
-				jetLeftVel = vec3_origin;
-			}
-			physicsObj.SetLinearVelocity(jetLeftVel);
-		}
-		if (jetRight) {
-			if (gameLocal.time > jetRightTime)
-			{
-				jetRightTime = 0;
-				jetRight = false;
-				jetRightVel = vec3_origin;
-			}
-			physicsObj.SetLinearVelocity(jetRightVel);
+			physicsObj.SetLinearVelocity(jetMoveVel);
 		}
 	}
 

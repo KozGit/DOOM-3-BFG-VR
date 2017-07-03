@@ -1365,8 +1365,14 @@ void idUsercmdGenLocal::JoystickMove2()
 
 		CircleToSquare( leftMapped.x, leftMapped.y );
 
-		cmd.forwardmove = idMath::ClampChar( cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y );
-		cmd.rightmove = idMath::ClampChar( cmd.rightmove + KEY_MOVESPEED * leftMapped.x );
+		if (vr_teleportMode.GetInteger() == 1) {
+			commonVr->leftMapped = leftMapped; // Jack: this has not been tested
+		}
+		else
+		{
+			cmd.forwardmove = idMath::ClampChar(cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y);
+			cmd.rightmove = idMath::ClampChar(cmd.rightmove + KEY_MOVESPEED * leftMapped.x);
+		}
 
 		pitchDelta = MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed;;
 		yawDelta = MS2SEC( pollTime - lastPollTime ) * -rightMapped.x * yawSpeed;
@@ -1435,16 +1441,10 @@ void idUsercmdGenLocal::JoystickMove2()
 		rightMapped = mappedLook;
 
 		if (vr_teleportMode.GetInteger() == 1) {
-			if (leftMapped.y < -0.8)
-				commonVr->jetForwardButtonCount++;
-			if (leftMapped.y > 0.8)
-				commonVr->jetBackButtonCount++;
-			if (leftMapped.x > 0.8)
-				commonVr->jetRightButtonCount++;
-			if (leftMapped.x < -0.8)
-				commonVr->jetLeftButtonCount++;
+			commonVr->leftMapped = leftMapped;
 		}
-		else {
+		else
+		{
 			cmd.forwardmove = idMath::ClampChar(cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y);
 			cmd.rightmove = idMath::ClampChar(cmd.rightmove + KEY_MOVESPEED * leftMapped.x);
 		}
@@ -1662,11 +1662,14 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		}
 	}
 
-	// okToMove is true if jet strafing
-	if (commonVr->jetBackButtonCount != 0 || commonVr->jetForwardButtonCount != 0 || commonVr->jetLeftButtonCount != 0 || commonVr->jetRightButtonCount != 0)
+	// okToMove is true for Doom VFR
+	if (vr_teleportMode.GetInteger() == 1) {
+		cmd.forwardmove = 0.0f;
+		cmd.rightmove = 0.0f;
 		okToMove = true;
+	}
 
-	if ( !okToMove )
+	if (!okToMove)
 	{
 		cmd.forwardmove = 0.0f;
 		cmd.rightmove = 0.0f;
@@ -1674,7 +1677,7 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 	}
 
 	if (commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && (vr_movePoint.GetInteger() == 1 || vr_movePoint.GetInteger() > 2) && 
-		(abs(cmd.forwardmove) >= .1 || abs(cmd.rightmove) >= .1) || (commonVr->jetBackButtonCount != 0 || commonVr->jetForwardButtonCount != 0 || commonVr->jetLeftButtonCount != 0 || commonVr->jetRightButtonCount != 0)) // body will follow motion from move vector
+		(abs(cmd.forwardmove) >= .1 || abs(cmd.rightmove) >= .1) || vr_teleportMode.GetInteger() == 1) // body will follow motion from move vector
 	{
 		static idAngles controllerAng;
 		int hand;

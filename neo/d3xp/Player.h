@@ -377,18 +377,10 @@ public:
 	idVec3					warpVel, warpDest;
 	int						warpTime;
 
-	bool					jetForward;
-	idVec3					jetForwardVel;
-	int						jetForwardTime;
-	bool					jetBack;
-	idVec3					jetBackVel;
-	int						jetBackTime;
-	bool					jetLeft;
-	idVec3					jetLeftVel;
-	int						jetLeftTime;
-	bool					jetRight;
-	idVec3					jetRightVel;
-	int						jetRightTime;
+	bool					jetMove;
+	idVec3					jetMoveVel;
+	int						jetMoveTime;
+	int						jetMoveCoolDownTime;
 	
 	bool					spawnAnglesSet;		// on first usercmd, we must set deltaAngles
 	idAngles				spawnAngles;
