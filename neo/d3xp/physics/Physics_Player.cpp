@@ -142,7 +142,7 @@ void idPhysics_Player::Accelerate( const idVec3& wishdir, const float wishspeed,
 	}
 	
 	// koz instant accel/decel
-	if ( game->isVR && vr_instantAccel.GetBool() && walking && groundPlane && !OnLadder() ) 
+	if ( game->isVR && vr_instantAccel.GetBool() && vr_teleportMode.GetInteger() !=1 && walking && groundPlane && !OnLadder() ) 
 	{
 		idVec3 newVel = wishspeed * wishdir;
 		current.velocity.x = newVel.x;
@@ -875,7 +875,7 @@ void idPhysics_Player::Friction()
 		vel += ( vel * gravityNormal ) * gravityNormal;
 		
 		//koz instant accel/decel
-		if ( game->isVR && vr_instantAccel.GetBool() && groundPlane && !OnLadder() )
+		if ( game->isVR && vr_instantAccel.GetBool() && vr_teleportMode.GetInteger() != 1 && groundPlane && !OnLadder() )
 		{
 			if ( command.forwardmove == 0 && command.rightmove == 0 )
 			{
