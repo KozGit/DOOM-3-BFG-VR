@@ -1507,8 +1507,13 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		const int legalMinTime = 5000; //Carl: Don't force them to wait more than a second
 		const bool showVideo = (!com_skipIntroVideos.GetBool() && fileSystem->UsingResourceFiles());
 
-		if ( game->isVR ) commonVr->HMDResetTrackingOriginOffset();
+		if ( game->isVR )
+		{
+			commonVr->HMDResetTrackingOriginOffset();
+			commonVr->FrameStart();
+		}
 
+		commonVr->renderingSplash = true;
 
 		if ( showVideo )
 		{
@@ -1532,22 +1537,22 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 
 		while ( Sys_Milliseconds() - legalStartTime < legalMinTime )
 		{
-			RenderSplash();
-			Sys_GenerateEvents();
-			
+						
 			if ( game->isVR )
 			{
-				if ( commonVr->hasOculusRift )
+				if ( commonVr->hasHMD )
 				{
-					commonVr->FrameStart();
 					idLib::frameNumber++;
-					commonVr->HMDTrackStatic( false );
+					commonVr->FrameStart();
 				}
 			}
 			else
 			{
 				Sys_Sleep( 10 );
 			}
+			
+			RenderSplash();
+			Sys_GenerateEvents();
 		};
 
 		commonVr->HMDResetTrackingOriginOffset();
@@ -1560,14 +1565,13 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		{
 			while ( centered == 0 )
 			{
-				RenderSplash();
-				if ( commonVr->hasOculusRift )
+				
+				if ( commonVr->hasHMD )
 				{
-					commonVr->FrameStart();
 					idLib::frameNumber++;
-					commonVr->HMDTrackStatic( false );
+					commonVr->FrameStart();
 				}
-
+				RenderSplash();
 				Sys_GenerateEvents();
 
 				// queue system events ready for polling

@@ -33,6 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "vr\Vr.h" // Koz
 
+idCVar vr_cineIPD("vr_cineIPD", "2.0", CVAR_FLOAT | CVAR_ARCHIVE, "");
 
 // _D3XP : rename all gameLocal.time to gameLocal.slow.time for merge!
 
@@ -593,56 +594,67 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 			float offset = -extend * view->viewEyeBuffer;
 			
 			renderSystem->SetColor4( 1.0f, 1.0f, 1.0f, 1.0f );
-			//renderSystem->DrawStretchPic( 0.0f, 0.0f, renderSystem->GetVirtualWidth(), renderSystem->GetVirtualHeight(), 0.0f, 0.0f, 1.0f, 1.0f, bfgMaterial );
 			renderSystem->DrawStretchPic( offset - extend, 0.0f, renderSystem->GetVirtualWidth() + extend * 2, renderSystem->GetVirtualHeight(), 0.0f, 0.0f, 1.0f, 1.0f, bfgMaterial );
 		}
 
-		if ( vrComfortVision )
+		// koz - Updated to use screenseparation for oculus, and provide borders for cropped or projected cinematics.
+		// If the cinematic is being projected, the projection matrix in GLMatrix.cpp is modified to make screen separation 0
+		// so the screen wont be offset twice when the bordered image is rendered in Vr_Gl.cpp HUDRender with the
+		// headset correct matrix.
+
+		if ( vrComfortVision || ( gameLocal.inCinematic && vr_cinematics.GetInteger() != 0 && vr_flicksyncCharacter.GetInteger() == 0 ) )
 		{
-			float extend = -0.5f * commonVr->VRScreenSeparation * renderSystem->GetVirtualWidth(); 
-			float offset = -extend * view->viewEyeBuffer;
-					
 			renderSystem->SetColor4(0, 0, 0, 255);
 
 			int width = renderSystem->GetVirtualWidth();
 			int height = renderSystem->GetVirtualHeight();
-			int blockwidth = width * 4;
-			int blockheight = height * 4;
+			
+			int blockWidth = gameLocal.inCinematic ? width / 8 : width / 4;
+			int blockHeight = height / 4;
 
-			renderSystem->DrawStretchPic(
-				offset - extend - blockwidth, -blockheight,
-				blockwidth + extend * 2, blockheight,
-				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
-			renderSystem->DrawStretchPic(
-				offset - extend, -blockheight,
-				width, blockheight + height / 3.0,
-				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
-			renderSystem->DrawStretchPic(
-				offset - extend + width, -blockheight,
-				blockwidth + extend * 2, blockheight,
-				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
+			float offsetSize = commonVr->VRScreenSeparation * width;
+			float offset = ( gameLocal.inCinematic && vr_cinematics.GetInteger() == 2 ) ? 0 : offsetSize / commonVr->hmdAspect;
+			
+			int start, barWidth;
+			
+			blockWidth /= commonVr->hmdAspect;
+					
+			// top and bottom blackout bars should be the same regardless of screen separation
+			
+			// top blackout bar
+			renderSystem->DrawStretchPic( 0, 0, width, blockHeight, 0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial( "_white" ) );
+			
+			// bottom blackout bar
+			renderSystem->DrawStretchPic( 0, height - blockHeight, width, blockHeight, 0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial( "_white" ) );
+							
+			//left eye
+			if ( view->viewEyeBuffer < 0 )
+			{
+				//left bar
+				barWidth = idMath::ClampFloat( 0.0f, width, blockWidth + offset);
+				renderSystem->DrawStretchPic( 0, 0, barWidth, height, 0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial( "_white" ) );
 
-			renderSystem->DrawStretchPic(
-				offset - extend - blockwidth, 0,
-				blockwidth + extend * 2 + width / 3.0, height,
-				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
-			renderSystem->DrawStretchPic(
-				offset - extend + width - width / 3.0, 0,
-				blockwidth + extend * 2 + width / 3.0, height,
-				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
+				//rightbar
+				start = (width - blockWidth) + offset;
+				barWidth = idMath::ClampFloat( 0.0f, width, width - start);
+				renderSystem->DrawStretchPic( start, 0, barWidth, height, 0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial( "_white" ) );
+			}
+			else if ( view->viewEyeBuffer > 0 ) // right eye
+			{
+				//left bar
+				start = 0 - offset;
+				barWidth = blockWidth - offset;
+				start = idMath::ClampFloat( 0.0f, width, start );
+				barWidth = idMath::ClampFloat( 0.0f, width - start, barWidth );
+				renderSystem->DrawStretchPic( start, 0, barWidth, height, 0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial( "_white" ) );
 
-			renderSystem->DrawStretchPic(
-				offset - extend - blockwidth, height,
-				blockwidth + extend * 2, blockheight,
-				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
-			renderSystem->DrawStretchPic(
-				offset - extend, height - height / 3.0,
-				width + extend * 2, blockheight + height / 3.0,
-				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
-			renderSystem->DrawStretchPic(
-				offset - extend + width, height,
-				blockwidth + extend * 2, blockheight,
-				0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial("_white"));
+				//right bar
+				start = (width - blockWidth) - offset;
+				barWidth = width - start;
+				renderSystem->DrawStretchPic( start, 0, barWidth, height, 0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial( "_white" ) );
+
+			}
+			
 			renderSystem->SetGLState(0); // JACK: unsure if this is required?
 		}
 	}
@@ -818,8 +830,8 @@ stereoDistances_t	CaclulateStereoDistances(
 	{
 		// head mounted display mode
 		dists.worldSeparation = CentimetersToWorldUnits( interOcularCentimeters * 0.5 );
-		//dists.screenSeparation = 0.0f;
-		dists.screenSeparation = commonVr->VRScreenSeparation;
+		dists.screenSeparation = 0.0f;
+		//dists.screenSeparation = commonVr->VRScreenSeparation;
 		return dists;
 	}
 	
@@ -845,7 +857,7 @@ float GetIPD()
 
 float	GetScreenSeparationForGuis()
 {
-	const stereoDistances_t dists = CaclulateStereoDistances(
+	stereoDistances_t dists = CaclulateStereoDistances(
 										//stereoRender_interOccularCentimeters.GetFloat(),
 										GetIPD(),
 										renderSystem->GetPhysicalScreenWidthInCentimeters(),
@@ -878,7 +890,7 @@ void idPlayerView::EmitStereoEyeView( const int eye, idMenuHandler_HUD* hudManag
 	renderView_t eyeView = *view;
     	
     	
-	const stereoDistances_t dists = CaclulateStereoDistances(
+	stereoDistances_t dists = CaclulateStereoDistances(
 										//stereoRender_interOccularCentimeters.GetFloat(),
 										GetIPD(),
 										renderSystem->GetPhysicalScreenWidthInCentimeters(),
@@ -886,8 +898,9 @@ void idPlayerView::EmitStereoEyeView( const int eye, idMenuHandler_HUD* hudManag
 										view->fov_x );
 										
 
-	
-	eyeView.vieworg += eye * dists.worldSeparation * eyeView.viewaxis[1];
+	float eyeOff = eye * dists.worldSeparation;
+
+	eyeView.vieworg += eyeOff /*eye * dists.worldSeparation*/ * eyeView.viewaxis[1];
 	
 	eyeView.viewEyeBuffer = stereoRender_swapEyes.GetBool() ? eye : -eye;
 	eyeView.stereoScreenSeparation = eye * dists.screenSeparation;
@@ -977,20 +990,20 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 	{
 		SingleView( view, hudManager );
 	}
-
+	
 	// Carl: Motion sickness aids for artificial locomotion
 	// 0 = None, 1 = Chaperone, 2 = Reduce FOV, 3 = Black Screen, 4 = Black & Chaperone, 5 = Reduce FOV & Chaperone, 6 = Slow Mo, 7 = Slow Mo & Chaperone, 8 = Slow Mo & Reduce FOV, 9 = Slow Mo, Chaperone, Reduce FOV, 10 = Third Person, 11 = Particles, 12 = Particles & Chaperone
 	int fix = vr_motionSickness.GetInteger();
 	if( gameLocal.inCinematic || Flicksync_InCutscene )
-		fix = 0;
+		fix = 0; 
 	commonVr->ForceChaperone( 1, player->ShouldBlink() && ( fix == 1 || fix == 4 || fix == 5 || fix == 7 || fix == 9 ) );
-	if( vr_blink.GetFloat() > 0.f && player->ShouldBlink() && ( fix == 3 || fix == 4 ) && !commonVr->VR_GAME_PAUSED )
+	if( vr_blink.GetFloat() > 0.f && player->ShouldBlink() && ( fix == 3 || fix == 4 || commonVr->leanBlank ) && !commonVr->VR_GAME_PAUSED )
 	{
 		static int next_strobe_time = 0;
 		int t = vr_strobeTime.GetInteger();
 		if ( !next_strobe_time )
 			next_strobe_time = gameLocal.realClientTime + t; // ms
-		if ( gameLocal.realClientTime >= next_strobe_time && t )
+		if ( gameLocal.realClientTime >= next_strobe_time && t && !commonVr->leanBlank )
 		{
 			Fade(idVec4(0, 0, 0, 0), 0);
 			next_strobe_time = gameLocal.realClientTime + t; // ms
@@ -1001,6 +1014,7 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 			Fade(idVec4(0, 0, 0, 0), 200);
 		}
 	}
+		
 	ScreenFade();
 }
 

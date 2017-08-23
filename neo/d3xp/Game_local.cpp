@@ -1376,7 +1376,7 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	
 	// precache any media specified in the map
 	savegame.ReadDecls( first_decl_string );
-	
+	 
 	savegame.ReadDict( &si );
 	SetServerInfo( si );
 	
@@ -3167,7 +3167,7 @@ void idGameLocal::CalcFov( float base_fov, float& fov_x, float& fov_y ) const
 	const int width = renderSystem->GetWidth();
 	const int height = renderSystem->GetHeight();
 	
-	if ( game->isVR )
+	if ( game->isVR ) 
 	{
 		fov_x = commonVr->hmdFovX;
 		fov_y = commonVr->hmdFovY;

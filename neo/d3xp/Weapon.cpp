@@ -4815,6 +4815,26 @@ void idWeapon::Event_LaunchProjectiles( int num_projectiles, float spread, float
 	idVec3			muzzle_pos;
 	idBounds		ownerBounds, projBounds;
 	
+	
+	// koz the shotgun is supposed to be a closeup weapon in the game, but the depth provided in VR really changes
+	// how it feels. IMO, it seems underpowered unless you are on top of an enemy, due to the extreme pellet spread.
+	// This enables an optional 'choke' for the shotgun, by reducing the spread.
+	weapon_t currentWeap;
+	currentWeap = IdentifyWeapon();
+	if ( currentWeap == WEAPON_SHOTGUN || currentWeap == WEAPON_SHOTGUN_DOUBLE || currentWeap == WEAPON_SHOTGUN_DOUBLE_MP )
+	{
+		//idPlayer *player;
+		//player = gameLocal.GetLocalPlayer();
+		//if ( 1 || player == owner )
+		//{
+			common->Printf( "Event_LaunchProjectiles spread = %f , ", spread );
+			spread -= 14 * vr_shotgunChoke.GetFloat() / 100.0f;
+			spread = idMath::ClampFloat( 8.0f, 22.0f, spread ); // not too low, or the shotgun gets WAY too powerful at range.
+			common->Printf( "choke spread = %f\n", spread );
+		//}
+	}
+	
+
 	assert( owner != NULL );
 	
 	if( IsHidden() )

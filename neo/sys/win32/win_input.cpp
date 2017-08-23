@@ -1216,7 +1216,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 
 			//===================
-			// add speect recognition + oculus & openvr controllers
+			// add speech recognition + oculus & openvr controllers
 			// device handling code is odd building usercmds, so 
 			// add all controllers as device 0.
 
@@ -1232,29 +1232,33 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 					bool talk = commonVoice->GetTalkButton();
 					if ( talk != oldTalk )
 					{
-						common->Printf( "Posting talk input event\n" );
+						//common->Printf( "Posting talk input event\n" );
 						PostInputEvent( inputDeviceNum, J_TALK, talk );
 						oldTalk = talk;
 					}
 				}
         
-        if (vr_voiceCommands.GetInteger() > 0)
-		    {
-				  static bool oldSay[J_SAY_MAX - J_SAY_MIN + 1] = {};
-				  int max = vr_voiceCommands.GetInteger() > 1 ? J_SAY_MAX : J_SAY_RELOAD;
-				  for ( int i = J_SAY_MIN; i <= max; ++i )
-				  {
-					  bool say = commonVoice->GetSayButton( i );
-					  if ( say != oldSay[i - J_SAY_MIN] )
-					  {
-						  common->Printf( "Posting say input event %d %d\n", i, say );
-						  PostInputEvent( inputDeviceNum, i, say );
-						  oldSay[i - J_SAY_MIN] = say;
-					  }
-				  }
-        }
+				if ( vr_voiceCommands.GetInteger() > 0 )
+				{
+					static bool oldSay[ J_SAY_MAX - J_SAY_MIN + 1 ] = {};
+					int max = vr_voiceCommands.GetInteger() > 1 ? J_SAY_MAX : J_SAY_RELOAD;
+					
+					for ( int i = J_SAY_MIN; i <= max; ++i )
+					{
+						bool say = commonVoice->GetSayButton( i );
+						if ( say != oldSay[ i - J_SAY_MIN ] )
+						{
+							//common->Printf( "Posting say input event %d %d\n", i, say );
+							PostInputEvent( inputDeviceNum, i, say );
+							oldSay[ i - J_SAY_MIN ] = say;
+						}
+					}
+				}
 				else
+				{
 					commonVr->forceRun = false;
+				}
+
 
 				//=============================
 				// Koz begin add SteamVR controllers

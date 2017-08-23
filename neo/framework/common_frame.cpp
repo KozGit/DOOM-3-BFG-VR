@@ -438,7 +438,7 @@ void idCommonLocal::UpdateScreen( bool captureToImage, bool releaseMouse )
 			//if ( Sys_Milliseconds() - lastTrack >9 )
 			//	{
 			//	lastTrack = Sys_Milliseconds();
-			//commonVr->HMDTrackStatic(); // koz fixme
+			//  commonVr->HMDTrackStatic(); // koz fixme
 			//	}
 
 
@@ -520,11 +520,13 @@ void idCommonLocal::Frame()
 	{
 		SCOPED_PROFILE_EVENT( "Common::Frame" );
 		
+		
 		// This is the only place this is incremented
 		idLib::frameNumber++;
-				
+		
 		if ( game->isVR && commonVr->hasOculusRift ) commonVr->FrameStart();
-
+		//common->Printf( "Common::Frame calling FrameStart when idLib::frameNumber++ = %d\n", idLib::frameNumber );
+		
 		// allow changing SIMD usage on the fly
 		if( com_forceGenericSIMD.IsModified() )
 		{

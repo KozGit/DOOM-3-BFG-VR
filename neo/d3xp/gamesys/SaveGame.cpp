@@ -959,8 +959,8 @@ void idRestoreGame::ReadDecls( idStr& first_decl_string )
 {
 	idStr declName;
 	bool first = true;
-	//int start = file->Tell() - 4;
-	//common->Printf("idRestoreGame::ReadDecls() start, num=%d, %d\n", declManager->GetNumDeclTypes(), start); //Carl debug
+	int start = file->Tell() - 4;
+	common->Printf("idRestoreGame::ReadDecls() start, num=%d, %d\n", declManager->GetNumDeclTypes(), start); //Carl debug
 	for( int t = 0; t < declManager->GetNumDeclTypes(); t++ )
 	{
 		while( true )
@@ -976,12 +976,14 @@ void idRestoreGame::ReadDecls( idStr& first_decl_string )
 			}
 			if( declName.IsEmpty() )
 			{
+				common->Printf("Empty, breaking.\n");
 				break;
 			}
+			common->Printf("Decln # %d name %s\n", t, declName.c_str());
 			declManager->FindType( ( declType_t )t, declName );
 		}
 	}
-	//common->Printf("idRestoreGame::ReadDecls() %d bytes, %d\n", file->Tell() - start, start); //Carl debug
+	common->Printf("idRestoreGame::ReadDecls() %d bytes, %d\n", file->Tell() - start, start); //Carl debug
 }
 
 /*
@@ -1300,7 +1302,7 @@ void idRestoreGame::ReadString( idStr& string )
 {
 	string.Empty();
 	
-	//int start = file->Tell(); //Carl debug
+	int start = file->Tell(); //Carl debug
 	int offset = -1;
 	ReadInt( offset );
 	
@@ -1312,7 +1314,7 @@ void idRestoreGame::ReadString( idStr& string )
 	stringFile->Seek( offset, FS_SEEK_SET );
 	stringFile->ReadString( string );
 	
-	//common->Printf("  ReadString(\"%s\") 4 bytes, %d\n", string.c_str(), start ); //Carl debug
+	//common->Printf("  ReadString(\"%s\") 4 bytes, start %d offset %d\n", string.c_str(), start, offset ); //Carl debug
 
 	return;
 }

@@ -440,7 +440,11 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 		viewDef->projectionMatrix[2 * 4 + 3] = -1.0f;
 		viewDef->projectionMatrix[3 * 4 + 3] = 0.0f;
 
-	} else {
+	} 
+	
+	else
+		
+		{
 		
 		// random jittering is usefull when multiple
 		// frames are going to be blended together
@@ -470,11 +474,34 @@ void R_SetupProjectionMatrix( viewDef_t* viewDef )
 
 			int pEye = viewDef->renderView.viewEyeBuffer == -1 ? 0 : 1;
 
-			ymax = zNear * commonVr->hmdEye[pEye].eyeFov.UpTan;
-			ymin = -zNear * commonVr->hmdEye[pEye].eyeFov.DownTan;
+			float leftTan, rightTan, upTan, downTan;
 
-			xmax = zNear * commonVr->hmdEye[pEye].eyeFov.RightTan;
-			xmin = -zNear * commonVr->hmdEye[pEye].eyeFov.LeftTan;
+			if ( game->CheckInCinematic() && vr_cinematics.GetInteger() == 2 ) // we are going to capture the scene and project it again later with the offset matrix so center it now
+			{
+				leftTan = ( commonVr->hmdEye[pEye].eyeFov.LeftTan + commonVr->hmdEye[pEye].eyeFov.RightTan ) / 2.0f;
+				rightTan = leftTan;
+				upTan = ( commonVr->hmdEye[pEye].eyeFov.UpTan + commonVr->hmdEye[pEye].eyeFov.DownTan ) / 2.0f;
+				downTan = upTan;
+			}
+			else
+			{
+				rightTan = commonVr->hmdEye[pEye].eyeFov.RightTan;
+				leftTan =  commonVr->hmdEye[pEye].eyeFov.LeftTan;
+				upTan = commonVr->hmdEye[pEye].eyeFov.UpTan;
+				downTan = commonVr->hmdEye[pEye].eyeFov.DownTan;
+			}
+
+			//ymax = zNear * commonVr->hmdEye[pEye].eyeFov.UpTan;
+			//ymin = -zNear * commonVr->hmdEye[pEye].eyeFov.DownTan;
+
+			//xmax = zNear * commonVr->hmdEye[pEye].eyeFov.RightTan;
+			//xmin = -zNear * commonVr->hmdEye[pEye].eyeFov.LeftTan;
+			
+			ymax = zNear * upTan;
+			ymin = -zNear * downTan;
+			
+			xmax = zNear * rightTan;
+			xmin = -zNear * leftTan;
 		}
 		else
 		{

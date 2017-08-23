@@ -88,26 +88,26 @@ idCVar ftz( "ftz", "0", CVAR_FLOAT, "" );
 
 extern idCVar g_demoMode;
 
-const idVec3 neckOffset(-3,0,-6);
+const idVec3 neckOffset( -3, 0, -6 );
 const int waistZ = -22.f;
 
-idCVar vr_slotDebug("vr_slotDebug", "0", CVAR_BOOL, "slot debug visualation" );
-idCVar vr_slotMag("vr_slotMag", "0.1", CVAR_FLOAT | CVAR_ARCHIVE, "slot vibration magnitude (0 is off)");
-idCVar vr_slotDur("vr_slotDur", "18", CVAR_INTEGER | CVAR_ARCHIVE, "slot vibration duration in milliseconds");
-idCVar vr_slotDisable("vr_slotDisable", "0", CVAR_BOOL | CVAR_ARCHIVE, "slot disable");
+idCVar vr_slotDebug( "vr_slotDebug", "0", CVAR_BOOL, "slot debug visualation" );
+idCVar vr_slotMag( "vr_slotMag", "0.1", CVAR_FLOAT | CVAR_ARCHIVE, "slot vibration magnitude (0 is off)" );
+idCVar vr_slotDur( "vr_slotDur", "18", CVAR_INTEGER | CVAR_ARCHIVE, "slot vibration duration in milliseconds" );
+idCVar vr_slotDisable( "vr_slotDisable", "0", CVAR_BOOL | CVAR_ARCHIVE, "slot disable" );
 
-slot_t slots[SLOT_COUNT] = {
-	{ idVec3(0, 10,-4), 9.0f*9.0f },
-	{ idVec3(0,-10,-4), 9.0f*9.0f },
-	{ idVec3(-9,-4, 4), 9.0f*9.0f },
-	{ idVec3(-9,-4,-waistZ - neckOffset.z), 9.0f*9.0f },
-	{ idVec3(4, 8, -waistZ + 2), 9.0f*9.0f },
-	{ idVec3(-neckOffset.x, 0, -waistZ - neckOffset.z + 7), 9.0f*9.0f },
+slot_t slots[ SLOT_COUNT ] = {
+	{ idVec3( 0, 10, -4 ), 9.0f * 9.0f },
+	{ idVec3( 0, -10, -4 ), 9.0f * 9.0f },
+	{ idVec3( -9, -4, 4 ), 9.0f * 9.0f },
+	{ idVec3( -9, -4,-waistZ - neckOffset.z ), 9.0f * 9.0f },
+	{ idVec3( 4, 8, -waistZ + 2 ), 9.0f * 9.0f },
+	{ idVec3( -neckOffset.x, 0, -waistZ - neckOffset.z + 7 ), 9.0f * 9.0f },
 };
 
-idAngles pdaAngle1(0,-90,0);
-idAngles pdaAngle2(0,0,76.5);
-idAngles pdaAngle3(0,0,0);
+idAngles pdaAngle1( 0, -90, 0);
+idAngles pdaAngle2( 0, 0, 76.5);
+idAngles pdaAngle3( 0, 0, 0);
 
 extern idCVar g_useWeaponDepthHack;
 
@@ -1959,6 +1959,12 @@ void idPlayer::Init()
 	fl.takedamage			= true;
 	ClearPain();
 	
+	// koz reset holster slots
+	
+	holsteredWeapon = weapon_fists;
+	extraHolsteredWeapon = weapon_fists;
+	extraHolsteredWeaponModel = NULL;
+	
 	// restore persistent data
 	RestorePersistantInfo();
 	
@@ -2049,153 +2055,7 @@ void idPlayer::Init()
 		renderEntity.shaderParms[6] = 0.0f;
 	}
 	
-	value = spawnArgs.GetString( "bone_hips", "" );
-	hipJoint = animator.GetJointHandle( value );
-	if( hipJoint == INVALID_JOINT )
-	{
-		gameLocal.Error( "Joint '%s' not found for 'bone_hips' on '%s'", value, name.c_str() );
-	}
-	
-	value = spawnArgs.GetString( "bone_chest", "" );
-	chestJoint = animator.GetJointHandle( value );
-	if( chestJoint == INVALID_JOINT )
-	{
-		gameLocal.Error( "Joint '%s' not found for 'bone_chest' on '%s'", value, name.c_str() );
-	}
-	
-	value = spawnArgs.GetString( "bone_head", "" );
-	headJoint = animator.GetJointHandle( value );
-	if( headJoint == INVALID_JOINT )
-	{
-		gameLocal.Error( "Joint '%s' not found for 'bone_head' on '%s'", value, name.c_str() );
-	}
-
-	// koz begin
-	value = spawnArgs.GetString( "bone_neck", "" );
-	neckJoint = animator.GetJointHandle( value );
-	if ( neckJoint == INVALID_JOINT )
-	{
-		gameLocal.Error( "Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str() );
-	}
-
-	value = spawnArgs.GetString( "bone_chest_pivot", "" );
-	chestPivotJoint = animator.GetJointHandle( value );
-	if ( chestPivotJoint == INVALID_JOINT )
-	{
-		gameLocal.Error( "Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str() );
-	}
-	
-	// we need to load the starting joint orientations for the hands so we can compute correct offsets later
-	value = spawnArgs.GetString( "ik_hand1", "" ); // right hand
-	ik_hand[0] = animator.GetJointHandle( value );
-	if ( ik_hand[0] == INVALID_JOINT )
-	{
-		gameLocal.Error( "Joint '%s' not found for 'ik_hand1' on '%s'", value, name.c_str() );
-	}
-	
-	value = spawnArgs.GetString( "ik_hand2", "" );// left hand
-	ik_hand[1] = animator.GetJointHandle( value );
-	if ( ik_hand[1] == INVALID_JOINT )
-	{
-		gameLocal.Error( "Joint '%s' not found for 'ik_hand2' on '%s'", value, name.c_str() );
-	}
-	
-	ik_handAttacher[0] = animator.GetJointHandle( "RhandWeap" );
-	if ( ik_handAttacher[0] == INVALID_JOINT )
-	{
-		gameLocal.Error( "Joint RhandWeap not found for player anim default\n" );
-	}
-
-	ik_handAttacher[1] = animator.GetJointHandle( "LhandWeap" );
-
-	if ( ik_handAttacher[1] == INVALID_JOINT )
-	{
-		gameLocal.Error( "Joint LhandWeap not found for player anim default\n" );
-	}
-
-	idStr animPre = "default";// this is the anim that has the default/normal hand and weapon attacher orientations (relationsh
-	
-	int animNo = animator.GetAnim( animPre.c_str() );
-	if ( animNo == 0 )
-	{
-		gameLocal.Error( "Player default animation not found\n" );
-	}
-
-	int numJoints = animator.NumJoints();
-		
-	idJointMat* joints = (idJointMat*)_alloca16( numJoints * sizeof( joints[0] ) );
-	
-	// create the idle default pose ( in this case set to default which should tranlsate to pistol_idle )
-	gameEdit->ANIM_CreateAnimFrame( animator.ModelHandle(), animator.GetAnim( animNo )->MD5Anim( 0 ), numJoints, joints, 1, animator.ModelDef()->GetVisualOffset() + modelOffset, animator.RemoveOrigin() );
-
-
-
-	static idVec3 defaultWeapAttachOff[2]; // the default distance between the weapon attacher and the hand joint;
-	defaultWeapAttachOff[0] = joints[ik_handAttacher[0]].ToVec3() - joints[ik_hand[0]].ToVec3(); // default 
-	defaultWeapAttachOff[1] = joints[ik_handAttacher[1]].ToVec3() - joints[ik_hand[1]].ToVec3();
-
-	jointHandle_t j1;
-	value = spawnArgs.GetString( "ik_elbow1", "" );// right
-	j1 = animator.GetJointHandle( value );
-	if ( j1 == INVALID_JOINT )
-	{
-		gameLocal.Error( "Joint ik_elbow1 not found for player anim default\n" );
-	}
-	ik_elbowCorrectAxis[0] = joints[j1].ToMat3();
-
-	value = spawnArgs.GetString( "ik_elbow2", "" );// left 
-	j1 = animator.GetJointHandle( value );
-	if ( j1 == INVALID_JOINT )
-	{
-		gameLocal.Error( "Joint ik_elbow2 not found for player anim default\n" );
-	}
-	ik_elbowCorrectAxis[1] = joints[j1].ToMat3();
-
-	chestPivotCorrectAxis = joints[chestPivotJoint].ToMat3();
-	chestPivotDefaultPos = joints[chestPivotJoint].ToVec3();
-	commonVr->chestDefaultDefined = true;
-
-
-	
-	common->Printf( "Animpre hand 0 default offset = %s\n", defaultWeapAttachOff[0].ToString() );
-	common->Printf( "Animpre hand 1 default offset = %s\n", defaultWeapAttachOff[1].ToString() );
-	
-	// now calc the weapon attacher offsets
-	for ( int hand = 0 ; hand < 2; hand++) 
-	{
-		for ( int weap = 0; weap < 32; weap++ ) // should be max weapons
-		{
-
-			idStr animPre = spawnArgs.GetString( va( "def_weapon%d", weap ) );
-			animPre.Strip( "weapon_" );
-			animPre += "_idle";
-
-			int animNo = animator.GetAnim( animPre.c_str() );
-			int numJoints = animator.NumJoints();
-
-			if (animNo == 0) continue;
-
-		//	common->Printf( "Animpre = %s animNo = %d\n", animPre.c_str(), animNo );
-
-			// create the idle pose for this weapon
-			gameEdit->ANIM_CreateAnimFrame( animator.ModelHandle(), animator.GetAnim( animNo )->MD5Anim( 0 ), numJoints, joints, 1, animator.ModelDef()->GetVisualOffset() + modelOffset, animator.RemoveOrigin() );
-
-			ik_handCorrectAxis[hand][weap] =  joints[ik_hand[hand]].ToMat3();
-		//	common->Printf( "Hand %d weap %d anim %s attacher pos %s   default pos %s\n", hand, weap, animPre.c_str(), joints[ik_handAttacher[hand]].ToVec3().ToString(), defaultWeapAttachOff[hand].ToString() );
-
-			//this is the translation between the hand joint ( the wrist ) and the attacher joint.  The attacher joint is 
-			//the location in space where the motion control is locating the weapon / hand, but IK is using the 'wrist' to 
-			//drive animation, so use this offset to derive the wrist position from the attacher joint orientation
-			handWeaponAttachertoWristJointOffset[hand][weap] = joints[ik_handAttacher[hand]].ToVec3() - joints[ik_hand[hand]].ToVec3();
-
-			// the is the delta if the attacher joint was moved from the position in the default animation to aid with alignment in 
-			// different weapon animations.  To keep the hand in a consistant location when weapon is changed, 
-			// the weapon and hand positions will need to be adjusted by this amount when presented
-			handWeaponAttacherToDefaultOffset[hand][weap] = handWeaponAttachertoWristJointOffset[hand][weap] - defaultWeapAttachOff[hand];
-
-		//	common->Printf( "Hand %d weap %d anim %s attacher offset = %s\n", hand, weap, animPre.c_str(), handWeaponAttacherToDefaultOffset[hand][weap].ToString() );
-		}
-	}
+	InitPlayerBones(); 
 
 	commonVr->currentFlashMode = vr_flashlightMode.GetInteger();
 
@@ -2269,9 +2129,7 @@ void idPlayer::Init()
 	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
 
 	SetupPDASlot( true );
-	holsteredWeapon = weapon_fists;
-	extraHolsteredWeapon = weapon_fists;
-	extraHolsteredWeaponModel = NULL;
+	
 
 	// Koz begin
 	
@@ -2316,6 +2174,165 @@ void idPlayer::Init()
 }
 
 
+/*
+==============
+idPlayer::InitPlayerBones
+Koz - moved bone inits here, called during player restore as well.
+==============
+*/
+void idPlayer::InitPlayerBones()
+{
+	const char*			value;
+	
+	value = spawnArgs.GetString( "bone_hips", "" );
+	hipJoint = animator.GetJointHandle( value );
+	if ( hipJoint == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint '%s' not found for 'bone_hips' on '%s'", value, name.c_str() );
+	}
+
+	value = spawnArgs.GetString( "bone_chest", "" );
+	chestJoint = animator.GetJointHandle( value );
+	if ( chestJoint == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint '%s' not found for 'bone_chest' on '%s'", value, name.c_str() );
+	}
+
+	value = spawnArgs.GetString( "bone_head", "" );
+	headJoint = animator.GetJointHandle( value );
+	if ( headJoint == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint '%s' not found for 'bone_head' on '%s'", value, name.c_str() );
+	}
+
+	// koz begin
+	value = spawnArgs.GetString( "bone_neck", "" );
+	neckJoint = animator.GetJointHandle( value );
+	if ( neckJoint == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str() );
+	}
+
+	value = spawnArgs.GetString( "bone_chest_pivot", "" );
+	chestPivotJoint = animator.GetJointHandle( value );
+	if ( chestPivotJoint == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str() );
+	}
+
+	// we need to load the starting joint orientations for the hands so we can compute correct offsets later
+	value = spawnArgs.GetString( "ik_hand1", "" ); // right hand
+	ik_hand[0] = animator.GetJointHandle( value );
+	if ( ik_hand[0] == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint '%s' not found for 'ik_hand1' on '%s'", value, name.c_str() );
+	}
+
+	value = spawnArgs.GetString( "ik_hand2", "" );// left hand
+	ik_hand[1] = animator.GetJointHandle( value );
+	if ( ik_hand[1] == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint '%s' not found for 'ik_hand2' on '%s'", value, name.c_str() );
+	}
+
+	ik_handAttacher[0] = animator.GetJointHandle( "RhandWeap" );
+	if ( ik_handAttacher[0] == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint RhandWeap not found for player anim default\n" );
+	}
+
+	ik_handAttacher[1] = animator.GetJointHandle( "LhandWeap" );
+
+	if ( ik_handAttacher[1] == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint LhandWeap not found for player anim default\n" );
+	}
+
+	idStr animPre = "default";// this is the anim that has the default/normal hand and weapon attacher orientations (relationsh
+
+	int animNo = animator.GetAnim( animPre.c_str() );
+	if ( animNo == 0 )
+	{
+		gameLocal.Error( "Player default animation not found\n" );
+	}
+
+	int numJoints = animator.NumJoints();
+
+	idJointMat* joints = (idJointMat*)_alloca16( numJoints * sizeof( joints[0] ) );
+
+	// create the idle default pose ( in this case set to default which should tranlsate to pistol_idle )
+	gameEdit->ANIM_CreateAnimFrame( animator.ModelHandle(), animator.GetAnim( animNo )->MD5Anim( 0 ), numJoints, joints, 1, animator.ModelDef()->GetVisualOffset() + modelOffset, animator.RemoveOrigin() );
+
+
+
+	static idVec3 defaultWeapAttachOff[2]; // the default distance between the weapon attacher and the hand joint;
+	defaultWeapAttachOff[0] = joints[ik_handAttacher[0]].ToVec3() - joints[ik_hand[0]].ToVec3(); // default 
+	defaultWeapAttachOff[1] = joints[ik_handAttacher[1]].ToVec3() - joints[ik_hand[1]].ToVec3();
+
+	jointHandle_t j1;
+	value = spawnArgs.GetString( "ik_elbow1", "" );// right
+	j1 = animator.GetJointHandle( value );
+	if ( j1 == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint ik_elbow1 not found for player anim default\n" );
+	}
+	ik_elbowCorrectAxis[0] = joints[j1].ToMat3();
+
+	value = spawnArgs.GetString( "ik_elbow2", "" );// left 
+	j1 = animator.GetJointHandle( value );
+	if ( j1 == INVALID_JOINT )
+	{
+		gameLocal.Error( "Joint ik_elbow2 not found for player anim default\n" );
+	}
+	ik_elbowCorrectAxis[1] = joints[j1].ToMat3();
+
+	chestPivotCorrectAxis = joints[chestPivotJoint].ToMat3();
+	chestPivotDefaultPos = joints[chestPivotJoint].ToVec3();
+	commonVr->chestDefaultDefined = true;
+
+
+
+	common->Printf( "Animpre hand 0 default offset = %s\n", defaultWeapAttachOff[0].ToString() );
+	common->Printf( "Animpre hand 1 default offset = %s\n", defaultWeapAttachOff[1].ToString() );
+
+	// now calc the weapon attacher offsets
+	for ( int hand = 0; hand < 2; hand++ )
+	{
+		for ( int weap = 0; weap < 32; weap++ ) // should be max weapons
+		{
+
+			idStr animPre = spawnArgs.GetString( va( "def_weapon%d", weap ) );
+			animPre.Strip( "weapon_" );
+			animPre += "_idle";
+
+			int animNo = animator.GetAnim( animPre.c_str() );
+			int numJoints = animator.NumJoints();
+
+			if ( animNo == 0 ) continue;
+
+			//	common->Printf( "Animpre = %s animNo = %d\n", animPre.c_str(), animNo );
+
+			// create the idle pose for this weapon
+			gameEdit->ANIM_CreateAnimFrame( animator.ModelHandle(), animator.GetAnim( animNo )->MD5Anim( 0 ), numJoints, joints, 1, animator.ModelDef()->GetVisualOffset() + modelOffset, animator.RemoveOrigin() );
+
+			ik_handCorrectAxis[hand][weap] = joints[ik_hand[hand]].ToMat3();
+			//	common->Printf( "Hand %d weap %d anim %s attacher pos %s   default pos %s\n", hand, weap, animPre.c_str(), joints[ik_handAttacher[hand]].ToVec3().ToString(), defaultWeapAttachOff[hand].ToString() );
+
+			//this is the translation between the hand joint ( the wrist ) and the attacher joint.  The attacher joint is 
+			//the location in space where the motion control is locating the weapon / hand, but IK is using the 'wrist' to 
+			//drive animation, so use this offset to derive the wrist position from the attacher joint orientation
+			handWeaponAttachertoWristJointOffset[hand][weap] = joints[ik_handAttacher[hand]].ToVec3() - joints[ik_hand[hand]].ToVec3();
+
+			// the is the delta if the attacher joint was moved from the position in the default animation to aid with alignment in 
+			// different weapon animations.  To keep the hand in a consistant location when weapon is changed, 
+			// the weapon and hand positions will need to be adjusted by this amount when presented
+			handWeaponAttacherToDefaultOffset[hand][weap] = handWeaponAttachertoWristJointOffset[hand][weap] - defaultWeapAttachOff[hand];
+
+			//	common->Printf( "Hand %d weap %d anim %s attacher offset = %s\n", hand, weap, animPre.c_str(), handWeaponAttacherToDefaultOffset[hand][weap].ToString() );
+		}
+	}
+
+}
 
 /*
 ==============
@@ -3036,10 +3053,14 @@ void idPlayer::Save( idSaveGame* savefile ) const
 
 	//blech.  Im going to pad the savegame file with a few diff var types,
 	// so if more changes are needed in the future, maybe save game compat can be preserved.
-	savefile->WriteInt( 0 );
-	savefile->WriteInt( 0 );
-	savefile->WriteInt( 0 );
-	savefile->WriteInt( 0 );
+	
+	//padded ints have been used now.
+	savefile->WriteInt( 666 ); // flag that holster has been saved.
+	savefile->WriteInt( holsteredWeapon );
+	savefile->WriteInt( extraHolsteredWeapon );
+	savefile->WriteInt( (int) holsterModelDefHandle );
+	
+	
 	savefile->WriteFloat( 0 );
 	savefile->WriteFloat( 0 );
 	savefile->WriteFloat( 0 );
@@ -3052,12 +3073,17 @@ void idPlayer::Save( idSaveGame* savefile ) const
 	savefile->WriteVec3( vec3_zero );
 	savefile->WriteVec3( vec3_zero );
 	savefile->WriteVec3( vec3_zero );
+		
+	savefile->WriteMat3( holsterAxis );
 	savefile->WriteMat3( mat3_identity );
 	savefile->WriteMat3( mat3_identity );
 	savefile->WriteMat3( mat3_identity );
-	savefile->WriteMat3( mat3_identity );
+	
+	// end padding
 
-
+	savefile->WriteRenderEntity( holsterRenderEntity ); // have to check if this has been saved
+	savefile->WriteString( extraHolsteredWeaponModel );
+	
 	//koz end
 
 }
@@ -3231,7 +3257,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	savefile->ReadJoint( chestJoint );
 	savefile->ReadJoint( headJoint );
 
-	//koz begin
+	//koz begin - update - will leave this here, but the player bone joints will all be re-initialized to help with cross version save compatability
 	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
 	{
 		savefile->ReadJoint( neckJoint );
@@ -3258,154 +3284,6 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		savefile->ReadBool( handLowered );
 		savefile->ReadBool( handRaised );
 		savefile->ReadBool( commonVr->handInGui );
-	}
-	else
-	{
-		idStr value = spawnArgs.GetString("bone_neck", "");
-		neckJoint = animator.GetJointHandle(value);
-		if (neckJoint == INVALID_JOINT)
-		{
-			gameLocal.Error("Joint '%s' not found for 'bone_neck' on '%s'", value.c_str(), name.c_str());
-		}
-
-		value = spawnArgs.GetString("bone_chest_pivot", "");
-		chestPivotJoint = animator.GetJointHandle(value);
-		if (chestPivotJoint == INVALID_JOINT)
-		{
-			gameLocal.Error( "Joint '%s' not found for 'bone_chest_pivot' on '%s'", value.c_str(), name.c_str() );
-		}
-
-		// we need to load the starting joint orientations for the hands so we can compute correct offsets later
-		value = spawnArgs.GetString("ik_hand1", ""); // right hand
-		ik_hand[0] = animator.GetJointHandle(value);
-		if (ik_hand[0] == INVALID_JOINT)
-		{
-			value = "Rhand1";
-			ik_hand[0] = animator.GetJointHandle(value);
-			if (ik_hand[0] == INVALID_JOINT)
-			{
-				gameLocal.Error( "Joint '%s' not found for 'ik_hand1' on '%s'", value.c_str(), name.c_str() );
-			}
-		}
-
-		value = spawnArgs.GetString("ik_hand2", "");// left hand
-		ik_hand[1] = animator.GetJointHandle(value);
-		if (ik_hand[1] == INVALID_JOINT)
-		{
-			value = "Lhand1";
-			ik_hand[1] = animator.GetJointHandle(value);
-			if (ik_hand[1] == INVALID_JOINT)
-			{
-				gameLocal.Error( "Joint '%s' not found for 'ik_hand2' on '%s'", value.c_str(), name.c_str() );
-			}
-		}
-
-		ik_handAttacher[0] = animator.GetJointHandle("RhandWeap");
-		if (ik_handAttacher[0] == INVALID_JOINT)
-		{
-			gameLocal.Error("Joint RhandWeap not found for player anim default\n");
-		}
-
-		ik_handAttacher[1] = animator.GetJointHandle("LhandWeap");
-
-		if (ik_handAttacher[1] == INVALID_JOINT)
-		{
-			gameLocal.Error("Joint LhandWeap not found for player anim default\n");
-		}
-
-		idStr animPre = "default";// this is the anim that has the default/normal hand and weapon attacher orientations (relationsh
-
-		int animNo = animator.GetAnim(animPre.c_str());
-		if (animNo == 0)
-		{
-			gameLocal.Error("Player default animation not found\n");
-		}
-
-		int numJoints = animator.NumJoints();
-
-		idJointMat* joints = (idJointMat*)_alloca16(numJoints * sizeof(joints[0]));
-
-		// create the idle default pose ( in this case set to default which should tranlsate to pistol_idle )
-		gameEdit->ANIM_CreateAnimFrame(animator.ModelHandle(), animator.GetAnim(animNo)->MD5Anim(0), numJoints, joints, 1, animator.ModelDef()->GetVisualOffset() + modelOffset, animator.RemoveOrigin());
-
-
-
-		static idVec3 defaultWeapAttachOff[2]; // the default distance between the weapon attacher and the hand joint;
-		defaultWeapAttachOff[0] = joints[ik_handAttacher[0]].ToVec3() - joints[ik_hand[0]].ToVec3(); // default 
-		defaultWeapAttachOff[1] = joints[ik_handAttacher[1]].ToVec3() - joints[ik_hand[1]].ToVec3();
-
-		jointHandle_t j1;
-		value = spawnArgs.GetString("ik_elbow1", "");// right
-		j1 = animator.GetJointHandle(value);
-		if (j1 == INVALID_JOINT)
-		{
-			value = "Rloarm";
-			j1 = animator.GetJointHandle(value);
-			if (j1 == INVALID_JOINT)
-			{
-				gameLocal.Error("Joint ik_elbow1 not found for player anim default\n");
-			}
-		}
-		ik_elbowCorrectAxis[0] = joints[j1].ToMat3();
-
-		value = spawnArgs.GetString("ik_elbow2", "");// left 
-		j1 = animator.GetJointHandle(value);
-		if (j1 == INVALID_JOINT)
-		{
-			value = "Lloarm";
-			j1 = animator.GetJointHandle(value);
-			if (j1 == INVALID_JOINT)
-			{
-				gameLocal.Error("Joint ik_elbow2 not found for player anim default\n");
-			}
-		}
-		ik_elbowCorrectAxis[1] = joints[j1].ToMat3();
-
-		chestPivotCorrectAxis = joints[chestPivotJoint].ToMat3();
-		chestPivotDefaultPos = joints[chestPivotJoint].ToVec3();
-		commonVr->chestDefaultDefined = true;
-
-
-
-		common->Printf("Animpre hand 0 default offset = %s\n", defaultWeapAttachOff[0].ToString());
-		common->Printf("Animpre hand 1 default offset = %s\n", defaultWeapAttachOff[1].ToString());
-
-		// now calc the weapon attacher offsets
-		for (int hand = 0; hand < 2; hand++)
-		{
-			for (int weap = 0; weap < 32; weap++) // should be max weapons
-			{
-
-				idStr animPre = spawnArgs.GetString(va("def_weapon%d", weap));
-				animPre.Strip("weapon_");
-				animPre += "_idle";
-
-				int animNo = animator.GetAnim(animPre.c_str());
-				int numJoints = animator.NumJoints();
-
-				if (animNo == 0) continue;
-
-				//	common->Printf( "Animpre = %s animNo = %d\n", animPre.c_str(), animNo );
-
-				// create the idle pose for this weapon
-				gameEdit->ANIM_CreateAnimFrame(animator.ModelHandle(), animator.GetAnim(animNo)->MD5Anim(0), numJoints, joints, 1, animator.ModelDef()->GetVisualOffset() + modelOffset, animator.RemoveOrigin());
-
-				ik_handCorrectAxis[hand][weap] = joints[ik_hand[hand]].ToMat3();
-				//	common->Printf( "Hand %d weap %d anim %s attacher pos %s   default pos %s\n", hand, weap, animPre.c_str(), joints[ik_handAttacher[hand]].ToVec3().ToString(), defaultWeapAttachOff[hand].ToString() );
-
-				//this is the translation between the hand joint ( the wrist ) and the attacher joint.  The attacher joint is 
-				//the location in space where the motion control is locating the weapon / hand, but IK is using the 'wrist' to 
-				//drive animation, so use this offset to derive the wrist position from the attacher joint orientation
-				handWeaponAttachertoWristJointOffset[hand][weap] = joints[ik_handAttacher[hand]].ToVec3() - joints[ik_hand[hand]].ToVec3();
-
-				// the is the delta if the attacher joint was moved from the position in the default animation to aid with alignment in 
-				// different weapon animations.  To keep the hand in a consistant location when weapon is changed, 
-				// the weapon and hand positions will need to be adjusted by this amount when presented
-				handWeaponAttacherToDefaultOffset[hand][weap] = handWeaponAttachertoWristJointOffset[hand][weap] - defaultWeapAttachOff[hand];
-
-				//	common->Printf( "Hand %d weap %d anim %s attacher offset = %s\n", hand, weap, animPre.c_str(), handWeaponAttacherToDefaultOffset[hand][weap].ToString() );
-			}
-		}
 	}
 	// koz end
 	
@@ -3653,33 +3531,21 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	// make sure the clipmodels for the body and head are re-initialized.
 	SetClipModel();
 	
-	// get the neck bone
-	const char*			value;
-	value = spawnArgs.GetString( "bone_neck", "" );
-	neckJoint = animator.GetJointHandle( value );
-	if ( neckJoint == INVALID_JOINT )
-	{
-		gameLocal.Warning( "Joint '%s' not found for 'bone_neck' on '%s'", value, name.c_str() );
-	}
-		
-
-	value = spawnArgs.GetString( "bone_chest_pivot", "" );
-	chestPivotJoint = animator.GetJointHandle( value );
-	if ( chestPivotJoint == INVALID_JOINT )
-	{
-		gameLocal.Warning( "Joint '%s' not found for 'bone_chest_pivot' on '%s'", value, name.c_str() );
-	}
-
 	// re-init the player render model if we're loading this savegame from a different mod
-	if( savefile->version < BUILD_NUMBER_FULLY_POSSESSED )
+	
+	if( 1 || savefile->version < BUILD_NUMBER_FULLY_POSSESSED )
 	{
 		memset(&renderEntity, 0, sizeof(renderEntity));
-			renderEntity.numJoints = animator.NumJoints();
+		renderEntity.numJoints = animator.NumJoints();
 		animator.GetJoints(&renderEntity.numJoints, &renderEntity.joints);
 		renderEntity.hModel = animator.ModelHandle();
 		if (renderEntity.hModel)
 		{
-			renderEntity.hModel->Reset();
+			//renderEntity.hModel->Reset();
+			
+			renderEntity.hModel->InitFromFile( renderEntity.hModel->Name() );
+			animator.ClearAllJoints();
+			
 			renderEntity.bounds = renderEntity.hModel->Bounds(&renderEntity);
 		}
 		renderEntity.shaderParms[SHADERPARM_RED] = 1.0f;
@@ -3691,6 +3557,9 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		renderEntity.shaderParms[6] = 0.0f;
 		renderEntity.shaderParms[7] = 0.0f;
 	}
+
+	//koz re-init the player model bones. Changes to player model require this to allow compatability with older savegames.
+	InitPlayerBones();
 
 	//re-init the VR ui models
 	laserSightHandle = -1;
@@ -3729,7 +3598,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		
 	const idDeclSkin* blag;
 	//koz begin
-	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
+	if ( savefile->version >= BUILD_NUMBER_FULLY_POSSESSED )
 	{
 		savefile->ReadBool( laserSightActive );
 		savefile->ReadBool( headingBeamActive );
@@ -3748,14 +3617,28 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		bool tempBool;
 		idVec3 tempVec3;
 		idMat3 tempMat3;
-
+		
+		int holsterFlag;
 
 		//blech.  Im going to pad the savegame file with a few diff var types,
 		// so if more changes are needed in the future, maybe save game compat can be preserved.
-		savefile->ReadInt( tempInt );
-		savefile->ReadInt( tempInt );
-		savefile->ReadInt( tempInt );
-		savefile->ReadInt( tempInt );
+		
+		//ints used saving weapon holsters.
+		savefile->ReadInt( holsterFlag );
+		if ( holsterFlag == 666 )
+		{
+			savefile->ReadInt( holsteredWeapon );
+			savefile->ReadInt( extraHolsteredWeapon );
+			savefile->ReadInt( tempInt );
+			holsterModelDefHandle = tempInt;
+		}
+		else
+		{
+			savefile->ReadInt( tempInt );
+			savefile->ReadInt( tempInt );
+			savefile->ReadInt( tempInt );
+		}
+
 		savefile->ReadFloat( tempFloat );
 		savefile->ReadFloat( tempFloat );
 		savefile->ReadFloat( tempFloat );
@@ -3768,10 +3651,75 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		savefile->ReadVec3( tempVec3 );
 		savefile->ReadVec3( tempVec3 );
 		savefile->ReadVec3( tempVec3 );
+	
+		savefile->ReadMat3( tempMat3 );
+		if ( holsterFlag == 666 ) holsterAxis = tempMat3;
+
 		savefile->ReadMat3( tempMat3 );
 		savefile->ReadMat3( tempMat3 );
 		savefile->ReadMat3( tempMat3 );
-		savefile->ReadMat3( tempMat3 );
+		
+		if ( holsterFlag == 666 )
+		{
+			
+			idStr	ehwm;
+			savefile->ReadRenderEntity( holsterRenderEntity );
+			savefile->ReadString( ehwm );
+			extraHolsteredWeaponModel = ehwm.c_str();
+
+			if ( extraHolsteredWeapon != weapon_fists )
+			{
+				
+				/*
+				If the game was autosaved, the holster and holster model will be correct,
+				but if the game was saved through the pause menu, the active weapon was pushed to the holster,
+				and the holstered weapon was pushed to extraHolsteredWeapon. This is the only time extraholstered
+				will not hold weapon_fists.  
+
+				Check if the holstered weapon was pushed to the extraholster, and switch it back on load.
+				*/
+				
+				holsteredWeapon = extraHolsteredWeapon;
+				extraHolsteredWeapon = weapon_fists;
+				//common->Printf( "Loading holster model %s\n", extraHolsteredWeaponModel );
+				holsterRenderEntity.hModel = renderModelManager->FindModel( extraHolsteredWeaponModel );
+
+				if ( strcmp( extraHolsteredWeaponModel, "models/weapons/pistol/w_pistol.lwo" ) == 0 )
+				{
+					holsterAxis = idAngles( 90, 0, 0 ).ToMat3() * 0.75f;
+				}
+				else if ( strcmp( extraHolsteredWeaponModel, "models/weapons/shotgun/w_shotgun2.lwo" ) == 0 ||
+					strcmp( extraHolsteredWeaponModel, "models/weapons/bfg/bfg_world.lwo" ) == 0 )
+				{
+					holsterAxis = idAngles( 0, -90, -90 ).ToMat3();
+				}
+				else if ( strcmp( extraHolsteredWeaponModel, "models/weapons/grabber/grabber_world.ase" ) == 0 )
+				{
+					holsterAxis = idAngles( -90, 180, 0 ).ToMat3() * 0.5f;
+				}
+				else if ( strcmp( extraHolsteredWeaponModel, "models/weapons/machinegun/w_machinegun.lwo" ) == 0 )
+				{
+					holsterAxis = idAngles( 0, 90, 90 ).ToMat3() * 0.75f;
+				}
+				else if ( strcmp( extraHolsteredWeaponModel, "models/weapons/plasmagun/plasmagun_world.lwo" ) == 0 )
+				{
+					holsterAxis = idAngles( 0, 90, 90 ).ToMat3() * 0.75f;
+				}
+				else if ( strcmp( extraHolsteredWeaponModel, "models/weapons/chainsaw/w_chainsaw.lwo" ) == 0 )
+				{
+					holsterAxis = idAngles( 0, 90, 90 ).ToMat3() * 0.9f;
+				}
+				else if ( strcmp( extraHolsteredWeaponModel, "models/weapons/chaingun/w_chaingun.lwo" ) == 0 )
+				{
+					holsterAxis = idAngles( 0, 90, 90 ).ToMat3() * 0.9f;
+				}
+				else
+				{
+					holsterAxis = idAngles( 0, 90, 90 ).ToMat3();
+				}
+			}
+		}
+
 	}
 	else
 	{
@@ -3783,12 +3731,13 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	throwVelocity = 0.0f;
 
 	armIK.Init( this, IK_ANIM, modelOffset );
+
 	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED)
 		NextWeapon();
 
 	vr_weaponSight.SetModified(); // make sure these get initialized properly
 	vr_headingBeamMode.SetModified();
-
+	
 	// Koz end
 
 }
@@ -4118,6 +4067,14 @@ void idPlayer::SavePersistantInfo()
 	playerInfo.SetBool( "laserSightActive", laserSightActive );
 	playerInfo.SetBool( "hudActive", hudActive );
 	playerInfo.SetInt( "currentFlashMode", commonVr->currentFlashMode );
+
+	playerInfo.SetInt( "holsteredWeapon", holsteredWeapon );
+	playerInfo.SetInt( "extraHolsteredWeapon", extraHolsteredWeapon );
+	if ( holsterRenderEntity.hModel )
+	{
+		playerInfo.Set( "holsteredWeaponModel", holsterRenderEntity.hModel->Name() );
+	}
+	playerInfo.SetMatrix( "holsterAxis", holsterAxis );
 	//koz end
 
 	achievementManager.SavePersistentData( playerInfo );
@@ -4148,6 +4105,27 @@ void idPlayer::RestorePersistantInfo()
 	laserSightActive = spawnArgs.GetBool( "laserSightActive", "1" );
 	commonVr->currentFlashMode = spawnArgs.GetInt( "currentFlashMode", "3" );
 	hudActive = spawnArgs.GetBool( "hudActive", "1" );
+	
+	holsteredWeapon = spawnArgs.GetInt( "holsteredWeapon", "-1" );
+	extraHolsteredWeapon = spawnArgs.GetInt( "extraHolsteredWeapon", "-1" );
+
+	idStr hwm;
+
+	//playerInfo.Get( "holsteredWeaponModel", holsterRenderEntity.hModel->Name() );
+	hwm = spawnArgs.GetString( "holsteredWeaponModel", "" );
+	holsterAxis = spawnArgs.GetMatrix( "holsterAxis", "" );
+
+
+	holsterRenderEntity.hModel = renderModelManager->FindModel( hwm.c_str() );
+	
+
+	common->Printf( "Restored holsteredWeapon %d\n", holsteredWeapon );
+	common->Printf( "Restored extraHolsteredWeapon %d\n", extraHolsteredWeapon );
+
+
+	//playerInfo.SetInt( "holsteredWeapon", holsteredWeapon );
+	//playerInfo.SetInt( "extraHolsteredWeapon", extraHolsteredWeapon );
+	//playerInfo.Set( "extraHolsteredWeaponModel", extraHolsteredWeaponModel );
 	//koz end
 
 	playedTimeSecs = spawnArgs.GetInt( "playedTime" );
@@ -6229,40 +6207,49 @@ bool idPlayer::WeaponHandImpulseSlot()
 	{
 		return false;
 	}
+
 	if( weaponHandSlot == SLOT_WEAPON_HIP )
 	{
-		if (objectiveSystemOpen)
+		if ( objectiveSystemOpen )
 		{
 			if ( previousWeapon == weapon_fists )
+			{
 				previousWeapon = holsteredWeapon;
+			}
 			TogglePDA();
 		}
 		else
+		{
 			SetupHolsterSlot();
+		}
 		return true;
 	}
 	if( weaponHandSlot == SLOT_WEAPON_BACK_BOTTOM )
 	{
-		if (objectiveSystemOpen)
+		if ( objectiveSystemOpen )
+		{
 			TogglePDA();
+		}
 		PrevWeapon();
 		return true;
 	}
 	if( weaponHandSlot == SLOT_WEAPON_BACK_TOP )
 	{
-		if (objectiveSystemOpen)
+		if ( objectiveSystemOpen )
+		{
 			TogglePDA();
+		}
 		NextWeapon();
 		return true;
 	}
 	if ( weaponHandSlot == SLOT_PDA_HIP )
 	{
 		SwapWeaponHand();
-		// if we're holding a gun (not a pointer finger or fist) then holster the gun
+		// if we're holding a gun ( not a pointer finger or fist ) then holster the gun
 		//if ( !commonVr->PDAforced && !objectiveSystemOpen && currentWeapon != weapon_fists )
 		//	SetupHolsterSlot();
 		// pick up PDA in our weapon hand, or pick up the torch if our hand is a pointer finger
-		if (!common->IsMultiplayer())
+		if ( !common->IsMultiplayer() )
 		{
 			// we don't have a PDA, so toggle the menu instead
 			if ( commonVr->PDAforced || inventory.pdas.Num() == 0 )
@@ -10051,6 +10038,8 @@ void idPlayer::EvaluateControls()
 		oldTeleportButtonState = common->ButtonState( UB_TELEPORT );
 	}
 	
+	bool didTeleport = false;
+
 	if( doTeleport )
 	{
 		commonVr->teleportButtonCount = 0;
@@ -10076,10 +10065,11 @@ void idPlayer::EvaluateControls()
 				//to determine if you are moving towards them before they start moving again.
 				//Teleporting imparts no velocity to the player, so those entities will not start moving again. ( unless you teleport way in front of them )
 				//Impart a tiny velocity here, just enough so the entities know you have moved, not enough to really change the player position.
-				
+				didTeleport = true;
+								
 				physicsObj.SetLinearVelocity( physicsObj.GetLinearVelocity() - teleportDir * 10.0f );
 				//koz end
-
+				
 				PlayFootStepSound();
 			}
 		}
@@ -10096,6 +10086,13 @@ void idPlayer::EvaluateControls()
 	
 	// update the viewangles
 	UpdateViewAngles();
+
+	if ( didTeleport )
+	{
+		commonVr->didTeleport = true;
+		commonVr->teleportDir = ((teleportTarget.GetEntity()->GetRenderEntity()->origin - teleportPoint).ToAngles().yaw - 180.0f) - viewAngles.yaw;
+		
+	}
 }
 
 /*
@@ -10801,8 +10798,9 @@ void idPlayer::Move()
 	idVec3 oldOrigin;
 	idVec3 oldVelocity;
 	idVec3 pushVelocity;
-
-	static bool isLeaning = false;
+		
+	static bool testLean = false;
+	static idVec3 leanOrigin = vec3_zero;
 			
 	// save old origin and velocity for crashlanding
 	oldOrigin = physicsObj.GetOrigin();
@@ -10887,31 +10885,31 @@ void idPlayer::Move()
 				
 				idAngles bodyAng = bodyAxis.ToAngles();
 				idMat3 bodyAx = idAngles( bodyAng.pitch, bodyAng.yaw - commonVr->bodyYawOffset, bodyAng.roll ).Normalize180().ToMat3();
-			
-				
+							
 				newBodyOrigin = bodyOrigin + bodyAx[0] * commonVr->remainingMoveHmdBodyPositionDelta.x + bodyAx[1] * commonVr->remainingMoveHmdBodyPositionDelta.y;
 				commonVr->remainingMoveHmdBodyPositionDelta.x = commonVr->remainingMoveHmdBodyPositionDelta.y = 0;
-				//newBodyOrigin.z = 0.0f;
-			
+							
 				commonVr->motionMoveDelta = newBodyOrigin - bodyOrigin;
-				commonVr->motionMoveVelocity = commonVr->motionMoveDelta / ( ( 1000 / commonVr->hmdHz ) * 0.001f);
+				commonVr->motionMoveVelocity = commonVr->motionMoveDelta / ( ( 1000 / commonVr->hmdHz ) * 0.001f );
 
-				if ( !isLeaning )
+				if ( !commonVr->isLeaning )
 				{
 					movedBodyOrigin = physicsObj.MotionMove( commonVr->motionMoveVelocity );
 					physicsObj.SetAxis( origPhysAxis ); // make sure motion move doesnt change the axis
-
-					movedRemainder = (movedBodyOrigin - bodyOrigin);
-										
-					if ( movedRemainder.Length() < commonVr->motionMoveDelta.Length() * 0.5f )
+															
+					movedRemainder = ( newBodyOrigin - movedBodyOrigin );
+					
+					if ( movedRemainder.Length() > commonVr->motionMoveDelta.Length() * 0.25f )
 					{ 
-						isLeaning = true;
+						commonVr->isLeaning = true;
+						testLean = false;
+						leanOrigin = movedBodyOrigin;
 						commonVr->leanOffset = movedRemainder;
 					}
 					else
 					{
 						// if the pda is fixed in space, we need to keep track of how much we have moved the player body
-						// so we can keep the PDA in the same position relative to the player while accounting for external movement ( on a lift / eleveator etc );
+						// so we can keep the PDA in the same position relative to the player while accounting for external movement ( on a lift / eleveator etc )
 						if ( !PDAfixed )
 						{
 							commonVr->fixedPDAMoveDelta = vec3_zero;
@@ -10919,50 +10917,65 @@ void idPlayer::Move()
 						else
 						{
 							commonVr->fixedPDAMoveDelta += ( movedBodyOrigin - bodyOrigin );
-							//common->Printf( "Move newbod x %f y %f   bodyOrigin x %f y %f  totaldel x %f y %f\n", newBod.x, newBod.y, bodyOrigin.x, bodyOrigin.y, commonVr->fixedPDAMoveDelta.x, commonVr->fixedPDAMoveDelta.y );
 						}
 					}
 				}
 				else
 
 				{
-					// player body blocked by object. let the head move some by
-					// accruing all ( body ) movement  here. 
+					// player body blocked by object. let the head move some by accruing all ( body ) movement  here. 
 					// check to see if player body can move to the new location without clipping anything
-					// if it can, move it and clear leanoffsets.
-					// otherwise limit the distance 
+					// if it can, move it and clear leanoffsets, otherwise limit the distance 
 					idVec3 testOrigin = vec3_zero;
-
+										
 					commonVr->leanOffset += commonVr->motionMoveDelta;
-					commonVr->leanOffset.x = idMath::ClampFloat( -16.0f, 16.0f, commonVr->leanOffset.x );
-					commonVr->leanOffset.y = idMath::ClampFloat( -16.0f, 16.0f, commonVr->leanOffset.y );
 					
+					if ( commonVr->leanOffset.LengthSqr() > 36.0f * 36.0f ) // dont move head more than 36 inches // koz fixme should me measure distance from waist?
+					{
+						commonVr->leanOffset.Normalize();
+						commonVr->leanOffset *= 36.0f ;
+					}
+
+					if ( commonVr->leanBlank )
+					{
+						if ( commonVr->leanOffset.LengthSqr() > commonVr->leanBlankOffsetLengthSqr )
+						{
+							commonVr->leanOffset = commonVr->leanBlankOffset;
+						}
+					}
+									
 					testOrigin = bodyOrigin + commonVr->leanOffset;
 					
-					// clip against the player clipmodel
-					trace_t trace;
-					idMat3 clipAxis;
-										
-					idClipModel* clip;
-					clip = physicsObj.GetClipModel();
-					clipAxis = physicsObj.GetClipModel()->GetAxis();
-					
-					gameLocal.clip.Translation( trace, testOrigin,testOrigin, clip, clipAxis, CONTENTS_SOLID, NULL );
-					
-					if ( trace.fraction < 1.0f )
-					{
-						
-						// do ik stuff here
-						// trying to do this now in player walkIk
+					if ( commonVr->leanOffset.LengthSqr() > 4.0f || bodyOrigin != leanOrigin ) testLean = true; // dont check to cancel lean until player body has moved, or head has moved at least two inches.
 
-					}
-					else
+					if ( testLean )
 					{
-						// not leaning, clear the offsets and move the player origin
-						physicsObj.SetOrigin( testOrigin ); 
-						isLeaning = false;
-						commonVr->leanOffset = vec3_zero;
-						//animator.ClearJoint( chestPivotJoint );
+						// clip against the player clipmodel
+						trace_t trace;
+						idMat3 clipAxis;
+
+						idClipModel* clip;
+						clip = physicsObj.GetClipModel();
+						clipAxis = physicsObj.GetClipModel()->GetAxis();
+
+
+						gameLocal.clip.Translation( trace, testOrigin, testOrigin, clip, clipAxis, MASK_SHOT_RENDERMODEL /* CONTENTS_SOLID */ , this );
+						if (trace.fraction < 1.0f)
+						{
+
+							// do ik stuff here
+							// trying to do this now in player walkIk
+
+						}
+						else
+						{
+							// not leaning, clear the offsets and move the player origin
+							physicsObj.SetOrigin(testOrigin);
+							commonVr->isLeaning = false;
+							//common->Printf("Setting Leaning FALSE %d\n", Sys_Milliseconds());
+							commonVr->leanOffset = vec3_zero;
+							//animator.ClearJoint( chestPivotJoint );
+						}
 					}
 				}
 			}
@@ -11132,7 +11145,7 @@ void idPlayer::Move()
 	if ( comfortMode == 10 && speed == 0 && usercmd.forwardmove == 0 && usercmd.rightmove == 0 )
 		commonVr->thirdPersonMovement = false;
 
-	if ((comfortMode == 2) || (comfortMode == 5) || (comfortMode == 8) || (comfortMode == 9))
+	if (( comfortMode == 2 ) || ( comfortMode == 5 ) || ( comfortMode == 8 ) || ( comfortMode == 9 ))
 	{
 		if (speed == 0 && !blink)
 		{
@@ -11146,14 +11159,14 @@ void idPlayer::Move()
 	else
 		this->playerView.EnableVrComfortVision(false);
 
-	if (((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9)) && !warpAim && !warpMove)
+	if ((( comfortMode == 6 ) || ( comfortMode == 7 ) || ( comfortMode == 8 ) || ( comfortMode == 9 )) && !warpAim && !warpMove )
 	{
-		float speedFactor = ((pm_runspeed.GetFloat() - speed) / pm_runspeed.GetFloat());
-		if (speedFactor < 0)
+		float speedFactor = (( pm_runspeed.GetFloat() - speed ) / pm_runspeed.GetFloat());
+		if ( speedFactor < 0 )
 		{
 			speedFactor = 0;
 		}
-		timescale.SetFloat(0.5 + 0.5*speedFactor);
+		timescale.SetFloat( 0.5f + 0.5f * speedFactor );
 	}
 }
 
@@ -11791,7 +11804,7 @@ void idPlayer::SetupHolsterSlot( int stashed )
 		{
 			SelectWeapon(holsteredWeapon, true, true);
 			holsteredWeapon = extraHolsteredWeapon;
-			extraHolsteredWeapon = weapon_fists;
+			 extraHolsteredWeapon = weapon_fists;
 		}
 	}
 
@@ -14938,14 +14951,13 @@ Returns the base FOV
 float idPlayer::DefaultFov() const
 {
 	float fov;
-/*
+
 	if ( game->isVR ) // koz fixme report HMD fov in VR. 
 	{
 		fov = commonVr->hmdFovX;
 	}
 	else
 	{
-*/
 		fov = g_fov.GetFloat();
 		if ( common->IsMultiplayer() )
 		{
@@ -14958,7 +14970,7 @@ float idPlayer::DefaultFov() const
 				return 120.0f;
 			}
 		}
-//	}
+	}
 
 	return fov;
 }
@@ -15474,7 +15486,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 			weapAxis = motionRotation.ToMat3() * weapAxis;
 		}
 
-		DebugCross( weapOrigin, weapAxis, colorYellow );
+		//DebugCross( weapOrigin, weapAxis, colorYellow );
 
 		if ( currentWeaponEnum != WEAPON_PDA )
 		{
@@ -15707,7 +15719,7 @@ void idPlayer::SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQua
 
 	currentWeaponEnum = weapon->IdentifyWeapon();
 
-	if ( isFlashlight )
+	if ( isFlashlight && commonVr->currentFlashlightPosition == FLASH_HAND && flashlight.IsValid() )
 	{
 		curEntity = flashlight;
 		activeWeapon = weapon_flashlight;
@@ -15757,7 +15769,7 @@ void idPlayer::SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQua
 	handAttacherPositionGlobal = handOrigin + ( weaponAttachDelta * handAxis );
 
 	// for debugging
-	DebugCross( handAttacherPositionGlobal, handAxis, colorRed );
+	//DebugCross( handAttacherPositionGlobal, handAxis, colorRed );
 	
 	handAttacherPositionLocal = handAttacherPositionGlobal - renderEntity.origin;
 	handAttacherPositionLocal *= renderEntity.axis.Inverse();
@@ -16003,9 +16015,11 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 		// Koz hack , the alignment isn't quite right, so do a quick hack here so the hand and flash align 
 		// better with the controllers.
 		// need to really fix this right, the whole body/viewweapon pose attacher code is a complete trainwreck now.
+		
 		const idVec3 flashPosHack[2] = { idVec3( 0.0f, -1.0f, 0.5f ), idVec3( 0.0f, 0.85f, 0.5f ) };
 		viewOrigin += flashPosHack[currentHand] * viewAxis;
 		
+		//DebugCross( viewOrigin, viewAxis, colorYellow );
 		SetHandIKPos( currentHand , viewOrigin, viewAxis, motionRotation, isFlash );
 		
 		if ( flashMode == FLASH_HAND   )
@@ -16017,7 +16031,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 			origin += handWeaponAttacherToDefaultOffset[currentHand][wepn/*weapon_flashlight*/] * viewAxis;
 			axis = viewAxis;
 
-			DebugCross( origin, axis, colorOrange );
+			//DebugCross( origin, axis, colorOrange );
 
 			flashlight->GetRenderEntity()->allowSurfaceInViewID = 0;
 			flashlight->GetRenderEntity()->suppressShadowInViewID = 0;
@@ -16027,7 +16041,6 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 	else if ( setLeftHand == true  )
 	{
 			// if the flashlight is not in the left hand, set the player model hand location anyway.
-		
 			static idQuat flashRot = idAngles( 0, 0.0f, 0.0f ).ToQuat();
 			static idVec3 originOffset = vec3_zero;
 			static int currentHand = 0;
@@ -16449,7 +16462,7 @@ Returns true if the view needs to be darkened
 */
 bool idPlayer::ShouldBlink()
 {
-	return blink;
+	return ( blink || commonVr->leanBlank );
 }
 
 /*
@@ -16521,6 +16534,7 @@ void idPlayer::CalculateRenderView()
 		else
 		{
 			// koz fixme this was in tmeks renderView->viewaxis = firstPersonViewAxis; shouldnt be needed, verify.
+			
 			gameLocal.GetCamera()->GetViewParms( renderView );
 
 			/*	if ( game->isVR && vr_interactiveCinematic.GetBool() ) // koz cinematic
@@ -16576,7 +16590,7 @@ void idPlayer::CalculateRenderView()
 		gameLocal.Printf( "%s : %s\n", renderView->vieworg.ToString(), renderView->viewaxis.ToAngles().ToString() );
 	}
 
-	if ( game->isVR )
+	if ( game->isVR )  
 	{
 		// koz headtracker does not modify the model rotations
 		// offsets to body rotation added here
@@ -16586,9 +16600,7 @@ void idPlayer::CalculateRenderView()
 
 		// Koz begin : Add headtracking
 		static idVec3 absolutePosition;
-
-		//commonVr->HMDGetOrientation( hmdAngles, headPositionDelta, bodyPositionDelta, absolutePosition, false );// gameLocal.inCinematic );
-
+		
 		hmdAngles = commonVr->poseHmdAngles;
 		headPositionDelta = commonVr->poseHmdHeadPositionDelta;
 		bodyPositionDelta = commonVr->poseHmdBodyPositionDelta;
@@ -16599,139 +16611,169 @@ void idPlayer::CalculateRenderView()
 		idMat3 axis = renderView->viewaxis;
 		float yawOffset = commonVr->bodyYawOffset;
 
+	
 		if ( gameLocal.inCinematic )
 		{
 			if ( wasCinematic == false )
 			{
 				wasCinematic = true;
-				cinematicOffset = absolutePosition;
+
+				commonVr->cinematicStartViewYaw = hmdAngles.yaw + commonVr->trackingOriginYawOffset;
+				//commonVr->cinematicStartPosition = absolutePosition;
+
+				commonVr->cinematicStartPosition.x = -commonVr->hmdTrackingState.HeadPose.ThePose.Position.z;
+				commonVr->cinematicStartPosition.y = -commonVr->hmdTrackingState.HeadPose.ThePose.Position.x;
+				commonVr->cinematicStartPosition.z = commonVr->hmdTrackingState.HeadPose.ThePose.Position.y;
+				
+				playerView.Flash(colorWhite, 300);
+				
+
+				if ( vr_cinematics.GetInteger() == 2 && vr_flicksyncCharacter.GetInteger() == 0)
+
+				{
+					cinematicOffset = vec3_zero;
+				}
+				else
+				{
+					cinematicOffset = absolutePosition;
+				}
 			}
 
-			headPositionDelta = absolutePosition - cinematicOffset;
-			bodyPositionDelta = vec3_zero;
+			if (vr_cinematics.GetInteger() == 2 && vr_flicksyncCharacter.GetInteger() == 0)
+			{
+				headPositionDelta = bodyPositionDelta = vec3_zero;
+			}
+			else
+			{
+				headPositionDelta = absolutePosition - cinematicOffset;
+				bodyPositionDelta = vec3_zero;
+			}
 		}
 		else
 		{
 			wasCinematic = false;
 		}
 
-		//move the head in relation to the body. 
-		//bodyYawOffsets are external rotations of the body where the head remains looking in the same direction
-		//e.g. when using movepoint and snapping the body to the view.
 
-		idAngles bodyAng = axis.ToAngles();
-		idMat3 bodyAx = idAngles( bodyAng.pitch, bodyAng.yaw - yawOffset, bodyAng.roll ).Normalize180().ToMat3();
-		origin = origin + bodyAx[0] * headPositionDelta.x + bodyAx[1] * headPositionDelta.y + bodyAx[2] * headPositionDelta.z;
-
-		origin += commonVr->leanOffset;
-
-		angles.yaw += hmdAngles.yaw - yawOffset;    // add the current hmd orientation
-		angles.pitch += hmdAngles.pitch;
-		angles.roll += hmdAngles.roll;
-		angles.Normalize180();
-
-
-		commonVr->lastHMDYaw = hmdAngles.yaw;
-		commonVr->lastHMDPitch = hmdAngles.pitch;
-		commonVr->lastHMDRoll = hmdAngles.roll;
-
-		axis = angles.ToMat3(); // this sets the actual view axis, separate from the body axis.
-
-		commonVr->lastHMDViewOrigin = origin;
-		commonVr->lastHMDViewAxis = axis;
-
-		commonVr->uncrouchedHMDViewOrigin = origin;
-		commonVr->uncrouchedHMDViewOrigin.z -= commonVr->headHeightDiff;
-
-
-		if ( commonVr->thirdPersonMovement )
+		if (!(gameLocal.inCinematic && vr_cinematics.GetInteger() == 2 && vr_flicksyncCharacter.GetInteger() == 0))
 		{
-			if ( wasThirdPerson == false )
-			{
-				wasThirdPerson = true;
-				thirdPersonOffset = absolutePosition;
-				thirdPersonOrigin = commonVr->lastHMDViewOrigin;//origin;
-				thirdPersonAxis = idAngles( 0.0f, commonVr->lastHMDViewAxis.ToAngles().yaw, 0.0f ).ToMat3();//axis;
-				thirdPersonBodyYawOffset = hmdAngles.yaw;// -yawOffset;
 
-			}
-			origin = thirdPersonOrigin;
-			axis = thirdPersonAxis;
-			yawOffset = thirdPersonBodyYawOffset;
-			angles = thirdPersonAxis.ToAngles();
-			headPositionDelta = absolutePosition - thirdPersonOffset;
-			bodyPositionDelta = vec3_zero;
+			//move the head in relation to the body. 
+			//bodyYawOffsets are external rotations of the body where the head remains looking in the same direction
+			//e.g. when using movepoint and snapping the body to the view.
 
-			idAngles bodyAng = thirdPersonAxis.ToAngles();
+			idAngles bodyAng = axis.ToAngles();
 			idMat3 bodyAx = idAngles( bodyAng.pitch, bodyAng.yaw - yawOffset, bodyAng.roll ).Normalize180().ToMat3();
-			origin = thirdPersonOrigin + bodyAx[0] * headPositionDelta.x + bodyAx[1] * headPositionDelta.y + bodyAx[2] * headPositionDelta.z;
+			origin = origin + bodyAx[0] * headPositionDelta.x + bodyAx[1] * headPositionDelta.y + bodyAx[2] * headPositionDelta.z;
 
 			origin += commonVr->leanOffset;
-
-			angles.yaw += hmdAngles.yaw - thirdPersonBodyYawOffset;    // add the current hmd orientation
-			angles.pitch += hmdAngles.pitch;
-			angles.roll += hmdAngles.roll;
-			angles.Normalize180();
-			axis = angles.ToMat3();
-			commonVr->thirdPersonHudAxis = axis;
-			commonVr->thirdPersonHudPos = origin;
-
-			commonVr->thirdPersonDelta = (origin - firstPersonViewOrigin).LengthSqr();
-
-		}
-		else
-		{
-			if ( wasThirdPerson )
+			
+			if ( gameLocal.inCinematic && vr_cinematics.GetInteger() == 1 )
 			{
-				commonVr->thirdPersonDelta = 0.0f;;
-				playerView.Flash( colorBlack, 140 );
+				
+				//koz to do clean up later - added to allow cropped cinematics with original camera movements.
+				idQuat q1, q2;
+
+				q1 = angles.ToQuat();
+				q2 = idAngles( hmdAngles.pitch, hmdAngles.yaw - yawOffset, hmdAngles.roll ).ToQuat();
+
+				angles = ( q2 * q1 ).ToAngles();
 			}
-			wasThirdPerson = false;
+			else
+			{
+				angles.yaw += hmdAngles.yaw - yawOffset;    // add the current hmd orientation
+				angles.pitch += hmdAngles.pitch;
+				angles.roll += hmdAngles.roll;
+			}
+			angles.Normalize180();
+
+
+			commonVr->lastHMDYaw = hmdAngles.yaw;
+			commonVr->lastHMDPitch = hmdAngles.pitch;
+			commonVr->lastHMDRoll = hmdAngles.roll;
+
+			axis = angles.ToMat3(); // this sets the actual view axis, separate from the body axis.
+
+			commonVr->lastHMDViewOrigin = origin;
+			commonVr->lastHMDViewAxis = axis;
+
+			commonVr->uncrouchedHMDViewOrigin = origin;
+			commonVr->uncrouchedHMDViewOrigin.z -= commonVr->headHeightDiff;
+
+
+			if (commonVr->thirdPersonMovement)
+			{
+				if (wasThirdPerson == false)
+				{
+					wasThirdPerson = true;
+					thirdPersonOffset = absolutePosition;
+					thirdPersonOrigin = commonVr->lastHMDViewOrigin;//origin;
+					thirdPersonAxis = idAngles(0.0f, commonVr->lastHMDViewAxis.ToAngles().yaw, 0.0f).ToMat3();//axis;
+					thirdPersonBodyYawOffset = hmdAngles.yaw;// -yawOffset;
+
+				}
+				origin = thirdPersonOrigin;
+				axis = thirdPersonAxis;
+				yawOffset = thirdPersonBodyYawOffset;
+				angles = thirdPersonAxis.ToAngles();
+				headPositionDelta = absolutePosition - thirdPersonOffset;
+				bodyPositionDelta = vec3_zero;
+
+				idAngles bodyAng = thirdPersonAxis.ToAngles();
+				idMat3 bodyAx = idAngles(bodyAng.pitch, bodyAng.yaw - yawOffset, bodyAng.roll).Normalize180().ToMat3();
+				origin = thirdPersonOrigin + bodyAx[0] * headPositionDelta.x + bodyAx[1] * headPositionDelta.y + bodyAx[2] * headPositionDelta.z;
+
+				origin += commonVr->leanOffset;
+
+				angles.yaw += hmdAngles.yaw - thirdPersonBodyYawOffset;    // add the current hmd orientation
+				angles.pitch += hmdAngles.pitch;
+				angles.roll += hmdAngles.roll;
+				angles.Normalize180();
+				axis = angles.ToMat3();
+				commonVr->thirdPersonHudAxis = axis;
+				commonVr->thirdPersonHudPos = origin;
+
+				commonVr->thirdPersonDelta = (origin - firstPersonViewOrigin).LengthSqr();
+
+			}
+			else
+			{
+				if (wasThirdPerson)
+				{
+					commonVr->thirdPersonDelta = 0.0f;;
+					playerView.Flash(colorBlack, 140);
+				}
+				wasThirdPerson = false;
+			}
+
 		}
-
-		/*
-		if ( wasThirdPerson )
-		{
-		angles = thirdPersonAxis.ToAngles();
-		angles.yaw += hmdAngles.yaw - thirdPersonBodyYawOffset;
-		angles.pitch += hmdAngles.pitch;
-		angles.roll += hmdAngles.roll;
-		angles.Normalize180();
-		axis = angles.ToMat3();
-
-		commonVr->thirdPersonHudAxis = axis;
-		commonVr->thirdPersonHudPos = origin;
-
-		commonVr->thirdPersonDelta = (origin - firstPersonViewOrigin).LengthSqr();
-
-		}
-		*/
-
 		renderView->vieworg = origin;
 		renderView->viewaxis = axis;
 
-
-
-
-
-		/* this will calc the distance from the view origin to the ground
-		idVec3 start;
-		idVec3 end;
-		trace_t traceResults;
-		idMat3 axc = idAngles( 00.0f, 90.0f, 0.0f ).ToMat3();
-
-		start = origin;
-		end = start - axc[2] * physicsObj.GetGravityAxis() * 100;
-
-		if ( gameLocal.clip.TracePoint( traceResults, start, end, MASK_SHOT_RENDERMODEL, this ) )
+		// if leaning, check if the eye is in a wall
+		if ( commonVr->isLeaning )
 		{
-		common->Printf("Eye HOG = %f         %f\n", 100.0f * traceResults.fraction, start.z - renderEntity.origin.z);
+			idBounds bounds = idBounds( idVec3( 0, -1, -1 ), idVec3( 0, 1, 1 ) );
+			trace_t trace;
+
+			gameLocal.clip.TraceBounds( trace, origin, origin, bounds, MASK_SHOT_RENDERMODEL /*MASK_SOLID*/, this );
+			if ( trace.fraction != 1.0f )
+			{
+				commonVr->leanBlank = true;
+				commonVr->leanBlankOffset = commonVr->leanOffset;
+				commonVr->leanBlankOffsetLengthSqr = commonVr->leanOffset.LengthSqr();
+				
+			}
+
+			else
+			{
+				commonVr->leanBlank = false;
+				commonVr->leanBlankOffset = vec3_zero;
+				commonVr->leanBlankOffsetLengthSqr = 0.0f;
+			}
+
 		}
-		*/
-
-
-
-		//UpdateVrHud();
+		
 
 		// koz fixme pause - handle the PDA model if game is paused
 		// really really need to move this somewhere else,
@@ -16747,27 +16789,20 @@ void idPlayer::CalculateRenderView()
 
 		if ( commonVr->PDAforcetoggle )
 		{
-			idPlayer* player = gameLocal.GetLocalPlayer();
-			player->SetupPDASlot( commonVr->PDAforced );
-			player->SetupHolsterSlot( commonVr->PDAforced );
+			
 			if ( !commonVr->PDAforced )
 			{
 				if ( weapon->IdentifyWeapon() != WEAPON_PDA )
 				{
 					//common->Printf( "idPlayer::CalculateRenderView calling SelectWeapon for PDA\nPDA Forced = %i, PDAForceToggle = %i\n",commonVr->PDAforced,commonVr->PDAforcetoggle );
+					//common->Printf( "CRV3 Calling SetupHolsterSlot( %i ) \n", commonVr->PDAforced );
+					
+					idPlayer* player = gameLocal.GetLocalPlayer();
+					player->SetupPDASlot( commonVr->PDAforced );
+					player->SetupHolsterSlot( commonVr->PDAforced );
+										
 					SelectWeapon( weapon_pda, true );
 					SetWeaponHandPose();
-					/* const function_t* func;
-					func = scriptObject.GetFunction( "SetWeaponHandPose" );
-					if ( func )
-					{
-						// use the frameCommandThread since it's safe to use outside of framecommands
-						//common->Printf( "Calling SetWeaponHandPose\n" );g
-						gameLocal.frameCommandThread->CallFunction( this, func, true );
-						gameLocal.frameCommandThread->Execute();
-
-					}
-					*/
 				}
 				else
 				{

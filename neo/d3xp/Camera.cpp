@@ -654,7 +654,7 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 	}
 	
 	// Koz begin
-	if ( game->isVR )
+	if ( game->isVR && (vr_cinematics.GetInteger() == 0 && vr_flicksyncCharacter.GetInteger() == 0) )
 	{
 		// Clamp the camera origin to camera cut locations. 
 		// This eliminates camera panning and smooth movements in cutscenes,
@@ -666,140 +666,140 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		// Flicksync camera
 		idEntity* ent = NULL;
 		static idEntity* hiddenEnt = NULL;
-		switch (vr_flicksyncCharacter.GetInteger())
+		switch ( vr_flicksyncCharacter.GetInteger() )
 		{
 		case FLICK_BETRUGER:
-			ent = gameLocal.FindEntity("marscity_cinematic_betruger_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("marscity_cinematic_betruger_speech");
-			if (!ent)
-				ent = gameLocal.FindEntity("delta3_betruger_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("delta3_betruger_2");
-			if (!ent)
-				ent = gameLocal.FindEntity("delta4_betruger_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("monorail_raisecommando_betruger_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("char_betruger_2");
-			if (!ent)
-				ent = gameLocal.FindEntity("char_betruger_1");
+			ent = gameLocal.FindEntity( "marscity_cinematic_betruger_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "marscity_cinematic_betruger_speech" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "delta3_betruger_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "delta3_betruger_2" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "delta4_betruger_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "monorail_raisecommando_betruger_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "char_betruger_2" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "char_betruger_1" );
 			// maledict_death_skull_1
-			if (!ent)
-				ent = gameLocal.FindEntity("maledict_intro_cinematic_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("jay_hell_maledict_intro_cinematic_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("monster_boss_d3xp_maledict_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("monster_boss_maledict_cinematic_1"); // Doom 3 Hellhole
-			if (!ent)
-				ent = gameLocal.FindEntity("monster_boss_maledict_cinematic_2"); // Doom 3 Hellhole
-			if (!ent)
-				ent = gameLocal.FindEntity("maledict_death_cinematic_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("maledict_death_cinematic_flyin");
-			if (!ent)
-				ent = gameLocal.FindEntity("maledict_death_cinematic_death");
+			if ( !ent )
+				ent = gameLocal.FindEntity( "maledict_intro_cinematic_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "jay_hell_maledict_intro_cinematic_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "monster_boss_d3xp_maledict_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "monster_boss_maledict_cinematic_1" ); // Doom 3 Hellhole
+			if ( !ent )
+				ent = gameLocal.FindEntity( "monster_boss_maledict_cinematic_2" ); // Doom 3 Hellhole
+			if ( !ent )
+				ent = gameLocal.FindEntity( "maledict_death_cinematic_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "maledict_death_cinematic_flyin" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "maledict_death_cinematic_death" );
 			break;
 		case FLICK_TOWER:
-			ent = gameLocal.FindEntity("marscity_sec_window_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("marscity_sec_window2_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("erebus1_intro_scientist_1");
+			ent = gameLocal.FindEntity( "marscity_sec_window_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "marscity_sec_window2_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "erebus1_intro_scientist_1" );
 			break;
 		case FLICK_SWANN:
-			ent = gameLocal.FindEntity("marscity_cinematic_swann_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("marscity_cinematic_swann_speech");
-			if (!ent)
-				ent = gameLocal.FindEntity("marscity_walking_swann_1");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("admin_overhear_swann_1");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("admin_overhear_swann_2");
-			if (!ent)
-				ent = gameLocal.FindEntity("enpro_swann_2");
-			if (!ent)
-				ent = gameLocal.FindEntity("enpro_swann_3");
-			if (!ent)
-				ent = gameLocal.FindEntity("char_swann_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("delta5_wounded_swann_1");
+			ent = gameLocal.FindEntity( "marscity_cinematic_swann_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "marscity_cinematic_swann_speech" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "marscity_walking_swann_1" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "admin_overhear_swann_1" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "admin_overhear_swann_2" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "enpro_swann_2" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "enpro_swann_3" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "char_swann_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "delta5_wounded_swann_1" );
 			break;
 		case FLICK_CAMPBELL:
-			ent = gameLocal.FindEntity("marscity_cinematic_campbell_1");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("marscity_cinematic_campbell_2");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("admin_overhear_campbell_3");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("char_campbell_bfgcase_1");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("admin_overhear_campbell_1");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("admin_overhear_campbell_2");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("cpu1_camphunt_campbell_1");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("cpu1_wounded_campbell_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("enpro_campbell_2");
-			if (!ent)
-				ent = gameLocal.FindEntity("enpro_campbell_3");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("char_campbell_bfg_1");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("char_campbell_bfg_2");
+			ent = gameLocal.FindEntity( "marscity_cinematic_campbell_1" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "marscity_cinematic_campbell_2" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "admin_overhear_campbell_3" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "char_campbell_bfgcase_1" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "admin_overhear_campbell_1" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "admin_overhear_campbell_2" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "cpu1_camphunt_campbell_1" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "cpu1_wounded_campbell_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "enpro_campbell_2" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "enpro_campbell_3" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "char_campbell_bfg_1" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "char_campbell_bfg_2" );
 			break;
 			// 
 		case FLICK_RECEPTION:
-			ent = gameLocal.FindEntity("marscity_receptionist_full");
+			ent = gameLocal.FindEntity( "marscity_receptionist_full" );
 			break;
 		case FLICK_SARGE:
-			ent = gameLocal.FindEntity("marscity_cinematic_sarge2_1");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("marscity_cinematic_sarge2_1_head");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("marscity_cinematic_sarge_1");
-			if (!ent || ent->IsHidden())
-				ent = gameLocal.FindEntity("sarge_secondary");
+			ent = gameLocal.FindEntity( "marscity_cinematic_sarge2_1" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "marscity_cinematic_sarge2_1_head" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "marscity_cinematic_sarge_1" );
+			if ( !ent || ent->IsHidden() )
+				ent = gameLocal.FindEntity( "sarge_secondary" );
 			break;
 		case FLICK_SCIENTIST:
-			ent = gameLocal.FindEntity("underground_crazy_sci_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("underground_crazy_zombie_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("delta2a_scientist_1");
+			ent = gameLocal.FindEntity( "underground_crazy_sci_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "underground_crazy_zombie_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "delta2a_scientist_1" );
 			break;
 		case FLICK_MCNEIL:
-			ent = gameLocal.FindEntity("erebus1_intro_mcneil_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("phobos2_cinematic_mcneil_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("phobos2_mcneil_typing_1");
+			ent = gameLocal.FindEntity( "erebus1_intro_mcneil_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "phobos2_cinematic_mcneil_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "phobos2_mcneil_typing_1" );
 			// phobos2_mcneil_chair_cine_1
 			break;
 		case FLICK_MARINE_PDA:
-			ent = gameLocal.FindEntity("erebus1_intro_marine1_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("enpro_soldier2_1");
+			ent = gameLocal.FindEntity( "erebus1_intro_marine1_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "enpro_soldier2_1" );
 			break;
 		case FLICK_MARINE_TORCH:
-			ent = gameLocal.FindEntity("erebus1_intro_marine2_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("enpro_soldier4_1");
+			ent = gameLocal.FindEntity( "erebus1_intro_marine2_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "enpro_soldier4_1" );
 			break;
 		case FLICK_POINT:
-			ent = gameLocal.FindEntity("erebus1_intro_detonate_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("enpro_soldier1_1");
-			if (!ent)
-				ent = gameLocal.FindEntity("erebus1_cinematic_marine_gravitygun_end_1");
+			ent = gameLocal.FindEntity( "erebus1_intro_detonate_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "enpro_soldier1_1" );
+			if ( !ent )
+				ent = gameLocal.FindEntity( "erebus1_cinematic_marine_gravitygun_end_1" );
 			break;
 		case FLICK_BRAVO_LEAD:
-			ent = gameLocal.FindEntity("enpro_soldier3_1");
+			ent = gameLocal.FindEntity( "enpro_soldier3_1" );
 		case FLICK_PLAYER:
 			static const char * player_entities[] = {
 				"marscity_cinematic_player_1",
@@ -845,33 +845,33 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 				"hellhole_cin_player_2",
 				"player1",
 			};
-			for (int e = 0; e < sizeof(player_entities) / sizeof(player_entities[0]); e++)
+			for ( int e = 0; e < sizeof( player_entities ) / sizeof( player_entities[0] ); e++ )
 			{
-				ent = gameLocal.FindEntity(player_entities[e]);
-				if (ent)
+				ent = gameLocal.FindEntity( player_entities[e] );
+				if ( ent )
 					break;
 			}
 		}
 		static idEntity *last_ent = NULL;
 		// only use character if it's not hidden, and it's within range of current camera
-		if ( ent && ( ent == hiddenEnt || !ent->IsHidden() ) && ( ent->GetPhysics()->GetOrigin() - view->vieworg ).LengthSqr() <= 550*550 )
+		if ( ent && (ent == hiddenEnt || !ent->IsHidden()) && (ent->GetPhysics()->GetOrigin() - view->vieworg).LengthSqr() <= 550 * 550 )
 		{
-			if (g_debugCinematic.GetBool() && ent!=last_ent)
-				gameLocal.Printf("%d: Flicksync using character %s (%s)\n", gameLocal.framenum, ent->name.c_str(), ent->GetClassname());
+			if ( g_debugCinematic.GetBool() && ent != last_ent )
+				gameLocal.Printf( "%d: Flicksync using character %s (%s)\n", gameLocal.framenum, ent->name.c_str(), ent->GetClassname() );
 			last_ent = ent;
 			idVec3 camPos = view->vieworg;
-			if (ent->GetPhysics()->IsType(idPhysics_Actor::Type))
+			if ( ent->GetPhysics()->IsType( idPhysics_Actor::Type ) )
 			{
 				idActor* actor = static_cast<idActor*>(ent);
-				actor->GetViewPos(view->vieworg, view->viewaxis);
-				if ((view->vieworg - actor->GetPhysics()->GetOrigin()).z <= 32)
+				actor->GetViewPos( view->vieworg, view->viewaxis );
+				if ( (view->vieworg - actor->GetPhysics()->GetOrigin()).z <= 32 )
 					view->vieworg.z = actor->GetPhysics()->GetOrigin().z + pm_normalviewheight.GetFloat();
 				idEntity* head = actor->GetHeadEntity();
-				if (head)
+				if ( head )
 				{
 					//head->GetRenderEntity()->suppressSurfaceInViewID = entityNumber + 1; //view->viewID;
 					head->GetRenderEntity()->allowSurfaceInViewID = 666;
-					view->vieworg = head->GetPhysics()->GetOrigin() + idVec3(0, 0, 10);
+					view->vieworg = head->GetPhysics()->GetOrigin() + idVec3( 0, 0, 10 );
 				}
 				if ( vr_playerBodyMode.GetInteger() > 0 || !head )
 				{
@@ -879,9 +879,9 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 					actor->GetRenderEntity()->allowSurfaceInViewID = 666;
 				}
 				// Fix facing backwards as Betruger in the meeting cutscene.
-				if( actor->name == "marscity_cinematic_betruger_speech" || actor->name == "monorail_raisecommando_betruger_1"
+				if ( actor->name == "marscity_cinematic_betruger_speech" || actor->name == "monorail_raisecommando_betruger_1"
 					|| actor->name == "phobos2_cinematic_mcneil_1" || actor->name == "monster_boss_maledict_cinematic_1" || actor->name == "monster_boss_maledict_cinematic_2" )
-					view->viewaxis = idAngles(0, view->viewaxis.ToAngles().yaw + 180, 0).ToMat3();
+					view->viewaxis = idAngles( 0, view->viewaxis.ToAngles().yaw + 180, 0 ).ToMat3();
 			}
 			else
 			{
@@ -893,8 +893,8 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		}
 		else
 		{
-			if (g_debugCinematic.GetBool() && ent != last_ent)
-				gameLocal.Printf("%d: Flicksync using camera %s\n", gameLocal.framenum, this->name.c_str());
+			if ( g_debugCinematic.GetBool() && ent != last_ent )
+				gameLocal.Printf( "%d: Flicksync using camera %s\n", gameLocal.framenum, this->name.c_str() );
 			last_ent = ent;
 			view->viewaxis = camFrame2[0].q.ToMat3();
 			view->vieworg = camFrame2[0].t + offset;
@@ -906,15 +906,19 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		angles.pitch = 0;
 		angles.roll = 0;
 		view->viewaxis = angles.ToMat3();
-
+	}
+	
+	if ( game->isVR )
+	{
 		// override any camera fov changes. Unless you *like* the taste of hurl.
 
 		const idPlayer	*player = gameLocal.GetLocalPlayer();
 		view->fov_x = player->DefaultFov();
 	}
 	// Koz end
-	gameLocal.CalcFov( view->fov_x, view->fov_x, view->fov_y );
 	
+	gameLocal.CalcFov( view->fov_x, view->fov_x, view->fov_y );
+		
 	// setup the pvs for this frame
 	UpdatePVSAreas( view->vieworg );
 	

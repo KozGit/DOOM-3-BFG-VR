@@ -31,6 +31,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../tr_local.h"
 #include "../../framework/Common_local.h"
+#include "d3xp\Game_local.h"
+
 
 #include"vr\Vr.h" // Koz
 #include"renderer\Framebuffer.h"
@@ -431,15 +433,16 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 			if ( game->isVR ) 
 			{
 			
+				
 				if ( commonVr->playerDead || (game->Shell_IsActive() && !commonVr->PDAforced && !commonVr->PDAforcetoggle ) || (!commonVr->PDAforced && common->Dialog().IsDialogActive() )
-					|| commonVr->isLoading || commonVr->showingIntroVideo || session->GetState() == idSession::LOADING )
+					|| commonVr->isLoading || commonVr->showingIntroVideo || session->GetState() == idSession::LOADING || ( gameLocal.inCinematic && vr_cinematics.GetInteger() == 2 && vr_flicksyncCharacter.GetInteger() == 0))
 				{
-					commonVr->HMDTrackStatic( !commonVr->isLoading && !commonVr->showingIntroVideo && session->GetState() != idSession::LOADING );
+					commonVr->HMDTrackStatic( !commonVr->isLoading && !commonVr->showingIntroVideo && session->GetState() != idSession::LOADING );//  && (gameLocal.inCinematic && vr_cinematics.GetInteger() == 0) );
 					
 				}
 				else
 				{
-					commonVr->HMDRender( stereoRenderImages[0], stereoRenderImages[1] );
+					commonVr->HMDRender( stereoRenderImages[0], stereoRenderImages[1] ); 
 				}
 
 				//koz GL_CheckErrors();

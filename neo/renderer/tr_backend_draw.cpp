@@ -35,6 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "Framebuffer.h"
 
 #include "vr\vr.h" // koz
+#include "d3xp\Game_local.h" //koz
 
 idCVar r_drawEyeColor( "r_drawEyeColor", "0", CVAR_RENDERER | CVAR_BOOL, "Draw a colored box, red = left eye, blue = right eye, grey = non-stereo" );
 idCVar r_motionBlur( "r_motionBlur", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "1 - 5, log2 of the number of motion blur samples" );
@@ -4304,7 +4305,7 @@ void RB_DrawView( const void* data, const int stereoEye )
 	//koz vr right before the view is drawn, update the view with the latest pos/angles from the hmd
 	//Thanks to Leyland for idea & implementation
 	
-	if ( game->isVR )
+	if ( game->isVR && !( gameLocal.inCinematic && vr_cinematics.GetInteger() == 2 )) // dont fix up if we are projecting the cinematic into space
 	{
 		static idVec3 hmdPosDelta = vec3_zero;
 		static idMat3 hmdAxisDelta = mat3_identity;

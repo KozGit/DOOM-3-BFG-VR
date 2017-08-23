@@ -1558,6 +1558,18 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 	static int pressedLastPoll = false;
 	static int lastMoveTime = Sys_Milliseconds();
 	
+
+	if ( commonVr->didTeleport )
+	{
+		commonVr->didTeleport = false;
+
+		viewangles[YAW] += commonVr->teleportDir;
+		common->Printf( "Teleport dir yaw adding %f angles to view \n", commonVr->teleportDir );
+		commonVr->teleportDir = 0.0f;
+		return;
+	}
+	
+
 	bool okToMove = false;
 	bool moveRequested = ( abs( cmd.forwardmove ) >= 0.05 || abs( cmd.rightmove ) >= 0.05 );
 
@@ -1678,11 +1690,15 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		}
 
 		controllerAng = commonVr->poseHandRotationAngles[hand];
-
+		/*
 		viewangles[YAW] += controllerAng.yaw - commonVr->bodyMoveAng;
 		commonVr->bodyMoveAng = controllerAng.yaw;
 		commonVr->bodyYawOffset = controllerAng.yaw;
+		*/
 
+		viewangles[YAW] += controllerAng.yaw - commonVr->bodyYawOffset;
+		//commonVr->bodyMoveAng = controllerAng.yaw;
+		commonVr->bodyYawOffset = controllerAng.yaw;
 	}
 	else if ( !commonVr->VR_USE_MOTION_CONTROLS || vr_movePoint.GetInteger() == 2 ) // body will follow view
 	{

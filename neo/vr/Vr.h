@@ -316,7 +316,12 @@ public:
 	
 	idVec3				motionMoveDelta;
 	idVec3				motionMoveVelocity;
+	bool				isLeaning;
 	idVec3				leanOffset;
+	idVec3				leanBlankOffset;
+	float				leanBlankOffsetLengthSqr;
+	bool				leanBlank;
+
 	idVec3				fixedPDAMoveDelta;
 
 	int					teleportButtonCount;
@@ -373,6 +378,14 @@ public:
 
 	idStr				currentBindingDisplay;
 
+	float				cinematicStartViewYaw;
+	idVec3				cinematicStartPosition;
+
+	bool				didTeleport;
+	float				teleportDir;
+
+
+	
 	
 	// clip stuff
 	idClipModel*		bodyClip;
@@ -552,6 +565,10 @@ extern idCVar vr_handSwapsAnalogs;
 extern idCVar vr_autoSwitchControllers;
 
 extern idCVar vr_useHandPoses;
+extern idCVar vr_cinematics;
+
+extern idCVar vr_instantAccel;
+extern idCVar vr_shotgunChoke;
 
 extern iVr* commonVr;
 extern iVoice* commonVoice;

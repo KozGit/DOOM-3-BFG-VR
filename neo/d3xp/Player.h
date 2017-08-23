@@ -324,7 +324,7 @@ public:
 	qhandle_t				holsterModelDefHandle;					// handle to static renderer model
 	idMat3					holsterAxis;
 	int						holsteredWeapon, extraHolsteredWeapon;
-	const char*		extraHolsteredWeaponModel;
+	const char*				extraHolsteredWeaponModel;
 
 	renderEntity_t			hudEntity; // koz add a model to place the hud into the world
 	qhandle_t				hudHandle;
@@ -347,13 +347,13 @@ public:
 	jointHandle_t			teleportPadJoint;
 	jointHandle_t			teleportCenterPadJoint;
 	
-	idVec3 teleportPoint; // Carl: used for teleporting
-	idVec3 teleportAimPoint; // Carl: used for teleporting
-	idVec3 teleportDir; // direction of teleport movement - needed for scripts where entities check player movement.
+	idVec3					teleportPoint; // Carl: used for teleporting
+	idVec3					teleportAimPoint; // Carl: used for teleporting
+	idVec3					teleportDir; // direction of teleport movement - needed for scripts where entities check player movement.
 	
-	float teleportAimPointPitch;
+	float					teleportAimPointPitch;
 
-	bool aimValidForTeleport;
+	bool					aimValidForTeleport;
 	
 	bool			  		PDAfixed; // koz has the PDA been fixed in space?
 	idVec3					PDAorigin; // koz 
@@ -602,6 +602,7 @@ public:
 	virtual void			Show();
 	
 	void					Init();
+	void					InitPlayerBones(); // koz
 	void					PrepareForRestart();
 	virtual void			Restart();
 	void					LinkScriptVariables();

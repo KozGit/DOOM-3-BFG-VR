@@ -141,7 +141,17 @@ void idPhysics_Player::Accelerate( const idVec3& wishdir, const float wishspeed,
 		accelspeed = addspeed;
 	}
 	
-	current.velocity += accelspeed * wishdir;
+	// koz instant accel/decel
+	if ( game->isVR && vr_instantAccel.GetBool() && walking && groundPlane && !OnLadder() ) 
+	{
+		idVec3 newVel = wishspeed * wishdir;
+		current.velocity.x = newVel.x;
+		current.velocity.y = newVel.y;
+	}
+	else
+	{
+		current.velocity += accelspeed * wishdir;
+	}
 #else
 	// proper way (avoids strafe jump maxspeed bug), but feels bad
 	idVec3		wishVelocity;
@@ -165,7 +175,7 @@ void idPhysics_Player::Accelerate( const idVec3& wishdir, const float wishspeed,
 
 #define	MAX_CLIP_PLANES	5
 
-//koz MotionMove, allow physical movent to move player body int the world
+//koz MotionMove, allow physical movent to move player body in the world
 idVec3 idPhysics_Player::MotionMove( idVec3 &moveVelocity ) // bool gravity, bool stepUp, bool stepDown, bool push )
 {
 	int			i, j, k, pushFlags;
@@ -863,6 +873,16 @@ void idPhysics_Player::Friction()
 	{
 		// ignore slope movement, remove all velocity in gravity direction
 		vel += ( vel * gravityNormal ) * gravityNormal;
+		
+		//koz instant accel/decel
+		if ( game->isVR && vr_instantAccel.GetBool() && groundPlane && !OnLadder() )
+		{
+			if ( command.forwardmove == 0 && command.rightmove == 0 )
+			{
+				current.velocity.x = 0;
+				current.velocity.y = 0;
+			}
+		}
 	}
 	
 	speed = vel.Length();
