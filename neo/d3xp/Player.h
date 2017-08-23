@@ -376,6 +376,11 @@ public:
 	bool					warpMove, warpAim;
 	idVec3					warpVel, warpDest;
 	int						warpTime;
+
+	bool					jetMove;
+	idVec3					jetMoveVel;
+	int						jetMoveTime;
+	int						jetMoveCoolDownTime;
 	
 	bool					spawnAnglesSet;		// on first usercmd, we must set deltaAngles
 	idAngles				spawnAngles;

@@ -1365,8 +1365,14 @@ void idUsercmdGenLocal::JoystickMove2()
 
 		CircleToSquare( leftMapped.x, leftMapped.y );
 
-		cmd.forwardmove = idMath::ClampChar( cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y );
-		cmd.rightmove = idMath::ClampChar( cmd.rightmove + KEY_MOVESPEED * leftMapped.x );
+		if (vr_teleportMode.GetInteger() == 1) {
+			commonVr->leftMapped = leftMapped; // Jack: this has not been tested
+		}
+		else
+		{
+			cmd.forwardmove = idMath::ClampChar(cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y);
+			cmd.rightmove = idMath::ClampChar(cmd.rightmove + KEY_MOVESPEED * leftMapped.x);
+		}
 
 		pitchDelta = MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed;;
 		yawDelta = MS2SEC( pollTime - lastPollTime ) * -rightMapped.x * yawSpeed;
@@ -1434,10 +1440,16 @@ void idUsercmdGenLocal::JoystickMove2()
 		leftMapped = mappedMove;
 		rightMapped = mappedLook;
 
-		cmd.forwardmove = idMath::ClampChar( cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y );
-		cmd.rightmove = idMath::ClampChar( cmd.rightmove + KEY_MOVESPEED * leftMapped.x );
+		if (vr_teleportMode.GetInteger() == 1) {
+			commonVr->leftMapped = leftMapped;
+		}
+		else
+		{
+			cmd.forwardmove = idMath::ClampChar(cmd.forwardmove + KEY_MOVESPEED * -leftMapped.y);
+			cmd.rightmove = idMath::ClampChar(cmd.rightmove + KEY_MOVESPEED * leftMapped.x);
+		}
 
-		pitchDelta = MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed;;
+		pitchDelta = MS2SEC( pollTime - lastPollTime ) * rightMapped.y * pitchSpeed;
 		yawDelta = MS2SEC( pollTime - lastPollTime ) * -rightMapped.x * yawSpeed;
 
 		if ( game->isVR )
@@ -1662,14 +1674,22 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		}
 	}
 
-	if ( !okToMove )
+	// okToMove is true for Doom VFR
+	if (vr_teleportMode.GetInteger() == 1) {
+		cmd.forwardmove = 0.0f;
+		cmd.rightmove = 0.0f;
+		okToMove = true;
+	}
+
+	if (!okToMove)
 	{
 		cmd.forwardmove = 0.0f;
 		cmd.rightmove = 0.0f;
 		return;
 	}
 
-	if ( commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && ( vr_movePoint.GetInteger() == 1 || vr_movePoint.GetInteger() > 2 ) && ( abs( cmd.forwardmove ) >= .1 || abs( cmd.rightmove ) >= .1) ) // body will follow motion from move vector
+	if (commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && (vr_movePoint.GetInteger() == 1 || vr_movePoint.GetInteger() > 2) && 
+		(abs(cmd.forwardmove) >= .1 || abs(cmd.rightmove) >= .1) || vr_teleportMode.GetInteger() == 1) // body will follow motion from move vector
 	{
 		static idAngles controllerAng;
 		int hand;
