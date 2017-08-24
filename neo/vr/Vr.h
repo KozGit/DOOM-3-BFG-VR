@@ -572,6 +572,8 @@ extern idCVar vr_cinematics;
 extern idCVar vr_instantAccel;
 extern idCVar vr_shotgunChoke;
 
+extern idCVar vr_headshotMultiplier;
+
 extern iVr* commonVr;
 extern iVoice* commonVoice;
 

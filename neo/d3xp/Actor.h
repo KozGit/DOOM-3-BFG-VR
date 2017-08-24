@@ -168,7 +168,7 @@ public:
 	// damage
 	void					SetupDamageGroups();
 	virtual	void			Damage( idEntity* inflictor, idEntity* attacker, const idVec3& dir, const char* damageDefName, const float damageScale, const int location );
-	int						GetDamageForLocation( int damage, int location );
+	int						GetDamageForLocation( int damage, int location, bool headMultiplier = false );
 	const char* 			GetDamageGroup( int location );
 	void					ClearPain();
 	virtual bool			Pain( idEntity* inflictor, idEntity* attacker, int damage, const idVec3& dir, int location );

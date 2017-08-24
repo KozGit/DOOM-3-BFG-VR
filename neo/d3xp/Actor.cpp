@@ -2762,7 +2762,19 @@ void idActor::Damage( idEntity* inflictor, idEntity* attacker, const idVec3& dir
 	}
 	
 	int	damage = damageDef->GetInt( "damage" ) * damageScale;
-	damage = GetDamageForLocation( damage, location );
+
+	//koz hack : add an adjustable headshot multiplier for VR for projectile weapons with no splash damage 
+	bool headMultiplier = false;
+	if (	!idStr::Icmp( damageDefName, "damage_bullet_chaingun" ) ||
+			!idStr::Icmp( damageDefName, "damage_bullet_machinegun" ) ||
+			!idStr::Icmp( damageDefName, "damage_bullet_pistol" ) ||
+			!idStr::Icmp( damageDefName, "damage_plasmablast" ) ||
+			!idStr::Icmp( damageDefName, "damage_shotgun" ) ||
+			!idStr::Icmp( damageDefName, "damage_fists" ) 
+		) headMultiplier = true;
+		
+	damage = GetDamageForLocation( damage, location, headMultiplier );
+	//koz end
 	
 	// inform the attacker that they hit someone
 	if( attacker )
@@ -3106,14 +3118,32 @@ void idActor::SetupDamageGroups()
 idActor::GetDamageForLocation
 =====================
 */
-int idActor::GetDamageForLocation( int damage, int location )
+int idActor::GetDamageForLocation( int damage, int location, bool headMultiplier )
 {
+		
 	if( ( location < 0 ) || ( location >= damageScale.Num() ) )
 	{
 		return damage;
 	}
 	
-	return ( int )ceil( damage * damageScale[ location ] );
+	//koz add more significant headshot damage.  
+	//only applies if head damage group is already scaled to take > 1.0x damage.
+	//limited by calling function to fists, pitsol,shotgun,machinegun,chaingun and plasmagun.
+	float damageAmt = damage *= damageScale[location];
+
+	if ( headMultiplier ) 
+	{
+		if ( ( this != gameLocal.GetLocalPlayer()) && strstr( damageGroups[location].c_str(), "head" ) )
+		{
+			if ( damageScale[location] > 1.0f )
+			{
+				damageAmt *= vr_headshotMultiplier.GetFloat();
+				//common->Printf( "Head damage group detected, adding additional damage scale. New damage = %f\n", damageAmt );
+			}
+		}
+	}
+	
+	return (int)ceil( damageAmt );
 }
 
 /*
