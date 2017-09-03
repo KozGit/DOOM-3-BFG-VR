@@ -29,14 +29,17 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
+#ifdef OVR
 #include "..\LibOVR\Include\OVR_CAPI.h"
 #include "..\LibOVR\Include\OVR_CAPI_GL.h"
+#include "..\LibOVR\Include\OVR_CAPI_Audio.h"
+#endif
+
 #include "vr_hmd.h"
 #include "Voice.h"
 #include "FlickSync.h"
-#include "..\renderer\Framebuffer.h"
-#include "..\LibOVR\Include\OVR_CAPI_Audio.h"
-#include "..\libs\OpenVR\headers\openvr.h"
+#include "../renderer/Framebuffer.h"
+#include "../libs/OpenVR/headers/openvr.h"
 
 
 #ifndef __VR_H__
@@ -176,11 +179,8 @@ public:
 	int					frameCount;
 		
 	double				sensorSampleTime;
-	ovrPosef            EyeRenderPose[2];
 
-	ovrPosef			handPose[2];
-
-	int					fingerPose[2];
+        int					fingerPose[2];
 				
 	idVec3				lastViewOrigin;
 	idMat3				lastViewAxis;
@@ -224,11 +224,6 @@ public:
 		
 	bool				hasHMD;
 	bool				hasOculusRift;
-
-	ovrSession			hmdSession;
-	ovrGraphicsLuid		ovrLuid;
-
-	ovrHmdDesc			hmdDesc;
 
 	bool				m_bDebugOpenGL;
 	bool				m_bVerbose;
@@ -282,7 +277,17 @@ public:
 	idImage*			hmdEyeImage[2];
 	idImage*			hmdCurrentRender[2];
 
-	ovrTextureSwapChain oculusSwapChain[2];
+#ifdef OVR
+        ovrPosef            EyeRenderPose[2];
+
+        ovrPosef			handPose[2];
+
+        ovrSession			hmdSession;
+        ovrGraphicsLuid		ovrLuid;
+
+        ovrHmdDesc			hmdDesc;
+
+        ovrTextureSwapChain oculusSwapChain[2];
 
 	GLuint				oculusFboId;
 	GLuint				ocululsDepthTexID;
@@ -290,16 +295,20 @@ public:
 	ovrMirrorTexture	oculusMirrorTexture;
 	GLuint				mirrorTexId;
 	GLuint				oculusMirrorFboId;
+
+        ovrLayerEyeFov		oculusLayer;
+        ovrViewScaleDesc	oculusViewScaleDesc;
+
+        GUID				oculusGuid;
+        WCHAR				oculusGuidStr[OVR_AUDIO_MAX_DEVICE_STR_SIZE];
+
+        ovrTrackingState	hmdTrackingState;
+#endif
+
 	int					mirrorW;
 	int					mirrorH;
 
-	ovrLayerEyeFov		oculusLayer;
-	ovrViewScaleDesc	oculusViewScaleDesc;
 
-	GUID				oculusGuid;
-	WCHAR				oculusGuidStr[OVR_AUDIO_MAX_DEVICE_STR_SIZE];
-
-	ovrTrackingState	hmdTrackingState;
 	idImage*			primaryFBOimage;
 	idImage*			resolveFBOimage;
 	idImage*			fullscreenFBOimage;

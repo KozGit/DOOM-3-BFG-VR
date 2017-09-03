@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "PredictedValue_impl.h"
 
 // Koz begin
-#include "vr\vr.h" 
+#include "vr/Vr.h"
 
 idClipModel* PDAclipModel; // Koz fixme pda more crappy globals.
 

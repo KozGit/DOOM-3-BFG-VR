@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../framework/Common_local.h"
 #include "PredictedValue_impl.h"
 
-#include "vr\Vr.h" // Koz
+#include "vr/Vr.h" // Koz
 
 #define	ANGLE2SHORT(x)			( idMath::Ftoi( (x) * 65536.0f / 360.0f ) & 65535 )
 
@@ -9849,8 +9849,10 @@ void idPlayer::PerformImpulse( int impulse )
 			
 			if ( !( vr_guiMode.GetInteger() == 2 && commonVr->handInGui ) && ( Sys_Milliseconds() - commonVr->pdaToggleTime > 3000 ) )
 			{
+#ifdef _WIN32 //TODO: FIX
 				void Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
 				Sys_QueEvent( SE_KEY, K_ESCAPE, 1, 0, NULL, 0 );
+#endif
 			}
 			break;
 		}
@@ -16600,7 +16602,7 @@ create the renderView for the current tic
 void idPlayer::CalculateRenderView()
 {
 	// Koz add headtracking
-	static idAngles hmdAngles = { 0.0, 0.0, 0.0 };
+	static idAngles hmdAngles( 0.0, 0.0, 0.0 );
 	static idVec3 lastValidHmdTranslation = vec3_zero;
 	static idVec3 headPositionDelta = vec3_zero;
 	static idVec3 bodyPositionDelta = vec3_zero;
@@ -16771,9 +16773,9 @@ void idPlayer::CalculateRenderView()
 				wasCinematic = true;
 								
 				commonVr->cinematicStartViewYaw = hmdAngles.yaw + commonVr->trackingOriginYawOffset;
-				
+#ifdef OVR //TODO: ovr only?
 				commonVr->cinematicStartPosition = absolutePosition + (commonVr->trackingOriginOffset * idAngles( 0.0f, commonVr->trackingOriginYawOffset, 0.0f ).ToMat3());
-				
+#endif
 				cineYawOffset = hmdAngles.yaw - yawOffset;
 				//commonVr->cinematicStartPosition.x = -commonVr->hmdTrackingState.HeadPose.ThePose.Position.z;
 				//commonVr->cinematicStartPosition.y = -commonVr->hmdTrackingState.HeadPose.ThePose.Position.x;

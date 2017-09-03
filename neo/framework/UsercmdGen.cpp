@@ -29,8 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-#include"vr\Vr.h" // Koz
-#include"d3xp\Game_local.h"
+#include"vr/Vr.h" // Koz
+#include"d3xp/Game_local.h"
 
 
 idCVar joy_mergedThreshold( "joy_mergedThreshold", "1", CVAR_BOOL | CVAR_ARCHIVE, "If the thresholds aren't merged, you drift more off center" );

@@ -1123,11 +1123,13 @@ void Flicksync_ResumeCutscene()
 		hasWaitingLine = hasPausedLine;
 		previousLineName = waitingLine.text;
 		// adjust the start time to start now
+#ifdef _WIN32
 		SYSTEMTIME systime;
 		GetSystemTime(&systime);
 		uint64 startTime = 0;
 		SystemTimeToFileTime(&systime, (LPFILETIME)&startTime);
 		waitingLine.startTime = startTime;
+#endif
 		// if we used up our cue card
 		if (Flicksync_CueCardText != "")
 			Flicksync_CueCardActive = false;
@@ -1150,6 +1152,7 @@ void Flicksync_ResumeCutscene()
 // length is in FileTime, which is 1/10,000 of a millisecond, or 1/10,000,000 of a second
 bool Flicksync_Voice( const char* entity, const char* animation, const char* lineName, int channel, uint32 length )
 {
+#ifdef _WIN32
 	SYSTEMTIME systime;
 	GetSystemTime(&systime);
 	// startTime is also in FileTime
@@ -1341,6 +1344,9 @@ bool Flicksync_Voice( const char* entity, const char* animation, const char* lin
 		Flicksync_CueCardText = line;
 	}
 	return false;
+#else
+        return true;
+#endif
 }
 
 // The game is trying to make a speaker entity either speak a line or play a sound effect.
@@ -1421,11 +1427,13 @@ void Flicksync_HearLine( const char* line, int confidence, uint64 startTime, uin
 
 	if( !startTime )
 	{
+#ifdef _WIN32
 		SYSTEMTIME systime;
 		uint64 filetime;
 		GetSystemTime( &systime );
 		SystemTimeToFileTime( &systime, (LPFILETIME)&filetime );
 		startTime = filetime - length;
+#endif
 	}
 	const char* confidences[3] = { "low", "medium", "high" };
 	//commonVoice->Say("%s: %s", confidences[confidence + 1], line);

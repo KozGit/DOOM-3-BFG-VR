@@ -29,10 +29,12 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-#include "vr\vr.h" 
+#include "vr/Vr.h"
+#ifdef _WIN32
 #include "sys\win32\win_local.h" 
-#include "framework\Common_local.h" 
-#include "vr\BackgroundSave.h" 
+#endif
+#include "framework/Common_local.h"
+#include "vr/BackgroundSave.h"
 
 BackgroundSave vrBackgroundSave;
 

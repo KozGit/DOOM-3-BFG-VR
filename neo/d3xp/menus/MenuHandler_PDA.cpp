@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #include "../Game_local.h"
 
-#include "d3xp\Weapon.h" // Koz include for in game pda
+#include "d3xp/Weapon.h" // Koz include for in game pda
 
 static const int MAX_PDA_ITEMS = 15;
 static const int MAX_NAV_OPTIONS = 4;

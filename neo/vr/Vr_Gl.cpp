@@ -2,12 +2,16 @@
 #include "precompiled.h"
 #pragma hdrstop
 
-#include "d3xp\Game_local.h"
-#include "vr.h"
-#include "renderer\tr_local.h"
+#include "d3xp/Game_local.h"
+#include "Vr.h"
+#include "renderer/tr_local.h"
+#ifdef _WIN32
 #include "sys\win32\win_local.h"
+#endif
+#ifdef OVR
 #include "libs\LibOVR\Include\OVR_CAPI_GL.h"
 #include "libs\LibOVR\Include\Extras\OVR_Math.h"
+#endif
 
 idCVar zdist("zdist", "-2.9", CVAR_FLOAT, "");
 
@@ -18,7 +22,9 @@ idCVar vr_cineSize("vr_cineSize", "3", CVAR_FLOAT | CVAR_ARCHIVE, "");
 void GLimp_SwapBuffers();
 void GL_BlockingSwapBuffers();
 
+#ifdef _WIN32
 extern PFNWGLSWAPINTERVALEXTPROC				wglSwapIntervalEXT;
+#endif
 
 /*
 ====================
@@ -276,8 +282,8 @@ void iVr::HUDRender( idImage *image0, idImage *image1 )
 {
 
 	//static idAngles imuAngles = { 0.0, 0.0, 0.0 };
-	static idQuat imuRotation = { 0.0, 0.0, 0.0, 0.0 };
-	static idQuat imuRotationGL = { 0.0, 0.0, 0.0, 0.0 };
+	static idQuat imuRotation( 0.0, 0.0, 0.0, 0.0 );
+	static idQuat imuRotationGL( 0.0, 0.0, 0.0, 0.0 );
 	static idVec3 absolutePosition = vec3_zero;
 	static float rot[4][4], rot2[4][4], trans[4][4], eye[4][4], eye2[4][4], proj[4][4], result[4][4] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	static float glMatrix[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
@@ -478,18 +484,21 @@ eye textures: idImage leftCurrent, rightCurrent
 
 void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent ) 
 {
+#ifdef OVR
 	using namespace OVR;
+#endif
+#ifdef _WIN32
+	wglSwapIntervalEXT( 0 ); 
+#endif
 
 	static int FBOW;
 	static int FBOH;
-
-	wglSwapIntervalEXT( 0 ); 
-
 
 	// final eye textures now in finalEyeImage[0,1]				
 	
 	if ( hasOculusRift )
 	{
+#ifdef OVR
 		static ovrLayerHeader	*layers = &oculusLayer.Header;
 		static ovrPosef			eyeRenderPose[2];
 		static ovrPosef			viewOffset[2] = { hmdEye[0].eyeRenderDesc.HmdToEyePose, hmdEye[1].eyeRenderDesc.HmdToEyePose };
@@ -669,7 +678,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 			RB_DrawElementsWithCounters( &backEnd.unitSquareSurface ); // draw it
 
 		}
-
+#endif
 	}
 	else // openVR
 	{
@@ -677,8 +686,9 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		vr::VRCompositor()->Submit( vr::Eye_Left, &leftEyeTexture );
 		vr::Texture_t rightEyeTexture = { (void*)rightCurrent->GetTexNum(), vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 		vr::VRCompositor()->Submit( vr::Eye_Right, &rightEyeTexture );
-		
+#ifdef _WIN32
 		wglSwapIntervalEXT( 0 ); //
+#endif
 		// Blit mirror texture to back buffer
 		//renderProgManager.BindShader_PostProcess(); // pass thru shader
 
@@ -698,7 +708,9 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		globalFramebuffers.primaryFBO->Bind();
 	
 
+#ifdef _WIN32
 		wglSwapIntervalEXT( 0 );//
+#endif
 	}
 }
 
@@ -713,18 +725,21 @@ quad textures: idImage leftCurrent, rightCurrent
 
 bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 {
+#ifdef OVR
 	using namespace OVR;
+#endif
+#ifdef _WIN32
+	wglSwapIntervalEXT(0);
+#endif
 
 	static int FBOW;
 	static int FBOH;
-
-	wglSwapIntervalEXT(0);
-
 
 	// final eye textures now in finalEyeImage[0,1]				
 
 	if ( hasOculusRift )
 	{
+#ifdef OVR
 		static ovrLayerHeader	*layers = &oculusLayer.Header;
 		static ovrPosef			eyeRenderPose[2];
 		static ovrPosef			viewOffset[2] = { hmdEye[0].eyeRenderDesc.HmdToEyePose, hmdEye[1].eyeRenderDesc.HmdToEyePose };
@@ -915,6 +930,7 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 
 			globalFramebuffers.primaryFBO->Bind();
 		}
+#endif
 		return true;
 	}
 	else // openVR

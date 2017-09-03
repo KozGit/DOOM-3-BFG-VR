@@ -1119,6 +1119,9 @@ struct vidMode_t
 	
 	vidMode_t( int width, int height, int displayHz, idStr displayName ) :
 		width( width ), height( height ), displayHz( displayHz ), displayName( displayName) {}
+
+        vidMode_t( int width, int height, int displayHz ) :
+		width( width ), height( height ), displayHz( displayHz ), displayName("No display name") {}
 	// RB end
 	
 	bool operator==( const vidMode_t& a )

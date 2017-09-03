@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // Koz begin
 
-#include "vr\Vr.h"
+#include "vr/Vr.h"
 
 idCVar vr_hmdPerfHud( "vr_hmdPerfHud", "0", CVAR_INTEGER, "Oculus Performance HUD.\n 0 Off\n 1 Latency Timing\n 2 RenderTiming\n 3 Perf Headroom\n 4 Version\n 6 Async Timewarp\n", 0, 7 );
 // Koz end
@@ -1660,13 +1660,16 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 	// Enable the oculus performance hud
 	if ( vr_hmdPerfHud.IsModified() )
 	{
+#ifdef OVR
 		ovr_SetInt( commonVr->hmdSession, "PerfHudMode", vr_hmdPerfHud.GetInteger() );
+#endif
 		vr_hmdPerfHud.ClearModified();
 	}
 	// Koz end
 	if ( vr_asw.IsModified() )
 	{
 		vr_asw.ClearModified();
+#ifdef _WIN32
 		INPUT i[4];
 		i[0].type = INPUT_KEYBOARD;
 		i[0].ki.dwFlags = KEYEVENTF_SCANCODE;
@@ -1700,6 +1703,9 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 		i[3] = i[0];
 		i[3].ki.dwFlags |= KEYEVENTF_KEYUP;
 		SendInput(4, i, sizeof(INPUT));
+#else
+                printf("TODO: handle input on non windows platforms \n");
+#endif
 	}
 
 }

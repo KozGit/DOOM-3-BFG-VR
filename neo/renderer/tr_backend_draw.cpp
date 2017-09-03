@@ -34,8 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_local.h"
 #include "Framebuffer.h"
 
-#include "vr\vr.h" // Koz
-#include "d3xp\Game_local.h" // Koz
+#include "vr/Vr.h" // Koz
+#include "d3xp/Game_local.h" //Koz
 
 idCVar r_drawEyeColor( "r_drawEyeColor", "0", CVAR_RENDERER | CVAR_BOOL, "Draw a colored box, red = left eye, blue = right eye, grey = non-stereo" );
 idCVar r_motionBlur( "r_motionBlur", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "1 - 5, log2 of the number of motion blur samples" );
@@ -351,20 +351,20 @@ void RB_DrawStripWithCounters( const drawSurf_t *surf ) {
 		}
 		assert( (jointBuffer.GetOffset() & (glConfig.uniformBufferOffsetAlignment - 1)) == 0 );
 
-		const GLuint ubo = reinterpret_cast< GLuint >(jointBuffer.GetAPIObject());
+                const GLintptr ubo = reinterpret_cast< GLintptr >(jointBuffer.GetAPIObject());
 		glBindBufferRange( GL_UNIFORM_BUFFER, 0, ubo, jointBuffer.GetOffset(), jointBuffer.GetNumJoints() * sizeof( idJointMat ) );
 	}
 
 	renderProgManager.CommitUniforms();
 
-	if ( backEnd.glState.currentIndexBuffer != (GLuint)indexBuffer->GetAPIObject() || !r_useStateCaching.GetBool() ) {
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER_ARB, (GLuint)indexBuffer->GetAPIObject() );
-		backEnd.glState.currentIndexBuffer = (GLuint)indexBuffer->GetAPIObject();
+        if ( backEnd.glState.currentIndexBuffer != (GLintptr)indexBuffer->GetAPIObject() || !r_useStateCaching.GetBool() ) {
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER_ARB, (GLintptr)indexBuffer->GetAPIObject() );
+		backEnd.glState.currentIndexBuffer = (GLintptr)indexBuffer->GetAPIObject();
 	}
 
-	if ( (backEnd.glState.vertexLayout != LAYOUT_DRAW_VERT) || (backEnd.glState.currentVertexBuffer != (GLuint)vertexBuffer->GetAPIObject()) || !r_useStateCaching.GetBool() ) {
-		glBindBuffer( GL_ARRAY_BUFFER_ARB, (GLuint)vertexBuffer->GetAPIObject() );
-		backEnd.glState.currentVertexBuffer = (GLuint)vertexBuffer->GetAPIObject();
+	if ( (backEnd.glState.vertexLayout != LAYOUT_DRAW_VERT) || (backEnd.glState.currentVertexBuffer != (GLintptr)vertexBuffer->GetAPIObject()) || !r_useStateCaching.GetBool() ) {
+		glBindBuffer( GL_ARRAY_BUFFER_ARB, (GLintptr)vertexBuffer->GetAPIObject() );
+		backEnd.glState.currentVertexBuffer = (GLintptr)vertexBuffer->GetAPIObject();
 
 		glEnableVertexAttribArray( PC_ATTRIB_INDEX_VERTEX );
 		glEnableVertexAttribArray( PC_ATTRIB_INDEX_NORMAL );

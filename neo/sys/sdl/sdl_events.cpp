@@ -44,6 +44,14 @@ If you have questions concerning this license or the applicable additional terms
 #include "sdl_local.h"
 #include "../posix/posix_public.h"
 
+
+idCVar vr_rumbleDiv( "vr_rumbleDiv", "1", CVAR_FLOAT | CVAR_ARCHIVE, "rumble divisor\n" );
+idCVar vr_rumbleSkip( "vr_rumbleSkip", "1", CVAR_FLOAT | CVAR_ARCHIVE, "frames to skip\n" );
+idCVar vr_rumbleEnable( "vr_rumbleEnable", "1", CVAR_BOOL | CVAR_ARCHIVE, "Enable VR controller rumble\n" );
+
+idCVar vr_openVrStuckPadAxisFix( "vr_openVrStuckPadAxisFix", "1", CVAR_BOOL | CVAR_ARCHIVE, "Check for openVR controller stuck pad axis." );
+idCVar vr_openVrStuckPadAxisFixThresh( "vr_openVrStuckPadAxisFixThresh", "12", CVAR_INTEGER | CVAR_ARCHIVE, "# of identical non zero input polls before axis flagged as stuck." );
+
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 #define SDL_Keycode SDLKey
 #define SDLK_APPLICATION SDLK_COMPOSE

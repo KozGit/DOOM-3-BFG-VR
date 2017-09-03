@@ -34,8 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "Window.h"
 #include "UserInterfaceLocal.h"
 
-#include "d3xp\Game_local.h"
-#include "d3xp\Player.h"
+#include "d3xp/Game_local.h"
+#include "d3xp/Player.h"
 
 extern idCVar r_skipGuiShaders;		// 1 = don't render any gui elements on surfaces
 

@@ -26,60 +26,72 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include "precompiled.h"
-#pragma hdrstop
+#ifndef __VR_HMD_H__
+#define __VR_HMD_H__
 
-#ifndef __VOICE_H__
-#define __VOICE_H__
-
-
-typedef struct vr_voiceAction_s
+typedef enum
 {
-	idStr string;
-	int	action;
-} vr_voiceAction_t;
+	EYE_LEFT = 0,
+	EYE_RIGHT = 1,
+	NUM_EYES = 2,
+} vr_eye_t;
 
-class iVoice
+typedef struct
 {
-public:
+	vr_eye_t eyes[NUM_EYES];
+} eye_order_t;
 
-	iVoice();
+typedef struct
+{
+	float scale;
+	float offset;
+} scaleOffset_t;
 
-	void		VoiceInit(void);
-	bool		InitVoiceDictionary( void );
-	static void		ListVoiceCmds_f( const idCmdArgs& args );
-	void		VoiceShutdown(void);
-	void		Speed(int talkingSpeed);
+typedef struct
+{
+	scaleOffset_t x;
+	scaleOffset_t y;
+} eyeScaleOffset_t;
 
-        void		Say(VERIFY_FORMAT_STRING const char* fmt, ...);
+typedef struct
+{
+	float projUp;
+	float projDown;
+	float projLeft;
+	float projRight;
+} eyeProjRaw_t;
 
-        void		HearWord(const char *w, int confidence);
-	void		HearWord(const wchar_t *w, int confidence);
-#ifdef _WIN32
-	void		Event(WPARAM wParam, LPARAM lParam);
+typedef struct
+{
+	int x;
+	int y;
+} resolution_t;
+
+//TODO: is this used by non ovr code?
+#ifndef OVR
+typedef struct ovrFovPort_
+{
+    float UpTan;
+    float DownTan;
+    float LeftTan;
+    float RightTan;
+} ovrFovPort;
 #endif
-	bool		GetTalkButton();
-	bool		GetSayButton(int j);
 
-	void		AddFlicksyncLine(const char* line);
-	void		AddFlicksyncLine(const wchar_t* line);
+typedef struct _hmdEye
+{
 
-	float currentVolume; // 0 to 1
-	float maxVolume; // max volume since sound started: 0 to 1
-	//---------------------------
-private:
-	
-	idStr available;
-	idStr npc;
-	idStr cmds1;
-	idStr cmds2;
-	idStr startListen;
-	idStr stopListen;
-	
-	void		AddWord(const char* word);
-	void		AddWord(const wchar_t* word);
-};
-
-
+	float				projectionHmd[16];
+	idVec3				viewOffset;
+	eyeProjRaw_t		projectionOpenVR;
+	eyeScaleOffset_t	projectionOculus;
+	resolution_t		renderTargetRes;
+	ovrFovPort			eyeFov;
+#ifdef OVR
+	ovrEyeRenderDesc	eyeRenderDesc;
+	ovrSizei			renderTarget;
+	ovrVector2f			UVScaleoffset[2];
+#endif
+} hmdEye_t;
 
 #endif
