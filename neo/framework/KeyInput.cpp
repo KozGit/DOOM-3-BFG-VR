@@ -994,6 +994,7 @@ Called by the system for both key up and key down events
 */
 void idKeyInput::PreliminaryKeyEvent( int keynum, bool down )
 {
+        printf("key %d %d\n", keynum, down);
 	keys[keynum].down = down;
 }
 
