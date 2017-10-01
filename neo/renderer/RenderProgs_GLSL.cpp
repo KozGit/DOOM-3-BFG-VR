@@ -359,7 +359,7 @@ static const char* GLSLParmNames[RENDERPARM_TOTAL] =
 	"rpShadowMatrix5W",
 	// RB end
 
-	//koz begin
+	// Koz begin
 	"rpEyeToSourceUVOffset",
 	"rpEyeToSourceUVScale",
 	"rpInverseResolution",
@@ -367,7 +367,7 @@ static const char* GLSLParmNames[RENDERPARM_TOTAL] =
 	"rpVignetteFade",
 
 	"rpStereoCorrection",
-	// koz end
+	// Koz end
 
 	
 };

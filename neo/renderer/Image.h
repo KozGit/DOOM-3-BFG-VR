@@ -204,7 +204,7 @@ public:
 	static void			GetGeneratedName( idStr& _name, const textureUsage_t& _usage, const cubeFiles_t& _cube );
 	
 	// Koz begin
-	GLuint		GetTexNum() const { return texnum; } // koz fixme return texnum for FBO binding
+	GLuint		GetTexNum() const { return texnum; } // Koz fixme return texnum for FBO binding
 	// Koz end
 	GLuint				texnum;				// gl texture binding fuckme made this public for the fucking skybox.
 private:
@@ -234,7 +234,7 @@ private:
 	
 	static const GLuint TEXTURE_NOT_LOADED = 0xFFFFFFFF;
 	
-	//GLuint				texnum;				// gl texture binding // koz see above moved to public need to fix this.
+	//GLuint				texnum;				// gl texture binding // Koz see above moved to public need to fix this.
 	
 	// we could derive these in subImageUpload each time if necessary
 	GLuint				internalFormat;
@@ -365,8 +365,8 @@ public:
 	idImage* 			hellLoadingIconImage;				// loading icon must exist always
 
 	// Koz begin
-	idImage*			pdaImage;						// koz rendered PDA gui will be copied here 
-	idImage*			hudImage;						// koz hud/menus will be copied here	
+	idImage*			pdaImage;						// Koz rendered PDA gui will be copied here 
+	idImage*			hudImage;						// Koz hud/menus will be copied here	
 	idImage*			skyBoxFront;
 	idImage*			skyBoxSides;
 	// Koz end

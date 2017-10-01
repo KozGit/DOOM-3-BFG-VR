@@ -141,8 +141,8 @@ void idPhysics_Player::Accelerate( const idVec3& wishdir, const float wishspeed,
 		accelspeed = addspeed;
 	}
 	
-	// koz instant accel/decel
-	if ( game->isVR && vr_instantAccel.GetBool() && vr_teleportMode.GetInteger() !=1 && walking && groundPlane && !OnLadder() ) 
+	// Koz instant accel/decel
+	if ( game->isVR && vr_instantAccel.GetBool() && vr_teleportMode.GetInteger() !=2 && walking && groundPlane && !OnLadder() ) 
 	{
 		idVec3 newVel = wishspeed * wishdir;
 		current.velocity.x = newVel.x;
@@ -175,7 +175,7 @@ void idPhysics_Player::Accelerate( const idVec3& wishdir, const float wishspeed,
 
 #define	MAX_CLIP_PLANES	5
 
-//koz MotionMove, allow physical movent to move player body in the world
+// Koz MotionMove, allow physical movent to move player body in the world
 idVec3 idPhysics_Player::MotionMove( idVec3 &moveVelocity ) // bool gravity, bool stepUp, bool stepDown, bool push )
 {
 	int			i, j, k, pushFlags;
@@ -195,7 +195,7 @@ idVec3 idPhysics_Player::MotionMove( idVec3 &moveVelocity ) // bool gravity, boo
 	
 	numbumps = 4;
 
-	//koz begin motion movement
+	// Koz begin motion movement
 	//movement vector was calc'd in player::move, was converted to a velocity 
 	//in idPhysics_Player::Evaluate
 	//add this temp velocity to move the player model the correct amount,
@@ -874,8 +874,8 @@ void idPhysics_Player::Friction()
 		// ignore slope movement, remove all velocity in gravity direction
 		vel += ( vel * gravityNormal ) * gravityNormal;
 		
-		//koz instant accel/decel
-		if ( game->isVR && vr_instantAccel.GetBool() && vr_teleportMode.GetInteger() != 1 && groundPlane && !OnLadder() )
+		// Koz instant accel/decel
+		if ( game->isVR && vr_instantAccel.GetBool() && vr_teleportMode.GetInteger() != 2 && groundPlane && !OnLadder() )
 		{
 			if ( command.forwardmove == 0 && command.rightmove == 0 )
 			{
@@ -2472,7 +2472,7 @@ idPhysics_Player::ApplyImpulse
 */
 void idPhysics_Player::ApplyImpulse( const int id, const idVec3& point, const idVec3& impulse )
 {
-	if ( current.movementType != PM_NOCLIP && !(game->isVR && !vr_knockBack.GetBool())) // koz fixme knockback
+	if ( current.movementType != PM_NOCLIP && !(game->isVR && !vr_knockBack.GetBool())) // Koz fixme knockback
 	{
 		current.velocity += impulse * invMass;
 	}

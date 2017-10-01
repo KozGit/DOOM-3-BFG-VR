@@ -65,9 +65,9 @@ private:
 	idRenderModel* 			defaultModel;
 	idRenderModel* 			beamModel;
 	idRenderModel* 			spriteModel;
-	// koz fixme this is all in the wrong place
+	// Koz fixme this is all in the wrong place
 	idRenderModel*			headingBeamModel;
-	//koz end
+	// Koz end
 	bool					insideLevelLoad;		// don't actually load now
 	
 	idRenderModel* 			GetModel( const char* modelName, bool createIfNotFound );
@@ -260,8 +260,8 @@ void idRenderModelManagerLocal::Init()
 	AddModel( sprite );
 
 	/*
-	// koz deleteme
-	//koz begin
+	// Koz deleteme
+	// Koz begin
 	idRenderModelStatic* headingBeam = new(TAG_MODEL)idRenderModelStatic;
 	//headingBeam->InitEmpty( "_HEADINGBEAM" );
 	headingBeam->InitFromFile( "/models/mapobjects/headingbeam.lwo" );
@@ -593,7 +593,7 @@ void idRenderModelManagerLocal::ReloadModels( bool forceAll )
 			// check timestamp
 			ID_TIME_T current;
 
-			common->Printf( "Checking model %s \n", model->Name() ); // koz fixme delete this only for debuging new assets
+			common->Printf( "Checking model %s \n", model->Name() ); // Koz fixme delete this only for debuging new assets
 			
 			fileSystem->ReadFile( model->Name(), NULL, &current );
 			if( current <= model->Timestamp() )

@@ -357,7 +357,7 @@ void idProjectile::Launch( const idVec3& start, const idVec3& dir, const idVec3&
 	
 	speed = velocity.Length() * launchPower;
 
-	//koz if throwing a grenade use the tracked hand velocity when using motion controls if the controller is not mounted
+	// Koz if throwing a grenade use the tracked hand velocity when using motion controls if the controller is not mounted
 	if ( game->isVR && commonVr->VR_USE_MOTION_CONTROLS && !vr_mountedWeaponController.GetBool() )
 	{
 
@@ -371,7 +371,7 @@ void idProjectile::Launch( const idVec3& start, const idVec3& dir, const idVec3&
 			}
 		}
 	}
-	// koz end
+	// Koz end
 	
 	damagePower = dmgPower;
 	

@@ -39,7 +39,7 @@ typedef struct
 
 static bindInfo_t keyboardBinds[] = 
 {
-	{ "                                ", "" }, // koz divider
+	{ "                                ", "" }, // Koz divider
 	{ "#str_02090", "" },						// HEADING
 	{ "#str_02100", "_forward" },				// FORWARD
 	{ "#str_02101", "_back" },					// BACKPEDAL
@@ -57,7 +57,7 @@ static bindInfo_t keyboardBinds[] =
 	{ "Teleport", "_teleport" },				// Carl: TELEPORT
 
 		
-	{ "                                ", "" }, // koz divider
+	{ "                                ", "" }, // Koz divider
 	{ "#str_02095", "" },						// HEADING
 	{ "#str_02112", "_attack" },				// ATTACK
 	{ "#str_00100187", "_impulse16" },			// FLASHLIGHT
@@ -66,22 +66,23 @@ static bindInfo_t keyboardBinds[] =
 	{ "#str_02115", "_impulse13" },				// RELOAD
 	{ "#str_02121", "_impulse19" },				// PDA / SCOREBOARD
 	{ "System Menu (ESC)", "_impulse40" },		// System Menu (escape)
+	{ "Push to Talk", "_impulse30" },			// KOZ Push to talk - to activate voice command recognition
 	{ "Toggle Lasersight", "_impulse33" },		// KOZ TOGGLE LASERSIGHT
 	{ "Toggle HUD", "_impulse36" },				// KOZ TOGGLE HUD
 	{ "Next Flashlight Mode", "_impulse39" },	// KOZ NEXT FLASHLIGHT MODE 
 	{ "Toggle Heading Beam", "_impulse37" },	// KOZ TOGGLE HEADING BEAM
-	{ "Walk in Place", "_impulse38" },			// KOZ Walk In Place
-	{ "Talk", "_talk" },			// Carl Talk to NPC
+	//{ "Walk in Place", "_impulse38" },			// KOZ Walk In Place
+	{ "Talk", "_talk" },						// Carl Talk to NPC
 	{ "#str_swf_action_use", "_use" },			// USE
 	{ "#str_02116", "_lookUp" },				// LOOK UP
 	{ "#str_02117", "_lookDown" },				// LOOK DOWN
 
-	{ "                                ", "" }, // koz divider
+	{ "                                ", "" }, // Koz divider
 	{ "#str_02093", "" },						// HEADING
 	{ "#str_00100177", "_impulse0" },			// FISTS / GRABBER
-	{ "Fists", "_impulse26" },			// Carl: Fists
-	{ "Chainsaw", "_impulse27" },		// Carl: Chainsaw
-	{ "Grabber", "_impulse1" },			// Carl: Grabber
+	{ "Fists", "_impulse26" },					// Carl: Fists
+	{ "Chainsaw", "_impulse27" },				// Carl: Chainsaw
+	{ "Grabber", "_impulse1" },					// Carl: Grabber
 	{ "#str_00100178", "_impulse2" },			// PISTOL
 	{ "#str_00100179", "_impulse3" },			// SHOTGUN / DOUBLE
 	{ "Single Shotgun", "_impulse11" },			// Carl: Shotgun
@@ -93,20 +94,20 @@ static bindInfo_t keyboardBinds[] =
 	{ "#str_00100184", "_impulse9" },			// ROCKETS
 	{ "#str_00100185", "_impulse10" },			// BFG
 	{ "#str_swf_soulcube_artifact", "_impulse12" },	// SOULCUBE / ARTIFACT	
-	{ "Soul Cube", "_soulcube" }, // Carl: Soul Cube
-	{ "The Artifact", "_artifact" }, // Carl: Artifact
+	{ "Soul Cube", "_soulcube" },				// Carl: Soul Cube
+	{ "The Artifact", "_artifact" },			// Carl: Artifact
 
 
-	{ "                                ", "" }, // koz divider
+	{ "                                ", "" }, // Koz divider
 	{ "#str_04065", "" },						// HEADING
-	{ "Pause Game", "_pause" },			// Carl: Computer, Freeze Program
-	{ "Resume Game", "_resume" },			// Carl: Computer, Resume Program
+	{ "Pause Game", "_pause" },					// Carl: Computer, Freeze Program
+	{ "Resume Game", "_resume" },				// Carl: Computer, Resume Program
 	{ "#str_04067", "savegame quick" },			// QUICK SAVE
 	{ "#str_04068", "loadgame quick" },			// QUICK LOAD
 	{ "#str_04069", "screenshot" },				// SCREENSHOT
 	{ "#str_02068", "clientMessageMode" },		// SCREENSHOT
 	{ "#str_02122", "clientMessageMode 1" },	// SCREENSHOT
-	{ "                                ", "" }, // koz divider
+	{ "                                ", "" }, // Koz divider
 	//{ "#str_04071",	"clientDropWeapon"						}	// DROP WEAPON
 };
 
@@ -270,7 +271,7 @@ idMenuScreen_Shell_Bindings::UpdateBindingString
 */
 void idMenuScreen_Shell_Bindings::UpdateBindingString()
 {
-	//koz begin;
+	// Koz begin;
 	int curIndex = options->GetViewIndex();
 	if ( idStr::Icmp( keyboardBinds[curIndex].bind, "" ) == 0 )
 	{
@@ -316,9 +317,9 @@ void idMenuScreen_Shell_Bindings::UpdateBindingString()
 					"JOY_TRIGGER1", "JOY_TRIGGER2", 0
 				};
 
-				//koz begin
-				//limited space in the menus, so dont list controllers we are not using,
-				//and list motion controllers 1st.
+				// Koz begin
+				// limited space in the menus, so dont list controllers we are not using,
+				// and list motion controllers first.
 
 				if ( commonVr->VR_USE_MOTION_CONTROLS )
 				{
@@ -430,7 +431,7 @@ idMenuScreen_Shell_Bindings::UpdateBindingDisplay
 */
 void idMenuScreen_Shell_Bindings::UpdateBindingDisplay()
 {
-	UpdateBindingString();//koz
+	UpdateBindingString();// Koz
 	idList< idList< idStr, TAG_IDLIB_LIST_MENU >, TAG_IDLIB_LIST_MENU > bindList;
 	
 	for( int i = 0; i < numBinds; ++i )
@@ -478,7 +479,7 @@ void idMenuScreen_Shell_Bindings::UpdateBindingDisplay()
 					"JOY_TRIGGER1", "JOY_TRIGGER2", 0
 				};
 				
-				//koz begin
+				// Koz begin
 				//limited space in the menus, so dont list controllers we are not using,
 				//and list motion controllers 1st.
 				
@@ -750,7 +751,7 @@ bool idMenuScreen_Shell_Bindings::HandleAction( idWidgetAction& action, const id
 		case WIDGET_ACTION_GO_BACK:
 		{
 			menuData->SetNextScreen( SHELL_AREA_CONTROLS, MENU_TRANSITION_SIMPLE );
-			commonVr->currentBindingDisplay = ""; //koz
+			commonVr->currentBindingDisplay = ""; // Koz
 			return true;
 		}
 		case WIDGET_ACTION_JOY3_ON_PRESS:

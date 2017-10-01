@@ -186,31 +186,31 @@ void idGuiModel::EmitSurfaces( float modelMatrix[16], float modelViewMatrix[16],
 		if( allowFullScreenStereoDepth || game->isVR  )
 		{
 			// override sort with the stereoDepth
-			//drawSurf->sort = stereoDepth;
+			// drawSurf->sort = stereoDepth;
 				
-			//koz
+			// Koz
 			// this is an unbelievably gross hack,
 			// but it adds some depth to the in game guis so they dont look like stickers.
 			// ideally could define depth per surface in gui definition, but would be really time consuming,
 			// maybe should at least add a depth parm to the gui materials that could be referenced here? 
+			
 			if ( game->isVR && drawSurf->sort == SS_GUI && vr_3dgui.GetBool() )
 			{
-			
-				if ( strstr( guiSurf.material->GetName(), "bg" ) || strstr( guiSurf.material->GetName(), "spin") )   // bg is normally a background image. spinny things are also normally background images.
+				
+				if ( strstr( guiSurf.material->GetName(), "bg" ) || strstr( guiSurf.material->GetName(), "spin" ) || strstr( guiSurf.material->GetName(), "glasscrack2" ) )   // bg is normally a background image. spinny things are also normally background images.
 				{
 					guiSurf.stereoType = STEREO_DEPTH_TYPE_IG_FAR;
 				}
-				else if ( strstr( guiSurf.material->GetName(), "logo" ) )// put logos in the mid field
+				else if ( strstr( guiSurf.material->GetName(), "logo" )  )// put logos in the mid field
 				{
 					guiSurf.stereoType = STEREO_DEPTH_TYPE_IG_MID;
 				}
 				else
 				{
-					guiSurf.stereoType = STEREO_DEPTH_TYPE_IG_NEAR;
+					guiSurf.stereoType = STEREO_DEPTH_TYPE_NONE; // Koz was STEREO_DEPTH_TYPE_IG_NEAR, but turns out my brilliant idea breaks subviews ( mirrors & security monitors etc ). Need to rethink this.
 				}
 			}
 			else if ( !allowFullScreenStereoDepth )  guiSurf.stereoType = STEREO_DEPTH_TYPE_NONE;
-
 			
 			switch( guiSurf.stereoType )
 			{

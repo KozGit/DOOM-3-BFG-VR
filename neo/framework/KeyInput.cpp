@@ -235,7 +235,7 @@ keyname_t keynames[] =
 	NAMEKEY( JOY15, "#str_07076" ),
 	NAMEKEY( JOY16, "#str_07077" ),
 		
-	//Koz :  begin add touch defs 
+	// Koz :  begin add touch defs 
 	NAMEKEY( JOY17, "L_TOUCHX" ),
 	NAMEKEY( JOY18, "L_TOUCHY" ),
 	NAMEKEY( JOY19, "L_TOUCHM" ),
@@ -329,7 +329,7 @@ keyname_t keynames[] =
 	NAMEKEY( L_TOUCHTRIG, "L_TOUCH_TR" ),
 	NAMEKEY( R_TOUCHTRIG, "R_TOUCH_TR" ),
 	
-	// koz SteamVr defs
+	// Koz SteamVr defs
 	NAMEKEY( STEAMVR_LEFT_PAD_UP, "L_STEAMVR_U" ),
 	NAMEKEY( STEAMVR_LEFT_PAD_DOWN, "L_STEAMVR_D" ),
 	NAMEKEY( STEAMVR_LEFT_PAD_LEFT, "L_STEAMVR_L" ),

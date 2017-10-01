@@ -73,7 +73,7 @@ idCVar com_allowConsole( "com_allowConsole", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR
 idCVar com_allowConsole( "com_allowConsole", "1", CVAR_BOOL | CVAR_SYSTEM | CVAR_INIT, "allow toggling console with the tilde key" );
 #endif
 
-idCVar com_developer( "developer", "1", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "developer mode" ); // koz fixme should be 0
+idCVar com_developer( "developer", "1", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "developer mode" ); // Koz fixme should be 0
 idCVar com_speeds( "com_speeds", "0", CVAR_BOOL | CVAR_SYSTEM | CVAR_NOCHEAT, "show engine timings" );
 // DG: support "com_showFPS 2" for fps-only view like in classic doom3 => make it CVAR_INTEGER
 idCVar com_showFPS( "com_showFPS", "0", CVAR_INTEGER | CVAR_SYSTEM | CVAR_ARCHIVE | CVAR_NOCHEAT, "show frames rendered per second. 0: off 1: default bfg values, 2: only show FPS (classic view)" );
@@ -266,7 +266,7 @@ void idCommonLocal::ParseCommandLine( int argc, const char* const* argv )
 	// API says no program path
 	for( i = 0; i < argc; i++ )
 	{
-		// koz fixme enable VR support here.
+		// Koz fixme enable VR support here.
 		if ( idStr::Icmp( argv[i], "-vr" ) == 0 )
 		{
 			vr_enable.SetBool( true );
@@ -1442,7 +1442,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		
 		AddStartupCommands();
 		
-		//koz moved static binds here to ensure all previous commands in the command buffer
+		// Koz moved static binds here to ensure all previous commands in the command buffer
 		//have been fully executed. Some of the .cfg files perform unbindall, which
 		//was wiping out these binds due to the way the commands queue.
 
@@ -1474,7 +1474,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		cmdSystem->AppendCommandText( "bind SAY_RESET_VIEW _impulse32\n" );
 		
 
-		//koz check for mod files:
+		// Koz check for mod files:
 		findFile_t found = fileSystem->FindFile( "guis\\lookforward.tga" );
 		
 		if ( found == FIND_NO )
@@ -1683,8 +1683,8 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 	}
 
 	extern idCVar vr_asw;
-	// koz
-	if (game->isVR) // koz override these for VR
+	// Koz
+	if (game->isVR) // Koz override these for VR
 	{
 		cvarSystem->SetCVarString("r_swapInterval", "0");
 		cvarSystem->SetCVarInteger("com_engineHz", commonVr->hmdHz);

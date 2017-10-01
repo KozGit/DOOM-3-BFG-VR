@@ -147,13 +147,13 @@ idCommonLocal::StartMainMenu
 void idCommonLocal::StartMenu( bool playIntro )
 {
 	
-	//common->Printf( "idCommonLocal::StartMenu\n" ); // koz debug
+	//common->Printf( "idCommonLocal::StartMenu\n" ); // Koz debug
 	if( game && game->Shell_IsActive() )
 	{
 		return;
 	}
 	
-	//koz fixme pause menu
+	// Koz fixme pause menu
 	//if escape is pressed while the pda is rising, it will bring up the pause menu when we really want to close the pda, so hack that shit here for now.
 	if ( game && game->isVR )
 	{	

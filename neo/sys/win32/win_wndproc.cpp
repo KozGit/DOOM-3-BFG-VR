@@ -200,13 +200,13 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 							r_windowHeight.SetInteger( glConfig.nativeScreenHeight );
 						}
 					}
-					//koz
+					// Koz
 					if ( vr_mouseCapture.GetInteger() == 1 )
 					{
 						GetWindowRect( hWnd, &rect );
 						ClipCursor( &rect );
 					}
-					//koz end;
+					// Koz end;
 				}
 			}
 			break;
@@ -233,13 +233,13 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 				r_windowY.SetInteger( yPos + r.top );
 			}
 			
-			//koz
+			// Koz
 			if ( vr_mouseCapture.GetInteger() == 1 )
 			{
 				GetWindowRect( hWnd, &r );
 				ClipCursor( &r );
 			}
-			//koz end;
+			// Koz end;
 			
 			
 			break;
@@ -261,14 +261,14 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			void GLW_WM_CREATE( HWND hWnd );
 			GLW_WM_CREATE( hWnd );
 			
-			//koz
+			// Koz
 			if ( vr_mouseCapture.GetInteger() == 1 )
 			{
 				RECT r;
 				GetWindowRect( hWnd, &r );
 				ClipCursor( &r );
 			}
-			//koz end;
+			// Koz end;
 			
 			break;
 			
@@ -307,19 +307,19 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 				{
 					SetCursor( NULL );
 				}
-				//koz
+				// Koz
 				if ( vr_mouseCapture.GetInteger() == 1 )
 				{
 					RECT r;
 					GetWindowRect( hWnd, &r );
 					ClipCursor( &r );
 				}
-				//koz end;
+				// Koz end;
 			}
 			
 			if( fActive == WA_INACTIVE )
 			{
-				//koz begin
+				// Koz begin
 				if ( vr_mouseCapture.GetInteger() == 1 )
 				{
 					RECT desktop;
@@ -327,7 +327,7 @@ LONG WINAPI MainWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 					GetWindowRect( hDesktop, &desktop );
 					ClipCursor( &desktop );
 				}
-				//koz end
+				// Koz end
 
 				win32.movingWindow = false;
 				if( common->IsInitialized() )

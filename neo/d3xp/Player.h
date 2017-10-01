@@ -307,9 +307,9 @@ public:
 	qhandle_t				laserSightHandle;
 
 	// Koz begin
-	bool					laserSightActive; // koz allow lasersight toggle
+	bool					laserSightActive; // Koz allow lasersight toggle
 
-	renderEntity_t			headingBeamEntity; // koz add a heading indicator pointing the direction the players body is facing.
+	renderEntity_t			headingBeamEntity; // Koz add a heading indicator pointing the direction the players body is facing.
 	qhandle_t				headingBeamHandle;
 	bool					headingBeamActive;
 	const idDeclSkin*		skinHeadingSolid;
@@ -326,11 +326,11 @@ public:
 	int						holsteredWeapon, extraHolsteredWeapon;
 	const char*				extraHolsteredWeaponModel;
 
-	renderEntity_t			hudEntity; // koz add a model to place the hud into the world
+	renderEntity_t			hudEntity; // Koz add a model to place the hud into the world
 	qhandle_t				hudHandle;
 	bool					hudActive;
 
-	renderEntity_t			crosshairEntity; // koz add a model to place the crosshair into the world
+	renderEntity_t			crosshairEntity; // Koz add a model to place the crosshair into the world
 	qhandle_t				crosshairHandle;
 	bool					crosshairActive;
 	const idDeclSkin*		skinCrosshairDot;
@@ -355,9 +355,9 @@ public:
 
 	bool					aimValidForTeleport;
 	
-	bool			  		PDAfixed; // koz has the PDA been fixed in space?
-	idVec3					PDAorigin; // koz 
-	idMat3					PDAaxis; // koz
+	bool			  		PDAfixed; // Koz has the PDA been fixed in space?
+	idVec3					PDAorigin; // Koz 
+	idMat3					PDAaxis; // Koz
 
 	idVec3 throwDirection; // for motion control throwing actions e.g. grenade
 	float throwVelocity;
@@ -448,7 +448,7 @@ public:
 	int						weapon_bloodstone_active2;
 	int						weapon_bloodstone_active3;
 	bool					harvest_lock;
-	//koz begin
+	// Koz begin
 	int						weapon_pistol;
 	int						weapon_shotgun;
 	int						weapon_shotgun_double;
@@ -528,7 +528,7 @@ public:
 	idVec3					firstPersonViewOrigin;
 	idMat3					firstPersonViewAxis;
 
-	idVec3					firstPersonWeaponOrigin; // koz fixme check if still needed - independent weapons
+	idVec3					firstPersonWeaponOrigin; // Koz fixme check if still needed - independent weapons
 	
 	idVec3					leftHandOrigin;
 	idMat3					leftHandAxis;
@@ -607,7 +607,7 @@ public:
 	virtual void			Show();
 	
 	void					Init();
-	void					InitPlayerBones(); // koz
+	void					InitPlayerBones(); // Koz
 	void					PrepareForRestart();
 	virtual void			Restart();
 	void					LinkScriptVariables();
@@ -701,13 +701,13 @@ public:
 	void					SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQuat rotation, bool isFlashlight = false );
 
 	// Koz begin
-	void					CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flashOffset ); // koz aim the flashlight with motion controls
+	void					CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flashOffset ); // Koz aim the flashlight with motion controls
 	// Koz end
 
 	idVec3					GetEyePosition() const;
 	void					GetViewPos( idVec3& origin, idMat3& axis ) const;
 
-	void					GetViewPosVR( idVec3& origin, idMat3& axis ) const; // koz fixme
+	void					GetViewPosVR( idVec3& origin, idMat3& axis ) const; // Koz fixme
 
 	void					OffsetThirdPersonView( float angle, float range, float height, bool clip );
 	
@@ -988,7 +988,7 @@ private:
 	jointHandle_t			chestJoint;
 	jointHandle_t			headJoint;
 
-	// koz begin
+	// Koz begin
 	jointHandle_t			neckJoint;
 	
 	jointHandle_t			ik_hand[2];
@@ -1006,7 +1006,7 @@ private:
 	idVec3					handWeaponAttacherToDefaultOffset[2][32];
 	
 		
-	// koz end
+	// Koz end
 
 	bool					blink;
 		
@@ -1150,8 +1150,8 @@ private:
 	void					AdjustSpeed();
 	void					AdjustBodyAngles();
 
-	void					SnapBodyToView(); // koz align body to current view;
-	void					OrientHMDBody(); // koz reset hmd/body orientations
+	void					SnapBodyToView(); // Koz align body to current view;
+	void					OrientHMDBody(); // Koz reset hmd/body orientations
 
 	void					SetAAS();
 	void					InitAASLocation();
@@ -1210,7 +1210,7 @@ private:
 	void					Event_ToggleBloom( int on );
 	void					Event_SetBloomParms( float speed, float intensity );
 
-	// koz
+	// Koz
 	void					Event_GetWeaponHand();
 	void					Event_GetWeaponHandState();
 	void					Event_GetFlashHand();

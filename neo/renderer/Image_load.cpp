@@ -867,7 +867,7 @@ void idImage::CopyFramebuffer( int x, int y, int imageWidth, int imageHeight )
 	{
 		if ( commonVr->VR_AAmode == VR_AA_MSAA ) // resolve the MSAA renderbuffer before copy.
 		{
-			glDisable( GL_SCISSOR_TEST ); // koz hack - issue with nvidia msaa, if scissor test is enabled when blitting/resolving the framebuffer the post processing is corrupt.
+			glDisable( GL_SCISSOR_TEST ); // Koz hack - issue with nvidia msaa, if scissor test is enabled when blitting/resolving the framebuffer the post processing is corrupt.
 			ResolveMSAA();
 		}
 		else
@@ -886,7 +886,7 @@ void idImage::CopyFramebuffer( int x, int y, int imageWidth, int imageHeight )
 	
 	glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, x, y, imageWidth, imageHeight, 0 );
 	
-	// koz begin
+	// Koz begin
 	if ( opts.genMipsOnCopy == true )
 	{
 		glGenerateMipmap( GL_TEXTURE_2D );
@@ -894,7 +894,7 @@ void idImage::CopyFramebuffer( int x, int y, int imageWidth, int imageHeight )
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	}
 	else 
-	// koz end
+	// Koz end
 	{
 		// these shouldn't be necessary if the image was initialized properly
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
@@ -909,7 +909,7 @@ void idImage::CopyFramebuffer( int x, int y, int imageWidth, int imageHeight )
 	if ( commonVr->useFBO )
 	{
 		globalFramebuffers.primaryFBO->Bind();
-		if ( commonVr->VR_AAmode == VR_AA_MSAA ) glEnable( GL_SCISSOR_TEST);// koz hack - re-enable scissor test 
+		if ( commonVr->VR_AAmode == VR_AA_MSAA ) glEnable( GL_SCISSOR_TEST);// Koz hack - re-enable scissor test 
 		
 	}
 }

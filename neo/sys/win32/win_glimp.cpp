@@ -714,7 +714,7 @@ static bool GetDisplayCoordinates( const int deviceNum, int& x, int& y, int& wid
 	{
 		return false;
 	}
-	common->Printf( "Get Display Coordinates:\n" );// koz
+	common->Printf( "Get Display Coordinates:\n" );// Koz
 	common->Printf( "display device: %i\n", deviceNum );
 	common->Printf( "  DeviceName  : %s\n", device.DeviceName );
 	common->Printf( "  DeviceString: %s\n", device.DeviceString );
@@ -1142,7 +1142,7 @@ bool R_GetModeListForDisplay( const int requestedDisplayNum, idList<vidMode_t>& 
 				continue;
 			}
 			//if( ( devmode.dmDisplayFrequency != 60 ) && ( devmode.dmDisplayFrequency != 120 ) )
-			if ( ( devmode.dmDisplayFrequency < 60 ) && ( devmode.dmDisplayFrequency > 120 ) ) // koz fixme
+			if ( ( devmode.dmDisplayFrequency < 60 ) && ( devmode.dmDisplayFrequency > 120 ) ) // Koz fixme
 			{
 				continue;
 			}

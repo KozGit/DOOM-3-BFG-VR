@@ -577,9 +577,9 @@ public:
 		return nextGibTime;
 	};
 	
-	// koz made public 
+	// Koz made public 
 	void					SetScriptFPS( const float com_engineHz );
-	// koz end
+	// Koz end
 
 	virtual bool				InhibitControls();
 	virtual bool				IsPDAOpen() const;
@@ -712,7 +712,7 @@ private:
 	void					RunDebugInfo();
 	
 	void					InitScriptForMap();
-	// koz made public void					SetScriptFPS( const float com_engineHz );
+	// Koz made public void					SetScriptFPS( const float com_engineHz );
 	void					SpawnPlayer( int clientNum );
 	
 	void					InitConsoleCommands();

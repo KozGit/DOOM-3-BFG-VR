@@ -145,7 +145,7 @@ static void R_RGBA8Image( idImage* image )
 	image->GenerateImage( ( byte* )data, DEFAULT_SIZE, DEFAULT_SIZE, TF_DEFAULT, TR_REPEAT, TD_LOOKUP_TABLE_RGBA );
 }
 
-// koz begin
+// Koz begin
 // used for Hud and PDA surfaces in VR
 static void R_VRSurfaceImage( idImage* image )
 {
@@ -168,7 +168,7 @@ static void R_VrSkyBoxImage( idImage* image )
 	image->AllocImage( opts, TF_DEFAULT, TR_CLAMP );
 
 }
-// koz end
+// Koz end
 
 static void R_DepthImage( idImage* image )
 {

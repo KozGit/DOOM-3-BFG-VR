@@ -105,10 +105,10 @@ private:
 	float				DrawFPS( float y );
 	float				DrawMemoryUsage( float y );
 	
-	// koz 
+	// Koz 
 	float				DrawVRWip( float y );
 	void				DrawVRBinding();
-	// koz end
+	// Koz end
 	void				DrawFlicksync( float& leftY, float& centerY );
 
 	void				DrawOverlayText( float& leftY, float& rightY, float& centerY );
@@ -488,7 +488,7 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 
 /*
 ==================
-koz begin
+Koz begin
 idConsoleLocal::DrawVRBinding
 ==================
 */
@@ -518,7 +518,7 @@ void idConsoleLocal::DrawVRBinding()
 
 /*
 ==================
-koz begin
+Koz begin
 idConsoleLocal::DrawVRWip
 ==================
 */
@@ -625,7 +625,7 @@ float idConsoleLocal::DrawVRWip( float y )
 
 	return y + BIGCHAR_HEIGHT + 4;
 }
-// koz end
+// Koz end
 
 
 
@@ -1641,13 +1641,13 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 	{
 		righty = DrawMemoryUsage( righty );
 	}
-	// koz
+	// Koz
 	DrawVRBinding();
 	if ( vr_showWIP.GetBool() )
 	{
 		righty = DrawVRWip( righty );
 	}
-	// koz end
+	// Koz end
 	if ( vr_flicksyncCharacter.GetInteger() )
 	{
 		DrawFlicksync( lefty, centery );

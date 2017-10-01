@@ -492,7 +492,7 @@ bool idMenuHandler_PDA::HandleAction( idWidgetAction& action, const idWidgetEven
 				
 			}
 						
-			commonVr->forceLeftStick = true;	// koz make left active.
+			commonVr->forceLeftStick = true;	// Koz make left active.
 
 			return true;
 		}

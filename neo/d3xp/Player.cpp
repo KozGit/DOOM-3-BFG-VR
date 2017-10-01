@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "../framework/Common_local.h"
 #include "PredictedValue_impl.h"
 
-#include "vr\Vr.h" // koz
+#include "vr\Vr.h" // Koz
 
 #define	ANGLE2SHORT(x)			( idMath::Ftoi( (x) * 65536.0f / 360.0f ) & 65535 )
 
@@ -172,14 +172,14 @@ const idEventDef EV_Player_StopHelltime( "stopHelltime", "d" );
 const idEventDef EV_Player_ToggleBloom( "toggleBloom", "d" );
 const idEventDef EV_Player_SetBloomParms( "setBloomParms", "ff" );
 
-//koz begin - let scripts query which hand does what when using motion controls
+// Koz begin - let scripts query which hand does what when using motion controls
 const idEventDef EV_Player_GetWeaponHand( "getWeaponHand", NULL, 'd' );
 const idEventDef EV_Player_GetFlashHand( "getFlashHand", NULL, 'd' );
 const idEventDef EV_Player_GetWeaponHandState( "getWeaponHandState", NULL, 'd' );
 const idEventDef EV_Player_GetFlashHandState( "getFlashHandState", NULL, 'd' );
 const idEventDef EV_Player_GetFlashState( "getFlashState", NULL, 'd' );
 
-//koz end
+// Koz end
 
 CLASS_DECLARATION( idActor, idPlayer )
 EVENT( EV_Player_GetButtons,			idPlayer::Event_GetButtons )
@@ -209,13 +209,13 @@ EVENT( EV_Player_StartWarp,				idPlayer::Event_StartWarp )
 EVENT( EV_Player_StopHelltime,			idPlayer::Event_StopHelltime )
 EVENT( EV_Player_ToggleBloom,			idPlayer::Event_ToggleBloom )
 EVENT( EV_Player_SetBloomParms,			idPlayer::Event_SetBloomParms )
-//koz begin
+// Koz begin
 EVENT( EV_Player_GetWeaponHand, 		idPlayer::Event_GetWeaponHand ) 
 EVENT( EV_Player_GetFlashHand,			idPlayer::Event_GetFlashHand )
 EVENT( EV_Player_GetWeaponHandState,	idPlayer::Event_GetWeaponHandState )
 EVENT( EV_Player_GetFlashHandState,		idPlayer::Event_GetFlashHandState )
 EVENT( EV_Player_GetFlashState,			idPlayer::Event_GetFlashState )
-//koz end
+// Koz end
 END_CLASS
 
 const int MAX_RESPAWN_TIME = 10000;
@@ -1582,7 +1582,7 @@ idPlayer::idPlayer():
 	holsterModelDefHandle = -1;
 	memset( &holsterRenderEntity, 0, sizeof( holsterRenderEntity ) );
 
-	// koz begin
+	// Koz begin
 	headingBeamHandle = -1;
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
 
@@ -1592,7 +1592,7 @@ idPlayer::idPlayer():
 	crosshairHandle = -1;
 	memset( &crosshairEntity, 0, sizeof( crosshairEntity ) );
 		
-	// koz end
+	// Koz end
 
 
 	weapon					= NULL;
@@ -1779,12 +1779,12 @@ idPlayer::idPlayer():
 	memset( videoHasBeenViewed, 0, sizeof( videoHasBeenViewed ) );
 	memset( audioHasBeenHeard, 0, sizeof( audioHasBeenHeard ) );
 
-	// koz begin
+	// Koz begin
 	//common->Printf( "Setting headingbeam active\n" );
 	//laserSightActive = vr_weaponSight.GetInteger() == 0;
 	//headingBeamActive = vr_headingBeamMode.GetInteger() != 0;
 	//hudActive = true;
-	// koz end
+	// Koz end
 
 	blink = false;
 }
@@ -1890,7 +1890,7 @@ void idPlayer::Init()
 	weapon_bloodstone_active3 = SlotForWeapon( "weapon_bloodstone_active3" );
 	harvest_lock			= false;
 
-	//koz begin;
+	// Koz begin;
 	weapon_pistol			= SlotForWeapon( "weapon_pistol" );
 	weapon_shotgun			= SlotForWeapon( "weapon_shotgun" );
 	weapon_shotgun_double	= SlotForWeapon( "weapon_shotgun_double" );
@@ -1902,7 +1902,7 @@ void idPlayer::Init()
 	weapon_bfg				= SlotForWeapon( "weapon_bfg" );
 	weapon_flashlight_new	= SlotForWeapon( "weapon_flashlight_new" );
 	weapon_grabber			= SlotForWeapon( "weapon_grabber" );
-	//koz end
+	// Koz end
 	
 	lastDmgTime				= 0;
 	lastArmorPulse			= -10000;
@@ -1962,7 +1962,7 @@ void idPlayer::Init()
 	fl.takedamage			= true;
 	ClearPain();
 	
-	// koz reset holster slots
+	// Koz reset holster slots
 	
 	holsteredWeapon = weapon_fists;
 	extraHolsteredWeapon = weapon_fists;
@@ -2067,7 +2067,7 @@ void idPlayer::Init()
 	commonVr->thirdPersonHudPos = vec3_zero;
 	commonVr->thirdPersonHudAxis = mat3_identity;
 
-	// koz end	
+	// Koz end	
 
 	// initialize the script variables
 	AI_FORWARD		= false;
@@ -2208,7 +2208,7 @@ void idPlayer::InitPlayerBones()
 		gameLocal.Error( "Joint '%s' not found for 'bone_head' on '%s'", value, name.c_str() );
 	}
 
-	// koz begin
+	// Koz begin
 	value = spawnArgs.GetString( "bone_neck", "" );
 	neckJoint = animator.GetJointHandle( value );
 	if ( neckJoint == INVALID_JOINT )
@@ -2494,7 +2494,7 @@ void idPlayer::Spawn()
 	// init the damage effects
 	playerView.SetPlayerEntity( this );
 	
-	// koz
+	// Koz
 	if ( game->isVR )
 	{
 		//Carl: don't suppress drawing the player's body in 1st person if we want to see it (in VR)
@@ -2506,7 +2506,7 @@ void idPlayer::Spawn()
 		renderEntity.suppressSurfaceInViewID = entityNumber + 1;
 	
 	}
-	// koz end
+	// Koz end
 	
 	// don't project shadow on self or weapon
 	renderEntity.noSelfShadow = true;
@@ -2579,7 +2579,7 @@ void idPlayer::Spawn()
 		hiddenWeapon = true;
 		if( weapon.GetEntity() )
 		{
-			if ( !game->isVR ) weapon.GetEntity()->LowerWeapon(); // koz
+			if ( !game->isVR ) weapon.GetEntity()->LowerWeapon(); // Koz
 		}
 		idealWeapon = weapon_fists;
 	}
@@ -2690,7 +2690,7 @@ void idPlayer::Spawn()
 		weapon.GetEntity()->ForceAmmoInClip();
 	}
 	
-	// koz fixme ovr_RecenterTrackingOrigin( commonVr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
+	// Koz fixme ovr_RecenterTrackingOrigin( commonVr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
 	common->Printf( "Spawn orientation reset\n" );
 	//commonVr->HMDResetTrackingOriginOffset();
 	OrientHMDBody();	
@@ -2784,7 +2784,7 @@ void idPlayer::Save( idSaveGame* savefile ) const
 	savefile->WriteInt( weapon_bloodstone_active1 );
 	savefile->WriteInt( weapon_bloodstone_active2 );
 	savefile->WriteInt( weapon_bloodstone_active3 );
-	// koz
+	// Koz
 	savefile->WriteInt( weapon_pistol );
 	savefile->WriteInt( weapon_shotgun );
 	savefile->WriteInt( weapon_shotgun_double );
@@ -2796,7 +2796,7 @@ void idPlayer::Save( idSaveGame* savefile ) const
 	savefile->WriteInt( weapon_bfg );
 	savefile->WriteInt( weapon_flashlight_new );
 	savefile->WriteInt( weapon_grabber );
-	// koz end
+	// Koz end
 
 	savefile->WriteBool( harvest_lock );
 	savefile->WriteInt( hudPowerup );
@@ -2853,7 +2853,7 @@ void idPlayer::Save( idSaveGame* savefile ) const
 	savefile->WriteJoint( chestJoint );
 	savefile->WriteJoint( headJoint );
 
-	//koz begin
+	// Koz begin
 	savefile->WriteJoint( neckJoint );
 	savefile->WriteJoint( chestPivotJoint );
 
@@ -2878,7 +2878,7 @@ void idPlayer::Save( idSaveGame* savefile ) const
 	savefile->WriteBool( handLowered );
 	savefile->WriteBool( handRaised );
 	savefile->WriteBool( commonVr->handInGui );
-	// koz end
+	// Koz end
 
 	savefile->WriteStaticObject( physicsObj );
 	
@@ -3041,7 +3041,7 @@ void idPlayer::Save( idSaveGame* savefile ) const
 		}
 	}
 
-	//koz begin
+	// Koz begin
 	savefile->WriteBool( laserSightActive );
 	savefile->WriteBool( headingBeamActive );
 	savefile->WriteBool( hudActive );
@@ -3087,7 +3087,7 @@ void idPlayer::Save( idSaveGame* savefile ) const
 	savefile->WriteRenderEntity( holsterRenderEntity ); // have to check if this has been saved
 	savefile->WriteString( extraHolsteredWeaponModel );
 	
-	//koz end
+	// Koz end
 
 }
 
@@ -3167,7 +3167,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	savefile->ReadInt( weapon_bloodstone_active2 );
 	savefile->ReadInt( weapon_bloodstone_active3 );
 
-	// koz
+	// Koz
 	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
 	{
 		savefile->ReadInt( weapon_pistol );
@@ -3195,7 +3195,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		weapon_bfg = 9;
 		weapon_flashlight_new = 17;
 	}
-	// koz end
+	// Koz end
 
 	
 	savefile->ReadBool( harvest_lock );
@@ -3260,7 +3260,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	savefile->ReadJoint( chestJoint );
 	savefile->ReadJoint( headJoint );
 
-	//koz begin - update - will leave this here, but the player bone joints will all be re-initialized to help with cross version save compatability
+	// Koz begin - update - will leave this here, but the player bone joints will all be re-initialized to help with cross version save compatability
 	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
 	{
 		savefile->ReadJoint( neckJoint );
@@ -3288,7 +3288,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		savefile->ReadBool( handRaised );
 		savefile->ReadBool( commonVr->handInGui );
 	}
-	// koz end
+	// Koz end
 	
 	savefile->ReadStaticObject( physicsObj );
 	RestorePhysics( &physicsObj );
@@ -3527,9 +3527,9 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	
 	
 	//------------------------------------------------------------
-	// koz begin - VR specific initialization
+	// Koz begin - VR specific initialization
 	
-	// koz fixme ovr_RecenterTrackingOrigin( commonVr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
+	// Koz fixme ovr_RecenterTrackingOrigin( commonVr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
 	
 	// make sure the clipmodels for the body and head are re-initialized.
 	SetClipModel();
@@ -3561,7 +3561,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		renderEntity.shaderParms[7] = 0.0f;
 	}
 
-	//koz re-init the player model bones. Changes to player model require this to allow compatability with older savegames.
+	// Koz re-init the player model bones. Changes to player model require this to allow compatability with older savegames.
 	InitPlayerBones();
 
 	//re-init the VR ui models
@@ -3600,7 +3600,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	skinTelepadCrouch = declManager->FindSkin( "skins/vr/padcrouch" );
 		
 	const idDeclSkin* blag;
-	//koz begin
+	// Koz begin
 	if ( savefile->version >= BUILD_NUMBER_FULLY_POSSESSED )
 	{
 		savefile->ReadBool( laserSightActive );
@@ -4065,7 +4065,7 @@ void idPlayer::SavePersistantInfo()
 	playerInfo.SetInt( "current_weapon", currentWeapon );
 	playerInfo.SetInt( "playedTime", playedTimeSecs );
 
-	//koz begin
+	// Koz begin
 	playerInfo.SetBool( "headingBeamActive", headingBeamActive );
 	playerInfo.SetBool( "laserSightActive", laserSightActive );
 	playerInfo.SetBool( "hudActive", hudActive );
@@ -4078,7 +4078,7 @@ void idPlayer::SavePersistantInfo()
 		playerInfo.Set( "holsteredWeaponModel", holsterRenderEntity.hModel->Name() );
 	}
 	playerInfo.SetMatrix( "holsterAxis", holsterAxis );
-	//koz end
+	// Koz end
 
 	achievementManager.SavePersistentData( playerInfo );
 }
@@ -4103,7 +4103,7 @@ void idPlayer::RestorePersistantInfo()
 	health = spawnArgs.GetInt( "health", "100" );
 	idealWeapon = spawnArgs.GetInt( "current_weapon", "1" );
 	
-	//koz begin
+	// Koz begin
 	headingBeamActive = spawnArgs.GetBool( "headingBeamActive", "1" );
 	laserSightActive = spawnArgs.GetBool( "laserSightActive", "1" );
 	commonVr->currentFlashMode = spawnArgs.GetInt( "currentFlashMode", "3" );
@@ -4129,7 +4129,7 @@ void idPlayer::RestorePersistantInfo()
 	//playerInfo.SetInt( "holsteredWeapon", holsteredWeapon );
 	//playerInfo.SetInt( "extraHolsteredWeapon", extraHolsteredWeapon );
 	//playerInfo.Set( "extraHolsteredWeaponModel", extraHolsteredWeaponModel );
-	//koz end
+	// Koz end
 
 	playedTimeSecs = spawnArgs.GetInt( "playedTime" );
 	
@@ -4649,7 +4649,7 @@ void idPlayer::DrawHUDVR( idMenuHandler_HUD* _hudManager )
 	
 	
 	renderSystem->CaptureRenderToImage( "_hudImage", true );
-	
+		
 }
 
 /*
@@ -4886,7 +4886,7 @@ void idPlayer::FireWeapon()
 	{
 		if( g_infiniteAmmo.GetBool() || weapon.GetEntity()->AmmoInClip() || weapon.GetEntity()->AmmoAvailable() )
 		{
-			// koz grabber doesn't fire projectiles, so player script won't trigger fire anim for hand if we dont do this
+			// Koz grabber doesn't fire projectiles, so player script won't trigger fire anim for hand if we dont do this
 			if ( currentWeapon == weapon_grabber ) AI_WEAPON_FIRED = true; 
 
 			AI_ATTACK_HELD = true;
@@ -5951,7 +5951,7 @@ void idPlayer::GivePDA( const idDeclPDA* pda, const char* securityItem, bool tog
 	{
 				
 		const char* sec = pda->GetSecurity();
-		if ( hud && inventory.pdas.Num() != 1 ) // koz dont show the pda loading indicator for the initial PDA.
+		if ( hud && inventory.pdas.Num() != 1 ) // Koz dont show the pda loading indicator for the initial PDA.
 		{
 			hud->DownloadPDA( pda, ( sec != NULL && sec[0] != 0 ) ? true : false );
 		}
@@ -5960,7 +5960,7 @@ void idPlayer::GivePDA( const idDeclPDA* pda, const char* securityItem, bool tog
 			GetPDA()->RemoveAddedEmailsAndVideos();
 			if( !objectiveSystemOpen )
 			{
-				if ( toggle ) // koz: toggle pda renders a fullscreen PDA in normal play, for VR we need to select the pda 'weapon'.
+				if ( toggle ) // Koz: toggle pda renders a fullscreen PDA in normal play, for VR we need to select the pda 'weapon'.
 				{
 					if ( !game->isVR )
 					{
@@ -6339,7 +6339,7 @@ idPlayer::Reload
 */
 void idPlayer::Reload()
 {
-	if( spectating || gameLocal.inCinematic || Flicksync_InCutscene || influenceActive || commonVr->handInGui ) // koz don't reload when in gui
+	if( spectating || gameLocal.inCinematic || Flicksync_InCutscene || influenceActive || commonVr->handInGui || weapon->hideOffset != 0.0f ) // Koz don't reload when in gui
 	{
 		return;
 	}
@@ -6409,7 +6409,7 @@ idPlayer::NextWeapon
 */
 void idPlayer::NextWeapon()
 {
-	//koz dont change weapon if in gui
+	// Koz dont change weapon if in gui
 	if( commonVr->handInGui || !weaponEnabled || spectating || hiddenWeapon || gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || health < 0 )
 	{
 		return;
@@ -6473,7 +6473,7 @@ idPlayer::PrevWeapon
 */
 void idPlayer::PrevWeapon()
 {
-	//koz dont change weapon if in gui
+	// Koz dont change weapon if in gui
 	if( commonVr->handInGui || !weaponEnabled || spectating || hiddenWeapon || gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || health < 0 )
 	{
 		return;
@@ -6538,7 +6538,7 @@ void idPlayer::SelectWeapon( int num, bool force, bool specific )
 {
 	const char* weap;
 	
-	if( !weaponEnabled || spectating || gameLocal.inCinematic || Flicksync_InCutscene || health < 0 || commonVr->handInGui ) // koz don't let the player change weapons if hand is currently in a gui
+	if( !weaponEnabled || spectating || gameLocal.inCinematic || Flicksync_InCutscene || health < 0 || commonVr->handInGui ) // Koz don't let the player change weapons if hand is currently in a gui
 	{
 		return;
 	}
@@ -6559,7 +6559,7 @@ void idPlayer::SelectWeapon( int num, bool force, bool specific )
 		hiddenWeapon ^= 1;
 		if( hiddenWeapon && weapon.GetEntity() )
 		{
-			if (!game->isVR || commonVr->handInGui == true ) weapon.GetEntity()->LowerWeapon(); // koz
+			if (!game->isVR || commonVr->handInGui == true ) weapon.GetEntity()->LowerWeapon(); // Koz
 		}
 		else
 		{
@@ -6979,9 +6979,9 @@ void idPlayer::Weapon_NPC()
 	weapon.GetEntity()->LowerWeapon();
 	
 	int talkButtons = 0;
-	if (vr_talkMode.GetInteger() < 2)
+	if ( vr_talkMode.GetInteger() < 2 )
 		talkButtons |= BUTTON_ATTACK | BUTTON_USE;
-	if (vr_talkMode.GetInteger() > 0)
+	if ( vr_talkMode.GetInteger() > 0 )
 		talkButtons |= BUTTON_CHATTING;
 	bool wasDown = ( oldButtons & talkButtons ) != 0;
 	bool isDown = ( usercmd.buttons & talkButtons ) != 0;
@@ -7133,13 +7133,13 @@ void idPlayer::UpdateWeapon()
 	
 
 	static bool wasTalking = false;
-	bool talking = (usercmd.buttons & BUTTON_CHATTING) > 0;
+	bool talking = ( usercmd.buttons & BUTTON_CHATTING ) > 0;
 
 	// Voice wakes up nearby monsters while you're speaking
 	// Carl: weapon method (voice wakes up monsters that respond to weapon sound)
 	if ( (vr_talkWakeMonsters.GetInteger() & 1) && talking )
 		gameLocal.AlertAI( this, 788 * commonVoice->currentVolume * (vr_talkWakeMonsterRadius.GetFloat() / 120 / vr_scale.GetFloat()) ); // maximum mic volume = 20 metres, normal volume = 5 m
-	//koz (voice wakes up monsters that respond to flashlight)
+	// Koz (voice wakes up monsters that respond to flashlight)
 	if ( vr_talkWakeMonsters.GetInteger() > 0 && vr_talkWakeMonsters.GetInteger() <= 2 )
 	{
 		if ( !talking || commonVoice->maxVolume == 0 ) 
@@ -7167,7 +7167,7 @@ void idPlayer::UpdateWeapon()
 			}
 		}
 	}
-	//koz end
+	// Koz end
 		
 	if( common->IsClient() )
 	{
@@ -7404,14 +7404,14 @@ void idPlayer::FlashlightOn()
 	
 	flashlight->FlashlightOn();
 		
-	// koz pose the hand
+	// Koz pose the hand
 	const function_t* func;
 		
 	func = scriptObject.GetFunction( "SetFlashHandPose" );
 	if ( func )
 	{
 		// use the frameCommandThread since it's safe to use outside of framecommands
-		// koz debug common->Printf( "Calling SetFlashHandPose\n" );
+		// Koz debug common->Printf( "Calling SetFlashHandPose\n" );
 		gameLocal.frameCommandThread->CallFunction( this, func, true );
 		gameLocal.frameCommandThread->Execute();
 
@@ -7421,7 +7421,7 @@ void idPlayer::FlashlightOn()
 		common->Warning( "Can't find function 'SetFlashHandPose' in object '%s'", scriptObject.GetTypeName() );
 		return;
 	}
-	// koz end
+	// Koz end
 	
 	
 }
@@ -7443,13 +7443,13 @@ void idPlayer::FlashlightOff()
 	}
 	flashlight->FlashlightOff();
 
-	//koz
+	// Koz
 	const function_t* func;
 	func = scriptObject.GetFunction( "SetFlashHandPose" );
 	if ( func )
 	{
 		// use the frameCommandThread since it's safe to use outside of framecommands
-		// koz debug common->Printf( "Calling SetFlashHandPose\n" );
+		// Koz debug common->Printf( "Calling SetFlashHandPose\n" );
 		gameLocal.frameCommandThread->CallFunction( this, func, true );
 		gameLocal.frameCommandThread->Execute();
 
@@ -7459,7 +7459,7 @@ void idPlayer::FlashlightOff()
 		common->Warning( "Can't find function 'SetFlashHandPose' in object '%s'", scriptObject.GetTypeName() );
 		return;
 	}
-	//koz
+	// Koz
 }
 
 /*
@@ -7776,7 +7776,7 @@ void idPlayer::ClearFocus()
 	focusVehicle	= NULL;
 	talkCursor		= 0;
 
-	//koz
+	// Koz
 	commonVr->handInGui = false;
 	//weapon.GetEntity()->GetRenderEntity()->allowSurfaceInViewID = 0;
 
@@ -7836,14 +7836,14 @@ bool idPlayer::UpdateFocusPDA()
 	commonVr->scanningPDA = true; // let the swf event handler know its ok to take mouse input, even if the mouse cursor is not in the window.
 
 
-	//game is VR and PDA active
+	// game is VR and PDA active
 
 	
-	//koz fixme
-	//i have completely borked swf rendering resolutions to try to make them fit better on the PDA screen,
-	//really really need to straighten out all this hacked crap.
-	//pdaScrX,Y are the resolutions mouse movements need to be scaled to align the cursor with the results
-	//of guitrace.  I'm very sorry.
+	// Koz fixme
+	// i have completely borked swf rendering resolutions to try to make them fit better on the PDA screen,
+	// really really need to straighten out all this hacked crap.
+	// pdaScrX,Y are the resolutions mouse movements need to be scaled to align the cursor with the results
+	// of guitrace.  I'm very sorry.
 	
 	
 	if ( common->Dialog().IsDialogActive() || game->Shell_IsActive() )
@@ -8082,9 +8082,7 @@ void idPlayer::UpdateFocus()
 	
 	scanRange = 50.0f;
 	
-
-
-	if ( Flicksync_InCutscene || gameLocal.inCinematic || commonVr->thirdPersonMovement )
+	if ( Flicksync_InCutscene || gameLocal.inCinematic || commonVr->thirdPersonMovement ) 
 	{
 		return;
 	}
@@ -8114,7 +8112,7 @@ void idPlayer::UpdateFocus()
 	oldTalkCursor = talkCursor;
 	oldVehicle = focusVehicle;
 
-	if ( focusTime <= gameLocal.time || commonVr->teleportButtonCount != 0) // koz kill the focus and drop the hand if teleport pressed.
+	if ( focusTime <= gameLocal.time || commonVr->teleportButtonCount != 0) // Koz kill the focus and drop the hand if teleport pressed.
 	{
 		ClearFocus();
 		raised = false;
@@ -8131,12 +8129,11 @@ void idPlayer::UpdateFocus()
 	start = GetEyePosition();
 
 	// Koz begin
-	if ( game->isVR ) // koz fixme only when vr actually active.
+	if ( game->isVR ) // Koz fixme only when vr actually active.
 	{
 		// Koz  in VR, if weapon equipped, use muzzle orientation to scan for accessible guis, 
 		// otherwise use player center eye.
-
-
+		
 		scanFromWeap = weapon->GetMuzzlePositionWithHacks( start, weaponAxis );
 		if ( !scanFromWeap || vr_guiMode.GetInteger() == 1 || (  vr_guiMode.GetInteger() == 2 && commonVr->VR_USE_MOTION_CONTROLS ) ) // guiMode 2 = use guis as touch screen
 		{
@@ -8163,7 +8160,7 @@ void idPlayer::UpdateFocus()
 					yawAdj = idAngles( 0.0f, viewAngles.yaw - lastBodyYaw, 0.0f ).Normalize180().ToMat3(); 
 					weaponAxis = yawAdj * lastScanAxis;
 					distMoved = physicsObj.GetOrigin() - lastBodyPosition;
-					if ( distMoved.Length() < 8.0f ) distMoved = vec3_zero;
+					if ( distMoved.Length() < 12.0f ) distMoved = vec3_zero;
 					start = lastScanStart + distMoved;
 									
 				}
@@ -8220,10 +8217,10 @@ void idPlayer::UpdateFocus()
 			lastMPAimTime = gameLocal.realClientTime;
 		}
 	}
-
+	
 	idBounds bounds( start );
 	bounds.AddPoint( end );
-
+	
 	listedClipModels = gameLocal.clip.ClipModelsTouchingBounds( bounds, -1, clipModelList, MAX_GENTITIES );
 	// no pretense at sorting here, just assume that there will only be one active
 	// gui within range along the trace
@@ -8307,8 +8304,24 @@ void idPlayer::UpdateFocus()
 			continue;
 		}
 		
+		// Koz : if the weapon is reloading, don't let the hand enter a gui, or the weapon anims
+		// will still be driving the hand and it looks stupid.
+
+		if ( weapon->IsReloading() ) continue;
+
+		// Koz : the shotgun reload script cycles through WP_RELOAD and WP_READY for each shell,
+		// so we cant just check the reload state or else the hand will enter
+		// the gui in between two shells loading.  Make sure when using the shotgun
+		// that the idle animation is playing before entering a gui.  
+		// fixme : this sucks - find a better way to check this.
+		if ( currentWeapon == weapon_shotgun )
+		{
+			if ( idStr::Cmp( weapon->GetAnimator()->CurrentAnim( ANIMCHANNEL_ALL )->AnimName(), "idle" ) != 0 ) continue;
+		}
+
+
 		ent->GetAnimator();
-		pt = gameRenderWorld->GuiTrace( ent->GetModelDefHandle(), ent->GetAnimator(), start, end ); // koz
+		pt = gameRenderWorld->GuiTrace( ent->GetModelDefHandle(), ent->GetAnimator(), start, end ); // Koz
 		if ( pt.x != -1 )
 		{
 			// we have a hit
@@ -8951,7 +8964,8 @@ idPlayer::UpdateDeltaViewAngles
 void idPlayer::UpdateDeltaViewAngles( const idAngles& angles )
 {
 	
-	if ( game->isVR ) return;
+	//if ( game->isVR ) return;
+
 	// set the delta angle
 	idAngles delta;
 	for( int i = 0; i < 3; i++ )
@@ -8988,7 +9002,7 @@ void idPlayer::UpdateViewAngles()
 		// we get out of this mode, our view will snap to a kind of random angle
 		UpdateDeltaViewAngles( viewAngles );
 
-		// koz fixme - this was in tmeks fork, verify what we are doing here is still appropriate.
+		// Koz fixme - this was in tmeks fork, verify what we are doing here is still appropriate.
 		for ( i = 0; i < 3; i++ )
 		{
 			cmdAngles[i] = SHORT2ANGLE( usercmd.angles[i] );
@@ -9001,7 +9015,7 @@ void idPlayer::UpdateViewAngles()
 				viewAngles[i] = idMath::AngleNormalize180( SHORT2ANGLE( usercmd.angles[i] ) + deltaViewAngles[i] );
 			}
 		}
-		// koz end
+		// Koz end
 
 		return;
 	}
@@ -9083,7 +9097,7 @@ void idPlayer::UpdateViewAngles()
 	else
 	{
 		// don't let the player look up or down more than 90 degrees normally
-		if ( !game->isVR ) // koz skip check in vr
+		if ( !game->isVR ) // Koz skip check in vr
 		{
 			const float restrict = 1.0f;
 
@@ -9400,7 +9414,7 @@ idPlayer::TogglePDA
 */
 void idPlayer::TogglePDA()
 {
-	//koz debug common->Printf( "Toggle PDA\n" );
+	// Koz debug common->Printf( "Toggle PDA\n" );
 	
 	// Koz begin : reset PDA controls
 	commonVr->forceLeftStick = true;
@@ -9410,7 +9424,7 @@ void idPlayer::TogglePDA()
 	{
 		if ( game->isVR )
 		{
-			// koz : hack to allow the player to change system settings in the mars city level before the PDA is given by the receptionist.
+			// Koz : hack to allow the player to change system settings in the mars city level before the PDA is given by the receptionist.
 			//GivePDA( NULL, NULL, false ); 
 		}
 		else
@@ -9588,7 +9602,7 @@ void idPlayer::PerformImpulse( int impulse )
 	bool isIntroMap = ( idStr::FindText( gameLocal.GetMapFileName(), "mars_city1" ) >= 0 );
 
 	// Normal 1 - 0 Keys.
-	if ( impulse >= IMPULSE_0 && impulse <= IMPULSE_12 && !isIntroMap ) // koz dont change weapons if in gui
+	if ( impulse >= IMPULSE_0 && impulse <= IMPULSE_12 && !isIntroMap ) // Koz dont change weapons if in gui
 	{
 		// Carl: impulse 1, 4, and 11 were unbound, so I'm using them for specific versions of weapons
 		if (impulse == 1)
@@ -9781,7 +9795,7 @@ void idPlayer::PerformImpulse( int impulse )
 
 		case IMPULSE_34: // comfort turn right
 		{
-			// koz fixme
+			// Koz fixme
 			// this performs comfort turns for key input,
 			// really need to move this to usercmdgen
 			/*
@@ -9794,7 +9808,7 @@ void idPlayer::PerformImpulse( int impulse )
 		
 		case IMPULSE_35: // comfort turn left
 		{
-			// koz fixme
+			// Koz fixme
 			// this performs comfort turns for key input,
 			// really need to move this to usercmdgen
 			/*
@@ -9827,7 +9841,7 @@ void idPlayer::PerformImpulse( int impulse )
 		{
 			//bring up the system menu
 			
-			if ( !(vr_guiMode.GetInteger() == 2 && commonVr->handInGui) && ( Sys_Milliseconds() - commonVr->pdaToggleTime > 3000) )
+			if ( !( vr_guiMode.GetInteger() == 2 && commonVr->handInGui ) && ( Sys_Milliseconds() - commonVr->pdaToggleTime > 3000 ) )
 			{
 				void Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
 				Sys_QueEvent( SE_KEY, K_ESCAPE, 1, 0, NULL, 0 );
@@ -9838,11 +9852,11 @@ void idPlayer::PerformImpulse( int impulse )
 		// Carl:
 		case IMPULSE_PAUSE:
 		{
-			if (gameLocal.inCinematic || Flicksync_InCutscene)
+			if ( gameLocal.inCinematic || Flicksync_InCutscene )
 			{
 
 			}
-			else if (commonVr->PDAforced && !commonVr->PDAforcetoggle)
+			else if ( commonVr->PDAforced && !commonVr->PDAforcetoggle )
 			{
 				// If we're in the menu, just exit
 				PerformImpulse( 40 );
@@ -9855,17 +9869,17 @@ void idPlayer::PerformImpulse( int impulse )
 		}
 		case IMPULSE_RESUME:
 		{
-			if (gameLocal.inCinematic || Flicksync_InCutscene)
+			if ( gameLocal.inCinematic || Flicksync_InCutscene )
 			{
 
 			}
 			else
 			{
-				g_stopTime.SetBool(false);
-				if (objectiveSystemOpen || (commonVr->PDAforced && !commonVr->PDAforcetoggle))
+				g_stopTime.SetBool( false );
+				if ( objectiveSystemOpen || ( commonVr->PDAforced && !commonVr->PDAforcetoggle ))
 				{
 					// If we're in the menu, just exit
-					PerformImpulse(40);
+					PerformImpulse( 40 );
 				}
 			}
 			break;
@@ -9918,14 +9932,7 @@ void idPlayer::SnapBodyToView()
 	newBodyAngles.roll = 0;
 	newBodyAngles.yaw += commonVr->lastHMDYaw - commonVr->bodyYawOffset;
 	newBodyAngles.Normalize180();
-
-	
-
-//	commonVr->bodyYawOffset = commonVr->lastHMDYaw;
 	SetViewAngles( newBodyAngles );
-	
-//	commonVr->MotionControlSetRotationOffset();
-		
 }
 /*
 ==============
@@ -9982,14 +9989,11 @@ void idPlayer::EvaluateControls()
 				
 				if ( game->isVR )
 				{
-					if ( !commonVr->playerDead )
-						common->Printf( "Player evaluate controls setting playerdead true %d\n", Sys_Milliseconds() );
 					commonVr->wasLoaded = false;
 					commonVr->playerDead = true;
 					extern idCVar timescale;
 					int comfortMode = vr_motionSickness.GetInteger();
-					if ((comfortMode == 6) || (comfortMode == 7) || (comfortMode == 8) || (comfortMode == 9) || warpAim || warpMove)
-						timescale.SetFloat(1);
+					if ( ( comfortMode == 6 ) || ( comfortMode == 7 ) || ( comfortMode == 8 ) || ( comfortMode == 9 ) || warpAim || warpMove ) timescale.SetFloat( 1 );
 				}
 		
 			}
@@ -10003,8 +10007,9 @@ void idPlayer::EvaluateControls()
 	
 	bool doTeleport = false;
 
-	currentOculusStrafe = (commonVr->hasOculusRift && (vr_teleportMode.GetInteger() == 1) && ((fabs( commonVr->leftMapped.x ) > strafeHiThresh) || (fabs( commonVr->leftMapped.y ) > strafeHiThresh)));
+	currentOculusStrafe = (commonVr->hasOculusRift && (vr_teleportMode.GetInteger() == 2 ) && ((fabs( commonVr->leftMapped.x ) > strafeHiThresh) || (fabs( commonVr->leftMapped.y ) > strafeHiThresh)));
 
+	extern idCVar timescale;
 
 	if ( game->IsPDAOpen() || commonVr->VR_GAME_PAUSED || currentWeapon == weapon_pda || commonVr->PDAforcetoggle ) // no teleporting in these cases
 	{
@@ -10012,63 +10017,60 @@ void idPlayer::EvaluateControls()
 	}
 	else
 	{
-		extern idCVar timescale;
+		
 		if ( (common->ButtonState( UB_TELEPORT ) && !commonVr->oldTeleportButtonState) || ( currentOculusStrafe && !lastOculusStrafe )) // on transit from no press to press.
 		{
-			if (vr_teleportMode.GetInteger() == 1) // Doom VFR style
+			if ( vr_teleportMode.GetInteger() != 0 ) // Doom VFR style
 			{
-				
-				common->Printf( "Jet Strafe leftmapped = %s\n", commonVr->leftMapped.ToString() );
 				if ( ((commonVr->leftMapped.x > -0.5f) && (commonVr->leftMapped.x < 0.5f) && (commonVr->leftMapped.y > -0.5f) && (commonVr->leftMapped.y < 0.5f) && !commonVr->hasOculusRift ) || commonVr->hasOculusRift && common->ButtonState( UB_TELEPORT ) )
 				{
-					common->Printf( "Jet Strafe 2 leftmapped = %s\n", commonVr->leftMapped.ToString() );
 					warpAim = true;
 					timescale.SetFloat(0.5f);
 					commonVr->teleportButtonCount++;
 				} 
-				else 
+				else if ( vr_teleportMode.GetInteger() == 2 )
 				{
-					common->Printf( "Jet Strafe 3 leftmapped = %s\n", commonVr->leftMapped.ToString() );
+					
 					if (!jetMove && gameLocal.time > jetMoveCoolDownTime) {
+					
 						// tie to the teleport button
-						
-						
+											
 						if ( commonVr->leftMapped.y < -strafeHiThresh && commonVr->leftMapped.x > -strafeLoThresh && commonVr->leftMapped.x < strafeLoThresh )
 						{
-							common->Printf( "Jet Strafe forward\n" );
+							//common->Printf( "Jet Strafe forward\n" );
 							jetMove = true;
 							jetMoveTime = gameLocal.time + 60;
 							idVec3 vf = physicsObj.viewForward; 
-							vf.z = 0.0f;// koz set vertical vel to 0, otherwise jetstraffing down a small incline kills you when you hit the floor due to high impact vel.
+							vf.z = 0.0f;// Koz set vertical vel to 0, otherwise jetstraffing down a small incline kills you when you hit the floor due to high impact vel.
 
-							jetMoveVel = (/*physicsObj.viewForward*/ vf * (100.0f)) / 0.060f;  // 60 ms
+							jetMoveVel = ( vf * (100.0f)) / 0.060f;  // 60 ms
 						}
 						else if ( commonVr->leftMapped.y > strafeHiThresh && commonVr->leftMapped.x > -strafeLoThresh && commonVr->leftMapped.x < strafeLoThresh )
 						{
-							common->Printf( "Jet Strafe Back\n" );
+							//common->Printf( "Jet Strafe Back\n" );
 							jetMove = true;
 							jetMoveTime = gameLocal.time + 60;
 							idVec3 vf = physicsObj.viewForward;
 							vf.z = 0.0f;
-							jetMoveVel = (/*physicsObj.viewForward*/ vf  * (-100.0f)) / 0.060f;  // 60 ms
+							jetMoveVel = ( vf  * (-100.0f)) / 0.060f;  // 60 ms
 						}
 						else if ( commonVr->leftMapped.x < -strafeHiThresh && commonVr->leftMapped.y > -strafeLoThresh && commonVr->leftMapped.y < strafeLoThresh )
 						{
-							common->Printf( "Jet Strafe Left\n" );
+							//common->Printf( "Jet Strafe Left\n" );
 							jetMove = true;
 							jetMoveTime = gameLocal.time + 60;
 							idVec3 vf = physicsObj.viewRight;
 							vf.z = 0.0f;
-							jetMoveVel = (/*physicsObj.viewRight*/ vf * (-100.0f)) / 0.060f;  // 60 ms
+							jetMoveVel = ( vf * (-100.0f)) / 0.060f;  // 60 ms
 						}
 						else if ( commonVr->leftMapped.x > strafeHiThresh && commonVr->leftMapped.y > -strafeLoThresh && commonVr->leftMapped.y < strafeLoThresh )
 						{
-							common->Printf( "Jet Strafe Right\n" );
+							//common->Printf( "Jet Strafe Right\n" );
 							jetMove = true;
 							jetMoveTime = gameLocal.time + 60;
 							idVec3 vf = physicsObj.viewRight;
 							vf.z = 0.0f;
-							jetMoveVel = (/*physicsObj.viewRight*/ vf * (100.0f)) / 0.060f;  // 60 ms
+							jetMoveVel = ( vf * (100.0f)) / 0.060f;  // 60 ms
 						}
 					}
 				}
@@ -10080,43 +10082,44 @@ void idPlayer::EvaluateControls()
 		}
 
 		// Jack: do not cancel if Doom VFR style
-		if (usercmd.buttons & BUTTON_ATTACK && vr_teleportMode.GetInteger() != 1)
+		if ( usercmd.buttons & BUTTON_ATTACK && vr_teleportMode.GetInteger() == 0 )
 		{
 			commonVr->teleportButtonCount = 0; // let the fire button abort teleporting.
 		}
 
-		if ( (vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS && commonVr->teleportButtonCount != 0) ||
-			(commonVr->teleportButtonCount > 1) ||
-			((commonVr->oldTeleportButtonState && !common->ButtonState( UB_TELEPORT )) && !vr_teleportButtonMode.GetBool())
-			|| lastOculusStrafe && !currentOculusStrafe && !!vr_teleportButtonMode.GetBool() ) // on transit from press to release
+		if ( ( vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS && commonVr->teleportButtonCount != 0 ) ||
+			( commonVr->teleportButtonCount > 1 ) ||
+			( ( commonVr->oldTeleportButtonState && !common->ButtonState( UB_TELEPORT ) ) && !vr_teleportButtonMode.GetBool() )
+			|| lastOculusStrafe && currentOculusStrafe && !!vr_teleportButtonMode.GetBool() ) // on transit from press to release
 		{
-			common->Printf( "Jet Strafe2 leftmapped = %s r\n", commonVr->leftMapped.ToString() );
-			if (vr_teleportMode.GetInteger() == 1)
+			
+			if ( vr_teleportMode.GetInteger() == 2 )
 			{
 				warpAim = false;
-				timescale.SetFloat(1.0f);
+				timescale.SetFloat( 1.0f );
 				// if touch within the map teleport boundary
-				if ((commonVr->leftMapped.x > -0.5f) && (commonVr->leftMapped.x < 0.5f) && (commonVr->leftMapped.y > -0.5f) && (commonVr->leftMapped.y < 0.5f)) {
-					doTeleport = true;  //common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState;
+				if ( ( commonVr->leftMapped.x > -0.5f ) && ( commonVr->leftMapped.x < 0.5f ) && ( commonVr->leftMapped.y > -0.5f ) && ( commonVr->leftMapped.y < 0.5f ) ) {
+					doTeleport = true;  
 					jetMoveCoolDownTime = 0;
 				}
 				commonVr->teleportButtonCount = 0;
 			} 
 			else
 			{
-				doTeleport = true;  //common->ButtonState( UB_TELEPORT ) && !oldTeleportButtonState;
+				doTeleport = true;  
 			}
 		}
-		commonVr->oldTeleportButtonState = common->ButtonState(UB_TELEPORT);
+		commonVr->oldTeleportButtonState = common->ButtonState( UB_TELEPORT );
 		lastOculusStrafe = currentOculusStrafe;
 	}
 	
 	bool didTeleport = false;
-
+	
 	if( doTeleport )
 	{
 		commonVr->teleportButtonCount = 0;
-		//teleportTarget.GetEntity()->Hide();
+		timescale.SetFloat( 1.0f ); // Koz make sure timescale is returned to normal if teleport was aborted or invalid target.
+		
 		// teleport
 		if ( aimValidForTeleport )
 		{
@@ -10124,24 +10127,23 @@ void idPlayer::EvaluateControls()
 			int t = vr_teleport.GetInteger();
 			if( t > 0 )
 			{
-				if (vr_teleportMode.GetInteger() == 0) 
+				if ( vr_teleportMode.GetInteger() == 0 ) 
 				{
-					playerView.Flash(colorBlack, 140);
+					playerView.Flash( colorBlack, 140 );
 				}
-
-				TeleportPath( teleportPoint );
-				//if ( t == 1 )
 				
-				//koz begin
-				//some of the entities in the game, like the sentry bot and the scientist in alpha2, want you to follow them.
-				//If you fall too far behind, they will stop, and they monitor your direction of movement and velocity
-				//to determine if you are moving towards them before they start moving again.
-				//Teleporting imparts no velocity to the player, so those entities will not start moving again. ( unless you teleport way in front of them )
-				//Impart a tiny velocity here, just enough so the entities know you have moved, not enough to really change the player position.
-				didTeleport = true;
+				TeleportPath( teleportPoint );
 								
+				// Koz begin
+				// some of the entities in the game, like the sentry bot and the scientist in alpha2, want you to follow them.
+				// If you fall too far behind, they will stop, and they monitor your direction of movement and velocity
+				// to determine if you are moving towards them before they start moving again.
+				// Teleporting imparts no velocity to the player, so those entities will not start moving again. ( unless you teleport way in front of them )
+				// Impart a tiny velocity here, just enough so the entities know you have moved, not enough to really change the player position.
+				
+				didTeleport = true;
 				physicsObj.SetLinearVelocity( physicsObj.GetLinearVelocity() - teleportDir * 10.0f );
-				//koz end
+				// Koz end
 				
 				PlayFootStepSound();
 			}
@@ -10159,13 +10161,14 @@ void idPlayer::EvaluateControls()
 	
 	// update the viewangles
 	UpdateViewAngles();
-
-	if ( 0 && didTeleport )
+	
+	if ( didTeleport && vr_teleportMode.GetInteger() == 0 )
 	{
 		commonVr->didTeleport = true;
 		commonVr->teleportDir = ((teleportTarget.GetEntity()->GetRenderEntity()->origin - teleportPoint).ToAngles().yaw - 180.0f) - viewAngles.yaw;
-		
 	}
+	
+
 }
 
 /*
@@ -10355,7 +10358,7 @@ void idPlayer::AdjustBodyAngles()
 	// calculate the blending between down, straight, and up
 	frac = viewAngles.pitch / 90.0f;
 	
-	if ( game->isVR ) // koz fixme check this way in vr only.
+	if ( game->isVR ) // Koz fixme check this way in vr only.
 	{
 		//mmdanggg2: stop the model from bending down and getting in the way!!
 
@@ -10821,7 +10824,7 @@ void idPlayer::Move_Interpolated( float fraction )
 		newEyeOffset = pm_normalviewheight.GetFloat();
 	}
 	
-	if( EyeHeight() != newEyeOffset ) // koz fixme - do we want a slow or instant crouch in VR?
+	if( EyeHeight() != newEyeOffset ) // Koz fixme - do we want a slow or instant crouch in VR?
 	{
 		if( spectating )
 		{
@@ -10936,12 +10939,12 @@ void idPlayer::Move()
 		idMat3	axis;
 		if ( !game->isVR )
 		{
-			GetViewPos( org, axis ); //koz default movement
+			GetViewPos( org, axis ); // Koz default movement
 			physicsObj.SetPlayerInput( usercmd, axis[0] );
 		}
 		else
 		{
-			if ( !physicsObj.OnLadder() ) // koz fixme, dont move if on a ladder or player will fall/stick
+			if ( !physicsObj.OnLadder() ) // Koz fixme, dont move if on a ladder or player will fall/stick
 			{
 
 				idVec3 bodyOrigin = vec3_zero;
@@ -10949,31 +10952,31 @@ void idPlayer::Move()
 				idVec3 movedRemainder = vec3_zero;
 				idMat3 bodyAxis;
 				idMat3 origPhysAxis;
-				
+
 				GetViewPos( bodyOrigin, bodyAxis );
 				bodyOrigin = physicsObj.GetOrigin();
 				origPhysAxis = physicsObj.GetAxis();
-				
+
 				idVec3 newBodyOrigin;
-				
+
 				idAngles bodyAng = bodyAxis.ToAngles();
 				idMat3 bodyAx = idAngles( bodyAng.pitch, bodyAng.yaw - commonVr->bodyYawOffset, bodyAng.roll ).Normalize180().ToMat3();
-							
+
 				newBodyOrigin = bodyOrigin + bodyAx[0] * commonVr->remainingMoveHmdBodyPositionDelta.x + bodyAx[1] * commonVr->remainingMoveHmdBodyPositionDelta.y;
 				commonVr->remainingMoveHmdBodyPositionDelta.x = commonVr->remainingMoveHmdBodyPositionDelta.y = 0;
-							
+
 				commonVr->motionMoveDelta = newBodyOrigin - bodyOrigin;
-				commonVr->motionMoveVelocity = commonVr->motionMoveDelta / ( ( 1000 / commonVr->hmdHz ) * 0.001f );
+				commonVr->motionMoveVelocity = commonVr->motionMoveDelta / ((1000 / commonVr->hmdHz) * 0.001f);
 
 				if ( !commonVr->isLeaning )
 				{
 					movedBodyOrigin = physicsObj.MotionMove( commonVr->motionMoveVelocity );
 					physicsObj.SetAxis( origPhysAxis ); // make sure motion move doesnt change the axis
-															
-					movedRemainder = ( newBodyOrigin - movedBodyOrigin );
-					
+
+					movedRemainder = (newBodyOrigin - movedBodyOrigin);
+
 					if ( movedRemainder.Length() > commonVr->motionMoveDelta.Length() * 0.25f )
-					{ 
+					{
 						commonVr->isLeaning = true;
 						testLean = false;
 						leanOrigin = movedBodyOrigin;
@@ -10989,7 +10992,7 @@ void idPlayer::Move()
 						}
 						else
 						{
-							commonVr->fixedPDAMoveDelta += ( movedBodyOrigin - bodyOrigin );
+							commonVr->fixedPDAMoveDelta += (movedBodyOrigin - bodyOrigin);
 						}
 					}
 				}
@@ -11000,13 +11003,13 @@ void idPlayer::Move()
 					// check to see if player body can move to the new location without clipping anything
 					// if it can, move it and clear leanoffsets, otherwise limit the distance 
 					idVec3 testOrigin = vec3_zero;
-										
+
 					commonVr->leanOffset += commonVr->motionMoveDelta;
-					
-					if ( commonVr->leanOffset.LengthSqr() > 36.0f * 36.0f ) // dont move head more than 36 inches // koz fixme should me measure distance from waist?
+
+					if ( commonVr->leanOffset.LengthSqr() > 36.0f * 36.0f ) // dont move head more than 36 inches // Koz fixme should me measure distance from waist?
 					{
 						commonVr->leanOffset.Normalize();
-						commonVr->leanOffset *= 36.0f ;
+						commonVr->leanOffset *= 36.0f;
 					}
 
 					if ( commonVr->leanBlank )
@@ -11016,9 +11019,9 @@ void idPlayer::Move()
 							commonVr->leanOffset = commonVr->leanBlankOffset;
 						}
 					}
-									
+
 					testOrigin = bodyOrigin + commonVr->leanOffset;
-					
+
 					if ( commonVr->leanOffset.LengthSqr() > 4.0f || bodyOrigin != leanOrigin ) testLean = true; // dont check to cancel lean until player body has moved, or head has moved at least two inches.
 
 					if ( testLean )
@@ -11032,8 +11035,8 @@ void idPlayer::Move()
 						clipAxis = physicsObj.GetClipModel()->GetAxis();
 
 
-						gameLocal.clip.Translation( trace, testOrigin, testOrigin, clip, clipAxis, MASK_SHOT_RENDERMODEL /* CONTENTS_SOLID */ , this );
-						if (trace.fraction < 1.0f)
+						gameLocal.clip.Translation( trace, testOrigin, testOrigin, clip, clipAxis, MASK_SHOT_RENDERMODEL /* CONTENTS_SOLID */, this );
+						if ( trace.fraction < 1.0f )
 						{
 
 							// do ik stuff here
@@ -11043,7 +11046,7 @@ void idPlayer::Move()
 						else
 						{
 							// not leaning, clear the offsets and move the player origin
-							physicsObj.SetOrigin(testOrigin);
+							physicsObj.SetOrigin( testOrigin );
 							commonVr->isLeaning = false;
 							//common->Printf("Setting Leaning FALSE %d\n", Sys_Milliseconds());
 							commonVr->leanOffset = vec3_zero;
@@ -11052,8 +11055,7 @@ void idPlayer::Move()
 					}
 				}
 			}
-		
-			GetViewPos( org, axis ); //koz default movement
+			GetViewPos( org, axis ); // Koz default movement
 			physicsObj.SetPlayerInput( usercmd, axis[0] );
 		}
 
@@ -11643,7 +11645,7 @@ bool idPlayer::GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3&
 	// In Multiplayer, weapon might not have been spawned yet.
 	if (weapon.GetEntity() == NULL || hand == TP_HAND_HEAD)
 	{
-		origin = commonVr->lastViewOrigin; // koz fixme set the origin and axis to the players view
+		origin = commonVr->lastViewOrigin; // Koz fixme set the origin and axis to the players view
 		axis = commonVr->lastViewAxis;
 		return false;
 	}
@@ -11658,7 +11660,7 @@ bool idPlayer::GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3&
 			case WEAPON_SOULCUBE:
 			case WEAPON_PDA:
 			case WEAPON_HANDGRENADE:
-				origin = weapon->viewWeaponOrigin; // koz fixme set the origin and axis to the weapon default
+				origin = weapon->viewWeaponOrigin; // Koz fixme set the origin and axis to the weapon default
 				axis = weapon->viewWeaponAxis;
 				return false;
 				break;
@@ -11678,7 +11680,7 @@ bool idPlayer::GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3&
 	// Carl: todo empty non-weapon hand (currently using head instead)
 	else
 	{
-		origin = commonVr->lastViewOrigin; // koz fixme set the origin and axis to the players view
+		origin = commonVr->lastViewOrigin; // Koz fixme set the origin and axis to the players view
 		axis = commonVr->lastViewAxis;
 		return false;
 	}
@@ -11992,7 +11994,7 @@ idPlayer::UpdateLaserSight
 ==============
 */
 idCVar	g_laserSightWidth( "g_laserSightWidth", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "laser sight beam width" ); // Koz default was 2, IMO too big in VR.
-idCVar	g_laserSightLength( "g_laserSightLength", "1000", CVAR_FLOAT | CVAR_ARCHIVE, "laser sight beam length" ); // koz default was 250, but was to short in VR.  Length will be clipped if object is hit, this is max length for the hit trace. 
+idCVar	g_laserSightLength( "g_laserSightLength", "1000", CVAR_FLOAT | CVAR_ARCHIVE, "laser sight beam length" ); // Koz default was 250, but was to short in VR.  Length will be clipped if object is hit, this is max length for the hit trace. 
 
 
 void idPlayer::UpdateLaserSight()
@@ -12026,16 +12028,16 @@ void idPlayer::UpdateLaserSight()
 
 	// check if lasersight should be hidden
 	if ( !IsGameStereoRendered() ||
-		!laserSightActive ||							// koz allow user to toggle lasersight.
+		!laserSightActive ||							// Koz allow user to toggle lasersight.
 		sightMode == -1 ||
 		!weapon.GetEntity()->ShowCrosshair() ||		
 		AI_DEAD ||
 		weapon->IsHidden() ||												
-		weapon->hideOffset != 0 ||						// koz - turn off lasersight If gun is lowered ( in gui ).
+		weapon->hideOffset != 0 ||						// Koz - turn off lasersight If gun is lowered ( in gui ).
 		commonVr->handInGui ||							// turn off lasersight if hand is in gui.
 		gameLocal.inCinematic ||
-		game->IsPDAOpen() ||							// koz - turn off laser sight if using pda.
-		weapon.GetEntity()->GetGrabberState() >= 2 ||	// koz turn off laser sight if grabber is dragging an entity
+		game->IsPDAOpen() ||							// Koz - turn off laser sight if using pda.
+		weapon.GetEntity()->GetGrabberState() >= 2 ||	// Koz turn off laser sight if grabber is dragging an entity
 		showTeleport || !weapon->GetMuzzlePositionWithHacks(muzzleOrigin, muzzleAxis)) // no lasersight for fists,grenades,soulcube etc
 
 	{
@@ -12096,7 +12098,7 @@ void idPlayer::UpdateLaserSight()
 
 	{
 		// only show in the player's view
-		// koz - changed show lasersight shows up in all views/reflections in VR
+		// Koz - changed show lasersight shows up in all views/reflections in VR
 		laserSightRenderEntity.allowSurfaceInViewID = 0;// entityNumber + 1;
 		laserSightRenderEntity.axis.Identity();
 		laserSightRenderEntity.origin = start;
@@ -12223,13 +12225,14 @@ void idPlayer::UpdateLaserSight()
 	
 
 	// Carl: teleport
-	if (showTeleport)
+	if  ( showTeleport )
 	{
+		
 		// teleportAimPoint is where you are actually aiming. teleportPoint is where AAS has nudged the teleport cursor to (so you can't teleport too close to a wall).
 		// teleportAimPointPitch is the pitch of the surface you are aiming at, where 90 is the floor and 0 is the wall
 		teleportAimPoint = crosshairEntity.origin;
 		teleportAimPointPitch = surfaceAngle.pitch;		// if the elevator is moving up, we don't want to fall through the floor
-		if (aimElevator)
+		if ( aimElevator )
 			teleportPoint = teleportAimPoint + idVec3(0, 0, 10);
 		// 45 degrees is maximum slope you can walk up
 		bool pitchValid = ( teleportAimPointPitch >= 45 && !aimActor ) || aimLadder; // -90 = ceiling, 0 = wall, 90 = floor
@@ -12292,9 +12295,9 @@ bool idPlayer::GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis ) // 
 	{
 		if ( !weapon.GetEntity()->ShowCrosshair() ||
 			weapon->IsHidden() ||
-			weapon->hideOffset != 0 ||						// koz - turn off lasersight If gun is lowered ( in gui ).
+			weapon->hideOffset != 0 ||						// Koz - turn off lasersight If gun is lowered ( in gui ).
 			commonVr->handInGui ||							// turn off lasersight if hand is in gui.
-			weapon.GetEntity()->GetGrabberState() >= 2 	// koz turn off laser sight if grabber is dragging an entity
+			weapon.GetEntity()->GetGrabberState() >= 2 	// Koz turn off laser sight if grabber is dragging an entity
 			)
 		{
 			return false;
@@ -12432,9 +12435,6 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 	
 	bool showTeleport = ( vr_teleport.GetInteger() > 1 || ( !commonVr->VR_USE_MOTION_CONTROLS && vr_teleport.GetInteger() > 0 ) ) && commonVr->teleportButtonCount != 0;
 	static bool lastShowTeleport = false;
-
-
-	
 
 	if ( !lastShowTeleport )
 	{
@@ -12680,7 +12680,7 @@ void idPlayer::UpdateTeleportAim()// idVec3 beamOrigin, idMat3 beamAxis )// idVe
 					{
 						aimValidForTeleport = false;
 						isShowing = false;
-						//koz
+						// Koz
 						//please duck sometimes shows incorrectly if a moveable object is in the way.
 						//add a clip check at the crouch height, and if it passes, show the please duck graphic.
 						//otherwise something is in the way.
@@ -13015,7 +13015,7 @@ void idPlayer::SetFlashHandPose()
 	if ( func )
 	{
 		// use the frameCommandThread since it's safe to use outside of framecommands
-		// koz debug common->Printf( "Calling SetFlashHandPose\n" );
+		// Koz debug common->Printf( "Calling SetFlashHandPose\n" );
 		gameLocal.frameCommandThread->CallFunction( this, func, true );
 		gameLocal.frameCommandThread->Execute();
 
@@ -13096,7 +13096,7 @@ void idPlayer::Think()
 	// clear the ik before we do anything else so the skeleton doesn't get updated twice
 	walkIK.ClearJointMods();
 
-	//Koz
+	// Koz
 	armIK.ClearJointMods();
 	
 	// if this is the very first frame of the map, set the delta view angles
@@ -13106,7 +13106,7 @@ void idPlayer::Think()
 		spawnAnglesSet = true;
 		SetViewAngles( spawnAngles );
 		oldImpulseSequence = usercmd.impulseSequence;
-		// koz fixme recenter ovr_RecenterTrackingOrigin( commonVr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
+		// Koz fixme recenter ovr_RecenterTrackingOrigin( commonVr->hmdSession ); // Koz reset hmd orientation  Koz fixme check if still appropriate here.
 
 
 	}
@@ -13149,19 +13149,23 @@ void idPlayer::Think()
 		acc->dir[0] = acc->dir[2] = 0;
 	}
 	
-	// zooming
-	if( ( usercmd.buttons ^ oldCmd.buttons ) & BUTTON_ZOOM )
-	{
-		if( ( usercmd.buttons & BUTTON_ZOOM ) && weapon.GetEntity() )
-		{
-			zoomFov.Init( gameLocal.time, 200.0f, CalcFov( false ), weapon.GetEntity()->GetZoomFov() );
-		}
-		else
-		{
-			zoomFov.Init( gameLocal.time, 200.0f, zoomFov.GetCurrentValue( gameLocal.time ), DefaultFov() );
-		}
-	}
+	// Koz, no zoom in VR.
+	/*
 	
+		// zooming
+		if( ( usercmd.buttons ^ oldCmd.buttons ) & BUTTON_ZOOM )
+		{
+			if( ( usercmd.buttons & BUTTON_ZOOM ) && weapon.GetEntity() )
+			{
+				zoomFov.Init( gameLocal.time, 200.0f, CalcFov( false ), weapon.GetEntity()->GetZoomFov() );
+			}
+			else
+			{
+				zoomFov.Init( gameLocal.time, 200.0f, zoomFov.GetCurrentValue( gameLocal.time ), DefaultFov() );
+			}
+		}
+	*/
+
 	// if we have an active gui, we will unrotate the view angles as
 	// we turn the mouse movements into gui events
 	idUserInterface* gui = ActiveGui();
@@ -13250,8 +13254,7 @@ void idPlayer::Think()
 		// clear out our pain flag so we can tell if we recieve any damage between now and the next time we think
 		AI_PAIN = false;
 	}
-	
-	
+		
 	// calculate the exact bobbed view position, which is used to
 	// position the view weapon, among other things
 	CalculateFirstPersonView();
@@ -13270,10 +13273,10 @@ void idPlayer::Think()
 		UpdateWeapon();
 	}
 	
-	//Koz
+	// Koz
 	UpdateNeckPose();
 
-	UpdateFocus(); // koz move here update GUIs, Items, and character interactions.
+	UpdateFocus(); // Koz move here update GUIs, Items, and character interactions.
 
 	UpdateFlashlight();
 	
@@ -13324,11 +13327,11 @@ void idPlayer::Think()
 	
 
 
-	// koz check for forced standard controller
+	// Koz check for forced standard controller
 	if( commonVr->VR_USE_MOTION_CONTROLS && vr_controllerStandard.GetInteger() )
 		commonVr->VR_USE_MOTION_CONTROLS = false;
 
-	//koz turn body on or off in vr, update hand poses/skins if body or weapon hand changes.
+	// Koz turn body on or off in vr, update hand poses/skins if body or weapon hand changes.
 	if ( game->isVR )
 	{
 				
@@ -13352,7 +13355,7 @@ void idPlayer::Think()
 			UpdatePlayerSkinsPoses();
 		}
 	}
-	// koz end
+	// Koz end
 
 	renderEntity_t* headRenderEnt = NULL;
 	if( head.GetEntity() )
@@ -13370,7 +13373,7 @@ void idPlayer::Think()
 			headRenderEnt->customSkin = NULL;
 		}
 
-		//koz show the head if the player is using third person movement mode && the model has moved more than 8 inches.
+		// Koz show the head if the player is using third person movement mode && the model has moved more than 8 inches.
 		if ( commonVr->thirdPersonMovement && commonVr->thirdPersonDelta > 45.0f )
 		{
 			headRenderEnt->suppressSurfaceInViewID = 0; // show head
@@ -13417,7 +13420,7 @@ void idPlayer::Think()
 	}
 	
 	// never cast shadows from our first-person muzzle flashes
-	// koz fixme shadows
+	// Koz fixme shadows
 	renderEntity.suppressShadowInLightID = LIGHTID_VIEW_MUZZLE_FLASH + entityNumber;
 	if( headRenderEnt )
 	{
@@ -13425,7 +13428,7 @@ void idPlayer::Think()
 	}
 	
 
-	if ( !g_stopTime.GetBool() ) //&& !commonVr->VR_GAME_PAUSED )  // koz fixme pause in VR
+	if ( !g_stopTime.GetBool() ) //&& !commonVr->VR_GAME_PAUSED )  // Koz fixme pause in VR
 	{
 		UpdateAnimation();
 		
@@ -13476,39 +13479,39 @@ void idPlayer::Think()
 	UpdateLaserSight();
 	UpdateTeleportAim();
 
-	if (vr_teleportMode.GetInteger() == 1)
+	if ( vr_teleportMode.GetInteger() != 0 )
 	{
-		if (warpMove) {
-			if (gameLocal.time > warpTime)
+		if  (warpMove ) {
+			if ( gameLocal.time > warpTime )
 			{
 				extern idCVar timescale;
 				warpTime = 0;
 				noclip = false;
 				warpMove = false;
 				warpVel = vec3_origin;
-				timescale.SetFloat(1.0f);
+				timescale.SetFloat( 1.0f );
 				//playerView.EnableBFGVision(false);
-				Teleport(warpDest, viewAngles, NULL); //Carl: get the destination exact
+				Teleport( warpDest, viewAngles, NULL ); //Carl: get the destination exact
 			}
-			physicsObj.SetLinearVelocity(warpVel);
+			physicsObj.SetLinearVelocity( warpVel );
 		}
 
-		if (jetMove) {
-			common->Printf( "Think -> Jetmove\n" );
-			if (gameLocal.time > jetMoveTime)
+		if ( jetMove ) {
+			
+			if ( gameLocal.time > jetMoveTime )
 			{
 				jetMoveTime = 0;
 				jetMove = false;
 				jetMoveVel = vec3_origin;
 				jetMoveCoolDownTime = gameLocal.time + 30;
-				common->Printf( "Think -> Jetmove set vel 0", jetMoveVel );
 			}
-			common->Printf( "Think -> Jetmove set vel %s\n", jetMoveVel.ToString() );
-			physicsObj.SetLinearVelocity(jetMoveVel);
+			
+			physicsObj.SetLinearVelocity( jetMoveVel );
+
 		}
 	}
 
-	if ( game->isVR ) UpdateHeadingBeam(); // koz
+	if ( game->isVR ) UpdateHeadingBeam(); // Koz
 
 	// Show the respawn hud message if necessary.
 	if( common->IsMultiplayer() && ( minRespawnTime != maxRespawnTime ) )
@@ -14369,7 +14372,7 @@ void idPlayer::Damage( idEntity* inflictor, idEntity* attacker, const idVec3& di
 	}
 	
 	// determine knockback
-	if ( !game->isVR || (game->isVR && vr_knockBack.GetBool()) ) // koz disable damage knockback in VR if desired.
+	if ( !game->isVR || (game->isVR && vr_knockBack.GetBool()) ) // Koz disable damage knockback in VR if desired.
 	{
 		int knockback = 0;
 		damageDef->dict.GetInt( "knockback", "20", knockback );
@@ -14707,7 +14710,7 @@ void idPlayer::TeleportPath( const idVec3& target )
 		// Move along path
 		while ( !blocked && currentArea && currentArea != toAreaNum )
 		{
-			if (!TeleportPathSegment(currentPos, path.moveGoal, lastPos))
+			if ( !TeleportPathSegment( currentPos, path.moveGoal, lastPos ) )
 			{
 				blocked = true;
 				break;
@@ -14725,10 +14728,10 @@ void idPlayer::TeleportPath( const idVec3& target )
 		// Is this needed? Doesn't hurt.
 		blocked = blocked || !TeleportPathSegment( currentPos, toPoint, lastPos );
 		// move from end of path to actual target
-		blocked = blocked || !TeleportPathSegment(toPoint, target, lastPos);
+		blocked = blocked || !TeleportPathSegment( toPoint, target, lastPos );
 	}
 
-	if (!blocked)
+	if ( !blocked )
 	{
 		lastPos = target;
 		// Check we didn't teleport inside a door that's not open.
@@ -14739,13 +14742,13 @@ void idPlayer::TeleportPath( const idVec3& target )
 		idEntity* 		ent;
 		trace_t			trace;
 
-		memset(&trace, 0, sizeof(trace));
+		memset( &trace, 0, sizeof(trace) );
 		trace.endpos = target;
 		trace.endAxis = GetPhysics()->GetAxis();
 
-		numClipModels = gameLocal.clip.ClipModelsTouchingBounds(GetPhysics()->GetAbsBounds(), CONTENTS_SOLID, clipModels, MAX_GENTITIES);
+		numClipModels = gameLocal.clip.ClipModelsTouchingBounds( GetPhysics()->GetAbsBounds(), CONTENTS_SOLID, clipModels, MAX_GENTITIES );
 
-		for (i = 0; i < numClipModels; i++)
+		for ( i = 0; i < numClipModels; i++ )
 		{
 			cm = clipModels[i];
 
@@ -14755,7 +14758,7 @@ void idPlayer::TeleportPath( const idVec3& target )
 
 			ent = cm->GetEntity();
 
-			if (!blocked && ent->IsType(idDoor::Type))
+			if ( !blocked && ent->IsType(idDoor::Type) )
 			{
 				idDoor *door = (idDoor *)ent;
 				// A door that is in the process of opening falsely registers as open.
@@ -14774,12 +14777,12 @@ void idPlayer::TeleportPath( const idVec3& target )
 			}
 		}
 	}
-	physicsObj.SetOrigin(trueOrigin);
+	physicsObj.SetOrigin( trueOrigin );
 	// Actually teleport
 
-	if (vr_teleportMode.GetInteger() == 0) 
+	if ( vr_teleportMode.GetInteger() == 0 ) 
 	{
-		Teleport(lastPos, viewAngles, NULL);
+		Teleport( lastPos, viewAngles, NULL );
 	}
 	else 
 	{
@@ -14788,10 +14791,10 @@ void idPlayer::TeleportPath( const idVec3& target )
 		noclip = true;
 		warpDest = lastPos;
 		//warpDest.z += 1;
-		warpVel = (warpDest - trueOrigin) / 0.075f;  // 75 ms
+		warpVel = ( warpDest - trueOrigin ) / 0.075f;  // 75 ms
 		//warpVel[2] = warpVel[2] + 50; // add a small fixed upwards velocity to handle noclip problem
 		warpTime = gameLocal.time + 75;
-		timescale.SetFloat(0.5f);
+		timescale.SetFloat( 0.5f );
 		//playerView.EnableBFGVision(true);
 	}
 }
@@ -14800,16 +14803,16 @@ bool idPlayer::CheckTeleportPathSegment(const idVec3& start, const idVec3& end, 
 {
 	idVec3 total = end - start;
 	float length = total.Length();
-	if (length >= 0.1f)
+	if ( length >= 0.1f )
 	{
 		const float stepSize = 15.0f; // We have a radius of 16, so this should catch everything
-		int steps = (int)(length / stepSize);
-		if (steps <= 0) steps = 1;
+		int steps = (int)( length / stepSize );
+		if ( steps <= 0 ) steps = 1;
 		idVec3 step = total / steps;
 		idVec3 pos = start;
-		for (int i = 0; i < steps; i++)
+		for ( int i = 0; i < steps; i++ )
 		{
-			physicsObj.SetOrigin(pos);
+			physicsObj.SetOrigin( pos );
 			// Check for doors
 			{
 				int				i, numClipModels;
@@ -14818,13 +14821,13 @@ bool idPlayer::CheckTeleportPathSegment(const idVec3& start, const idVec3& end, 
 				idEntity* 		ent;
 				trace_t			trace;
 
-				memset(&trace, 0, sizeof(trace));
+				memset( &trace, 0, sizeof(trace) );
 				trace.endpos = pos;
 				trace.endAxis = GetPhysics()->GetAxis();
 
-				numClipModels = gameLocal.clip.ClipModelsTouchingBounds(GetPhysics()->GetAbsBounds(), CONTENTS_SOLID, clipModels, MAX_GENTITIES);
+				numClipModels = gameLocal.clip.ClipModelsTouchingBounds( GetPhysics()->GetAbsBounds(), CONTENTS_SOLID, clipModels, MAX_GENTITIES );
 
-				for (i = 0; i < numClipModels; i++)
+				for ( i = 0; i < numClipModels; i++ )
 				{
 					cm = clipModels[i];
 
@@ -14837,56 +14840,56 @@ bool idPlayer::CheckTeleportPathSegment(const idVec3& start, const idVec3& end, 
 					ent = cm->GetEntity();
 
 					// check if it's a closed or locked door 
-					if (ent->IsType(idDoor::Type))
+					if ( ent->IsType(idDoor::Type) )
 					{
 						idDoor *door = (idDoor *)ent;
-						if (door->IsLocked() || (!vr_teleportThroughDoors.GetBool() && (cm->GetContents() & CONTENTS_SOLID)))
+						if ( door->IsLocked() || ( !vr_teleportThroughDoors.GetBool() && ( cm->GetContents() & CONTENTS_SOLID ) ) )
 						{
 							// check if we're moving toward the door
 							idVec3 away = door->GetPhysics()->GetOrigin() - pos;
 							away.z = 0;
 							float dist = away.Length();
-							if (dist < 60.0f)
+							if ( dist < 60.0f )
 							{
 								away /= dist;
 								idVec3 my_dir = step;
 								my_dir.Normalize();
 								float angle = idMath::ACos(away * my_dir);
-								if (angle < DEG2RAD(45) || (angle < DEG2RAD(90) && dist < 20))
+								if ( angle < DEG2RAD( 45 ) || ( angle < DEG2RAD( 90 ) && dist < 20 ) )
 									return false;
 							}
 						}
 					}
 					// Check if it's a glass window. func_static with textures/glass/glass2
-					else if (ent->IsType(idStaticEntity::Type))
+					else if ( ent->IsType( idStaticEntity::Type ) )
 					{
 						renderEntity_t *rent = ent->GetRenderEntity();
-						if (rent)
+						if ( rent )
 						{
 							const idMaterial *mat = rent->customShader;
-							if (!mat)
+							if ( !mat )
 								mat = rent->referenceShader;
-							if (!mat && rent->hModel)
+							if ( !mat && rent->hModel )
 							{
-								for (int i = 0; i < rent->hModel->NumSurfaces(); i++)
-									if (rent->hModel->Surface(i)->shader)
+								for ( int i = 0; i < rent->hModel->NumSurfaces(); i++ )
+									if ( rent->hModel->Surface(i)->shader )
 									{
 										mat = rent->hModel->Surface(i)->shader;
 										break;
 									}
 							}
-							if (mat)
+							if ( mat )
 							{
 								const char* name = mat->GetName();
 								// trying to teleport through glass: textures/glass/glass2 or textures/glass/glass1
-								if (name && idStr::Cmpn(name, "textures/glass/glass", 20) == 0)
+								if ( name && idStr::Cmpn( name, "textures/glass/glass", 20 ) == 0 )
 									return false;
 								//else if (name)
 								//	common->Printf("teleporting through \"%s\"\n", name);
 								//else
 								//	common->Printf("teleporting through NULL\n");
 							}
-							else if (ent->name)
+							else if ( ent->name )
 							{
 								//common->Printf("teleporting through entity %s", ent->name);
 							}
@@ -14918,28 +14921,28 @@ bool idPlayer::CheckTeleportPath(const idVec3& target, int toAreaNum)
 	idVec3 lastPos = origin;
 	bool blocked = false;
 	// Find path start and end areas and points
-	originAreaNum = PointReachableAreaNum(origin);
-	if (aas)
-		aas->PushPointIntoAreaNum(originAreaNum, origin);
-	if (!toAreaNum)
-		toAreaNum = PointReachableAreaNum(toPoint);
-	if (aas)
-		aas->PushPointIntoAreaNum(toAreaNum, toPoint);
+	originAreaNum = PointReachableAreaNum( origin );
+	if ( aas )
+		aas->PushPointIntoAreaNum( originAreaNum, origin );
+	if ( !toAreaNum )
+		toAreaNum = PointReachableAreaNum( toPoint );
+	if ( aas )
+		aas->PushPointIntoAreaNum( toAreaNum, toPoint );
 	// if there's no path, just go in a straight line
-	if (!aas || !originAreaNum || !toAreaNum || !aas->WalkPathToGoal(path, originAreaNum, origin, toAreaNum, toPoint, travelFlags))
+	if ( !aas || !originAreaNum || !toAreaNum || !aas->WalkPathToGoal(path, originAreaNum, origin, toAreaNum, toPoint, travelFlags ) )
 	{
-		if (!CheckTeleportPathSegment(physicsObj.GetOrigin(), target, lastPos))
+		if ( !CheckTeleportPathSegment( physicsObj.GetOrigin(), target, lastPos ) )
 		{
-			physicsObj.SetOrigin(trueOrigin);
+			physicsObj.SetOrigin( trueOrigin );
 			return false;
 		}
 	}
 	else
 	{
 		// move from actual position to start of path
-		if (!CheckTeleportPathSegment(trueOrigin, origin, lastPos))
+		if ( !CheckTeleportPathSegment( trueOrigin, origin, lastPos ) )
 		{
-			physicsObj.SetOrigin(trueOrigin);
+			physicsObj.SetOrigin( trueOrigin );
 			return false;
 		}
 		idVec3 currentPos = origin;
@@ -14951,29 +14954,29 @@ bool idPlayer::CheckTeleportPath(const idVec3& target, int toAreaNum)
 
 
 		// Move along path
-		while (currentArea && currentArea != toAreaNum)
+		while ( currentArea && currentArea != toAreaNum )
 		{
-			if (!CheckTeleportPathSegment(currentPos, path.moveGoal, lastPos))
+			if ( !CheckTeleportPathSegment( currentPos, path.moveGoal, lastPos ) )
 			{
-				physicsObj.SetOrigin(trueOrigin);
+				physicsObj.SetOrigin( trueOrigin );
 				return false;
 			}
 
 			lastAreas[lastAreaIndex] = currentArea;
-			lastAreaIndex = (lastAreaIndex + 1) & 3;
+			lastAreaIndex = ( lastAreaIndex + 1 ) & 3;
 
 			currentPos = path.moveGoal;
 			currentArea = path.moveAreaNum;
 
 			// Sometimes it tells us to go to the current location and gets stuck in a loop, so check for that.
 			// TODO: Work out why it gets stuck in a loop, and fix it. Currently we just go in a straight line from stuck point to destination.
-			if (currentArea == lastAreas[0] || currentArea == lastAreas[1] ||
-				currentArea == lastAreas[2] || currentArea == lastAreas[3])
+			if ( currentArea == lastAreas[0] || currentArea == lastAreas[1] ||
+				currentArea == lastAreas[2] || currentArea == lastAreas[3] )
 			{
-				common->Warning("CheckTeleportPath: local routing minimum going from area %d to area %d", currentArea, toAreaNum);
-				if (!CheckTeleportPathSegment(currentPos, toPoint, lastPos))
+				common->Warning( "CheckTeleportPath: local routing minimum going from area %d to area %d", currentArea, toAreaNum );
+				if ( !CheckTeleportPathSegment( currentPos, toPoint, lastPos ) )
 				{
-					physicsObj.SetOrigin(trueOrigin);
+					physicsObj.SetOrigin( trueOrigin );
 					return false;
 				}
 				currentPos = toPoint;
@@ -14991,20 +14994,20 @@ bool idPlayer::CheckTeleportPath(const idVec3& target, int toAreaNum)
 			}
 		}
 		// Is this needed? Doesn't hurt.
-		if (!CheckTeleportPathSegment(currentPos, toPoint, lastPos))
+		if ( !CheckTeleportPathSegment( currentPos, toPoint, lastPos ) )
 		{
-			physicsObj.SetOrigin(trueOrigin);
+			physicsObj.SetOrigin( trueOrigin );
 			return false;
 		}
 		// move from end of path to actual target
-		if (!CheckTeleportPathSegment(toPoint, target, lastPos))
+		if ( !CheckTeleportPathSegment( toPoint, target, lastPos ) )
 		{
-			physicsObj.SetOrigin(trueOrigin);
+			physicsObj.SetOrigin( trueOrigin );
 			return false;
 		}
 	}
 
-	physicsObj.SetOrigin(trueOrigin);
+	physicsObj.SetOrigin( trueOrigin );
 	return true;
 }
 
@@ -15041,7 +15044,7 @@ float idPlayer::DefaultFov() const
 {
 	float fov;
 
-	if ( game->isVR ) // koz fixme report HMD fov in VR. 
+	if ( game->isVR ) // Koz fixme report HMD fov in VR. 
 	{
 		fov = commonVr->hmdFovX;
 	}
@@ -15075,7 +15078,7 @@ float idPlayer::CalcFov( bool honorZoom )
 {
 	float fov;
 /*
-	if ( game->isVR ) // koz only use HMD fov in VR
+	if ( game->isVR ) // Koz only use HMD fov in VR
 	{
 		return DefaultFov();
 	}
@@ -15091,6 +15094,9 @@ float idPlayer::CalcFov( bool honorZoom )
 			return influenceFov;
 		}
 
+		// Koz, no zoom in VR.
+
+		/*
 		if ( zoomFov.IsDone( gameLocal.time ) )
 		{
 			fov = (honorZoom && usercmd.buttons & BUTTON_ZOOM) && weapon.GetEntity() ? weapon.GetEntity()->GetZoomFov() : DefaultFov();
@@ -15099,6 +15105,9 @@ float idPlayer::CalcFov( bool honorZoom )
 		{
 			fov = zoomFov.GetCurrentValue( gameLocal.time );
 		}
+		*/
+
+		fov = DefaultFov();
 
 		// bound normal viewsize
 		if ( fov < 1 )
@@ -15306,7 +15315,7 @@ void idPlayer::CalculateViewWeaponPos( idVec3& origin, idMat3& axis )
 	
 	axis = scaledMat * viewAxis;
 
-	weapon->CalculateHideRise( origin, axis );// koz
+	weapon->CalculateHideRise( origin, axis );// Koz
 
 }
 
@@ -15454,14 +15463,14 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 			int flip = vr_weaponHand.GetInteger() == 0 ? 1 : -1;
 			
 			gunpos = idVec3( vr_weaponPivotOffsetForward.GetFloat(), vr_weaponPivotOffsetHorizontal.GetFloat() * flip, vr_weaponPivotOffsetVertical.GetFloat() );
-			gunOrigin += gunpos * bodyAxis;			// koz move the gun to the hand position
+			gunOrigin += gunpos * bodyAxis;			// Koz move the gun to the hand position
 						
 			idVec3 forearm = idVec3( vr_weaponPivotForearmLength.GetFloat(), 0.0f, 0.0f );
 			newOrg = gunOrigin + forearm * newAx;
 						
 			
 						
-			weapon->CalculateHideRise( newOrg, newAx );// koz
+			weapon->CalculateHideRise( newOrg, newAx );// Koz
 			
 			SetHandIKPos( currentHand, newOrg, newAx, angQuat, false );
 			originOffset = weapon->weaponHandDefaultPos[currentHand];
@@ -15634,7 +15643,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 
 /*
 ==============
-koz idPlayer::RecreateCopyJoints()
+Koz idPlayer::RecreateCopyJoints()
 After restoring from a savegame with different player models, the copyjoints for the head are wrong.
 This will recreate a working copyJoint list.
 ==============
@@ -15702,7 +15711,7 @@ void idPlayer::RecreateCopyJoints()
 
 /*
 ==============
-koz idPlayer::UpdateNeckPose
+Koz idPlayer::UpdateNeckPose
 In Vr, if viewing the player body, update the neck joint with the orientation of the HMD.
 ==============
 */
@@ -15723,7 +15732,7 @@ void idPlayer::UpdateNeckPose()
 
 /*
 ==============
-koz idPlayer::TrackWeaponDirection
+Koz idPlayer::TrackWeaponDirection
 keep track of weapon movement to determine direction of motion
 ==============
 */
@@ -15754,7 +15763,7 @@ void idPlayer::TrackWeaponDirection( idVec3 origin )
 
 /*
 ==============
-koz idPlayer::SetHandIKPos
+Koz idPlayer::SetHandIKPos
 Set the position for the hand based on weapon origin
 ==============
 */
@@ -15764,18 +15773,7 @@ void idPlayer::SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQua
 	// the position for the player hand joint is modified 
 	// to reflect the position of the viewmodel.  
 	// armIK / reach_ik then performs crude IK on arm using new positon.
-
-	if (hand)
-	{
-		leftHandOrigin = handOrigin;
-		leftHandAxis = handAxis;
-	}
-	else
-	{
-		rightHandOrigin = handOrigin;
-		rightHandAxis = handAxis;
-	}
-
+	
 	idEntityPtr<idWeapon> curEntity;
 
 	static jointHandle_t weaponHandAttachJoint = INVALID_JOINT; // this is the joint on the WEAPON the hand should meet
@@ -15806,6 +15804,19 @@ void idPlayer::SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQua
 	static int activeWeapon;
 	static int offs;
 
+	commonVr->currentHandWorldPosition[hand] = handOrigin;
+
+	if ( hand )
+	{
+		leftHandOrigin = handOrigin;
+		leftHandAxis = handAxis;
+	}
+	else
+	{
+		rightHandOrigin = handOrigin;
+		rightHandAxis = handAxis;
+	}
+	
 	currentWeaponEnum = weapon->IdentifyWeapon();
 
 	if ( isFlashlight && commonVr->currentFlashlightPosition == FLASH_HAND && flashlight.IsValid() )
@@ -16050,7 +16061,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 	}
 
 	
-	// koz fixme this is where we set the left hand position. Yes it's a stupid place to do it move later
+	// Koz fixme this is where we set the left hand position. Yes it's a stupid place to do it move later
 	
 	if ( game->IsPDAOpen() || commonVr->PDAforcetoggle || currentWeapon == weapon_pda) return; //dont dont anything with the left hand if motion controlling the PDA, only if fixed.
 	
@@ -16286,7 +16297,7 @@ void idPlayer::GetViewPos( idVec3& origin, idMat3& axis ) const
 	// if dead, fix the angle and don't add any kick
 	if ( health <= 0 )
 	{
-		if ( game->isVR ) // koz 
+		if ( game->isVR ) // Koz 
 		{
 			angles = viewAngles; 
 		}
@@ -16393,7 +16404,7 @@ void idPlayer::CalculateFirstPersonView()
 	else
 	{
 		// offset for local bobbing and kicks
-		firstPersonWeaponOrigin = GetEyePosition(); // koz 
+		firstPersonWeaponOrigin = GetEyePosition(); // Koz 
 		GetViewPos( firstPersonViewOrigin, firstPersonViewAxis );
 #if 0
 		// shakefrom sound stuff only happens in first person
@@ -16415,17 +16426,17 @@ void idPlayer::CalculateWaist()
 	waistOrigin = hmdAxis * neckOffset + commonVr->lastHMDViewOrigin;
 	waistOrigin.z += waistZ;
 
-	if (hmdAxis[0].z < 0) // looking down
+	if ( hmdAxis[0].z < 0 ) // looking down
 	{
-		if (hmdAxis[2].z > 0)
+		if ( hmdAxis[2].z > 0 )
 		{
 			// use a point between head forward and upward
 			float h = hmdAxis[2].z - hmdAxis[0].z;
 			float x = -hmdAxis[0].z / h;
 			float y = hmdAxis[2].z / h;
 			idVec3 i = hmdAxis[0] * y + hmdAxis[2] * x;
-			float yaw = atan2(i.y, i.x) * idMath::M_RAD2DEG;
-			waistAxis = idAngles(0, yaw, 0).ToMat3();
+			float yaw = atan2( i.y, i.x ) * idMath::M_RAD2DEG;
+			waistAxis = idAngles( 0, yaw, 0 ).ToMat3();
 		}
 		else
 		{
@@ -16434,13 +16445,13 @@ void idPlayer::CalculateWaist()
 			float x = -hmdAxis[0].z / h;
 			float y = hmdAxis[2].z / h;
 			idVec3 i = hmdAxis[0] * y + hmdAxis[2] * x;
-			float yaw = atan2(i.y, i.x) * idMath::M_RAD2DEG;
-			waistAxis = idAngles(0, yaw, 0).ToMat3();
+			float yaw = atan2( i.y, i.x ) * idMath::M_RAD2DEG;
+			waistAxis = idAngles( 0, yaw, 0 ).ToMat3();
 		}
 	}
 	else // fallback
 	{
-		waistAxis = idAngles(0, hmdAxis.ToAngles().yaw, 0).ToMat3();
+		waistAxis = idAngles( 0, hmdAxis.ToAngles().yaw, 0 ).ToMat3();
 	}
 }
 
@@ -16575,7 +16586,7 @@ create the renderView for the current tic
 */
 void idPlayer::CalculateRenderView()
 {
-	// koz add headtracking
+	// Koz add headtracking
 	static idAngles hmdAngles = { 0.0, 0.0, 0.0 };
 	static idVec3 lastValidHmdTranslation = vec3_zero;
 	static idVec3 headPositionDelta = vec3_zero;
@@ -16622,16 +16633,17 @@ void idPlayer::CalculateRenderView()
 		}
 		else
 		{
-			// koz fixme this was in tmeks renderView->viewaxis = firstPersonViewAxis; shouldnt be needed, verify.
+			// Koz fixme this was in tmeks renderView->viewaxis = firstPersonViewAxis; shouldnt be needed, verify.
 			
 			gameLocal.GetCamera()->GetViewParms( renderView );
 
-			/*	if ( game->isVR && vr_interactiveCinematic.GetBool() ) // koz cinematic
+			/*	if ( game->isVR && vr_interactiveCinematic.GetBool() ) // Koz cinematic
 			{
 			renderView->vieworg = firstPersonViewOrigin;
 			renderView->viewaxis = firstPersonViewAxis;
 			}*/
 		}
+		
 	}
 	else
 	{
@@ -16679,13 +16691,14 @@ void idPlayer::CalculateRenderView()
 		gameLocal.Printf( "%s : %s\n", renderView->vieworg.ToString(), renderView->viewaxis.ToAngles().ToString() );
 	}
 
-	if ( game->isVR )  
+	if ( game->isVR )
 	{
-		// koz headtracker does not modify the model rotations
+				
+		// Koz headtracker does not modify the model rotations
 		// offsets to body rotation added here
 
 		// body position based on neck model
-		// koz fixme fix this.
+		// Koz fixme fix this.
 
 		// Koz begin : Add headtracking
 		static idVec3 absolutePosition;
@@ -16708,17 +16721,16 @@ void idPlayer::CalculateRenderView()
 				wasCinematic = true;
 
 				commonVr->cinematicStartViewYaw = hmdAngles.yaw + commonVr->trackingOriginYawOffset;
-				//commonVr->cinematicStartPosition = absolutePosition;
-
-				commonVr->cinematicStartPosition.x = -commonVr->hmdTrackingState.HeadPose.ThePose.Position.z;
-				commonVr->cinematicStartPosition.y = -commonVr->hmdTrackingState.HeadPose.ThePose.Position.x;
-				commonVr->cinematicStartPosition.z = commonVr->hmdTrackingState.HeadPose.ThePose.Position.y;
+				
+				commonVr->cinematicStartPosition = absolutePosition + (commonVr->trackingOriginOffset * idAngles( 0.0f, commonVr->trackingOriginYawOffset, 0.0f ).ToMat3());
+				
+				//commonVr->cinematicStartPosition.x = -commonVr->hmdTrackingState.HeadPose.ThePose.Position.z;
+				//commonVr->cinematicStartPosition.y = -commonVr->hmdTrackingState.HeadPose.ThePose.Position.x;
+				//commonVr->cinematicStartPosition.z = commonVr->hmdTrackingState.HeadPose.ThePose.Position.y;
 				
 				playerView.Flash(colorWhite, 300);
 				
-
 				if ( vr_cinematics.GetInteger() == 2 && vr_flicksyncCharacter.GetInteger() == 0)
-
 				{
 					cinematicOffset = vec3_zero;
 				}
@@ -16757,10 +16769,10 @@ void idPlayer::CalculateRenderView()
 
 			origin += commonVr->leanOffset;
 			
-			if ( gameLocal.inCinematic && vr_cinematics.GetInteger() == 1 )
+			if ( 1 ) //gameLocal.inCinematic && vr_cinematics.GetInteger() == 1 )
 			{
 				
-				//koz to do clean up later - added to allow cropped cinematics with original camera movements.
+				// Koz to do clean up later - added to allow cropped cinematics with original camera movements.
 				idQuat q1, q2;
 
 				q1 = angles.ToQuat();
@@ -16864,7 +16876,7 @@ void idPlayer::CalculateRenderView()
 		}
 		
 
-		// koz fixme pause - handle the PDA model if game is paused
+		// Koz fixme pause - handle the PDA model if game is paused
 		// really really need to move this somewhere else,
 
 		if ( !commonVr->PDAforcetoggle && commonVr->PDAforced && weapon->IdentifyWeapon() != WEAPON_PDA ) // PDAforced cannot be valid if the weapon is not the PDA
@@ -17443,7 +17455,7 @@ void idPlayer::Event_GetWeaponEntity()
 	idThread::ReturnEntity( weapon.GetEntity() );
 }
 
-//koz begin
+// Koz begin
 /*
 ==================
 idPlayer::Event_GetWeaponHand
@@ -17573,12 +17585,12 @@ void idPlayer::Event_GetFlashState()
 {
 	static int flashon;
 	flashon = flashlight.GetEntity()->lightOn  ? 1 : 0 ;
-	// koz debug common->Printf( "Returning flashlight state = %d\n",flashon );
+	// Koz debug common->Printf( "Returning flashlight state = %d\n",flashon );
 	idThread::ReturnInt( flashon );
 }
 
 
-//koz end
+// Koz end
 
 /*
 ==================
@@ -17589,7 +17601,7 @@ void idPlayer::Event_OpenPDA()
 {
 	if( !common->IsMultiplayer() )
 	{
-		// koz debug common->Printf( "idPlayer::Event_OpenPDA() calling TogglePDA\n" );
+		// Koz debug common->Printf( "idPlayer::Event_OpenPDA() calling TogglePDA\n" );
 		TogglePDA();
 	}
 }
@@ -17722,6 +17734,9 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 		usercmd.buttons &= ~( BUTTON_JUMP | BUTTON_CROUCH );
 	}
 	
+	
+	// Koz, no zoom in VR. 
+	/*
 	if( IsLocallyControlled() )
 	{
 		// zooming
@@ -17737,11 +17752,12 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 			}
 		}
 	}
-	
+	*/
+
 	// clear the ik before we do anything else so the skeleton doesn't get updated twice
 	walkIK.ClearJointMods();
 	
-	// koz
+	// Koz
 	armIK.ClearJointMods();
 	
 	if( gameLocal.isNewFrame )
@@ -17937,7 +17953,7 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 	UpdateLaserSight();
 	UpdateTeleportAim();
 
-	if ( game->isVR ) UpdateHeadingBeam(); // koz
+	if ( game->isVR ) UpdateHeadingBeam(); // Koz
 		
 	if( gameLocal.isNewFrame && IsLocallyControlled() )
 	{

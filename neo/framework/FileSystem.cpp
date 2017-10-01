@@ -309,7 +309,7 @@ idCVar  idFileSystemLocal::fs_game_base( "fs_game_base", "", CVAR_SYSTEM | CVAR_
 idCVar	fs_basepath( "fs_basepath", "", CVAR_SYSTEM | CVAR_INIT, "" );
 idCVar	fs_savepath( "fs_savepath", "", CVAR_SYSTEM | CVAR_INIT, "" );
 
-// koz changed fs_resourceLoadPriority default to 0 to load modified files if present. koz fixme only load modified files for vr - need to add a correct modpath.
+// Koz changed fs_resourceLoadPriority default to 0 to load modified files if present. 
 idCVar	fs_resourceLoadPriority( "fs_resourceLoadPriority", "0", CVAR_SYSTEM , "if 1, open requests will be honored from resource files first; if 0, the resource files are checked after normal search paths" );
 idCVar	fs_enableBackgroundCaching( "fs_enableBackgroundCaching", "1", CVAR_SYSTEM , "if 1 allow the 360 to precache game files in the background" );
 
@@ -3167,9 +3167,9 @@ void idFileSystemLocal::Init()
 	common->StartupVariable( "fs_game_base" );
 	common->StartupVariable( "fs_copyfiles" );
 
-	//koz permanently set the path for the mod
+	// Koz permanently set the path for the mod
 	cvarSystem->SetCVarString( "fs_game", "Fully Possessed" );
-	//koz end
+	// Koz end
 
 	if( fs_basepath.GetString()[0] == '\0' )
 	{
@@ -3378,7 +3378,7 @@ separate file or a ZIP file.
 */
 idFile* idFileSystemLocal::OpenFileReadFlags( const char* relativePath, int searchFlags, bool allowCopyFiles, const char* gamedir )
 {
-	//common->Printf( "Gamedir = %s\n", gamedir );//koz deleteme
+	//common->Printf( "Gamedir = %s\n", gamedir );// Koz deleteme
 	//common->Printf( "RelPath = %s\n\n", relativePath3 );
 
 	if( !IsInitialized() )

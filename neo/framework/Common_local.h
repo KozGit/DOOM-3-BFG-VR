@@ -314,7 +314,7 @@ public:
 	frameTiming_t		frameTiming;
 	frameTiming_t		mainFrameTiming;
 
-	bool				insideExecuteMapChange;	// Enable Pacifier Updates // koz moved to public
+	bool				insideExecuteMapChange;	// Enable Pacifier Updates // Koz moved to public
 	bool				insideUpdateScreen;		// true while inside ::UpdateScreen()
 
 public:	// These are public because they are called directly by static functions in this file

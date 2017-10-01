@@ -163,14 +163,14 @@ public:
 	virtual void			Evaluate();
 	virtual void			ClearJointMods();
 
-	// koz begin  - moved from private
+	// Koz begin  - moved from private
 	static const int		MAX_ARMS = 2;
 	jointHandle_t			handJoints[MAX_ARMS];
 	jointHandle_t			elbowJoints[MAX_ARMS];
 	jointHandle_t			shoulderJoints[MAX_ARMS];
 	jointHandle_t			wristJoints[MAX_ARMS];
 	idMat3					elbowAxisMotion[2];
-	// koz end
+	// Koz end
 
 private:
 		

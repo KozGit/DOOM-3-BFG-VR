@@ -4076,7 +4076,7 @@ void idAnimator::Restore( idRestoreGame* savefile )
 	
 	savefile->ReadBool( removeOriginOffset );
 
-	// Carl: koz
+	// Carl: Koz
 	int numChannels; // ANIM_NumAnimChannels is different in this mod
 	if (savefile->version >= BUILD_NUMBER_FULLY_POSSESSED)
 		numChannels = 7;
@@ -4098,7 +4098,7 @@ void idAnimator::Restore( idRestoreGame* savefile )
 			channels[ i ][ j ].Reset( modelDef );
 		}
 	}
-	// Carl: koz end
+	// Carl: Koz end
 
 	// Carl: if this is from RBDoom, then everything we just restored is bullshit, except perhaps the model name
 	// Try clearing it all and loading the model again.

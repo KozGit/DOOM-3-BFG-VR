@@ -343,6 +343,7 @@ public:
 	
 	float				bodyMoveAng;
 
+	bool				privateCamera;
 
 	vr_motionControl_t	motionControlType;
 	
@@ -386,7 +387,8 @@ public:
 	bool				didTeleport;
 	float				teleportDir;
 
-
+	idVec3				currentHandWorldPosition[2];
+	
 	
 	
 	// clip stuff
@@ -472,6 +474,7 @@ extern idCVar	vr_talkWakeMonsters;
 extern idCVar	vr_talkWakeMonsterRadius;
 extern idCVar	vr_talkMode;
 extern idCVar	vr_voiceCommands;
+extern idCVar	vr_voicePushToTalk;
 extern idCVar	vr_voiceRepeat;
 extern idCVar	vr_voiceMinVolume;
 

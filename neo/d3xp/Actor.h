@@ -250,9 +250,9 @@ protected:
 	jointHandle_t			soundJoint;
 	
 	idIK_Walk				walkIK;
-	// koz
+	// Koz
 	idIK_Reach				armIK;
-	// koz
+	// Koz
 	
 	idStr					animPrefix;
 	idStr					painAnim;
@@ -270,10 +270,10 @@ protected:
 	idAnimState				torsoAnim;
 	idAnimState				legsAnim;
 
-	//koz
+	// Koz
 	idAnimState				leftHandAnim;
 	idAnimState				rightHandAnim;
-	//koz end
+	// Koz end
 	
 	bool					allowPain;
 	bool					allowEyeFocus;

@@ -253,7 +253,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 	if ( event->evType == SE_KEY )
 	{
 
-		/*	koz PDA - if the user is in VR, and the PDA menu is up,
+		/*	Koz PDA - if the user is in VR, and the PDA menu is up,
 		he can use head tracking to controll the mouse in the
 		PDA menus.  We need to check for touch/steamvr buttons/triggers as
 		well as mouse clicks so the user can actually select
@@ -358,13 +358,13 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				}
 			}
 
-			//return false; // koz fixme this was just a return, but let motion control key events fall through
+			//return false;// Koz fixme this was just a return, but let motion control key events fall through
 
 		}
 
-		// koz begin
+		// Koz begin
 		/* ==================================
-		koz some serious ugly here.  By default, the PDA menu uses both joysticks for
+		Koz some serious ugly here.  By default, the PDA menu uses both joysticks for
 		navigation - left stick for user info and right stick to select an item from a submenu.
 		I don't think this works well with the motion controls, or when using a gun style controller
 		like the top shot elite. I'm implementing a hack here so the user can A: use either
@@ -465,7 +465,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				if ( joyAxisSwap[j][sourceAxis] == keyValue ) keyValue = joyAxisSwap[j][destAxis];
 			}
 				
-		} // koz end joy remapping if enabled
+		}// Koz end joy remapping if enabled
 
 		// Koz begin
 		// const char* keyName = idKeyInput::KeyNumToString( (keyNum_t)event->evValue );
@@ -521,10 +521,10 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 			idSWFScriptVar useFunction = globals->Get( "useFunction" );
 			if ( useFunction.IsFunction() && event->evValue2 )
 			{
-				// koz begin
+				// Koz begin
 				//const char* action = idKeyInput::GetBinding( event->evValue );
 				const char * action = idKeyInput::GetBinding( keyValue );
-				// koz end
+				// Koz end
 				if ( idStr::Cmp( "_use", action ) == 0 )
 				{
 					useFunction.GetFunction()->Call( NULL, idSWFParmList() );
@@ -538,10 +538,10 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				if ( event->evValue2 )
 				{
 					idSWFParmList waitParms;
-					// koz begin
+					// Koz begin
 					// waitParms.Append( event->evValue );
 					waitParms.Append( keyValue );
-					// koz end
+					// Koz end
 
 					waitInput.GetFunction()->Call( NULL, waitParms );
 				}
@@ -565,16 +565,16 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 					if ( event->evValue2 || wasPressed )
 					{
 						idSWFParmList parms;
-						parms.Append( keyValue ); // koz parms.Append(event->evValue);
+						parms.Append( keyValue );// Koz parms.Append(event->evValue);
 						parms.Append( event->evValue2 );
 						onKey.GetFunction()->Call( focusWindow.GetObject(), parms ).ToBool();
 						return true;
 					}
 					//else if( event->evValue == K_LSHIFT || event->evValue == K_RSHIFT )
-					else if ( keyValue == K_LSHIFT || keyValue == K_RSHIFT ) // koz
+					else if ( keyValue == K_LSHIFT || keyValue == K_RSHIFT )// Koz
 					{
 						idSWFParmList parms;
-						parms.Append( keyValue ); // koz parms.Append(event->evValue);
+						parms.Append( keyValue );// Koz parms.Append(event->evValue);
 						parms.Append( event->evValue2 );
 						onKey.GetFunction()->Call( focusWindow.GetObject(), parms ).ToBool();
 					}
@@ -623,7 +623,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 						
 			float scale = swfScale * sysHeight / (float)frameHeight;
 
-			// koz
+			// Koz
 			if ( game->isVR  )
 			{
 				if ( commonVr->VR_GAME_PAUSED )
@@ -648,7 +648,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 					}
 				}
 			}
-			//koz end
+			// Koz end
 
 			sysWidth = renderSystem->GetWidth() * (pixelAspect > 1.0f ? pixelAspect : 1.0f);
 			sysHeight = renderSystem->GetHeight() / (pixelAspect < 1.0f ? pixelAspect : 1.0f);

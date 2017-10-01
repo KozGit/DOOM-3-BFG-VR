@@ -957,7 +957,7 @@ public:
 	
 	int				GetDimension() const;
 
-	idMat3			ToMat3() const; // koz
+	idMat3			ToMat3() const; // Koz
 	
 	const float* 	ToFloatPtr() const;
 	float* 			ToFloatPtr();

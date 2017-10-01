@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-#include"vr\Vr.h" // koz
+#include"vr\Vr.h" // Koz
 #include"d3xp\Game_local.h"
 
 
@@ -190,7 +190,7 @@ userCmdString_t	userCmdStrings[] =
 	{ "_impulse39", UB_IMPULSE39 }, // new impulse for next flashlight mode;
 	{ "_impulse40", UB_IMPULSE40 }, // new impulse for system menu;
 	{ "_impulse41", UB_IMPULSE41 }, // new impulse for click to move;
-	// koz end
+	// Koz end
 	{ "_soulcube", UB_IMPULSE_SOULCUBE }, // new impulse for Soul Cube
 	{ "_artifact", UB_IMPULSE_ARTIFACT }, // new impulse for The Artifact
 	{ "_pause", UB_IMPULSE_PAUSE }, // new impulse for Computer, Freeze Program
@@ -287,6 +287,7 @@ private:
 	void			MakeCurrent();
 	void			InitCurrent();
 	void			EvaluateVRMoveMode();
+	void			CalcTorsoYawDelta();
 
 	bool			Inhibited();
 	void			AdjustAngles();
@@ -482,7 +483,7 @@ void idUsercmdGenLocal::AdjustAngles()
 		viewangles[PITCH] -= speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKUP );
 		viewangles[PITCH] += speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKDOWN );
 	}
-	else // koz add independent weapon aiming 
+	else // Koz add independent weapon aiming 
 	{
 		float yawdelta = 0.0f;
 		float pitchdelta = 0.0f;
@@ -601,7 +602,7 @@ void idUsercmdGenLocal::MouseMove()
 	yawdelta = -m_yaw.GetFloat() * mx * in_mouseSpeed.GetFloat();
 	pitchdelta = m_pitch.GetFloat() * in_mouseSpeed.GetFloat() * (in_mouseInvertLook.GetBool() ? -my : my);
 
-	// koz begin add mouse control here
+	// Koz begin add mouse control here
 	if ( vr_enable.GetBool() )
 	{
 		// update the independent weapon angles and return any view changes based on current aim mode
@@ -1275,9 +1276,9 @@ void idUsercmdGenLocal::JoystickMove2()
 	// Koz - joystick handling changed to allow all axes to be mapped to any movement/look control independently,
 	// including touch/openvr.  No need for stick swapping or inversion - just remap.
 
-	// koz const bool invertLook =			in_invertLook.GetBool(); dont need anymore remap instead.
+	// Koz const bool invertLook =			in_invertLook.GetBool(); dont need anymore remap instead.
 
-	//koz fixme these were const changed for easier testing
+	// Koz fixme these were const changed for easier testing
 	 float threshold = joy_deadZone.GetFloat();
 	 float range = joy_range.GetFloat();
 	 transferFunction_t shape = (transferFunction_t)joy_gammaLook.GetInteger();
@@ -1297,7 +1298,7 @@ void idUsercmdGenLocal::JoystickMove2()
 	if ( ButtonState( UB_IMPULSE34 ) ) comfortTurn = -vr_comfortDelta.GetFloat();
 	if ( ButtonState( UB_IMPULSE35 ) ) comfortTurn = vr_comfortDelta.GetFloat();
 	
-	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_X ); //koz remamp axis
+	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_X ); // Koz remamp axis
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_Y );
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_X );
 	comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_Y );
@@ -1365,7 +1366,7 @@ void idUsercmdGenLocal::JoystickMove2()
 
 		CircleToSquare( leftMapped.x, leftMapped.y );
 
-		if (vr_teleportMode.GetInteger() == 1) {
+		if (vr_teleportMode.GetInteger() == 2) {
 			commonVr->leftMapped = leftMapped; // Jack: this has not been tested
 		}
 		else
@@ -1440,7 +1441,7 @@ void idUsercmdGenLocal::JoystickMove2()
 		leftMapped = mappedMove;
 		rightMapped = mappedLook;
 
-		if (vr_teleportMode.GetInteger() == 1) {
+		if (vr_teleportMode.GetInteger() == 2) {
 			commonVr->leftMapped = leftMapped;
 		}
 		else
@@ -1475,13 +1476,13 @@ void idUsercmdGenLocal::CmdButtons()
 		
 	cmd.buttons = 0;
 	
-	//koz begin cancel teleport if fire button pressed.
+	// Koz begin cancel teleport if fire button pressed.
 	static int teleportCanceled = 0;
 	
 	// check the attack button
 	if( ButtonState( UB_ATTACK ) )
 	{
-		if ( commonVr->teleportButtonCount != 0 )
+		if ( commonVr->teleportButtonCount != 0 && vr_teleportMode.GetInteger() == 0 )// dont cancel teleport
 		{
 			commonVr->teleportButtonCount = 0;
 			teleportCanceled = 1;
@@ -1494,7 +1495,7 @@ void idUsercmdGenLocal::CmdButtons()
 	}
 	
 	teleportCanceled &= ButtonState( UB_ATTACK );
-	//koz end
+	// Koz end
 
 	// check the use button
 	if( ButtonState( UB_USE ) )
@@ -1510,7 +1511,7 @@ void idUsercmdGenLocal::CmdButtons()
 
 	// check the run button
 
-	if ( !game->isVR || game->isVR && vr_moveClick.GetInteger() <= 2 ) // koz, do normal run if moveClick = 0
+	if ( !game->isVR || game->isVR && vr_moveClick.GetInteger() <= 2 ) // Koz, do normal run if moveClick = 0
 	{
 		if ( toggled_run.on || (in_alwaysRun.GetBool() && common->IsMultiplayer()) || commonVr->forceRun )
 		{
@@ -1534,7 +1535,7 @@ void idUsercmdGenLocal::CmdButtons()
 		cmd.buttons |= BUTTON_CROUCH;
 	}
 	
-	//koz begin crouch trigger
+	// Koz begin crouch trigger
 	if ( commonVr->userDuckingAmount > vr_crouchTriggerDist.GetFloat() / vr_scale.GetFloat() && vr_crouchMode.GetInteger() == 1 ) cmd.buttons |= BUTTON_CROUCH;
 	
 }
@@ -1555,6 +1556,162 @@ void idUsercmdGenLocal::InitCurrent()
 }
 
 
+
+
+/*
+================
+Koz
+idUsercmdGenLocal::CalcTorsoYawDelta()
+
+Calculates a yaw offset to rotate the player model torso to a somewhat forward position
+based on view direction and tracked hand controller position.
+================
+*/
+
+void idUsercmdGenLocal::CalcTorsoYawDelta()
+{
+	// we want to orient the body relative to the view ( if movement, body will be auto positioned by move )
+	// to do : improve this - it's pretty hacky, just calcs a mostly naive forward vector for the body based on view direction and hand positions.  
+	static int influenceLevel = 0;
+
+	if ( gameLocal.GetLocalPlayer() )
+	{
+		influenceLevel = gameLocal.GetLocalPlayer()->GetInfluenceLevel();
+	}
+
+	if ( influenceLevel == 0 && !gameLocal.inCinematic && commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && (abs( cmd.forwardmove ) < .1 || abs( cmd.rightmove ) < .1) )
+	{
+		idVec3 rightHandPos;
+		idVec3 rightHandForwardVec;
+		idVec3 leftHandPos;
+		idVec3 leftHandForwardVec;
+		idVec3 combinedHandVec;
+		idVec3 centerHandsPos;
+		idVec3 hipPos;
+		idVec3 viewDirVec;
+		idVec3 bodyDirVec;
+		idVec3 bodyToHandCenterVec;
+
+		idVec3 torsoVec;
+		static idVec3 lastTorsoVec = vec3_zero;
+
+		float bodyYaw;
+		float viewYaw;
+
+		bodyYaw = gameLocal.GetLocalPlayer()->viewAngles.yaw;
+		viewYaw = gameLocal.GetLocalPlayer()->viewAngles.yaw - commonVr->bodyYawOffset + commonVr->poseHmdAngles.yaw;
+
+		viewYaw = idAngles( 0.0f, viewYaw, 0.0f ).Normalize180().yaw;
+		static float targetBodyYaw = viewYaw;
+		
+		hipPos = gameLocal.GetLocalPlayer()->GetPlayerPhysics()->GetOrigin();
+		hipPos.z += 48.0f;
+
+		rightHandPos = commonVr->currentHandWorldPosition[HAND_RIGHT /*0*/ ];// right Hand
+		rightHandForwardVec = rightHandPos - hipPos;
+		rightHandForwardVec.z = 0.0f;
+		rightHandForwardVec.Normalize();
+		
+		leftHandPos = commonVr->currentHandWorldPosition[HAND_LEFT /*1*/ ];// left hand
+		leftHandForwardVec = leftHandPos - hipPos;
+		leftHandForwardVec.z = 0.0f;
+		leftHandForwardVec.Normalize();
+
+		combinedHandVec = leftHandForwardVec + rightHandForwardVec;
+		combinedHandVec.Normalize();
+
+		//body direction vector;
+		bodyDirVec = hipPos + (gameLocal.GetLocalPlayer()->viewAxis[0] * 40);
+		bodyDirVec = bodyDirVec - hipPos;
+		bodyDirVec.z = 0.0f;
+		bodyDirVec.Normalize();
+
+		viewDirVec = gameLocal.GetLocalPlayer()->GetPlayerPhysics()->GetOrigin() + (idAngles( 0.0f, viewYaw, 0.0f ).ToMat3()[0] * 40);
+		viewDirVec = viewDirVec - gameLocal.GetLocalPlayer()->GetPlayerPhysics()->GetOrigin();
+		viewDirVec.z = 0.0f;
+		viewDirVec.Normalize();
+
+		// check if hands are moving behind body.
+		if ( fabs( idMath::AngleDelta( rightHandForwardVec.ToAngles().yaw, bodyDirVec.ToAngles().yaw ) ) >= 80 ||
+			fabs( idMath::AngleDelta( leftHandForwardVec.ToAngles().yaw, bodyDirVec.ToAngles().yaw ) ) >= 80 )
+		{
+			//common->Printf( "hand deltas > 80 resetting %d\n",Sys_Milliseconds() );
+			leftHandForwardVec =  bodyDirVec; //viewDirVec
+			rightHandForwardVec = bodyDirVec; //viewDirVec
+			leftHandPos = hipPos + (gameLocal.GetLocalPlayer()->viewAxis[0] * 40); // viewDirVec * 40;
+			rightHandPos = hipPos + (gameLocal.GetLocalPlayer()->viewAxis[0] * 40); // viewDirVec * 40; 
+			combinedHandVec = leftHandForwardVec + rightHandForwardVec;
+			combinedHandVec.Normalize();
+		}
+		
+		centerHandsPos = (leftHandPos + rightHandPos) / 2.0f;
+
+		bodyToHandCenterVec = hipPos - centerHandsPos;
+		bodyToHandCenterVec.z = 0;
+		bodyToHandCenterVec.Normalize();
+
+		if ( bodyToHandCenterVec * viewDirVec < 0 ) // this shouldn't really happen.
+		{
+			bodyToHandCenterVec *= -1;
+		}
+		
+		/*
+		gameRenderWorld->DebugLine( colorYellow, hipPos, hipPos + bodyDirVec * 40, 20 );
+		gameRenderWorld->DebugLine( colorRed, hipPos, hipPos + rightHandForwardVec * 40, 20 );
+		gameRenderWorld->DebugLine( colorBlue, hipPos, hipPos + leftHandForwardVec * 40, 20 );
+		gameRenderWorld->DebugLine( colorBrown, hipPos, hipPos + viewDirVec * 40, 20 );
+		gameRenderWorld->DebugLine( colorPink, hipPos, hipPos + combinedHandVec * 40, 20 );
+		gameRenderWorld->DebugLine( colorPurple, hipPos, hipPos + bodyToHandCenterVec * 40, 20 );
+		*/
+		
+		torsoVec = viewDirVec;
+
+		if ( fabs( idMath::AngleDelta( viewDirVec.ToAngles().Normalize180().yaw, combinedHandVec.ToAngles().Normalize180().yaw ) ) > 80.0f )
+		{
+			torsoVec = combinedHandVec + bodyToHandCenterVec;
+		}
+
+		torsoVec.Normalize();
+
+		if ( viewDirVec * torsoVec < 0.0f )
+		{
+			torsoVec = viewDirVec + lastTorsoVec;
+			torsoVec.z = 0.0f;
+			torsoVec.Normalize();
+		}
+
+		lastTorsoVec = torsoVec;
+
+		float desiredBody = torsoVec.ToAngles().Normalize180().yaw;
+		float angDelta = fabs( idMath::AngleDelta( targetBodyYaw, (viewYaw + bodyToHandCenterVec.ToAngles().Normalize180().yaw) / 2 ) );
+		float turnDelta;
+
+		if ( angDelta > 5.0f ) targetBodyYaw = (viewYaw + bodyToHandCenterVec.ToAngles().Normalize180().yaw) / 2;// viewYaw;
+
+		if ( fabs( idMath::AngleDelta( targetBodyYaw, viewYaw ) ) > 70.0f ) targetBodyYaw = viewYaw;
+
+		turnDelta = -idMath::AngleDelta( bodyYaw, targetBodyYaw );
+
+		float cmdYaw = 0.0f;
+		float degPerFrame = fabs( turnDelta ) > 30 ? turnDelta : fabs( turnDelta ) / (200.0f / (1000 / commonVr->hmdHz));// 1.0f;
+
+		if ( fabs( turnDelta ) < degPerFrame )
+		{
+			cmdYaw = turnDelta;
+		}
+		else
+		{
+			cmdYaw = turnDelta > 0.0f ? degPerFrame : -degPerFrame;
+		}
+
+		if ( fabs( cmdYaw ) < 0.1f ) cmdYaw = 0.0f;
+
+		viewangles[YAW] += cmdYaw;
+		commonVr->bodyYawOffset += cmdYaw;
+
+	}
+}
+
 /*
 ================
 Koz begin
@@ -1563,6 +1720,7 @@ idUsercmdGenLocal::EvaluateVRMoveMode()
 Process the different VR movement mode options
 ================
 */
+
 void idUsercmdGenLocal::EvaluateVRMoveMode()
 {
 	static bool moveStarted = 0; // no movement
@@ -1570,17 +1728,22 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 	static int pressedLastPoll = false;
 	static int lastMoveTime = Sys_Milliseconds();
 	
-
+	
 	if ( commonVr->didTeleport )
 	{
 		commonVr->didTeleport = false;
-
-		viewangles[YAW] += commonVr->teleportDir;
-		common->Printf( "Teleport dir yaw adding %f angles to view \n", commonVr->teleportDir );
-		commonVr->teleportDir = 0.0f;
-		return;
+		if ( vr_teleportMode.GetInteger() == 0 )
+		{
+			viewangles[YAW] += commonVr->teleportDir;
+			common->Printf( "Teleport dir yaw adding %f angles to view \n", commonVr->teleportDir );
+			commonVr->teleportDir = 0.0f;
+			//return;
+		}
 	}
 	
+	// Koz make sure the torso faces some form of forward.
+
+	CalcTorsoYawDelta();
 
 	bool okToMove = false;
 	bool moveRequested = ( abs( cmd.forwardmove ) >= 0.05 || abs( cmd.rightmove ) >= 0.05 );
@@ -1597,9 +1760,7 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 	int buttonCurrentlyClicked = ButtonState( UB_IMPULSE41 );
 
 	if ( game->CheckInCinematic() == true || Flicksync_InCutscene ) return; // do nothing in cinematics
-
-
-	//common->Printf( "Forwardmove %d rightmove %d\n", cmd.forwardmove, cmd.rightmove );
+		
 	if ( buttonCurrentlyClicked && !pressedLastPoll && moveRequested )
 	{
 		numButtonClicks++;
@@ -1675,21 +1836,23 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 	}
 
 	// okToMove is true for Doom VFR
-	if (vr_teleportMode.GetInteger() == 1) {
-		cmd.forwardmove = 0.0f;
-		cmd.rightmove = 0.0f;
-		okToMove = true;
-	}
+//	if (vr_teleportMode.GetInteger() == 2) {
+//		cmd.forwardmove = 0.0f;
+//		cmd.rightmove = 0.0f;
+//		okToMove = true;
+//	}
 
-	if (!okToMove)
+	if ( !okToMove )
 	{
 		cmd.forwardmove = 0.0f;
 		cmd.rightmove = 0.0f;
 		return;
 	}
-
+		
+	
+	
 	if (commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && (vr_movePoint.GetInteger() == 1 || vr_movePoint.GetInteger() > 2) && 
-		(abs(cmd.forwardmove) >= .1 || abs(cmd.rightmove) >= .1) || vr_teleportMode.GetInteger() == 1) // body will follow motion from move vector
+		(abs(cmd.forwardmove) >= .1 || abs(cmd.rightmove) >= .1) || vr_teleportMode.GetInteger() == 2) // body will follow motion from move vector
 	{
 		static idAngles controllerAng;
 		int hand;
@@ -1710,14 +1873,7 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		}
 
 		controllerAng = commonVr->poseHandRotationAngles[hand];
-		/*
-		viewangles[YAW] += controllerAng.yaw - commonVr->bodyMoveAng;
-		commonVr->bodyMoveAng = controllerAng.yaw;
-		commonVr->bodyYawOffset = controllerAng.yaw;
-		*/
-
 		viewangles[YAW] += controllerAng.yaw - commonVr->bodyYawOffset;
-		//commonVr->bodyMoveAng = controllerAng.yaw;
 		commonVr->bodyYawOffset = controllerAng.yaw;
 	}
 	else if ( !commonVr->VR_USE_MOTION_CONTROLS || vr_movePoint.GetInteger() == 2 ) // body will follow view
@@ -1780,31 +1936,7 @@ void idUsercmdGenLocal::MakeCurrent()
 		{
 			EvaluateVRMoveMode();
 		}
-					
-		/*
 		
-		if ( commonVr->isWalking )
-		{
-			// WIP button pressed
-			// if freelook not enabled, turn body to last view
-
-			if ( !usercmdGen->ButtonState( UB_IMPULSE39 ) )
-			{
-				// turn body to view
-				//player->SnapBodyToView();
-			
-				
-				viewangles[YAW] += commonVr->lastHMDYaw - commonVr->bodyYawOffset;
-				//newBodyAngles.Normalize180();
-				
-				commonVr->MotionControlSetRotationOffset();
-				commonVr->bodyYawOffset = commonVr->lastHMDYaw;
-
-			}
-		}
-		*/
-
-
 		// check to make sure the angles haven't wrapped
 		if( viewangles[PITCH] - oldAngles[PITCH] > 90 )
 		{
@@ -1823,7 +1955,7 @@ void idUsercmdGenLocal::MakeCurrent()
 	
 	for( int i = 0; i < 3; i++ )
 	{
-		cmd.angles[i] = ANGLE2SHORT( viewangles[i] ); // koz this sets player body
+		cmd.angles[i] = ANGLE2SHORT( viewangles[i] ); // Koz this sets player body
 	}
 	
 	cmd.mx = continuousMouseX;
@@ -2208,7 +2340,7 @@ void idUsercmdGenLocal::BuildCurrentUsercmd( int deviceNum )
 	
 	// process the system joystick events
 	
-	// koz bfg doesnt really seem to like more than 1 controller by default,
+	// Koz bfg doesnt really seem to like more than 1 controller by default,
 	// so scan thru them all here
 		 
 	if ( deviceNum >= 0 && in_useJoystick.GetBool() )

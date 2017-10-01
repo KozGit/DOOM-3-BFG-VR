@@ -314,7 +314,7 @@ bool idMenuScreen_Shell_Difficulty::HandleAction( idWidgetAction& action, const 
 			}
 			
 			g_skill.SetInteger( selectionIndex );
-			vr_teleportHint.SetBool( false ); // koz should really save this instead. sigh.
+			vr_teleportHint.SetBool( false ); // Koz should really save this instead. sigh.
 
 			idMenuHandler_Shell* shellMgr = dynamic_cast< idMenuHandler_Shell* >( menuData );
 			if( shellMgr )

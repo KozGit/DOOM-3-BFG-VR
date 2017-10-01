@@ -742,13 +742,13 @@ int Sys_PollMouseInputEvents( int mouseEvents[MAX_MOUSE_EVENTS][2] )
 void Sys_SetRumble( int device, int low, int hi )
 {
 	if ( commonVr->hasOculusRift ) {
-		//koz begin
+		// Koz begin
 		if ( commonVr->VR_USE_MOTION_CONTROLS && vr_rumbleEnable.GetBool() )
 		{
 			commonVr->MotionControllerSetHapticOculus( low, hi );
 			return;
 		}
-		// koz end
+		// Koz end
 	} 
 	
 	else if( commonVr->motionControlType == MOTION_STEAMVR && vr_rumbleEnable.GetBool() )
@@ -1238,7 +1238,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 					}
 				}
         
-				if ( vr_voiceCommands.GetInteger() > 0 )
+				if ( vr_voiceCommands.GetInteger() > 0 )   
 				{
 					static bool oldSay[ J_SAY_MAX - J_SAY_MIN + 1 ] = {};
 					int max = vr_voiceCommands.GetInteger() > 1 ? J_SAY_MAX : J_SAY_RELOAD;

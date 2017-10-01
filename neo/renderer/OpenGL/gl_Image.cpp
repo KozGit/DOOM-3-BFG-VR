@@ -352,7 +352,7 @@ This should not be done during normal game-play, if you can avoid it.
 */
 void idImage::AllocImage()
 {
-	// koz GL_CheckErrors();
+	// Koz GL_CheckErrors();
 	PurgeImage();
 	
 	switch( opts.format )

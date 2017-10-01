@@ -510,7 +510,7 @@ void idCommonLocal::ExecuteMapChange()
 	bool hellMap = false;
 	LoadLoadingGui( currentMapName, hellMap );
 	
-	// koz
+	// Koz
 		
 	// Stop rendering the wipe
 	//if ( !game->isVR) ClearWipe(); // Koz skip this to leave the screen black during loads.
@@ -533,7 +533,7 @@ void idCommonLocal::ExecuteMapChange()
 	{
 		// In multiplayer, make sure the player is either 60Hz or 120Hz
 		// to avoid potential issues.
-		const float mpEngineHz = ( com_engineHz.GetFloat() < 90.0f ) ? 60.0f : 120.0f; // koz fixme for multiplayer
+		const float mpEngineHz = ( com_engineHz.GetFloat() < 90.0f ) ? 60.0f : 120.0f; // Koz fixme for multiplayer
 		com_engineHz_denominator = 100LL * mpEngineHz;
 		com_engineHz_latched = mpEngineHz;
 	}
@@ -541,7 +541,7 @@ void idCommonLocal::ExecuteMapChange()
 	{
 		// allow com_engineHz to be changed between map loads
 		
-		if ( game->isVR ) // koz
+		if ( game->isVR ) // Koz
 		{
 			com_engineHz_denominator = 100LL * ( commonVr->hmdHz );
 			com_engineHz_latched = ( commonVr->hmdHz );
@@ -769,7 +769,7 @@ void idCommonLocal::ExecuteMapChange()
 	// Issue a render at the very end of the load process to update soundTime before the first frame
 	soundSystem->Render();
 
-	// koz
+	// Koz
 	commonVr->PDAforcetoggle = false;
 	commonVr->PDAforced = false;
 	commonVr->vrIsBackgroundSaving = false;
@@ -792,7 +792,7 @@ void idCommonLocal::ExecuteMapChange()
 		player->RecreateCopyJoints();
 	}
 		
-	// koz end
+	// Koz end
 
   commonVr->isLoading = false;
 
@@ -917,7 +917,7 @@ void idCommonLocal::UpdateLevelLoadPacifier()
 			}
 			txtVal->SetStrokeInfo( true, 1.75f, 0.75f );
 		}
-		if ( !game->isVR ) 	UpdateScreen( false ); // koz
+		if ( !game->isVR ) 	UpdateScreen( false ); // Koz
 		if( autoswapsRunning )
 		{
 			renderSystem->BeginAutomaticBackgroundSwaps( icon );
@@ -1077,7 +1077,7 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	
 	
 	
-	// koz close the saving dialog before returning or my crappy code to determine when to raise the pda for pause activities gets confused
+	// Koz close the saving dialog before returning or my crappy code to determine when to raise the pda for pause activities gets confused
 	Dialog().ShowSaveIndicator( false );
 
 
@@ -1106,7 +1106,7 @@ idCommonLocal::LoadGame
 bool idCommonLocal::LoadGame( const char* saveName, bool isRBDoom )
 {
 	// Koz begin
-	// koz fixme do this right.
+	// Koz fixme do this right.
 	// Make sure the pda is in a valid state on game load.
 	commonVr->PDAforced = false;
 	commonVr->PDAforcetoggle = false;
@@ -1432,10 +1432,10 @@ CONSOLE_COMMAND_SHIP( loadGame, "loads a game", idCmdSystem::ArgCompletion_SaveG
 	console->Close();
 	commonLocal.LoadGame( ( args.Argc() > 1 ) ? args.Argv( 1 ) : "quick", ( args.Argc() > 2 ) && idStr::Cmp( args.Argv( 2 ), "0" )!=0 );
 	
-	//koz
+	// Koz
 	vr_headingBeamMode.SetModified();
 	vr_weaponSight.SetModified();
-	//koz end
+	// Koz end
 
 }
 

@@ -38,9 +38,9 @@ const int VERTCACHE_NUM_FRAMES = 2;
 // index lists that reference existing vertexes
 const int STATIC_INDEX_MEMORY = 31 * 1024 * 1024;
 
-//koz changing to full 32 meg to prevent mem errors with hi res texture/model pack.
-//KOX FIXME MAKE SURE THIS HASNT BROKEN ANYTHING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//const int STATIC_VERTEX_MEMORY = 31 * 1024 * 1024;	// make sure it fits in VERTCACHE_OFFSET_MASK!
+// Koz changing to full 32 meg to prevent mem errors with hi res texture/model pack.
+// KOZ FIXME MAKE SURE THIS HASNT BROKEN ANYTHING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// const int STATIC_VERTEX_MEMORY = 31 * 1024 * 1024;	// make sure it fits in VERTCACHE_OFFSET_MASK!
 const int STATIC_VERTEX_MEMORY = 32 * 1024 * 1024;	// make sure it fits in VERTCACHE_OFFSET_MASK!
 
 // vertCacheHandle_t packs size, offset, and frame number into 64 bits

@@ -198,7 +198,7 @@ void idGrabber::Initialize()
 			args.SetVector( "origin", vec3_origin );
 			args.SetBool( "start_off", true );
 			
-			// koz begin
+			// Koz begin
 			if ( game->isVR )
 			{ 
 				args.Set( "width", vr_grabberBeamWidth.GetString() );
@@ -207,7 +207,7 @@ void idGrabber::Initialize()
 			{
 				args.Set( "width", "6" );
 			}
-			// koz end
+			// Koz end
 
 			args.Set( "skin", "textures/smf/flareSizeable" );
 			args.Set( "_color", "0.0235 0.843 0.969 0.2" );
@@ -340,7 +340,7 @@ void idGrabber::StartDrag( idEntity* grabEnt, int id )
 
 	// start the screen warp
 
-	if ( !game->isVR ) // koz don't warp in VR.  This needs a new shader if 
+	if ( !game->isVR ) // Koz don't warp in VR.  This needs a new shader if 
 	{
 		warpId = thePlayer->playerView.AddWarp( phys->GetOrigin(), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 160, 2000 );
 	}
@@ -422,7 +422,7 @@ void idGrabber::StopDrag( bool dropOnly )
 		else
 		{
 			// Shoot the object forward
-			// koz begin : in vr launch the object in the direction the grabber is pointing
+			// Koz begin : in vr launch the object in the direction the grabber is pointing
 			if ( game->isVR )
 			{
 				static idVec3 launchOrigin = vec3_zero;
@@ -435,7 +435,7 @@ void idGrabber::StopDrag( bool dropOnly )
 			{
 				ent->ApplyImpulse( thePlayer, 0, ent->GetPhysics()->GetOrigin(), thePlayer->firstPersonViewAxis[0] * THROW_SCALE * ent->GetPhysics()->GetMass() );
 			}
-			// koz end
+			// Koz end
 
 			thePlayer->StartSoundShader( declManager->FindSound( "grabber_release" ), SND_CHANNEL_WEAPON, 0, false, NULL );
 			
@@ -505,12 +505,12 @@ int idGrabber::Update( idPlayer* player, bool hide )
 	trace_t trace;
 	idEntity* newEnt;
 	
-	// koz begin 
+	// Koz begin 
 	idVec3  dragOrigin = vec3_zero;
 	idMat3	dragAxis = mat3_identity;
 	
 	
-	if ( game->IsInGame() ) // koz fix me
+	if ( game->IsInGame() ) // Koz fix me
 	{
 		dragOrigin = player->firstPersonViewOrigin;
 		dragAxis = player->firstPersonViewAxis;
@@ -527,7 +527,7 @@ int idGrabber::Update( idPlayer* player, bool hide )
 			}
 		}
 	}
-	// koz end
+	// Koz end
 
 	// pause before allowing refire
 	if( lastFiredTime + FIRING_DELAY > gameLocal.time )
@@ -586,7 +586,7 @@ int idGrabber::Update( idPlayer* player, bool hide )
 		idVec3 end;
 		
 
-		// koz begin
+		// Koz begin
 		end = dragOrigin + dragAxis[0] * dragTraceDist;
 		
 		bounds.Zero();
@@ -594,7 +594,7 @@ int idGrabber::Update( idPlayer* player, bool hide )
 		
 		// gameLocal.clip.TraceBounds( trace, player->firstPersonViewOrigin, end, bounds, MASK_SHOT_RENDERMODEL | CONTENTS_PROJECTILE | CONTENTS_MOVEABLECLIP, player );
 		gameLocal.clip.TraceBounds( trace, dragOrigin, end, bounds, MASK_SHOT_RENDERMODEL | CONTENTS_PROJECTILE | CONTENTS_MOVEABLECLIP, player );
-		// koz end
+		// Koz end
 				
 		// If the trace hit something
 		if( trace.fraction < 1.0f )
@@ -714,10 +714,10 @@ int idGrabber::Update( idPlayer* player, bool hide )
 		
 		// Set and evaluate drag force
 		
-		// koz begin 
+		// Koz begin 
 		//goalPos = player->firstPersonViewOrigin + localPlayerPoint * player->firstPersonViewAxis;
 		goalPos = dragOrigin + localPlayerPoint * dragAxis;
-		// koz end
+		// Koz end
 	
 		drag.SetGoalPosition( goalPos );
 		drag.Evaluate( gameLocal.time );
@@ -730,7 +730,7 @@ int idGrabber::Update( idPlayer* player, bool hide )
 			float toPlayerSpeed;
 			
 			//toPlayerVelocity = -player->firstPersonViewAxis[0];
-			toPlayerVelocity = -dragAxis[0]; // koz
+			toPlayerVelocity = -dragAxis[0]; // Koz
 			
 			toPlayerSpeed = entPhys->GetLinearVelocity() * toPlayerVelocity;
 			
@@ -739,7 +739,7 @@ int idGrabber::Update( idPlayer* player, bool hide )
 				objectCenter = entPhys->GetAbsBounds().GetCenter();
 				
 				//theWall.SetNormal( player->firstPersonViewAxis[0] );
-				theWall.SetNormal( dragAxis[0] ); // koz
+				theWall.SetNormal( dragAxis[0] ); // Koz
 
 				theWall.FitThroughPoint( goalPos );
 				
@@ -773,7 +773,7 @@ int idGrabber::Update( idPlayer* player, bool hide )
 		if( dragEnt.GetEntity()->IsType( idProjectile::Type ) )
 		{
 			//idAngles ang = player->firstPersonViewAxis[0].ToAngles();
-			idAngles ang = dragAxis[0].ToAngles(); // koz
+			idAngles ang = dragAxis[0].ToAngles(); // Koz
 			
 			ang.pitch += 90.f;
 			entPhys->SetAxis( ang.ToMat3() );
@@ -830,15 +830,15 @@ void idGrabber::UpdateBeams()
 			beamTarget->SetOrigin( dragEnt.GetEntity()->GetPhysics()->GetAbsBounds().GetCenter() );
 		}
 		
-		muzzle_joint = thePlayer->weapon.GetEntity()->GetAnimator()->GetJointHandle( /* "particle_upper" */ "beam" ); // koz
+		muzzle_joint = thePlayer->weapon.GetEntity()->GetAnimator()->GetJointHandle( /* "particle_upper" */ "beam" ); // Koz
 		if( muzzle_joint != INVALID_JOINT )
 		{
 			thePlayer->weapon.GetEntity()->GetJointWorldTransform( muzzle_joint, gameLocal.time, muzzle_origin, muzzle_axis );
 			
-			// koz begin
+			// Koz begin
 			// move the beam forward 3 inches to prevent it from distorting the (now complete) grabber viewmodel.
 			muzzle_origin += muzzle_axis[0] * 3.0; 
-			// koz end
+			// Koz end
 		
 		}
 		else

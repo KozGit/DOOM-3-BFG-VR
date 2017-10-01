@@ -156,7 +156,7 @@ enum renderParm_t
 
 
 
-	// koz begin	
+	// Koz begin	
 	RENDERPARM_EYE_TO_SOURCE_UV_OFFSET,
 	RENDERPARM_EYE_TO_SOURCE_UV_SCALE,
 	RENDERPARM_INVERSE_RESOLUTION,
@@ -164,7 +164,7 @@ enum renderParm_t
 	RENDERPARM_VIGNETTE_FADE,
 
 	RENDERPARM_STEREO_CORRECTION,
-	// koz end
+	// Koz end
 
 	RENDERPARM_TOTAL,
 	RENDERPARM_USER = 128,
@@ -526,7 +526,7 @@ protected:
 		
 		BUILTIN_DEBUG_SHADOWMAP,
 				
-		//BUILTIN_VRFXAA,							// koz fxaa antialiaising shader
+		//BUILTIN_VRFXAA,							// Koz fxaa antialiaising shader
 		// Koz end
 		
 		MAX_BUILTINS

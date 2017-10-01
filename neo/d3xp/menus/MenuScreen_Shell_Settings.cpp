@@ -70,7 +70,7 @@ void idMenuScreen_Shell_Settings::Initialize( idMenuHandler* data )
 	menuOptions.Append( option );
 	option.Clear();
 
-	//koz add vr options
+	// Koz add vr options
 	option.Append( "VR Options" );	// Koz fixme VR options use dictionary strings instead of hard coding.
 	menuOptions.Append(option);
 	option.Clear();

@@ -358,7 +358,7 @@ Called when a weapon fires, generates head twitches, etc
 */
 void idPlayerView::WeaponFireFeedback( const idDict* weaponDef )
 {
-	if ( game->isVR && !vr_headKick.GetBool() ) return; // koz skip head kick from weapon recoil in vr
+	if ( game->isVR && !vr_headKick.GetBool() ) return; // Koz skip head kick from weapon recoil in vr
 
 	int recoilTime = weaponDef->GetInt( "recoilTime" );
 	// don't shorten a damage kick in progress
@@ -388,7 +388,7 @@ void idPlayerView::CalculateShake()
 	// the player can hear, it can go over 1.0 too.
 	//
 
-	//koz
+	// Koz
 	if ( game->isVR ) shakeVolume *= vr_shakeAmplitude.GetFloat();
 
 	shakeAng[0] = gameLocal.random.CRandomFloat() * shakeVolume;
@@ -454,7 +454,7 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 	
 	tr.guiModel->SetEye( view->viewEyeBuffer );
 
-	// koz fixme sanity check this move.
+	// Koz fixme sanity check this move.
 	// hack the shake in at the very last moment, so it can't cause any consistency problems
 	renderView_t hackedView = *view;
 	hackedView.viewaxis = hackedView.viewaxis * ShakeAxis();
@@ -537,7 +537,7 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 			}
 		}
 		
-		// player->DrawHUD( hudManager ); koz moved before draw screen blobs so we can see the hud if we want, but still skip all other view effects.
+		// player->DrawHUD( hudManager ); Koz moved before draw screen blobs so we can see the hud if we want, but still skip all other view effects.
 
 		
 		if( player->spectating )
@@ -597,7 +597,7 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 			renderSystem->DrawStretchPic( offset - extend, 0.0f, renderSystem->GetVirtualWidth() + extend * 2, renderSystem->GetVirtualHeight(), 0.0f, 0.0f, 1.0f, 1.0f, bfgMaterial );
 		}
 
-		// koz - Updated to use screenseparation for oculus, and provide borders for cropped or projected cinematics.
+		// Koz - Updated to use screenseparation for oculus, and provide borders for cropped or projected cinematics.
 		// If the cinematic is being projected, the projection matrix in GLMatrix.cpp is modified to make screen separation 0
 		// so the screen wont be offset twice when the bordered image is rendered in Vr_Gl.cpp HUDRender with the
 		// headset correct matrix.
@@ -826,7 +826,7 @@ stereoDistances_t	CaclulateStereoDistances(
 
 	stereoDistances_t	dists = {};
     
-    if( convergenceWorldUnits == 0.0f || game->isVR ) // koz
+    if( convergenceWorldUnits == 0.0f || game->isVR ) // Koz
 	{
 		// head mounted display mode
 		dists.worldSeparation = CentimetersToWorldUnits( interOcularCentimeters * 0.5 );
@@ -948,7 +948,7 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 	const renderView_t* view = player->GetRenderView();
 	if( renderSystem->GetStereo3DMode() != STEREO3D_OFF )
 	{
-		// koz fixme pda, render the PDA here. it will be copied to intrinsic image _pdaImage,  
+		// Koz fixme pda, render the PDA here. it will be copied to intrinsic image _pdaImage,  
 		// which is the new texture for the PDA viewmodel screen.
 		
 		if ( game->isVR )
@@ -957,7 +957,7 @@ void idPlayerView::RenderPlayerView( idMenuHandler_HUD* hudManager )
 			commonVr->lastCenterEyeAxis = view->viewaxis;
 			commonVr->lastCenterEyeOrigin = view->vieworg;
 						
-			if ( !commonVr->PDAforced && !commonVr->PDAforcetoggle && !game->IsPDAOpen() ) // koz moved this so we can see the hud if we want, but still skip all other view effects.
+			if ( !commonVr->PDAforced && !commonVr->PDAforcetoggle && !game->IsPDAOpen() ) // Koz moved this so we can see the hud if we want, but still skip all other view effects.
 			{
 				commonVr->swfRenderMode = RENDERING_HUD;
 				player->DrawHUDVR( hudManager );
@@ -2170,7 +2170,7 @@ void FullscreenFXManager::Process( const renderView_t* view )
 		}
 		
 		// do the actual drawing
-		if( drawIt ) // koz fix me had temp made this always false, cant remember what I was testing now, make sure nothing is broken.
+		if( drawIt ) // Koz fix me had temp made this always false, cant remember what I was testing now, make sure nothing is broken.
 		{
 			//common->Printf( "Process FullscreenFX %s\n", pfx->GetName().c_str() );
 			atLeastOneFX = true;

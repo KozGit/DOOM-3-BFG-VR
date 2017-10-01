@@ -1254,7 +1254,7 @@ void idAI::Think()
 		{
 			// clear the ik before we do anything else so the skeleton doesn't get updated twice
 			walkIK.ClearJointMods();
-			//koz
+			// Koz
 			armIK.ClearJointMods();
 			
 			switch( move.moveType )
@@ -4081,7 +4081,7 @@ void idAI::PlayCinematic()
 	torsoAnim.animBlendFrames = 0;
 	torsoAnim.lastAnimBlendFrames = 0;
 
-	//koz begin
+	// Koz begin
 	leftHandAnim.animBlendFrames = 0;
 	leftHandAnim.lastAnimBlendFrames = 0;
 
@@ -4090,7 +4090,7 @@ void idAI::PlayCinematic()
 
 	ProcessEvent( &AI_PlayAnim, ANIMCHANNEL_LEFTHAND, animname );
 	ProcessEvent( &AI_PlayAnim, ANIMCHANNEL_RIGHTHAND, animname );
-	//Koz end
+	// Koz end
 
 	ProcessEvent( &AI_PlayAnim, ANIMCHANNEL_TORSO, animname );
 	

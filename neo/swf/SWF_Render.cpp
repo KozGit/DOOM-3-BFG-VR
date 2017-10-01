@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #include "../renderer/tr_local.h"
 
-#include "vr\vr.h" // koz
+#include "vr\vr.h" // Koz
 
 idCVar swf_timescale( "swf_timescale", "1", CVAR_FLOAT, "timescale for swf files" );
 idCVar swf_stopat( "swf_stopat", "0", CVAR_FLOAT, "stop at a specific frame" );
@@ -154,7 +154,7 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 
 	float scale = swfScale * sysHeight / ( float )frameHeight;
 
-	// koz begin
+	// Koz begin
 	// In VR, scale SWF elements to a more appropriate size.
 	if ( game->isVR  )
 	{
@@ -182,7 +182,7 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 		vr_mScale = scale;
 	}
 
-	// koz end
+	// Koz end
 	
 	swfRenderState_t renderState;
 	renderState.stereoDepth = ( stereoDepthType_t )mainspriteInstance->GetStereoDepth();
@@ -222,11 +222,11 @@ void idSWF::Render( idRenderSystem* gui, int time, bool isSplitscreen )
 		idVec2 mouse = renderState.matrix.Transform( idVec2( mouseX - 1, mouseY - 2 ) );
 		//idSWFScriptObject * hitObject = HitTest( mainspriteInstance, swfRenderState_t(), mouseX, mouseY, NULL );
 		
-		// koz begin
+		// Koz begin
 		// scale the mouse pointer in VR on gui screens.
 		// float mScale = game->isVR ? vr_guiScale.GetFloat() : 1.0f;
 		// vr_mScale set earlier
-		// koz end
+		// Koz end
 	//	vr_mScale = 1.0f;
 
 		extern idCVar vr_debugTouchCursor;

@@ -386,8 +386,8 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 
 		case SAFETY_PROTOCOLS_FIELD_TELEPORTATION_MODE:
 		{
-			static const int numValues = 2;
-			static const int values[numValues] = { 0, 1};
+			static const int numValues = 3;
+			static const int values[numValues] = { 0, 1, 2 };
 			vr_teleportMode.SetInteger(AdjustOption(vr_teleportMode.GetInteger(), values, numValues, adjustAmount));
 			break;
 		}
@@ -532,7 +532,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR
 
 		case SAFETY_PROTOCOLS_FIELD_TELEPORTATION_MODE:
 		{
-			const char* names[] = { "Blink", "Doom VFR"};
+			const char* names[] = { "Blink", "Doom VFR", "Doom VFR + JetStrafe"};
 			return names[vr_teleportMode.GetInteger()];
 		}
 

@@ -32,7 +32,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../Game_local.h"
 
-idCVar binaryLoadAnim( "binaryLoadAnim", "1", 0, "enable binary load/write of idMD5Anim" ); // koz fixme does this need to be archived?
+idCVar binaryLoadAnim( "binaryLoadAnim", "1", 0, "enable binary load/write of idMD5Anim" ); // Koz fixme does this need to be archived?
 
 static const byte B_ANIM_MD5_VERSION = 101;
 static const unsigned int B_ANIM_MD5_MAGIC = ( 'B' << 24 ) | ( 'M' << 16 ) | ( 'D' << 8 ) | B_ANIM_MD5_VERSION;
@@ -122,7 +122,7 @@ idMD5Anim::Length
 int idMD5Anim::Length() const
 {
 	if ( vr_disableWeaponAnimation.GetBool() && game->isVR )
-	{	// koz - disable weapon idle animations in VR, so aim is only affected by motion controls
+	{	// Koz - disable weapon idle animations in VR, so aim is only affected by motion controls
 		// Originally set the length to 1 at animation load time, but this way the user can toggle
 		// animations without having to reload them all.  
 	

@@ -97,6 +97,16 @@ typedef struct
 	float				fov;
 } cameraFrame_t;
 
+// Koz
+typedef struct
+{
+	int					cutFrame;
+	bool				posOverride;
+	bool				rotOverride;
+	idVec3				posNew;
+	idCQuat				rotNew;
+} cameraCut_t;
+
 class idCameraAnim : public idCamera
 {
 public:
@@ -118,7 +128,8 @@ private:
 	int						frameRate;
 	int						starttime;
 	int						cycle;
-	idList<int>				cameraCuts;
+	//idList<int>				cameraCuts; // Koz
+	idList<cameraCut_t>		cameraCuts; // Koz enable position and angle overrides for camera cut positions. ( When using immersive cutscenes, overrides allow better clamped camera positions without having to completely rewrite the camera files. )
 	idList<cameraFrame_t>	camera;
 	idEntityPtr<idEntity>	activator;
 	

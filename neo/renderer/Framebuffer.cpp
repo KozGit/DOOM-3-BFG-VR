@@ -132,7 +132,7 @@ Framebuffer::Framebuffer( const char* name, int w, int h, bool msaa )
 	useMsaa = msaa;
 	msaaSamples = r_multiSamples.GetInteger();
 	//if ( !useMsaa ) msaaSamples = 0;
-	//common->Printf( "Use MSAA = %d Framebuffer msaaSamples = %d\n", useMsaa, msaaSamples ); //koz fixme
+	//common->Printf( "Use MSAA = %d Framebuffer msaaSamples = %d\n", useMsaa, msaaSamples ); // Koz fixme
 	if ( msaaSamples == 0 ) useMsaa = false;
 	// Koz end
 	
@@ -153,7 +153,7 @@ void Framebuffer::Init()
 	{
 		width = height = shadowMapResolutions[i];
 		
-		globalFramebuffers.shadowFBO[i] = new Framebuffer( va( "_shadowMap%i", i ) , width, height, false ); // koz
+		globalFramebuffers.shadowFBO[i] = new Framebuffer( va( "_shadowMap%i", i ) , width, height, false ); // Koz
 		globalFramebuffers.shadowFBO[i]->Bind();
 		glDrawBuffers( 0, NULL );
 	}
@@ -401,7 +401,7 @@ int Framebuffer::Check()
 	return status;
 }
 
-void Framebuffer::Error( int status ) // koz throw error if needed.
+void Framebuffer::Error( int status ) // Koz throw error if needed.
 {
 	if ( status == GL_FRAMEBUFFER_COMPLETE )
 	{

@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Game_local.h"
 
-#include "vr\Vr.h" // koz
+#include "vr\Vr.h" // Koz
 
 
 /*
@@ -426,16 +426,58 @@ void idCameraAnim::LoadAnim()
 	}
 	
 	// parse the camera cuts
+	// Koz : added support for the camera cuts to include overrides for position and rotation at each cut location.
+	// this allows better camera control when using 'immersive' cutscenes without having to modify or re-write the entire camera file.
 	parser.ExpectTokenString( "cuts" );
 	parser.ExpectTokenString( "{" );
 	cameraCuts.SetNum( numCuts );
+	
+	idToken cutToken; // Koz
+
 	for( i = 0; i < numCuts; i++ )
 	{
-		cameraCuts[ i ] = parser.ParseInt();
-		if( ( cameraCuts[ i ] < 1 ) || ( cameraCuts[ i ] >= numFrames ) )
+		cameraCuts[i].posOverride = false;
+		cameraCuts[i].rotOverride = false;
+		cameraCuts[i].posNew = vec3_zero;
+		cameraCuts[i].rotNew.Set( 0.0f, 0.0f, 0.0f );
+				
+		cameraCuts[ i ].cutFrame = parser.ParseInt();
+		if( ( cameraCuts[ i ].cutFrame < 0 ) || ( cameraCuts[ i ].cutFrame >= numFrames ) ) // Koz - changed to allow camera cut on first frame.
 		{
 			parser.Error( "Invalid camera cut" );
 		}
+
+		// Koz read pos and rot override values if present.
+		if ( parser.PeekTokenString( "pos" ) )
+		{
+			parser.ReadToken( &cutToken );
+			common->Printf( "String %s found\n",cutToken.c_str() );
+			parser.Parse1DMatrix( 3, cameraCuts[i].posNew.ToFloatPtr() );
+			cameraCuts[i].posOverride = true;
+		}
+
+		if ( parser.PeekTokenString( "rotA" ) ) // read rotation in angles - easier for manual editing.
+		{
+			parser.ReadToken( &cutToken );
+			common->Printf( "String %s found\n", cutToken.c_str() );
+			idAngles ta;
+			parser.Parse1DMatrix( 3, &ta[0] );
+			//parser.Parse1DMatrix( 3, cameraCuts[i].rotAnglesNew.ToFloatPtr() );
+			cameraCuts[i].rotNew = ta.ToQuat().ToCQuat();
+			cameraCuts[i].rotOverride = true;
+		}
+
+		if ( parser.PeekTokenString( "rot" ) ) // read rotation quat - easier to copy from exitsing frame.
+		{
+			parser.ReadToken( &cutToken );
+			common->Printf( "String %s found\n", cutToken.c_str() );
+			parser.Parse1DMatrix( 3, cameraCuts[i].rotNew.ToFloatPtr() );
+			cameraCuts[i].rotOverride = true;
+		}
+
+
+
+		
 	}
 	parser.ExpectTokenString( "}" );
 	
@@ -528,8 +570,10 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 	float			lerp;
 	float			invlerp;
 	cameraFrame_t*	camFrame;
-	cameraFrame_t*	camFrame2; // koz for clamping camera positions during cinematics to eliminate uncomfortable panning in VR.
+	cameraFrame_t*	camFrame2; // Koz for clamping camera positions during cinematics to eliminate uncomfortable panning in VR.
 
+	cameraFrame_t	cutFrame;
+	
 	int				i;
 	int				cut;
 	idQuat			q1, q2, q3;
@@ -556,22 +600,39 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 	// skip any frames where camera cuts occur
 	realFrame = frame;
 	cut = 0;
-	camFrame2 = &camera[0]; // koz
+	camFrame2 = &camera[0]; // Koz
+	
+	cutFrame.fov = camFrame2[ 0 ].fov;
+	cutFrame.q = camFrame2[ 0 ].q;
+	cutFrame.t = camFrame2[ 0 ].t;
 
-	for( i = 0; i < cameraCuts.Num(); i++ )
+	for ( i = 0; i < cameraCuts.Num(); i++ )
 	{
-		if( frame < cameraCuts[ i ] )
+		if ( frame < cameraCuts[i].cutFrame )
 		{
-			if ( i > 0 )
-			{
-				camFrame2 = &camera[cameraCuts[i]]; // koz this is the frame of the camera cut
-			}
 			break;
 		}
 		frame++;
 		cut++;
+		int cf = idMath::ClampInt( 0, camera.Num() - 1, cameraCuts[i].cutFrame + 1 );
+		camFrame2 = &camera[ cf /*cameraCuts[i].cutFrame*/ ];
+		
+		cutFrame.fov = camFrame2[0].fov;
+		cutFrame.q = camFrame2[0].q;
+		cutFrame.t = camFrame2[0].t;
+
+		if ( cameraCuts[i].posOverride )
+		{
+			cutFrame.t = cameraCuts[i].posNew;
+		}
+		if ( cameraCuts[i].rotOverride )
+		{
+			cutFrame.q = cameraCuts[i].rotNew;
+		}
 	}
-	
+
+	if ( cut > 0 ) common->Printf( "Frame cut %d at frame %d\n", cut -1, frame - 1 );
+
 	if( g_debugCinematic.GetBool() )
 	{
 		int prevFrameTime	= ( gameLocal.previousTime - starttime ) * frameRate;
@@ -581,7 +642,7 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		prevCut = 0;
 		for( i = 0; i < cameraCuts.Num(); i++ )
 		{
-			if( prevFrame < cameraCuts[ i ] )
+			if( prevFrame < cameraCuts[ i ].cutFrame )
 			{
 				break;
 			}
@@ -894,18 +955,27 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		else
 		{
 			if ( g_debugCinematic.GetBool() && ent != last_ent )
+			{
 				gameLocal.Printf( "%d: Flicksync using camera %s\n", gameLocal.framenum, this->name.c_str() );
+			}
+			
 			last_ent = ent;
-			view->viewaxis = camFrame2[0].q.ToMat3();
-			view->vieworg = camFrame2[0].t + offset;
+			
+			if ( gameLocal.GetCamera()) common->Printf( "Camera %s rot %s pos %s\n",gameLocal.GetCamera()->GetName(), camFrame2[0].q.ToString(), camFrame2[0].t.ToString() );
+			
+			//view->viewaxis = camFrame2[0].q.ToMat3();
+			//view->vieworg = camFrame2[0].t + offset;
+
+			view->viewaxis = cutFrame.q.ToMat3();
+			view->vieworg = cutFrame.t + offset;
 		}
 
 		// remove camera pitch & roll, this is uncomfortable in VR.
 
-		idAngles angles = view->viewaxis.ToAngles();
-		angles.pitch = 0;
-		angles.roll = 0;
-		view->viewaxis = angles.ToMat3();
+		//idAngles angles = view->viewaxis.ToAngles();
+		//angles.pitch = 0;
+		//angles.roll = 0;
+		//view->viewaxis = angles.ToMat3();
 	}
 	
 	if ( game->isVR )

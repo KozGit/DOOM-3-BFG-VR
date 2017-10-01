@@ -742,7 +742,7 @@ struct backEndState_t
 	drawSurf_t			unitSquareSurface;
 	drawSurf_t			zeroOneCubeSurface;
 	drawSurf_t			testImageSurface;
-	drawSurf_t			hudSurface; //koz hud mesh
+	drawSurf_t			hudSurface; // Koz hud mesh
 };
 
 class idParallelJobList;
@@ -893,7 +893,7 @@ public:
 	srfTriangles_t* 		unitSquareTriangles;
 	srfTriangles_t* 		zeroOneCubeTriangles;
 	srfTriangles_t* 		testImageTriangles;
-	srfTriangles_t*			hudTriangles; //koz hud mesh
+	srfTriangles_t*			hudTriangles; // Koz hud mesh
 	
 	// these are allocated at buffer swap time, but
 	// the back end should only use the ones in the backEnd stucture,
@@ -901,7 +901,7 @@ public:
 	drawSurf_t				unitSquareSurface_;
 	drawSurf_t				zeroOneCubeSurface_;
 	drawSurf_t				testImageSurface_;
-	drawSurf_t				hudSurface_; // koz hud mesh
+	drawSurf_t				hudSurface_;// Koz hud mesh
 	
 	idParallelJobList* 		frontEndJobList;
 	
@@ -1106,7 +1106,7 @@ struct vidMode_t
 	int width;
 	int height;
 	int displayHz;
-	idStr displayName; // koz
+	idStr displayName;// Koz
 	
 	// RB begin
 	vidMode_t()
@@ -1114,7 +1114,7 @@ struct vidMode_t
 		width = 640;
 		height = 480;
 		displayHz = 60;
-		displayName = ""; // koz
+		displayName = ""; // Koz
 	}
 	
 	vidMode_t( int width, int height, int displayHz, idStr displayName ) :

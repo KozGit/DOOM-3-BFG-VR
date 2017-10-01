@@ -31,9 +31,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
-#include "vr\vr.h" // koz
-#include "../d3xp/Game_local.h" // koz
-#include "../d3xp/anim/Anim.h"// koz
+#include "vr\vr.h" // Koz
+#include "../d3xp/Game_local.h" // Koz
+#include "../d3xp/anim/Anim.h"// Koz
 
 /*
 ===================
@@ -277,7 +277,7 @@ void idRenderWorldLocal::UpdateEntityDef( qhandle_t entityHandle, const renderEn
 	
 	if( !re->hModel && !re->callback )
 	{
-		return;// koz fixme!
+		return;// Koz fixme!
 
 		common->Error( "idRenderWorld::UpdateEntityDef: NULL hModel" );
 	}
@@ -1234,20 +1234,20 @@ this doesn't do any occlusion testing, simply ignoring non-gui surfaces.
 start / end are in global world coordinates.
 ================
 */
-guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, idAnimator* animator, const idVec3 start, const idVec3 end ) const// koz
+guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, idAnimator* animator, const idVec3 start, const idVec3 end ) const// Koz
 {
 
 	guiPoint_t	pt;
 	pt.x = pt.y = -1;
-	pt.fraction = 1.0f; // koz
+	pt.fraction = 1.0f; // Koz
 	pt.guiId = 0;
 
 
 
 
-	// koz begin
+	// Koz begin
 	bool isPDA = false;
-	// koz end
+	// Koz end
 
 	//common->Printf( "Begin guitrace\n" );
 	if ( (entityHandle < 0) || ( entityHandle >= entityDefs.Num()) )
@@ -1262,13 +1262,13 @@ guiPoint_t idRenderWorldLocal::GuiTrace( qhandle_t entityHandle, idAnimator* ani
 	}
 
 	idRenderModel* model = def->parms.hModel;
-	if ( model == NULL ) // koz static model check moved below || model->IsDynamicModel() != DM_STATIC || def->parms.callback != NULL )
+	if ( model == NULL ) // Koz static model check moved below || model->IsDynamicModel() != DM_STATIC || def->parms.callback != NULL )
 	{
 		return pt;
 	}
 
 	// Koz begin
-	// koz allow the PDA model to be traced. 
+	// Koz allow the PDA model to be traced. 
 
 	jointHandle_t guiJoints[4];
 

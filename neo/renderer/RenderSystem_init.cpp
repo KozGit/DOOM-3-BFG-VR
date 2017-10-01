@@ -42,7 +42,7 @@ If you have questions concerning this license or the applicable additional terms
 // RB end
 
 // Koz begin
-#undef strncmp // koz fixme to prevent conflict with oculus SDK.
+#undef strncmp // Koz fixme to prevent conflict with oculus SDK.
 #include "vr\vr.h"
 #include "libs\LibOVR\Include\OVR_CAPI.h"
 // Koz end
@@ -715,7 +715,7 @@ void R_SetNewMode( const bool fullInit )
 		
 
 		parms.multiSamples = r_multiSamples.GetInteger();
-		common->Printf( "R_SetNewMode r_multisamples = %d\n", parms.multiSamples );// koz fixme
+		common->Printf( "R_SetNewMode r_multisamples = %d\n", parms.multiSamples );// Koz fixme
 		if( i == 0 && !commonVr->hasHMD )
 		{
 			parms.stereo = ( stereoRender_enable.GetInteger() == STEREO3D_QUAD_BUFFER );
@@ -758,7 +758,7 @@ void R_SetNewMode( const bool fullInit )
 safeMode:
 		// if we failed, set everything back to "safe mode"
 		// and try again
-		common->Printf( "R_SetNewMode trying safemode\n" ); //koz fixme
+		common->Printf( "R_SetNewMode trying safemode\n" ); // Koz fixme
 		r_vidMode.SetInteger( 0 );
 		r_fullscreen.SetInteger( 1 );
 		r_displayRefresh.SetInteger( 0 );
@@ -2448,7 +2448,7 @@ void R_InitCommands()
 	cmdSystem->AddCommand( "gfxInfo", GfxInfo_f, CMD_FL_RENDERER, "show graphics info" );
 	cmdSystem->AddCommand( "modulateLights", R_ModulateLights_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "modifies shader parms on all lights" );
 	cmdSystem->AddCommand( "testImage", R_TestImage_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "displays the given image centered on screen", idCmdSystem::ArgCompletion_ImageName );
-	cmdSystem->AddCommand( "extractTGA", ExtractTGA_f, CMD_FL_RENDERER, "extracts texture as TGA file", idCmdSystem::ArgCompletion_ImageName ); // koz from tmek/carl
+	cmdSystem->AddCommand( "extractTGA", ExtractTGA_f, CMD_FL_RENDERER, "extracts texture as TGA file", idCmdSystem::ArgCompletion_ImageName ); // Koz from tmek/carl
 	cmdSystem->AddCommand( "testVideo", R_TestVideo_f, CMD_FL_RENDERER | CMD_FL_CHEAT, "displays the given cinematic", idCmdSystem::ArgCompletion_VideoName );
 	cmdSystem->AddCommand( "reportSurfaceAreas", R_ReportSurfaceAreas_f, CMD_FL_RENDERER, "lists all used materials sorted by surface area" );
 	cmdSystem->AddCommand( "showInteractionMemory", R_ShowInteractionMemory_f, CMD_FL_RENDERER, "shows memory used by interactions" );
@@ -2509,7 +2509,7 @@ void idRenderSystemLocal::Clear()
 	}
 	
 	// Koz begin
-	if ( hudTriangles != NULL ) { // koz create the hud mesh
+	if ( hudTriangles != NULL ) { // Koz create the hud mesh
 		Mem_Free( hudTriangles );
 		hudTriangles = NULL;
 	}
@@ -2722,7 +2722,7 @@ Koz - build the hud mesh
 ===============
 */
 
-// koz fixme this is all broken.
+// Koz fixme this is all broken.
 
 srfTriangles_t* R_MakeHUDTriangles() {
 

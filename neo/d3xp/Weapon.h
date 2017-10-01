@@ -52,7 +52,7 @@ typedef enum
 	WP_LOWERING
 } weaponStatus_t;
 
-typedef enum { // koz weapon enumerations
+typedef enum { // Koz weapon enumerations
 	WEAPON_NONE = 0,
 	WEAPON_FISTS,
 	WEAPON_CHAINSAW,
@@ -74,7 +74,7 @@ typedef enum { // koz weapon enumerations
 	WEAPON_NUM_WEAPONS
 } weapon_t;
 
-// koz flashOffsets - values are used to move flashlight model to 'mount' to the active weapon.  Hacky McCrappyHack was here.
+// Koz flashOffsets - values are used to move flashlight model to 'mount' to the active weapon.  Hacky McCrappyHack was here.
 const idVec3 flashOffsets[int( WEAPON_NUM_WEAPONS )] = {	idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_NONE
 															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_FISTS
 															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_CHAINSAW
@@ -153,7 +153,7 @@ public:
 	void					GetWeaponDef( const char* objectname, int ammoinclip );
 	bool					IsLinked();
 	bool					IsWorldModelReady();
-	weapon_t				IdentifyWeapon(); // koz
+	weapon_t				IdentifyWeapon(); // Koz
 
 	
 	// GUIs
@@ -209,7 +209,7 @@ public:
 	
 	// Visual presentation
 	void					PresentWeapon( bool showViewModel );
-	void					PresentWeaponOriginal( bool showViewModel ); // koz fixme delete this
+	void					PresentWeaponOriginal( bool showViewModel ); // Koz fixme delete this
 
 	int						GetZoomFov();
 	void					GetWeaponAngleOffsets( int* average, float* scale, float* max );
@@ -343,10 +343,10 @@ private:
 	renderLight_t			guiLight;
 	int						guiLightHandle;
 	
-	// koz begin
+	// Koz begin
 	// VR Stat Gui - this is the 'watch' the player wears in VR to display stats.
 	class idUserInterface*	vrStatGui;
-	// koz end
+	// Koz end
 
 	// muzzle flash
 	renderLight_t			muzzleFlash;		// positioned on view weapon bone
@@ -402,14 +402,14 @@ private:
 	
 	jointHandle_t			smokeJointView;
 
-	// koz
+	// Koz
 	jointHandle_t			weaponHandAttacher[2];
 	idVec3					weaponHandDefaultPos[2];
 	idMat3					weaponHandDefaultAxis[2];
 	
 	idVec3					laserSightOffset;
 	
-	// koz end
+	// Koz end
 	
 	idHashTable<WeaponParticle_t>	weaponParticles;
 	idHashTable<WeaponLight_t>		weaponLights;
@@ -497,11 +497,11 @@ private:
 	void					Event_IsInvisible();
 	void					Event_NetEndReload();
 	
-	//koz
+	// Koz
 	void					Event_GetWeaponSkin();
 	void					Event_IsMotionControlled();
 	void					CalculateHideRise( idVec3& origin, idMat3& axis );
-	// koz end
+	// Koz end
 	
 	idGrabber				grabber;
 	int						grabberState;

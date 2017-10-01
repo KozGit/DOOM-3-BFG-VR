@@ -236,7 +236,7 @@ See if some cvars that we watch have changed
 static void R_CheckCvars()
 {
 	
-	//koz
+	// Koz
 	if ( game->isVR )
 	{
 
@@ -358,7 +358,7 @@ idRenderSystemLocal::idRenderSystemLocal() :
 	unitSquareTriangles( NULL ),
 	zeroOneCubeTriangles( NULL ),
 	testImageTriangles( NULL ),
-	hudTriangles( NULL ) //koz hud mesh
+	hudTriangles( NULL ) // Koz hud mesh
 {
 	Clear();
 }
@@ -844,7 +844,7 @@ const emptyCommand_t* idRenderSystemLocal::SwapCommandBuffers_FinishCommandBuffe
 	backEnd.unitSquareSurface = tr.unitSquareSurface_;
 	backEnd.zeroOneCubeSurface = tr.zeroOneCubeSurface_;
 	backEnd.testImageSurface = tr.testImageSurface_;
-	backEnd.hudSurface = tr.hudSurface_; // koz hud mesh
+	backEnd.hudSurface = tr.hudSurface_; // Koz hud mesh
 	
 	// use the other buffers next frame, because another CPU
 	// may still be rendering into the current buffers
@@ -877,7 +877,7 @@ const emptyCommand_t* idRenderSystemLocal::SwapCommandBuffers_FinishCommandBuffe
 	R_InitDrawSurfFromTri( tr.unitSquareSurface_, *tr.unitSquareTriangles );
 	R_InitDrawSurfFromTri( tr.zeroOneCubeSurface_, *tr.zeroOneCubeTriangles );
 	R_InitDrawSurfFromTri( tr.testImageSurface_, *tr.testImageTriangles );
-	R_InitDrawSurfFromTri( tr.hudSurface_, *tr.hudTriangles ); //koz hud mesh
+	R_InitDrawSurfFromTri( tr.hudSurface_, *tr.hudTriangles ); // Koz hud mesh
 	
 	// Reset render crop to be the full screen
 	renderCrops[0].x1 = 0;
@@ -1117,7 +1117,7 @@ void idRenderSystemLocal::CaptureRenderToFile( const char* fileName, bool fixAlp
 	guiModel->Clear();
 	RenderCommandBuffers( frameData->cmdHead );
 	
-	if ( !commonVr->useFBO ) // koz
+	if ( !commonVr->useFBO ) // Koz
 	{
 		glReadBuffer( GL_BACK );
 	}

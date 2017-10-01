@@ -234,7 +234,7 @@ bool idIK::SolveTwoBones( const idVec3& startPos, const idVec3& endPos, const id
 
 /*
 ================
-// koz
+// Koz
 // Moves the elbow towards the wrist (stretches the upper arm) if player reach exceeds model arm length when using motion controls
 // idIK::SolveTwoArmBones
 ================
@@ -250,7 +250,7 @@ bool idIK::SolveTwoArmBones( idVec3& startPos, idVec3& endPos, const idVec3& dir
 	length = lengthInv * lengthSqr;
 
 	
-	//koz - if using motion controls and displaying the body, and a controller is reporting a impossible position, restrain the arm length.
+	// Koz - if using motion controls and displaying the body, and a controller is reporting a impossible position, restrain the arm length.
 	
 	if ( 0 && game->isVR && vr_playerBodyMode.GetInteger() == 0 )
 	{
@@ -749,7 +749,7 @@ void idIK_Walk::Evaluate()
 	idMat3 hipAxis[MAX_LEGS], kneeAxis[MAX_LEGS], ankleAxis[MAX_LEGS];
 	trace_t results;
 	
-	// koz begin
+	// Koz begin
 	bool isPlayer = false;
 	idPlayer *player;
 	player = gameLocal.GetLocalPlayer();
@@ -760,7 +760,7 @@ void idIK_Walk::Evaluate()
 			isPlayer = true;
 		}
 	}
-	// koz end
+	// Koz end
 	
 	if( !self || !gameLocal.isNewFrame )
 	{
@@ -908,7 +908,7 @@ void idIK_Walk::Evaluate()
 
 	// adjust position of the waist
 	waistOffset = ( smallestShift + waistShift ) * normal;
-	//koz add waist IK for crouching
+	// Koz add waist IK for crouching
 	if ( isPlayer  )
 	{
 		
@@ -1336,7 +1336,7 @@ void idIK_Reach::Evaluate()
 	idVec3 modelOrigin, shoulderOrigin, elbowOrigin, handOrigin, shoulderDir, elbowDir;
 	idMat3 modelAxis, axis;
 	idMat3 shoulderAxis[MAX_ARMS], elbowAxis[MAX_ARMS];
-	idVec3 elbowPos[MAX_ARMS], handPos[MAX_ARMS], shoulderPos[MAX_ARMS]; // koz
+	idVec3 elbowPos[MAX_ARMS], handPos[MAX_ARMS], shoulderPos[MAX_ARMS]; // Koz
 	trace_t trace;
 	
 	
@@ -1364,7 +1364,7 @@ void idIK_Reach::Evaluate()
 		// solve IK and calculate elbow position
 		SolveTwoArmBones( shoulderOrigin, handOrigin, elbowDir, upperArmLength[i] , lowerArmLength[i] , elbowOrigin );
 		
-		elbowPos[i] = elbowOrigin - modelOrigin; // koz actually move the elbow joint
+		elbowPos[i] = elbowOrigin - modelOrigin; // Koz actually move the elbow joint
 		elbowPos[i] = elbowPos[i] * modelAxis.Transpose();
 		
 		handPos[i] = handOrigin - modelOrigin; 
@@ -1556,8 +1556,8 @@ void idIK_Reach::Evaluate()
 	{
 		animator->SetJointAxis( elbowJoints[i], JOINTMOD_WORLD_OVERRIDE, elbowAxis[i] );
 		animator->SetJointAxis( shoulderJoints[i], JOINTMOD_WORLD_OVERRIDE, shoulderAxis[i] );
-		animator->SetJointPos( elbowJoints[i], JOINTMOD_WORLD_OVERRIDE, elbowPos[i] );// koz
-		animator->SetJointPos( handJoints[i], JOINTMOD_WORLD_OVERRIDE, handPos[i] );// koz
+		animator->SetJointPos( elbowJoints[i], JOINTMOD_WORLD_OVERRIDE, elbowPos[i] );// Koz
+		animator->SetJointPos( handJoints[i], JOINTMOD_WORLD_OVERRIDE, handPos[i] );// Koz
 		animator->SetJointAxis(wristJoints[i], JOINTMOD_LOCAL, wristMod[i]);
 	}
 	

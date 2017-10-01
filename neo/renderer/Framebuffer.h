@@ -80,7 +80,7 @@ public:
 
 	// check for OpenGL errors
 	int						Check();
-	void					Error( int status ); // koz
+	void					Error( int status ); // Koz
 	uint32_t				GetFramebuffer() const
 	{
 		return frameBuffer;

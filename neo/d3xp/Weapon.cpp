@@ -35,7 +35,7 @@ If you have questions concerning this license or the applicable additional terms
 // Koz begin
 #include "vr\vr.h" 
 
-idClipModel* PDAclipModel; // koz fixme pda more crappy globals.
+idClipModel* PDAclipModel; // Koz fixme pda more crappy globals.
 
 
 
@@ -94,7 +94,7 @@ const idEventDef EV_Weapon_StartWeaponLight( "startWeaponLight", "s" );
 const idEventDef EV_Weapon_StopWeaponLight( "stopWeaponLight", "s" );
 const idEventDef EV_Weapon_GetWeaponSkin( "getWeaponSkin", NULL, 's' );
 
-//koz
+// Koz
 const idEventDef EV_Weapon_IsMotionControlled( "isMotionControlled", NULL, 'd' );
 
 //
@@ -156,9 +156,9 @@ END_CLASS
 
 idCVar cg_projectile_clientAuthoritative_maxCatchup( "cg_projectile_clientAuthoritative_maxCatchup", "500", CVAR_INTEGER, "" );
 
-idCVar g_useWeaponDepthHack( "g_useWeaponDepthHack", "0", CVAR_BOOL | CVAR_GAME |  CVAR_ARCHIVE, "Crunch z depth on weapons" );// koz
+idCVar g_useWeaponDepthHack( "g_useWeaponDepthHack", "0", CVAR_BOOL | CVAR_GAME |  CVAR_ARCHIVE, "Crunch z depth on weapons" );// Koz
 
-idCVar g_weaponShadows( "g_weaponShadows", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Cast shadows from weapons" ); // koz
+idCVar g_weaponShadows( "g_weaponShadows", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Cast shadows from weapons" ); // Koz
 
 extern idCVar cg_predictedSpawn_debug;
 
@@ -199,9 +199,9 @@ idWeapon::idWeapon()
 
 	allowDrop = true;
 	isPlayerFlashlight = false;
-	isPlayerLeftHand = false; // koz
+	isPlayerLeftHand = false; // Koz
 
-	//koz end
+	// Koz end
 	
 	fraccos = 0.0f;
 	fraccos2 = 0.0f;
@@ -502,14 +502,14 @@ void idWeapon::Save( idSaveGame* savefile ) const
 	}
 
 	
-	// koz begin
+	// Koz begin
 	for ( int i = 0; i < 2; i++ )
 	{
 		savefile->WriteJoint( weaponHandAttacher[i] );
 		savefile->WriteVec3( weaponHandDefaultPos[i] );
 		savefile->WriteMat3( weaponHandDefaultAxis[i] );
 	}
-	// koz end
+	// Koz end
 
 }
 
@@ -766,7 +766,7 @@ void idWeapon::Restore( idRestoreGame* savefile )
 		weaponLights.Set( newLight.name, newLight );
 	}
 
-	// koz begin
+	// Koz begin
 	if( savefile->version >= BUILD_NUMBER_FULLY_POSSESSED )
 	{
 		for ( int i = 0; i < 2; i++ )
@@ -778,23 +778,23 @@ void idWeapon::Restore( idRestoreGame* savefile )
 	}
 	else
 	{
-		// koz get jointhandles for hand attachers
+		// Koz get jointhandles for hand attachers
 		if (game->isVR)
 		{
 			weaponHandAttacher[0] = animator.GetJointHandle("RhandAttacher");
 			if (weaponHandAttacher[0] != INVALID_JOINT)
 			{
-				// koz debug common->Printf( "Weapon %s RhandAttacherJoint Found\n", objectname );
+				// Koz debug common->Printf( "Weapon %s RhandAttacherJoint Found\n", objectname );
 				animator.GetJointTransform(weaponHandAttacher[0], gameLocal.time, weaponHandDefaultPos[0], weaponHandDefaultAxis[0]);
-				// koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[0].ToString(), weaponHandDefaultAxis[0].ToAngles().ToString() );
+				// Koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[0].ToString(), weaponHandDefaultAxis[0].ToAngles().ToString() );
 			}
 
 			weaponHandAttacher[1] = animator.GetJointHandle("LhandAttacher");
 			if (weaponHandAttacher[1] != INVALID_JOINT)
 			{
-				// koz debug common->Printf( "Weapon %s LhandAttacherJoint Found\n", objectname );
+				// Koz debug common->Printf( "Weapon %s LhandAttacherJoint Found\n", objectname );
 				animator.GetJointTransform(weaponHandAttacher[1], gameLocal.time, weaponHandDefaultPos[1], weaponHandDefaultAxis[1]);
-				// koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[1].ToString(), weaponHandDefaultAxis[1].ToAngles().ToString() );
+				// Koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[1].ToString(), weaponHandDefaultAxis[1].ToAngles().ToString() );
 			}
 		}
 
@@ -1105,7 +1105,7 @@ void idWeapon::InitWorldModel( const idDeclEntityDef* def )
 			// Koz begin
 			if ( game->isVR && !strstr(def->dict.GetString("model_world"),"flashlight"))
 			{
-				//koz dont show the worldmodel if the player body is shown in vr.
+				// Koz dont show the worldmodel if the player body is shown in vr.
 				worldModelRenderEntity->suppressSurfaceInViewID = 0;
 				worldModelRenderEntity->suppressShadowInViewID = 0;
 			}
@@ -1211,7 +1211,7 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 	const char* guiLightShader = weaponDef->dict.GetString( "mtr_guiLightShader" );
 	if( *guiLightShader != '\0' )
 	{
-		// koz begin
+		// Koz begin
 		// the PDA model was scaled by a factor of 2.5 to make it easier to read in VR.
 		// The weapon guilight size isn't stored in the weapon def, it's hardcoded here,
 		// so check if PDA and resize the guilight accordingly 
@@ -1227,7 +1227,7 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 		}
 
 		guiLight.lightRadius[0] = guiLight.lightRadius[1] = guiLight.lightRadius[2] = lightRad;
-		// koz end
+		// Koz end
 
 		guiLight.shader = declManager->FindMaterial( guiLightShader, false );
 		guiLight.pointLight = true;
@@ -1237,13 +1237,13 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 	vmodel = weaponDef->dict.GetString( "model_view" );
 	SetModel( vmodel );
 	
-	// koz weapon shadows
+	// Koz weapon shadows
 	
 	renderEntity.noShadow = false;
 
 	// setup the world model
 	InitWorldModel( weaponDef );
-	worldModel.GetEntity()->GetRenderEntity()->noShadow = true; // koz fixme only if using viewweapon for body model
+	worldModel.GetEntity()->GetRenderEntity()->noShadow = true; // Koz fixme only if using viewweapon for body model
 
 	// copy the sounds from the weapon view model def into out spawnargs
 	const idKeyValue* kv = weaponDef->dict.MatchPrefix( "snd_" );
@@ -1253,7 +1253,7 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 		kv = weaponDef->dict.MatchPrefix( "snd_", kv );
 	}
 	
-	// koz get jointhandles for hand attachers
+	// Koz get jointhandles for hand attachers
 		
 	
 	if ( game->isVR )
@@ -1261,18 +1261,18 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 		weaponHandAttacher[0] = animator.GetJointHandle( "RhandAttacher" );
 		if ( weaponHandAttacher[0] != INVALID_JOINT )
 		{
-			// koz debug common->Printf( "Weapon %s RhandAttacherJoint Found\n", objectname );
+			// Koz debug common->Printf( "Weapon %s RhandAttacherJoint Found\n", objectname );
 			animator.GetJointTransform( weaponHandAttacher[0], gameLocal.time, weaponHandDefaultPos[0], weaponHandDefaultAxis[0] );
-			// koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[0].ToString(), weaponHandDefaultAxis[0].ToAngles().ToString() );
+			// Koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[0].ToString(), weaponHandDefaultAxis[0].ToAngles().ToString() );
 
 		}
 				
 		weaponHandAttacher[1] = animator.GetJointHandle( "LhandAttacher" );
 		if ( weaponHandAttacher[1] != INVALID_JOINT )
 		{
-			// koz debug common->Printf( "Weapon %s LhandAttacherJoint Found\n", objectname );
+			// Koz debug common->Printf( "Weapon %s LhandAttacherJoint Found\n", objectname );
 			animator.GetJointTransform( weaponHandAttacher[1], gameLocal.time, weaponHandDefaultPos[1], weaponHandDefaultAxis[1] );
-			// koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[1].ToString(), weaponHandDefaultAxis[1].ToAngles().ToString() );
+			// Koz debug common->Printf( "Default pos %s default axis %s\n", weaponHandDefaultPos[1].ToString(), weaponHandDefaultAxis[1].ToAngles().ToString() );
 		}
 
 		laserSightOffset = weaponDef->dict.GetVector( "laserSightOffset" );
@@ -1436,7 +1436,7 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 	{
 		renderEntity.gui[ 0 ] = uiManager->FindGui( guiName, true, false, true );
 		
-		//common->Printf( "Weapon guiname = %s\n", guiName );// koz delete me
+		//common->Printf( "Weapon guiname = %s\n", guiName );// Koz delete me
 	}
 	
 
@@ -2140,7 +2140,7 @@ idWeapon::LowerWeapon
 void idWeapon::LowerWeapon()
 {
 		
-	if ( game->isVR && commonVr->handInGui ) return;// koz never lower weapon if hand is in gui
+	if ( game->isVR && commonVr->handInGui ) return;// Koz never lower weapon if hand is in gui
 	if ( commonVr->VR_USE_MOTION_CONTROLS && !owner->GuiActive() && !gameLocal.inCinematic ) return;
 
 	if( !hide )
@@ -2843,13 +2843,13 @@ bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 		case WEAPON_FISTS:
 		case WEAPON_SOULCUBE:
 		case WEAPON_PDA:
-			origin = commonVr->lastViewOrigin; // koz fixme set the origin and axis to the players view
+			origin = commonVr->lastViewOrigin; // Koz fixme set the origin and axis to the players view
 			axis = commonVr->lastViewAxis;
 			return false;
 			break;
 				
 		case WEAPON_HANDGRENADE:
-			origin = viewWeaponOrigin; // koz fixme set the origin and axis to the weapon default
+			origin = viewWeaponOrigin; // Koz fixme set the origin and axis to the weapon default
 			axis = viewWeaponAxis;
 			return false;
 			break;
@@ -2858,7 +2858,7 @@ bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 		{
 			if ( barrelJointView == INVALID_JOINT )
 			{
-				origin = viewWeaponOrigin; // koz fixme set the origin and axis to the weapon default
+				origin = viewWeaponOrigin; // Koz fixme set the origin and axis to the weapon default
 				axis = viewWeaponAxis;
 				return false;
 				break;
@@ -2929,7 +2929,7 @@ bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 			// joint doesn't point straight, so rotate it
 			//const jointHandle_t bodJoint = animator.GetJointHandle("trigger");
 			//GetGlobalJointTransform(true, bodJoint, discardedOrigin, axis);
-			std::swap( axis[0], axis[2] ); // koz fixme just swap like the rocketlauncher this should work now test and cleanup
+			std::swap( axis[0], axis[2] ); // Koz fixme just swap like the rocketlauncher this should work now test and cleanup
 			//axis[0] = -axis[0];
 			//common->Printf( "GMPWH returning value for WEAPON_SHOTGUN_DOUBLE \n" );
 			
@@ -2965,7 +2965,7 @@ bool idWeapon::GetMuzzlePositionWithHacks( idVec3& origin, idMat3& axis )
 /*
 ===============
 idWeapon::IdentifyWeapon
-koz return weapon enumeration
+Koz return weapon enumeration
 ===============
 */
 
@@ -3111,7 +3111,7 @@ void idWeapon::PresentWeaponOriginal( bool showViewModel )
 	UpdateAnimation();
 	
 	// only show the surface in player view
-	// koz begin
+	// Koz begin
 	if ( !isPlayerFlashlight )
 	{
 		if ( game->isVR )
@@ -3123,7 +3123,7 @@ void idWeapon::PresentWeaponOriginal( bool showViewModel )
 			renderEntity.allowSurfaceInViewID = owner->entityNumber + 1;
 		}
 	}
-	// koz end
+	// Koz end
 
 	// crunch the depth range so it never pokes into walls this breaks the machine gun gui
 	renderEntity.weaponDepthHack = g_useWeaponDepthHack.GetBool();
@@ -3376,7 +3376,7 @@ void idWeapon::CalculateHideRise( idVec3& origin, idMat3& axis )
 			Hide();
 		}
 	}
-	//viewWeaponOrigin += hideOffset * viewWeaponAxis[2]; // koz adjust the gui pointer by this offset later 
+	//viewWeaponOrigin += hideOffset * viewWeaponAxis[2]; // Koz adjust the gui pointer by this offset later 
 	//viewWeaponOrigin.z += hideOffset;
 	origin.z += hideOffset;
 	// kick up based on repeat firing
@@ -3406,7 +3406,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 		owner->CalculateViewFlashPos( viewWeaponOrigin, viewWeaponAxis, flashOffsets[int( currentWeapon )] );
 
 	}
-	else if ( isPlayerLeftHand ) // koz left hand
+	else if ( isPlayerLeftHand ) // Koz left hand
 	{
 
 	}
@@ -3414,7 +3414,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	{
 		// calculate weapon position based on player movement bobbing
 		owner->CalculateViewWeaponPos( viewWeaponOrigin, viewWeaponAxis );
-		// koz hide weapon and muzzlerise was here, now called as weapon::CalculateHideRise in player->CalculateViewWeaponPosition to allow hand animations
+		// Koz hide weapon and muzzlerise was here, now called as weapon::CalculateHideRise in player->CalculateViewWeaponPosition to allow hand animations
 
 
 	}
@@ -3445,7 +3445,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 			showViewModel = false;
 		}
 		//show the viewmodel in all views - flashlight visibilty set in calcViewFlashPosition
-		else if (!isPlayerFlashlight && !commonVr->handInGui  ) renderEntity.allowSurfaceInViewID = 0; // koz fixme
+		else if (!isPlayerFlashlight && !commonVr->handInGui  ) renderEntity.allowSurfaceInViewID = 0; // Koz fixme
 		owner->GetRenderEntity()->suppressSurfaceInViewID = 0;
 	}
 	else
@@ -3462,7 +3462,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	renderEntity_t *worldModelRenderEntity = ent->GetRenderEntity();
 	if ( worldModelRenderEntity )
 	{
-		if ( vr_showBody.GetBool() && game->isVR ) // koz fixme only in vr 
+		if ( vr_showBody.GetBool() && game->isVR ) // Koz fixme only in vr 
 		{
 			//Carl: Don't suppress drawing the weapon's world model or it's shadow in 1st person, if they want to see it (in VR) 
 			worldModelRenderEntity->suppressSurfaceInViewID = 0;
@@ -3492,7 +3492,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	{
 		// deal with the third-person visible world model
 		// don't show shadows of the world model in first person
-		if ( common->IsMultiplayer() || g_showPlayerShadow.GetBool() || pm_thirdPerson.GetBool() || game->isVR ) // koz fixme only in vr
+		if ( common->IsMultiplayer() || g_showPlayerShadow.GetBool() || pm_thirdPerson.GetBool() || game->isVR ) // Koz fixme only in vr
 		{
 			worldModel.GetEntity()->GetRenderEntity()->suppressShadowInViewID = 0;
 		}
@@ -4441,7 +4441,7 @@ void idWeapon::Event_PlayAnim( int channel, const char* animname )
 	int anim;
 	anim = animator.GetAnim( animname );
 	
-	//koz deleteme debugging common->Printf( "Weapon Playing anim %s %d\n", animname, gameLocal.time );
+	// Koz deleteme debugging common->Printf( "Weapon Playing anim %s %d\n", animname, gameLocal.time );
 	
 	if( !anim )
 	{
@@ -4477,7 +4477,7 @@ idWeapon::Event_PlayCycle
 */
 void idWeapon::Event_PlayCycle( int channel, const char* animname )
 {
-	//koz deleteme debugging common->Printf( "Weapon PlayCycle %s %d\n", animname, gameLocal.time );
+	// Koz deleteme debugging common->Printf( "Weapon PlayCycle %s %d\n", animname, gameLocal.time );
 	
 	int anim;
 	anim = animator.GetAnim( animname );
@@ -4745,7 +4745,7 @@ void idWeapon::GetProjectileLaunchOriginAndAxis( idVec3& origin, idMat3& axis )
 	{
 		static weapon_t curWeap = WEAPON_NONE;
 
-		// koz debug common->Printf( "GPLOAA getting muzzle position w/ hacks\n" ); // koz delete me
+		// Koz debug common->Printf( "GPLOAA getting muzzle position w/ hacks\n" ); // Koz delete me
 		GetMuzzlePositionWithHacks( origin, axis );
 				
 		curWeap = IdentifyWeapon();
@@ -4816,7 +4816,7 @@ void idWeapon::Event_LaunchProjectiles( int num_projectiles, float spread, float
 	idBounds		ownerBounds, projBounds;
 	
 	
-	// koz the shotgun is supposed to be a closeup weapon in the game, but the depth provided in VR really changes
+	// Koz the shotgun is supposed to be a closeup weapon in the game, but the depth provided in VR really changes
 	// how it feels. IMO, it seems underpowered unless you are on top of an enemy, due to the extreme pellet spread.
 	// This enables an optional 'choke' for the shotgun, by reducing the spread.
 	weapon_t currentWeap;
@@ -5143,10 +5143,10 @@ void idWeapon::Event_LaunchProjectilesEllipse( int num_projectiles, float spread
 		worldModel.GetEntity()->SetShaderParm( SHADERPARM_TIMEOFFSET, renderEntity.shaderParms[ SHADERPARM_TIMEOFFSET ] );
 	}
 	
-	// koz begin - calculate the muzzle position
+	// Koz begin - calculate the muzzle position
 	GetProjectileLaunchOriginAndAxis( muzzleOrigin, muzzleAxis );
 
-	/*	koz original code - changed to maintain consistency with Event_LaunchProjectiles
+	/*	Koz original code - changed to maintain consistency with Event_LaunchProjectiles
 		// calculate the muzzle position
 		if( barrelJointView != INVALID_JOINT && projectileDict.GetBool( "launchFromBarrel" ) )
 		{
@@ -5162,7 +5162,7 @@ void idWeapon::Event_LaunchProjectilesEllipse( int num_projectiles, float spread
 	
 	*/
 
-	// koz end
+	// Koz end
 	
 	// add some to the kick time, incrementally moving repeat firing weapons back
 	if( kick_endtime < gameLocal.time )
@@ -5191,10 +5191,10 @@ void idWeapon::Event_LaunchProjectilesEllipse( int num_projectiles, float spread
 			anga = idMath::Sin( spreadRadA * gameLocal.random.RandomFloat() );
 			angb = idMath::Sin( spreadRadB * gameLocal.random.RandomFloat() );
 			
-			// koz begin 
+			// Koz begin 
 			//dir = playerViewAxis[ 0 ] + playerViewAxis[ 2 ] * ( angb * idMath::Sin( spin ) ) - playerViewAxis[ 1 ] * ( anga * idMath::Cos( spin ) );
 			dir = muzzleAxis[0] + muzzleAxis[2] * (angb * idMath::Sin( spin )) - muzzleAxis[1] * (anga * idMath::Cos( spin ));
-			// koz end
+			// Koz end
 			
 			dir.Normalize();
 			
@@ -5220,10 +5220,10 @@ void idWeapon::Event_LaunchProjectilesEllipse( int num_projectiles, float spread
 				
 				if( ( ownerBounds - projBounds ).RayIntersection( muzzle_pos, playerViewAxis[0], distance ) )
 				{
-					// koz begin
+					// Koz begin
 					//start = muzzle_pos + distance * playerViewAxis[0];
 					start = muzzle_pos + distance * muzzleAxis[0];
-					// koz end
+					// Koz end
 				}
 				else
 				{
@@ -5624,7 +5624,7 @@ void idWeapon::Event_EjectBrass()
 	debris->Create( owner, origin, axis );
 	debris->Launch();
 	
-	//koz begin
+	// Koz begin
 	if ( game->isVR && commonVr->VR_USE_MOTION_CONTROLS )
 	{
 		idAngles vwa = viewWeaponAxis.ToAngles();
@@ -5638,7 +5638,7 @@ void idWeapon::Event_EjectBrass()
 	{
 		linear_velocity = 40 * ( playerViewAxis[0] + playerViewAxis[1] + playerViewAxis[2] );
 	}
-	// koz end
+	// Koz end
 
 	angular_velocity.Set( 10 * gameLocal.random.CRandomFloat(), 10 * gameLocal.random.CRandomFloat(), 10 * gameLocal.random.CRandomFloat() );
 	
@@ -5647,7 +5647,7 @@ void idWeapon::Event_EjectBrass()
 }
 
 
-/*koz - what a mess
+/*Koz - what a mess
 ===============
 idWeapon::Event_GetWeaponSkin
 ===============
@@ -5697,7 +5697,7 @@ void idWeapon::Event_IsMotionControlled()
 
 	isMC = (game->isVR && commonVr->VR_USE_MOTION_CONTROLS) ? 1 : 0;
 	
-	// koz debug common->Printf( "Event_IsMotionControlled returning %d\n", isMC );
+	// Koz debug common->Printf( "Event_IsMotionControlled returning %d\n", isMC );
 	//	idThread::ReturnInt( ( game->isVR && commonVr->VR_USE_MOTION_CONTROLS ) ? 1 : 0 );
 	
 	idThread::ReturnInt( isMC );

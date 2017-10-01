@@ -341,13 +341,13 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 			*/
 			if ( sev->evValue >= K_TOUCH_LEFT_STICK_UP && sev->evValue <= K_STEAMVR_RIGHT_PAD_RIGHT )
 			{
-				//koz check why dis I disable remapping this?
+				// Koz check why did I disable remapping this?
 				//return true;
 			}
 			if( sev->evValue == K_ESCAPE )
 			{
 				
-				//common->Printf( "idMenuHandlerShell handlegui event k_escape\n" ); // koz debug
+				//common->Printf( "idMenuHandlerShell handlegui event k_escape\n" ); // Koz debug
 				waitForBinding = false;
 				
 				idMenuScreen_Shell_Bindings* bindScreen = dynamic_cast< idMenuScreen_Shell_Bindings* >( menuScreens[ SHELL_AREA_KEYBOARD ] );
@@ -507,7 +507,7 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_CHARACTER_OPTIONS, idMenuScreen_Shell_VR_Character_Options, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_SAFETY_PROTOCOLS, idMenuScreen_Shell_VR_Safety_Protocols, this ); // Carl
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this );
-		// koz end
+		// Koz end
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this ); // Carl
 
 	}
@@ -548,7 +548,7 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_CHARACTER_OPTIONS, idMenuScreen_Shell_VR_Character_Options, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_SAFETY_PROTOCOLS, idMenuScreen_Shell_VR_Safety_Protocols, this ); // Carl
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this );
-		// koz end 
+		// Koz end 
 		BIND_SHELL_SCREEN(SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this); // Carl
 		
 		doom3Intro = declManager->FindMaterial( "gui/intro/introloop" );

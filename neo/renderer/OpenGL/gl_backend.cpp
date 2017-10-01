@@ -249,7 +249,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 	// textures anyway, so there isn't any benefit to rendering to BACK_RIGHT for
 	// that eye.
 	
-	//Koz begin
+	// Koz begin
 	if ( commonVr->useFBO )
 	{
 		globalFramebuffers.primaryFBO->Bind();
@@ -427,7 +427,7 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 		
 		case STEREO3D_HMD:
 			
-			//Koz begin
+			// Koz begin
 			// This is the rift.
 			
 			if ( game->isVR ) 
@@ -445,11 +445,11 @@ void RB_StereoRenderExecuteBackEndCommands( const emptyCommand_t* const allCmds 
 					commonVr->HMDRender( stereoRenderImages[0], stereoRenderImages[1] ); 
 				}
 
-				//koz GL_CheckErrors();
+				// Koz GL_CheckErrors();
 				
 			}
 			break;
-			//Koz end		
+			// Koz end		
 		
 		
 		case STEREO3D_SIDE_BY_SIDE:

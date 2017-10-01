@@ -2671,7 +2671,7 @@ void idGameLocal::RunFrame( idUserCmdMgr& cmdMgr, gameReturn_t& ret )
 	static bool wasInCinematic = false;
 	static bool cutsceneEnded = false;
 
-	if ( !common->IsMultiplayer() && g_stopTime.GetBool() || commonVr->VR_GAME_PAUSED ) // koz vr pause
+	if ( !common->IsMultiplayer() && g_stopTime.GetBool() || commonVr->VR_GAME_PAUSED ) // Koz vr pause
 	{
 		// clear any debug lines from a previous frame
 		gameRenderWorld->DebugClearLines( time + 1 );

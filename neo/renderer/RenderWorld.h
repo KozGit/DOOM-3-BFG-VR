@@ -82,7 +82,7 @@ ID_INLINE void SIMD_INIT_LAST_JOINT( idJointMat* joints, int numJoints )
 	}
 }
 
-class idAnimator; // koz
+class idAnimator; // Koz
 
 typedef bool( *deferredEntityCallback_t )( renderEntity_s*, const renderView_s* );
 
@@ -259,7 +259,7 @@ typedef struct
 {
 	float				x, y;			// 0.0 to 1.0 range if trace hit a gui, otherwise -1
 	int					guiId;			// id of gui ( 0, 1, or 2 ) that the trace happened against
-	float				fraction;		// koz added fraction of trace completed for touch screens
+	float				fraction;		// Koz added fraction of trace completed for touch screens
 } guiPoint_t;
 
 
@@ -398,7 +398,7 @@ public:
 	// fraction location of the trace on the gui surface, or -1,-1 if no hit.
 	// This doesn't do any occlusion testing, simply ignoring non-gui surfaces.
 	// start / end are in global world coordinates.
-	virtual guiPoint_t		GuiTrace( qhandle_t entityHandle, idAnimator* animator, const idVec3 start, const idVec3 end ) const = 0; // koz added animator
+	virtual guiPoint_t		GuiTrace( qhandle_t entityHandle, idAnimator* animator, const idVec3 start, const idVec3 end ) const = 0; // Koz added animator
 	
 	// Traces vs the render model, possibly instantiating a dynamic version, and returns true if something was hit
 	virtual bool			ModelTrace( modelTrace_t& trace, qhandle_t entityHandle, const idVec3& start, const idVec3& end, const float radius ) const = 0;

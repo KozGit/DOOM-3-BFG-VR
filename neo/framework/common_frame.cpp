@@ -304,12 +304,12 @@ void idCommonLocal::Draw()
 		// when paused capture the shell render to the PDA screen texture,
 		// then draw the game frame
 		
-		//koz fixme had playerdead here, can't remember why... but it was breaking the exit game selection in the pause menu, so
+		// Koz fixme had playerdead here, can't remember why... but it was breaking the exit game selection in the pause menu, so
 		//commented out, need to test all this crap again.
-		if ( commonVr->PDAforced || commonVr->PDAforcetoggle ) //&& !commonVr->playerDead) // koz fixme do we only want to use the PDA model in VR?
+		if ( commonVr->PDAforced || commonVr->PDAforcetoggle ) //&& !commonVr->playerDead) // Koz fixme do we only want to use the PDA model in VR?
 		{
-			tr.guiModel->SetEye( 0 );// koz set eye to 0 to render guimodel to both eyes. ( -1 left, 1 right ) 
-			game->Shell_Render(); //koz render the menu
+			tr.guiModel->SetEye( 0 );// Koz set eye to 0 to render guimodel to both eyes. ( -1 left, 1 right ) 
+			game->Shell_Render(); // Koz render the menu
 			Dialog().Render( false );
 			console->Draw( false );
 			renderSystem->CaptureRenderToImage( "_pdaImage", true ); // copy the rendered menu then clear buffer
@@ -326,9 +326,9 @@ void idCommonLocal::Draw()
 		// Koz begin
 		if ( ( !game->isVR || commonVr->playerDead ) || ( !commonVr->PDAforced && !commonVr->PDAforcetoggle )  )
 		{
-			game->Shell_Render(); //koz render any menus outside of game ( main menu etc )
+			game->Shell_Render(); // Koz render any menus outside of game ( main menu etc )
 		}
-		//Koz end
+		// Koz end
 
 	}
 	else if( readDemo )
@@ -438,7 +438,7 @@ void idCommonLocal::UpdateScreen( bool captureToImage, bool releaseMouse )
 			//if ( Sys_Milliseconds() - lastTrack >9 )
 			//	{
 			//	lastTrack = Sys_Milliseconds();
-			//  commonVr->HMDTrackStatic(); // koz fixme
+			//  commonVr->HMDTrackStatic(); // Koz fixme
 			//	}
 
 
@@ -688,7 +688,7 @@ void idCommonLocal::Frame()
 			
 			// don't run any frames when paused
 			// Koz begin
-			// koz fixme pause - In VR, we still want head movement while the game is paused.
+			// Koz fixme pause - In VR, we still want head movement while the game is paused.
 			// so we still need to run game frames. The pause menu will be rendered
 			// to the PDA screen, so force a pda toggle if needed. Actual gametime 
 			// will be stopped just as if the g_stoptime cvar was set.
@@ -764,7 +764,7 @@ void idCommonLocal::Frame()
 			
 			// Koz end			
 
-			if ( pauseGame && !ingame ) // koz added !ingame
+			if ( pauseGame && !ingame ) // Koz added !ingame
 			{
 				gameFrame++;
 				gameTimeResidual = 0;

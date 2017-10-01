@@ -198,12 +198,12 @@ void idMenuScreen_Shell_Resolution::ShowScreen( const mainMenuTransition_t trans
 
 			if ( vr_listMonitorName.GetBool() )
 			{
-				str.Append( va( "(%s) ", modeList[i].displayName.c_str() ) );// koz add the montior name to the list
+				str.Append( va( "(%s) ", modeList[i].displayName.c_str() ) );// Koz add the montior name to the list
 			}
 			// Koz end
 
 			str.Append( va( "%4i x %4i", modeList[i].width, modeList[i].height ) );
-			if( modeList[i].displayHz != 60 || 1 ) // koz always show refresh rate.
+			if( modeList[i].displayHz != 60 || 1 ) // Koz always show refresh rate.
 			{
 				str.Append( va( " @ %dhz", modeList[i].displayHz ) );
 			}

@@ -34,8 +34,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_local.h"
 #include "Framebuffer.h"
 
-#include "vr\vr.h" // koz
-#include "d3xp\Game_local.h" //koz
+#include "vr\vr.h" // Koz
+#include "d3xp\Game_local.h" // Koz
 
 idCVar r_drawEyeColor( "r_drawEyeColor", "0", CVAR_RENDERER | CVAR_BOOL, "Draw a colored box, red = left eye, blue = right eye, grey = non-stereo" );
 idCVar r_motionBlur( "r_motionBlur", "0", CVAR_RENDERER | CVAR_INTEGER | CVAR_ARCHIVE, "1 - 5, log2 of the number of motion blur samples" );
@@ -2736,7 +2736,7 @@ static void RB_ShadowMapPass( const drawSurf_t* drawSurfs, const viewLight_t* vL
 	}
 	
     int status = globalFramebuffers.shadowFBO[vLight->shadowLOD]->Check();
-	globalFramebuffers.shadowFBO[vLight->shadowLOD]->Error( status ); // koz 
+	globalFramebuffers.shadowFBO[vLight->shadowLOD]->Error( status ); // Koz 
 
 	GL_ViewportAndScissor( 0, 0, shadowMapResolutions[vLight->shadowLOD], shadowMapResolutions[vLight->shadowLOD] );
 	
@@ -3188,8 +3188,8 @@ static int RB_DrawShaderPasses( const drawSurf_t* const* const drawSurfs, const 
 								float guiStereoScreenOffset, const int stereoEye )
 {
 	
-	static float guiOffset = 0.0f;
-	static float guiSort = 0.0f;
+	float guiOffset = 0.0f;
+	float guiSort = 0.0f;
 	
 	// only obey skipAmbient if we are rendering a view
 	if( backEnd.viewDef->viewEntitys && r_skipAmbient.GetBool() )
@@ -3270,22 +3270,23 @@ static int RB_DrawShaderPasses( const drawSurf_t* const* const drawSurfs, const 
 		// check will never force an update due to the current sort value.
 		
 		
-		// koz begin
+		// Koz begin
 		// this is more of the gross hack to add some depth to in game guis
 		guiOffset = guiStereoScreenOffset;
 		guiSort = surf->sort;
 		
+		
 		if ( guiSort >= 1000 ) // 1000 added to the depth marks this as an in game gui, so a different separation value can be used 
 		{
 			//guiOffset = vr_gui2.GetFloat() * -stereoEye;
-			
 			guiOffset = stereoEye * .03; //.03 is the stereo separation to use on in game guis
 			guiSort -= 1000; 
+			
 		}
-				
+		
 		//const float thisGuiStereoOffset = guiStereoScreenOffset * surf->sort;
 		float thisGuiStereoOffset = guiOffset * guiSort ;
-		// koz end
+		// Koz end
 
 
 
@@ -3299,10 +3300,9 @@ static int RB_DrawShaderPasses( const drawSurf_t* const* const drawSurfs, const 
 			const viewEntity_t* space = backEnd.currentSpace;
 			
 			//if( guiStereoScreenOffset != 0.0f  
-			if ( guiOffset != 0.0f ) // koz
+			if ( guiOffset != 0.0f ) // Koz
 			{
 				RB_SetMVPWithStereoOffset( space->mvp, currentGuiStereoOffset );
-				//common->Printf( "RB_SetMVPWithStereoOffset %f\n", currentGuiStereoOffset );// koz
 			}
 			else
 			{
@@ -4064,7 +4064,7 @@ void RB_DrawViewInternal( const viewDef_t* viewDef, const int stereoEye )
 		}
 		else
 		{
-			//koz fixme guiScreenOffset = stereoEye * viewDef->renderView.stereoScreenSeparation;
+			// Koz fixme guiScreenOffset = stereoEye * viewDef->renderView.stereoScreenSeparation;
 			
 			extern idCVar vr_guiSeparation;
 			guiScreenOffset = stereoEye * vr_guiSeparation.GetFloat(); //viewDef->renderView.stereoScreenSeparation;
@@ -4164,7 +4164,7 @@ void RB_MotionBlur()
 		return;
 	}
 	
-	// koz GL_CheckErrors();
+	// Koz GL_CheckErrors();
 	
 	// clear the alpha buffer and draw only the hands + weapon into it so
 	// we can avoid blurring them
@@ -4250,7 +4250,7 @@ void RB_MotionBlur()
 	globalImages->currentDepthImage->Bind();
 	
 	RB_DrawElementsWithCounters( &backEnd.unitSquareSurface );
-	// koz GL_CheckErrors();
+	// Koz GL_CheckErrors();
 }
 
 /*
@@ -4302,11 +4302,12 @@ void RB_DrawView( const void* data, const int stereoEye )
 	
 
 	
-	//koz vr right before the view is drawn, update the view with the latest pos/angles from the hmd
+	// Koz vr right before the view is drawn, update the view with the latest pos/angles from the hmd
 	//Thanks to Leyland for idea & implementation
 	
-	if ( game->isVR && !( gameLocal.inCinematic && vr_cinematics.GetInteger() == 2 )) // dont fix up if we are projecting the cinematic into space
+	if ( game->isVR && !cmd->viewDef->isSubview && !( gameLocal.inCinematic && vr_cinematics.GetInteger() == 2 )) // dont fix up if we are projecting the cinematic into space or if this is a subview ( security cam etc. )
 	{
+			
 		static idVec3 hmdPosDelta = vec3_zero;
 		static idMat3 hmdAxisDelta = mat3_identity;
 		static float ipdOffset = 0.0f;
@@ -4339,7 +4340,7 @@ void RB_DrawView( const void* data, const int stereoEye )
 		//for ( viewEntity_t * vEntity = cmd->viewDef->viewEntitys; vEntity; vEntity = vEntity->next )
 		{
 			
-			// koz from tr_frontend_addmodels
+			// Koz from tr_frontend_addmodels
 			R_MatrixMultiply(vEntity->modelMatrix, cmd->viewDef->worldSpace.modelViewMatrix,vEntity->modelViewMatrix );
 						
 			idRenderMatrix viewMat;
@@ -4357,7 +4358,9 @@ void RB_DrawView( const void* data, const int stereoEye )
 		}
 	}
 	
-	// koz end
+	commonVr->privateCamera = false;
+	
+	// Koz end
 
 	// render the scene
 	RB_DrawViewInternal( cmd->viewDef, stereoEye );

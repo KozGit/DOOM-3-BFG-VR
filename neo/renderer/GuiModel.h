@@ -53,11 +53,11 @@ public:
 	void	EmitToCurrentView( float modelMatrix[16], bool depthHack );
 	void	EmitFullScreen();
 
-	//Koz 
+	// Koz 
 	void	SetEye( int eye );
 	int		GetEye() { return renderEye; };
 	bool	SurfaceValid(){ return surf != NULL; }
-	// koz end
+	// Koz end
 
 	
 	// the returned pointer will be in write-combined memory, so only make contiguous

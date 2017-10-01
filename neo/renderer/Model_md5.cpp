@@ -33,7 +33,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_local.h"
 #include "Model_local.h"
 
-#include "vr\Vr.h"// koz
+#include "vr\Vr.h"// Koz
 
 
 #if defined(USE_INTRINSICS)

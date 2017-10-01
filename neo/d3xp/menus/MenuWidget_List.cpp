@@ -129,7 +129,7 @@ bool idMenuWidget_List::HandleAction( idWidgetAction& action, const idWidgetEven
 		{
 			ScrollOffset( parms[ 0 ].ToInteger() * 999 );
 		}
-		if ( widget->GetParent() ) // koz widget repeater doesn't update the screen - force an update so we can dynamically scroll menu lists
+		if ( widget->GetParent() ) // Koz widget repeater doesn't update the screen - force an update so we can dynamically scroll menu lists
 		{
 			widget->GetParent()->Update(); 
 		}

@@ -140,7 +140,7 @@ extern idCVar		com_showMemoryUsage;
 extern idCVar		com_updateLoadSize;
 extern idCVar		com_productionMode;
 
-// koz
+// Koz
 extern idCVar		vr_showWIP;
 
 

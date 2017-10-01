@@ -9,7 +9,7 @@
 #include "libs\LibOVR\Include\OVR_CAPI_GL.h"
 #include "libs\LibOVR\Include\Extras\OVR_Math.h"
 
-idCVar zdist("zdist", "-2.0", CVAR_FLOAT, "");
+idCVar zdist("zdist", "-2.5", CVAR_FLOAT, "");
 
 idCVar vr_cineDist("vr_cineDist", "-2", CVAR_FLOAT | CVAR_ARCHIVE, "");
 idCVar vr_cineSize("vr_cineSize", "3", CVAR_FLOAT | CVAR_ARCHIVE, "");
@@ -529,7 +529,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 
 			glViewport( 0, 0, FBOW, FBOH );
 			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-			// koz GL_CheckErrors();
+			// Koz GL_CheckErrors();
 
 			// draw the left eye texture.				
 			GL_SelectTexture( 0 );
@@ -622,7 +622,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 				RB_DrawElementsWithCounters( &backEnd.unitSquareSurface ); // draw it
 			}
 
-			// koz hack
+			// Koz hack
 			// for some reason, vsync will not disable unless wglSwapIntervalEXT( 0 )
 			// is called at least once after ovr_SubmitFrame is called.
 			// (at least on the two Nvidia cards I have to test with.)
@@ -650,7 +650,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 			glViewport( 0, 0, commonVr->hmdWidth, commonVr->hmdHeight );
 			glClearColor( 0, 0, 0, 0 );
 			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-			//koz GL_CheckErrors();
+			// Koz GL_CheckErrors();
 
 			// draw the left eye texture.				
 			glViewport( 0, 0, commonVr->hmdWidth / 4, commonVr->hmdHeight / 2 );
@@ -763,7 +763,7 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 
 			glViewport(0, 0, FBOW, FBOH);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			// koz GL_CheckErrors();
+			// Koz GL_CheckErrors();
 
 			// draw the left eye texture.				
 			GL_SelectTexture(0);
@@ -810,7 +810,7 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 			float qw;
 			float qdist;
 
-			if (gameLocal.inCinematic)
+			if ( gameLocal.inCinematic )
 			{
 				//qw = 0.5f;
 				//qdist = 0.0f;
@@ -826,11 +826,8 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 						
 			idQuat viewForwardQ = idAngles( 0.0f, commonVr->cinematicStartViewYaw, 0.0f ).ToQuat();
 			idMat3 viewMat = viewForwardQ.ToMat3();
-			//idVec3 viewPos = commonVr->cinematicStartPosition - zdist.GetFloat() * viewMat[0];
-
 			idVec3 viewPos = commonVr->cinematicStartPosition - qdist * viewMat[0];
-				
-
+			
 			ovr_CalcEyePoses(commonVr->hmdTrackingState.HeadPose.ThePose, viewOffset, eyeRenderPose);
 
 			ovrLayerQuad lg, lg2;
@@ -844,7 +841,7 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 			lg.QuadSize.x = qw;
 
 			//lg.QuadSize.y = lg.QuadSize.x;// *3.0f / 4.0f; // metres
-			lg.QuadSize.y = lg.QuadSize.x / hmdAspect; // koz correct hmd aspect.
+			lg.QuadSize.y = lg.QuadSize.x / hmdAspect; // Koz correct hmd aspect.
 			
 			lg.QuadPoseCenter.Position.x = -viewPos.y;
 			lg.QuadPoseCenter.Position.y = viewPos.z;
@@ -904,7 +901,7 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 				RB_DrawElementsWithCounters(&backEnd.unitSquareSurface); // draw it
 			}
 
-			// koz hack
+			// Koz hack
 			// for some reason, vsync will not disable unless wglSwapIntervalEXT( 0 )
 			// is called at least once after ovr_SubmitFrame is called.
 			// (at least on the two Nvidia cards I have to test with.)
@@ -913,7 +910,7 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 			// if anyone has any ideas why this is, please tell!
 
 			static int swapset = 0;
-			if (swapset == 0)
+			if ( swapset == 0 )
 			{
 				//swapset = 1;
 				wglSwapIntervalEXT(0);
@@ -951,7 +948,7 @@ void iVr::HMDTrackStatic( bool is3D )
 			return;
 		}
 		
-		common->Printf( "is3d = %d\n", is3D );
+		//common->Printf( "is3d = %d\n", is3D );
 		if ( !is3D )
 		{
 			if ( HMDRenderQuad( commonVr->hmdCurrentRender[0], commonVr->hmdCurrentRender[1] ) ) return;

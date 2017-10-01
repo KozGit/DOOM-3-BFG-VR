@@ -260,7 +260,7 @@ bool idAnimState::AnimDone( int blendFrames ) const
 	
 	animDoneTime = animator->CurrentAnim( channel )->GetEndTime();
 	
-	//koz deleteme was debugging	if ( channel == ANIMCHANNEL_LEFTHAND || channel == ANIMCHANNEL_RIGHTHAND ) common->Printf( "Anim endtime = %d\n", animDoneTime );
+	// Koz deleteme was debugging	if ( channel == ANIMCHANNEL_LEFTHAND || channel == ANIMCHANNEL_RIGHTHAND ) common->Printf( "Anim endtime = %d\n", animDoneTime );
 	
 	if( animDoneTime < 0 )
 	{
@@ -599,14 +599,14 @@ void idActor::Spawn()
 	
 	walkIK.Init( this, IK_ANIM, modelOffset );
 
-	// koz begin
+	// Koz begin
 	armIK.Init( this, IK_ANIM, modelOffset );
 	
 	if ( armIK.IsInitialized() ) {
 		common->Printf( "ArmIK initialized for %s.\n",name.c_str() );
 	}
 	
-	// koz end
+	// Koz end
 	
 	// the animation used to be set to the IK_ANIM at this point, but that was fixed, resulting in
 	// attachments not binding correctly, so we're stuck setting the IK_ANIM before attaching things.
@@ -964,10 +964,10 @@ void idActor::Save( idSaveGame* savefile ) const
 	torsoAnim.Save( savefile );
 	legsAnim.Save( savefile );
 
-	//koz begin
+	// Koz begin
 	leftHandAnim.Save( savefile );
 	rightHandAnim.Save( savefile );
-	//koz end
+	// Koz end
 
 	
 	savefile->WriteBool( allowPain );
@@ -1165,14 +1165,14 @@ void idActor::Restore( idRestoreGame* savefile )
 	
 	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED)
 	{
-		// koz begin
+		// Koz begin
 		armIK.Init( this, IK_ANIM, modelOffset );
 	
 		if ( armIK.IsInitialized() ) {
 			common->Printf( "ArmIK initialized for %s.\n",name.c_str() );
 		}
 	
-		// koz end
+		// Koz end
 	
 		// the animation used to be set to the IK_ANIM at this point, but that was fixed, resulting in
 		// attachments not binding correctly, so we're stuck setting the IK_ANIM before attaching things.
@@ -1237,7 +1237,7 @@ void idActor::Restore( idRestoreGame* savefile )
 	torsoAnim.Restore( savefile );
 	legsAnim.Restore( savefile );
 	
-	//koz begin
+	// Koz begin
 	if( savefile->version >= BUILD_NUMBER_FULLY_POSSESSED )
 	{
 		leftHandAnim.Restore( savefile );
@@ -1248,7 +1248,7 @@ void idActor::Restore( idRestoreGame* savefile )
 		leftHandAnim.Init( this, &animator, ANIMCHANNEL_LEFTHAND );
 		rightHandAnim.Init( this, &animator, ANIMCHANNEL_RIGHTHAND );
 	}
-	//koz end
+	// Koz end
 
 	savefile->ReadBool( allowPain );
 	savefile->ReadBool( allowEyeFocus );
@@ -1487,10 +1487,10 @@ void idActor::SetupBody()
 	torsoAnim.Init( this, &animator, ANIMCHANNEL_TORSO );
 	legsAnim.Init( this, &animator, ANIMCHANNEL_LEGS );
 
-	//koz
+	// Koz
 	leftHandAnim.Init( this, &animator, ANIMCHANNEL_LEFTHAND );
 	rightHandAnim.Init( this, &animator, ANIMCHANNEL_RIGHTHAND );
-	//koz end
+	// Koz end
 
 }
 
@@ -1576,10 +1576,10 @@ void idActor::ShutdownThreads()
 	torsoAnim.Shutdown();
 	legsAnim.Shutdown();
 
-	//koz
+	// Koz
 	leftHandAnim.Shutdown();
 	rightHandAnim.Shutdown();
-	//koz end
+	// Koz end
 
 	
 	if( scriptThread )
@@ -2120,7 +2120,7 @@ bool idActor::UpdateAnimationControllers()
 		success = true;
 	}
 	
-	// koz vr arm ik
+	// Koz vr arm ik
 	if ( game->isVR && armIK.IsInitialized() )
 	{
 		armIK.Evaluate();
@@ -2226,7 +2226,7 @@ idActor::SetDeltaViewAngles
 */
 void idActor::SetDeltaViewAngles( const idAngles& delta )
 {
-	// koz fixme : check :this should be OK now in VR - make sure unintentional view changes have all been addressed.
+	// Koz fixme : check :this should be OK now in VR - make sure unintentional view changes have all been addressed.
 	// was zero'd in previous versions to prevent unintentional head movement.
 
 	deltaViewAngles = delta;
@@ -2390,7 +2390,7 @@ void idActor::SetAnimState( int channel, const char* statename, int blendFrames 
 			allowEyeFocus = true;
 			break;
 		
-		//koz begin
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			leftHandAnim.SetState( statename, blendFrames );
 			break;
@@ -2398,7 +2398,7 @@ void idActor::SetAnimState( int channel, const char* statename, int blendFrames 
 		case ANIMCHANNEL_RIGHTHAND :
 			rightHandAnim.SetState( statename, blendFrames );
 			break;
-		//koz end
+		// Koz end
 
 		default:
 			gameLocal.Error( "idActor::SetAnimState: Unknown anim group" );
@@ -2427,7 +2427,7 @@ const char* idActor::GetAnimState( int channel ) const
 			return legsAnim.state;
 			break;
 
-		//koz begin
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			return leftHandAnim.state;
 			break;
@@ -2435,7 +2435,7 @@ const char* idActor::GetAnimState( int channel ) const
 		case ANIMCHANNEL_RIGHTHAND :
 			return rightHandAnim.state;
 			break;
-		//koz end
+		// Koz end
 
 		default:
 			gameLocal.Error( "idActor::GetAnimState: Unknown anim group" );
@@ -2474,7 +2474,7 @@ bool idActor::InAnimState( int channel, const char* statename ) const
 			}
 			break;
 
-		//koz begin
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			if ( leftHandAnim.state == statename )
 			{
@@ -2488,7 +2488,7 @@ bool idActor::InAnimState( int channel, const char* statename ) const
 				return true;
 			}
 			break;
-		//koz end
+		// Koz end
 			
 		default:
 			gameLocal.Error( "idActor::InAnimState: Unknown anim group" );
@@ -2536,10 +2536,10 @@ void idActor::UpdateAnimState()
 	torsoAnim.UpdateState();
 	legsAnim.UpdateState();
 
-	//koz begin
+	// Koz begin
 	leftHandAnim.UpdateState();
 	rightHandAnim.UpdateState();
-	//koz end
+	// Koz end
 
 
 }
@@ -2763,7 +2763,7 @@ void idActor::Damage( idEntity* inflictor, idEntity* attacker, const idVec3& dir
 	
 	int	damage = damageDef->GetInt( "damage" ) * damageScale;
 
-	//koz hack : add an adjustable headshot multiplier for VR for projectile weapons with no splash damage 
+	// Koz hack : add an adjustable headshot multiplier for VR for projectile weapons with no splash damage 
 	bool headMultiplier = false;
 	if (	!idStr::Icmp( damageDefName, "damage_bullet_chaingun" ) ||
 			!idStr::Icmp( damageDefName, "damage_bullet_machinegun" ) ||
@@ -2774,7 +2774,7 @@ void idActor::Damage( idEntity* inflictor, idEntity* attacker, const idVec3& dir
 		) headMultiplier = true;
 		
 	damage = GetDamageForLocation( damage, location, headMultiplier );
-	//koz end
+	// Koz end
 	
 	// inform the attacker that they hit someone
 	if( attacker )
@@ -3126,7 +3126,7 @@ int idActor::GetDamageForLocation( int damage, int location, bool headMultiplier
 		return damage;
 	}
 	
-	//koz add more significant headshot damage.  
+	// Koz add more significant headshot damage.  
 	//only applies if head damage group is already scaled to take > 1.0x damage.
 	//limited by calling function to fists, pitsol,shotgun,machinegun,chaingun and plasmagun.
 	float damageAmt = damage *= damageScale[location];
@@ -3358,7 +3358,7 @@ void idActor::Event_StopAnim( int channel, int frames )
 			legsAnim.StopAnim( frames );
 			break;
 
-		//koz begin
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			leftHandAnim.StopAnim( frames );
 			break;
@@ -3366,7 +3366,7 @@ void idActor::Event_StopAnim( int channel, int frames )
 		case ANIMCHANNEL_RIGHTHAND :
 			rightHandAnim.StopAnim( frames );
 			break; 
-		//koz end
+		// Koz end
 
 			
 		default:
@@ -3386,7 +3386,7 @@ void idActor::Event_PlayAnim( int channel, const char* animname )
 	idEntity* headEnt;
 	int	anim;
 	
-	// koz debug if ( channel == ANIMCHANNEL_LEFTHAND || channel == ANIMCHANNEL_RIGHTHAND ) common->Printf( "Player Playing anim %s %d\n", animname, gameLocal.time );
+	// Koz debug if ( channel == ANIMCHANNEL_LEFTHAND || channel == ANIMCHANNEL_RIGHTHAND ) common->Printf( "Player Playing anim %s %d\n", animname, gameLocal.time );
 
 	anim = GetAnim( channel, animname );
 	if( !anim )
@@ -3465,8 +3465,8 @@ void idActor::Event_PlayAnim( int channel, const char* animname )
 				}
 			}
 			break;
-		//koz fix anims add hand channels to leg and torso cases?
-		//koz begin
+		// Koz fix anims add hand channels to leg and torso cases?
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			leftHandAnim.idleAnim = false;
 			leftHandAnim.PlayAnim( anim );
@@ -3504,7 +3504,7 @@ void idActor::Event_PlayAnim( int channel, const char* animname )
 				}
 			}*/
 			break;
-		// koz end
+		// Koz end
 
 
 		default :
@@ -3524,7 +3524,7 @@ void idActor::Event_PlayCycle( int channel, const char* animname )
 	animFlags_t	flags;
 	int			anim;
 	
-	//koz delete me debugging if ( channel == ANIMCHANNEL_LEFTHAND || channel == ANIMCHANNEL_RIGHTHAND ) common->Printf( "Player PlayCycle %s %d\n", animname, gameLocal.time );
+	// Koz delete me debugging if ( channel == ANIMCHANNEL_LEFTHAND || channel == ANIMCHANNEL_RIGHTHAND ) common->Printf( "Player PlayCycle %s %d\n", animname, gameLocal.time );
 
 	anim = GetAnim( channel, animname );
 	if( !anim )
@@ -3597,8 +3597,8 @@ void idActor::Event_PlayCycle( int channel, const char* animname )
 			}
 			break;
 
-		//koz fix anim ad handanims to head/leg/torso cases?
-		//koz begin
+		// Koz fix anim ad handanims to head/leg/torso cases?
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			leftHandAnim.idleAnim = false;
 			leftHandAnim.CycleAnim( anim );
@@ -3636,7 +3636,7 @@ void idActor::Event_PlayCycle( int channel, const char* animname )
 				}
 			}*/
 			break;
-		// koz end
+		// Koz end
 
 			
 		default:
@@ -3681,7 +3681,7 @@ void idActor::Event_IdleAnim( int channel, const char* animname )
 				legsAnim.BecomeIdle();
 				break;
 
-			//koz begin
+			// Koz begin
 			case ANIMCHANNEL_LEFTHAND :
 				leftHandAnim.BecomeIdle();
 				break;
@@ -3689,7 +3689,7 @@ void idActor::Event_IdleAnim( int channel, const char* animname )
 			case ANIMCHANNEL_RIGHTHAND :
 				rightHandAnim.BecomeIdle();
 				break;
-			//koz end
+			// Koz end
 
 			
 				
@@ -3784,8 +3784,8 @@ void idActor::Event_IdleAnim( int channel, const char* animname )
 			}
 			break;
 
-		//koz fix anims
-		//koz begin
+		// Koz fix anims
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			leftHandAnim.BecomeIdle();
 			break;
@@ -3793,7 +3793,7 @@ void idActor::Event_IdleAnim( int channel, const char* animname )
 		case ANIMCHANNEL_RIGHTHAND :
 			rightHandAnim.BecomeIdle();
 			break;
-		//koz end
+		// Koz end
 
 			
 		default:
@@ -3858,8 +3858,8 @@ void idActor::Event_SetSyncedAnimWeight( int channel, int anim, float weight )
 			}
 			break;
 
-		//koz fix anims
-		//koz begin
+		// Koz fix anims
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			animator.CurrentAnim( ANIMCHANNEL_LEFTHAND )->SetSyncedAnimWeight( anim, weight );
 			break;
@@ -3867,7 +3867,7 @@ void idActor::Event_SetSyncedAnimWeight( int channel, int anim, float weight )
 		case ANIMCHANNEL_RIGHTHAND :
 			animator.CurrentAnim( ANIMCHANNEL_RIGHTHAND )->SetSyncedAnimWeight( anim, weight );
 			break;
-		//koz end
+		// Koz end
 
 			
 		default:
@@ -3910,8 +3910,8 @@ void idActor::Event_OverrideAnim( int channel )
 			SyncAnimChannels( ANIMCHANNEL_LEGS, ANIMCHANNEL_TORSO, torsoAnim.lastAnimBlendFrames );
 			break;
 			
-		//koz fix anim
-		//koz begin
+		// Koz fix anim
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			leftHandAnim.Disable();
 			break;
@@ -3919,7 +3919,7 @@ void idActor::Event_OverrideAnim( int channel )
 		case ANIMCHANNEL_RIGHTHAND :
 			rightHandAnim.Disable();
 			break;
-		//koz end
+		// Koz end
 
 		default:
 			gameLocal.Error( "Event_OverrideAnim Unknown anim group" );
@@ -3948,8 +3948,8 @@ void idActor::Event_EnableAnim( int channel, int blendFrames )
 			legsAnim.Enable( blendFrames );
 			break;
 
-		//koz fix anim
-		//koz begin
+		// Koz fix anim
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			leftHandAnim.Enable( blendFrames );
 			break;
@@ -3957,7 +3957,7 @@ void idActor::Event_EnableAnim( int channel, int blendFrames )
 		case ANIMCHANNEL_RIGHTHAND :
 			rightHandAnim.Enable( blendFrames );
 			break;
-		//koz end
+		// Koz end
 			
 		default:
 			gameLocal.Error( "Event_EnableAnim Unknown anim group" );
@@ -3989,8 +3989,8 @@ void idActor::Event_SetBlendFrames( int channel, int blendFrames )
 			legsAnim.lastAnimBlendFrames = blendFrames;
 			break;
 
-		//koz fix anims
-		//koz begin
+		// Koz fix anims
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			leftHandAnim.animBlendFrames = blendFrames;
 			leftHandAnim.lastAnimBlendFrames = blendFrames;
@@ -4000,7 +4000,7 @@ void idActor::Event_SetBlendFrames( int channel, int blendFrames )
 			rightHandAnim.animBlendFrames = blendFrames;
 			rightHandAnim.lastAnimBlendFrames = blendFrames;
 			break;
-		//koz end
+		// Koz end
 					
 		default:
 			gameLocal.Error( "Event_SetBlendFrames Unknown anim group" );
@@ -4029,8 +4029,8 @@ void idActor::Event_GetBlendFrames( int channel )
 			idThread::ReturnInt( legsAnim.animBlendFrames );
 			break;
 
-		//koz fix anims
-		//koz begin
+		// Koz fix anims
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			idThread::ReturnInt( leftHandAnim.animBlendFrames );
 			break;
@@ -4038,7 +4038,7 @@ void idActor::Event_GetBlendFrames( int channel )
 		case ANIMCHANNEL_RIGHTHAND :
 			idThread::ReturnInt( rightHandAnim.animBlendFrames );
 			break;
-		//koz end
+		// Koz end
 						
 		default:
 			gameLocal.Error( "Event_GetBlendFrames Unknown anim group" );
@@ -4121,8 +4121,8 @@ void idActor::Event_AnimDone( int channel, int blendFrames )
 			idThread::ReturnInt( result );
 			break;
 		
-		//koz fix anims
-		//koz begin
+		// Koz fix anims
+		// Koz begin
 		case ANIMCHANNEL_LEFTHAND :
 			result = leftHandAnim.AnimDone( blendFrames );
 			idThread::ReturnInt( result );
@@ -4132,7 +4132,7 @@ void idActor::Event_AnimDone( int channel, int blendFrames )
 			result = rightHandAnim.AnimDone( blendFrames );
 			idThread::ReturnInt( result );
 			break;
-		//koz end
+		// Koz end
 			
 		default:
 			gameLocal.Error( "Event_AnimDone Unknown anim group" );

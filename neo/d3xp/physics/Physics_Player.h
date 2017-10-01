@@ -155,7 +155,7 @@ public:	// common physics interface
 		previous = current;
 	}
 
-	//koz
+	// Koz
 	idVec3					MotionMove( idVec3 &moveVelocity ); // bool gravity, bool stepUp, bool stepDown, bool push );
 	
 private:

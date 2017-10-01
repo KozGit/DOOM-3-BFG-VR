@@ -46,7 +46,7 @@ If you have questions concerning this license or the applicable additional terms
 */
 
 static const int NUM_DECAL_BOUNDING_PLANES	= 6;
-#ifndef ID_PC // koz this was #ifdef
+#ifndef ID_PC // Koz this was #ifdef
 static const int MAX_DEFERRED_DECALS		= 8;
 static const int DEFFERED_DECAL_TIMEOUT		= 1000;	// don't create a decal if it wasn't visible within the first second
 static const int MAX_DECALS					= 64;
