@@ -426,8 +426,9 @@ void idCameraAnim::LoadAnim()
 	}
 	
 	// parse the camera cuts
-	// Koz : added support for the camera cuts to include overrides for position and rotation at each cut location.
-	// this allows better camera control when using 'immersive' cutscenes without having to modify or re-write the entire camera file.
+	// Koz Begin : add support for camera cuts to include overrides for position and rotation at each cut location.
+	// this allows better camera control when using 'immersive' cutscenes without having to re-write the entire camera file.
+	
 	parser.ExpectTokenString( "cuts" );
 	parser.ExpectTokenString( "{" );
 	cameraCuts.SetNum( numCuts );
@@ -459,10 +460,9 @@ void idCameraAnim::LoadAnim()
 		if ( parser.PeekTokenString( "rotA" ) ) // read rotation in angles - easier for manual editing.
 		{
 			parser.ReadToken( &cutToken );
-			common->Printf( "String %s found\n", cutToken.c_str() );
+			
 			idAngles ta;
 			parser.Parse1DMatrix( 3, &ta[0] );
-			//parser.Parse1DMatrix( 3, cameraCuts[i].rotAnglesNew.ToFloatPtr() );
 			cameraCuts[i].rotNew = ta.ToQuat().ToCQuat();
 			cameraCuts[i].rotOverride = true;
 		}
@@ -470,15 +470,13 @@ void idCameraAnim::LoadAnim()
 		if ( parser.PeekTokenString( "rot" ) ) // read rotation quat - easier to copy from exitsing frame.
 		{
 			parser.ReadToken( &cutToken );
-			common->Printf( "String %s found\n", cutToken.c_str() );
 			parser.Parse1DMatrix( 3, cameraCuts[i].rotNew.ToFloatPtr() );
 			cameraCuts[i].rotOverride = true;
 		}
-
-
-
-		
 	}
+
+	// Koz End
+	
 	parser.ExpectTokenString( "}" );
 	
 	// parse the camera frames
@@ -573,6 +571,7 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 	cameraFrame_t*	camFrame2; // Koz for clamping camera positions during cinematics to eliminate uncomfortable panning in VR.
 
 	cameraFrame_t	cutFrame;
+	bool			cutRotOverride;
 	
 	int				i;
 	int				cut;
@@ -606,6 +605,7 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 	cutFrame.q = camFrame2[ 0 ].q;
 	cutFrame.t = camFrame2[ 0 ].t;
 
+	cutRotOverride = false;
 	for ( i = 0; i < cameraCuts.Num(); i++ )
 	{
 		if ( frame < cameraCuts[i].cutFrame )
@@ -614,27 +614,35 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		}
 		frame++;
 		cut++;
-		int cf = idMath::ClampInt( 0, camera.Num() - 1, cameraCuts[i].cutFrame + 1 );
+		int cf = idMath::ClampInt( 0, camera.Num() - 2, cameraCuts[i].cutFrame + 1 );
 		camFrame2 = &camera[ cf /*cameraCuts[i].cutFrame*/ ];
 		
 		cutFrame.fov = camFrame2[0].fov;
 		cutFrame.q = camFrame2[0].q;
 		cutFrame.t = camFrame2[0].t;
 
-		if ( cameraCuts[i].posOverride )
+		if ( vr_cinematics.GetInteger() == 0 ) // only use replacement positions/rotations if using immersive cinematics.
 		{
-			cutFrame.t = cameraCuts[i].posNew;
-		}
-		if ( cameraCuts[i].rotOverride )
-		{
-			cutFrame.q = cameraCuts[i].rotNew;
+			cutRotOverride = false;
+			if ( cameraCuts[i].posOverride )
+			{
+				cutFrame.t = cameraCuts[i].posNew;
+			}
+			if ( cameraCuts[i].rotOverride )
+			{
+				cutFrame.q = cameraCuts[i].rotNew;
+				cutRotOverride = true;
+			}
 		}
 	}
-
-	if ( cut > 0 ) common->Printf( "Frame cut %d at frame %d\n", cut -1, frame - 1 );
-
+	
 	if( g_debugCinematic.GetBool() )
 	{
+		if ( gameLocal.GetCamera() )
+		{
+			common->Printf( "Time %d - Camera %s cut %d rot Quat %s : rot Angles %s : pos %s\n", Sys_Milliseconds(), gameLocal.GetCamera()->GetName(), cut, cutFrame.q.ToString(), cutFrame.q.ToAngles().ToString(), cutFrame.t.ToString() );
+		}
+				
 		int prevFrameTime	= ( gameLocal.previousTime - starttime ) * frameRate;
 		int prevFrame		= prevFrameTime / 1000;
 		int prevCut;
@@ -721,8 +729,10 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 		// This eliminates camera panning and smooth movements in cutscenes,
 		// while allowing the player to look around from
 		// the camera origin. Not perfect but less vomitous.
-		// Maybe I should redefine the camera animation files to 
-		// provide more coherent camera transitions in cutscenes?
+		
+		// Update: camera files have been updated with additional cuts, and pos/rot overrides at cut locations
+		// for better 'immersive' cutscenes. Player also has option to use cropped or projected cutscenes 
+		// where the pos/rot overrides are ignored and cameras are not clamped to cuts.
 
 		// Flicksync camera
 		idEntity* ent = NULL;
@@ -957,28 +967,28 @@ void idCameraAnim::GetViewParms( renderView_t* view )
 			if ( g_debugCinematic.GetBool() && ent != last_ent )
 			{
 				gameLocal.Printf( "%d: Flicksync using camera %s\n", gameLocal.framenum, this->name.c_str() );
+
 			}
 			
 			last_ent = ent;
 			
-			if ( gameLocal.GetCamera()) common->Printf( "Camera %s rot %s pos %s\n",gameLocal.GetCamera()->GetName(), camFrame2[0].q.ToString(), camFrame2[0].t.ToString() );
 			
-			//view->viewaxis = camFrame2[0].q.ToMat3();
-			//view->vieworg = camFrame2[0].t + offset;
-
 			view->viewaxis = cutFrame.q.ToMat3();
 			view->vieworg = cutFrame.t + offset;
 		}
 
-		// remove camera pitch & roll, this is uncomfortable in VR.
+		// if the rotation wasn't overridden, remove camera pitch & roll, this is uncomfortable in VR.
 
-		//idAngles angles = view->viewaxis.ToAngles();
-		//angles.pitch = 0;
-		//angles.roll = 0;
-		//view->viewaxis = angles.ToMat3();
+		if ( !cutRotOverride )
+		{
+			idAngles angles = view->viewaxis.ToAngles();
+			angles.pitch = 0;
+			angles.roll = 0;
+			view->viewaxis = angles.ToMat3();
+		}
 	}
 	
-	if ( game->isVR )
+	if ( game->isVR && gameLocal.inCinematic )
 	{
 		// override any camera fov changes. Unless you *like* the taste of hurl.
 

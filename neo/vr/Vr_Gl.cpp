@@ -9,7 +9,7 @@
 #include "libs\LibOVR\Include\OVR_CAPI_GL.h"
 #include "libs\LibOVR\Include\Extras\OVR_Math.h"
 
-idCVar zdist("zdist", "-2.5", CVAR_FLOAT, "");
+idCVar zdist("zdist", "-2.9", CVAR_FLOAT, "");
 
 idCVar vr_cineDist("vr_cineDist", "-2", CVAR_FLOAT | CVAR_ARCHIVE, "");
 idCVar vr_cineSize("vr_cineSize", "3", CVAR_FLOAT | CVAR_ARCHIVE, "");
@@ -746,7 +746,7 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 
 		renderProgManager.BindShader_PostProcess(); // pass thru shader
 
-		if (1) //!vr_skipOvr.GetBool() )
+		if (1) // !vr_skipOvr.GetBool() )
 		{
 			wglSwapIntervalEXT(0);
 
@@ -820,7 +820,7 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 			}
 			else
 			{
-				qw = 3.0f;
+				qw = 3.8f;
 				qdist = zdist.GetFloat();
 			}
 						
@@ -837,12 +837,9 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 			lg.Viewport = oculusLayer.Viewport[0];
 			
 			
-			//lg.QuadSize.x = 3.0f; // metres
 			lg.QuadSize.x = qw;
-
-			//lg.QuadSize.y = lg.QuadSize.x;// *3.0f / 4.0f; // metres
-			lg.QuadSize.y = lg.QuadSize.x / hmdAspect; // Koz correct hmd aspect.
-			
+			lg.QuadSize.y = lg.QuadSize.x;// *hmdAspect; // Koz correct hmd aspect?
+			//common->Printf( "Aspect %f X, Y = %f : %f\n", hmdAspect, lg.QuadSize.x, lg.QuadSize.y );
 			lg.QuadPoseCenter.Position.x = -viewPos.y;
 			lg.QuadPoseCenter.Position.y = viewPos.z;
 			lg.QuadPoseCenter.Position.z = -viewPos.x;

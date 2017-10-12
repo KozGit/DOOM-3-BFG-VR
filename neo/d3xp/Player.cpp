@@ -15573,7 +15573,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 		absolutePosition = commonVr->poseHmdAbsolutePosition;
 
 
-		weapAxis = idAngles( 0.0, weapAxis.ToAngles().yaw - commonVr->bodyYawOffset, 0.0f ).ToMat3();
+		weapAxis = idAngles( 0.0f, weapAxis.ToAngles().yaw - commonVr->bodyYawOffset, 0.0f ).ToMat3();
 
 		weapOrigin += weapAxis[0] * headPositionDelta.x + weapAxis[1] * headPositionDelta.y + weapAxis[2] * headPositionDelta.z;
 		
@@ -15582,6 +15582,10 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 		if ( currentWeaponEnum != WEAPON_ARTIFACT && currentWeaponEnum != WEAPON_SOULCUBE )
 		{
 			weapAxis = motionRotation.ToMat3() * weapAxis;
+		}
+		else
+		{
+			weapAxis = idAngles( 0.0f ,viewAngles.yaw , 0.0f).ToMat3();
 		}
 
 		//DebugCross( weapOrigin, weapAxis, colorYellow );
@@ -16594,6 +16598,7 @@ void idPlayer::CalculateRenderView()
 
 	static bool wasCinematic = false;
 	static idVec3 cinematicOffset = vec3_zero;
+	static float cineYawOffset = 0.0f;
 
 	static bool wasThirdPerson = false;
 	static idVec3 thirdPersonOffset = vec3_zero;
@@ -16626,22 +16631,18 @@ void idPlayer::CalculateRenderView()
 	// check if we should be drawing from a camera's POV
 	if ( !noclip && (gameLocal.GetCamera() || privateCameraView) )
 	{
+		
+		
 		// get origin, axis, and fov
 		if ( privateCameraView )
 		{
+								
 			privateCameraView->GetViewParms( renderView );
 		}
 		else
 		{
 			// Koz fixme this was in tmeks renderView->viewaxis = firstPersonViewAxis; shouldnt be needed, verify.
-			
 			gameLocal.GetCamera()->GetViewParms( renderView );
-
-			/*	if ( game->isVR && vr_interactiveCinematic.GetBool() ) // Koz cinematic
-			{
-			renderView->vieworg = firstPersonViewOrigin;
-			renderView->viewaxis = firstPersonViewAxis;
-			}*/
 		}
 		
 	}
@@ -16714,7 +16715,7 @@ void idPlayer::CalculateRenderView()
 		float yawOffset = commonVr->bodyYawOffset;
 
 	
-		if ( gameLocal.inCinematic )
+		if ( gameLocal.inCinematic || privateCameraView )
 		{
 			if ( wasCinematic == false )
 			{
@@ -16724,6 +16725,7 @@ void idPlayer::CalculateRenderView()
 				
 				commonVr->cinematicStartPosition = absolutePosition + (commonVr->trackingOriginOffset * idAngles( 0.0f, commonVr->trackingOriginYawOffset, 0.0f ).ToMat3());
 				
+				cineYawOffset = hmdAngles.yaw - yawOffset;
 				//commonVr->cinematicStartPosition.x = -commonVr->hmdTrackingState.HeadPose.ThePose.Position.z;
 				//commonVr->cinematicStartPosition.y = -commonVr->hmdTrackingState.HeadPose.ThePose.Position.x;
 				//commonVr->cinematicStartPosition.z = commonVr->hmdTrackingState.HeadPose.ThePose.Position.y;
@@ -16753,6 +16755,7 @@ void idPlayer::CalculateRenderView()
 		else
 		{
 			wasCinematic = false;
+			cineYawOffset = 0.0f;
 		}
 
 
@@ -16776,7 +16779,7 @@ void idPlayer::CalculateRenderView()
 				idQuat q1, q2;
 
 				q1 = angles.ToQuat();
-				q2 = idAngles( hmdAngles.pitch, hmdAngles.yaw - yawOffset, hmdAngles.roll ).ToQuat();
+				q2 = idAngles( hmdAngles.pitch, ( hmdAngles.yaw - yawOffset ) - cineYawOffset, hmdAngles.roll ).ToQuat();
 
 				angles = ( q2 * q1 ).ToAngles();
 			}

@@ -4305,7 +4305,7 @@ void RB_DrawView( const void* data, const int stereoEye )
 	// Koz vr right before the view is drawn, update the view with the latest pos/angles from the hmd
 	//Thanks to Leyland for idea & implementation
 	
-	if ( game->isVR && !cmd->viewDef->isSubview && !( gameLocal.inCinematic && vr_cinematics.GetInteger() == 2 )) // dont fix up if we are projecting the cinematic into space or if this is a subview ( security cam etc. )
+	if ( game->isVR && ( !cmd->viewDef->isSubview || cmd->viewDef->isMirror ) && !( gameLocal.inCinematic && vr_cinematics.GetInteger() == 2 )) // dont fix up if we are projecting the cinematic into space or if this is a subview ( security cam etc. )
 	{
 			
 		static idVec3 hmdPosDelta = vec3_zero;

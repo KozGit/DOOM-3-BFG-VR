@@ -362,12 +362,14 @@ void idProjectile::Launch( const idVec3& start, const idVec3& dir, const idVec3&
 	{
 
 		idPlayer* player = static_cast<idPlayer*>(owner.GetEntity());
-
-		if ( player->weapon )
+		if ( player )
 		{
-			if ( player->weapon->IdentifyWeapon() == WEAPON_HANDGRENADE )
+			if ( player->weapon )
 			{
-				speed = player->throwVelocity * vr_throwPower.GetFloat();
+				if ( player->weapon->IdentifyWeapon() == WEAPON_HANDGRENADE )
+				{
+					speed = player->throwVelocity * vr_throwPower.GetFloat();
+				}
 			}
 		}
 	}

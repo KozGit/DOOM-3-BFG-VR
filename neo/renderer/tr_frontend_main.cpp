@@ -266,9 +266,12 @@ static void R_SortDrawSurfs( drawSurf_t** drawSurfs, const int numDrawSurfs )
 	assert( numDrawSurfs <= 0xFFFF );
 	for( int i = 0; i < numDrawSurfs; i++ )
 	{
-		float sort = SS_POST_PROCESS - drawSurfs[i]->sort;
-		//Carl: This assertion is no longer true, because we're adding 1000 to some sort values
-		//assert( sort >= 0.0f );
+		// koz sort values for 3d guis were flagged by adding 1000 to the sort value, so cancel out to sort correctly.
+		float guiSort = drawSurfs[i]->sort >= 1000 ? ( 1.0f - ( drawSurfs[i]->sort - 1000) ) : drawSurfs[i]->sort;
+				
+		float sort = SS_POST_PROCESS - guiSort; // koz drawSurfs[i]->sort;
+		
+		assert( sort >= 0.0f );
 		
 		uint64 dist = 0;
 		if( drawSurfs[i]->frontEndGeo != NULL )

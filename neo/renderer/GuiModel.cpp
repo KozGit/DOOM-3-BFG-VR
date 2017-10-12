@@ -146,6 +146,8 @@ void idGuiModel::EmitSurfaces( float modelMatrix[16], float modelViewMatrix[16],
 	// add the surfaces to this view
 	for( int i = 0; i < surfaces.Num(); i++ )
 	{
+		
+		
 		// koz fixme const guiModelSurface_t& guiSurf = surfaces[i];
 		guiModelSurface_t& guiSurf = surfaces[i];
 		if( guiSurf.numIndexes == 0 )
@@ -154,6 +156,9 @@ void idGuiModel::EmitSurfaces( float modelMatrix[16], float modelViewMatrix[16],
 		}
 		
 		const idMaterial* shader = guiSurf.material;
+		
+		// common->Printf( "Emitting surface %s %d indexes %d cr\n", shader->GetName(), guiSurf.numIndexes, shader->ConstantRegisters() != NULL ? 1 : 0 );
+		
 		drawSurf_t* drawSurf = ( drawSurf_t* )R_FrameAlloc( sizeof( *drawSurf ), FRAME_ALLOC_DRAW_SURFACE );
 		
 		drawSurf->numIndexes = guiSurf.numIndexes;
@@ -194,7 +199,7 @@ void idGuiModel::EmitSurfaces( float modelMatrix[16], float modelViewMatrix[16],
 			// ideally could define depth per surface in gui definition, but would be really time consuming,
 			// maybe should at least add a depth parm to the gui materials that could be referenced here? 
 			
-			if ( game->isVR && drawSurf->sort == SS_GUI && vr_3dgui.GetBool() )
+			if ( game->isVR && drawSurf->sort == SS_GUI && vr_3dgui.GetBool() && !drawSurf->material->HasSubview() )
 			{
 				
 				if ( strstr( guiSurf.material->GetName(), "bg" ) || strstr( guiSurf.material->GetName(), "spin" ) || strstr( guiSurf.material->GetName(), "glasscrack2" ) )   // bg is normally a background image. spinny things are also normally background images.
@@ -207,7 +212,7 @@ void idGuiModel::EmitSurfaces( float modelMatrix[16], float modelViewMatrix[16],
 				}
 				else
 				{
-					guiSurf.stereoType = STEREO_DEPTH_TYPE_NONE; // Koz was STEREO_DEPTH_TYPE_IG_NEAR, but turns out my brilliant idea breaks subviews ( mirrors & security monitors etc ). Need to rethink this.
+					guiSurf.stereoType = STEREO_DEPTH_TYPE_NONE; // Koz was STEREO_DEPTH_TYPE_IG_NEAR, but can break subviews 
 				}
 			}
 			else if ( !allowFullScreenStereoDepth )  guiSurf.stereoType = STEREO_DEPTH_TYPE_NONE;

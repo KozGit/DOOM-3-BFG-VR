@@ -1577,6 +1577,16 @@ void idUsercmdGenLocal::CalcTorsoYawDelta()
 	if ( gameLocal.GetLocalPlayer() )
 	{
 		influenceLevel = gameLocal.GetLocalPlayer()->GetInfluenceLevel();
+
+		// for fucks sake this is now officially beyond ridiculous.
+		// Turns out the teleport sequences in delta labs are just private camera views of the 'hell tunnel'
+		// which are meshes built off in the corner of the level.  No player influece is set, and if the torso is 
+		// updated here, it screws up the view rendering the teleport sequence. 
+		if ( gameLocal.GetLocalPlayer()->GetPrivateCameraView() )
+		{
+			// bail if the teleport camera is active.
+			if ( strstr( gameLocal.GetLocalPlayer()->GetPrivateCameraView()->GetName(), "teleportView" ) ) return;
+		}
 	}
 
 	if ( influenceLevel == 0 && !gameLocal.inCinematic && commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && (abs( cmd.forwardmove ) < .1 || abs( cmd.rightmove ) < .1) )
