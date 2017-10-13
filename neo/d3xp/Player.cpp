@@ -2172,6 +2172,8 @@ void idPlayer::Init()
 	
 	
 	InitTeleportTarget();
+
+	aasState = 0;
 	// Koz end
 
 }
@@ -3741,6 +3743,8 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	vr_weaponSight.SetModified(); // make sure these get initialized properly
 	vr_headingBeamMode.SetModified();
 	
+	aasState = 0;
+
 	// Koz end
 
 }
@@ -10405,7 +10409,7 @@ void idPlayer::AdjustBodyAngles()
 idPlayer::SetAAS
 =====================
 */
-void idPlayer::SetAAS()
+void idPlayer::SetAAS( bool forceAAS48 )
 {
 	idStr use_aas;
 
@@ -10413,10 +10417,10 @@ void idPlayer::SetAAS()
 	gameLocal.Printf("Player AAS: use_aas = %s\n", use_aas.c_str());
 	aas = gameLocal.GetAAS(use_aas);
 	// Carl: use our own custom generated AAS specifically for player movement (teleporting).
-	if (!aas)
+	if (!aas && !forceAAS48 )
 		aas = gameLocal.GetAAS("aas_player");
 	// Every map has aas48, used for zombies and imps. It's close enough to player.
-	if (!aas)
+	if (!aas || forceAAS48 )
 		aas = gameLocal.GetAAS("aas48");
 	if (aas)
 	{
@@ -16714,13 +16718,53 @@ void idPlayer::CalculateRenderView()
 		idMat3 axis = renderView->viewaxis;
 		float yawOffset = commonVr->bodyYawOffset;
 
+
+
+
+
+		
+		// Koz
+		// cant believe I did this it's so ugly.
+		// In the final level, the player aas file for the map doesn't allow
+		// teleporting past the sarcophagus.
+		// This means the player can't use teleportation in the final battle.
+		// The standard AAS48 file allows teleportation around the hellhole / final
+		// fight, so check how far the player has descended in the level, and
+		// switch AAS files if below threshold.
+
+		// There is still a section of the level where the player will have to walk - 
+		// the path from the sarcophagus to where the floor drops, but this
+		// is the best I can do until I can figure out how to compile a better AAS
+		// file for the level and get rid of this mess.
+		
+		if ( strstr( commonLocal.GetCurrentMapName(), "game/hellhole" ) != 0 )
+		{
+			float pz = physicsObj.GetOrigin().z;
+
+			if ( pz < 1138.0f && aasState != 2 )
+			{
+				common->Printf( "Updating player AAS to aas48\n" );
+				SetAAS( true );
+				InitAASLocation();
+				aasState = 2;
+			}
+			else if ( aasState != 1 )
+			{
+				common->Printf( "Updating player AAS to aas_player\n" );
+				SetAAS();
+				InitAASLocation();
+				aasState = 1;
+			}
+		}
+
+
 	
 		if ( gameLocal.inCinematic || privateCameraView )
 		{
 			if ( wasCinematic == false )
 			{
 				wasCinematic = true;
-
+								
 				commonVr->cinematicStartViewYaw = hmdAngles.yaw + commonVr->trackingOriginYawOffset;
 				
 				commonVr->cinematicStartPosition = absolutePosition + (commonVr->trackingOriginOffset * idAngles( 0.0f, commonVr->trackingOriginYawOffset, 0.0f ).ToMat3());
@@ -16771,26 +16815,16 @@ void idPlayer::CalculateRenderView()
 			origin = origin + bodyAx[0] * headPositionDelta.x + bodyAx[1] * headPositionDelta.y + bodyAx[2] * headPositionDelta.z;
 
 			origin += commonVr->leanOffset;
-			
-			if ( 1 ) //gameLocal.inCinematic && vr_cinematics.GetInteger() == 1 )
-			{
 				
-				// Koz to do clean up later - added to allow cropped cinematics with original camera movements.
-				idQuat q1, q2;
+			// Koz to do clean up later - added to allow cropped cinematics with original camera movements.
+			idQuat q1, q2;
 
-				q1 = angles.ToQuat();
-				q2 = idAngles( hmdAngles.pitch, ( hmdAngles.yaw - yawOffset ) - cineYawOffset, hmdAngles.roll ).ToQuat();
+			q1 = angles.ToQuat();
+			q2 = idAngles( hmdAngles.pitch, ( hmdAngles.yaw - yawOffset ) - cineYawOffset, hmdAngles.roll ).ToQuat();
 
-				angles = ( q2 * q1 ).ToAngles();
-			}
-			else
-			{
-				angles.yaw += hmdAngles.yaw - yawOffset;    // add the current hmd orientation
-				angles.pitch += hmdAngles.pitch;
-				angles.roll += hmdAngles.roll;
-			}
+			angles = ( q2 * q1 ).ToAngles();
+
 			angles.Normalize180();
-
 
 			commonVr->lastHMDYaw = hmdAngles.yaw;
 			commonVr->lastHMDPitch = hmdAngles.pitch;
@@ -16877,6 +16911,8 @@ void idPlayer::CalculateRenderView()
 			}
 
 		}
+		
+		
 		
 
 		// Koz fixme pause - handle the PDA model if game is paused

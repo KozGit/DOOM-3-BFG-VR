@@ -2398,7 +2398,7 @@ bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first
 	// Carl: now for the hard part... we don't know how many bytes we need to read. The minimum is zero, the maximum is (num - minVariableDefaultsNum).
 	// All we know is, it's followed by a 4-byte hash, then a 4-byte integer between 0 and 3, then a 4-byte integer pointing to a valid string in the strings file.
 	// And we're not allowed to seek ahead or behind in the save file to check what's next.
-
+	
 	// This code will fail if: this is an old save and the first table name is longer than 255 characters or only 1 character long (highly unlikely) or missing
 	// OR there just happens to be a sequence of variables with these values: 0 0 0 (0 to 3) 0 0 (two bytes that match a string offset > 12 in the string file)
 	// The second problem is more likely. Perhaps we should reduce false positives by making sure the string is not a type?

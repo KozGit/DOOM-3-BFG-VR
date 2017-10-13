@@ -976,10 +976,10 @@ void idRestoreGame::ReadDecls( idStr& first_decl_string )
 			}
 			if( declName.IsEmpty() )
 			{
-				common->Printf("Empty, breaking.\n");
+				//common->Printf("Empty, breaking.\n");
 				break;
 			}
-			common->Printf("Decln # %d name %s\n", t, declName.c_str());
+			//common->Printf("Decln # %d name %s\n", t, declName.c_str());
 			declManager->FindType( ( declType_t )t, declName );
 		}
 	}

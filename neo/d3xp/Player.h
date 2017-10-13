@@ -1005,7 +1005,7 @@ private:
 	idVec3					handWeaponAttachertoWristJointOffset[2][32];
 	idVec3					handWeaponAttacherToDefaultOffset[2][32];
 	
-		
+	int						aasState;
 	// Koz end
 
 	bool					blink;
@@ -1153,7 +1153,7 @@ private:
 	void					SnapBodyToView(); // Koz align body to current view;
 	void					OrientHMDBody(); // Koz reset hmd/body orientations
 
-	void					SetAAS();
+	void					SetAAS( bool forceAAS48 = false );
 	void					InitAASLocation();
 	void					SetAASLocation();
 	void					Move();

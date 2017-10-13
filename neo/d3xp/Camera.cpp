@@ -452,7 +452,6 @@ void idCameraAnim::LoadAnim()
 		if ( parser.PeekTokenString( "pos" ) )
 		{
 			parser.ReadToken( &cutToken );
-			common->Printf( "String %s found\n",cutToken.c_str() );
 			parser.Parse1DMatrix( 3, cameraCuts[i].posNew.ToFloatPtr() );
 			cameraCuts[i].posOverride = true;
 		}
