@@ -66,17 +66,17 @@ windowDef Desktop
 		matcolor	1 ,1 ,1 ,0
 		visible	1
 
-		onTime 0 {
-			transition "matcolor" "1 1 1 0" "1 1 1 0.4" "500" ;
-		}
+	//	onTime 0 {
+	//		transition "matcolor" "1 1 1 0" "1 1 1 0.4" "500" ;
+	//	}
 
-		onTime 500 {
-			transition "matcolor" "1 1 1 0.4" "1 1 1 0" "500" ;
-		}
+	//	onTime 500 {
+	//		transition "matcolor" "1 1 1 0.4" "1 1 1 0" "500" ;
+	//	}
 
-		onTime 1000 {
-			resetTime "0" ;
-		}
+	//	onTime 1000 {
+	//		resetTime "0" ;
+	//	}
 
 	}
 	windowDef bg2
@@ -90,7 +90,8 @@ windowDef Desktop
 	windowDef ammovalue
 	{
 		text	"gui::player_ammo"
-		rect	20 ,-20 ,640 ,220
+		//rect	20 ,-20 ,640 ,220
+		rect	0 ,-20 ,640 ,220
 		forecolor	0.6 ,0.8 ,1 ,1
 		visible	1
 		textscale	6
@@ -166,7 +167,9 @@ windowDef Desktop
 	
 	windowDef healthFill
 	{
-		rect	0,90,86,("gui::player_health" * 3.0 )
+		//rect	0,90,86,( "gui::player_health" * 3.0 )
+		
+		rect	0, 390 - ( "gui::player_health" * 3.0 ),86, ( "gui::player_health" * 3.0 )
 		
 		windowDef healthFillBg
 		{
@@ -174,14 +177,16 @@ windowDef Desktop
 			background	"guis/assets/statwatch/statHealthFill"
 			//matcolor	0.6 ,0.9 ,1 ,0.3
 			
-			matcolor ( 2.0 * (1.0 -("gui::player_health" / 100.0 ))),("gui::player_health" / 50.0 ),  ("gui::player_healthb" ), 0.28 
+			matcolor ( 2.0 * ( 1.0 -( "gui::player_health" / 100.0 ))),( "gui::player_health" / 50.0 ),  ("gui::player_healthb" ), 0.28 
 						
 			visible		1
 		}
 	}
 	windowDef armorFill
 	{
-		rect	554,90,86,("gui::player_armor" * 3.0 )
+		//rect	554,90,86,( "gui::player_armor" * 3.0 )
+		
+		rect	554, 390 - ( "gui::player_armor" * 3.0 ), 86,( "gui::player_armor" * 3.0 )
 		
 		windowDef armorFillBg
 		{
@@ -189,7 +194,7 @@ windowDef Desktop
 			background	"guis/assets/statwatch/statArmorFill"
 			//matcolor	0.6 ,0.9 ,1 ,0.3
 			
-			matcolor ( 2.0 * (1.0 -("gui::player_armor" / 100.0 ))),("gui::player_armor" / 50.0 ), ("gui::player_armorb"), 0.28
+			matcolor ( 2.0 * ( 1.0 -( "gui::player_armor" / 100.0 ))),( "gui::player_armor" / 50.0 ), ("gui::player_armorb"), 0.28
 			
 			visible		1
 		}

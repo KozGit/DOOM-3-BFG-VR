@@ -15,7 +15,7 @@ gui/weapons/statwatch/background
 		Blend add
 		Map   guis/assets/statwatch/statbg2.tga
 		zeroclamp
-		rgb mguitable[ time *.3 ]
+		//rgb mguitable[ time *.3 ]
 	}
 } 
 
