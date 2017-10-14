@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Game_local.h"
 
-idCVar rollfix("rollfix", ".5", CVAR_FLOAT, "");
+idCVar rollfix("rollfix", "20", CVAR_FLOAT, "");
 idCVar rfx("rfx", "0", CVAR_FLOAT, "");
 idCVar rfy("rfy", "0", CVAR_FLOAT, "");
 idCVar rfz("rfz", "0", CVAR_FLOAT, "");
@@ -1463,9 +1463,10 @@ void idIK_Reach::Evaluate()
 				
 			if (commonVr->VR_USE_MOTION_CONTROLS)
 			{
-				commonVr->MotionControlGetHand(i, handP, handQ); // get the rotation of the hand controller
+				commonVr->MotionControlGetHand( i, handP, handQ ); // get the rotation of the hand controller
 
-				handOr = handQ.ToMat3();
+				
+				handOr = handQ.ToMat3() * idAngles( 0.0f, -commonVr->bodyYawOffset, 0.0f ).ToMat3();
 
 				gr = handOr[2]; // axis of the hand controller used for 'roll'
 				ma = -elbowAxis[i][2]; //axis of elbow joint ( forearm ) used to calculate roll difference from gr.
@@ -1488,8 +1489,9 @@ void idIK_Reach::Evaluate()
 				if (angle2 > 90) angle1 = -angle1;
 
 				// fix the roll a little to better align with the elbow joint.
-				angle1 = angle1 - 70.0f; 
-				angle1 = idMath::ClampFloat(-60.0f, 60.0f, angle1);
+				
+				angle1 = angle1 - 30.0f; 
+				angle1 = idMath::ClampFloat( -66.0f, 66.0f, angle1 );
 								
 				angle2 = angle1 * 0.3f; // roll the elbow 1/3 of the total roll.
 				angle1 -= angle2;
@@ -1511,9 +1513,9 @@ void idIK_Reach::Evaluate()
 
 			if (commonVr->VR_USE_MOTION_CONTROLS)
 			{
-				commonVr->MotionControlGetHand(i, handP, handQ); // get the rotation of the hand controller
+				commonVr->MotionControlGetHand( i, handP, handQ ); // get the rotation of the hand controller
 
-				handOr = handQ.ToMat3();
+				handOr = handQ.ToMat3() * idAngles( 0.0f, -commonVr->bodyYawOffset, 0.0f ).ToMat3();;
 
 				gr = handOr[2]; // axis of the hand controller used for 'roll'
 				ma = -elbowAxis[i][2]; //axis of elbow joint ( forearm ) used to calculate roll difference from gr.
@@ -1536,9 +1538,9 @@ void idIK_Reach::Evaluate()
 				if ( angle2 > 90 ) angle1 = -angle1;
 
 				// fix the roll a little to better align with the elbow joint.
-				angle1 = angle1 - 20.0f;// rollfix.GetFloat();
-				angle1 = idMath::ClampFloat(-70.0f, 75.0f, angle1);
-
+				angle1 = angle1 - 20.0f;
+				angle1 = idMath::ClampFloat( -66.0f, 66.0f, angle1 );
+				
 				angle2 = angle1 * 0.3f;  //roll the elbow 1/3 of the total roll.
 				angle1 -= angle2;
 

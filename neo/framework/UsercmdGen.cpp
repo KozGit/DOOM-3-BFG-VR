@@ -1718,6 +1718,7 @@ void idUsercmdGenLocal::CalcTorsoYawDelta()
 
 		viewangles[YAW] += cmdYaw;
 		commonVr->bodyYawOffset += cmdYaw;
+		commonVr->bodyYawOffset = idAngles(0.0f, commonVr->bodyYawOffset, 0.0f).Normalize180().yaw; 
 
 	}
 }
