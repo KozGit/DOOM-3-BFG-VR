@@ -3194,7 +3194,9 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		weapon_chaingun = 6;
 		weapon_handgrenade = 7;
 		weapon_plasmagun = 8;
-		weapon_bfg = 9;
+		weapon_plasmagun = 8;
+		weapon_rocketlauncher = 9;
+		weapon_bfg = 10;
 		weapon_flashlight_new = 17;
 	}
 	// Koz end

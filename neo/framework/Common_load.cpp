@@ -1095,6 +1095,14 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	commonVr->lastSaveTime = Sys_Milliseconds();
 	commonVr->wasSaved = true;
 	
+	/*
+	Koz ran into a stupid error. Game now searches 2 directories for saves ( to try to allow importing from other mods ). If there
+	are >31 save games, and you quicksave a game, it will not be in the enumerated list can't be loaded until the application is
+	restarted. Call session->OnMasterLocalUserSignin() here to re-enumerate, which keeps the newest files including the quicksave.
+	*/
+	session->OnMasterLocalUserSignin();
+
+
 	return true;
 }
 
