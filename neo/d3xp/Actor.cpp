@@ -2120,12 +2120,17 @@ bool idActor::UpdateAnimationControllers()
 		success = true;
 	}
 	
+	
+	// Koz changed this from running here
+	// to player::Think to smooth out arm IK movements
+	// when going up/down stairs.
+
 	// Koz vr arm ik
-	if ( game->isVR && armIK.IsInitialized() )
-	{
-		armIK.Evaluate();
-		success = true;
-	}
+	//if ( game->isVR && armIK.IsInitialized() )
+	//{
+	//	armIK.Evaluate();
+	//	success = true;
+	//}
 
 	return success;
 }

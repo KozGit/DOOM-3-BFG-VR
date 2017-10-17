@@ -13281,7 +13281,7 @@ void idPlayer::Think()
 	
 	// Koz
 	UpdateNeckPose();
-
+	
 	UpdateFocus(); // Koz move here update GUIs, Items, and character interactions.
 
 	UpdateFlashlight();
@@ -13436,6 +13436,9 @@ void idPlayer::Think()
 
 	if ( !g_stopTime.GetBool() ) //&& !commonVr->VR_GAME_PAUSED )  // Koz fixme pause in VR
 	{
+		
+		if ( armIK.IsInitialized() ) armIK.Evaluate();
+		
 		UpdateAnimation();
 		
 		Present();
@@ -17954,6 +17957,7 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 	
 	if( !gameLocal.inCinematic )
 	{
+		if ( armIK.IsInitialized() ) armIK.Evaluate();
 		UpdateAnimation();
 	}
 	
