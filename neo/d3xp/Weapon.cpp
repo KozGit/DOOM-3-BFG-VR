@@ -840,6 +840,9 @@ void idWeapon::Restore( idRestoreGame* savefile )
 
 	// gui for stats device on player wrist in VR. 
 	vrStatGui = uiManager->FindGui( "guis/weapons/vrstatgui.gui", true, false, true );
+	
+	scale = 1.0f; // koz code to scale weapon models in the world borks the viewmodel when loading quick or autosaves, so make sure scale is correct here.
+	
 	// Koz end
 }
 
@@ -3422,6 +3425,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	// set the physics position and orientation
 
 	
+
 	GetPhysics()->SetOrigin( viewWeaponOrigin );
 	GetPhysics()->SetAxis( viewWeaponAxis );
 
