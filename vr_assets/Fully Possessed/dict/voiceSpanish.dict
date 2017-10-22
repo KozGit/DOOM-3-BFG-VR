@@ -1,5 +1,10 @@
 numActions 29
 
+//Para usar voces en Español, renombra el "voice.dict" a "voiceEnglish.dict"
+//y renombra "voiceSpanish.dict" a "voice.dict"
+//In order to use Spanish Voices, rename your "voice.dict" to "voiceEnglish.dict"
+//and rename "voiceSpanish.dict" to "voice.dict"
+
 // these strings in quotes can be changed to localize these phrases if needed.
 // the 6 phrases must be all be present and listed in this order.
 
@@ -22,35 +27,38 @@ action {
 action {
 	
 	name LISTENSTART
-	entries 3
+	entries 4
 	
 	"start listening"
 	"consecution"
 	"empieza a escuchar"
+	"te escucho"
 }
 
 action {
 	
 	name LISTENSTOP
-	entries 3
+	entries 4
 	
 	"stop listening"
 	"consentient"
 	"deja de escuchar"
+	"para de escuchar"
 }
 
 action {
 
 	name PAUSE
-	entries 2
+	entries 3
 	"pause game"
 	"computer, freeze program"
+	"pausar partida"
 }
 
 action {
 
 	name RESUME
-	entries 6
+	entries 7
 	
 	"resume game"
 	"unpause game"
@@ -58,24 +66,26 @@ action {
 	"computer, play program"
 	"computer, run program"
 	"computer, continue program"
+	"continuar partida"
 }
 
 action {
 
 	name EXIT
-	entries 5
+	entries 6
 	
 	"exit game"
 	"computer, end program"
 	"computer, exit"
 	"computer, program complete"
 	"computer, cancel program"
+	"abandonar juego"
 }
 
 action {
 
 	name TALK
-	entries 9
+	entries 10
 	
 	"hey"
 	"talk"
@@ -86,6 +96,7 @@ action {
 	"hola"
 	"habla"
 	"dime"
+	"adios"
 }
 
 action {
@@ -157,13 +168,15 @@ action {
 action {
 
 	name FIST
-	entries 5
+	entries 7
 	
 	"fist"
 	"fists"
 	"hands"
 	"puño"
+	"puños"
 	"mano"
+	"manos"
 }
 
 action {
@@ -227,20 +240,21 @@ action {
 action {
 
 	name SUPERSHOTGUN
-	entries 6
+	entries 7
 	
 	"super shotgun"
 	"double barreled shotgun"
 	"double barrel shotgun"
 	"combat shotgun"
 	"super escopeta"
+	"superescopeta"
 	"escopeta de combate"
 }
 
 action {
 
 	name MACHINEGUN
-	entries 6
+	entries 7
 	
 	"machine gun"
 	"enforcer"
@@ -248,12 +262,13 @@ action {
 	"M G 88 enforcer"
 	"M G"
 	"ametralladora"
+	"metralleta"
 }
 
 action {
 
 	name CHAINGUN
-	entries 9
+	entries 10
 	
 	"chain gun"
 	"mach 2 chain gun"
@@ -262,6 +277,7 @@ action {
 	"mini gun"
 	"gatling gun"
 	"super ametralladora"
+	"superametralladora"
 	"rotativa"
 	"cañon de cadena"
 }
@@ -269,10 +285,11 @@ action {
 action {
 
 	name ROCKETLAUNCHER
-	entries 2
+	entries 3
 	
 	"rocket launcher"
-	"lanza cohetes"
+	"lanzacohetes"
+	"lanzamisiles"
 }
 
 action {
@@ -294,7 +311,7 @@ action {
 	"plasma gun"
 	"plasma rifle"
 	"rifle de plasma"
-	" plasma"
+	"plasma"
 }
 
 action {
@@ -315,11 +332,12 @@ action {
 action {
 
 	name SOULCUBE
-	entries 3
+	entries 4
 	
 	"soul cube"
 	"cubo de almas"
 	"cubo de las almas"
+	"almas"
 }
 
 action {
@@ -335,6 +353,3 @@ action {
 	"corazon del infierno"
 	"piedra de sangre"
 }
-
-	
-	
