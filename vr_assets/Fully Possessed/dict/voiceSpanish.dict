@@ -1,8 +1,9 @@
 numActions 29
 
-//Para usar voces en Español, renombra el "voice.dict" a "voiceEnglish.dict"
+//Para usar voces en Español (es decir, estas), renombra el "voice.dict" a "voiceEnglish.dict"
 //y renombra "voiceSpanish.dict" a "voice.dict"
-//In order to use Spanish Voices, rename your "voice.dict" to "voiceEnglish.dict"
+
+//In order to use Spanish Voices (aka this file), rename your "voice.dict" to "voiceEnglish.dict"
 //and rename "voiceSpanish.dict" to "voice.dict"
 
 // these strings in quotes can be changed to localize these phrases if needed.
@@ -353,3 +354,6 @@ action {
 	"corazon del infierno"
 	"piedra de sangre"
 }
+
+	
+	
