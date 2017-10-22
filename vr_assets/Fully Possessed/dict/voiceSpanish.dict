@@ -1,0 +1,340 @@
+numActions 29
+
+// these strings in quotes can be changed to localize these phrases if needed.
+// the 6 phrases must be all be present and listed in this order.
+
+available "Los comandos disponibles son:"
+npc "Puedes decir lo que quieras a los NPC's"
+cmds1 "Puedes usar comandos de voz o comandos del holodeck."
+cmds2 "Puedes usar comandos de voz, nombres de armas o comandos del holodeck."
+start "Empezó a escuchar."
+stop "Paró de escuchar."
+
+action {
+
+	name LIST
+	entries 2
+	
+	"what can I say"
+	"que puedo decir"
+}
+
+action {
+	
+	name LISTENSTART
+	entries 3
+	
+	"start listening"
+	"consecution"
+	"empieza a escuchar"
+}
+
+action {
+	
+	name LISTENSTOP
+	entries 3
+	
+	"stop listening"
+	"consentient"
+	"deja de escuchar"
+}
+
+action {
+
+	name PAUSE
+	entries 2
+	"pause game"
+	"computer, freeze program"
+}
+
+action {
+
+	name RESUME
+	entries 6
+	
+	"resume game"
+	"unpause game"
+	"computer, resume program"
+	"computer, play program"
+	"computer, run program"
+	"computer, continue program"
+}
+
+action {
+
+	name EXIT
+	entries 5
+	
+	"exit game"
+	"computer, end program"
+	"computer, exit"
+	"computer, program complete"
+	"computer, cancel program"
+}
+
+action {
+
+	name TALK
+	entries 9
+	
+	"hey"
+	"talk"
+	"hello"
+	"goodbye"
+	"greets"
+	"hey dickwad"
+	"hola"
+	"habla"
+	"dime"
+}
+
+action {
+
+	name MENU
+	entries 2
+	
+	"menu"
+	"system"
+}
+
+action {
+
+	name CANCEL
+	entries 2
+	
+	"cancel"
+	"cancela"
+}
+
+action {
+
+	name RESETVIEW
+	entries 4
+	
+	"reset view"
+	"recenter view"
+	"reset HMD orientation"
+	"reset HMD view"
+}
+
+action {
+
+	name STARTRUNNING
+	entries 2
+	
+	"start running"
+	"correr"
+}
+
+action {
+
+	name STOPRUNNING
+	entries 3
+	
+	"stop running"
+	"start walking"
+	"andar"
+}
+
+action {
+
+	name RELOAD
+	entries 2
+	
+	"reload"
+	"recargar"
+}
+
+action {
+
+	name PDA
+	entries 2
+	
+	"PDA"
+	"personal data assistant"
+}
+
+action {
+
+	name FIST
+	entries 5
+	
+	"fist"
+	"fists"
+	"hands"
+	"puño"
+	"mano"
+}
+
+action {
+
+	name CHAINSAW
+	entries 6
+	
+	"chainsaw"
+	"beaver tooth"
+	"beaver tooth chainsaw"
+	"mixom beaver tooth"
+	"mixom beaver tooth chainsaw"
+	"motosierra"
+}
+
+action {
+
+	name FLASHLIGHT
+	entries 4
+	
+	"flashlight"
+	"torch"
+	"linterna"
+	"luz"
+}
+
+action {
+
+	name GRABBER
+	entries 5
+	
+	"grabber"
+	"ionized plasma levitator"
+	"IPL unit"
+	"gravity gun"
+	"agarradera"
+}
+
+action {
+
+	name PISTOL
+	entries 3
+	
+	"pistol"
+	"pistola"
+	"pipa"
+}
+
+action {
+
+	name SHOTGUN
+	entries 5
+	
+	"shotgun"
+	"pump action shotgun"
+	"single barreled shotgun"
+	"single barrel shotgun"
+	"escopeta"
+}
+
+action {
+
+	name SUPERSHOTGUN
+	entries 6
+	
+	"super shotgun"
+	"double barreled shotgun"
+	"double barrel shotgun"
+	"combat shotgun"
+	"super escopeta"
+	"escopeta de combate"
+}
+
+action {
+
+	name MACHINEGUN
+	entries 6
+	
+	"machine gun"
+	"enforcer"
+	"M G 88"
+	"M G 88 enforcer"
+	"M G"
+	"ametralladora"
+}
+
+action {
+
+	name CHAINGUN
+	entries 9
+	
+	"chain gun"
+	"mach 2 chain gun"
+	"UAC Weapons division mach 2 chain gun"
+	"saw"
+	"mini gun"
+	"gatling gun"
+	"super ametralladora"
+	"rotativa"
+	"cañon de cadena"
+}
+
+action {
+
+	name ROCKETLAUNCHER
+	entries 2
+	
+	"rocket launcher"
+	"lanza cohetes"
+}
+
+action {
+
+	name GRENADE
+	entries 4
+	
+	"grenade"
+	"grenades"
+	"granada"
+	"granadas"
+}
+
+action {
+
+	name PLASMAGUN
+	entries 4
+	
+	"plasma gun"
+	"plasma rifle"
+	"rifle de plasma"
+	" plasma"
+}
+
+action {
+
+	name BFG
+	entries 8
+	
+	"BFG"
+	"BFG 9000"
+	"bio force gun"
+	"big fucking gun"
+	"big fragging gun"
+	"big freaking gun"
+	"biorifle"
+	"bio rifle"
+}
+
+action {
+
+	name SOULCUBE
+	entries 3
+	
+	"soul cube"
+	"cubo de almas"
+	"cubo de las almas"
+}
+
+action {
+
+	name ARTIFACT
+	entries 7
+	
+	"artifact"
+	"the artifact"
+	"heart of hell"
+	"blood stone"
+	"artefacto"
+	"corazon del infierno"
+	"piedra de sangre"
+}
+
+	
+	
