@@ -3,7 +3,6 @@ LINUX VR:
 cd neo
 mkdir build
 cd build
-#only compiles with C++89, so use gcc < 7. If you have more for example set CC=/usr/bin/gcc-5 CXX=/usr/bin/g++-5
 cmake -DCMAKE_BUILD_TYPE=Release .. #Debug asserts after intro video
 
 wine steam installation of doom3:
