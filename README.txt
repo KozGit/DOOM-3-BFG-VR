@@ -9,6 +9,7 @@ wine steam installation of doom3:
 cd steam/SteamApps/common/DOOM\ 3\ BFG\ Edition
 cp ~/DOOM-3-BFG-VR/neo/build/Doom3BFGVR .
 cp -ra ~/DOOM-3-BFG-VR/vr_assets/Fully\ Possessed/ .
+export MESA_GL_VERSION_OVERRIDE=4.5COMPAT MESA_GLSL_VERSION_OVERRIDE=450 #mesa needs to fake a compat profile. other drivers won't care about these variables
 ./Doom3BFGVR
 
 KNOWN ISSUES:
