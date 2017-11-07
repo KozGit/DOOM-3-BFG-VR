@@ -1,18 +1,23 @@
 LINUX VR:
 
-cd neo
-mkdir build
-cd build
-cmake -DCMAKE_BUILD_TYPE=Release .. #Debug asserts after intro video
+build the engine:
 
-wine steam installation of doom3:
-cd steam/SteamApps/common/DOOM\ 3\ BFG\ Edition
-cp ~/DOOM-3-BFG-VR/neo/build/Doom3BFGVR .
-cp -ra ~/DOOM-3-BFG-VR/vr_assets/Fully\ Possessed/ .
-export MESA_GL_VERSION_OVERRIDE=4.5COMPAT MESA_GLSL_VERSION_OVERRIDE=450 #mesa needs to fake a compat profile. other drivers won't care about these variables
-./Doom3BFGVR
+    cd neo
+    mkdir build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Release .. #Debug asserts after intro video
 
-KNOWN ISSUES:
+symlink binary + mod files to wine steam installation and run
+
+    cd steam/SteamApps/common/DOOM\ 3\ BFG\ Edition
+    ln -s ~/DOOM-3-BFG-VR/neo/build/Doom3BFGVR .
+    ln -s ~/DOOM-3-BFG-VR/vr_assets/Fully\ Possessed/ .
+    export MESA_GL_VERSION_OVERRIDE=4.5COMPAT MESA_GLSL_VERSION_OVERRIDE=450 #mesa needs to fake a compat profile
+    ./Doom3BFGVR
+
+Use enter (have to look at the menu?) and the keyboard to get past the menu and start a game
+
+KNOWN LINUX ISSUES:
 
 Controller buttons don't work
 
