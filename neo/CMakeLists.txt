@@ -1281,8 +1281,8 @@ if(MSVC)
 			
 	if(CMAKE_CL_64)
 		link_directories(
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/x64/Release/VS2013
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/x64/VS2013)
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/OculusSDK/LibOVR/Lib/Windows/x64/Release/VS2015
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/OculusSDK/LibOVR/Lib/Windows/x64/Debug/VS2015)
 						
 		set(LibOVR_LIBRARIES
 			libovr.lib
@@ -1290,8 +1290,8 @@ if(MSVC)
 					
 	else()
 		link_directories(
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/Win32/Release/VS2013
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Win32/VS2013)
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/OculusSDK/LibOVR/Lib/Windows/Win32/Release/VS2015
+				${CMAKE_CURRENT_SOURCE_DIR}/libs/OculusSDK/LibOVR/Lib/Windows/Win32/Debug/VS2015)
 					
 			set(LibOVR_LIBRARIES
 			libovr.lib

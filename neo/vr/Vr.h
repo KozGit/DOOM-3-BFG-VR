@@ -29,14 +29,14 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-#include "..\LibOVR\Include\OVR_CAPI.h"
-#include "..\LibOVR\Include\OVR_CAPI_GL.h"
+#include "..\libs\OculusSDK\LibOVR\Include\OVR_CAPI.h"
+#include "..\libs\OculusSDK\LibOVR\Include\OVR_CAPI_GL.h"
 #include "vr_hmd.h"
 #include "Voice.h"
 #include "FlickSync.h"
 #include "..\renderer\Framebuffer.h"
-#include "..\LibOVR\Include\OVR_CAPI_Audio.h"
-#include "..\libs\OpenVR\headers\openvr.h"
+#include "..\libs\OculusSDK\LibOVR\Include\OVR_CAPI_Audio.h"
+#include "..\libs\openvr\headers\openvr.h"
 
 
 #ifndef __VR_H__

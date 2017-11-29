@@ -6,8 +6,8 @@
 #include "vr.h"
 #include "renderer\tr_local.h"
 #include "sys\win32\win_local.h"
-#include "libs\LibOVR\Include\OVR_CAPI_GL.h"
-#include "libs\LibOVR\Include\Extras\OVR_Math.h"
+#include "libs\OculusSDK\LibOVR\Include\OVR_CAPI_GL.h"
+#include "libs\OculusSDK\LibOVR\Include\Extras\OVR_Math.h"
 
 idCVar zdist("zdist", "-2.9", CVAR_FLOAT, "");
 

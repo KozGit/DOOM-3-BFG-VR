@@ -11,7 +11,7 @@
 #include "d3xp\Game_local.h"
 #include "sys\win32\win_local.h"
 #include "d3xp\physics\Clip.h"
-#include "libs\LibOVR\Include\OVR_CAPI_GL.h"
+#include "libs\OculusSDK\LibOVR\Include\OVR_CAPI_GL.h"
 #include "..\renderer\Framebuffer.h"
 
 #define RADIANS_TO_DEGREES(rad) ((float) rad * (float) (180.0 / idMath::PI))
