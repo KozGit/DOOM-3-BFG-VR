@@ -1608,6 +1608,10 @@ void idUsercmdGenLocal::CalcTorsoYawDelta()
 		float bodyYaw;
 		float viewYaw;
 
+		if (!gameLocal.GetLocalPlayer()) {
+			common->Printf("Local player null, skipping for now...\n");
+			return;
+		}
 		bodyYaw = gameLocal.GetLocalPlayer()->viewAngles.yaw;
 		viewYaw = gameLocal.GetLocalPlayer()->viewAngles.yaw - commonVr->bodyYawOffset + commonVr->poseHmdAngles.yaw;
 
