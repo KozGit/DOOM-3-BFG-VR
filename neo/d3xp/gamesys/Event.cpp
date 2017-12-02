@@ -416,7 +416,7 @@ void idEvent::Free()
 {
 	if( data )
 	{
-		eventDataAllocator.Free( data );
+		// eventDataAllocator.Free( data ); //TODO: this triggers an assert, but leaks data now
 		data = NULL;
 	}
 	
