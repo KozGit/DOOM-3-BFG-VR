@@ -1080,6 +1080,31 @@ void idJoystickWin32::PostInputEvent( int inputDeviceNum, int event, int value, 
 		//common->Printf( "Pushing button K_R_STEAMVRTRIG y\n" );
 		PushButton( inputDeviceNum, K_R_STEAMVRTRIG, (value > range) );
 	}
+	else if (event == J_AXIS_LEFT_JS_STEAMVR_X)
+	{
+		//common->Printf( "Pushing button K_STEAMVR_LEFT_PAD x\n" );
+		PushButton(inputDeviceNum, K_STEAMVR_LEFT_JS_LEFT, (value < -range));
+		PushButton(inputDeviceNum, K_STEAMVR_LEFT_JS_RIGHT, (value > range));
+	}
+	else if (event == J_AXIS_LEFT_JS_STEAMVR_Y)
+	{
+		//common->Printf( "Pushing button K_STEAMVR_LEFT_PAD y\n" );
+		PushButton(inputDeviceNum, K_STEAMVR_LEFT_JS_UP, (value < -range));
+		PushButton(inputDeviceNum, K_STEAMVR_LEFT_JS_DOWN, (value > range));
+	}
+	else if (event == J_AXIS_RIGHT_JS_STEAMVR_X)
+	{
+		//common->Printf( "Pushing button K_STEAMVR_RIGHT_PAD x\n" );
+		PushButton(inputDeviceNum, K_STEAMVR_RIGHT_JS_LEFT, (value < -range));
+		PushButton(inputDeviceNum, K_STEAMVR_RIGHT_JS_RIGHT, (value > range));
+	}
+	else if (event == J_AXIS_RIGHT_JS_STEAMVR_Y)
+	{
+		//common->Printf( "Pushing button K_STEAMVR_RIGHT_PAD y\n" );
+		PushButton(inputDeviceNum, K_STEAMVR_RIGHT_JS_UP, (value < -range));
+		PushButton(inputDeviceNum, K_STEAMVR_RIGHT_JS_DOWN, (value > range));
+	}
+
 	// Koz end
 
 	if( event >= J_AXIS_MIN && event <= J_AXIS_MAX )
@@ -1275,14 +1300,20 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 
 					static uint32 triggerAxis[2] = {};
 					static uint32 padAxis[2] = {};
+					static uint32 jsAxis[2] = {};
 					static uint32 axisType;
 					static float triggerVal[2] = {};
 					static float padAxisX[2] = {};
 					static float padAxisY[2] = {};
+					static float jsAxisX[2] = {};
+					static float jsAxisY[2] = {};
 
 					static float padX = 0.0f;
 					static float padY = 0.0f;
 					static float trig = 0.0f;
+
+					static float jsX = 0.0f;
+					static float jsY = 0.0f;
 
 					static uint64_t	 oldButton[2] = {};
 					static uint32 lastPacketL = -1;
@@ -1312,9 +1343,13 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							{
 								triggerAxis[0] = axis;
 							}
-							if ( axisType == vr::k_eControllerAxis_TrackPad )
+							if ( axisType == vr::k_eControllerAxis_TrackPad)
 							{
 								padAxis[0] = axis;
+							}
+							if (axisType == vr::k_eControllerAxis_Joystick)
+							{
+								jsAxis[0] = axis;
 							}
 
 						}
@@ -1394,6 +1429,25 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							PostInputEvent( inputDeviceNum, J_AXIS_LEFT_STEAMVR_Y, -padY * 32767.0f );
 						}
 						
+						jsX = currentStateL.rAxis[jsAxis[0]].x;
+						jsY = currentStateL.rAxis[jsAxis[0]].y;
+
+						if (fabs(jsX) < vr_jsDeadzone.GetFloat()) jsX = 0.0f;
+						if (fabs(jsY) < vr_jsDeadzone.GetFloat()) jsY = 0.0f;
+
+						if (jsX != jsAxisX[0])
+						{
+							//common->Printf( "Posting input event left steamvr pad x value %f time %d\n", padX, Sys_Milliseconds() );
+							PostInputEvent(inputDeviceNum, J_AXIS_LEFT_JS_STEAMVR_X, jsX * 32767.0f);
+							jsAxisX[0] = jsX;
+						}
+
+						if (jsY != jsAxisY[0])
+						{
+							//common->Printf( "Posting input event left steamvr pad y value %f time %d\n", padY, Sys_Milliseconds() );
+							PostInputEvent(inputDeviceNum, J_AXIS_LEFT_JS_STEAMVR_Y, -jsY * 32767.0f);
+							jsAxisY[0] = jsY;
+						}
 						
 						if ( !defaultX ) padAxisX[0] = padX;
 						if ( !defaultY ) padAxisY[0] = padY;
@@ -1498,7 +1552,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 					
 					if ( rGood )
 					{
-						for ( int axis = 0; axis <= 4; axis++ )
+						for ( int axis = 0; axis < vr::k_unControllerStateAxisCount; axis++ )
 						{
 							axisType = vr::VRSystem()->GetInt32TrackedDeviceProperty( commonVr->rightControllerDeviceNo, (vr::ETrackedDeviceProperty) ((int)vr::Prop_Axis0Type_Int32 + axis) );
 							if ( axisType == vr::k_eControllerAxis_Trigger )
@@ -1508,6 +1562,10 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 							if ( axisType == vr::k_eControllerAxis_TrackPad )
 							{
 								padAxis[1] = axis;
+							}
+							if (axisType == vr::k_eControllerAxis_Joystick)
+							{
+								jsAxis[1] = axis;
 							}
 						}
 
@@ -1589,6 +1647,26 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 						padAxisX[1] = padX;
 						padAxisY[1] = padY;
 						
+						jsX = currentStateR.rAxis[jsAxis[1]].x;
+						jsY = currentStateR.rAxis[jsAxis[1]].y;
+
+						if (fabs(jsX) < vr_jsDeadzone.GetFloat()) jsX = 0.0f;
+						if (fabs(jsY) < vr_jsDeadzone.GetFloat()) jsY = 0.0f;
+
+						if (jsX != jsAxisX[1])
+						{
+							//common->Printf( "Posting input event left steamvr pad x value %f time %d\n", padX, Sys_Milliseconds() );
+							PostInputEvent(inputDeviceNum, J_AXIS_RIGHT_JS_STEAMVR_X, jsX * 32767.0f);
+							jsAxisX[1] = jsX;
+						}
+
+						if (jsY != jsAxisY[1])
+						{
+							//common->Printf( "Posting input event left steamvr pad y value %f time %d\n", padY, Sys_Milliseconds() );
+							PostInputEvent(inputDeviceNum, J_AXIS_RIGHT_JS_STEAMVR_Y, -jsY * 32767.0f);
+							jsAxisY[1] = jsY;
+						}
+
 						// process buttons ( appmenu, grip, trigger, touchpad pressed )
 						button = currentStateR.ulButtonPressed;
 
@@ -1692,7 +1770,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 				// Carl: There's never any reason not to recognise button presses or joysticks from Touch controllers.
 				// Touch controllers will turn themselves off if not in use, and send no buttons.
 				// And Touch controllers were cleverly designed so if you place them on a flat surface, no buttons are bumped.
-
+#ifdef OVR
 				if ( commonVr->hasOculusRift ) // was ( commonVr->VR_USE_MOTION_CONTROLS && commonVr->motionControlType == MOTION_OCULUS )
 				{
 
@@ -1820,6 +1898,7 @@ int idJoystickWin32::PollInputEvents( int inputDeviceNum )
 												
 					}
 				}
+#endif
 			} // end if inputdeviceno == 0
 		}
 	return numEvents;

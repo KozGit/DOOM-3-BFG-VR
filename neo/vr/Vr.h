@@ -513,6 +513,7 @@ extern idCVar	vr_offHandPosY;
 extern idCVar	vr_offHandPosZ;
 
 extern idCVar	vr_padDeadzone;
+extern idCVar	vr_jsDeadzone;
 extern idCVar	vr_padToButtonThreshold;
 extern idCVar	vr_knockBack;
 extern idCVar	vr_jumpBounce;

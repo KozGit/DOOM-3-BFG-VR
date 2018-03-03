@@ -1130,7 +1130,11 @@ float idUsercmdGenLocal::MapAxis( idVec2 &mappedMove, idVec2 &mappedLook, int ax
 														K_STEAMVR_RIGHT_PAD_LEFT,	K_STEAMVR_RIGHT_PAD_RIGHT,
 														K_STEAMVR_RIGHT_PAD_UP,		K_STEAMVR_RIGHT_PAD_DOWN,
 														K_L_STEAMVRTRIG,			K_L_STEAMVRTRIG,
-														K_R_STEAMVRTRIG,			K_R_STEAMVRTRIG
+														K_R_STEAMVRTRIG,			K_R_STEAMVRTRIG,
+														K_STEAMVR_LEFT_JS_LEFT,		K_STEAMVR_LEFT_JS_RIGHT,
+														K_STEAMVR_LEFT_JS_UP,		K_STEAMVR_LEFT_JS_DOWN,
+														K_STEAMVR_RIGHT_JS_LEFT,	K_STEAMVR_RIGHT_JS_RIGHT,
+														K_STEAMVR_RIGHT_JS_UP,		K_STEAMVR_RIGHT_JS_DOWN,
 	};
 
 	float jaxisValue = 0.0f;
@@ -1405,6 +1409,11 @@ void idUsercmdGenLocal::JoystickMove2()
 		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_LEFT_STEAMVR_Y );
 		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_STEAMVR_X );
 		comfortTurn += MapAxis( mappedMove, mappedLook, AXIS_RIGHT_STEAMVR_Y );
+
+		comfortTurn += MapAxis(mappedMove, mappedLook, AXIS_LEFT_JS_STEAMVR_X);
+		comfortTurn += MapAxis(mappedMove, mappedLook, AXIS_LEFT_JS_STEAMVR_Y);
+		comfortTurn += MapAxis(mappedMove, mappedLook, AXIS_RIGHT_JS_STEAMVR_X);
+		comfortTurn += MapAxis(mappedMove, mappedLook, AXIS_RIGHT_JS_STEAMVR_Y);
 
 		//common->Printf( "Openvr mappedmove x %f y %f mappedLook x %f y %f : time %d\n", mappedMove.x, mappedMove.y, mappedLook.x, mappedLook.y, Sys_Milliseconds() );
 		if ( comfortTurn != 0.0 && ( Sys_Milliseconds() - lastComfortTimeSteamVr >= vr_comfortRepeat.GetInteger()) )

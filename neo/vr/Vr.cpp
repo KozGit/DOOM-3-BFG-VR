@@ -144,7 +144,8 @@ idCVar vr_shakeAmplitude( "vr_shakeAmplitude", "1.0", CVAR_FLOAT | CVAR_ARCHIVE,
 
 idCVar vr_controllerStandard( "vr_controllerStandard", "0", CVAR_INTEGER | CVAR_ARCHIVE, "If 1, use standard controller, not motion controllers\nRestart after changing\n" );
 
-idCVar vr_padDeadzone( "vr_padDeadzone", ".25", CVAR_FLOAT | CVAR_ARCHIVE, "Deadzone for steam pads.\n 0.0 = no deadzone 1.0 = dead\n" );
+idCVar vr_padDeadzone("vr_padDeadzone", ".25", CVAR_FLOAT | CVAR_ARCHIVE, "Deadzone for steam pads.\n 0.0 = no deadzone 1.0 = dead\n");
+idCVar vr_jsDeadzone("vr_jsDeadzone", ".25", CVAR_FLOAT | CVAR_ARCHIVE, "Deadzone for steam joysticks.\n 0.0 = no deadzone 1.0 = dead\n");
 idCVar vr_padToButtonThreshold( "vr_padToButtonThreshold", ".7", CVAR_FLOAT | CVAR_ARCHIVE, "Threshold value for pad contact\n to register as button press\n .1 high sensitiveity thru\n .99 low sensitivity" );
 idCVar vr_knockBack( "vr_knockBack", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Enable damage knockback in VR. 0 = Disabled, 1 = Enabled" );
 idCVar vr_jumpBounce( "vr_jumpBounce", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Enable view bounce after jumping. 0 = Disabled, 1 = Full", 0.0f, 1.0f ); // Carl
@@ -250,6 +251,8 @@ void SwapWeaponHand()
 		for (int k = K_TOUCH_LEFT_STICK_UP; k <= K_TOUCH_LEFT_STICK_RIGHT; k++)
 			SwapBinding(k, k + 4);
 		for (int k = K_STEAMVR_LEFT_PAD_UP; k <= K_STEAMVR_LEFT_PAD_RIGHT; k++)
+			SwapBinding(k, k + 4);
+		for (int k = K_STEAMVR_LEFT_JS_UP; k <= K_STEAMVR_LEFT_JS_RIGHT; k++)
 			SwapBinding(k, k + 4);
 	}
 }

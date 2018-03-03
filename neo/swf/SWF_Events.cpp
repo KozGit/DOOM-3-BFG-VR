@@ -377,7 +377,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 		default for menu navigation.
 		====================================*/
 
-		const keyNum_t joyAxisSwap[12][2] = {	K_JOY_STICK2_UP, K_JOY_STICK1_UP,
+		const keyNum_t joyAxisSwap[16][2] = {	K_JOY_STICK2_UP, K_JOY_STICK1_UP,
 												K_JOY_STICK2_DOWN, K_JOY_STICK1_DOWN,
 												K_JOY_STICK2_LEFT, K_JOY_STICK1_LEFT,
 												K_JOY_STICK2_RIGHT, K_JOY_STICK1_RIGHT,
@@ -388,8 +388,11 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 												K_STEAMVR_RIGHT_PAD_UP, K_STEAMVR_LEFT_PAD_UP,
 												K_STEAMVR_RIGHT_PAD_DOWN, K_STEAMVR_LEFT_PAD_DOWN,
 												K_STEAMVR_RIGHT_PAD_LEFT, K_STEAMVR_LEFT_PAD_LEFT,
-												K_STEAMVR_RIGHT_PAD_RIGHT, K_STEAMVR_LEFT_PAD_RIGHT
-
+												K_STEAMVR_RIGHT_PAD_RIGHT, K_STEAMVR_LEFT_PAD_RIGHT,
+												K_STEAMVR_RIGHT_JS_UP, K_STEAMVR_LEFT_JS_UP,
+												K_STEAMVR_RIGHT_JS_DOWN, K_STEAMVR_LEFT_JS_DOWN,
+												K_STEAMVR_RIGHT_JS_LEFT, K_STEAMVR_LEFT_JS_LEFT,
+												K_STEAMVR_RIGHT_JS_RIGHT, K_STEAMVR_LEFT_JS_RIGHT
 											}; // will map right sticks to left sticks for nav 
 
 
@@ -432,7 +435,9 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 						keyValue == K_JOY_STICK1_LEFT ||
 						keyValue == K_JOY_STICK2_LEFT ||
 						keyValue == K_STEAMVR_RIGHT_PAD_LEFT ||
-						keyValue == K_STEAMVR_LEFT_PAD_LEFT	) 
+						keyValue == K_STEAMVR_LEFT_PAD_LEFT	||
+						keyValue == K_STEAMVR_RIGHT_JS_LEFT ||
+						keyValue == K_STEAMVR_LEFT_JS_LEFT)
 					{
 						commonVr->forceLeftStick = true;
 					}
@@ -444,7 +449,9 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 						keyValue == K_JOY_STICK1_RIGHT ||
 						keyValue == K_JOY_STICK2_RIGHT ||
 						keyValue == K_STEAMVR_RIGHT_PAD_RIGHT ||
-						keyValue == K_STEAMVR_LEFT_PAD_RIGHT )
+						keyValue == K_STEAMVR_LEFT_PAD_RIGHT ||
+						keyValue == K_STEAMVR_RIGHT_JS_RIGHT ||
+						keyValue == K_STEAMVR_LEFT_JS_RIGHT)
 					{
 						commonVr->forceLeftStick = false;
 					}
@@ -460,7 +467,7 @@ bool idSWF::HandleEvent( const sysEvent_t* event )
 				destAxis = rightStick;
 			}
 
-			for ( int j = 0; j < 12; j++ ) 
+			for ( int j = 0; j < 16; j++ ) 
 			{ // swap the axis if needed
 				if ( joyAxisSwap[j][sourceAxis] == keyValue ) keyValue = joyAxisSwap[j][destAxis];
 			}
