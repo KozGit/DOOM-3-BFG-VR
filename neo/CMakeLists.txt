@@ -1280,22 +1280,22 @@ if(MSVC)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/include)
 			
 	if(CMAKE_CL_64)
-		link_directories(
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/x64/Release/VS2013
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/x64/VS2013)
-						
-		set(LibOVR_LIBRARIES
-			libovr.lib
-			ws2_32.lib)
+		#link_directories(
+		#		${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/x64/Release/VS2013
+		#		${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/x64/VS2013)
+		#				
+		#set(LibOVR_LIBRARIES
+		#	libovr.lib
+		#	ws2_32.lib)
 					
 	else()
-		link_directories(
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/Win32/Release/VS2013
-				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Win32/VS2013)
-					
-			set(LibOVR_LIBRARIES
-			libovr.lib
-			ws2_32.lib)
+		#link_directories(
+		#		${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/Win32/Release/VS2013
+		#		${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Win32/VS2013)
+		#			
+		#	set(LibOVR_LIBRARIES
+		#	libovr.lib
+		#	ws2_32.lib)
 		
 	endif()
 		

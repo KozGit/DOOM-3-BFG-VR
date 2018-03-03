@@ -209,8 +209,13 @@ bulk of the codebase, so it is the best place for analyze pragmas.
 
 
 // checking format strings catches a LOT of errors
+#if _MSC_VER < 1700
 #include <CodeAnalysis\SourceAnnotations.h>
 #define	VERIFY_FORMAT_STRING	[SA_FormatString(Style="printf")]
+#else
+#define VERIFY_FORMAT_STRING
+#endif
+
 // DG: alternative for GCC with attribute (NOOP for MSVC)
 #define ID_STATIC_ATTRIBUTE_PRINTF(STRIDX, FIRSTARGIDX)
 

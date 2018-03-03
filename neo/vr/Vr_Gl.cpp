@@ -6,8 +6,10 @@
 #include "vr.h"
 #include "renderer\tr_local.h"
 #include "sys\win32\win_local.h"
+#ifdef OVR
 #include "libs\LibOVR\Include\OVR_CAPI_GL.h"
 #include "libs\LibOVR\Include\Extras\OVR_Math.h"
+#endif
 
 idCVar zdist("zdist", "-2.9", CVAR_FLOAT, "");
 
@@ -478,8 +480,6 @@ eye textures: idImage leftCurrent, rightCurrent
 
 void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent ) 
 {
-	using namespace OVR;
-
 	static int FBOW;
 	static int FBOH;
 
@@ -487,7 +487,9 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 
 
 	// final eye textures now in finalEyeImage[0,1]				
-	
+#ifdef OVR	
+	using namespace OVR;
+
 	if ( hasOculusRift )
 	{
 		static ovrLayerHeader	*layers = &oculusLayer.Header;
@@ -672,6 +674,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 
 	}
 	else // openVR
+#endif
 	{
 		vr::Texture_t leftEyeTexture = { (void*)leftCurrent->GetTexNum(), vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 		vr::VRCompositor()->Submit( vr::Eye_Left, &leftEyeTexture );
@@ -713,8 +716,6 @@ quad textures: idImage leftCurrent, rightCurrent
 
 bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 {
-	using namespace OVR;
-
 	static int FBOW;
 	static int FBOH;
 
@@ -722,6 +723,9 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 
 
 	// final eye textures now in finalEyeImage[0,1]				
+
+#ifdef OVR
+	using namespace OVR;
 
 	if ( hasOculusRift )
 	{
@@ -918,6 +922,7 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 		return true;
 	}
 	else // openVR
+#endif
 	{
 		return false;
 	}

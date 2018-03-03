@@ -29,13 +29,10 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-#include "..\LibOVR\Include\OVR_CAPI.h"
-#include "..\LibOVR\Include\OVR_CAPI_GL.h"
 #include "vr_hmd.h"
 #include "Voice.h"
 #include "FlickSync.h"
 #include "..\renderer\Framebuffer.h"
-#include "..\LibOVR\Include\OVR_CAPI_Audio.h"
 #include "..\libs\OpenVR\headers\openvr.h"
 
 
@@ -176,7 +173,9 @@ public:
 	int					frameCount;
 		
 	double				sensorSampleTime;
+#ifdef OVR
 	ovrPosef            EyeRenderPose[2];
+#endif
 
 	ovrPosef			handPose[2];
 
@@ -225,10 +224,12 @@ public:
 	bool				hasHMD;
 	bool				hasOculusRift;
 
+#ifdef OVR
 	ovrSession			hmdSession;
 	ovrGraphicsLuid		ovrLuid;
 
 	ovrHmdDesc			hmdDesc;
+#endif
 
 	bool				m_bDebugOpenGL;
 	bool				m_bVerbose;
@@ -270,7 +271,7 @@ public:
 	float				hmdPixelScale;
 	float				hmdAspect;
 	hmdEye_t			hmdEye[2];
-	
+
 	float				VRScreenSeparation; // for Reduce FOV motion sickness fix
 
 	float				officialIPD;
@@ -282,6 +283,7 @@ public:
 	idImage*			hmdEyeImage[2];
 	idImage*			hmdCurrentRender[2];
 
+#ifdef OVR
 	ovrTextureSwapChain oculusSwapChain[2];
 
 	GLuint				oculusFboId;
@@ -300,6 +302,7 @@ public:
 	WCHAR				oculusGuidStr[OVR_AUDIO_MAX_DEVICE_STR_SIZE];
 
 	ovrTrackingState	hmdTrackingState;
+#endif
 	idImage*			primaryFBOimage;
 	idImage*			resolveFBOimage;
 	idImage*			fullscreenFBOimage;

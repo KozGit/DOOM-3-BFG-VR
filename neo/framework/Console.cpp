@@ -1660,7 +1660,9 @@ void idConsoleLocal::Draw( bool forceFullScreen )
 	// Enable the oculus performance hud
 	if ( vr_hmdPerfHud.IsModified() )
 	{
+#ifdef OVR
 		ovr_SetInt( commonVr->hmdSession, "PerfHudMode", vr_hmdPerfHud.GetInteger() );
+#endif
 		vr_hmdPerfHud.ClearModified();
 	}
 	// Koz end
