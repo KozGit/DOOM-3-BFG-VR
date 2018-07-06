@@ -51,7 +51,7 @@ If you have questions concerning this license or the applicable additional terms
 #if _MSC_VER < 1910
 #define WINVER				0x501
 #else
-#define WINVER				0xA00
+//#define WINVER				0xA00
 #endif
 
 #include <winsock2.h>
