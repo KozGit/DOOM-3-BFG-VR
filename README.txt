@@ -19,6 +19,7 @@ QuakeCon teleporting, Slow Mo and Tunnel vision motion sickness fixes: jckhng
 Spanish Voice Commands: TinoSM
 Windows Mixed Reality and VS2017 support: Mark Sheehan
 Additional VS2017 support: Bao Chi Tran Nguyen
+Linux support and buffer overrun fixes: Christoph Haag
 Originally inspired by: tmek
 
 DOOM-3-BFG-VR Readme - https://github.com/KozGit/DOOM-3-BFG-VR

@@ -85,6 +85,9 @@ void idMenuScreen_Shell_Credits::SetupCreditList()
 	creditList.Append( creditInfo_t( 0, "Mark Sheehan:" ) );
 	creditList.Append( creditInfo_t( 0, "    Windows Mixed Reality support. Visual Studio 2017 support." ) );
 	creditList.Append( creditInfo_t() );
+	creditList.Append( creditInfo_t( 0, "Christoph Haag:" ) );
+	creditList.Append( creditInfo_t( 0, "    Linux support, buffer overrun fixes." ) );
+	creditList.Append( creditInfo_t() );
 	creditList.Append( creditInfo_t( 0, "Bao Chi Tran Nguyen:" ) );
 	creditList.Append( creditInfo_t( 0, "    Additional Visual Studio 2017 support." ) );
 	creditList.Append( creditInfo_t() );
