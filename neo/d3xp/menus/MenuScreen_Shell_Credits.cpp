@@ -77,7 +77,16 @@ void idMenuScreen_Shell_Credits::SetupCreditList()
 	creditList.Append( creditInfo_t( 0, "    Holster slots, Crawl Space Head Collision, minor fixes." ) );
 	creditList.Append( creditInfo_t() );
 	creditList.Append( creditInfo_t( 0, "jckhng:" ) );
-	creditList.Append( creditInfo_t( 0, "    QuakeCon style teleporting. Slow Mo and Tunnel vision motion sickness fixes." ) );
+	creditList.Append( creditInfo_t( 0, "    Doom VFR style teleporting. Slow Mo and Tunnel vision motion sickness fixes." ) );
+	creditList.Append( creditInfo_t() );
+	creditList.Append( creditInfo_t( 0, "TinoSM:" ) );
+	creditList.Append( creditInfo_t( 0, "    Spanish voice commands." ) );
+	creditList.Append( creditInfo_t() );
+	creditList.Append( creditInfo_t( 0, "Mark Sheehan:" ) );
+	creditList.Append( creditInfo_t( 0, "    Windows Mixed Reality support. Visual Studio 2017 support." ) );
+	creditList.Append( creditInfo_t() );
+	creditList.Append( creditInfo_t( 0, "Bao Chi Tran Nguyen:" ) );
+	creditList.Append( creditInfo_t( 0, "    Additional Visual Studio 2017 support." ) );
 	creditList.Append( creditInfo_t() );
 	creditList.Append( creditInfo_t( 0, "tmek:" ) );
 	creditList.Append( creditInfo_t( 0, "    Original inspiration." ) );

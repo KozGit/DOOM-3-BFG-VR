@@ -16,6 +16,9 @@ VR Implementation: /u/Samson-
 Major Contributions - Teleportation, Voice Commands, Flicksync, Bink videos, Loading other savegames, code improvements: Carl Kenner
 Holster slots, Crawl Space Head Collision, minor fixes: Leyland
 QuakeCon teleporting, Slow Mo and Tunnel vision motion sickness fixes: jckhng
+Spanish Voice Commands: TinoSM
+Windows Mixed Reality and VS2017 support: Mark Sheehan
+Additional VS2017 support: Bao Chi Tran Nguyen
 Originally inspired by: tmek
 
 DOOM-3-BFG-VR Readme - https://github.com/KozGit/DOOM-3-BFG-VR
@@ -237,7 +240,33 @@ ___________________________________________________
 4) NEW FEATURES
 __________________________________________
 
+New in 0.23:
+	Spanish voice commands (to use, replace dict/voice.dict with dict/voiceSpanish.dict)
+
 New in 0.22:
+
+New in 0.21-Alpha-WMR (WMR Joystick support):
+	Windows Mixed Reality Joystick support
+
+	Doom VFR style teleport and jet-strafe
+	Added headshot damage multiplier vr_headshotMultiplier (defaults to 2.5x)
+	Improved arm and body inverse kinematics and leaning, body now automatically turns
+	Screen blanking if eye moved into a solid.
+	Additional cinematic modes (vr_cinematic : now three modes, immersive, cropped, and projected).
+	Added enhanced support for camera cuts to improve cutscenes in VR.
+	Added cvar adjustable choke to shotgun to tame pellet spread.
+	Added instant player acceleration/decelaration when using artifical movement vr_instantAccel
+	Improved FOV reduction border code for better stereo overlap.
+	Holster slot states now persist thru level transitions and game saves/loads.
+	Updated player models/anims with higher def hands, better hand poses on weapons,
+		and initial controller based finger poses. ( vr_useHandPoses )
+	Added optional push to talk button for voice commands
+	Fixed Hell tunnel teleport camera issue.
+	Fixed issue with artifact/soul cube weapon axis.
+	Teleporting now updates body orientation to direction of teleport.
+	Enable teleportation in final boss fight of standard campaign.
+	Fixed a few bugs with in-game GUIs.
+
 	Fix loading saved games from other versions and mods.
 	ATI / AMD graphics card support. ( Fix black menu screens ) 
 	Voice command for "fists" has changed to "weapon fists" to prevent false recognitions.
@@ -2137,11 +2166,14 @@ vr_hudNewItems 1 BOOL - Show new items acquired in Hud.
 
 vr_hudFlashlight 1 BOOL - Show flashlight in Hud.
 
-vr_hudLowHealth 0 INTEGER0 = Disable, otherwise force hud if heath below this value.
+vr_hudLowHealth 20 INTEGER = Disable, otherwise force hud if heath below this value.
 
 vr_voiceRepeat 0 BOOL - 1 = computer speaks back whatever commands or lines you say
 
 vr_voiceCommands 2 INTEGER - Enable voice commands. 0 = none, 1 = menus, 2 = menus and weapons
+
+vr_voicePushToTalk 0 BOOL - Push to Talk' button must be pressed before voice commands recognized
+				0 = disabled, 1 = enabled
 
 vr_talkWakeMonsters 1 INTEGER - Talking wakes monsters. 0 = no, 1 = both methods,
 				2 = like flashlight, 3 = like weapon.
@@ -2345,6 +2377,9 @@ vr_motionSickness 10 INTEGER - Motion sickness prevention aids. 0 = None,
 	
 vr_strobeTime 500 INTEGER - Time in ms between flashes when blacking screen. 0 = no strobe
 
+vr_instantAccel 1 BOOL - optional instant player acceleration/decelaration when using artifical
+			movement (to reduce motion sickness)
+
 timescale 1.0 FLOAT - game speed multiplier. Used by slow mo motion sickness fix. If 
 			there's an issue with it, you may need to set timescale 1
 			
@@ -2359,6 +2394,24 @@ vr_autoSwitchControllers 1 BOOL - Automatically switch to/from gamepad mode when
 			gamepad/motion controller. Should be true unless you're trying
 			to use both together, or you get false detections. 0 = no, 1 = yes.
 
+vr_headshotMultiplier 2.5 FLOAT - Add headshot damage multiplier for projectile weapons
+			with no splash damage (and fists). Damage inflicted by the fists, pistol,
+			shotgun, machinegun, chaingun, and plasmagun will be multiplied by this factor
+			when enemy is hit in the head. Multiplier only affects enemies who already had
+			a defined head damage zone with > 1 damage scale, so it does not affect most boss
+			monsters (cyberdemon, guardian, seekers, maledict and saboath). Also does not
+			affect the pinky, trite, tick, cacodemon and lost soul enemies. 1.0f thru 5.0f.
+			Setting cvar to 1.0 adds no additional damage.
+
+vr_shotgunChoke 0 FLOAT - This enables an optional 'choke' for the shotgun, by reducing the spread.
+			The shotgun is supposed to be a closeup weapon in the game, but the depth provided
+			in VR really changes how it feels. IMO, it seems underpowered unless you are on top of
+			an enemy, due to the extreme pellet spread.
+			% To choke shotgun. 0 = None, 100 = Full Choke
+
+vr_useHandPoses 0 BOOL - If using oculus touch, enable finger poses when hands are empty or in guis
+
+vr_cinematics 0 INTEGER - Cinematic type. 0 = Immersive, 1 = Cropped, 2 = Projected
 
 r_useShadowMapping 0 - Use soft shadow mapping instead of hard stencil shadows
 
@@ -2402,16 +2455,54 @@ __________________________________________________________
 3. Download and install the latest CMake, saying YES to adding CMake to your path.
 
 4. Generate the VC13 projects using CMake by doubleclicking a matching configuration .bat
-   file in the neo/ folder.
+   file in the neo/ folder. eg. cmake-vs2013-64bit.bat
 
-5. Go to https://developer.oculus.com/downloads/pc/1.9.0/Oculus_SDK_for_Windows/ then download
+5. (UPDATED) Go to https://developer.oculus.com/downloads/pc/1.17.0/Oculus_SDK_for_Windows/ then download
    and extract it somewhere. Copy the LibOVR folder to DOOM-3-BFG/neo/libs
 
 6. Clone the OpenVR git repository in another folder: https://github.com/ValveSoftware/openvr
-   If it's an incompatible later version, you may need to do a hard reset in git (from the log
+   It's probably an incompatible later version, so you need to do a hard reset in git (from the log
    in TortoiseGit) to the v1.0.5 version. Copy the openvr folder to DOOM-3-BFG/neo/libs
 
 7. Use the VC13 solution to compile what you need:
+	DOOM-3-BFG/build/Doom3BFGVR.sln
+	
+8. Download ffmpeg-20140405-git-ec8789a-win32-shared.7z from
+	ffmpeg.zeranoe.com/builds/win32/shared/2014
+
+9. Extract the FFmpeg DLLs to your current build directory under DOOM-3-BFG/build/
+
+10. In Visual Studio, right click project Doom3BFGVR, click Properties. Set Configuration to
+    All Configurations. Choose Debugging, set Command Arguments to:
+    +set fs_basepath "C:\Program Files (x86)\Steam\steamapps\common\DOOM 3 BFG Edition"
+    or wherever you installed Doom 3 BFG edition
+
+11. To create the installer, download and install NSIS. Build the release version in visual
+    studio. Right click on the installer.nsi file and choose Compile NSIS Script.
+
+___________________________________________________________________
+
+13) COMPILING ON WIN32 WITH VISUAL C++ 2017 (untested)
+__________________________________________________________
+
+1. Download and install the Visual C++ 2017
+
+2. You probably need to download and install the DirectX SDK (June 2010) here:
+	http://www.microsoft.com/en-us/download/details.aspx?id=6812
+
+3. Download and install the latest CMake, saying YES to adding CMake to your path.
+
+4. Generate the VC17 projects using CMake by doubleclicking cmake-vs2017-64bit.bat
+   in the neo/ folder.
+
+5. (UPDATED) Go to https://developer.oculus.com/downloads/pc/1.17.0/Oculus_SDK_for_Windows/ then
+   download and extract it somewhere. Copy the LibOVR folder to DOOM-3-BFG/neo/libs
+
+6. Clone the OpenVR git repository in another folder: https://github.com/ValveSoftware/openvr
+   It's probably an incompatible later version, so you need to do a hard reset in git (from the log
+   in TortoiseGit) to the v1.0.5 version. Copy the openvr folder to DOOM-3-BFG/neo/libs
+
+7. Use the VC17 solution to compile what you need:
 	DOOM-3-BFG/build/Doom3BFGVR.sln
 	
 8. Download ffmpeg-20140405-git-ec8789a-win32-shared.7z from
