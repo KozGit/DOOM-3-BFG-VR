@@ -60,13 +60,15 @@ This file contains the following sections:
 
 	12) COMPILING ON WIN32 WITH VISUAL C++ 2013 EXPRESS EDITION
 
-	13) COMPILING ON GNU/LINUX
+	13) COMPILING ON WIN32 WITH VISUAL C++ 2017
+
+	14) COMPILING ON LINUX
 	
-	14) BUG REPORTS
+	15) BUG REPORTS
 	
-	15) LICENSE
+	16) LICENSE
 	
-	16) CODE LICENSE EXCEPTIONS
+	17) CODE LICENSE EXCEPTIONS
 
 
 
@@ -83,7 +85,7 @@ Minimum system requirements:
 	System Memory: 8 GB
 	Graphics card: Nvidia Geforce GTX 960 or higher, with recent drivers
 	               or AMD 290 or above
-	OS: Windows 7 64 bit or above?
+	OS: Windows 7 64 bit or above? or Linux
 	VR: SteamVR compatible HMD or Oculus Rift DK2 or above
 	A microphone or HMD containing a microphone
 
@@ -2520,10 +2522,34 @@ __________________________________________________________
 
 __________________________________
 
-13) COMPILING ON GNU/LINUX
+14) COMPILING ON LINUX
 _________________________
 
-It probably doesn't compile on GNU/LINUX anymore. I don't have it to test. Sorry.
+LINUX VR:
+
+build the engine:
+
+    cd neo
+    mkdir build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Release .. #Debug asserts after intro video
+
+symlink binary + mod files to wine steam installation and run
+
+    cd steam/SteamApps/common/DOOM\ 3\ BFG\ Edition
+    ln -s ~/DOOM-3-BFG-VR/neo/build/Doom3BFGVR .
+    ln -s ~/DOOM-3-BFG-VR/vr_assets/Fully\ Possessed/ .
+    export MESA_GL_VERSION_OVERRIDE=4.5COMPAT MESA_GLSL_VERSION_OVERRIDE=450 #mesa needs to fake a compat profile
+    ./Doom3BFGVR
+
+Use enter (have to look at the menu?) and the keyboard to get past the menu and start a game
+
+KNOWN LINUX ISSUES:
+
+Controller buttons don't work
+
+
+*** The following instructions were for an older version of Doom 3 BFG and probably no longer apply.
 
 1. You need the following dependencies in order to compile Doom3BFGVR with all features:
  
@@ -2567,7 +2593,7 @@ It probably doesn't compile on GNU/LINUX anymore. I don't have it to test. Sorry
 
 ___________________________________________________
 
-14) BUG REPORTS
+15) BUG REPORTS
 __________________________________________
 
 DOOM-3-BFG VR: Fully Possessed is not perfect, it is not bug free just like all other software.
@@ -2602,7 +2628,7 @@ ALSA or configuring the network.
 	
 _______________________________
 
-15) LICENSE
+16) LICENSE
 ______________________
 
 
@@ -2617,7 +2643,7 @@ Suite 120, Rockville, Maryland 20850 USA.
 
 ____________________________________________________________________________________
 
-16) CODE LICENSE EXCEPTIONS - The parts that are not covered by the GPL:
+17) CODE LICENSE EXCEPTIONS - The parts that are not covered by the GPL:
 _______________________________________________________________________
 
 

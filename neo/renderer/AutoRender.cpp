@@ -28,10 +28,12 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
-#include "renderer\AutoRender.h"
+#include "renderer/AutoRender.h"
 #include "tr_local.h"
-#include "vr\Vr.h"
+#include "vr/Vr.h"
+#ifdef _WIN32
 #include "sys\win32\win_local.h"
+#endif
 
 const int AUTO_RENDER_STACK_SIZE = 256 * 1024;
 

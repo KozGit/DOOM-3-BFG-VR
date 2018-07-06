@@ -1353,8 +1353,9 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 							
 		// Koz end
 			
-
+#ifdef _WIN32
 		commonVoice->VoiceInit();
+#endif
 
 		if ( game->isVR )
 		{
@@ -2008,9 +2009,11 @@ bool idCommonLocal::ProcessEvent( const sysEvent_t* event )
 		{
 			if ( ButtonState( UB_IMPULSE19 ) )
 			{
+#ifdef _WIN32
 				void Sys_QueEvent( sysEventType_t type, int value, int value2, int ptrLength, void *ptr, int inputDeviceNum );
 				Sys_QueEvent( SE_KEY, K_ESCAPE, 1, 0, NULL, 0 );
 				send1 = true;
+#endif
 			}
 		}
 		else

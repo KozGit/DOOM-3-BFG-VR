@@ -487,7 +487,7 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 
 
 	// final eye textures now in finalEyeImage[0,1]				
-#ifdef USE_OVR	
+#ifdef USE_OVR
 	using namespace OVR;
 
 	if ( hasOculusRift )

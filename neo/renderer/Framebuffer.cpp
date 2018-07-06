@@ -32,8 +32,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "tr_local.h"
 #include "Framebuffer.h"
 
+#ifdef _WIN32
 #include "sys\win32\win_local.h"
-
+#endif
 
 //idList<Framebuffer*>	Framebuffer::framebuffers;
 
@@ -180,7 +181,9 @@ void Framebuffer::Bind()
 	{
 		glBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );
 		backEnd.glState.currentFramebuffer = this;
+#ifdef _WIN32 //TODO: does this break
 		wglSwapIntervalEXT( 0 );
+#endif
 	}
 }
 

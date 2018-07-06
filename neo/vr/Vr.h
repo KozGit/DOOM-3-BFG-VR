@@ -33,14 +33,15 @@ If you have questions concerning this license or the applicable additional terms
 #include "..\LibOVR\Include\OVR_CAPI.h"
 #include "..\LibOVR\Include\OVR_CAPI_GL.h"
 #endif
+
 #include "vr_hmd.h"
 #include "Voice.h"
 #include "FlickSync.h"
-#include "..\renderer\Framebuffer.h"
+#include "../renderer/Framebuffer.h"
 #ifdef USE_OVR
 #include "..\LibOVR\Include\OVR_CAPI_Audio.h"
 #endif
-#include "..\libs\OpenVR\headers\openvr.h"
+#include "../libs/OpenVR/headers/openvr.h"
 
 
 #ifndef __VR_H__
@@ -180,11 +181,6 @@ public:
 	int					frameCount;
 		
 	double				sensorSampleTime;
-#ifdef USE_OVR
-	ovrPosef            EyeRenderPose[2];
-#endif
-
-	ovrPosef			handPose[2];
 
 	int					fingerPose[2];
 				
@@ -230,13 +226,6 @@ public:
 		
 	bool				hasHMD;
 	bool				hasOculusRift;
-
-#ifdef USE_OVR
-	ovrSession			hmdSession;
-	ovrGraphicsLuid		ovrLuid;
-
-	ovrHmdDesc			hmdDesc;
-#endif
 
 	bool				m_bDebugOpenGL;
 	bool				m_bVerbose;
@@ -291,6 +280,15 @@ public:
 	idImage*			hmdCurrentRender[2];
 
 #ifdef USE_OVR
+	ovrPosef			EyeRenderPose[2];
+
+	ovrPosef			handPose[2];
+
+	ovrSession			hmdSession;
+	ovrGraphicsLuid		ovrLuid;
+
+	ovrHmdDesc			hmdDesc;
+
 	ovrTextureSwapChain oculusSwapChain[2];
 
 	GLuint				oculusFboId;
@@ -299,8 +297,6 @@ public:
 	ovrMirrorTexture	oculusMirrorTexture;
 	GLuint				mirrorTexId;
 	GLuint				oculusMirrorFboId;
-	int					mirrorW;
-	int					mirrorH;
 
 	ovrLayerEyeFov		oculusLayer;
 	ovrViewScaleDesc	oculusViewScaleDesc;
@@ -310,6 +306,11 @@ public:
 
 	ovrTrackingState	hmdTrackingState;
 #endif
+
+	int					mirrorW;
+	int					mirrorH;
+
+
 	idImage*			primaryFBOimage;
 	idImage*			resolveFBOimage;
 	idImage*			fullscreenFBOimage;

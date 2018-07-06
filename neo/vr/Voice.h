@@ -50,10 +50,14 @@ public:
 	static void		ListVoiceCmds_f( const idCmdArgs& args );
 	void		VoiceShutdown(void);
 	void		Speed(int talkingSpeed);
+
 	void		Say(VERIFY_FORMAT_STRING const char* fmt, ...);
+
 	void		HearWord(const char *w, int confidence);
 	void		HearWord(const wchar_t *w, int confidence);
+#ifdef _WIN32
 	void		Event(WPARAM wParam, LPARAM lParam);
+#endif
 	bool		GetTalkButton();
 	bool		GetSayButton(int j);
 

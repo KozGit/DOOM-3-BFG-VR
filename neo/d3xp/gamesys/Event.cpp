@@ -416,7 +416,10 @@ void idEvent::Free()
 {
 	if( data )
 	{
+//TODO: this triggers an assert, but leaks data now
+#ifdef _WIN32
 		eventDataAllocator.Free( data );
+#endif
 		data = NULL;
 	}
 	

@@ -30,7 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "Common_local.h"
-#include "d3xp\Game_local.h"
+#include "d3xp/Game_local.h"
 
 /*
 ==============

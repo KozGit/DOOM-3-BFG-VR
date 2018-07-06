@@ -11,6 +11,9 @@
 #undef StrCmpI
 
 #include "Voice.h"
+
+#ifdef _WIN32
+
 #include <sapi.h>
 #include <sphelper.h>
 #include "sys\win32\win_local.h"
@@ -23,7 +26,9 @@ ISpRecoGrammar *pGrammar = NULL;
 SPSTATEHANDLE rule = NULL;
 SPSTATEHANDLE flicksyncRule = NULL;
 
-extern iVoice voice;
+#endif
+
+extern iVoice _voice;
 
 vr_voiceAction_t voiceActionStrings[J_SAY_NUM] =
 {
@@ -92,10 +97,12 @@ const char* words[] = {
 };
 
 
+#ifdef _WIN32
 void __stdcall SpeechCallback(WPARAM wParam, LPARAM lParam)
 {
 	commonVoice->Event(wParam, lParam);
 }
+#endif
 
 
 
@@ -302,7 +309,11 @@ void iVoice::HearWord(const char *w, int confidence)
 		}
 	}
 
-	else if ( listening && confidence >= SP_NORMAL_CONFIDENCE )
+	else if ( listening
+#ifdef _WIN32
+            && confidence >= SP_NORMAL_CONFIDENCE
+#endif
+        )
 	{
 		int heardIndex = voiceCommandActions.FindIndex( action );
 
@@ -323,11 +334,14 @@ void iVoice::HearWord(const char *w, int confidence)
 
 void iVoice::HearWord( const wchar_t *w, int confidence )
 {
+#ifdef _WIN32
 	char buffer[1024];
 	WideCharToMultiByte( CP_ACP, 0, w, -1, buffer, sizeof( buffer ) / sizeof( buffer[0] ),"'", NULL );
 	HearWord( buffer, confidence );
+#endif
 }
 
+#ifdef _WIN32
 void iVoice::Event( WPARAM wParam, LPARAM lParam )
 {
 	SPEVENT event;
@@ -386,7 +400,7 @@ void iVoice::Event( WPARAM wParam, LPARAM lParam )
 						const char* confidences[3] = { "low", "medium", "high" };
 						hr = recoResult->GetText( SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL );
 						if ( vr_voiceRepeat.GetBool() )
-							voice.Say( "%s %d: %S.", confidences[confidence + 1], (int)(maxVolume * 100), text );
+							_voice.Say( "%s %d: %S.", confidences[confidence + 1], (int)(maxVolume * 100), text );
 						if ( isLine )
 						{
 							if ( vr_flicksyncCharacter.GetInteger() )
@@ -504,29 +518,38 @@ void iVoice::Event( WPARAM wParam, LPARAM lParam )
 		}
 	}
 }
+#endif
 
 void iVoice::AddWord( const char* word )
 {
+#ifdef _WIN32
 	wchar_t wbuffer[1024];
 	MultiByteToWideChar( CP_ACP, MB_PRECOMPOSED, word, -1, wbuffer, sizeof(wbuffer) / sizeof(wbuffer[0]) );
 	pGrammar->AddWordTransition( rule, NULL, wbuffer, L" ", SPWT_LEXICAL, 1.0f, NULL );
+#endif
 }
 
 void iVoice::AddWord( const wchar_t* word )
 {
+#ifdef _WIN32
 	pGrammar->AddWordTransition( rule, NULL, word, L" ", SPWT_LEXICAL, 1.0f, NULL );
+#endif
 }
 
 void iVoice::AddFlicksyncLine( const char* line )
 {
+#ifdef _WIN32
 	wchar_t wbuffer[1024];
 	MultiByteToWideChar( CP_ACP, MB_PRECOMPOSED, line, -1, wbuffer, sizeof(wbuffer) / sizeof(wbuffer[0]) );
 	pGrammar->AddWordTransition( flicksyncRule, NULL, wbuffer, L" ", SPWT_LEXICAL, 1.0f, NULL );
+#endif
 }
 
 void iVoice::AddFlicksyncLine( const wchar_t* line )
 {
+#ifdef _WIN32
 	pGrammar->AddWordTransition( flicksyncRule, NULL, line, L" ", SPWT_LEXICAL, 1.0f, NULL );
+#endif
 }
 
 
@@ -633,7 +656,7 @@ iVoice::VoiceInit
 
 void iVoice::VoiceInit( void )
 {
-	
+#ifdef _WIN32
 	if ( !InitVoiceDictionary() )
 	{
 		pVoice = NULL;
@@ -717,6 +740,7 @@ void iVoice::VoiceInit( void )
 	{
 		//Say("Recognizer failed.");
 	}
+#endif
 }
 
 
@@ -728,21 +752,26 @@ iVoice::VoiceShutdown
 
 void iVoice::VoiceShutdown( void )
 {
+#ifdef _WIN32
 	if ( pVoice )
 	{
 		pVoice->Release();
 		pVoice = NULL;
 	}
+#endif
 }
 
 // speed must be -10 to 10
 void iVoice::Speed( int talkingSpeed )
 {
+#ifdef _WIN32
 	pVoice->SetRate( talkingSpeed );
+#endif
 }
 
 void iVoice::Say( VERIFY_FORMAT_STRING const char* fmt, ... )
 {
+#ifdef _WIN32
 	va_list argptr;
 	va_start( argptr, fmt );
 	common->Printf( "$ " );
@@ -755,4 +784,5 @@ void iVoice::Say( VERIFY_FORMAT_STRING const char* fmt, ... )
 		wbuffer[i] = buffer[i];
 	pVoice->Speak( wbuffer, SPF_ASYNC, NULL );
 	va_end( argptr );
+#endif
 }

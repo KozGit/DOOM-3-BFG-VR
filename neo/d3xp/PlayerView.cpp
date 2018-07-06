@@ -31,7 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Game_local.h"
 
-#include "vr\Vr.h" // Koz
+#include "vr/Vr.h" // Koz
 
 idCVar vr_cineIPD("vr_cineIPD", "2.0", CVAR_FLOAT | CVAR_ARCHIVE, "");
 

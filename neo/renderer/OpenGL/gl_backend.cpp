@@ -31,11 +31,11 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "../tr_local.h"
 #include "../../framework/Common_local.h"
-#include "d3xp\Game_local.h"
+#include "d3xp/Game_local.h"
 
 
-#include"vr\Vr.h" // Koz
-#include"renderer\Framebuffer.h"
+#include"vr/Vr.h" // Koz
+#include"renderer/Framebuffer.h"
 
 
 idCVar r_drawFlickerBox( "r_drawFlickerBox", "0", CVAR_RENDERER | CVAR_BOOL, "visual test for dropping frames" );

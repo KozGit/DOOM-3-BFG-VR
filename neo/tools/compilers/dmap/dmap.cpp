@@ -214,7 +214,7 @@ void Dmap( const idCmdArgs& args )
 {
 	int			i;
 	int			start, end;
-	char		path[1024];
+	char		path[1024 + 4]; //allow for file extension
 	idStr		passedName;
 	bool		leaked = false;
 	bool		noCM = false;

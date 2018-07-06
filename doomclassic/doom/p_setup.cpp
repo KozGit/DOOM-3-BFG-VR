@@ -690,7 +690,7 @@ P_SetupLevel
 	P_LoadLineDefs (lumpnum+ML_LINEDEFS);
 	if (::g->gamemode==commercial && map==33) // Doom 3 BFG Edition's MAP33 has a bug with a teleporter missing a tag
 	{
-		for (i=0 ; i<::g->numlines ; i++) {
+		for (i=0 ; i< ::g->numlines ; i++) {
 			if (::g->lines[i].special==97 && ::g->lines[i].tag==0) // teleporter with missing tag
 				::g->lines[i].tag = 41; 
 		}

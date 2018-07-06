@@ -35,9 +35,11 @@ If you have questions concerning this license or the applicable additional terms
 #include "d3xp/Game_local.h"
 
 // Koz begin
-#include "vr\BackgroundSave.h"
-#include "vr\Vr.h"
+#include "vr/BackgroundSave.h"
+#include "vr/Vr.h"
+#ifdef _WIN32
 #include "sys\win32\win_local.h"
+#endif
 
 // Koz end
 

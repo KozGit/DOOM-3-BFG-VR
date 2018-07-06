@@ -42,8 +42,8 @@ If you have questions concerning this license or the applicable additional terms
 // RB end
 
 // Koz begin
-#include "vr\Vr.h"
-#include "renderer\tr_local.h"
+#include "vr/Vr.h"
+#include "renderer/tr_local.h"
 extern idRenderSystemLocal tr;
 // Koz end
 
