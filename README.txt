@@ -898,8 +898,11 @@ Voice Controls:
 	understand you' 
 	
 	The phrases recognized by the voice commands are defined in the 
-	"Fully Possessed/dict/voice.dict" 
-	file.  This file may be edited to change the phrases associated with each action.
+	"Fully Possessed/dict/voice.dict" file.  
+	This file may be edited to change the phrases associated with each action.
+	
+	Apart from the default English language, other languages (Spanish as of now) are available in Fully Possessed/dict/
+	just rename the corresponding voiceXXX.dict to voice.dict in order to use that language.
 	
 	Available Voice Commands:
 	
