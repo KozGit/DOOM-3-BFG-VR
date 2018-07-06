@@ -875,6 +875,17 @@ idSWFScriptVar idSWF::idSWFScriptFunction_shortcutKeys_clear::Call( idSWFScriptO
 	object->Set( "R_STEAMVRTRIG", "ENTER" );	// right SteamVR trigger
 	object->Set( "K_R_STEAMVRTRIG", "ENTER" );
 	object->Set( "K_L_STEAMVRTRIG", "ENTER" );
+
+	object->Set("STEAMVR_LEFT_JS_UP", "STICK1_UP");
+	object->Set("STEAMVR_LEFT_JS_DOWN", "STICK1_DOWN");
+	object->Set("STEAMVR_LEFT_JS_LEFT", "STICK1_LEFT");
+	object->Set("STEAMVR_LEFT_JS_RIGHT", "STICK1_RIGHT");
+
+	object->Set("STEAMVR_RIGHT_JS_UP", "STICK2_UP");
+	object->Set("STEAMVR_RIGHT_JS_DOWN", "STICK2_DOWN");
+	object->Set("STEAMVR_RIGHT_JS_LEFT", "STICK2_LEFT");
+	object->Set("STEAMVR_RIGHT_JS_RIGHT", "STICK2_RIGHT");
+
 	// Koz end steamvr
 
   // Carl voice commands

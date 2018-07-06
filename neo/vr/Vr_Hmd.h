@@ -67,6 +67,42 @@ typedef struct
 	int y;
 } resolution_t;
 
+#ifndef USE_OVR
+
+typedef struct
+{
+	int x;
+	int y;
+} ovrEyeRenderDesc;
+
+typedef struct
+{
+	int w;
+	int h;
+} ovrSizei;
+
+typedef struct
+{
+	float x;
+	float y;
+} ovrVector2f;
+
+
+typedef struct
+{
+	float LeftTan;
+	float RightTan;
+	float UpTan;
+	float DownTan;
+} ovrFovPort;
+
+typedef struct
+{
+	idVec3 Position;
+	idVec4 Orientation;
+} ovrPosef;
+
+#endif
 
 typedef struct _hmdEye
 {

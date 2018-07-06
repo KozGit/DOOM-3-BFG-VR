@@ -1279,6 +1279,7 @@ if(MSVC)
 	
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/include)
 			
+	add_definitions(-DUSE_OVR)
 	if(CMAKE_CL_64)
 		link_directories(
 				${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/x64/Release/VS2013

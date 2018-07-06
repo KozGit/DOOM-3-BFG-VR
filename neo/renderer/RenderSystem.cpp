@@ -242,6 +242,7 @@ static void R_CheckCvars()
 
 		if ( vr_useFloorHeight.IsModified() || ( vr_normalViewHeight.IsModified() && vr_useFloorHeight.GetInteger() == 0 ) || vr_scale.IsModified() || commonVr->shouldRecenter )
 		{
+#ifdef USE_OVR
 			if (commonVr->hasOculusRift)
 			{
 				if ( vr_useFloorHeight.GetInteger() >= 3 )
@@ -255,6 +256,7 @@ static void R_CheckCvars()
 				ovr_RecenterTrackingOrigin( commonVr->hmdSession );
 				commonVr->HMDResetTrackingOriginOffset();
 			}
+#endif
 			vr_useFloorHeight.ClearModified();
 			vr_normalViewHeight.ClearModified();
 			vr_scale.ClearModified();

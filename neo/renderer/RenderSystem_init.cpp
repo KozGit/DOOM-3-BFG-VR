@@ -44,7 +44,9 @@ If you have questions concerning this license or the applicable additional terms
 // Koz begin
 #undef strncmp // Koz fixme to prevent conflict with oculus SDK.
 #include "vr\vr.h"
+#ifdef USE_OVR
 #include "libs\LibOVR\Include\OVR_CAPI.h"
+#endif
 // Koz end
 
 // DeviceContext bypasses RenderSystem to work directly with this
@@ -634,6 +636,7 @@ void R_SetNewMode( const bool fullInit )
 		{
 			r_fullscreen.SetInteger( 0 ); // force a windowed mode
 			
+#ifdef USE_OVR
 			if ( commonVr->hasOculusRift )
 			{
 				if ( vr_stereoMirror.GetBool() )
@@ -646,7 +649,10 @@ void R_SetNewMode( const bool fullInit )
 				}
 
 				r_windowHeight.SetInteger( commonVr->hmdDesc.Resolution.h / 2 );
-			} else {
+			} 
+			else 
+#endif
+			{
 				r_windowWidth.SetInteger( commonVr->hmdWidth / 2 );
 				r_windowHeight.SetInteger( commonVr->hmdHeight / 2 );
 			}
