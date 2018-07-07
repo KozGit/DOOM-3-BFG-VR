@@ -61,17 +61,15 @@ This file contains the following sections:
 	
 	11) GETTING THE SOURCE CODE
 
-	12) COMPILING ON WIN32 WITH VISUAL C++ 2013 EXPRESS / COMMUNITY
+	12) COMPILING ON WINDOWS WITH VISUAL C++ 2013, 2015, OR 2017 EXPRESS / COMMUNITY
 
-	13) COMPILING ON WIN32 WITH VISUAL C++ 2017
-
-	14) COMPILING ON LINUX
+	13) COMPILING ON LINUX
 	
-	15) BUG REPORTS
+	14) BUG REPORTS
 	
-	16) LICENSE
+	15) LICENSE
 	
-	17) CODE LICENSE EXCEPTIONS
+	16) CODE LICENSE EXCEPTIONS
 
 
 
@@ -2450,10 +2448,10 @@ If you don't want to use git, you can download the source as a zip file at
 
 ___________________________________________________________________
 
-12) COMPILING ON WIN32 WITH VISUAL C++ 2013 EXPRESS / COMMUNITY
+12) COMPILING ON WINDOWS WITH VISUAL C++ 2013, 2015, OR 2017 EXPRESS / COMMUNITY
 __________________________________________________________
 
-1. Download and install the free Visual C++ 2013 Express Edition or Community.
+1. Download and install the free Express or Community version of Visual C++ 2013, 2015, or 2017.
 
 2. Download and install the DirectX SDK (June 2010) here:
 	http://www.microsoft.com/en-us/download/details.aspx?id=6812
@@ -2461,7 +2459,7 @@ __________________________________________________________
 3. Download and install the latest CMake, saying YES to adding CMake to your path.
 
 4. Generate the VC13 projects using CMake by doubleclicking a matching configuration .bat
-   file in the neo/ folder. eg. cmake-vs2013-64bit.bat
+   file in the neo/ folder. eg. cmake-vs2013-64bit.bat (it will erase your build folder)
 
 5. (UPDATED) Go to https://developer.oculus.com/downloads/pc/1.17.0/Oculus_SDK_for_Windows/ then
    download and extract it somewhere. Copy the LibOVR folder to DOOM-3-BFG/neo/libs
@@ -2469,48 +2467,13 @@ __________________________________________________________
 6. Init/Update the submodules in Git to get OpenVR. In TortoiseGit, right click in the folder
    then choose TortoiseGit > Submodule Update... then press OK.
 
-7. Use the VC13 solution to compile what you need:
+7. Open the following file in Visual Studio and compile it:
 	DOOM-3-BFG/build/Doom3BFGVR.sln
 	
 8. Download ffmpeg-20140405-git-ec8789a-win32-shared.7z from
-	ffmpeg.zeranoe.com/builds/win32/shared/2014
-
-9. Extract the FFmpeg DLLs to your current build directory under DOOM-3-BFG/build/
-
-10. In Visual Studio, right click project Doom3BFGVR, click Properties. Set Configuration to
-    All Configurations. Choose Debugging, set Command Arguments to:
-    +set fs_basepath "C:\Program Files (x86)\Steam\steamapps\common\DOOM 3 BFG Edition"
-    or wherever you installed Doom 3 BFG edition
-
-11. To create the installer, download and install NSIS. Build the release version in visual
-    studio. Right click on the installer.nsi file and choose Compile NSIS Script.
-
-___________________________________________________________________
-
-13) COMPILING ON WIN32 WITH VISUAL C++ 2017 (untested)
-__________________________________________________________
-
-1. Download and install the Visual C++ 2017
-
-2. You probably need to download and install the DirectX SDK (June 2010) here:
-	http://www.microsoft.com/en-us/download/details.aspx?id=6812
-
-3. Download and install the latest CMake, saying YES to adding CMake to your path.
-
-4. Generate the VC17 projects using CMake by doubleclicking cmake-vs2017-64bit.bat
-   in the neo/ folder.
-
-5. (UPDATED) Go to https://developer.oculus.com/downloads/pc/1.17.0/Oculus_SDK_for_Windows/ then
-   download and extract it somewhere. Copy the LibOVR folder to DOOM-3-BFG/neo/libs
-
-6. Init/Update the submodules in Git to get OpenVR. In TortoiseGit, right click in the folder
-   then choose TortoiseGit > Submodule Update... then press OK.
-
-7. Use the VC17 solution to compile what you need:
-	DOOM-3-BFG/build/Doom3BFGVR.sln
-	
-8. Download ffmpeg-20140405-git-ec8789a-win32-shared.7z from
-	ffmpeg.zeranoe.com/builds/win32/shared/2014
+	https://web.archive.org/web/20160702015929/ffmpeg.zeranoe.com/builds/win32/shared/2014
+	and/or ffmpeg-20140405-git-ec8789a-win64-shared.7z from
+	https://web.archive.org/web/20160702015929/ffmpeg.zeranoe.com/builds/win64/shared/2014
 
 9. Extract the FFmpeg DLLs to your current build directory under DOOM-3-BFG/build/
 
@@ -2524,7 +2487,7 @@ __________________________________________________________
 
 __________________________________
 
-14) COMPILING ON LINUX
+13) COMPILING ON LINUX
 _________________________
 
 LINUX VR:
@@ -2595,7 +2558,7 @@ Controller buttons don't work
 
 ___________________________________________________
 
-15) BUG REPORTS
+14) BUG REPORTS
 __________________________________________
 
 DOOM-3-BFG VR: Fully Possessed is not perfect, it is not bug free just like all other software.
@@ -2630,7 +2593,7 @@ ALSA or configuring the network.
 	
 _______________________________
 
-16) LICENSE
+15) LICENSE
 ______________________
 
 
@@ -2645,7 +2608,7 @@ Suite 120, Rockville, Maryland 20850 USA.
 
 ____________________________________________________________________________________
 
-17) CODE LICENSE EXCEPTIONS - The parts that are not covered by the GPL:
+16) CODE LICENSE EXCEPTIONS - The parts that are not covered by the GPL:
 _______________________________________________________________________
 
 

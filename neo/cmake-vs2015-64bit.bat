@@ -1,0 +1,6 @@
+cd ..
+del /s /q build
+mkdir build
+cd build
+cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_SYSTEM_VERSION="10.0.10240.0" -DCMAKE_INSTALL_PREFIX=../bin/win8-64 ../neo
+pause

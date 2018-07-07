@@ -1286,7 +1286,8 @@ if(MSVC)
 	if(OVR)
 		add_definitions(-DUSE_OVR)
 		
-		if(CMAKE_GENERATOR STREQUAL "Visual Studio 15 2017" OR CMAKE_GENERATOR STREQUAL "Visual Studio 14 2015")
+		if(CMAKE_GENERATOR STREQUAL "Visual Studio 15 2017 Win64" OR CMAKE_GENERATOR STREQUAL "Visual Studio 15 2017"
+			OR CMAKE_GENERATOR STREQUAL "Visual Studio 14 2015 Win64" OR CMAKE_GENERATOR STREQUAL "Visual Studio 14 2015")
 			link_directories(
 					${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/x64/Release/VS2015
 					${CMAKE_CURRENT_SOURCE_DIR}/libs/LibOVR/Lib/Windows/x64/Debug/VS2015)
