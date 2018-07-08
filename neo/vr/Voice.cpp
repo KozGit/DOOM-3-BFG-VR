@@ -400,7 +400,7 @@ void iVoice::Event( WPARAM wParam, LPARAM lParam )
 						const char* confidences[3] = { "low", "medium", "high" };
 						hr = recoResult->GetText( SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL );
 						if ( vr_voiceRepeat.GetBool() )
-							_voice.Say( "%s %d: %S.", confidences[confidence + 1], (int)(maxVolume * 100), text );
+							Say( "%s %d: %S.", confidences[confidence + 1], (int)(maxVolume * 100), text );
 						if ( isLine )
 						{
 							if ( vr_flicksyncCharacter.GetInteger() )
@@ -447,11 +447,11 @@ void iVoice::Event( WPARAM wParam, LPARAM lParam )
 						hr = recoResult->GetText( SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL );
 						if ( isLine )
 						{
-							//voice.Say("Maybe %s: %S", confidences[confidence + 1], text);
+							//Say("Maybe %s: %S", confidences[confidence + 1], text);
 						}
 						else
 						{
-							//voice.Say("Maybe %S.", text);
+							//Say("Maybe %S.", text);
 						}
 						CoTaskMemFree( text );
 					}
@@ -473,7 +473,7 @@ void iVoice::Event( WPARAM wParam, LPARAM lParam )
 				{
 					wchar_t* text;
 					hr = recoResult->GetText( SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, FALSE, &text, NULL );
-					//voice.Say("You did not say that.");
+					//Say("You did not say that.");
 					CoTaskMemFree( text );
 				}
 				in_phrase = false;
