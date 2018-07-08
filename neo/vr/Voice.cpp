@@ -1,7 +1,7 @@
-#pragma hdrstop
-
 #include"precompiled.h"
 #include "d3xp/Game_local.h"
+
+#pragma hdrstop
 
 #undef strncmp
 #undef vsnprintf
