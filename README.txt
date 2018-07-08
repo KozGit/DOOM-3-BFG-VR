@@ -2470,12 +2470,12 @@ __________________________________________________________
 7. Open the following file in Visual Studio and compile it:
 	DOOM-3-BFG/build/Doom3BFGVR.sln
 	
-8. Download ffmpeg-20140405-git-ec8789a-win32-shared.7z from
-	https://web.archive.org/web/20160702015929/ffmpeg.zeranoe.com/builds/win32/shared/2014
-	and/or ffmpeg-20140405-git-ec8789a-win64-shared.7z from
-	https://web.archive.org/web/20160702015929/ffmpeg.zeranoe.com/builds/win64/shared/2014
+8. Download ffmpeg-4.0-win32-shared.zip from
+	https://ffmpeg.zeranoe.com/builds/win32/shared/
+	and/or ffmpeg-4.0-win64-shared.zip from
+	https://ffmpeg.zeranoe.com/builds/win64/shared/
 
-9. Extract the FFmpeg DLLs to your current build directory under DOOM-3-BFG/build/
+9. Extract the FFmpeg DLLs to your current build directory (eg. Release) under DOOM-3-BFG/build/
 
 10. In Visual Studio, right click project Doom3BFGVR, click Properties. Set Configuration to
     All Configurations. Choose Debugging, set Command Arguments to:
