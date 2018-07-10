@@ -1154,7 +1154,7 @@ void ParseInOutStruct( idLexer& src, int attribType, int attribIgnoreType, idLis
 			//case GLDRV_OPENGL32_CORE_PROFILE:
 			//case GLDRV_OPENGL_ES2:
 			//case GLDRV_OPENGL_ES3:
-			//case GLDRV_OPENGL_MESA:
+			case GLDRV_OPENGL_MESA:
 			default:
 			{
 				for( int i = 0; attribsPC[i].semantic != NULL; i++ )

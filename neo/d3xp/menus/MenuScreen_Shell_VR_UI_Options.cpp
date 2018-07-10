@@ -347,7 +347,7 @@ void idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::LoadData(
 	originalHeadingBeam = vr_headingBeamMode.GetInteger();
 	originalWeaponSight = vr_weaponSight.GetInteger();
 	originalWeaponSightSurface = vr_weaponSightToSurface.GetInteger();
-	originalLaserSightUseOffset = vr_laserSightUseOffset.GetInteger();
+	originalLaserSightUseOffset = vr_laserSightUseOffset.GetBool();
 	originalHaptics = vr_rumbleEnable.GetInteger();
 	originalGuiMode = vr_guiMode.GetInteger();
 }
@@ -402,7 +402,7 @@ void idMenuScreen_Shell_VR_UI_Options::idMenuDataSource_VR_UI_Options::AdjustFie
 		case UI_OPTIONS_FIELD_LASER_SOURCE: {
 			static const int numValues = 2;
 			static const int values[numValues] = { 0, 1 };
-			vr_laserSightUseOffset.SetBool( AdjustOption( vr_laserSightUseOffset.GetBool(), values, numValues, adjustAmount ) );
+			vr_laserSightUseOffset.SetBool( AdjustOption( vr_laserSightUseOffset.GetInteger(), values, numValues, adjustAmount ) != 0 );
 		}
 		case UI_OPTIONS_FIELD_HAPTICS: {
 			static const int numValues = 2;

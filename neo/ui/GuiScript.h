@@ -64,7 +64,7 @@ public:
 	void FixupParms( idWindow* win );
 	size_t Size()
 	{
-		int sz = sizeof( *this );
+		size_t sz = sizeof( *this );
 		for( int i = 0; i < parms.Num(); i++ )
 		{
 			sz += parms[i].var->Size();
@@ -104,7 +104,7 @@ public:
 	}
 	size_t Size()
 	{
-		int sz = sizeof( *this );
+		size_t sz = sizeof( *this );
 		for( int i = 0; i < list.Num(); i++ )
 		{
 			sz += list[i]->Size();

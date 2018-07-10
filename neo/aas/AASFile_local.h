@@ -66,7 +66,7 @@ public:
 	bool						Load( const idStr& fileName, unsigned int mapFileCRC );
 	bool						Write( const idStr& fileName, unsigned int mapFileCRC );
 	
-	int							MemorySize() const;
+	size_t						MemorySize() const;
 	void						ReportRoutingEfficiency() const;
 	void						Optimize();
 	void						LinkReversedReachability();

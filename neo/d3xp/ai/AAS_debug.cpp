@@ -336,11 +336,11 @@ void idAASLocal::ShowWalkPath( const idVec3& origin, int goalAreaNum, const idVe
 				color = colorPink;
 			if (i == 0)
 			{
-				gameRenderWorld->DrawText(va("%d %x", travelTime, reach->travelType), (goalOrigin * 0.4 + origin * 0.6) + idVec3(0, 0, 4), 0.2f, color, player->viewAxis);
-				gameRenderWorld->DrawText(va("%d %d %x", travelTime, reach->travelTime, reach->travelType), (org + reach->start) * 0.5 + idVec3(0, 0, 4), 0.1f, color, player->viewAxis);
+				gameRenderWorld->DrawText(va("%d %x", travelTime, reach->travelType), (goalOrigin * 0.4f + origin * 0.6f) + idVec3(0, 0, 4), 0.2f, color, player->viewAxis);
+				gameRenderWorld->DrawText(va("%d %d %x", travelTime, reach->travelTime, reach->travelType), (org + reach->start) * 0.5f + idVec3(0, 0, 4), 0.1f, color, player->viewAxis);
 			}
 			else
-				gameRenderWorld->DrawText(va("%d %d %x", travelTime, reach->travelTime, reach->travelType), (org + reach->start) * 0.5 + idVec3(0, 0, 4), 0.1f, color, player->viewAxis);
+				gameRenderWorld->DrawText(va("%d %d %x", travelTime, reach->travelTime, reach->travelType), (org + reach->start) * 0.5f + idVec3(0, 0, 4), 0.1f, color, player->viewAxis);
 		}
 
 		gameRenderWorld->DebugArrow( color, org, reach->start, 2 );

@@ -1832,13 +1832,13 @@ idDeclManagerLocal::ListDecls_f
 void idDeclManagerLocal::ListDecls_f( const idCmdArgs& args )
 {
 	int		i, j;
-	int		totalDecls = 0;
-	int		totalText = 0;
-	int		totalStructs = 0;
+	size_t		totalDecls = 0;
+	size_t		totalText = 0;
+	size_t		totalStructs = 0;
 	
 	for( i = 0; i < declManagerLocal.declTypes.Num(); i++ )
 	{
-		int size, num;
+		size_t size, num;
 		
 		if( declManagerLocal.declTypes[i] == NULL )
 		{
