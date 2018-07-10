@@ -806,7 +806,9 @@ public:
 
 #define SHADOWVERT_XYZW_OFFSET		(0)
 
-assert_offsetof( idShadowVert, xyzw, SHADOWVERT_XYZW_OFFSET );
+#ifndef __INTELLISENSE__
+assert_offsetof(idShadowVert, xyzw, SHADOWVERT_XYZW_OFFSET);
+#endif
 
 ID_INLINE void idShadowVert::Clear()
 {
@@ -834,9 +836,11 @@ public:
 #define SHADOWVERTSKINNED_COLOR_OFFSET		(16)
 #define SHADOWVERTSKINNED_COLOR2_OFFSET		(20)
 
+#ifndef __INTELLISENSE__
 assert_offsetof( idShadowVertSkinned, xyzw, SHADOWVERTSKINNED_XYZW_OFFSET );
 assert_offsetof( idShadowVertSkinned, color, SHADOWVERTSKINNED_COLOR_OFFSET );
 assert_offsetof( idShadowVertSkinned, color2, SHADOWVERTSKINNED_COLOR2_OFFSET );
+#endif
 
 ID_INLINE void idShadowVertSkinned::Clear()
 {
