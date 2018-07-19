@@ -155,7 +155,22 @@ FunctionEnd
 
 Function .onInit
   !insertmacro MUI_LANGDLL_DISPLAY
-  ReadRegStr $R0 HKCU "Software\Valve\Steam" SteamPath
+  ; Check for the Good Old Games (GOG) version first, because we know it's the right drive.
+  ; This nullsoft installer is a 32bit executable (I think), so this should work.
+  ; Otherwise we might need to check Software\Wow6432Node\GOG.com\Games\1135892318
+  ReadRegStr $R0 HKCU "Software\GOG.com\Games\1135892318" "Path"
+  IfErrors lbl_checksteam 0
+  Push $R0
+  Push "/"
+  Call StrSlash
+  Pop $R0
+  StrCpy $INSTDIR $R0
+  Return
+  ; Check for the Steam version if GOG failed. This path will be wrong if it's on another drive.
+  ; Note that the retail disc version also uses Steam, so these are the only two legal ways.
+  lbl_checksteam:
+  ClearErrors
+  ReadRegStr $R0 HKCU "Software\Valve\Steam" "SteamPath"
   IfErrors lbl_error 0
   Push $R0
   Push "/"

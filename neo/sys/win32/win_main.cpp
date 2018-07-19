@@ -553,13 +553,202 @@ const char *Sys_Cwd() {
 	return cwd;
 }
 
+// Carl: Partly based on GZDoom code by Randy Heit, Gaerzi, and Mike Swanson
+//==========================================================================
+//
+// QueryPathKey
+//
+// Returns the value of a registry key into the output variable value.
+//
+//==========================================================================
+
+static bool QueryPathKey( HKEY key, const char *keypath, const char *valname, char *value )
+{
+	HKEY pathkey;
+	DWORD pathtype;
+	DWORD pathlen;
+
+	if( ERROR_SUCCESS == RegOpenKeyEx( key, keypath, 0, KEY_QUERY_VALUE, &pathkey ) )
+	{
+		pathlen = 512;
+		if( ERROR_SUCCESS == RegQueryValueEx( pathkey, valname, 0, &pathtype, ( LPBYTE )value, &pathlen ) &&
+			pathtype == REG_SZ && pathlen != 0 )
+		{
+		}
+		else
+		{
+			value[0] = '\0';
+		}
+		RegCloseKey( pathkey );
+	}
+	return *value != '\0';
+}
+
+/*
+===================
+Sys_PathHasDoom3BFG
+===================
+*/
+bool Sys_PathHasDoom3BFG( const char *path )
+{
+	idStr p( path );
+	p.AppendPath( "base" );
+	return Sys_IsFolder( p ) == FOLDER_YES;
+}
+
+/*
+=========================
+Sys_PathHasFullyPossessed
+=========================
+*/
+bool Sys_PathHasFullyPossessed( const char *path )
+{
+	idStr p( path );
+	p.AppendPath( "Fully Possessed" );
+	return Sys_IsFolder( p ) == FOLDER_YES;
+}
+
+/*
+==============
+Sys_GetGOGPath()
+==============
+*/
+const char *Sys_GetGOGPath() {
+	static char path[512];
+
+#ifdef _WIN64
+#define gogregistrypath "Software\\Wow6432Node\\GOG.com\\Games"
+#else
+	// If a 32-bit ZDoom runs on a 64-bit Windows, this will be transparently and
+	// automatically redirected to the Wow6432Node address instead, so this address
+	// should be safe to use in all cases.
+#define gogregistrypath "Software\\GOG.com\\Games"
+#endif
+
+	// Look for Doom 3: BFG Edition
+	if( QueryPathKey( HKEY_LOCAL_MACHINE, gogregistrypath "\\1135892318", "Path", path ) )
+	{
+		return path;
+	}
+	return NULL;
+}
+
+const char *Sys_GetSteamPath()
+{
+	static char path[512] = "";
+	if( !QueryPathKey( HKEY_CURRENT_USER, "Software\\Valve\\Steam", "SteamPath", path ) )
+	{
+		if( !QueryPathKey( HKEY_LOCAL_MACHINE, "Software\\Valve\\Steam", "InstallPath", path ) )
+		{
+			return NULL;
+		}
+	}
+	size_t oldlen = strlen( path );
+	// Carl: Check if it's installed on the main steam harddrive
+	strncat( path, "/SteamApps/common/DOOM 3 BFG Edition", 511 - oldlen );
+	if( Sys_PathHasDoom3BFG( path ) )
+		return path;
+	// Carl: If not, read Steam's libraryfolders.vdf for a list of other drives with steam libraries to check
+	path[oldlen + strlen("/SteamApps/") ] = '\0';
+	strncat( path, "libraryfolders.vdf", 511 - oldlen - strlen( "/SteamApps/" ) );
+
+	// Carl: We haven't initialised the file system yet, so open it using the Windows API
+	DWORD dwAccess = GENERIC_READ;
+	DWORD dwShare = FILE_SHARE_READ;
+	DWORD dwCreate = OPEN_EXISTING;
+	DWORD dwFlags = FILE_ATTRIBUTE_NORMAL;
+	// Carl: Support paths longer than 260 characters (MAX_PATH)
+	// see https://msdn.microsoft.com/en-us/library/windows/desktop/aa363855(v=vs.85).aspx
+	int len = strlen( path );
+	wchar_t *w;
+	w = ( wchar_t* )malloc( ( 4 + len + 1 ) * 2 );
+	w[0] = '\\';
+	w[1] = '\\';
+	w[2] = '?';
+	w[3] = '\\';
+	for( int i = 0; i <= len; i++ )
+	{
+		char c = path[i];
+		w[4 + i] = ( c == '/' ) ? '\\' : c;
+	}
+	//common->Printf("CreateFileW(\"%S\")\n", w);
+	HANDLE fp = CreateFileW( w, dwAccess, dwShare, NULL, dwCreate, dwFlags, NULL );
+	free( w );
+	// if it wasn't on our main steam drive, and the libraryfolders.vdf file doesn't exist, give up
+	if( fp == INVALID_HANDLE_VALUE )
+		return NULL;
+	// load the file contents into a lexer
+	size_t filelength = GetFileSize( fp, NULL );
+	char *filecontents = ( char * )Mem_Alloc( filelength, TAG_IDFILE );
+	DWORD bytesRead;
+	if( !ReadFile( fp, filecontents, (DWORD)filelength, &bytesRead, NULL ) )
+	{
+		idLib::Warning( "Sys_GetSteamPath: Read failed with %d from %s", GetLastError(), path );
+		CloseHandle( fp );
+		Mem_Free( filecontents );
+		return NULL;
+	}
+	CloseHandle( fp );
+	idLexer lex( filecontents, bytesRead, "libraryfolders.vdf", LEXFL_NOFATALERRORS | LEXFL_NOSTRINGCONCAT | LEXFL_NODOLLARPRECOMPILE );
+	idToken t;
+	while( lex.ReadToken( &t ) )
+	{
+		if( ( t.type == TT_STRING || t.type == TT_LITERAL || t.type == TT_NAME ) && ( t.Icmp( "LibraryFolders" ) == 0 ) )
+		{
+			lex.ExpectTokenString( "{" );
+			while( lex.ReadToken( &t ) && ( t.type == TT_STRING || t.type == TT_LITERAL || t.type == TT_NAME || t.type == TT_NUMBER ) )
+			{
+				idToken t2;
+				if( lex.ReadTokenOnLine( &t2 ) && ( t2.type == TT_STRING || t2.type == TT_LITERAL || t2.type == TT_NAME ) )
+				{
+					if( t.IsNumeric() )
+					{
+						//	"1"		"D:\\Steam"
+						idStr folder(t2);
+						folder.AppendPath( "SteamApps/common/DOOM 3 BFG Edition" );
+						if( Sys_PathHasDoom3BFG( folder ) && folder.Length() <= 511 )
+						{
+							Mem_Free( filecontents );
+							strncpy( path, folder.c_str(), 512 );
+							return path;
+						}
+					}
+				}
+			}
+			
+		}
+	};
+	Mem_Free( filecontents );
+	return NULL;
+}
+
 /*
 ==============
 Sys_DefaultBasePath
 ==============
 */
 const char *Sys_DefaultBasePath() {
-	return Sys_Cwd();
+	const char *currentFolder = Sys_Cwd();
+	// Carl: Use the current folder if it contains Doom 3 BFG
+	if( Sys_PathHasDoom3BFG( currentFolder ) )
+		return currentFolder;
+	// Carl: Note that we prefer the Steam version over the GOG version, because we've tested it.
+	// Carl: Use the Steam version's path (from the registry & libraryfolders.vdf) if it has our mod
+	const char *steamPath = Sys_GetSteamPath();
+	if( steamPath && Sys_PathHasFullyPossessed( steamPath ) )
+		return steamPath;
+	// Carl: Use the GOG version's path (from the registry) if it's installed and has our mod
+	const char *gogPath = Sys_GetGOGPath();
+	if( gogPath && Sys_PathHasDoom3BFG( gogPath ) && Sys_PathHasFullyPossessed( gogPath ) )
+		return gogPath;
+	// Carl: If there's no Fully Possessed mod anywhere, try the Steam version first then the GOG version
+	if( steamPath )
+		return steamPath;
+	if( gogPath )
+		return gogPath;
+
+	// Carl: Use the current folder even if it doesn't look right, because we couldn't find anything better.
+	return currentFolder;
 }
 
 // Vista shit
