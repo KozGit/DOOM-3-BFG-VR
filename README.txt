@@ -10,12 +10,14 @@ ____________________________________________________________________________
 
 
 DOOM3-BFG VR : Fully Possessed
-Includes support for the HTC Vive via OpenVR, and the Oculus Rift and Touch motion controls via the Oculus SDK or OpenVR.
+Includes support for the HTC Vive via SteamVR, the Oculus Rift and Touch motion controls via the
+Oculus SDK or SteamVR, and (in theory) Windows Mixed Reality via SteamVR.
 
 VR Implementation: /u/Samson-
-Major Contributions - Teleportation, Voice Commands, Flicksync, Bink videos, Loading other savegames, code improvements: Carl Kenner
+Major Contributions - Teleportation, Voice Commands, Flicksync, Bink videos, Loading other
+                      savegames, code improvements: Carl Kenner
 Holster slots, Crawl Space Head Collision, minor fixes: Leyland
-QuakeCon teleporting, Slow Mo and Tunnel vision motion sickness fixes: jckhng
+Doom VFR style teleporting, JetStrafe, Slow Mo and Tunnel vision motion sickness fixes: jckhng
 Spanish Voice Commands: TinoSM
 Windows Mixed Reality and VS2017 support: Mark Sheehan
 Additional VS2017 support: Bao Chi Tran Nguyen
@@ -59,17 +61,15 @@ This file contains the following sections:
 	
 	11) GETTING THE SOURCE CODE
 
-	12) COMPILING ON WIN32 WITH VISUAL C++ 2013 EXPRESS EDITION
+	12) COMPILING ON WINDOWS WITH VISUAL C++ 2013, 2015, OR 2017 EXPRESS / COMMUNITY
 
-	13) COMPILING ON WIN32 WITH VISUAL C++ 2017
-
-	14) COMPILING ON LINUX
+	13) COMPILING ON LINUX
 	
-	15) BUG REPORTS
+	14) BUG REPORTS
 	
-	16) LICENSE
+	15) LICENSE
 	
-	17) CODE LICENSE EXCEPTIONS
+	16) CODE LICENSE EXCEPTIONS
 
 
 
@@ -185,6 +185,7 @@ ___________________________________________________
 __________________________________________
 
 1. Make sure you have Doom 3 BFG Edition installed in Steam.
+   Doom 3 BFG Edition is also available from Good Old Games, but I haven't tested that version.
 
 2. Set the Doom 3 BFG language in Steam to your desired language. 
 
@@ -232,7 +233,8 @@ __________________________________________
    launch the game. (SteamVR will be automatically activated if needed)
 
    To play the game, you need the game data from a legal copy of the game, which 
-   requires Steam for Windows. Currently, Doom 3 BFG: Fully Possessed is only compatible with Windows.
+   requires Steam for Windows. Currently, Doom 3 BFG: Fully Possessed is only officially compatible
+   with Windows, but see the Linux section.
 
 9. Enjoy
 
@@ -246,11 +248,10 @@ __________________________________________
 New in 0.23:
 	Spanish voice commands (to use, replace dict/voice.dict with dict/voiceSpanish.dict)
 
-New in 0.22:
-
-New in 0.21-Alpha-WMR (WMR Joystick support):
+New in 0.21-Alpha-WMR (WMR Joystick support) (unofficial):
 	Windows Mixed Reality Joystick support
 
+New in 0.21a (unreleased):
 	Doom VFR style teleport and jet-strafe
 	Added headshot damage multiplier vr_headshotMultiplier (defaults to 2.5x)
 	Improved arm and body inverse kinematics and leaning, body now automatically turns
@@ -2447,10 +2448,10 @@ If you don't want to use git, you can download the source as a zip file at
 
 ___________________________________________________________________
 
-12) COMPILING ON WIN32 WITH VISUAL C++ 2013 EXPRESS EDITION
+12) COMPILING ON WINDOWS WITH VISUAL C++ 2013, 2015, OR 2017 EXPRESS / COMMUNITY
 __________________________________________________________
 
-1. Download and install the Visual C++ 2013 Express Edition.
+1. Download and install the free Express or Community version of Visual C++ 2013, 2015, or 2017.
 
 2. Download and install the DirectX SDK (June 2010) here:
 	http://www.microsoft.com/en-us/download/details.aspx?id=6812
@@ -2458,60 +2459,23 @@ __________________________________________________________
 3. Download and install the latest CMake, saying YES to adding CMake to your path.
 
 4. Generate the VC13 projects using CMake by doubleclicking a matching configuration .bat
-   file in the neo/ folder. eg. cmake-vs2013-64bit.bat
-
-5. (UPDATED) Go to https://developer.oculus.com/downloads/pc/1.17.0/Oculus_SDK_for_Windows/ then download
-   and extract it somewhere. Copy the LibOVR folder to DOOM-3-BFG/neo/libs
-
-6. Clone the OpenVR git repository in another folder: https://github.com/ValveSoftware/openvr
-   It's probably an incompatible later version, so you need to do a hard reset in git (from the log
-   in TortoiseGit) to the v1.0.5 version. Copy the openvr folder to DOOM-3-BFG/neo/libs
-
-7. Use the VC13 solution to compile what you need:
-	DOOM-3-BFG/build/Doom3BFGVR.sln
-	
-8. Download ffmpeg-20140405-git-ec8789a-win32-shared.7z from
-	ffmpeg.zeranoe.com/builds/win32/shared/2014
-
-9. Extract the FFmpeg DLLs to your current build directory under DOOM-3-BFG/build/
-
-10. In Visual Studio, right click project Doom3BFGVR, click Properties. Set Configuration to
-    All Configurations. Choose Debugging, set Command Arguments to:
-    +set fs_basepath "C:\Program Files (x86)\Steam\steamapps\common\DOOM 3 BFG Edition"
-    or wherever you installed Doom 3 BFG edition
-
-11. To create the installer, download and install NSIS. Build the release version in visual
-    studio. Right click on the installer.nsi file and choose Compile NSIS Script.
-
-___________________________________________________________________
-
-13) COMPILING ON WIN32 WITH VISUAL C++ 2017 (untested)
-__________________________________________________________
-
-1. Download and install the Visual C++ 2017
-
-2. You probably need to download and install the DirectX SDK (June 2010) here:
-	http://www.microsoft.com/en-us/download/details.aspx?id=6812
-
-3. Download and install the latest CMake, saying YES to adding CMake to your path.
-
-4. Generate the VC17 projects using CMake by doubleclicking cmake-vs2017-64bit.bat
-   in the neo/ folder.
+   file in the neo/ folder. eg. cmake-vs2013-64bit.bat (it will erase your build folder)
 
 5. (UPDATED) Go to https://developer.oculus.com/downloads/pc/1.17.0/Oculus_SDK_for_Windows/ then
    download and extract it somewhere. Copy the LibOVR folder to DOOM-3-BFG/neo/libs
 
-6. Clone the OpenVR git repository in another folder: https://github.com/ValveSoftware/openvr
-   It's probably an incompatible later version, so you need to do a hard reset in git (from the log
-   in TortoiseGit) to the v1.0.5 version. Copy the openvr folder to DOOM-3-BFG/neo/libs
+6. Init/Update the submodules in Git to get OpenVR. In TortoiseGit, right click in the folder
+   then choose TortoiseGit > Submodule Update... then press OK.
 
-7. Use the VC17 solution to compile what you need:
+7. Open the following file in Visual Studio and compile it:
 	DOOM-3-BFG/build/Doom3BFGVR.sln
 	
-8. Download ffmpeg-20140405-git-ec8789a-win32-shared.7z from
-	ffmpeg.zeranoe.com/builds/win32/shared/2014
+8. Download ffmpeg-4.0-win32-shared.zip from
+	https://ffmpeg.zeranoe.com/builds/win32/shared/
+	and/or ffmpeg-4.0-win64-shared.zip from
+	https://ffmpeg.zeranoe.com/builds/win64/shared/
 
-9. Extract the FFmpeg DLLs to your current build directory under DOOM-3-BFG/build/
+9. Extract the FFmpeg DLLs to your current build directory (eg. Release) under DOOM-3-BFG/build/
 
 10. In Visual Studio, right click project Doom3BFGVR, click Properties. Set Configuration to
     All Configurations. Choose Debugging, set Command Arguments to:
@@ -2523,7 +2487,7 @@ __________________________________________________________
 
 __________________________________
 
-14) COMPILING ON LINUX
+13) COMPILING ON LINUX
 _________________________
 
 LINUX VR:
@@ -2594,7 +2558,7 @@ Controller buttons don't work
 
 ___________________________________________________
 
-15) BUG REPORTS
+14) BUG REPORTS
 __________________________________________
 
 DOOM-3-BFG VR: Fully Possessed is not perfect, it is not bug free just like all other software.
@@ -2629,7 +2593,7 @@ ALSA or configuring the network.
 	
 _______________________________
 
-16) LICENSE
+15) LICENSE
 ______________________
 
 
@@ -2644,7 +2608,7 @@ Suite 120, Rockville, Maryland 20850 USA.
 
 ____________________________________________________________________________________
 
-17) CODE LICENSE EXCEPTIONS - The parts that are not covered by the GPL:
+16) CODE LICENSE EXCEPTIONS - The parts that are not covered by the GPL:
 _______________________________________________________________________
 
 

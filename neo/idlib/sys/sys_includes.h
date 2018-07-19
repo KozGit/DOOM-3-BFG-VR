@@ -48,10 +48,11 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef _D3SDK
 #ifndef GAME_DLL
 
-#if _MSC_VER < 1910
+// Carl: Vista is needed for LCMapStringEx when compiling Voice.cpp on Visual Studio 2015 and above
+#if _MSC_VER < 1900
 #define WINVER				0x501
 #else
-//#define WINVER				0xA00
+#define WINVER				0x600
 #endif
 
 #include <winsock2.h>

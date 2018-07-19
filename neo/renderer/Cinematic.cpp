@@ -439,8 +439,8 @@ idCinematicLocal::~idCinematicLocal()
 	
 	// RB: TODO double check this. It seems we have different versions of ffmpeg on Kubuntu 13.10 and the win32 development files
 #if defined(_WIN32) || defined(_WIN64)
-	avcodec_free_frame( &frame );
-	avcodec_free_frame( &frame2 );
+	av_frame_free( &frame );
+	av_frame_free( &frame2 );
 #else
 	av_freep( &frame );
 	av_freep( &frame2 );
