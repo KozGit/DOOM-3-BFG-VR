@@ -2458,27 +2458,28 @@ __________________________________________________________
 
 3. Download and install the latest CMake, saying YES to adding CMake to your path.
 
-4. Generate the VC13 projects using CMake by doubleclicking a matching configuration .bat
+4. Generate the VC projects using CMake by doubleclicking a matching configuration .bat
    file in the neo/ folder. eg. cmake-vs2013-64bit.bat (it will erase your build folder)
 
 5. (UPDATED) Go to https://developer.oculus.com/downloads/pc/1.17.0/Oculus_SDK_for_Windows/ then
    download and extract it somewhere. Copy the LibOVR folder to DOOM-3-BFG/neo/libs
 
-6. Init/Update the submodules in Git to get OpenVR. In TortoiseGit, right click in the folder
-   then choose TortoiseGit > Submodule Update... then press OK.
+6. (UPDATED) Init/Update the submodules in Git to get OpenVR. In TortoiseGit, right click in the
+   folder then choose TortoiseGit > Submodule Update... then press OK.
 
 7. Open the following file in Visual Studio and compile it:
 	DOOM-3-BFG/build/Doom3BFGVR.sln
 	
-8. Download ffmpeg-4.0-win32-shared.zip from
+8. (UPDATED) Download ffmpeg-4.0-win32-shared.zip from
 	https://ffmpeg.zeranoe.com/builds/win32/shared/
 	and/or ffmpeg-4.0-win64-shared.zip from
 	https://ffmpeg.zeranoe.com/builds/win64/shared/
 
 9. Extract the FFmpeg DLLs to your current build directory (eg. Release) under DOOM-3-BFG/build/
 
-10. In Visual Studio, right click project Doom3BFGVR, click Properties. Set Configuration to
-    All Configurations. Choose Debugging, set Command Arguments to:
+10. (OPTIONAL) If Doom 3 BFG wasn't installed from Steam or GOG, set the path in Visual Studio.
+    Right click project Doom3BFGVR, click Properties. Set Configuration to All Configurations.
+    Choose Debugging, set Command Arguments to:
     +set fs_basepath "C:\Program Files (x86)\Steam\steamapps\common\DOOM 3 BFG Edition"
     or wherever you installed Doom 3 BFG edition
 
