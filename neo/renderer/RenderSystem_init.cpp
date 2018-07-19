@@ -1984,7 +1984,6 @@ void R_TransformCubemap( const char* orgDirection[6], const char* orgDir, const 
 	idStr fullname;
 	int			i;
 	bool        errorInOriginalImages = false;
-	int			outSize;
 	byte*		buffers[6];
 	int			width = 0, height = 0;
 	

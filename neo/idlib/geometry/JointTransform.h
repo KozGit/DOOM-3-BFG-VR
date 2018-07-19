@@ -62,8 +62,10 @@ public:
 
 assert_sizeof( idJointQuat, JOINTQUAT_SIZE );
 assert_sizeof( idJointQuat, ( 1 << JOINTQUAT_SIZE_SHIFT ) );
+#ifndef __INTELLISENSE__
 assert_offsetof( idJointQuat, q, JOINTQUAT_Q_OFFSET );
 assert_offsetof( idJointQuat, t, JOINTQUAT_T_OFFSET );
+#endif
 
 /*
 ===============================================================================

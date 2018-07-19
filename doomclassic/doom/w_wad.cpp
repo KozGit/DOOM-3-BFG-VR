@@ -445,25 +445,25 @@ int W_LumpLength (int lump)
 
 	// Hardcoded medikit, stimpack, and beserk lumps have hardcoded lengths.
 	if (lump==lumpnum_media0) { //MEDIA0 Medipack
-		return lump_media0_len;
+		return (int)lump_media0_len;
 	} else if (lump==lumpnum_stima0) { //STIMA0 stimpack
-		return lump_stima0_len;
+		return (int)lump_stima0_len;
 	} else if (lump==lumpnum_pstra0) { //PSTRA0 beserk
-		return lump_pstra0_len;
+		return (int)lump_pstra0_len;
 	} else if (lump==lumpnum_wolf2) { //WOLF2 wall
-		return lump_wolf2_len;
+		return (int)lump_wolf2_len;
 	} else if (lump==lumpnum_wolf3) { //WOLF3 wall
-		return lump_wolf3_len;
+		return (int)lump_wolf3_len;
 	} else if (lump==lumpnum_wolf4) { //WOLF4 wall
-		return lump_wolf4_len;
+		return (int)lump_wolf4_len;
 	} else if (lump==lumpnum_wolf6) { //WOLF6 wall
-		return lump_wolf6_len;
+		return (int)lump_wolf6_len;
 	} else if (lump==lumpnum_wolf7) { //WOLF7 wall
-		return lump_wolf7_len;
+		return (int)lump_wolf7_len;
 	} else if (lump==lumpnum_wolf14) { //WOLF14 wall
-		return lump_wolf14_len;
+		return (int)lump_wolf14_len;
 	} else if (lump==lumpnum_wolf17) { //WOLF17 wall
-		return lump_wolf17_len;
+		return (int)lump_wolf17_len;
 	}
     return lumpinfo[lump].size;
 }

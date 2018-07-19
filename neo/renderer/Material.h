@@ -307,7 +307,7 @@ typedef enum
 	CONTENTS_AREAPORTAL			= BIT( 20 ),	// portal separating renderer areas
 	CONTENTS_NOCSG				= BIT( 21 ),	// don't cut this brush with CSG operations in the editor
 	
-	CONTENTS_REMOVE_UTIL		= ~( CONTENTS_AREAPORTAL | CONTENTS_NOCSG )
+	CONTENTS_REMOVE_UTIL		= (int)(~( CONTENTS_AREAPORTAL | CONTENTS_NOCSG ))
 } contentsFlags_t;
 
 // surface types
