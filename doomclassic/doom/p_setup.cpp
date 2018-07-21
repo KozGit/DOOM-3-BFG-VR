@@ -622,7 +622,7 @@ P_SetupLevel
  skill_t	skill)
 {
 	int		i;
-	char	lumpname[9];
+	char	lumpname[16];
 	int		lumpnum;
 
 	::g->totalkills = ::g->totalitems = ::g->totalsecret = ::g->wminfo.maxfrags = 0;
