@@ -2500,7 +2500,8 @@ build the engine:
     cd neo
     mkdir build
     cd build
-    cmake -DCMAKE_BUILD_TYPE=Release .. #Debug asserts after intro video
+    cmake -DCMAKE_BUILD_TYPE=Release .. # -DCMAKE_BUILD_TYPE=Debug has really bad VR performance
+    make -j$(nproc)
 
 symlink binary + mod files to wine steam installation and run
 
