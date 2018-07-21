@@ -1051,7 +1051,7 @@ void iVr::HMDInitializeDistortion()
 		{
 			hmdEye[eye].renderTargetRes.x = primaryFBOWidth;
 			hmdEye[eye].renderTargetRes.y = primaryFBOHeight;
-			hmdEye[eye].renderTarget = rendertarget;
+			//TODO LINUX: hmdEye[eye].renderTarget = rendertarget;
 		}
 
 	}

@@ -2,10 +2,14 @@
 #include "precompiled.h"
 #pragma hdrstop
 
-#include "d3xp\Game_local.h"
-#include "vr.h"
-#include "renderer\tr_local.h"
-#include "sys\win32\win_local.h"
+#include "d3xp/Game_local.h"
+#include "Vr.h"
+#include "renderer/tr_local.h"
+#ifdef _WIN32
+#include "sys/win32/win_local.h"
+#else
+#include "sys/sdl/sdl_local.h"
+#endif
 #ifdef USE_OVR
 #include "libs\LibOVR\Include\OVR_CAPI_GL.h"
 #include "libs\LibOVR\Include\Extras\OVR_Math.h"
@@ -20,7 +24,9 @@ idCVar vr_cineSize("vr_cineSize", "3", CVAR_FLOAT | CVAR_ARCHIVE, "");
 void GLimp_SwapBuffers();
 void GL_BlockingSwapBuffers();
 
+#ifdef _WIN32
 extern PFNWGLSWAPINTERVALEXTPROC				wglSwapIntervalEXT;
+#endif
 
 /*
 ====================
@@ -483,7 +489,10 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 	static int FBOW;
 	static int FBOH;
 
+#ifdef _WIN32
+	//TODO LINUX
 	wglSwapIntervalEXT( 0 ); 
+#endif
 
 
 	// final eye textures now in finalEyeImage[0,1]				
@@ -516,7 +525,10 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 
 		if ( 1 ) //!vr_skipOvr.GetBool() )
 		{
+#ifdef _WIN32
+			//TODO LINUX
 			wglSwapIntervalEXT( 0 );
+#endif
 
 			GLuint curTexId;
 			int curIndex;
@@ -636,7 +648,10 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 			if ( swapset == 0 )
 			{
 				//swapset = 1;
+#ifdef _WIN32
+				//TODO LINUX
 				wglSwapIntervalEXT( 0 );
+#endif
 			}
 
 			globalFramebuffers.primaryFBO->Bind();
@@ -681,7 +696,10 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 		vr::Texture_t rightEyeTexture = { (void*)rightCurrent->GetTexNum(), vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 		vr::VRCompositor()->Submit( vr::Eye_Right, &rightEyeTexture );
 		
+#ifdef _WIN32
+		//TODO LINUX
 		wglSwapIntervalEXT( 0 ); //
+#endif
 		// Blit mirror texture to back buffer
 		//renderProgManager.BindShader_PostProcess(); // pass thru shader
 
@@ -700,8 +718,10 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 
 		globalFramebuffers.primaryFBO->Bind();
 	
-
+#ifdef WIN32
+		//TODO LINUX
 		wglSwapIntervalEXT( 0 );//
+#endif
 	}
 }
 
@@ -719,8 +739,10 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 	static int FBOW;
 	static int FBOH;
 
+#ifdef _WIN32
+	//TODO LINUX
 	wglSwapIntervalEXT(0);
-
+#endif
 
 	// final eye textures now in finalEyeImage[0,1]				
 
@@ -752,7 +774,10 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 
 		if (1) // !vr_skipOvr.GetBool() )
 		{
+#ifdef _WIN32
+			//TODO LINUX
 			wglSwapIntervalEXT(0);
+#endif
 
 			GLuint curTexId;
 			int curIndex;
@@ -914,7 +939,10 @@ bool iVr::HMDRenderQuad(idImage *leftCurrent, idImage *rightCurrent)
 			if ( swapset == 0 )
 			{
 				//swapset = 1;
+#ifdef _WIN32
+				//TODO LINUX
 				wglSwapIntervalEXT(0);
+#endif
 			}
 
 			globalFramebuffers.primaryFBO->Bind();
