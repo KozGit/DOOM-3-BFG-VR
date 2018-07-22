@@ -963,9 +963,11 @@ idMath::ATan
 */
 ID_INLINE float idMath::ATan( float y, float x )
 {
+#if defined( _DEBUG ) || defined( _lint )
 	if(!( fabs( y ) > idMath::FLT_SMALLEST_NON_DENORMAL || fabs( x ) > idMath::FLT_SMALLEST_NON_DENORMAL )) {
 		printf("Pseudo assert: fabs( y = %f) > idMath::FLT_SMALLEST_NON_DENORMAL || fabs( x = %f ) > idMath::FLT_SMALLEST_NON_DENORMAL\n", y, x);
 	}
+#endif
 	return atan2f( y, x );
 }
 
