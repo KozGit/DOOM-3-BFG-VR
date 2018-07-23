@@ -583,7 +583,7 @@ public:
 	bool					GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis);
 	void					UpdatePlayerSkinsPoses();
 	void					SetWeaponHandPose();
-	void					SetFlashHandPose();
+	void					SetFlashHandPose(); // Set flashlight hand pose
 	void					ToggleLaserSight(); 
 	void					UpdateHeadingBeam(); 
 	void					ToggleHeadingBeam();
@@ -701,7 +701,7 @@ public:
 	void					SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQuat rotation, bool isFlashlight = false );
 
 	// Koz begin
-	void					CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flashOffset ); // Koz aim the flashlight with motion controls
+	void					CalculateViewFlashlightPos( idVec3 &origin, idMat3 &axis, idVec3 flashlightOffset ); // Koz aim the flashlight with motion controls
 	// Koz end
 
 	idVec3					GetEyePosition() const;
@@ -828,7 +828,7 @@ public:
 		return privateCameraView;
 	}
 	void					StartFxFov( float duration );
-	void					UpdateHudWeapon( bool flashWeapon = true );
+	void					UpdateHudWeapon( bool flashlightWeapon = true );
 	void					UpdateChattingHud();
 	void					UpdateHudStats( idMenuHandler_HUD* hudManager );
 	void					Event_StopAudioLog();
@@ -1213,9 +1213,9 @@ private:
 	// Koz
 	void					Event_GetWeaponHand();
 	void					Event_GetWeaponHandState();
-	void					Event_GetFlashHand();
-	void					Event_GetFlashHandState();
-	void					Event_GetFlashState();
+	void					Event_GetFlashHand(); // get flashlight hand
+	void					Event_GetFlashHandState(); // get flashlight hand state
+	void					Event_GetFlashState(); // get flashlight state
 
 
 };

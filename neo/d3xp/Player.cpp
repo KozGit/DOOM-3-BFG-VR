@@ -174,10 +174,10 @@ const idEventDef EV_Player_SetBloomParms( "setBloomParms", "ff" );
 
 // Koz begin - let scripts query which hand does what when using motion controls
 const idEventDef EV_Player_GetWeaponHand( "getWeaponHand", NULL, 'd' );
-const idEventDef EV_Player_GetFlashHand( "getFlashHand", NULL, 'd' );
+const idEventDef EV_Player_GetFlashHand( "getFlashHand", NULL, 'd' ); // get flashlight hand
 const idEventDef EV_Player_GetWeaponHandState( "getWeaponHandState", NULL, 'd' );
-const idEventDef EV_Player_GetFlashHandState( "getFlashHandState", NULL, 'd' );
-const idEventDef EV_Player_GetFlashState( "getFlashState", NULL, 'd' );
+const idEventDef EV_Player_GetFlashHandState( "getFlashHandState", NULL, 'd' ); // get flashlight hand state
+const idEventDef EV_Player_GetFlashState( "getFlashState", NULL, 'd' ); // get flashlight state
 
 // Koz end
 
@@ -210,11 +210,11 @@ EVENT( EV_Player_StopHelltime,			idPlayer::Event_StopHelltime )
 EVENT( EV_Player_ToggleBloom,			idPlayer::Event_ToggleBloom )
 EVENT( EV_Player_SetBloomParms,			idPlayer::Event_SetBloomParms )
 // Koz begin
-EVENT( EV_Player_GetWeaponHand, 		idPlayer::Event_GetWeaponHand ) 
-EVENT( EV_Player_GetFlashHand,			idPlayer::Event_GetFlashHand )
+EVENT( EV_Player_GetWeaponHand, 		idPlayer::Event_GetWeaponHand )
+EVENT( EV_Player_GetFlashHand,			idPlayer::Event_GetFlashHand ) // get flashlight hand
 EVENT( EV_Player_GetWeaponHandState,	idPlayer::Event_GetWeaponHandState )
-EVENT( EV_Player_GetFlashHandState,		idPlayer::Event_GetFlashHandState )
-EVENT( EV_Player_GetFlashState,			idPlayer::Event_GetFlashState )
+EVENT( EV_Player_GetFlashHandState,		idPlayer::Event_GetFlashHandState ) // get flashlight hand state
+EVENT( EV_Player_GetFlashState,			idPlayer::Event_GetFlashState ) // get flashlight state
 // Koz end
 END_CLASS
 
@@ -2060,7 +2060,7 @@ void idPlayer::Init()
 	
 	InitPlayerBones(); 
 
-	commonVr->currentFlashMode = vr_flashlightMode.GetInteger();
+	commonVr->currentFlashlightMode = vr_flashlightMode.GetInteger();
 
 	commonVr->thirdPersonMovement = false;
 	commonVr->thirdPersonDelta = 0.0f;
@@ -3048,7 +3048,7 @@ void idPlayer::Save( idSaveGame* savefile ) const
 	savefile->WriteBool( headingBeamActive );
 	savefile->WriteBool( hudActive );
 	
-	savefile->WriteInt( commonVr->currentFlashMode );
+	savefile->WriteInt( commonVr->currentFlashlightMode );
 	savefile->WriteSkin( crosshairEntity.customSkin );
 	
 	savefile->WriteBool( PDAfixed );
@@ -3611,7 +3611,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		savefile->ReadBool( headingBeamActive );
 		savefile->ReadBool( hudActive );
 	
-		savefile->ReadInt( commonVr->currentFlashMode );
+		savefile->ReadInt( commonVr->currentFlashlightMode );
 	//	savefile->ReadSkin( crosshairEntity.customSkin );
 		savefile->ReadSkin( blag );
 
@@ -4075,7 +4075,7 @@ void idPlayer::SavePersistantInfo()
 	playerInfo.SetBool( "headingBeamActive", headingBeamActive );
 	playerInfo.SetBool( "laserSightActive", laserSightActive );
 	playerInfo.SetBool( "hudActive", hudActive );
-	playerInfo.SetInt( "currentFlashMode", commonVr->currentFlashMode );
+	playerInfo.SetInt( "currentFlashMode", commonVr->currentFlashlightMode );
 
 	playerInfo.SetInt( "holsteredWeapon", holsteredWeapon );
 	playerInfo.SetInt( "extraHolsteredWeapon", extraHolsteredWeapon );
@@ -4112,7 +4112,7 @@ void idPlayer::RestorePersistantInfo()
 	// Koz begin
 	headingBeamActive = spawnArgs.GetBool( "headingBeamActive", "1" );
 	laserSightActive = spawnArgs.GetBool( "laserSightActive", "1" );
-	commonVr->currentFlashMode = spawnArgs.GetInt( "currentFlashMode", "3" );
+	commonVr->currentFlashlightMode = spawnArgs.GetInt( "currentFlashMode", "3" );
 	hudActive = spawnArgs.GetBool( "hudActive", "1" );
 	
 	holsteredWeapon = spawnArgs.GetInt( "holsteredWeapon", "-1" );
@@ -4295,7 +4295,7 @@ void idPlayer::UpdateHudStats( idMenuHandler_HUD* _hudManager )
 idPlayer::UpdateHudWeapon
 ===============
 */
-void idPlayer::UpdateHudWeapon( bool flashWeapon )
+void idPlayer::UpdateHudWeapon( bool flashlightWeapon )
 {
 
 	idMenuScreen_HUD* curDisplay = hud;
@@ -4315,7 +4315,7 @@ void idPlayer::UpdateHudWeapon( bool flashWeapon )
 		return;
 	}
 	
-	curDisplay->UpdateWeaponStates( p, flashWeapon );
+	curDisplay->UpdateWeaponStates( p, flashlightWeapon );
 }
 
 /*
@@ -6124,13 +6124,13 @@ bool idPlayer::OtherHandImpulseSlot()
 		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons") )
 	{
 		// swap flashlight between head and hand
-		if (vr_flashlightMode.GetInteger() == FLASH_HEAD)
+		if (vr_flashlightMode.GetInteger() == FLASHLIGHT_HEAD)
 		{
-			vr_flashlightMode.SetInteger(FLASH_HAND);
+			vr_flashlightMode.SetInteger(FLASHLIGHT_HAND);
 		}
-		else if (vr_flashlightMode.GetInteger() == FLASH_HAND)
+		else if (vr_flashlightMode.GetInteger() == FLASHLIGHT_HAND)
 		{
-			vr_flashlightMode.SetInteger(FLASH_HEAD);
+			vr_flashlightMode.SetInteger(FLASHLIGHT_HEAD);
 		}
 		return true;
 	}
@@ -6138,13 +6138,13 @@ bool idPlayer::OtherHandImpulseSlot()
 		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons") )
 	{
 		// swap flashlight between body and hand
-		if (vr_flashlightMode.GetInteger() == FLASH_BODY)
+		if (vr_flashlightMode.GetInteger() == FLASHLIGHT_BODY)
 		{
-			vr_flashlightMode.SetInteger(FLASH_HAND);
+			vr_flashlightMode.SetInteger(FLASHLIGHT_HAND);
 		}
-		else if (vr_flashlightMode.GetInteger() == FLASH_HAND)
+		else if (vr_flashlightMode.GetInteger() == FLASHLIGHT_HAND)
 		{
-			vr_flashlightMode.SetInteger(FLASH_BODY);
+			vr_flashlightMode.SetInteger(FLASHLIGHT_BODY);
 		}
 		return true;
 	}
@@ -6278,20 +6278,20 @@ bool idPlayer::WeaponHandImpulseSlot()
 		}
 		return true;
 	}
-	if (weaponHandSlot == SLOT_FLASHLIGHT_HEAD && vr_flashlightMode.GetInteger() == FLASH_HEAD && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen
+	if (weaponHandSlot == SLOT_FLASHLIGHT_HEAD && vr_flashlightMode.GetInteger() == FLASHLIGHT_HEAD && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen
 		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons"))
 	{
 		SwapWeaponHand();
 		// swap flashlight between head and hand
-		vr_flashlightMode.SetInteger( FLASH_HAND );
+		vr_flashlightMode.SetInteger( FLASHLIGHT_HAND );
 		return true;
 	}
-	if (weaponHandSlot == SLOT_FLASHLIGHT_SHOULDER && vr_flashlightMode.GetInteger() == FLASH_BODY && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen
+	if (weaponHandSlot == SLOT_FLASHLIGHT_SHOULDER && vr_flashlightMode.GetInteger() == FLASHLIGHT_BODY && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen
 		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons"))
 	{
 		SwapWeaponHand();
 		// swap flashlight between head and hand
-		vr_flashlightMode.SetInteger( FLASH_HAND );
+		vr_flashlightMode.SetInteger( FLASHLIGHT_HAND );
 		return true;
 	}
 	return false;
@@ -7413,18 +7413,18 @@ void idPlayer::FlashlightOn()
 	// Koz pose the hand
 	const function_t* func;
 		
-	func = scriptObject.GetFunction( "SetFlashHandPose" );
+	func = scriptObject.GetFunction( "SetFlashHandPose" ); // Set flashlight hand pose
 	if ( func )
 	{
 		// use the frameCommandThread since it's safe to use outside of framecommands
-		// Koz debug common->Printf( "Calling SetFlashHandPose\n" );
+		// Koz debug common->Printf( "Calling SetFlashHandPose\n" ); // Set flashlight hand pose
 		gameLocal.frameCommandThread->CallFunction( this, func, true );
 		gameLocal.frameCommandThread->Execute();
 
 	}
 	else
 	{
-		common->Warning( "Can't find function 'SetFlashHandPose' in object '%s'", scriptObject.GetTypeName() );
+		common->Warning( "Can't find function 'SetFlashHandPose' in object '%s'", scriptObject.GetTypeName() ); // Set flashlight hand pose
 		return;
 	}
 	// Koz end
@@ -7451,18 +7451,18 @@ void idPlayer::FlashlightOff()
 
 	// Koz
 	const function_t* func;
-	func = scriptObject.GetFunction( "SetFlashHandPose" );
+	func = scriptObject.GetFunction( "SetFlashHandPose" ); // Set flashlight hand pose
 	if ( func )
 	{
 		// use the frameCommandThread since it's safe to use outside of framecommands
-		// Koz debug common->Printf( "Calling SetFlashHandPose\n" );
+		// Koz debug common->Printf( "Calling SetFlashHandPose\n" ); // Set flashlight hand pose
 		gameLocal.frameCommandThread->CallFunction( this, func, true );
 		gameLocal.frameCommandThread->Execute();
 
 	}
 	else
 	{
-		common->Warning( "Can't find function 'SetFlashHandPose' in object '%s'", scriptObject.GetTypeName() );
+		common->Warning( "Can't find function 'SetFlashHandPose' in object '%s'", scriptObject.GetTypeName() ); // Set flashlight hand pose
 		return;
 	}
 	// Koz
@@ -9839,7 +9839,7 @@ void idPlayer::PerformImpulse( int impulse )
 
 		case IMPULSE_39:// next flashlight mode
 		{
-			commonVr->NextFlashMode();
+			commonVr->NextFlashlightMode();
 			break;
 		}
 
@@ -11679,10 +11679,10 @@ bool idPlayer::GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3&
 		}
 	}
 	// Carl: flashlight hand
-	else if ( commonVr->GetCurrentFlashMode() == FLASH_HAND && weaponEnabled && !spectating && !gameLocal.world->spawnArgs.GetBool("no_Weapons") && !game->IsPDAOpen() && !commonVr->PDAforcetoggle && currentWeapon != weapon_pda )
+	else if ( commonVr->GetCurrentFlashlightMode() == FLASHLIGHT_HAND && weaponEnabled && !spectating && !gameLocal.world->spawnArgs.GetBool("no_Weapons") && !game->IsPDAOpen() && !commonVr->PDAforcetoggle && currentWeapon != weapon_pda )
 	{
 		weapon_t currentWeapon = flashlight->IdentifyWeapon();
-		CalculateViewFlashPos( origin, axis, flashOffsets[ int( currentWeapon ) ] );
+		CalculateViewFlashlightPos( origin, axis, flashlightOffsets[ int( currentWeapon ) ] );
 		return false;
 	}
 	// Carl: todo empty non-weapon hand (currently using head instead)
@@ -12356,7 +12356,7 @@ bool idPlayer::GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis ) // 
 
 	else // beam originates from the off hand, use the flashlight if in the hand;
 	{
-		if ( commonVr->currentFlashlightPosition == FLASH_HAND ) // flashlight is in the hand, so originate the beam slightly in front of the flashlight.
+		if ( commonVr->currentFlashlightPosition == FLASHLIGHT_HAND ) // flashlight is in the hand, so originate the beam slightly in front of the flashlight.
 		{
 			beamAxis = flashlight->GetRenderEntity()->axis;
 			beamOrigin = flashlight->GetRenderEntity()->origin + 10 * beamAxis[0];
@@ -13010,27 +13010,27 @@ void idPlayer::UpdateVrHud()
 
 /*
 ==============
-idPlayer::SetFlashHandPose()
+idPlayer::SetFlashHandPose() // Call set flashlight hand pose script function
 Updates the pose of the player model flashlight hand
 ======
 */
-void idPlayer::SetFlashHandPose()
+void idPlayer::SetFlashHandPose() // Call set flashlight hand pose script function
 {
 
 	const function_t* func;
 
-	func = scriptObject.GetFunction( "SetFlashHandPose" );
+	func = scriptObject.GetFunction( "SetFlashHandPose" ); // Set flashlight hand pose
 	if ( func )
 	{
 		// use the frameCommandThread since it's safe to use outside of framecommands
-		// Koz debug common->Printf( "Calling SetFlashHandPose\n" );
+		// Koz debug common->Printf( "Calling SetFlashHandPose\n" ); // Set flashlight hand pose
 		gameLocal.frameCommandThread->CallFunction( this, func, true );
 		gameLocal.frameCommandThread->Execute();
 
 	}
 	else
 	{
-		common->Warning( "Can't find function 'SetFlashHandPose' in object '%s'", scriptObject.GetTypeName() );
+		common->Warning( "Can't find function 'SetFlashHandPose' in object '%s'", scriptObject.GetTypeName() ); // Set flashlight hand pose
 		return;
 	}
 }
@@ -13076,7 +13076,7 @@ void idPlayer::UpdatePlayerSkinsPoses()
 	{
 		flashlight->UpdateSkin();
 	}
-	SetFlashHandPose();
+	SetFlashHandPose(); // Call set flashlight hand pose script function
 	SetWeaponHandPose();
 }
 /*
@@ -13203,7 +13203,7 @@ void idPlayer::Think()
 	//	common->Printf( "HideOffset = %f\n", weapon->hideOffset );
 		
 		SetWeaponHandPose();
-		SetFlashHandPose();
+		SetFlashHandPose(); // Call set flashlight hand pose script function
 		
 	}
 	else
@@ -13327,7 +13327,7 @@ void idPlayer::Think()
 	
 	
 	
-	static int lastFlashMode = commonVr->GetCurrentFlashMode();
+	static int lastFlashlightMode = commonVr->GetCurrentFlashlightMode();
 	//static bool lastViewArms = vr_viewModelArms.GetBool();
 	static bool lastFists = false;
 	static bool lastHandInGui = false;
@@ -13350,16 +13350,16 @@ void idPlayer::Think()
 
 		}
 
-		if ( vr_flashlightMode.IsModified() || lastFlashMode != commonVr->GetCurrentFlashMode() )
+		if ( vr_flashlightMode.IsModified() || lastFlashlightMode != commonVr->GetCurrentFlashlightMode() )
 		{
 			
 			if ( vr_flashlightMode.IsModified() )
 			{
-				commonVr->currentFlashMode = vr_flashlightMode.GetInteger();
+				commonVr->currentFlashlightMode = vr_flashlightMode.GetInteger();
 				vr_flashlightMode.ClearModified();
 			}
 
-			lastFlashMode = commonVr->GetCurrentFlashMode();
+			lastFlashlightMode = commonVr->GetCurrentFlashlightMode();
 			UpdatePlayerSkinsPoses();
 		}
 	}
@@ -15634,7 +15634,7 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 			PDAorigin = weapOrigin;
 			if ( wasPDA == false )
 			{
-				SetFlashHandPose();
+				SetFlashHandPose(); // Call set flashlight hand pose script function
 				SetWeaponHandPose();
 				wasPDA = true;
 			}
@@ -15834,7 +15834,7 @@ void idPlayer::SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQua
 	
 	currentWeaponEnum = weapon->IdentifyWeapon();
 
-	if ( isFlashlight && commonVr->currentFlashlightPosition == FLASH_HAND && flashlight.IsValid() )
+	if ( isFlashlight && commonVr->currentFlashlightPosition == FLASHLIGHT_HAND && flashlight.IsValid() )
 	{
 		curEntity = flashlight;
 		activeWeapon = weapon_flashlight;
@@ -15910,11 +15910,11 @@ void idPlayer::SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQua
 
 /*
 ==============
-Koz idPlayer::CalculateViewFlashPos
+Koz idPlayer::CalculateViewFlashlightPos
 Calculate the flashlight orientation
 ==============
 */
-void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flashOffset )
+void idPlayer::CalculateViewFlashlightPos( idVec3 &origin, idMat3 &axis, idVec3 flashlightOffset )
 {
 	static idVec3 viewOrigin = vec3_zero;
 	static idMat3 viewAxis = mat3_identity;
@@ -15929,46 +15929,46 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 	axis = idAngles( 0.0, viewAngles.yaw, 0.0f ).ToMat3();
 	if ( game->isVR ) axis = idAngles( 0.0, viewAngles.yaw - commonVr->bodyYawOffset, 0.0f ).ToMat3();
 	
-	int flashMode = game->isVR ? commonVr->GetCurrentFlashMode() : FLASH_BODY;
+	int flashlightMode = game->isVR ? commonVr->GetCurrentFlashlightMode() : FLASHLIGHT_BODY;
 		
 	curWeap = weapon->IdentifyWeapon();
 	
 	setLeftHand = false;
 	//move the flashlight to alternate location for items with no mount
 		
-	if ( spectating || !weaponEnabled || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) ) flashMode = FLASH_BODY;
+	if ( spectating || !weaponEnabled || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) ) flashlightMode = FLASHLIGHT_BODY;
 	
-	if ( flashMode == FLASH_HAND )
+	if ( flashlightMode == FLASHLIGHT_HAND )
 	{
-		if ( game->IsPDAOpen() || commonVr->PDAforcetoggle || currentWeapon == weapon_pda || !commonVr->VR_USE_MOTION_CONTROLS  || (commonVr->handInGui && flashMode == FLASH_GUN) )
+		if ( game->IsPDAOpen() || commonVr->PDAforcetoggle || currentWeapon == weapon_pda || !commonVr->VR_USE_MOTION_CONTROLS  || (commonVr->handInGui && flashlightMode == FLASHLIGHT_GUN) )
 		{
-			flashMode = FLASH_HEAD;
+			flashlightMode = FLASHLIGHT_HEAD;
 		}
 	}
 		
-	if ( ( flashMode == FLASH_GUN && !weapon->GetMuzzlePositionWithHacks( origin, axis )) || ( flashMode == FLASH_GUN && commonVr->handInGui ) )
+	if ( ( flashlightMode == FLASHLIGHT_GUN && !weapon->GetMuzzlePositionWithHacks( origin, axis )) || ( flashlightMode == FLASHLIGHT_GUN && commonVr->handInGui ) )
 	{
-		idAngles flashAx = axis.ToAngles();
-		flashMode = FLASH_HEAD;
-		if ( game->isVR ) axis = idAngles( flashAx.pitch, flashAx.yaw - commonVr->bodyYawOffset, flashAx.roll ).ToMat3();
+		idAngles flashlightAx = axis.ToAngles();
+		flashlightMode = FLASHLIGHT_HEAD;
+		if ( game->isVR ) axis = idAngles( flashlightAx.pitch, flashlightAx.yaw - commonVr->bodyYawOffset, flashlightAx.roll ).ToMat3();
 		
 	}
 		
-	commonVr->currentFlashlightPosition = flashMode;
+	commonVr->currentFlashlightPosition = flashlightMode;
 
-	switch ( flashMode )
+	switch ( flashlightMode )
 	{
 	
-		case FLASH_GUN:
+		case FLASHLIGHT_GUN:
 			// move the flashlight to the weapon
 			
 			/* was for adjusting
-			flashOffset.x += ftx.GetFloat();
-			flashOffset.y += fty.GetFloat();
-			flashOffset.z += ftz.GetFloat();
+			flashlightOffset.x += ftx.GetFloat();
+			flashlightOffset.y += fty.GetFloat();
+			flashlightOffset.z += ftz.GetFloat();
 			*/
 
-			origin += flashOffset.x * axis[1] + flashOffset.y * axis[0] + flashOffset.z * axis[2];
+			origin += flashlightOffset.x * axis[1] + flashlightOffset.y * axis[0] + flashlightOffset.z * axis[2];
 		
 			if ( curWeap == WEAPON_SHOTGUN_DOUBLE || curWeap == WEAPON_ROCKETLAUNCHER )
 			{
@@ -15985,7 +15985,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 			setLeftHand = true;
 			break;
 				
-		case FLASH_HEAD:
+		case FLASHLIGHT_HEAD:
 			// Flashlight on helmet 
 			origin = commonVr->lastViewOrigin;
 			axis = commonVr->lastViewAxis;
@@ -16000,11 +16000,11 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 			setLeftHand = true;
 			break;
 			
-		case FLASH_HAND:
+		case FLASHLIGHT_HAND:
 		
 			if ( !commonVr->VR_USE_MOTION_CONTROLS )
 			{
-				static idQuat flashRot = idAngles( 0, 0.0f, 0.0f ).ToQuat();
+				static idQuat flashlightRot = idAngles( 0, 0.0f, 0.0f ).ToQuat();
 				static idVec3 originOffset = vec3_zero;
 				static int currentHand = 0;
 				static int flip = 1;
@@ -16025,9 +16025,9 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 				{
 					origin += idVec3( vr_offHandPosX.GetFloat(), vr_offHandPosY.GetFloat() * flip, vr_offHandPosZ.GetFloat() ) * axis;
 				}
-				idMat3 fr = flashRot.ToMat3() * axis;
+				idMat3 fr = flashlightRot.ToMat3() * axis;
 				
-				SetHandIKPos( currentHand, origin, fr , flashRot, true );
+				SetHandIKPos( currentHand, origin, fr , flashlightRot, true );
 
 				origin -= originOffset * axis;
 				origin += handWeaponAttacherToDefaultOffset[currentHand][weapon_flashlight] * axis;
@@ -16037,7 +16037,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 				break;
 			}
 
-		case FLASH_BODY:
+		case FLASHLIGHT_BODY:
 		default: // this is the original body mount code.
 			{
 				origin = weapon->playerViewOrigin;
@@ -16091,17 +16091,17 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 		static idVec3 headPositionDelta;
 		static idVec3 bodyPositionDelta;
 		static idVec3 absolutePosition;
-		static idQuat flashPitch;
-		static bool isFlash = false;
+		static idQuat flashlightPitch;
+		static bool isFlashlight = false;
 				
 		currentHand = 1 - vr_weaponHand.GetInteger();
 		originOffset = flashlight->weaponHandDefaultPos[currentHand];
-		flashPitch = idAngles( vr_motionFlashPitchAdj.GetFloat(), 0.f, 0.0f ).ToQuat();
-		isFlash = true;
+		flashlightPitch = idAngles( vr_motionFlashPitchAdj.GetFloat(), 0.f, 0.0f ).ToQuat();
+		isFlashlight = true;
 		
 		commonVr->MotionControlGetHand( currentHand, motionPosition, motionRotation );
 		
-		motionRotation = flashPitch * motionRotation;
+		motionRotation = flashlightPitch * motionRotation;
 		
 		GetViewPos( viewOrigin, viewAxis );  //GetEyePosition();
 	
@@ -16127,17 +16127,17 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 		
 
 		// Koz fixme:
-		// Koz hack , the alignment isn't quite right, so do a quick hack here so the hand and flash align 
+		// Koz hack , the alignment isn't quite right, so do a quick hack here so the hand and flashlight align 
 		// better with the controllers.
 		// need to really fix this right, the whole body/viewweapon pose attacher code is a complete trainwreck now.
 		
-		const idVec3 flashPosHack[2] = { idVec3( 0.0f, -1.0f, 0.5f ), idVec3( 0.0f, 0.85f, 0.5f ) };
-		viewOrigin += flashPosHack[currentHand] * viewAxis;
+		const idVec3 flashlightPosHack[2] = { idVec3( 0.0f, -1.0f, 0.5f ), idVec3( 0.0f, 0.85f, 0.5f ) };
+		viewOrigin += flashlightPosHack[currentHand] * viewAxis;
 		
 		//DebugCross( viewOrigin, viewAxis, colorYellow );
-		SetHandIKPos( currentHand , viewOrigin, viewAxis, motionRotation, isFlash );
+		SetHandIKPos( currentHand , viewOrigin, viewAxis, motionRotation, isFlashlight );
 		
-		if ( flashMode == FLASH_HAND   )
+		if ( flashlightMode == FLASHLIGHT_HAND   )
 		{
 			origin = viewOrigin;
 			origin -= originOffset * viewAxis;
@@ -16156,7 +16156,7 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 	else if ( setLeftHand == true  )
 	{
 			// if the flashlight is not in the left hand, set the player model hand location anyway.
-			static idQuat flashRot = idAngles( 0, 0.0f, 0.0f ).ToQuat();
+			static idQuat flashlightRot = idAngles( 0, 0.0f, 0.0f ).ToQuat();
 			static idVec3 originOffset = vec3_zero;
 			static int currentHand = 0;
 			static int flip = 1;
@@ -16183,9 +16183,9 @@ void idPlayer::CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flash
 				handLoc += idVec3( vr_offHandPosX.GetFloat(), vr_offHandPosY.GetFloat() * flip, vr_offHandPosZ.GetFloat() ) * handOrg;
 			}
 
-			idMat3 fr = flashRot.ToMat3() * handOrg;
+			idMat3 fr = flashlightRot.ToMat3() * handOrg;
 
-			SetHandIKPos( currentHand, handLoc, fr, flashRot, true );
+			SetHandIKPos( currentHand, handLoc, fr, flashlightRot, true );
 	}
 
 	if ( game->CheckInCinematic() )
@@ -17562,27 +17562,27 @@ void idPlayer::Event_GetWeaponHandState()
 
 /*
 ==================
-idPlayer::Event_GetFlashHand
+idPlayer::Event_GetFlashHand // get flashlight hand
 ==================
 */
-void idPlayer::Event_GetFlashHand()
+void idPlayer::Event_GetFlashHand() // get flashlight hand
 {
-	static int flashHand = 1;
+	static int flashlightHand = 1;
 	//returns 0 for right, 1 for left
 		
-	flashHand = vr_weaponHand.GetInteger() == 0 ? 1 : 0;
+	flashlightHand = vr_weaponHand.GetInteger() == 0 ? 1 : 0;
 	
 	
-	idThread::ReturnInt( flashHand );
+	idThread::ReturnInt( flashlightHand );
 
 }
 
 /*
 ==================
-idPlayer::Event_GetFlashHandState
+idPlayer::Event_GetFlashHandState // get flashlight hand state
 ==================
 */
-void idPlayer::Event_GetFlashHandState()
+void idPlayer::Event_GetFlashHandState() // get flashlight hand state
 {
 	
 	// this is for the flashlight hand
@@ -17593,46 +17593,46 @@ void idPlayer::Event_GetFlashHandState()
 	// 3 = normal weapon idle hand anim - used for holding PDA.
 			
 	
-	int flashHand = 1;
+	int flashlightHand = 1;
 	
 	if ( weapon->IdentifyWeapon() == WEAPON_PDA )
 	{
-		flashHand = 3;
+		flashlightHand = 3;
 	}
 	else if ( spectating || !weaponEnabled || hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
-		flashHand = 0;
+		flashlightHand = 0;
 	}
 		 
-	//else if ( commonVr->currentFlashlightPosition == FLASH_HAND && !spectating && weaponEnabled &&!hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
-	else if ( commonVr->currentFlashlightPosition == FLASH_HAND ) //&& !spectating && weaponEnabled &&!hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
+	//else if ( commonVr->currentFlashlightPosition == FLASHLIGHT_HAND && !spectating && weaponEnabled &&!hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
+	else if ( commonVr->currentFlashlightPosition == FLASHLIGHT_HAND ) //&& !spectating && weaponEnabled &&!hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
-		flashHand = 2;
+		flashlightHand = 2;
 	}
 	
-	if ( flashHand <= 1 && vr_useHandPoses.GetBool() )
+	if ( flashlightHand <= 1 && vr_useHandPoses.GetBool() )
 	{
 		int fingerPose;
 		fingerPose = vr_weaponHand.GetInteger() != 0 ? commonVr->fingerPose[HAND_RIGHT] : commonVr->fingerPose[HAND_LEFT];
 		fingerPose = fingerPose << 4;
-		//common->Printf( "Flash hand finger pose = %d , %d\n ", flashHand, fingerPose );
-		flashHand += fingerPose;
+		//common->Printf( "Flashlight hand finger pose = %d , %d\n ", flashlightHand, fingerPose );
+		flashlightHand += fingerPose;
 	}
-	idThread::ReturnInt( flashHand );
+	idThread::ReturnInt( flashlightHand );
 
 }
 
 /*
 ==================
-idPlayer::Event_GetFlashState
+idPlayer::Event_GetFlashState // get flashlight state
 ==================
 */
-void idPlayer::Event_GetFlashState()
+void idPlayer::Event_GetFlashState() // get flashlight state
 {
-	static int flashon;
-	flashon = flashlight.GetEntity()->lightOn  ? 1 : 0 ;
-	// Koz debug common->Printf( "Returning flashlight state = %d\n",flashon );
-	idThread::ReturnInt( flashon );
+	static int flashlighton;
+	flashlighton = flashlight.GetEntity()->lightOn  ? 1 : 0 ;
+	// Koz debug common->Printf( "Returning flashlight state = %d\n",flashlighton );
+	idThread::ReturnInt( flashlighton );
 }
 
 
@@ -18578,10 +18578,10 @@ void idPlayer::Hide()
 	{
 		weap->HideWorldModel();
 	}
-	idWeapon* flash = flashlight.GetEntity();
-	if( flash )
+	idWeapon* flashlight_weapon = flashlight.GetEntity();
+	if( flashlight_weapon )
 	{
-		flash->HideWorldModel();
+		flashlight_weapon->HideWorldModel();
 	}
 }
 
@@ -18600,10 +18600,10 @@ void idPlayer::Show()
 	{
 		weap->ShowWorldModel();
 	}
-	idWeapon* flash = flashlight.GetEntity();
-	if( flash )
+	idWeapon* flashlight_weapon = flashlight.GetEntity();
+	if( flashlight_weapon )
 	{
-		flash->ShowWorldModel();
+		flashlight_weapon->ShowWorldModel();
 	}
 }
 

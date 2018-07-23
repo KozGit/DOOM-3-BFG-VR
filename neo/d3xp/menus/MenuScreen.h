@@ -2098,7 +2098,7 @@ public:
 		int		originalCrouchHide;
 		float	originalCrouchTriggerDistance;
 		float	originalWeaponPitch;
-		float	originalFlashPitch;
+		float	originalFlashlightPitch;
 		int		originalTalkMode;
 		int		originalVoiceCommands;
 
@@ -2143,7 +2143,7 @@ public:
 		enum vrCharacterOptions_t
 		{
 			CHARACTER_OPTIONS_FIELD_BODY_MODE,
-			CHARACTER_OPTIONS_FIELD_FLASH_MODE,
+			CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE,
 			CHARACTER_OPTIONS_FIELD_WEAPON_HAND,
 			CHARACTER_OPTIONS_FIELD_HOLSTER_SLOTS,
 			CHARACTER_OPTIONS_FIELD_USE_FLOOR_HEIGHT,
@@ -2173,7 +2173,7 @@ public:
 
 	private:
 		int		originalBodyMode;
-		int		originalFlashMode;
+		int		originalFlashlightMode;
 		int		originalWeaponHand;
 		int		originalSlotDisable;
 		float	originalViewHeight;

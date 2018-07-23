@@ -3406,7 +3406,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	{
 		viewWeaponOrigin = playerViewOrigin;
 		viewWeaponAxis = playerViewAxis;
-		owner->CalculateViewFlashPos( viewWeaponOrigin, viewWeaponAxis, flashOffsets[int( currentWeapon )] );
+		owner->CalculateViewFlashlightPos( viewWeaponOrigin, viewWeaponAxis, flashlightOffsets[int( currentWeapon )] );
 
 	}
 	else if ( isPlayerLeftHand ) // Koz left hand
@@ -5677,7 +5677,7 @@ void idWeapon::Event_GetWeaponSkin()
 
 	if ( isPlayerFlashlight )
 	{
-		vrSkinName = commonVr->GetCurrentFlashMode() == 2 ? "minivr/flashhands/0h" : "vr/flashhands/0h"; // mini flashlight skin for gun mount : normal flashlight skin
+		vrSkinName = commonVr->GetCurrentFlashlightMode() == 2 ? "minivr/flashhands/0h" : "vr/flashhands/0h"; // mini flashlight skin for gun mount : normal flashlight skin
 	}
 	else
 	{

@@ -435,7 +435,7 @@ void idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Op
 	originalCrouchHide = vr_crouchHideBody.GetBool();
 	originalCrouchTriggerDistance = vr_crouchTriggerDist.GetFloat();
 	originalWeaponPitch = vr_motionWeaponPitchAdj.GetFloat();
-	originalFlashPitch = vr_motionFlashPitchAdj.GetFloat();
+	originalFlashlightPitch = vr_motionFlashPitchAdj.GetFloat();
 	originalTalkMode = vr_talkMode.GetInteger();
 	originalVoiceCommands = vr_voiceCommands.GetInteger();
 
@@ -523,11 +523,11 @@ void idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Op
 
 		case CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH: 
 		{
-			float p = vr_motionFlashPitchAdj.GetFloat();
+			float p = vr_motionFlashPitchAdj.GetFloat(); // flashlight pitch adjust
 			p += adjustAmount;
 			if ( p < -100 ) p = -100;
 			if ( p > 100 ) p = 100;
-			vr_motionFlashPitchAdj.SetFloat( p );
+			vr_motionFlashPitchAdj.SetFloat( p ); // flashlight pitch adjust
 			break;
 		}
 
@@ -624,7 +624,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_
 			return va( "%.0f degrees", vr_motionWeaponPitchAdj.GetFloat() );
 
 		case CONTROL_OPTIONS_FIELD_FLASHLIGHT_PITCH:
-			return va( "%.0f degrees", vr_motionFlashPitchAdj.GetFloat() );
+			return va( "%.0f degrees", vr_motionFlashPitchAdj.GetFloat() );	// flashlight pitch adjust
 
 		case CONTROL_OPTIONS_FIELD_TALK_MODE:
 		{
@@ -686,7 +686,7 @@ bool idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_Control_Op
 		return true;
 	}
 	
-	if ( originalFlashPitch != vr_motionFlashPitchAdj.GetFloat() )
+	if ( originalFlashlightPitch != vr_motionFlashPitchAdj.GetFloat() )
 	{
 		return true;
 	}

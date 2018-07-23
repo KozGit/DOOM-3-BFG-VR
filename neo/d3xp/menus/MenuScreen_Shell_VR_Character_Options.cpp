@@ -78,9 +78,9 @@ void idMenuScreen_Shell_VR_Character_Options::Initialize( idMenuHandler * data )
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "Flashlight Mount" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_FLASH_MODE );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_FLASH_MODE );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE );
 	options->AddChild( control );
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
@@ -329,7 +329,7 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	
 
 	originalBodyMode = vr_playerBodyMode.GetInteger();
-	originalFlashMode = vr_flashlightMode.GetInteger();
+	originalFlashlightMode = vr_flashlightMode.GetInteger();
 	originalWeaponHand = vr_weaponHand.GetInteger();
 	originalSlotDisable = vr_slotDisable.GetInteger();
 	originalViewHeight = vr_normalViewHeight.GetFloat();
@@ -371,7 +371,7 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 			break;
 		}
 		
-		case CHARACTER_OPTIONS_FIELD_FLASH_MODE:
+		case CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE:
 		{
 			static const int numValues = 4;
 			static const int values[numValues] = { 0, 1, 2, 3 };
@@ -454,7 +454,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_V
 		}
 			
 		
-		case CHARACTER_OPTIONS_FIELD_FLASH_MODE:
+		case CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE:
 		{
 			const int fm = vr_flashlightMode.GetInteger();
 
@@ -550,7 +550,7 @@ bool idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	{
 		return true;
 	}
-	if ( originalFlashMode != vr_flashlightMode.GetInteger() )
+	if ( originalFlashlightMode != vr_flashlightMode.GetInteger() )
 	{
 		return true;
 	}

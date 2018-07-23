@@ -348,7 +348,7 @@ iVr::iVr()
 	
 	chestDefaultDefined = false;
 
-	currentFlashlightPosition = FLASH_BODY;
+	currentFlashlightPosition = FLASHLIGHT_BODY;
 
 	handInGui = false;
 
@@ -434,7 +434,7 @@ iVr::iVr()
 	teleportButtonCount = 0;
 
 
-	currentFlashMode = vr_flashlightMode.GetInteger();
+	currentFlashlightMode = vr_flashlightMode.GetInteger();
 	renderingSplash = true;
 
 	currentBindingDisplay = "";
@@ -2068,25 +2068,25 @@ void iVr::FrameStart( void )
 
 /*
 ==============
-iVr::GetCurrentFlashMode();
+iVr::GetCurrentFlashlightMode();
 ==============
 */
 
-int iVr::GetCurrentFlashMode()
+int iVr::GetCurrentFlashlightMode()
 {
-	//common->Printf( "Returning flashmode %d\n", currentFlashMode );
-	return currentFlashMode;
+	//common->Printf( "Returning flashlightmode %d\n", currentFlashlightMode );
+	return currentFlashlightMode;
 }
 
 /*
 ==============
-iVr::GetCurrentFlashMode();
+iVr::GetCurrentFlashlightMode();
 ==============
 */
-void iVr::NextFlashMode()
+void iVr::NextFlashlightMode()
 {
-	currentFlashMode++;
-	if ( currentFlashMode >= FLASH_MAX ) currentFlashMode = 0;
+	currentFlashlightMode++;
+	if ( currentFlashlightMode >= FLASHLIGHT_MAX ) currentFlashlightMode = 0;
 }
 
 bool iVr::ShouldQuit()

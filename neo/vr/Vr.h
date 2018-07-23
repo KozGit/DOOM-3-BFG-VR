@@ -87,11 +87,11 @@ typedef enum
 
 typedef enum
 {
-	FLASH_BODY,
-	FLASH_HEAD,
-	FLASH_GUN,
-	FLASH_HAND,
-	FLASH_MAX,
+	FLASHLIGHT_BODY,
+	FLASHLIGHT_HEAD,
+	FLASHLIGHT_GUN,
+	FLASHLIGHT_HAND,
+	FLASHLIGHT_MAX,
 } vr_flashlight_mode_t;
 
 void SwapWeaponHand();
@@ -138,15 +138,15 @@ public:
 
 	void				CalcAimMove( float &yawDelta, float &pitchDelta );
 
-	int					GetCurrentFlashMode();
-	void				NextFlashMode();
+	int					GetCurrentFlashlightMode();
+	void				NextFlashlightMode();
 
 	bool				ShouldQuit();
 	void				ForceChaperone(int which, bool force);
 
 	//------------------
 
-	int					currentFlashMode;
+	int					currentFlashlightMode;
 
 	bool				VR_GAME_PAUSED;
 	
@@ -509,7 +509,7 @@ extern idCVar	vr_headingBeamMode;
 extern idCVar	vr_weaponSight;
 extern idCVar	vr_weaponSightToSurface;
 
-extern idCVar   vr_motionFlashPitchAdj;
+extern idCVar	vr_motionFlashPitchAdj; // flashlight pitch adjust
 extern idCVar	vr_motionWeaponPitchAdj;
 
 extern idCVar	vr_3dgui;
