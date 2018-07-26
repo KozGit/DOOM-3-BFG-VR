@@ -4772,7 +4772,7 @@ void idWeapon::GetProjectileLaunchOriginAndAxis( idVec3& origin, idMat3& axis )
 				// hand movement, not the barrel axis. (unless the controller is mounted on something like a topshot, then you have a grenade launcher.)
 				if ( commonVr->VR_USE_MOTION_CONTROLS && !vr_mountedWeaponController.GetBool() )
 				{
-					axis = owner->throwDirection.ToMat3();
+					axis = owner->hands[0].throwDirection.ToMat3();
 					break;
 				}
 			}

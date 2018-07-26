@@ -277,6 +277,45 @@ struct slot_t
 	float radiusSq;
 };
 
+class idPlayerHand
+{
+public:
+	idPlayer* owner;
+	int whichHand;
+
+	// laser sight - technically every weapon instance could have its own laser sight,
+	// but laser sights are only active when in a player's hand, so make it one per hand
+	renderEntity_t			laserSightRenderEntity;	// replace crosshair for 3DTV
+	qhandle_t				laserSightHandle;
+	renderEntity_t			crosshairEntity; // Koz add a model to place the crosshair into the world
+	qhandle_t				crosshairHandle;
+	int						lastCrosshairMode;
+
+	// throwing is per hand
+	idVec3 throwDirection; // for motion control throwing actions e.g. grenade
+	float throwVelocity;
+	int frameTime[10];
+	idVec3 position[10];
+	int frameNum;
+	int curTime;
+	int timeDelta;
+	int startFrameNum;
+
+	// slots
+	idVec3					handOrigin;
+	idMat3					handAxis;
+	slotIndex_t				handSlot;
+
+	bool grabbingWorld;
+
+public:
+	idPlayerHand();
+	virtual					~idPlayerHand();
+	void					Init( idPlayer* player, int hand );
+
+	void					TrackWeaponDirection( idVec3 origin );
+};
+
 class idPlayer : public idActor
 {
 public:
@@ -303,8 +342,7 @@ public:
 	
 	class idPlayerView		playerView;			// handles damage kicks and effects
 	
-	renderEntity_t			laserSightRenderEntity;	// replace crosshair for 3DTV
-	qhandle_t				laserSightHandle;
+	idPlayerHand hands[2];
 
 	// Koz begin
 	bool					laserSightActive; // Koz allow lasersight toggle
@@ -330,8 +368,6 @@ public:
 	qhandle_t				hudHandle;
 	bool					hudActive;
 
-	renderEntity_t			crosshairEntity; // Koz add a model to place the crosshair into the world
-	qhandle_t				crosshairHandle;
 	bool					crosshairActive;
 	const idDeclSkin*		skinCrosshairDot;
 	const idDeclSkin*		skinCrosshairCircleDot;
@@ -359,9 +395,6 @@ public:
 	idVec3					PDAorigin; // Koz 
 	idMat3					PDAaxis; // Koz
 
-	idVec3 throwDirection; // for motion control throwing actions e.g. grenade
-	float throwVelocity;
-	
 	idMat3					chestPivotCorrectAxis; //made these public so could be accessed by hmdgetorientation;
 	idVec3					chestPivotDefaultPos;
 	jointHandle_t			chestPivotJoint;
@@ -530,16 +563,6 @@ public:
 
 	idVec3					firstPersonWeaponOrigin; // Koz fixme check if still needed - independent weapons
 	
-	idVec3					leftHandOrigin;
-	idMat3					leftHandAxis;
-	slotIndex_t				otherHandSlot;
-
-	idVec3					rightHandOrigin;
-	idMat3					rightHandAxis;
-	slotIndex_t				weaponHandSlot;
-
-	bool handGrabbingWorld[2];
-
 	idVec3					waistOrigin;
 	idMat3					waistAxis;
 
@@ -575,7 +598,7 @@ public:
 	void					FreeHolsterSlot();
 	void					UpdateHolsterSlot();
 
-	void					UpdateLaserSight();
+	void					UpdateLaserSight( int hand );
 	bool					GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3& axis );
 
 	// Koz begin
@@ -591,7 +614,6 @@ public:
 	void					ToggleHud();
 	void					RecreateCopyJoints();
 	void					UpdateNeckPose();
-	void					TrackWeaponDirection( idVec3 origin );
 	bool					IsCrouching()
 	{
 		return physicsObj.IsCrouching();

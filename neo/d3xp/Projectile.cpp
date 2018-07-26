@@ -368,7 +368,7 @@ void idProjectile::Launch( const idVec3& start, const idVec3& dir, const idVec3&
 			{
 				if ( player->weapon->IdentifyWeapon() == WEAPON_HANDGRENADE )
 				{
-					speed = player->throwVelocity * vr_throwPower.GetFloat();
+					speed = player->hands[0].throwVelocity * vr_throwPower.GetFloat();
 				}
 			}
 		}

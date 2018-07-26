@@ -1524,6 +1524,81 @@ void idInventory::SetRemoteClientAmmo( const int ownerEntityNumber )
 
 /*
 ==============
+idPlayerHand::idPlayerHand
+==============
+*/
+idPlayerHand::idPlayerHand()
+{
+	laserSightHandle = -1;
+	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
+
+	crosshairHandle = -1;
+	memset( &crosshairEntity, 0, sizeof( crosshairEntity ) );
+
+	lastCrosshairMode = -1;
+
+	throwDirection = vec3_zero;
+	throwVelocity = 0.0f;
+	frameTime[10] = { 0 };
+	position[10] = { vec3_zero };
+	frameNum = -1;
+	curTime = 0;
+	timeDelta = 0;
+	startFrameNum = 0;
+
+	grabbingWorld = false;
+}
+
+/*
+==============
+idPlayerHand::~idPlayerHand()
+
+Release any resources used by the player's hand.
+==============
+*/
+idPlayerHand::~idPlayerHand()
+{
+	//delete weapon.GetEntity();
+	//weapon = NULL;
+
+	//delete flashlight.GetEntity();
+	//flashlight = NULL;
+
+	//delete pdaMenu;
+	//pdaMenu = NULL;
+}
+
+/*
+==============
+idPlayerHand::Init()
+==============
+*/
+void idPlayerHand::Init( idPlayer* player, int hand )
+{
+	owner = player;
+	whichHand = hand;
+
+	laserSightHandle = -1;
+	// laser sight for 3DTV
+	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
+	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
+	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
+
+	crosshairHandle = -1;
+	// model to place crosshair or red dot into 3d space
+	memset( &crosshairEntity, 0, sizeof( crosshairEntity ) );
+	crosshairEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/weaponsight.lwo" );
+	crosshairEntity.weaponDepthHack = true;
+
+	lastCrosshairMode = -1;
+
+	throwDirection = vec3_zero;
+	throwVelocity = 0.0f;
+
+}
+
+/*
+==============
 idPlayer::idPlayer
 ==============
 */
@@ -1542,9 +1617,6 @@ idPlayer::idPlayer():
 	teleportAimPoint = vec3_zero;
 	teleportPoint = vec3_zero;
 	teleportAimPointPitch = 0.0f;
-
-	handGrabbingWorld[0] = false;
-	handGrabbingWorld[1] = false;
 
 	warpMove				= false;
 	warpAim					= false;
@@ -1573,9 +1645,6 @@ idPlayer::idPlayer():
 	lastSndHitTime			= 0;
 	lastSavingThrowTime		= 0;
 	
-	laserSightHandle	= -1;
-	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
-	
 	pdaModelDefHandle = -1;
 	memset( &pdaRenderEntity, 0, sizeof( pdaRenderEntity ) );
 	
@@ -1588,10 +1657,6 @@ idPlayer::idPlayer():
 
 	hudHandle = -1;
 	memset( &hudEntity, 0, sizeof( hudEntity ) );
-
-	crosshairHandle = -1;
-	memset( &crosshairEntity, 0, sizeof( crosshairEntity ) );
-		
 	// Koz end
 
 
@@ -2125,12 +2190,10 @@ void idPlayer::Init()
 	flashlightBattery = flashlight_batteryDrainTimeMS.GetInteger();		// fully charged
 	
 	aimAssist.Init( this );
-	
-	// laser sight for 3DTV
-	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
-	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
-	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
 
+	for( int hand = 0; hand < 2; hand++ )
+		hands[hand].Init( this, hand );
+	
 	SetupPDASlot( true );
 	
 
@@ -2142,10 +2205,6 @@ void idPlayer::Init()
 	hudEntity.customShader = declManager->FindMaterial( "vr/hud" );
 	hudEntity.weaponDepthHack = vr_hudOcclusion.GetBool();
 	
-	// model to place crosshair or red dot into 3d space
-	memset( &crosshairEntity, 0, sizeof( crosshairEntity ) );
-	crosshairEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/weaponsight.lwo" );
-	crosshairEntity.weaponDepthHack = true;
 	skinCrosshairDot = declManager->FindSkin( "skins/vr/crosshairDot" );
 	skinCrosshairCircleDot = declManager->FindSkin( "skins/vr/crosshairCircleDot" );
 	skinCrosshairCross = declManager->FindSkin( "skins/vr/crosshairCross" );
@@ -2166,9 +2225,6 @@ void idPlayer::Init()
 	PDAfixed = false;			
 	PDAorigin = vec3_zero;
 	PDAaxis = mat3_identity;
-	
-	throwDirection = vec3_zero;
-	throwVelocity = 0.0f;
 	
 	
 	InitTeleportTarget();
@@ -3049,7 +3105,7 @@ void idPlayer::Save( idSaveGame* savefile ) const
 	savefile->WriteBool( hudActive );
 	
 	savefile->WriteInt( commonVr->currentFlashlightMode );
-	savefile->WriteSkin( crosshairEntity.customSkin );
+	savefile->WriteSkin( hands[0].crosshairEntity.customSkin );
 	
 	savefile->WriteBool( PDAfixed );
 	savefile->WriteVec3( PDAorigin );
@@ -3486,12 +3542,9 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	
 	aimAssist.Init( this );
 	
-	laserSightHandle = -1;
-	
-	// re-init the laser model
-	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
-	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
-	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
+	// re-init the hand's laser model
+	for( int hand = 0; hand < 2; hand++ )
+		hands[hand].Init( this, hand );
 
 	SetupPDASlot( true );
 	holsteredWeapon = weapon_fists;
@@ -3569,26 +3622,14 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	InitPlayerBones();
 
 	//re-init the VR ui models
-	laserSightHandle = -1;
 	headingBeamHandle = -1;
 	hudHandle = -1;
-	crosshairHandle = -1;
 
 	// re-init hud model
 	memset( &hudEntity, 0, sizeof( hudEntity ) );
 	hudEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/hud.lwo" );
 	hudEntity.customShader = declManager->FindMaterial( "vr/hud" );
 	hudEntity.weaponDepthHack = vr_hudOcclusion.GetBool();
-
-	// re-init crosshair model
-	memset( &crosshairEntity, 0, sizeof( crosshairEntity ) );
-	crosshairEntity.hModel = renderModelManager->FindModel( "/models/mapobjects/weaponsight.lwo" );
-	crosshairEntity.weaponDepthHack = true;
-	
-	// re-init the lasersight model
-	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
-	laserSightRenderEntity.hModel = renderModelManager->FindModel( "_BEAM" );
-	laserSightRenderEntity.customShader = declManager->FindMaterial( "stereoRenderLaserSight" );
 
 	// re-init the heading beam model
 	memset( &headingBeamEntity, 0, sizeof( headingBeamEntity ) );
@@ -3612,7 +3653,7 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		savefile->ReadBool( hudActive );
 	
 		savefile->ReadInt( commonVr->currentFlashlightMode );
-	//	savefile->ReadSkin( crosshairEntity.customSkin );
+	//	savefile->ReadSkin( hands[0].crosshairEntity.customSkin );
 		savefile->ReadSkin( blag );
 
 		savefile->ReadBool( PDAfixed );
@@ -3733,9 +3774,6 @@ void idPlayer::Restore( idRestoreGame* savefile )
 		spawnArgs.SetInt("ik_numArms", 2);
 	}
 
-
-	throwDirection = vec3_zero;
-	throwVelocity = 0.0f;
 
 	armIK.Init( this, IK_ANIM, modelOffset );
 
@@ -6098,6 +6136,8 @@ bool idPlayer::OtherHandImpulseSlot()
 	{
 		return false;
 	}
+
+	slotIndex_t otherHandSlot = hands[1 - vr_weaponHand.GetInteger()].handSlot;
 	if( otherHandSlot == SLOT_PDA_HIP )
 	{
 		if( !common->IsMultiplayer() )
@@ -6217,6 +6257,7 @@ bool idPlayer::WeaponHandImpulseSlot()
 		return false;
 	}
 
+	slotIndex_t weaponHandSlot = hands[vr_weaponHand.GetInteger()].handSlot;
 	if( weaponHandSlot == SLOT_WEAPON_HIP )
 	{
 		if ( objectiveSystemOpen )
@@ -6303,15 +6344,15 @@ bool idPlayer::GrabWorld( int hand, bool pressed )
 	bool b;
 	if( !pressed )
 	{
-		b = handGrabbingWorld[hand];
-		handGrabbingWorld[hand] = false;
+		b = hands[hand].grabbingWorld;
+		hands[hand].grabbingWorld = false;
 		return b;
 	}
 	if ( hand == vr_weaponHand.GetInteger() )
 		b = WeaponHandImpulseSlot();
 	else
 		b = OtherHandImpulseSlot();
-	handGrabbingWorld[hand] = b;
+	hands[hand].grabbingWorld = b;
 	return b;
 }
 
@@ -12005,7 +12046,7 @@ idCVar	g_laserSightWidth( "g_laserSightWidth", "1.0", CVAR_FLOAT | CVAR_ARCHIVE,
 idCVar	g_laserSightLength( "g_laserSightLength", "1000", CVAR_FLOAT | CVAR_ARCHIVE, "laser sight beam length" ); // Koz default was 250, but was to short in VR.  Length will be clipped if object is hit, this is max length for the hit trace. 
 
 
-void idPlayer::UpdateLaserSight()
+void idPlayer::UpdateLaserSight( int hand )
 {
 	idVec3	muzzleOrigin;
 	idMat3	muzzleAxis;
@@ -12014,7 +12055,6 @@ void idPlayer::UpdateLaserSight()
 	trace_t traceResults;
 	
 	float beamLength = g_laserSightLength.GetFloat(); // max length to run trace.
-	static int lastCrosshairMode = -1;
 	
 	int sightMode = vr_weaponSight.GetInteger();
 
@@ -12054,27 +12094,27 @@ void idPlayer::UpdateLaserSight()
 		
 	if ( hideSight == true || ( sightMode != 0 && sightMode < 4 ) )
 	{
-		laserSightRenderEntity.allowSurfaceInViewID = -1;
-		if ( laserSightHandle == -1 )
+		hands[hand].laserSightRenderEntity.allowSurfaceInViewID = -1;
+		if( hands[hand].laserSightHandle == -1 )
 		{
-			laserSightHandle = gameRenderWorld->AddEntityDef( &laserSightRenderEntity );
+			hands[hand].laserSightHandle = gameRenderWorld->AddEntityDef( &hands[hand].laserSightRenderEntity );
 		}
 		else
 		{
-			gameRenderWorld->UpdateEntityDef( laserSightHandle, &laserSightRenderEntity );
+			gameRenderWorld->UpdateEntityDef( hands[hand].laserSightHandle, &hands[hand].laserSightRenderEntity );
 		}
 	}
 
 	if ( !showTeleport && ( hideSight == true || sightMode == 0 ) )
 	{
-		crosshairEntity.allowSurfaceInViewID = -1;
-		if ( crosshairHandle == -1 )
+		hands[hand].crosshairEntity.allowSurfaceInViewID = -1;
+		if ( hands[hand].crosshairHandle == -1 )
 		{
-			crosshairHandle = gameRenderWorld->AddEntityDef( &crosshairEntity );
+			hands[hand].crosshairHandle = gameRenderWorld->AddEntityDef( &hands[hand].crosshairEntity );
 		}
 		else
 		{
-			gameRenderWorld->UpdateEntityDef( crosshairHandle, &crosshairEntity );
+			gameRenderWorld->UpdateEntityDef( hands[hand].crosshairHandle, &hands[hand].crosshairEntity );
 		}
 	}
 
@@ -12107,24 +12147,24 @@ void idPlayer::UpdateLaserSight()
 	{
 		// only show in the player's view
 		// Koz - changed show lasersight shows up in all views/reflections in VR
-		laserSightRenderEntity.allowSurfaceInViewID = 0;// entityNumber + 1;
-		laserSightRenderEntity.axis.Identity();
-		laserSightRenderEntity.origin = start;
+		hands[hand].laserSightRenderEntity.allowSurfaceInViewID = 0;// entityNumber + 1;
+		hands[hand].laserSightRenderEntity.axis.Identity();
+		hands[hand].laserSightRenderEntity.origin = start;
 		
 
 		// program the beam model
-		idVec3&	target = *reinterpret_cast<idVec3*>(&laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_END_X]);
+		idVec3&	target = *reinterpret_cast<idVec3*>( &hands[hand].laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_END_X] );
 		target = start + muzzleAxis[0] * beamLength;
 
-		laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_WIDTH] = g_laserSightWidth.GetFloat();
+		hands[hand].laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_WIDTH] = g_laserSightWidth.GetFloat();
 
-		if ( IsGameStereoRendered() && laserSightHandle == -1 )
+		if ( IsGameStereoRendered() && hands[hand].laserSightHandle == -1 )
 		{
-			laserSightHandle = gameRenderWorld->AddEntityDef( &laserSightRenderEntity );
+			hands[hand].laserSightHandle = gameRenderWorld->AddEntityDef( &hands[hand].laserSightRenderEntity );
 		}
 		else
 		{
-			gameRenderWorld->UpdateEntityDef( laserSightHandle, &laserSightRenderEntity );
+			gameRenderWorld->UpdateEntityDef( hands[hand].laserSightHandle, &hands[hand].laserSightRenderEntity );
 		}
 	}
 	
@@ -12143,31 +12183,31 @@ void idPlayer::UpdateLaserSight()
 	{
 		case 4:
 		case 1:
-			crosshairEntity.customSkin = skinCrosshairDot;
+			hands[hand].crosshairEntity.customSkin = skinCrosshairDot;
 			break;
 
 		case 5:
 		case 2:
-			crosshairEntity.customSkin = skinCrosshairCircleDot;
+			hands[hand].crosshairEntity.customSkin = skinCrosshairCircleDot;
 			break;
 
 		case 6:
 		case 3:
-			crosshairEntity.customSkin = skinCrosshairCross;
+			hands[hand].crosshairEntity.customSkin = skinCrosshairCross;
 			break;
 
 		default:
-			crosshairEntity.customSkin = skinCrosshairDot;
+			hands[hand].crosshairEntity.customSkin = skinCrosshairDot;
 
 	}
 		
-	if ( showTeleport || sightMode > 0 ) crosshairEntity.allowSurfaceInViewID = entityNumber + 1;
-	crosshairEntity.axis.Identity();
+	if ( showTeleport || sightMode > 0 ) hands[hand].crosshairEntity.allowSurfaceInViewID = entityNumber + 1;
+	hands[hand].crosshairEntity.axis.Identity();
 	
 	static float muzscale = 0.0f ;
 
 	muzscale = 1 + beamLength / 100;
-	crosshairEntity.axis = muzzleAxis * muzscale;
+	hands[hand].crosshairEntity.axis = muzzleAxis * muzscale;
 
 	bool aimLadder = false, aimActor = false, aimElevator = false;
 	
@@ -12218,15 +12258,15 @@ void idPlayer::UpdateLaserSight()
 			surfaceAngle.roll = muzzleAngle.roll - rollDiff;
 			surfaceAngle.Normalize180();
 		
-			crosshairEntity.axis = surfaceAngle.ToMat3() * muzscale;
+			hands[hand].crosshairEntity.axis = surfaceAngle.ToMat3() * muzscale;
 		}
 		else
 		{
-			crosshairEntity.axis = muzzleAxis * muzscale;
+			hands[hand].crosshairEntity.axis = muzzleAxis * muzscale;
 		}
 	}
 
-	crosshairEntity.origin = start + muzzleAxis[0] * beamLength;
+	hands[hand].crosshairEntity.origin = start + muzzleAxis[0] * beamLength;
 	
 
 	
@@ -12238,7 +12278,7 @@ void idPlayer::UpdateLaserSight()
 		
 		// teleportAimPoint is where you are actually aiming. teleportPoint is where AAS has nudged the teleport cursor to (so you can't teleport too close to a wall).
 		// teleportAimPointPitch is the pitch of the surface you are aiming at, where 90 is the floor and 0 is the wall
-		teleportAimPoint = crosshairEntity.origin;
+		teleportAimPoint = hands[hand].crosshairEntity.origin;
 		teleportAimPointPitch = surfaceAngle.pitch;		// if the elevator is moving up, we don't want to fall through the floor
 		if ( aimElevator )
 			teleportPoint = teleportAimPoint + idVec3(0, 0, 10);
@@ -12249,21 +12289,21 @@ void idPlayer::UpdateLaserSight()
 
 		if ( aimValidForTeleport )
 		{
-			crosshairEntity.origin = teleportPoint;
-			crosshairEntity.customSkin = skinCrosshairCircleDot;
+			hands[hand].crosshairEntity.origin = teleportPoint;
+			hands[hand].crosshairEntity.customSkin = skinCrosshairCircleDot;
 		}
 		else if ( pitchValid )
 		{
-			crosshairEntity.origin = teleportPoint;
-			crosshairEntity.customSkin = skinCrosshairCross;
+			hands[hand].crosshairEntity.origin = teleportPoint;
+			hands[hand].crosshairEntity.customSkin = skinCrosshairCross;
 		}
 		else if ( vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS )
 		{
-			crosshairEntity.customSkin = skinCrosshairDot;
+			hands[hand].crosshairEntity.customSkin = skinCrosshairDot;
 		}
 		else
 		{
-			crosshairEntity.customSkin = skinCrosshairCross;
+			hands[hand].crosshairEntity.customSkin = skinCrosshairCross;
 		}
 	}
 	else
@@ -12272,13 +12312,13 @@ void idPlayer::UpdateLaserSight()
 	}
 	oldTeleport = showTeleport;
 
-	if ( IsGameStereoRendered() && crosshairHandle == -1 )
+	if ( IsGameStereoRendered() && hands[hand].crosshairHandle == -1 )
 	{
-		crosshairHandle = gameRenderWorld->AddEntityDef( &crosshairEntity );
+		hands[hand].crosshairHandle = gameRenderWorld->AddEntityDef( &hands[hand].crosshairEntity );
 	}
 	else
 	{
-		gameRenderWorld->UpdateEntityDef( crosshairHandle, &crosshairEntity );
+		gameRenderWorld->UpdateEntityDef( hands[hand].crosshairHandle, &hands[hand].crosshairEntity );
 	}
 
 }
@@ -13487,7 +13527,7 @@ void idPlayer::Think()
 	gameLocal.portalSkyActive = gameLocal.pvs.CheckAreasForPortalSky( gameLocal.GetPlayerPVS(), GetPhysics()->GetOrigin() );
 	
 	// stereo rendering laser sight that replaces the crosshair
-	UpdateLaserSight();
+	UpdateLaserSight( 0 );
 	UpdateTeleportAim();
 
 	if ( vr_teleportMode.GetInteger() != 0 )
@@ -15603,7 +15643,8 @@ void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 
 		if ( currentWeaponEnum != WEAPON_PDA )
 		{
-			TrackWeaponDirection( weapOrigin );
+			hands[currentHand].TrackWeaponDirection( weapOrigin );
+			hands[1 - currentHand].TrackWeaponDirection( weapOrigin );
 			weapon->CalculateHideRise( weapOrigin, weapAxis );
 			//check for melee hit?		
 		}
@@ -15747,19 +15788,12 @@ void idPlayer::UpdateNeckPose()
 
 /*
 ==============
-Koz idPlayer::TrackWeaponDirection
+Koz idPlayerHand::TrackWeaponDirection
 keep track of weapon movement to determine direction of motion
 ==============
 */
-void idPlayer::TrackWeaponDirection( idVec3 origin )
+void idPlayerHand::TrackWeaponDirection( idVec3 origin )
 {
-	static int frameTime[10] { 0 };
-	static idVec3 position[10] { vec3_zero };
-	static int frameNum = -1;
-	static int curTime = 0;
-	static int timeDelta = 0;
-	static int startFrameNum = 0;
-
 	frameNum += 1;
 	if ( frameNum > 9 ) frameNum = 0;
 	frameTime[frameNum] = gameLocal.GetTime();
@@ -15821,16 +15855,8 @@ void idPlayer::SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQua
 
 	commonVr->currentHandWorldPosition[hand] = handOrigin;
 
-	if ( hand )
-	{
-		leftHandOrigin = handOrigin;
-		leftHandAxis = handAxis;
-	}
-	else
-	{
-		rightHandOrigin = handOrigin;
-		rightHandAxis = handAxis;
-	}
+	hands[hand].handOrigin = handOrigin;
+	hands[hand].handAxis = handAxis;
 	
 	currentWeaponEnum = weapon->IdentifyWeapon();
 
@@ -16472,11 +16498,7 @@ void idPlayer::CalculateWaist()
 
 void idPlayer::CalculateLeftHand()
 {
-	slotIndex_t oldSlot;
-	if (vr_weaponHand.GetInteger() == 0)
-		oldSlot = otherHandSlot;
-	else
-		oldSlot = weaponHandSlot;
+	slotIndex_t oldSlot = hands[1].handSlot;
 	slotIndex_t slot = SLOT_NONE;
 	if ( commonVr->hasHMD )
 	{
@@ -16496,7 +16518,7 @@ void idPlayer::CalculateLeftHand()
 				if ( vr_weaponHand.GetInteger() && i != SLOT_FLASHLIGHT_SHOULDER )
 					slotOrigin.y *= -1;
 				idVec3 origin = waistOrigin + slotOrigin * waistAxis;
-				if( (leftHandOrigin - origin).LengthSqr() < slots[i].radiusSq )
+				if( ( hands[1].handOrigin - origin ).LengthSqr() < slots[i].radiusSq )
 				{
 					slot = (slotIndex_t)i;
 					break;
@@ -16506,26 +16528,19 @@ void idPlayer::CalculateLeftHand()
 	}
 	else
 	{
-		//leftHandOrigin = hmdOrigin + hmdAxis[2] * -5;
-		//leftHandAxis = hmdAxis;
+		//hands[1].handOrigin = hmdOrigin + hmdAxis[2] * -5;
+		//hands[1].handAxis = hmdAxis;
 	}
 	if( oldSlot != slot )
 	{
 		SetControllerShake(0, 0, vr_slotMag.GetFloat(), vr_slotDur.GetInteger());
 	}
-	if (vr_weaponHand.GetInteger() == 0)
-		otherHandSlot = slot;
-	else
-		weaponHandSlot = slot;
+	hands[1].handSlot = slot;
 }
 
 void idPlayer::CalculateRightHand()
 {
-	slotIndex_t oldSlot;
-	if (vr_weaponHand.GetInteger() == 0)
-		oldSlot = weaponHandSlot;
-	else
-		oldSlot = otherHandSlot;
+	slotIndex_t oldSlot = hands[0].handSlot;
 	slotIndex_t slot = SLOT_NONE;
 	if ( commonVr->hasHMD )
 	{
@@ -16545,7 +16560,7 @@ void idPlayer::CalculateRightHand()
 				if ( vr_weaponHand.GetInteger() && i != SLOT_FLASHLIGHT_SHOULDER )
 					slotOrigin.y *= -1;
 				idVec3 origin = waistOrigin + slotOrigin * waistAxis;
-				if( (rightHandOrigin - origin).LengthSqr() < slots[i].radiusSq )
+				if( (hands[0].handOrigin - origin).LengthSqr() < slots[i].radiusSq )
 				{
 					slot = (slotIndex_t)i;
 					break;
@@ -16562,10 +16577,7 @@ void idPlayer::CalculateRightHand()
 	{
 		SetControllerShake(vr_slotMag.GetFloat(), vr_slotDur.GetInteger(), 0, 0);
 	}
-	if (vr_weaponHand.GetInteger() == 0)
-		weaponHandSlot = slot;
-	else
-		otherHandSlot = slot;
+	hands[0].handSlot = slot;
 }
 
 /*
@@ -17997,7 +18009,7 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 	LinkCombat();
 	
 	// stereo rendering laser sight that replaces the crosshair
-	UpdateLaserSight();
+	UpdateLaserSight( 0 );
 	UpdateTeleportAim();
 
 	if ( game->isVR ) UpdateHeadingBeam(); // Koz
@@ -18917,7 +18929,7 @@ void idPlayer::SetControllerShake( float magnitude, int duration, const idVec3 &
 {
 	idVec3 dir = direction;
 	dir.Normalize();
-	idVec3 left = leftHandOrigin - rightHandOrigin;
+	idVec3 left = hands[1].handOrigin - hands[0].handOrigin;
 	float side = left * dir * 0.5 + 0.5;
 
 	// push magnitude up so the middle doesn't feel as weak
