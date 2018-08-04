@@ -263,6 +263,7 @@ void DoomLib::InitControlRemap() {
 
 	memset( classicRemap, K_NONE, sizeof( classicRemap ) );
 
+	// Carl: XBox One controller hardcoded controls for Doom Classic
 	classicRemap[K_JOY3] = KEY_TAB ; 
 	classicRemap[K_JOY4] = K_MINUS;
 	classicRemap[K_JOY2] = K_EQUALS;
@@ -277,6 +278,7 @@ void DoomLib::InitControlRemap() {
 	classicRemap[K_JOY_DPAD_RIGHT] = K_RIGHTARROW ;	
 	classicRemap[K_JOY1] = K_ENTER;
 
+	// Carl: Oculus Touch hardcoded controls for Doom Classic
 	classicRemap[K_JOY17] = K_TAB;
 	classicRemap[K_JOY18] = K_TAB;
 	classicRemap[K_JOY19] = K_ESCAPE;
@@ -287,6 +289,23 @@ void DoomLib::InitControlRemap() {
 	classicRemap[K_TOUCH_LEFT_STICK_LEFT] = K_LEFTARROW;
 	classicRemap[K_TOUCH_LEFT_STICK_RIGHT] = K_RIGHTARROW;
 
+	// Carl: HTC Vive hardcoded controls for Doom Classic
+	classicRemap[K_JOY32] = K_TAB;			// Left Menu = toggle map
+	classicRemap[K_JOY50] = K_ESCAPE;		// Right Menu = toggle menu
+	classicRemap[K_JOY58] = K_ENTER;		// Right trigger = Enter
+	classicRemap[K_JOY51] = K_BACKSPACE;	// Right grip = cancel
+	classicRemap[K_STEAMVR_LEFT_PAD_UP] = K_UPARROW; // left touchpad navigates menus
+	classicRemap[K_STEAMVR_LEFT_PAD_DOWN] = K_DOWNARROW;
+	classicRemap[K_STEAMVR_LEFT_PAD_LEFT] = K_LEFTARROW;
+	classicRemap[K_STEAMVR_LEFT_PAD_RIGHT] = K_RIGHTARROW;
+
+	// Carl: Windows Mixed Reality hardcoded controls for Doom Classic
+	classicRemap[K_STEAMVR_LEFT_JS_UP] = K_UPARROW; // left touchpad navigates menus
+	classicRemap[K_STEAMVR_LEFT_JS_DOWN] = K_DOWNARROW;
+	classicRemap[K_STEAMVR_LEFT_JS_LEFT] = K_LEFTARROW;
+	classicRemap[K_STEAMVR_LEFT_JS_RIGHT] = K_RIGHTARROW;
+
+	// Carl: Voice hardcoded controls for Doom Classic (weapons are handled elsewhere)
 	classicRemap[K_SAY_CANCEL] = K_BACKSPACE;
 	classicRemap[K_SAY_RESUME] = K_BACKSPACE;
 	classicRemap[K_SAY_PAUSE] = K_ESCAPE;
