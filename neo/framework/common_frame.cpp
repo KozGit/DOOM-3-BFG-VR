@@ -1088,7 +1088,8 @@ idCommonLocal::RunDoomClassicFrame
 */
 void idCommonLocal::RunDoomClassicFrame()
 {
-	static int doomTics = 0;
+	int doomTics;
+	static int startTime = 0;
 	
 	if( DoomLib::expansionDirty )
 	{
@@ -1099,6 +1100,11 @@ void idCommonLocal::RunDoomClassicFrame()
 		DoomLib::expansionDirty = false;
 	}
 	
+	// Carl: Count number of 35 FPS frames, since the engine is running at a different frame rate in VR
+	if( startTime == 0 )
+		startTime = Sys_Milliseconds();
+	int timeSinceStart = Sys_Milliseconds() - startTime;
+	doomTics = timeSinceStart / (1000 / 35);
 	
 	if( DoomLib::Interface.Frame( doomTics, &userCmdMgr ) )
 	{
@@ -1129,7 +1135,6 @@ void idCommonLocal::RunDoomClassicFrame()
 	}
 	
 	renderSystem->UploadImage( "_doomClassic", doomClassicImageData.Ptr(), DOOMCLASSIC_RENDERWIDTH, DOOMCLASSIC_RENDERHEIGHT );
-	doomTics++;
 }
 
 #endif

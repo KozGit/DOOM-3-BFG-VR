@@ -1618,7 +1618,8 @@ void idUsercmdGenLocal::CalcTorsoYawDelta()
 		float viewYaw;
 
 		if (!gameLocal.GetLocalPlayer()) {
-			common->Printf("Local player null, skipping for now...\n");
+			if (common->GetCurrentGame() == DOOM3_BFG)
+				common->Printf("Local player null, skipping for now...\n");
 			return;
 		}
 		bodyYaw = gameLocal.GetLocalPlayer()->viewAngles.yaw;
