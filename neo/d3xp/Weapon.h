@@ -272,6 +272,10 @@ public:
 	}
 	
 	friend class idPlayer;
+	friend class idWeaponHolder;
+	friend class idHolster;
+	friend class idPlayerHand;
+	friend class idGrabber;
 private:
 	// script control
 	idScriptBool			WEAPON_ATTACK;

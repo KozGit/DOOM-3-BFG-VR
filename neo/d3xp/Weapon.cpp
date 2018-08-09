@@ -981,7 +981,7 @@ void idWeapon::Clear()
 	silent_fire		= false;
 	
 	grabberState	= -1;
-	grabber.Update( owner, true );
+	grabber.Update( owner, this, true );
 	
 	ammoType		= 0;
 	ammoRequired	= 0;
@@ -2261,7 +2261,7 @@ void idWeapon::OwnerDied()
 		// Update the grabber effects
 		if( /*!common->IsMultiplayer() &&*/ grabberState != -1 )
 		{
-			grabber.Update( owner, hide );
+			grabber.Update( owner, this, hide );
 		}
 	}
 	
@@ -3263,7 +3263,7 @@ void idWeapon::PresentWeaponOriginal( bool showViewModel )
 	// Update the grabber effects
 	if( grabberState != -1 )
 	{
-		grabberState = grabber.Update( owner, hide );
+		grabberState = grabber.Update( owner, this, hide );
 	}
 	
 	// remove the muzzle flash light when it's done
@@ -3614,7 +3614,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	// Update the grabber effects
 	if ( grabberState != -1 )
 	{
-		grabberState = grabber.Update( owner, hide );
+		grabberState = grabber.Update( owner, this, hide );
 	}
 
 	// remove the muzzle flash light when it's done
@@ -3701,7 +3701,7 @@ void idWeapon::EnterCinematic()
 		WEAPON_RAISEWEAPON	= false;
 		WEAPON_LOWERWEAPON	= false;
 		
-		grabber.Update( this->GetOwner(), true );
+		grabber.Update( this->GetOwner(), this, true );
 	}
 	
 	disabled = true;

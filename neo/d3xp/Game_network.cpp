@@ -670,6 +670,7 @@ void idGameLocal::ServerProcessReliableMessage( int clientNum, int type, const i
 				break;
 			}
 			
+			// Carl: TODO Dual wielding, maybe check both weapons?
 			// Line of sight check. As a basic precaution against cheating,
 			// the server performs a ray intersection from the client's position
 			// to the joint he hit on the target.
@@ -784,12 +785,16 @@ void idGameLocal::ClientReadSnapshot( const idSnapShot& ss )
 				otherPlayer->ReadPlayerStateFromSnapshot( msg );
 				if( otherPlayer != entities[ GetLocalClientNum() ] )    // This happens when we spectate another player
 				{
-					idWeapon* weap = otherPlayer->weapon.GetEntity();
-					if( weap && ( weap->GetRenderEntity()->bounds[0] == weap->GetRenderEntity()->bounds[1] ) )
+					// Carl when otherPlayer is dual wielding, fix both weapons' viewmodel bounds
+					for( int hand = 0; hand < 2; hand++ )
 					{
-						// update the weapon's viewmodel bounds so that the model doesn't flicker in the spectator's view
-						weap->GetAnimator()->GetBounds( gameLocal.time, weap->GetRenderEntity()->bounds );
-						weap->UpdateVisuals();
+						idWeapon* weap = otherPlayer->GetWeaponInHand( hand );
+						if( weap && ( weap->GetRenderEntity()->bounds[ 0 ] == weap->GetRenderEntity()->bounds[ 1 ] ) )
+						{
+							// update the weapon's viewmodel bounds so that the model doesn't flicker in the spectator's view
+							weap->GetAnimator()->GetBounds( gameLocal.time, weap->GetRenderEntity()->bounds );
+							weap->UpdateVisuals();
+						}
 					}
 				}
 			}

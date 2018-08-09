@@ -1050,6 +1050,7 @@ bool idInventory::Give( idPlayer* owner, const idDict& spawnArgs, const char* st
 	}
 	else if( !idStr::Icmp( statname, "weapon" ) )
 	{
+		// Carl TODO Dual wielding
 		tookWeapon = false;
 		for( pos = value; pos != NULL; pos = end )
 		{
@@ -1524,11 +1525,356 @@ void idInventory::SetRemoteClientAmmo( const int ownerEntityNumber )
 
 /*
 ==============
+idWeaponHolder::idWeaponHolder
+==============
+*/
+idWeaponHolder::idWeaponHolder()
+{
+	owner = NULL;
+	heldWeapon = 0;
+}
+
+/*
+==============
+idWeaponHolder::~idWeaponHolder
+==============
+*/
+idWeaponHolder::~idWeaponHolder()
+{
+}
+
+/*
+==============
+idWeaponHolder::Init
+==============
+*/
+void idWeaponHolder::Init( idPlayer* player )
+{
+	owner = player;
+	heldWeapon = owner->weapon_fists;
+}
+
+/*
+==============
+idWeaponHolder::isEmpty
+==============
+*/
+bool idWeaponHolder::isEmpty()
+{
+	if( heldWeapon < 0 || !owner )
+		return true;
+	return heldWeapon == owner->weapon_fists;
+}
+
+idHolster::idHolster()
+{
+	owner = NULL;
+	heldWeapon = 0;
+	modelDefHandle = -1;
+	memset( &renderEntity, 0, sizeof( renderEntity ) );
+}
+
+idHolster::~idHolster()
+{
+	FreeSlot();
+}
+
+/*
+==============
+idHolster::FreeSlot
+==============
+*/
+void idHolster::FreeSlot()
+{
+	if( modelDefHandle != -1 )
+	{
+		if( gameRenderWorld )
+			gameRenderWorld->FreeEntityDef(modelDefHandle);
+		modelDefHandle = -1;
+	}
+}
+
+/*
+==============
+idHolster::HolsterModelByName
+==============
+*/
+void idHolster::HolsterModelByName( const char* modelname, idRenderModel* renderModel )
+{
+	memset( &renderEntity, 0, sizeof( renderEntity ) );
+
+	if( !renderModel && !( renderModel = renderModelManager->FindModel( modelname ) ) )
+	{
+		// can't find the model
+		return;
+	}
+
+	renderEntity.hModel = renderModel;
+	if (renderEntity.hModel)
+	{
+		renderEntity.hModel->Reset();
+		renderEntity.bounds = renderEntity.hModel->Bounds(&renderEntity);
+	}
+	renderEntity.shaderParms[SHADERPARM_RED] = 1.0f;
+	renderEntity.shaderParms[SHADERPARM_GREEN] = 1.0f;
+	renderEntity.shaderParms[SHADERPARM_BLUE] = 1.0f;
+	renderEntity.shaderParms[3] = 1.0f;
+	renderEntity.shaderParms[SHADERPARM_TIMEOFFSET] = 0.0f;
+	renderEntity.shaderParms[5] = 0.0f;
+	renderEntity.shaderParms[6] = 0.0f;
+	renderEntity.shaderParms[7] = 0.0f;
+
+	if( strcmp( modelname, "models/weapons/pistol/w_pistol.lwo" ) == 0 )
+		holsterAxis = idAngles( 90, 0, 0 ).ToMat3() * 0.75f;
+	else if( strcmp( modelname, "models/weapons/shotgun/w_shotgun2.lwo" ) == 0 ||
+		strcmp( modelname, "models/weapons/bfg/bfg_world.lwo" ) == 0 )
+		holsterAxis = idAngles( 0, -90, -90 ).ToMat3();
+	else if( strcmp( modelname, "models/weapons/grabber/grabber_world.ase" ) == 0 )
+		holsterAxis = idAngles( -90, 180, 0 ).ToMat3() * 0.5f;
+	else if( strcmp( modelname, "models/weapons/machinegun/w_machinegun.lwo" ) == 0 )
+		holsterAxis = idAngles( 0, 90, 90 ).ToMat3() * 0.75f;
+	else if( strcmp( modelname, "models/weapons/plasmagun/plasmagun_world.lwo" ) == 0 )
+		holsterAxis = idAngles( 0, 90, 90 ).ToMat3() * 0.75f;
+	else if( strcmp( modelname, "models/weapons/chainsaw/w_chainsaw.lwo" ) == 0 )
+		holsterAxis = idAngles( 0, 90, 90 ).ToMat3() * 0.9f;
+	else if( strcmp( modelname, "models/weapons/chaingun/w_chaingun.lwo" ) == 0 )
+		holsterAxis = idAngles( 0, 90, 90 ).ToMat3() * 0.9f;
+	else if( strcmp( modelname, "models/items/pda/pda_world.lwo" ) == 0 )
+		holsterAxis = ( pdaAngle1.ToMat3() * pdaAngle2.ToMat3() * pdaAngle3.ToMat3() ) * 0.6f;
+	else // eg. flashlight
+		holsterAxis = idAngles( 0, 90, 90 ).ToMat3();
+}
+
+/*
+==============
+idHolster::HolsterPDA
+==============
+*/
+void idHolster::HolsterPDA()
+{
+	if( vr_slotDisable.GetBool() || !owner )
+	{
+		heldWeapon = owner ? owner->weapon_fists : 0;
+		return;
+	}
+
+	heldWeapon = owner->weapon_fists;
+	if( vr_slotDisable.GetBool() )
+		return;
+
+	// we will holster the PDA
+	HolsterModelByName( "models/items/pda/pda_world.lwo" );
+	heldWeapon = owner->weapon_pda;
+}
+
+/*
+==============
+idHolster::EmptyHolster
+==============
+*/
+void idHolster::EmptyHolster()
+{
+	FreeSlot();
+	heldWeapon = owner ? owner->weapon_fists : 0;
+}
+
+/*
+==============
+idHolster::HolsterFlashlight
+==============
+*/
+void idHolster::HolsterFlashlight()
+{
+	const char * modelname;
+
+	FreeSlot();
+	if( vr_slotDisable.GetBool() || !owner )
+	{
+		heldWeapon = owner ? owner->weapon_fists : 0;
+		return;
+	}
+
+	// we will holster the flashlight if carrying it
+	if( vr_flashlightMode.GetInteger() == 3 && owner->flashlight.GetEntity()->IsLinked() && !owner->spectating && owner->weaponEnabled && !owner->hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
+	{
+		modelname = owner->flashlight->weaponDef->dict.GetString( "model" );
+	}
+	else modelname = "";
+	HolsterModelByName( modelname );
+	heldWeapon = owner->weapon_flashlight;
+}
+
+/*
+==============
+idHolster::StashToExtraHolster
+==============
+*/
+void idHolster::StashToExtraHolster()
+{
+	if( owner )
+	{
+		// push current contents to extra holster
+		owner->extraHolsteredWeapon = heldWeapon;
+		if( renderEntity.hModel )
+			owner->extraHolsteredWeaponModel = renderEntity.hModel->Name();
+		else
+			owner->extraHolsteredWeaponModel = NULL;
+	}
+	EmptyHolster();
+}
+
+void idHolster::RestoreFromExtraHolster()
+{
+	FreeSlot();
+	if( vr_slotDisable.GetBool() || !owner )
+	{
+		heldWeapon = owner ? owner->weapon_fists : 0;
+		return;
+	}
+	heldWeapon = owner->extraHolsteredWeapon;
+	owner->extraHolsteredWeapon = owner->weapon_fists;
+	const char * modelname = owner->extraHolsteredWeaponModel;
+	owner->extraHolsteredWeaponModel = NULL;
+
+	HolsterModelByName( modelname );
+}
+
+/*
+==============
+idPlayer::SetupHolsterSlot
+
+stashed: -1 = switch weapons, 1 = empty holster of stashed weapon, 0 = stash current weapon in holster but don't switch
+==============
+*/
+void idHolster::HolsterCurrentWeapon(int stashed)
+{
+	if( !owner )
+	{
+		EmptyHolster();
+		return;
+	}
+	// if there's nothing to stash because we were already using fists or PDA
+	if (stashed == 0 && (owner->currentWeapon == owner->weapon_pda || owner->currentWeapon == owner->weapon_fists))
+		return;
+	// if we were using fists before activating pda, we didn't stash anything in our holster, so don't unstash anything
+	if (stashed == 1 && owner->previousWeapon == owner->weapon_fists)
+		return;
+	// if we want to read or switch the current weapon but it's not ready
+	if (!owner->weapon.GetEntity()->IsReady() && stashed != 1)
+	{
+		return;
+	}
+
+	const char * modelname;
+	idRenderModel* renderModel;
+
+	// push current contents to extra holster
+	if (stashed == 0)
+		StashToExtraHolster();
+	else
+		FreeSlot();
+	if (vr_slotDisable.GetBool())
+	{
+		heldWeapon = owner->weapon_fists;
+		return;
+	}
+
+	if (stashed == 1)
+		modelname = owner->extraHolsteredWeaponModel;
+	else
+		modelname = owner->weapon->weaponDef->dict.GetString("model");
+
+	// can we holster?
+	if( !modelname ||
+		strcmp( modelname, "models/weapons/soulcube/w_soulcube.lwo" ) == 0 ||
+		strcmp( modelname, "_DEFAULT" ) == 0 ||
+		strcmp( modelname, "models/items/grenade_ammo/grenade.lwo" ) == 0 ||
+		strcmp( modelname, "models/items/pda/pda_world.lwo" ) == 0 ||
+		!( renderModel = renderModelManager->FindModel( modelname ) ) )
+	{
+		// can't holster, just unholster
+		if( heldWeapon != owner->weapon_fists )
+		{
+			if( stashed < 0 )
+				owner->SelectWeapon( heldWeapon, false, true );
+			heldWeapon = owner->weapon_fists;
+			memset( &renderEntity, 0, sizeof( renderEntity ) );
+		}
+		return;
+	}
+
+	// we can holster! so unholster or change weapons
+	if( stashed < 0 )
+	{
+		int previousWeapon = owner->currentWeapon;
+		owner->SelectWeapon( heldWeapon, false, true );
+		heldWeapon = previousWeapon;
+	}
+	else
+	{
+		if( stashed == 0 ) // stash current weapon, holstered weapon moves to invisible "extra" slot
+		{
+			heldWeapon = owner->currentWeapon;
+		}
+		else // unstash holstered weapon, extra weapon moves back to holster
+		{
+			owner->SelectWeapon( heldWeapon, true, true );
+			RestoreFromExtraHolster();
+			return;
+		}
+	}
+
+	HolsterModelByName( modelname, renderModel );
+}
+
+/*
+==============
+idHolster::UpdateSlot
+==============
+*/
+void idHolster::UpdateSlot()
+{
+	if( vr_slotDisable.GetBool() || !owner )
+	{
+		FreeSlot();
+		heldWeapon = owner ? owner->weapon_fists : 0;
+		return;
+	}
+	if( renderEntity.hModel )
+	{
+		renderEntity.timeGroup = owner->timeGroup;
+
+		renderEntity.entityNum = ENTITYNUM_NONE;
+
+		renderEntity.axis = holsterAxis * owner->waistAxis;
+		idVec3 slotOrigin = origin + idVec3( -5, 0, 0 );
+		if( vr_weaponHand.GetInteger() )
+			slotOrigin.y *= -1.0f;
+		renderEntity.origin = owner->waistOrigin + slotOrigin * owner->waistAxis;
+
+		renderEntity.allowSurfaceInViewID = owner->entityNumber + 1;
+		renderEntity.weaponDepthHack = g_useWeaponDepthHack.GetBool();
+
+		if( modelDefHandle == -1 )
+		{
+			modelDefHandle = gameRenderWorld->AddEntityDef( &renderEntity );
+		}
+		else
+		{
+			gameRenderWorld->UpdateEntityDef( modelDefHandle, &renderEntity );
+		}
+	}
+}
+
+/*
+==============
 idPlayerHand::idPlayerHand
 ==============
 */
 idPlayerHand::idPlayerHand()
 {
+	heldWeapon = 0;
+
 	laserSightHandle = -1;
 	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
 
@@ -1558,14 +1904,6 @@ Release any resources used by the player's hand.
 */
 idPlayerHand::~idPlayerHand()
 {
-	//delete weapon.GetEntity();
-	//weapon = NULL;
-
-	//delete flashlight.GetEntity();
-	//flashlight = NULL;
-
-	//delete pdaMenu;
-	//pdaMenu = NULL;
 }
 
 /*
@@ -6802,15 +7140,16 @@ void idPlayer::DropWeapon( bool died )
 /*
 =================
 idPlayer::StealWeapon
-steal the target player's current weapon
+steal the best weapon that the target player is holding in their hands
 =================
 */
 void idPlayer::StealWeapon( idPlayer* player )
 {
+	// Carl: TODO Dual Wielding
 	assert( !common->IsClient() );
 	
 	// make sure there's something to steal
-	idWeapon* player_weapon = static_cast< idWeapon* >( player->weapon.GetEntity() );
+	idWeapon* player_weapon = player->GetBestWeaponToSteal( this );
 	if( !player_weapon || !player_weapon->CanDrop() || weaponGone )
 	{
 		return;
@@ -6828,8 +7167,8 @@ void idPlayer::StealWeapon( idPlayer* player )
 	}
 	const char* weapon_classname = spawnArgs.GetString( va( "def_weapon%d", newweap ) );
 	assert( weapon_classname );
-	int ammoavailable = player->weapon.GetEntity()->AmmoAvailable();
-	int inclip = player->weapon.GetEntity()->AmmoInClip();
+	int ammoavailable = player_weapon->AmmoAvailable();
+	int inclip = player_weapon->AmmoInClip();
 	
 	ammoavailable += inclip;
 	
@@ -6846,7 +7185,7 @@ void idPlayer::StealWeapon( idPlayer* player )
 		ammoavailable = atoi( keypair->GetValue() );
 	}
 	
-	player->weapon.GetEntity()->WeaponStolen();
+	player_weapon->WeaponStolen();
 	player->inventory.Drop( player->spawnArgs, NULL, newweap );
 	player->SelectWeapon( weapon_fists, false );
 	// in case the robbed player is firing rounds with a continuous fire weapon like the chaingun/plasma etc.
@@ -15379,6 +15718,7 @@ void DebugCross( idVec3 origin, idMat3 axis, idVec4 color )
 	gameRenderWorld->DebugLine( color, origin - 3 * axis[2], origin + 3 * axis[2], 20 );
 }
 
+// Carl: TODO Dual wielding
 void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
 {
 	
@@ -15815,6 +16155,7 @@ void idPlayerHand::TrackWeaponDirection( idVec3 origin )
 Koz idPlayer::SetHandIKPos
 Set the position for the hand based on weapon origin
 ==============
+Carl: TODO Dual wielding
 */
 void idPlayer::SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQuat rotation, bool isFlashlight )
 {
@@ -18768,6 +19109,84 @@ bool idPlayer::CanShowWeaponViewmodel() const
 {
 	return ui_showGun.GetBool();
 }
+
+/*
+===============
+idPlayer::GetWeaponInHand
+Carl: Dual wielding. Returns NULL if no weapon in the hand.
+===============
+*/
+idWeapon* idPlayer::GetWeaponInHand( int hand ) const
+{
+	// Carl: TODO dual wielding
+	if( hand == vr_weaponHand.GetInteger() )
+		return weapon.GetEntity();
+	else
+		return flashlight.GetEntity();
+}
+
+/*
+===============
+idPlayer::GetGrabberWeapon
+Carl: Dual wielding
+===============
+*/
+idWeapon* idPlayer::GetGrabberWeapon() const
+{
+	// Carl: TODO dual wielding
+	return weapon.GetEntity();
+}
+
+/*
+===============
+idPlayer::GetMainWeapon
+Carl: Dual wielding, when the code needs just one weapon, guess which one is the "main" one
+===============
+*/
+idWeapon* idPlayer::GetMainWeapon() const
+{
+	// Carl: TODO dual wielding
+	return weapon.GetEntity();
+}
+
+/*
+===============
+idPlayer::GetMainWeapon
+Carl: Dual wielding, when the code needs just one weapon, guess which one is the "main" one
+===============
+*/
+idWeapon* idPlayer::GetBestWeaponToSteal( idPlayer* thief ) const
+{
+	// Carl: TODO dual wielding
+	return GetMainWeapon();
+}
+
+/*
+===============
+idPlayer::GetHarvestWeapon
+Carl: Dual wielding, get the specific weapon used to harvest souls (Soul Cube or Artifact)
+Returns the required one if you're holding it, or the other one, or the main weapon
+===============
+*/
+idWeapon* idPlayer::GetHarvestWeapon( idStr requiredWeapons ) const
+{
+	// Carl: TODO dual wielding
+	return weapon.GetEntity();
+}
+
+/*
+=================
+idPlayer::GetCurrentHarvestWeapon
+Carl: Dual wielding, get the specific weapon used to harvest souls (Soul Cube or Artifact)
+Returns the required one if you're holding it, or the other one, or the main weapon
+=================
+*/
+idStr idPlayer::GetCurrentHarvestWeapon( idStr requiredWeapons )
+{
+	// Carl: TODO dual wielding
+	return GetCurrentWeapon();
+}
+
 
 /*
 ===============

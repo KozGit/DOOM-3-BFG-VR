@@ -358,12 +358,12 @@ void idProjectile::Launch( const idVec3& start, const idVec3& dir, const idVec3&
 	speed = velocity.Length() * launchPower;
 
 	// Koz if throwing a grenade use the tracked hand velocity when using motion controls if the controller is not mounted
+	// Carl TODO Dual Wielding
 	if ( game->isVR && commonVr->VR_USE_MOTION_CONTROLS && !vr_mountedWeaponController.GetBool() )
 	{
-
-		idPlayer* player = static_cast<idPlayer*>(owner.GetEntity());
-		if ( player )
+		if( ( owner.GetEntity() && owner.GetEntity()->IsType( idPlayer::Type ) ) )
 		{
+			idPlayer* player = static_cast<idPlayer*>( owner.GetEntity() );
 			if ( player->weapon )
 			{
 				if ( player->weapon->IdentifyWeapon() == WEAPON_HANDGRENADE )

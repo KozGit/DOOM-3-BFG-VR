@@ -277,10 +277,45 @@ struct slot_t
 	float radiusSq;
 };
 
-class idPlayerHand
+class idWeaponHolder
 {
 public:
 	idPlayer* owner;
+	int heldWeapon;
+public:
+	idWeaponHolder();
+	virtual	~idWeaponHolder();
+	void Init( idPlayer* player );
+	virtual bool isEmpty();
+};
+
+class idHolster : public idWeaponHolder
+{
+public:
+	slotIndex_t slot;
+	idVec3 origin;
+	float radiusSq;
+	renderEntity_t			renderEntity;					// used to present a model to the renderer
+	qhandle_t				modelDefHandle;					// handle to static renderer model
+	idMat3					holsterAxis;
+public:
+	idHolster();
+	virtual	~idHolster();
+	void Init( idPlayer* player );
+	void FreeSlot();
+	void HolsterModelByName( const char* modelname, idRenderModel* renderModel = NULL );
+	void HolsterPDA();
+	void HolsterFlashlight();
+	void EmptyHolster();
+	void HolsterCurrentWeapon( int stashed );
+	void StashToExtraHolster();
+	void RestoreFromExtraHolster();
+	void UpdateSlot();
+};
+
+class idPlayerHand : public idWeaponHolder
+{
+public:
 	int whichHand;
 
 	// laser sight - technically every weapon instance could have its own laser sight,
@@ -809,6 +844,18 @@ public:
 	void					RemoveAllButEssentialWeapons();
 	bool					CanShowWeaponViewmodel() const;
 	
+	// Carl: Dual wielding
+	idWeapon*				GetWeaponInHand( int hand ) const;
+	// Carl: when the code needs just one weapon, guess which one is the "main" one
+	idWeapon*				GetMainWeapon() const;
+	idWeapon*				GetGrabberWeapon() const;
+	idWeapon*				GetBestWeaponToSteal( idPlayer* thief ) const;
+	// Carl: get the specific weapon used to harvest souls (Soul Cube or Artifact)
+	// Returns the required one if you're holding it in a hand, or the other one, or the main weapon
+	idWeapon*				GetHarvestWeapon( idStr requiredWeapons ) const;
+	idStr					GetCurrentHarvestWeapon( idStr requiredWeapons );
+	// Carl end
+
 	void					AddAIKill();
 	void					SetSoulCubeProjectile( idProjectile* projectile );
 	
@@ -999,6 +1046,9 @@ public:
 		numProjectileKills = 0;
 	}
 
+	friend class idWeaponHolder;
+	friend class idHolster;
+	friend class idPlayerHand;
 private:
 	// Stats & achievements
 	idAchievementManager	achievementManager;

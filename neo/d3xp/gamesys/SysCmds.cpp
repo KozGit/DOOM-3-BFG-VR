@@ -1781,8 +1781,14 @@ static void Cmd_WeaponSplat_f( const idCmdArgs& args )
 	{
 		return;
 	}
-	
-	player->weapon.GetEntity()->BloodSplat( 2.0f );
+
+	// Carl dual wielding, splat blood on both weapons
+	for( int hand = 0; hand < 2; hand++ )
+	{
+		idWeapon* weapon = player->GetWeaponInHand( hand );
+		if( weapon )
+			weapon->BloodSplat( 2.0f );
+	}
 }
 
 /*

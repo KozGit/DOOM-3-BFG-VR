@@ -64,6 +64,7 @@ idGrabber::idGrabber()
 {
 	dragEnt = NULL;
 	owner = NULL;
+	weapon = NULL;
 	beam = NULL;
 	beamTarget = NULL;
 	oldImpulseSequence = 0;
@@ -155,6 +156,10 @@ void idGrabber::Restore( idRestoreGame* savefile )
 	savefile->ReadVec3( localPlayerPoint );
 	
 	owner.Restore( savefile );
+	if( owner )
+		weapon = owner->GetGrabberWeapon(); // Carl: Dual wielding, don't change save file format
+	else
+		weapon = NULL;
 	
 	savefile->ReadBool( holdingAF );
 	savefile->ReadBool( shakeForceFlip );
@@ -428,7 +433,7 @@ void idGrabber::StopDrag( bool dropOnly )
 				static idVec3 launchOrigin = vec3_zero;
 				static idMat3 launchAxis = mat3_identity;
 				
-				thePlayer->weapon->GetProjectileLaunchOriginAndAxis( launchOrigin, launchAxis );
+				weapon->GetProjectileLaunchOriginAndAxis( launchOrigin, launchAxis );
 				ent->ApplyImpulse( thePlayer, 0, ent->GetPhysics()->GetOrigin(), launchAxis[0] * THROW_SCALE * ent->GetPhysics()->GetMass() );
 			}
 			else // in normal play launch in the direction the body is facing
@@ -500,11 +505,13 @@ void idGrabber::StopDrag( bool dropOnly )
 idGrabber::Update
 ==============
 */
-int idGrabber::Update( idPlayer* player, bool hide )
+int idGrabber::Update( idPlayer* player, idWeapon* weap, bool hide )
 {
 	trace_t trace;
 	idEntity* newEnt;
-	
+
+	weapon = weap; // Carl: support Dual Wielding
+
 	// Koz begin 
 	idVec3  dragOrigin = vec3_zero;
 	idMat3	dragAxis = mat3_identity;
@@ -517,9 +524,9 @@ int idGrabber::Update( idPlayer* player, bool hide )
 
 		if ( game->isVR )
 		{
-			if ( player->weapon != NULL )
+			if ( weapon != NULL )
 			{
-				if ( !player->weapon->GetMuzzlePositionWithHacks( dragOrigin, dragAxis ) )
+				if ( !weapon->GetMuzzlePositionWithHacks( dragOrigin, dragAxis ) )
 				{
 					dragOrigin = player->firstPersonViewOrigin;
 					dragAxis = player->firstPersonViewAxis;
@@ -565,7 +572,7 @@ int idGrabber::Update( idPlayer* player, bool hide )
 			abort = true;
 		}
 		// Not in multiplayer :: Pressing "reload" lets you carefully drop an item
-		if( !common->IsMultiplayer() && !abort && ( player->usercmd.impulseSequence != oldImpulseSequence ) && ( player->usercmd.impulse == IMPULSE_13 ) )
+		if( !common->IsMultiplayer() && !abort && ( weapon->WEAPON_RELOAD ) ) // Carl: support dual wielding
 		{
 			abort = true;
 		}
@@ -638,7 +645,7 @@ int idGrabber::Update( idPlayer* player, bool hide )
 					}
 				}
 				
-				if( validAF && player->usercmd.buttons & BUTTON_ATTACK )
+				if( validAF && weapon->WEAPON_ATTACK ) // Carl: If dual wielding, use attack button for this specific weapon
 				{
 					// Grab this entity and start dragging it around
 					StartDrag( newEnt, trace.c.id );
@@ -673,7 +680,7 @@ int idGrabber::Update( idPlayer* player, bool hide )
 		idVec3 goalPos;
 		
 		// If the player lets go of attack, or time is up
-		if( !( player->usercmd.buttons & BUTTON_ATTACK ) )
+		if( !( weapon->WEAPON_ATTACK ) ) // Carl: support dual wielding
 		{
 			StopDrag( false );
 			return 3;
@@ -830,10 +837,10 @@ void idGrabber::UpdateBeams()
 			beamTarget->SetOrigin( dragEnt.GetEntity()->GetPhysics()->GetAbsBounds().GetCenter() );
 		}
 		
-		muzzle_joint = thePlayer->weapon.GetEntity()->GetAnimator()->GetJointHandle( /* "particle_upper" */ "beam" ); // Koz
+		muzzle_joint = weapon.GetEntity()->GetAnimator()->GetJointHandle( /* "particle_upper" */ "beam" ); // Koz
 		if( muzzle_joint != INVALID_JOINT )
 		{
-			thePlayer->weapon.GetEntity()->GetJointWorldTransform( muzzle_joint, gameLocal.time, muzzle_origin, muzzle_axis );
+			weapon.GetEntity()->GetJointWorldTransform( muzzle_joint, gameLocal.time, muzzle_origin, muzzle_axis );
 			
 			// Koz begin
 			// move the beam forward 3 inches to prevent it from distorting the (now complete) grabber viewmodel.
