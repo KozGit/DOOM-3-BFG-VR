@@ -341,7 +341,9 @@ public:
 	idMat3					handAxis;
 	slotIndex_t				handSlot;
 
-	bool grabbingWorld;
+	bool grabbingWorld, oldGrabbingWorld;
+	bool triggerDown, oldTriggerDown;
+	bool thumbDown, oldThumbDown;
 
 public:
 	idPlayerHand();
@@ -349,6 +351,16 @@ public:
 	void					Init( idPlayer* player, int hand );
 
 	void					TrackWeaponDirection( idVec3 origin );
+
+	virtual bool			holdingFlashlight();
+	virtual bool			holdingWeapon(); // physically holding it, not just levitating
+	virtual bool			floatingWeapon(); // the soul cube and the artifact float next to your hand rather than being held
+	virtual bool			controllingWeapon(); // holding or floating
+	virtual bool			holdingPDA();
+	virtual bool			holdingPhysics();
+	virtual bool			holdingItem();
+	bool					isOverFlashlight();
+	bool					tooFullToInteract();
 };
 
 class idPlayer : public idActor
@@ -820,7 +832,9 @@ public:
 	bool					OtherHandImpulseSlot();
 	bool					WeaponHandImpulseSlot();
 	bool					GrabWorld( int hand, bool pressed ); // 0 = right hand, 1 = left hand; true if pressed, false if released; returns true if handled as grab
-	
+	bool					TriggerClickWorld( int hand, bool pressed ); // 0 = right hand, 1 = left hand; true if pressed, false if released; returns true if handled as trigger
+	bool					ThumbClickWorld( int hand, bool pressed ); // 0 = right hand, 1 = left hand; true if pressed, false if released; returns true if handled as thumb click
+
 	int						SlotForWeapon( const char* weaponName );
 	void					Reload();
 	void					NextWeapon();
@@ -1200,7 +1214,7 @@ private:
 	void					LookAtKiller( idEntity* inflictor, idEntity* attacker );
 	
 	void					StopFiring();
-	void					FireWeapon();
+	void					FireWeapon( int hand, idWeapon* weap );
 	void					Weapon_Combat();
 	void					Weapon_NPC();
 	void					Weapon_GUI();

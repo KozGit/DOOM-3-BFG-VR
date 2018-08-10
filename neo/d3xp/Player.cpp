@@ -1893,6 +1893,11 @@ idPlayerHand::idPlayerHand()
 	startFrameNum = 0;
 
 	grabbingWorld = false;
+	triggerDown = false;
+	thumbDown = false;
+	oldGrabbingWorld = false;
+	oldTriggerDown = false;
+	oldThumbDown = false;
 }
 
 /*
@@ -1916,6 +1921,13 @@ void idPlayerHand::Init( idPlayer* player, int hand )
 	owner = player;
 	whichHand = hand;
 
+	grabbingWorld = false;
+	triggerDown = false;
+	thumbDown = false;
+	oldGrabbingWorld = false;
+	oldTriggerDown = false;
+	oldThumbDown = false;
+
 	laserSightHandle = -1;
 	// laser sight for 3DTV
 	memset( &laserSightRenderEntity, 0, sizeof( laserSightRenderEntity ) );
@@ -1934,6 +1946,74 @@ void idPlayerHand::Init( idPlayer* player, int hand )
 	throwVelocity = 0.0f;
 
 }
+
+bool idPlayerHand::holdingFlashlight()
+{
+	if( whichHand == vr_weaponHand.GetInteger() || vr_flashlightMode.GetInteger() != 3 || !owner || !owner->flashlight || !owner->flashlight.GetEntity()->IsLinked()
+		|| owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
+		return false;
+	return true;
+}
+
+bool idPlayerHand::holdingWeapon()
+{
+	if( !controllingWeapon() )
+		return false;
+	int w = owner->GetCurrentWeaponSlot();
+	return w != owner->weapon_soulcube && w != owner->weapon_bloodstone && w != owner->weapon_bloodstone_active1 && w != owner->weapon_bloodstone_active2 && w != owner->weapon_bloodstone_active3;
+}
+
+bool idPlayerHand::floatingWeapon()
+{
+	if( !controllingWeapon() )
+		return false;
+	int w = owner->GetCurrentWeaponSlot();
+	return w == owner->weapon_soulcube || w == owner->weapon_bloodstone || w == owner->weapon_bloodstone_active1 || w == owner->weapon_bloodstone_active2 || w == owner->weapon_bloodstone_active3;
+}
+
+bool idPlayerHand::controllingWeapon()
+{
+	if( whichHand != vr_weaponHand.GetInteger() || !owner || !owner->weapon || owner->weapon->IdentifyWeapon() == WEAPON_PDA
+		|| owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
+		return false;
+	return true;
+}
+
+bool idPlayerHand::holdingPDA()
+{
+	// Carl todo
+	return false;
+}
+
+bool idPlayerHand::holdingPhysics()
+{
+	// Carl todo
+	return false;
+}
+
+bool idPlayerHand::holdingItem()
+{
+	// Carl todo
+	return false;
+}
+
+bool idPlayerHand::isOverFlashlight()
+{
+	if( !owner || !owner->flashlight.IsValid() || owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
+		return false;
+	else if( handSlot == SLOT_FLASHLIGHT_HEAD )
+		return vr_flashlightMode.GetInteger() == FLASHLIGHT_HEAD;
+	else if( handSlot == SLOT_FLASHLIGHT_SHOULDER )
+		return vr_flashlightMode.GetInteger() == FLASHLIGHT_BODY;
+	else
+		return false;
+}
+
+bool idPlayerHand::tooFullToInteract()
+{
+	return vr_mustEmptyHands.GetBool() && ( holdingWeapon() || holdingFlashlight() || holdingPDA() || holdingPhysics() || holdingItem() );
+}
+
 
 /*
 ==============
@@ -5245,7 +5325,7 @@ idPlayer::FireWeapon
 */
 idCVar g_infiniteAmmo( "g_infiniteAmmo", "0", CVAR_GAME | CVAR_BOOL, "infinite ammo" );
 extern idCVar ui_autoSwitch;
-void idPlayer::FireWeapon()
+void idPlayer::FireWeapon( int hand, idWeapon *weap )
 {
 	idMat3 axis;
 	idVec3 muzzle;
@@ -5264,16 +5344,17 @@ void idPlayer::FireWeapon()
 		}
 	}
 	
-	if( !hiddenWeapon && weapon.GetEntity()->IsReady() )
+	if( !hiddenWeapon && weap->IsReady() )
 	{
-		if( g_infiniteAmmo.GetBool() || weapon.GetEntity()->AmmoInClip() || weapon.GetEntity()->AmmoAvailable() )
+		if( g_infiniteAmmo.GetBool() || weap->AmmoInClip() || weap->AmmoAvailable() )
 		{
+			weapon_t w = weap->IdentifyWeapon();
 			// Koz grabber doesn't fire projectiles, so player script won't trigger fire anim for hand if we dont do this
-			if ( currentWeapon == weapon_grabber ) AI_WEAPON_FIRED = true; 
+			if( w == WEAPON_GRABBER ) AI_WEAPON_FIRED = true;
 
 			AI_ATTACK_HELD = true;
-			weapon.GetEntity()->BeginAttack();
-			if( ( weapon_soulcube >= 0 ) && ( currentWeapon == weapon_soulcube ) )
+			weap->BeginAttack();
+			if( ( weapon_soulcube >= 0 ) && ( w == WEAPON_SOULCUBE ) )
 			{
 				if( hud )
 				{
@@ -6676,7 +6757,9 @@ bool idPlayer::WeaponHandImpulseSlot()
 	return false;
 }
 
+// Carl: Context sensitive VR grabs, and dual wielding
 // 0 = right hand, 1 = left hand; true if pressed, false if released; returns true if handled as grab
+// WARNING! Called from the input thread?
 bool idPlayer::GrabWorld( int hand, bool pressed )
 {
 	bool b;
@@ -6691,6 +6774,48 @@ bool idPlayer::GrabWorld( int hand, bool pressed )
 	else
 		b = OtherHandImpulseSlot();
 	hands[hand].grabbingWorld = b;
+	return b;
+}
+
+// Carl: Context sensitive VR trigger buttons, and dual wielding
+// 0 = right hand, 1 = left hand; true if pressed, false if released; returns true if handled as trigger pull
+// WARNING! Called from the input thread?
+bool idPlayer::TriggerClickWorld( int hand, bool pressed )
+{
+	bool b;
+	if( !pressed )
+	{
+		b = hands[ hand ].triggerDown;
+		hands[ hand ].triggerDown = false;
+		common->Printf( " Releasing Trigger\n" );
+		return b;
+	}
+	// if we're holding or floating a weapon, then the trigger button activates the trigger of that weapon
+	b = hands[ hand ].controllingWeapon();
+	// if we're over a flashlight then the trigger button activates the button of that flashlight
+	b = b || ( hands[ hand ].isOverFlashlight() && !hands[ hand ].tooFullToInteract() );
+	hands[ hand ].triggerDown = b;
+	common->Printf( " Pressing Trigger = %d\n", b );
+	return b;
+}
+
+// Carl: Context sensitive VR thumb clicks, and dual wielding
+// 0 = right hand, 1 = left hand; true if pressed, false if released; returns true if handled as thumb click
+// WARNING! Called from the input thread?
+bool idPlayer::ThumbClickWorld( int hand, bool pressed )
+{
+	bool b;
+	if( !pressed )
+	{
+		b = hands[ hand ].thumbDown;
+		hands[ hand ].thumbDown = false;
+		return b;
+	}
+	// if we're holding or over a flashlight, then the thumb button activates the button of that flashlight
+	// b = hands[ hand ].holdingFlashlight();
+	// b = b || ( hands[ hand ].isOverFlashlight() && !hands[ hand ].tooFullToInteract() )
+	b = false;
+	hands[ hand ].thumbDown = b;
 	return b;
 }
 
@@ -7321,14 +7446,25 @@ void idPlayer::Weapon_Combat()
 	AI_WEAPON_FIRED = false;
 	if( !influenceActive )
 	{
-		if( ( usercmd.buttons & BUTTON_ATTACK ) && !weaponGone )
+		// Carl Dual wielding - check both hands for weapons being fired
+		for( int h = 0; h < 2; h++ )
 		{
-			FireWeapon();
-		}
-		else if( oldButtons & BUTTON_ATTACK )
-		{
-			AI_ATTACK_HELD = false;
-			weapon.GetEntity()->EndAttack();
+			if( hands[ h ].triggerDown /* || ( usercmd.buttons & BUTTON_ATTACK ) */ )
+			{
+				common->Printf( "trigger down\n" );
+				if( hands[ h ].controllingWeapon() && !weaponGone )
+				{
+					FireWeapon( h, GetWeaponInHand( h ) );
+					hands[ h ].oldTriggerDown = true;
+				}
+			}
+			else if( hands[ h ].oldTriggerDown /* || oldButtons & BUTTON_ATTACK */ )
+			{
+				hands[ h ].oldTriggerDown = false;
+				common->Printf( "old trigger down\n" );
+				AI_ATTACK_HELD = false;
+				GetWeaponInHand( h )->EndAttack();
+			}
 		}
 	}
 	
@@ -18483,6 +18619,11 @@ void idPlayer::HandleUserCmds( const usercmd_t& newcmd )
 {
 	// latch button actions
 	oldButtons = usercmd.buttons;
+	for( int h = 0; h < 2; h++ )
+	{
+		hands[ h ].oldGrabbingWorld = hands[ h ].grabbingWorld;
+		hands[ h ].oldThumbDown = hands[ h ].thumbDown;
+	}
 	
 	// grab out usercmd
 	oldCmd = usercmd;
