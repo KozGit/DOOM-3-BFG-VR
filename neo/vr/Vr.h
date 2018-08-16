@@ -413,8 +413,6 @@ private:
 	
 };
 
-#endif
-
 extern idCVar	vr_scale;
 extern idCVar	vr_normalViewHeight;
 extern idCVar	vr_useOculusProfile;
@@ -601,4 +599,20 @@ extern idCVar vr_voiceMicLocation;
 
 extern iVr* commonVr;
 extern iVoice* commonVoice;
+
+typedef enum
+{
+	VR_GRIP_CONTEXT_TOGGLE = 0,
+	VR_GRIP_CONTEXT_TOGGLE_NO_SURFACE = 1,
+	VR_GRIP_TOGGLE_WEAPONS_HOLD_PHYSICS = 2,
+	VR_GRIP_TOGGLE_WEAPONS_HOLD_ITEMS = 3,
+	VR_GRIP_TOGGLE_WITH_DROP = 4,
+	VR_GRIP_DEAD_AND_BURIED = 5,
+	VR_GRIP_HOLD = 6,
+	VR_GRIP_HOLD_AND_SQUEEZE = 7,
+} vr_gripMode_t;
+
+#endif
+
+
 

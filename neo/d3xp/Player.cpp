@@ -1897,6 +1897,7 @@ idPlayerHand::idPlayerHand()
 	thumbDown = false;
 	oldGrabbingWorld = false;
 	oldTriggerDown = false;
+	oldFlashlightTriggerDown = false;
 	oldThumbDown = false;
 }
 
@@ -1926,6 +1927,7 @@ void idPlayerHand::Init( idPlayer* player, int hand )
 	thumbDown = false;
 	oldGrabbingWorld = false;
 	oldTriggerDown = false;
+	oldFlashlightTriggerDown = false;
 	oldThumbDown = false;
 
 	laserSightHandle = -1;
@@ -1960,7 +1962,8 @@ bool idPlayerHand::holdingWeapon()
 	if( !controllingWeapon() )
 		return false;
 	int w = owner->GetCurrentWeaponSlot();
-	return w != owner->weapon_soulcube && w != owner->weapon_bloodstone && w != owner->weapon_bloodstone_active1 && w != owner->weapon_bloodstone_active2 && w != owner->weapon_bloodstone_active3;
+	return w != owner->weapon_fists && w != owner->weapon_soulcube && w != owner->weapon_bloodstone
+		&& w != owner->weapon_bloodstone_active1 && w != owner->weapon_bloodstone_active2 && w != owner->weapon_bloodstone_active3;
 }
 
 bool idPlayerHand::floatingWeapon()
@@ -1997,7 +2000,12 @@ bool idPlayerHand::holdingItem()
 	return false;
 }
 
-bool idPlayerHand::isOverFlashlight()
+bool idPlayerHand::holdingSomethingDroppable()
+{
+	return holdingWeapon() || holdingFlashlight() || holdingPDA() || holdingPhysics() || holdingItem();
+}
+
+bool idPlayerHand::isOverMountedFlashlight()
 {
 	if( !owner || !owner->flashlight.IsValid() || owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 		return false;
@@ -2012,6 +2020,179 @@ bool idPlayerHand::isOverFlashlight()
 bool idPlayerHand::tooFullToInteract()
 {
 	return vr_mustEmptyHands.GetBool() && ( holdingWeapon() || holdingFlashlight() || holdingPDA() || holdingPhysics() || holdingItem() );
+}
+
+bool idPlayerHand::contextToggleVirtualGrab()
+{
+	return false;
+}
+
+bool idPlayerHand::startVirtualGrab()
+{
+	virtualGrabDown = true;
+	return true;
+}
+
+bool idPlayerHand::releaseVirtualGrab()
+{
+	if( holdingWeapon() )
+	{
+		virtualGrabDown = false;
+		if( vr_gripMode.GetInteger() != VR_GRIP_DEAD_AND_BURIED )
+			DropWeapon( false );
+		else
+		{
+			// return weapon to holster it was drawn from
+			// if that holster is full, move its contents to inventory
+			// if its contents can't be stored in the inventory, then store the ammo but drop the weapon
+		}
+		return true;
+	}
+	else if( holdingFlashlight() )
+	{
+		// for now, dropping the flashlight will move it to your armour
+		vr_flashlightMode.SetInteger( FLASHLIGHT_BODY );
+		return true;
+	}
+	else if( holdingPDA() )
+	{
+		// for now, dropping any PDA will put it away
+		return true;
+	}
+	else if( holdingItem() )
+	{
+		// either use the item
+		// or drop the item
+		// depending on the settings and where our hand is
+		return true;
+	}
+	else if( holdingPhysics() )
+	{
+		// throw the physics object
+		return true;
+	}
+	return false;
+}
+
+int idPlayerHand::currentWeapon()
+{
+	if( whichHand != vr_weaponHand.GetInteger() )
+	{
+		if( holdingFlashlight() )
+			return owner->weapon_flashlight_new;
+		else if( holdingPDA() )
+			return owner->weapon_pda;
+		else if( holdingSomethingDroppable() )
+			return -1;
+		else
+			return owner->weapon_fists;
+	}
+	return owner->currentWeapon;
+}
+
+void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
+{
+	if( whichHand == vr_weaponHand.GetInteger() )
+	{
+		owner->SelectWeapon( num, force, specific );
+	}
+	else
+	{
+		if( num != owner->weapon_fists )
+		{
+			SwapWeaponHand();
+			owner->SelectWeapon( num, force, specific );
+		}
+		else
+		{
+			// trying to select the fists in the non-weapon hand via the SwitchWeapon function
+			// this should probably do nothing (until we have dual wielding of course)
+		}			
+	}
+}
+
+void idPlayerHand::DropWeapon( bool died )
+{
+	idVec3 forward, up;
+
+	assert( !common->IsClient() );
+
+	if( !owner || owner->spectating || owner->weaponGone || owner->weapon.GetEntity() == NULL )
+		return;
+
+	if( vr_weaponHand.GetInteger() != whichHand )
+		return;
+
+	idWeapon* weap = owner->GetWeaponInHand( whichHand );
+
+	if( !weap || ( !died && !weap->IsReady() ) || weap->IsReloading() )
+		return;
+
+	// ammoavailable is how many shots we can fire
+	// inclip is which amount is in clip right now
+	int ammoavailable = weap->AmmoAvailable();
+	int inclip = weap->AmmoInClip();
+
+	// don't drop a grenade if we have none left
+	if( !idStr::Icmp( idWeapon::GetAmmoNameForNum( weap->GetAmmoType() ), "ammo_grenades" ) && ( ammoavailable - inclip <= 0 ) )
+	{
+		return;
+	}
+
+	ammoavailable += inclip;
+
+	// expect an ammo setup that makes sense before doing any dropping
+	// ammoavailable is -1 for infinite ammo, and weapons like chainsaw
+	// a bad ammo config usually indicates a bad weapon state, so we should not drop
+	// used to be an assertion check, but it still happens in edge cases
+
+	if( ( ammoavailable != -1 ) && ( ammoavailable < 0 ) )
+	{
+		common->DPrintf( "idPlayer::DropWeapon: bad ammo setup\n" );
+		return;
+	}
+	idEntity* item = NULL;
+	// Carl: todo throwing a weapon when you let go of it (also dual wielding)
+	if( died )
+	{
+		// ain't gonna throw you no weapon if I'm dead
+		item = weap->DropItem( vec3_origin, 0, -1, died );
+	}
+	else
+	{
+		// Carl If we drop it straight down, we'll automatically pick it up immediately (if we're alive), so throw it forward a bit.
+		owner->viewAngles.ToVectors( &forward, NULL, &up );
+		item = weap->DropItem( 150.0f * forward + 50.0f * up, 500, -1, died );
+	}
+	if( !item )
+		return;
+	// set the appropriate ammo in the dropped object
+	const idKeyValue* keyval = item->spawnArgs.MatchPrefix( "inv_ammo_" );
+	if( keyval )
+	{
+		item->spawnArgs.SetInt( keyval->GetKey(), ammoavailable );
+		idStr inclipKey = keyval->GetKey();
+		inclipKey.Insert( "inclip_", 4 );
+		inclipKey.Insert( va( "%.2d", currentWeapon() ), 11 );
+		item->spawnArgs.SetInt( inclipKey, inclip );
+	}
+	if( !died )
+	{
+		bool isDuplicate = false;
+		if( !isDuplicate )
+		{
+			// remove from our local inventory completely
+			owner->inventory.Drop( owner->spawnArgs, item->spawnArgs.GetString( "inv_weapon" ), -1 );
+			weap->ResetAmmoClip();
+			SelectWeapon( owner->weapon_fists, true, true );
+			weap->WeaponStolen();
+			owner->weaponGone = true;
+		}
+		else
+		{
+			// just remove from our hand
+		}
+	}
 }
 
 
@@ -6566,12 +6747,18 @@ bool idPlayer::OtherHandImpulseSlot()
 			{
 				PerformImpulse( 40 );
 			}
-			else if( objectiveSystemOpen )
+			else if( objectiveSystemOpen ) // if we're holding our PDA and we try to grab the PDA slot
 			{
+				// our hand is always full in this case, but that's only an issue we care and the holster contains the flashlight
+				if( vr_mustEmptyHands.GetBool() && vr_flashlightMode.GetInteger() == FLASHLIGHT_HAND )
+					return false;
 				TogglePDA();
 			}
-			else if( weapon_pda >= 0 )
+			else if( weapon_pda >= 0 ) // if the PDA is in the slot and we try to grab it
 			{
+				int h = 1 - vr_weaponHand.GetInteger();
+				if( hands[ h ].tooFullToInteract() )
+					return false;
 				SetupPDASlot( false );
 				SetupHolsterSlot( false );
 				SelectWeapon( weapon_pda, true );
@@ -6609,20 +6796,25 @@ bool idPlayer::OtherHandImpulseSlot()
 	}
 	if (otherHandSlot == SLOT_WEAPON_HIP)
 	{
-		SwapWeaponHand();
 		// Holster the PDA we are holding on the other side
 		if( commonVr->PDAforced )
 		{
+			SwapWeaponHand();
 			PerformImpulse( 40 );
 		}
 		else if( !common->IsMultiplayer() && objectiveSystemOpen )
 		{
+			SwapWeaponHand();
 			if (previousWeapon == weapon_fists)
 				previousWeapon = holsteredWeapon;
 			TogglePDA();
 		}
 		else
 		{
+			int h = 1 - vr_weaponHand.GetInteger();
+			if( hands[ h ].tooFullToInteract() && holsteredWeapon != weapon_fists )
+				return false;
+			SwapWeaponHand();
 			// pick up whatever weapon we have holstered, and magically holster our current weapon
 			SetupHolsterSlot();
 		}
@@ -6679,7 +6871,7 @@ bool idPlayer::WeaponHandImpulseSlot()
 	slotIndex_t weaponHandSlot = hands[vr_weaponHand.GetInteger()].handSlot;
 	if( weaponHandSlot == SLOT_WEAPON_HIP )
 	{
-		if ( objectiveSystemOpen )
+		if ( objectiveSystemOpen ) // for now this means our weapon hand was empty
 		{
 			if ( previousWeapon == weapon_fists )
 			{
@@ -6689,6 +6881,9 @@ bool idPlayer::WeaponHandImpulseSlot()
 		}
 		else
 		{
+			// if our hand is too full, we can't pick up the weapon
+			if( hands[ vr_weaponHand.GetInteger() ].tooFullToInteract() && holsteredWeapon != weapon_fists )
+				return false;
 			SetupHolsterSlot();
 		}
 		return true;
@@ -6713,7 +6908,6 @@ bool idPlayer::WeaponHandImpulseSlot()
 	}
 	if ( weaponHandSlot == SLOT_PDA_HIP )
 	{
-		SwapWeaponHand();
 		// if we're holding a gun ( not a pointer finger or fist ) then holster the gun
 		//if ( !commonVr->PDAforced && !objectiveSystemOpen && currentWeapon != weapon_fists )
 		//	SetupHolsterSlot();
@@ -6723,14 +6917,21 @@ bool idPlayer::WeaponHandImpulseSlot()
 			// we don't have a PDA, so toggle the menu instead
 			if ( commonVr->PDAforced || inventory.pdas.Num() == 0 )
 			{
+				if( !commonVr->PDAforced && hands[ vr_weaponHand.GetInteger() ].tooFullToInteract() )
+					return false;
+				SwapWeaponHand();
 				PerformImpulse( 40 );
 			}
 			else if( objectiveSystemOpen )
 			{
+				SwapWeaponHand();
 				TogglePDA();
 			}
 			else if( weapon_pda >= 0 )
 			{
+				if( hands[ vr_weaponHand.GetInteger() ].tooFullToInteract() )
+					return false;
+				SwapWeaponHand();
 				SetupPDASlot( false );
 				SetupHolsterSlot( false );
 				SelectWeapon( weapon_pda, true );
@@ -6738,21 +6939,39 @@ bool idPlayer::WeaponHandImpulseSlot()
 		}
 		return true;
 	}
-	if (weaponHandSlot == SLOT_FLASHLIGHT_HEAD && vr_flashlightMode.GetInteger() == FLASHLIGHT_HEAD && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen
-		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons"))
+	if( weaponHandSlot == SLOT_FLASHLIGHT_HEAD && !commonVr->PDAforced && !objectiveSystemOpen
+		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
-		SwapWeaponHand();
-		// swap flashlight between head and hand
-		vr_flashlightMode.SetInteger( FLASHLIGHT_HAND );
-		return true;
+		// if the flashlight is mounted on our head, and we're unambiguously trying to grab it with our weapon hand
+		if( vr_flashlightMode.GetInteger() == FLASHLIGHT_HEAD && (currentWeapon == weapon_fists || vr_gripMode.GetInteger() == VR_GRIP_TOGGLE_WITH_DROP ) )
+		{
+			SwapWeaponHand();
+			// swap flashlight between head and hand
+			vr_flashlightMode.SetInteger( FLASHLIGHT_HAND );
+			return true;
+		}
+		// if we're unambiguously trying to grab it, but there's nothing there, process and ignore the grip
+		else if( vr_gripMode.GetInteger() == VR_GRIP_TOGGLE_WITH_DROP )
+		{
+			return true;
+		}
 	}
-	if (weaponHandSlot == SLOT_FLASHLIGHT_SHOULDER && vr_flashlightMode.GetInteger() == FLASHLIGHT_BODY && currentWeapon == weapon_fists && !commonVr->PDAforced && !objectiveSystemOpen
-		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons"))
+	if( weaponHandSlot == SLOT_FLASHLIGHT_SHOULDER && !commonVr->PDAforced && !objectiveSystemOpen
+		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
-		SwapWeaponHand();
-		// swap flashlight between head and hand
-		vr_flashlightMode.SetInteger( FLASHLIGHT_HAND );
-		return true;
+		// if the flashlight is mounted on our shoulder, and we're unambiguously trying to grab it with our weapon hand
+		if( vr_flashlightMode.GetInteger() == FLASHLIGHT_BODY && ( currentWeapon == weapon_fists || vr_gripMode.GetInteger() == VR_GRIP_TOGGLE_WITH_DROP ) )
+		{
+			SwapWeaponHand();
+			// swap flashlight between shoulder and hand
+			vr_flashlightMode.SetInteger( FLASHLIGHT_HAND );
+			return true;
+		}
+		// if we're unambiguously trying to grab it, but there's nothing there, process and ignore the grip
+		else if( vr_gripMode.GetInteger() == VR_GRIP_TOGGLE_WITH_DROP )
+		{
+			return true;
+		}
 	}
 	return false;
 }
@@ -6765,8 +6984,37 @@ bool idPlayer::GrabWorld( int hand, bool pressed )
 	bool b;
 	if( !pressed )
 	{
-		b = hands[hand].grabbingWorld;
-		hands[hand].grabbingWorld = false;
+		b = hands[ hand ].grabbingWorld;
+		hands[ hand ].grabbingWorld = false;
+		// We're releasing something
+		if( vr_gripMode.GetInteger() == VR_GRIP_HOLD )
+		{
+			hands[ hand ].releaseVirtualGrab();
+			// releasing outside a holster will drop the weapon
+			// releasing inside an empty holster should place the weapon in the holster
+			// releasing inside a full holster, when vr_mustEmptyHands is true, should drop the weapon
+			// releasing inside a full holster, when vr_mustEmptyHands is false, should put the holster in an intermediate state
+			// where it contains two weapons, your hand contains nothing, and you are waiting to pick up the other weapon
+			// if you then grab in that state, it should pick up the original weapon that was in the holster and show the gun you just put there
+			// if you move your hand away from the holster in that state, we could do one of three things (make it a cvar?)
+			//   1. move the original weapon into the inventory (accessed via your back) and show the new weapon in the holster
+			//   2. keep the original weapon in the holster and drop the weapon you tried to stash on the floor
+			//   3. move the new weapon into the inventory and keep the original weapon in the holster
+			// releasing inside a back holster should place the weapon in your inventory
+			// but should not change the next/previous weapon until your hand leaves the holster
+		}
+		else if( vr_gripMode.GetInteger() == VR_GRIP_DEAD_AND_BURIED )
+		{
+			hands[ hand ].releaseVirtualGrab();
+			// releasing outside a holster will return the weapon to the holster it came from
+			// (if it didn't come from a holster, move it to the hip holster on the same side as the hand)
+			// (anything in that holster always gets moved to inventory)
+			// releasing inside an empty holster should place the weapon in the holster
+			// releasing inside a full holster, when vr_mustEmptyHands is true, should return the weapon to the holster it came from
+			// releasing inside a full holster, when vr_mustEmptyHands is false, should put the holster in an intermediate state
+			// (option 2. above would seem weird in this case, but we should probably still allow it)
+		}
+
 		return b;
 	}
 	if ( hand == vr_weaponHand.GetInteger() )
@@ -6774,6 +7022,17 @@ bool idPlayer::GrabWorld( int hand, bool pressed )
 	else
 		b = OtherHandImpulseSlot();
 	hands[hand].grabbingWorld = b;
+	if( vr_gripMode.GetInteger() == VR_GRIP_TOGGLE_WITH_DROP )
+	{
+		if( !b ) // if we didn't grab a holster
+		{
+			if( hands[ hand ].holdingSomethingDroppable() )
+			{
+				b = hands[ hand ].releaseVirtualGrab();
+			}
+		}
+		return b;
+	}
 	return b;
 }
 
@@ -6787,15 +7046,15 @@ bool idPlayer::TriggerClickWorld( int hand, bool pressed )
 	{
 		b = hands[ hand ].triggerDown;
 		hands[ hand ].triggerDown = false;
-		common->Printf( " Releasing Trigger\n" );
+		//common->Printf( " Releasing Trigger\n" );
 		return b;
 	}
 	// if we're holding or floating a weapon, then the trigger button activates the trigger of that weapon
 	b = hands[ hand ].controllingWeapon();
 	// if we're over a flashlight then the trigger button activates the button of that flashlight
-	b = b || ( hands[ hand ].isOverFlashlight() && !hands[ hand ].tooFullToInteract() );
+	b = b || ( hands[ hand ].isOverMountedFlashlight() && !hands[ hand ].tooFullToInteract() );
 	hands[ hand ].triggerDown = b;
-	common->Printf( " Pressing Trigger = %d\n", b );
+	//common->Printf( " Pressing Trigger = %d\n", b );
 	return b;
 }
 
@@ -6812,9 +7071,8 @@ bool idPlayer::ThumbClickWorld( int hand, bool pressed )
 		return b;
 	}
 	// if we're holding or over a flashlight, then the thumb button activates the button of that flashlight
-	// b = hands[ hand ].holdingFlashlight();
-	// b = b || ( hands[ hand ].isOverFlashlight() && !hands[ hand ].tooFullToInteract() )
-	b = false;
+	b = hands[ hand ].holdingFlashlight();
+	b = b || ( hands[ hand ].isOverMountedFlashlight() && !hands[ hand ].tooFullToInteract() );
 	hands[ hand ].thumbDown = b;
 	return b;
 }
@@ -7449,22 +7707,38 @@ void idPlayer::Weapon_Combat()
 		// Carl Dual wielding - check both hands for weapons being fired
 		for( int h = 0; h < 2; h++ )
 		{
-			if( hands[ h ].triggerDown /* || ( usercmd.buttons & BUTTON_ATTACK ) */ )
+			bool pullingTrigger = hands[ h ].triggerDown;
+			// Check if we're actually turning our helmet/armour-mounted light on or off instead of firing
+			if( pullingTrigger && hands[ h ].isOverMountedFlashlight() && !hands[ h ].tooFullToInteract() && !hands[h].oldFlashlightTriggerDown )
 			{
-				common->Printf( "trigger down\n" );
+				pullingTrigger = false;
+				if( flashlight->lightOn )
+					FlashlightOff();
+				else
+					FlashlightOn();
+				hands[ h ].oldFlashlightTriggerDown = true;
+			}
+			// Fire weapon
+			if( (pullingTrigger && !hands[ h ].oldFlashlightTriggerDown ) || ( usercmd.buttons & BUTTON_ATTACK ) )
+			{
+				//common->Printf( "trigger down\n" );
 				if( hands[ h ].controllingWeapon() && !weaponGone )
 				{
 					FireWeapon( h, GetWeaponInHand( h ) );
-					hands[ h ].oldTriggerDown = true;
 				}
 			}
-			else if( hands[ h ].oldTriggerDown /* || oldButtons & BUTTON_ATTACK */ )
+			else if( (hands[ h ].oldTriggerDown && !hands[ h ].oldFlashlightTriggerDown) || oldButtons & BUTTON_ATTACK )
 			{
-				hands[ h ].oldTriggerDown = false;
-				common->Printf( "old trigger down\n" );
+				//common->Printf( "old trigger down\n" );
 				AI_ATTACK_HELD = false;
 				GetWeaponInHand( h )->EndAttack();
 			}
+			// remember the old state
+			if( hands[ h ].oldFlashlightTriggerDown && !hands[ h ].triggerDown )
+			{
+				hands[ h ].oldFlashlightTriggerDown = false;
+			}
+			hands[ h ].oldTriggerDown = hands[ h ].triggerDown;
 		}
 	}
 	
@@ -10529,6 +10803,15 @@ void idPlayer::EvaluateControls()
 		PerformImpulse( usercmd.impulse );
 	}
 	
+	for( int h = 0; h < 2; h++ )
+	{
+		if( hands[ h ].thumbDown && !hands[ h ].oldThumbDown && ( hands[ h ].holdingFlashlight() || ( hands[ h ].isOverMountedFlashlight() && !hands[ h ].tooFullToInteract() ) ) )
+		{
+			PerformImpulse( 16 ); // toggle flashlight
+		}
+		hands[ h ].oldThumbDown = hands[ h ].thumbDown;
+	}
+
 	bool doTeleport = false;
 
 	currentOculusStrafe = (commonVr->hasOculusRift && (vr_teleportMode.GetInteger() == 2 ) && ((fabs( commonVr->leftMapped.x ) > strafeHiThresh) || (fabs( commonVr->leftMapped.y ) > strafeHiThresh)));
@@ -18622,7 +18905,6 @@ void idPlayer::HandleUserCmds( const usercmd_t& newcmd )
 	for( int h = 0; h < 2; h++ )
 	{
 		hands[ h ].oldGrabbingWorld = hands[ h ].grabbingWorld;
-		hands[ h ].oldThumbDown = hands[ h ].thumbDown;
 	}
 	
 	// grab out usercmd

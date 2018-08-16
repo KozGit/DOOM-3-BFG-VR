@@ -341,8 +341,9 @@ public:
 	idMat3					handAxis;
 	slotIndex_t				handSlot;
 
-	bool grabbingWorld, oldGrabbingWorld;
-	bool triggerDown, oldTriggerDown;
+	bool grabbingWorld, oldGrabbingWorld; // currently this corresponds more to the state of the grip trigger/button which may actually act as a toggle
+	bool virtualGrabDown, oldVirtualGrabDown; // this is the actual virtual grab state, when this goes false you should drop what you're holding
+	bool triggerDown, oldTriggerDown, oldFlashlightTriggerDown;
 	bool thumbDown, oldThumbDown;
 
 public:
@@ -353,14 +354,22 @@ public:
 	void					TrackWeaponDirection( idVec3 origin );
 
 	virtual bool			holdingFlashlight();
-	virtual bool			holdingWeapon(); // physically holding it, not just levitating
+	virtual bool			holdingWeapon(); // physically holding it, not just levitating or using fists
 	virtual bool			floatingWeapon(); // the soul cube and the artifact float next to your hand rather than being held
 	virtual bool			controllingWeapon(); // holding or floating
 	virtual bool			holdingPDA();
 	virtual bool			holdingPhysics();
 	virtual bool			holdingItem();
-	bool					isOverFlashlight();
+	virtual bool			holdingSomethingDroppable();
+	bool					isOverMountedFlashlight();
 	bool					tooFullToInteract();
+	bool					contextToggleVirtualGrab();
+	bool					startVirtualGrab();
+	bool					releaseVirtualGrab(); // will drop whatever you're holding
+
+	int						currentWeapon(); // Carl: change this from a function to a variable when we add dual wielding
+	void					SelectWeapon( int num, bool force, bool specific );
+	void					DropWeapon( bool died );
 };
 
 class idPlayer : public idActor

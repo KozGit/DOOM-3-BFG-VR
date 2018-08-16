@@ -2291,7 +2291,7 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 				int joyButton = K_JOY1 + (action - J_ACTION1);
 				// vrLeftGrab = (value != 0);
 				idPlayer * player = gameLocal.GetLocalPlayer();
-				if ( !player || !player->GrabWorld( 1, (value != 0) ) )
+				if ( !player || !vr_contextSensitive.GetBool() || !player->GrabWorld( 1, (value != 0) ) )
 					Key( joyButton, ( value != 0 ) );
 			}
 			// right grip button
@@ -2300,7 +2300,7 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 				int joyButton = K_JOY1 + (action - J_ACTION1);
 				// vrRightGrab = (value != 0);
 				idPlayer * player = gameLocal.GetLocalPlayer();
-				if ( !player || !player->GrabWorld( 0, (value != 0) ) )
+				if ( !player || !vr_contextSensitive.GetBool() || !player->GrabWorld( 0, (value != 0) ) )
 					Key( joyButton, ( value != 0 ) );
 			}
 			// left trigger button
@@ -2309,7 +2309,7 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 				int joyButton = K_JOY1 + ( action - J_ACTION1 );
 				// vrLeftTrigger = (value != 0);
 				idPlayer * player = gameLocal.GetLocalPlayer();
-				if( !player || !player->TriggerClickWorld( 1, ( value != 0 ) ) )
+				if( !player || !vr_contextSensitive.GetBool() || !player->TriggerClickWorld( 1, ( value != 0 ) ) )
 					Key( joyButton, ( value != 0 ) );
 			}
 			// right trigger button
@@ -2318,7 +2318,7 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 				int joyButton = K_JOY1 + ( action - J_ACTION1 );
 				// vrRightTrigger = (value != 0);
 				idPlayer * player = gameLocal.GetLocalPlayer();
-				if( !player || !player->TriggerClickWorld( 0, ( value != 0 ) ) )
+				if( !player || !vr_contextSensitive.GetBool() || !player->TriggerClickWorld( 0, ( value != 0 ) ) )
 					Key( joyButton, ( value != 0 ) );
 			}
 			// left thumb click (TODO - vive should only do this for center of pad)
@@ -2327,7 +2327,7 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 				int joyButton = K_JOY1 + ( action - J_ACTION1 );
 				// vrLeftTrigger = (value != 0);
 				idPlayer * player = gameLocal.GetLocalPlayer();
-				if( !player || !player->ThumbClickWorld( 1, ( value != 0 ) ) )
+				if( !player || !vr_contextSensitive.GetBool() || !player->ThumbClickWorld( 1, ( value != 0 ) ) )
 					Key( joyButton, ( value != 0 ) );
 			}
 			// right thumb click (TODO - vive should only do this for center of pad)
@@ -2336,7 +2336,7 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 				int joyButton = K_JOY1 + ( action - J_ACTION1 );
 				// vrRightTrigger = (value != 0);
 				idPlayer * player = gameLocal.GetLocalPlayer();
-				if( !player || !player->ThumbClickWorld( 0, ( value != 0 ) ) )
+				if( !player || !vr_contextSensitive.GetBool() || !player->ThumbClickWorld( 0, ( value != 0 ) ) )
 					Key( joyButton, ( value != 0 ) );
 			}
 			// Carl end

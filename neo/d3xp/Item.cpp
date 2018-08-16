@@ -2033,7 +2033,9 @@ idEntity* idMoveableItem::DropItem( const char* classname, const idVec3& origin,
 			removeDelay = 5 * 60 * 1000;
 		}
 		// always remove a dropped item after 5 minutes in case it dropped to an unreachable location
-		item->PostEventMS( &EV_Remove, removeDelay );
+		// Carl: y tho? Usually we want a dropped item to stay there forever.
+		if( removeDelay > 0 )
+			item->PostEventMS( &EV_Remove, removeDelay );
 	}
 	return item;
 }
