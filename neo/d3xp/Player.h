@@ -307,7 +307,7 @@ public:
 	void HolsterPDA();
 	void HolsterFlashlight();
 	void EmptyHolster();
-	void HolsterCurrentWeapon( int stashed );
+	void HolsterCurrentWeapon( int stashed, int hand );
 	void StashToExtraHolster();
 	void RestoreFromExtraHolster();
 	void UpdateSlot();
@@ -346,6 +346,22 @@ public:
 	bool triggerDown, oldTriggerDown, oldFlashlightTriggerDown;
 	bool thumbDown, oldThumbDown;
 
+	idEntityPtr<idWeapon>	weapon;
+	bool weaponGone;			// force stop firing
+
+	int						currentWeapon;
+	idPredictedValue< int >	idealWeapon;
+	int						previousWeapon;
+	int						weaponSwitchTime;
+
+	// Weapon positioning
+	bool			  		PDAfixed; // Koz has the PDA been fixed in space?
+	bool					lastPdaFixed;
+	idVec3					playerPdaPos; // position player was at when pda fixed in space
+	idVec3					motionPosition;
+	idQuat					motionRotation;// = idQuat_zero;
+	bool					wasPDA;
+
 public:
 	idPlayerHand();
 	virtual					~idPlayerHand();
@@ -367,7 +383,10 @@ public:
 	bool					startVirtualGrab();
 	bool					releaseVirtualGrab(); // will drop whatever you're holding
 
-	int						currentWeapon(); // Carl: change this from a function to a variable when we add dual wielding
+	idStr					GetCurrentWeaponString();
+	void					NextWeapon();
+	void					PrevWeapon();
+	void					NextBestWeapon();
 	void					SelectWeapon( int num, bool force, bool specific );
 	void					DropWeapon( bool died );
 };
@@ -447,7 +466,6 @@ public:
 
 	bool					aimValidForTeleport;
 	
-	bool			  		PDAfixed; // Koz has the PDA been fixed in space?
 	idVec3					PDAorigin; // Koz 
 	idMat3					PDAaxis; // Koz
 
@@ -519,7 +537,6 @@ public:
 	int						flashlightBattery;
 	idEntityPtr<idWeapon>	flashlight;
 			
-	idEntityPtr<idWeapon>	weapon;
 	idMenuHandler_HUD* 		hudManager;
 	idMenuScreen_HUD* 		hud;
 	idMenuHandler_PDA* 		pdaMenu;
@@ -617,8 +634,6 @@ public:
 	idVec3					firstPersonViewOrigin;
 	idMat3					firstPersonViewAxis;
 
-	idVec3					firstPersonWeaponOrigin; // Koz fixme check if still needed - independent weapons
-	
 	idVec3					waistOrigin;
 	idMat3					waistAxis;
 
@@ -650,7 +665,7 @@ public:
 	void					FreePDASlot();
 	void					UpdatePDASlot();
 
-	void					SetupHolsterSlot( int stashed = -1 );
+	void					SetupHolsterSlot( int hand, int stashed = -1 );
 	void					FreeHolsterSlot();
 	void					UpdateHolsterSlot();
 
@@ -774,8 +789,8 @@ public:
 	
 	float					DefaultFov() const;
 	float					CalcFov( bool honorZoom );
-	void					CalculateViewWeaponPos( idVec3& origin, idMat3& axis );
-	void					CalculateViewWeaponPosVR( idVec3& origin, idMat3& axis );
+	void					CalculateViewWeaponPos( int hand, idVec3& origin, idMat3& axis );
+	void					CalculateViewWeaponPosVR( int hand, idVec3& origin, idMat3& axis );
 	void					SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQuat rotation, bool isFlashlight = false );
 
 	// Koz begin
@@ -789,7 +804,7 @@ public:
 
 	void					OffsetThirdPersonView( float angle, float range, float height, bool clip );
 	
-	bool					Give( const char* statname, const char* value, unsigned int giveFlags );
+	bool					Give( const char* statname, const char* value, unsigned int giveFlags, int hand );
 	bool					GiveItem( idItem* item, unsigned int giveFlags );
 	void					GiveItem( const char* name );
 	void					GiveHealthPool( float amt );
@@ -851,16 +866,14 @@ public:
 	void					PrevWeapon();
 	void					SetPreviousWeapon( int num )
 	{
-		previousWeapon = num;
+		hands[ vr_weaponHand.GetInteger() ].previousWeapon = num;
 	}
 	void					SelectWeapon( int num, bool force, bool specific = false );
-	void					DropWeapon( bool died ) ;
+	void					DropWeapons( bool died ) ;
 	void					StealWeapon( idPlayer* player );
 	void					AddProjectilesFired( int count );
 	void					AddProjectileHits( int count );
 	void					SetLastHitTime( int time );
-	void					LowerWeapon();
-	void					RaiseWeapon();
 	void					WeaponLoweringCallback();
 	void					WeaponRisingCallback();
 	void					RemoveWeapon( const char* weap );
@@ -870,12 +883,15 @@ public:
 	// Carl: Dual wielding
 	idWeapon*				GetWeaponInHand( int hand ) const;
 	// Carl: when the code needs just one weapon, guess which one is the "main" one
-	idWeapon*				GetMainWeapon() const;
+	idWeapon*				GetMainWeapon();
 	idWeapon*				GetGrabberWeapon() const;
-	idWeapon*				GetBestWeaponToSteal( idPlayer* thief ) const;
+	idWeapon*				GetPDAWeapon() const;
+	idWeapon*				GetWeaponWithMountedFlashlight();
+	int						GetBestWeaponHand();
+	int						GetBestWeaponHandToSteal( idPlayer* thief );
 	// Carl: get the specific weapon used to harvest souls (Soul Cube or Artifact)
 	// Returns the required one if you're holding it in a hand, or the other one, or the main weapon
-	idWeapon*				GetHarvestWeapon( idStr requiredWeapons ) const;
+	idWeapon*				GetHarvestWeapon( idStr requiredWeapons );
 	idStr					GetCurrentHarvestWeapon( idStr requiredWeapons );
 	// Carl end
 
@@ -898,7 +914,7 @@ public:
 	bool					HandleGuiEvents( const sysEvent_t* ev );
 	void					PerformImpulse( int impulse );
 	void					Spectate( bool spectate, bool force = false );
-	void					TogglePDA();
+	void					TogglePDA( int hand );
 	void					RouteGuiMouse( idUserInterface* gui );
 	void					UpdateHud();
 	const idDeclPDA* 		GetPDA() const;
@@ -989,11 +1005,11 @@ public:
 	idStr					GetCurrentWeapon();
 	int						GetCurrentWeaponSlot()
 	{
-		return currentWeapon;
+		return hands[ vr_weaponHand.GetInteger() ].currentWeapon;
 	}
 	int						GetIdealWeapon()
 	{
-		return idealWeapon.Get();
+		return hands[ vr_weaponHand.GetInteger() ].idealWeapon.Get();
 	}
 	idHashTable<WeaponToggle_t>	GetWeaponToggles() const
 	{
@@ -1126,12 +1142,9 @@ private:
 	int						landTime;
 	
 	
-	int						currentWeapon;
-	idPredictedValue< int >	idealWeapon;
-	int						previousWeapon;
-	int						weaponSwitchTime;
 	bool					weaponEnabled;
-	
+	int						risingWeaponHand; // Carl: getWeaponEntity script function assumes there is only one weapon and assigns it during raise
+
 	int						skinIndex;
 	const idDeclSkin* 		skin;
 	const idDeclSkin* 		powerUpSkin;

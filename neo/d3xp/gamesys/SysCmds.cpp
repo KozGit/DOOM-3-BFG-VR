@@ -510,7 +510,7 @@ void Cmd_Give_f( const idCmdArgs& args )
 		return;
 	}
 	
-	if( !give_all && !player->Give( args.Argv( 1 ), args.Argv( 2 ), ITEM_GIVE_FEEDBACK | ITEM_GIVE_UPDATE_STATE ) )
+	if( !give_all && !player->Give( args.Argv( 1 ), args.Argv( 2 ), ITEM_GIVE_FEEDBACK | ITEM_GIVE_UPDATE_STATE, -1 ) )
 	{
 		gameLocal.Printf( "unknown item\n" );
 	}

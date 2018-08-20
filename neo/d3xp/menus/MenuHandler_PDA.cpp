@@ -341,7 +341,7 @@ void idMenuHandler_PDA::Initialize( const char* swfFile, idSoundWorld* sw )
 			idPlayer* player = gameLocal.GetLocalPlayer();
 			if( player != NULL )
 			{
-				player->TogglePDA();
+				player->TogglePDA( 1 - vr_weaponHand.GetInteger() );
 			}
 			return idSWFScriptVar();
 		}

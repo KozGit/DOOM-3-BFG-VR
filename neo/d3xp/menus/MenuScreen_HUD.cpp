@@ -459,12 +459,10 @@ void idMenuScreen_HUD::UpdateWeaponInfo( idPlayer* player )
 	}
 	// Koz end
 	
-	idEntityPtr<idWeapon> weapon = player->weapon;
+	idWeapon* weapon = player->GetMainWeapon(); // Carl: TODO show dual wielding on HUD
 	
-	assert( weapon.GetEntity() );
-	
-	int inClip = weapon.GetEntity()->AmmoInClip();
-	int ammoAmount = weapon.GetEntity()->AmmoAvailable();
+	int inClip = weapon->AmmoInClip();
+	int ammoAmount = weapon->AmmoAvailable();
 	
 	//Make sure the hud always knows how many bloodstone charges there are
 	int ammoRequired;
@@ -503,7 +501,7 @@ void idMenuScreen_HUD::UpdateWeaponInfo( idPlayer* player )
 		bool showClip = true;
 		
 		//Hack to stop the bloodstone ammo to display when it is being activated
-		if( !weapon.GetEntity()->IsReady() )
+		if( !weapon->IsReady() )
 		{
 			// show infinite ammo
 			playerAmmo = "";
@@ -513,19 +511,19 @@ void idMenuScreen_HUD::UpdateWeaponInfo( idPlayer* player )
 		{
 			// show remaining ammo
 			totalAmmo = va( "%i", ammoAmount );
-			playerAmmo = weapon.GetEntity()->ClipSize() ? va( "%i", inClip ) : "--";		// how much in the current clip
-			playerClip = weapon.GetEntity()->ClipSize() ? va( "%i", ammoAmount / weapon.GetEntity()->ClipSize() ) : "--";
+			playerAmmo = weapon->ClipSize() ? va( "%i", inClip ) : "--";		// how much in the current clip
+			playerClip = weapon->ClipSize() ? va( "%i", ammoAmount / weapon->ClipSize() ) : "--";
 			//allAmmo = va( "%i/%i", inClip, ammoAmount );
 		}
 		
-		if( !weapon.GetEntity()->ClipSize() )
+		if( !weapon->ClipSize() )
 		{
 			showClip = false;
 		}
 		
 		bool ammoEmpty = ( ammoAmount == 0 );
-		bool clipEmpty = ( weapon.GetEntity()->ClipSize() ? inClip == 0 : false );
-		bool clipLow = ( weapon.GetEntity()->ClipSize() ? inClip <= weapon.GetEntity()->LowAmmo() : false );
+		bool clipEmpty = ( weapon->ClipSize() ? inClip == 0 : false );
+		bool clipLow = ( weapon->ClipSize() ? inClip <= weapon->LowAmmo() : false );
 		
 		//Hack to stop the bloodstone ammo to display when it is being activated
 		if( player->GetCurrentWeaponSlot() == player->weapon_bloodstone )

@@ -137,10 +137,11 @@ public:
 	
 	// Init
 	void					Spawn();
-	void					SetOwner( idPlayer* owner );
+	void					SetOwner( idPlayer* owner, int ownerHand );
 	idPlayer*				GetOwner();
 	virtual bool			ShouldConstructScriptObjectAtSpawn() const;
 	void					SetFlashlightOwner( idPlayer* owner );
+	int						GetHand();
 	
 	static void				CacheWeapon( const char* weaponName );
 	
@@ -294,12 +295,17 @@ private:
 	bool					isLinked;
 	bool					isPlayerFlashlight;
 	bool					isPlayerLeftHand;
-	
+
+	int lastIdentifiedFrame = 0;
+	weapon_t currentIdentifiedWeapon = WEAPON_NONE;
+	weapon_t lastIdentifiedWeapon = WEAPON_NONE; // lastweapon holds the last actual weapon value, so the weapon enum will never return a value of 'weapon_flaslight'. nothing to do with the players previous weapon
+
 	// precreated projectile
 	idEntity*				projectileEnt;
 	
 	idPlayer* 				owner;
 	idEntityPtr<idAnimatedEntity>	worldModel;
+	int						hand;
 	
 	// hiding (for GUIs and NPCs)
 	int						hideTime;

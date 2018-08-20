@@ -3770,7 +3770,7 @@ void idHarvestable::Think()
 	{
 		idPlayer* thePlayer = player.GetEntity();
 		
-		thePlayer->Give( spawnArgs.GetString( "give_item" ), spawnArgs.GetString( "give_value" ), ITEM_GIVE_FEEDBACK | ITEM_GIVE_UPDATE_STATE );
+		thePlayer->Give( spawnArgs.GetString( "give_item" ), spawnArgs.GetString( "give_value" ), ITEM_GIVE_FEEDBACK | ITEM_GIVE_UPDATE_STATE, thePlayer->GetHarvestWeapon("")->GetHand() );
 		thePlayer->harvest_lock = false;
 		given = true;
 	}

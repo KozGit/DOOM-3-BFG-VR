@@ -660,10 +660,10 @@ void idGameLocal::ServerProcessReliableMessage( int clientNum, int type, const i
 				break;
 			}
 			
-			if( attacker.weapon.GetEntity() == NULL )
-			{
-				break;
-			}
+			//if( attacker.weapon.GetEntity() == NULL )
+			//{
+			//	break;
+			//}
 			
 			if( location == INVALID_JOINT )
 			{
@@ -674,21 +674,21 @@ void idGameLocal::ServerProcessReliableMessage( int clientNum, int type, const i
 			// Line of sight check. As a basic precaution against cheating,
 			// the server performs a ray intersection from the client's position
 			// to the joint he hit on the target.
-			idVec3 muzzleOrigin;
-			idMat3 muzzleAxis;
+			//idVec3 muzzleOrigin;
+			//idMat3 muzzleAxis;
 			
-			attacker.weapon.GetEntity()->GetProjectileLaunchOriginAndAxis( muzzleOrigin, muzzleAxis );
+			//attacker.weapon.GetEntity()->GetProjectileLaunchOriginAndAxis( muzzleOrigin, muzzleAxis );
 			
-			idVec3 targetLocation = victim.GetRenderEntity()->origin + victim.GetRenderEntity()->joints[location].ToVec3() * victim.GetRenderEntity()->axis;
+			//idVec3 targetLocation = victim.GetRenderEntity()->origin + victim.GetRenderEntity()->joints[location].ToVec3() * victim.GetRenderEntity()->axis;
 			
-			trace_t tr;
-			gameLocal.clip.Translation( tr, muzzleOrigin, targetLocation, NULL, mat3_identity, MASK_SHOT_RENDERMODEL, &attacker );
+			//trace_t tr;
+			//gameLocal.clip.Translation( tr, muzzleOrigin, targetLocation, NULL, mat3_identity, MASK_SHOT_RENDERMODEL, &attacker );
 			
-			idEntity* hitEnt = gameLocal.entities[ tr.c.entityNum ];
-			if( hitEnt != &victim )
-			{
-				break;
-			}
+			//idEntity* hitEnt = gameLocal.entities[ tr.c.entityNum ];
+			//if( hitEnt != &victim )
+			//{
+			//	break;
+			//}
 			const idDeclEntityDef* damageDef = static_cast<const idDeclEntityDef*>( declManager->DeclByIndex( DECL_ENTITYDEF, damageDefIndex, false ) );
 			
 			if( damageDef != NULL )
