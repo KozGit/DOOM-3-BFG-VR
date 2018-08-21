@@ -149,7 +149,7 @@ class idInventory
 {
 public:
 	int						maxHealth;
-	int						weapons;
+	int						weapons, duplicateWeapons, foundWeapons;
 	int						powerups;
 	int						armor;
 	int						maxarmor;

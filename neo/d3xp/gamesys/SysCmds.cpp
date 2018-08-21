@@ -386,7 +386,9 @@ void Cmd_Give_f( const idCmdArgs& args )
 	
 	if( give_all || idStr::Icmp( name, "weapons" ) == 0 )
 	{
+		player->inventory.duplicateWeapons |= player->inventory.weapons;
 		player->inventory.weapons = ( int )( BIT( MAX_WEAPONS ) - 1 );
+		player->inventory.foundWeapons |= player->inventory.weapons;
 		player->CacheWeapons();
 		
 		if( !give_all )

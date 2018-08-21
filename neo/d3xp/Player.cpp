@@ -234,6 +234,8 @@ void idInventory::Clear()
 {
 	maxHealth		= 0;
 	weapons			= 0;
+	duplicateWeapons= 0;
+	foundWeapons	= 0;
 	powerups		= 0;
 	armor			= 0;
 	maxarmor		= 0;
@@ -402,8 +404,9 @@ void idInventory::GetPersistantData( idDict& dict )
 	dict.SetInt( "emails", emails.Num() );
 	
 	// weapons
-	dict.SetInt( "weapon_bits", weapons );
-	
+	dict.SetInt( "weapon_bits", weapons | duplicateWeapons | foundWeapons ); // Carl: magically get back any weapons we dropped
+	dict.SetInt( "weapon_duplicates", duplicateWeapons ); // Carl: Dual wielding, bitmask for which weapons you have two of
+
 	dict.SetInt( "levelTriggers", levelTriggers.Num() );
 	for( i = 0; i < levelTriggers.Num(); i++ )
 	{
@@ -516,6 +519,8 @@ void idInventory::RestoreInventory( idPlayer* owner, const idDict& dict )
 	
 	// weapons are stored as a number for persistant data, but as strings in the entityDef
 	weapons	= dict.GetInt( "weapon_bits", "0" );
+	foundWeapons = weapons; // Carl: if we drop any of these weapons, we magically get them back at the end of the level
+	duplicateWeapons = dict.GetInt( "weapon_duplicates", "0" ); // Carl: Dual wielding, bitmask for which weapons you have two of
 	
 	if( g_skill.GetInteger() >= 3 || cvarSystem->GetCVarBool( "fs_buildresources" ) )
 	{
@@ -549,7 +554,7 @@ void idInventory::Save( idSaveGame* savefile ) const
 	int i;
 	
 	savefile->WriteInt( maxHealth );
-	savefile->WriteInt( weapons );
+	savefile->WriteInt( weapons | foundWeapons | duplicateWeapons ); // Carl: don't make saves incompatible, we don't save how many of each weapon we have
 	savefile->WriteInt( powerups );
 	savefile->WriteInt( armor );
 	savefile->WriteInt( maxarmor );
@@ -663,6 +668,8 @@ void idInventory::Restore( idRestoreGame* savefile )
 	
 	savefile->ReadInt( maxHealth );
 	savefile->ReadInt( weapons );
+	foundWeapons = weapons;
+	duplicateWeapons = 0;
 	savefile->ReadInt( powerups );
 	savefile->ReadInt( armor );
 	savefile->ReadInt( maxarmor );
@@ -1085,17 +1092,17 @@ bool idInventory::Give( idPlayer* owner, const idDict& spawnArgs, const char* st
 			// cache the media for this weapon
 			weaponDecl = gameLocal.FindEntityDef( weaponName, false );
 			
-			// don't pickup "no ammo" weapon types twice
+			// don't pickup "no ammo" weapon types three times
 			// not for D3 SP .. there is only one case in the game where you can get a no ammo
 			// weapon when you might already have it, in that case it is more conistent to pick it up
-			if( common->IsMultiplayer() && ( weapons & ( 1 << i ) ) && ( weaponDecl != NULL ) && !weaponDecl->dict.GetInt( "ammoRequired" ) )
+			if( common->IsMultiplayer() && ( weapons & ( 1 << i ) ) && ( duplicateWeapons & ( 1 << i ) ) && ( weaponDecl != NULL ) && !weaponDecl->dict.GetInt( "ammoRequired" ) )
 			{
 				continue;
 			}
 			
 			if( !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || ( weaponName == "weapon_fists" ) || ( weaponName == "weapon_soulcube" ) )
 			{
-				if( ( weapons & ( 1 << i ) ) == 0 || common->IsMultiplayer() )
+				if( ( weapons & ( 1 << i ) ) == 0 || ( duplicateWeapons & ( 1 << i ) ) == 0 || common->IsMultiplayer() )
 				{
 					tookWeapon = true;
 					
@@ -1122,9 +1129,12 @@ bool idInventory::Give( idPlayer* owner, const idDict& spawnArgs, const char* st
 						}
 						
 						weaponPulse = true;
-						weapons |= ( 1 << i );
-						
-						
+						if( ( weapons & ( 1 << i ) ) == 0 )
+							weapons |= ( 1 << i );
+						else
+							duplicateWeapons |= ( 1 << i );
+						foundWeapons |= weapons;
+												
 						if( weaponName != "weapon_pda" )
 						{
 							for( int index = 0; index < NUM_QUICK_SLOTS; ++index )
@@ -1185,12 +1195,16 @@ void idInventory::Drop( const idDict& spawnArgs, const char* weapon_classname, i
 	{
 		weapon_classname = spawnArgs.GetString( va( "def_weapon%d", weapon_index ) );
 	}
-	weapons &= ( 0xffffffff ^ ( 1 << weapon_index ) );
+	// Carl: Dual wielding
+	if( duplicateWeapons & ( 1 << weapon_index ) )
+		duplicateWeapons &= ( 0xffffffff ^ ( 1 << weapon_index ) );
+	else
+		weapons &= ( 0xffffffff ^ ( 1 << weapon_index ) );
 	ammo_t ammo_i = AmmoIndexForWeaponClass( weapon_classname, NULL );
 	if( ammo_i && ammo_i < AMMO_NUMTYPES )
 	{
+		//ammo[ ammo_i ] = ammo[ ammo_i ].Get() - clip[ weapon_index ].Get(); // Carl: we don't really want to throw away all our ammo, do we?
 		clip[ weapon_index ] = -1;
-		ammo[ ammo_i ] = 0;
 	}
 }
 
@@ -2142,9 +2156,26 @@ void idPlayerHand::NextWeapon()
 		{
 			continue;
 		}
-		if( w == owner->holsteredWeapon && owner->holsteredWeapon != owner->weapon_fists )
+		// Carl: dual wielding
+		if( w != owner->weapon_fists )
 		{
-			continue;
+			int availableWeaponsOfThisType = 1;
+			if( owner->inventory.duplicateWeapons & ( 1 << w ) )
+				availableWeaponsOfThisType++;
+			// Carl: skip weapons in the holster unless we have a duplicate, TODO make it optional
+			if( w == owner->holsteredWeapon )
+			{
+				availableWeaponsOfThisType--;
+				if( availableWeaponsOfThisType <= 0 )
+					continue;
+			}
+			// Carl: skip weapons in the other hand unless we have a duplicate (dual wielding)
+			if( w == owner->hands[ 1 - whichHand ].idealWeapon.Get() )
+			{
+				availableWeaponsOfThisType--;
+				if( availableWeaponsOfThisType <= 0 )
+					continue;
+			}
 		}
 		const char* weap = owner->spawnArgs.GetString( va( "def_weapon%d", w ) );
 		if( !owner->spawnArgs.GetBool( va( "weapon%d_cycle", w ) ) )
@@ -2206,9 +2237,26 @@ void idPlayerHand::PrevWeapon()
 		{
 			continue;
 		}
-		if( w == owner->holsteredWeapon && owner->holsteredWeapon != owner->weapon_fists )
+		// Carl: dual wielding
+		if( w != owner->weapon_fists )
 		{
-			continue;
+			int availableWeaponsOfThisType = 1;
+			if( owner->inventory.duplicateWeapons & ( 1 << w ) )
+				availableWeaponsOfThisType++;
+			// Carl: skip weapons in the holster unless we have a duplicate, TODO make it optional
+			if( w == owner->holsteredWeapon )
+			{
+				availableWeaponsOfThisType--;
+				if( availableWeaponsOfThisType <= 0 )
+					continue;
+			}
+			// Carl: skip weapons in the other hand unless we have a duplicate (dual wielding)
+			if( w == owner->hands[ 1 - whichHand ].idealWeapon.Get() )
+			{
+				availableWeaponsOfThisType--;
+				if( availableWeaponsOfThisType <= 0 )
+					continue;
+			}
 		}
 		const char* weap = owner->spawnArgs.GetString( va( "def_weapon%d", w ) );
 		if( !owner->spawnArgs.GetBool( va( "weapon%d_cycle", w ) ) )
@@ -2266,6 +2314,28 @@ void idPlayerHand::NextBestWeapon()
 		if( owner->inventory.HasEmptyClipCannotRefill( weap, owner ) )
 		{
 			continue;
+		}
+
+		// Carl: dual wielding
+		if( w != owner->weapon_fists )
+		{
+			int availableWeaponsOfThisType = 1;
+			if( owner->inventory.duplicateWeapons & ( 1 << w ) )
+				availableWeaponsOfThisType++;
+			// Carl: skip weapons in the holster unless we have a duplicate, TODO make it optional
+			if( w == owner->holsteredWeapon )
+			{
+				availableWeaponsOfThisType--;
+				if( availableWeaponsOfThisType <= 0 )
+					continue;
+			}
+			// Carl: skip weapons in the other hand unless we have a duplicate (dual wielding)
+			if( w == owner->hands[ 1 - whichHand ].idealWeapon.Get() )
+			{
+				availableWeaponsOfThisType--;
+				if( availableWeaponsOfThisType <= 0 )
+					continue;
+			}
 		}
 
 		break;
@@ -2336,6 +2406,8 @@ void idPlayerHand::DropWeapon( bool died )
 	if( !item )
 		return;
 	// set the appropriate ammo in the dropped object
+	if( !died )
+		ammoavailable = inclip; // Carl: TODO work out what these keys do, don't put ALL our ammo in the drop
 	const idKeyValue* keyval = item->spawnArgs.MatchPrefix( "inv_ammo_" );
 	if( keyval )
 	{
@@ -5744,7 +5816,7 @@ void idPlayer::FireWeapon( int hand, idWeapon *weap )
 				}
 				hands[hand].SelectWeapon( hands[hand].previousWeapon, false, false );
 			}
-			if( ( weapon_bloodstone >= 0 ) && ( hands[hand].currentWeapon == weapon_bloodstone ) && inventory.weapons & ( 1 << weapon_bloodstone_active1 ) && hands[hand].weapon.GetEntity()->GetStatus() == WP_READY )
+			if( ( weapon_bloodstone >= 0 ) && ( hands[hand].currentWeapon == weapon_bloodstone ) && (inventory.weapons & ( 1 << weapon_bloodstone_active1 )) && hands[hand].weapon.GetEntity()->GetStatus() == WP_READY )
 			{
 				// tell it to switch to the previous weapon. Only do this once to prevent
 				// weapon toggling messing up the previous weapon
@@ -5823,6 +5895,8 @@ void idPlayer::CacheWeapons()
 			else
 			{
 				inventory.weapons &= ~( 1 << w );
+				inventory.foundWeapons &= ~( 1 << w );
+				inventory.duplicateWeapons &= ~( 1 << w );
 			}
 		}
 	}
@@ -7442,8 +7516,29 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 		for( int i = 0; i < weaponToggle->toggleList.Num(); i++ )
 		{
 			int weapNum = weaponToggle->toggleList[weaponToggleIndex];
+			// Carl: dual wielding
+			int availableWeaponsOfThisType = 0;
+			if( weapNum == owner->weapon_fists )
+			{
+				if( owner->inventory.weapons & ( 1 << weapNum ) )
+					availableWeaponsOfThisType++;
+			}
+			else
+			{
+				if( owner->inventory.weapons & ( 1 << weapNum ) )
+					availableWeaponsOfThisType++;
+				if( owner->inventory.duplicateWeapons & ( 1 << weapNum ) )
+					availableWeaponsOfThisType++;
+				// Carl: skip weapons in the holster unless we have a duplicate, TODO make it optional
+				if( weapNum == owner->holsteredWeapon )
+					availableWeaponsOfThisType--;
+				// Carl: skip weapons in the other hand unless we have a duplicate (dual wielding)
+				if( weapNum == owner->hands[ 1 - whichHand ].idealWeapon.Get() )
+					availableWeaponsOfThisType--;
+			}
+
 			//Is it available
-			if( owner->inventory.weapons & ( 1 << weapNum ) )
+			if( availableWeaponsOfThisType > 0 )
 			{
 				//Do we have ammo for it
 				if( owner->inventory.HasAmmo( owner->spawnArgs.GetString( va( "def_weapon%d", weapNum ) ), true, owner ) || owner->spawnArgs.GetBool( va( "weapon%d_allowempty", weapNum ) ) )
@@ -7469,7 +7564,28 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 		return;
 	}
 	
-	if( force || ( owner->inventory.weapons & ( 1 << num ) ) )
+	// Carl: dual wielding
+	int availableWeaponsOfThisType = 0;
+	if( num == owner->weapon_fists )
+	{
+		if( owner->inventory.weapons & ( 1 << num ) )
+			availableWeaponsOfThisType++;
+	}
+	else
+	{
+		if( owner->inventory.weapons & ( 1 << num ) )
+			availableWeaponsOfThisType++;
+		if( owner->inventory.duplicateWeapons & ( 1 << num ) )
+			availableWeaponsOfThisType++;
+		// Carl: skip weapons in the holster unless we have a duplicate, TODO make it optional
+		if( num == owner->holsteredWeapon )
+			availableWeaponsOfThisType--;
+		// Carl: skip weapons in the other hand unless we have a duplicate (dual wielding)
+		if( num == owner->hands[ 1 - whichHand ].idealWeapon.Get() )
+			availableWeaponsOfThisType--;
+	}
+
+	if( force || availableWeaponsOfThisType > 0 )
 	{
 		if( !owner->inventory.HasAmmo( weap, true, owner ) && !owner->spawnArgs.GetBool( va( "weapon%d_allowempty", num ) ) )
 		{
@@ -18330,9 +18446,16 @@ void idPlayer::Event_SelectWeapon( const char* weaponName )
 	}
 	
 	hiddenWeapon = false;
-	hands[ vr_weaponHand.GetInteger() ].idealWeapon = weaponNum;
-	
-	UpdateHudWeapon( vr_weaponHand.GetInteger() );
+	// Carl: check for dual wielding
+	if( hands[ 1 - vr_weaponHand.GetInteger() ].idealWeapon != weaponNum )
+	{
+		hands[ vr_weaponHand.GetInteger() ].idealWeapon = weaponNum;
+		UpdateHudWeapon( vr_weaponHand.GetInteger() );
+	}
+	else
+	{
+		UpdateHudWeapon( 1 - vr_weaponHand.GetInteger() );
+	}
 }
 
 /*
