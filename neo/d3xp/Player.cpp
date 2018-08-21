@@ -1908,6 +1908,11 @@ idealWeapon( -1 )
 	oldTriggerDown = false;
 	oldFlashlightTriggerDown = false;
 	oldThumbDown = false;
+
+	// Koz begin
+	//laserSightActive = vr_weaponSight.GetInteger() == 0;
+	// Koz end
+
 }
 
 /*
@@ -1969,6 +1974,10 @@ void idPlayerHand::Init( idPlayer* player, int hand )
 	motionPosition = vec3_zero;
 	// motionRotation = idQuat_zero;
 	wasPDA = false;
+
+	// Koz begin
+	//	laserSightActive = vr_weaponSight.GetInteger() == 0;
+	// Koz end
 
 }
 
@@ -2599,7 +2608,6 @@ idPlayer::idPlayer():
 
 	// Koz begin
 	//common->Printf( "Setting headingbeam active\n" );
-	//laserSightActive = vr_weaponSight.GetInteger() == 0;
 	//headingBeamActive = vr_headingBeamMode.GetInteger() != 0;
 	//hudActive = true;
 	// Koz end
@@ -2974,7 +2982,6 @@ void idPlayer::Init()
 	skinHeadingArrowsScroll = declManager->FindSkin( "skins/models/headingbeamarrowsscroll" );
 				
 //	common->Printf( "Setting headingbeam active\n" );
-//	laserSightActive = vr_weaponSight.GetInteger() == 0;
 //	headingBeamActive = vr_headingBeamMode.GetInteger() != 0;
 	hudActive = true;
 
@@ -3862,7 +3869,7 @@ void idPlayer::Save( idSaveGame* savefile ) const
 	}
 
 	// Koz begin
-	savefile->WriteBool( laserSightActive );
+	savefile->WriteBool( hands[0].laserSightActive || hands[1].laserSightActive );
 	savefile->WriteBool( headingBeamActive );
 	savefile->WriteBool( hudActive );
 	
@@ -4422,7 +4429,10 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	// Koz begin
 	if ( savefile->version >= BUILD_NUMBER_FULLY_POSSESSED )
 	{
+		bool laserSightActive;
 		savefile->ReadBool( laserSightActive );
+		hands[ 0 ].laserSightActive = laserSightActive;
+		hands[ 1 ].laserSightActive = laserSightActive;
 		savefile->ReadBool( headingBeamActive );
 		savefile->ReadBool( hudActive );
 	
@@ -4889,7 +4899,7 @@ void idPlayer::SavePersistantInfo()
 
 	// Koz begin
 	playerInfo.SetBool( "headingBeamActive", headingBeamActive );
-	playerInfo.SetBool( "laserSightActive", laserSightActive );
+	playerInfo.SetBool( "laserSightActive", hands[0].laserSightActive || hands[1].laserSightActive ); // Carl: don't change save format
 	playerInfo.SetBool( "hudActive", hudActive );
 	playerInfo.SetInt( "currentFlashMode", commonVr->currentFlashlightMode );
 
@@ -4928,7 +4938,9 @@ void idPlayer::RestorePersistantInfo()
 	
 	// Koz begin
 	headingBeamActive = spawnArgs.GetBool( "headingBeamActive", "1" );
-	laserSightActive = spawnArgs.GetBool( "laserSightActive", "1" );
+	bool laserSightActive = spawnArgs.GetBool( "laserSightActive", "1" );
+	hands[ 0 ].laserSightActive = laserSightActive;
+	hands[ 1 ].laserSightActive = laserSightActive;
 	commonVr->currentFlashlightMode = spawnArgs.GetInt( "currentFlashMode", "3" );
 	hudActive = spawnArgs.GetBool( "hudActive", "1" );
 	
@@ -10708,7 +10720,16 @@ idPlayer::ToggleLaserSight  Koz toggle the lasersight
 */
 void idPlayer::ToggleLaserSight()
 {
-	laserSightActive = !laserSightActive;
+	if( !hands[ 0 ].laserSightActive || !hands[ 1 ].laserSightActive )
+	{
+		hands[ 0 ].laserSightActive = true;
+		hands[ 1 ].laserSightActive = true;
+	}
+	else
+	{
+		hands[ 0 ].laserSightActive = false;
+		hands[ 1 ].laserSightActive = false;
+	}
 }
 
 /*
@@ -12858,7 +12879,7 @@ void idPlayer::UpdateLaserSight( int hand )
 
 	// check if lasersight should be hidden
 	if ( !IsGameStereoRendered() ||
-		!laserSightActive ||							// Koz allow user to toggle lasersight.
+		!hands[hand].laserSightActive ||							// Koz allow user to toggle lasersight.
 		sightMode == -1 ||
 		!weapon->ShowCrosshair() ||		
 		AI_DEAD ||
@@ -14313,7 +14334,10 @@ void idPlayer::Think()
 	gameLocal.portalSkyActive = gameLocal.pvs.CheckAreasForPortalSky( gameLocal.GetPlayerPVS(), GetPhysics()->GetOrigin() );
 	
 	// stereo rendering laser sight that replaces the crosshair
-	UpdateLaserSight( 0 );
+	for( int h = 0; h < 2; h++ )
+	{
+		UpdateLaserSight( h );
+	}
 	UpdateTeleportAim();
 
 	if ( vr_teleportMode.GetInteger() != 0 )
@@ -18830,7 +18854,10 @@ void idPlayer::ClientThink( const int curTime, const float fraction, const bool 
 	LinkCombat();
 	
 	// stereo rendering laser sight that replaces the crosshair
-	UpdateLaserSight( 0 );
+	for( int h = 0; h < 2; h++ )
+	{
+		UpdateLaserSight( h );
+	}
 	UpdateTeleportAim();
 
 	if ( game->isVR ) UpdateHeadingBeam(); // Koz

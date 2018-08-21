@@ -325,6 +325,7 @@ public:
 	renderEntity_t			crosshairEntity; // Koz add a model to place the crosshair into the world
 	qhandle_t				crosshairHandle;
 	int						lastCrosshairMode;
+	bool					laserSightActive; // Koz allow lasersight toggle
 
 	// throwing is per hand
 	idVec3 throwDirection; // for motion control throwing actions e.g. grenade
@@ -420,8 +421,6 @@ public:
 	idPlayerHand hands[2];
 
 	// Koz begin
-	bool					laserSightActive; // Koz allow lasersight toggle
-
 	renderEntity_t			headingBeamEntity; // Koz add a heading indicator pointing the direction the players body is facing.
 	qhandle_t				headingBeamHandle;
 	bool					headingBeamActive;
@@ -443,7 +442,6 @@ public:
 	qhandle_t				hudHandle;
 	bool					hudActive;
 
-	bool					crosshairActive;
 	const idDeclSkin*		skinCrosshairDot;
 	const idDeclSkin*		skinCrosshairCircleDot;
 	const idDeclSkin*		skinCrosshairCross;
