@@ -934,7 +934,7 @@ public:
 		return privateCameraView;
 	}
 	void					StartFxFov( float duration );
-	void					UpdateHudWeapon( bool flashlightWeapon = true );
+	void					UpdateHudWeapon( int flashWeaponHand );
 	void					UpdateChattingHud();
 	void					UpdateHudStats( idMenuHandler_HUD* hudManager );
 	void					Event_StopAudioLog();

@@ -2166,7 +2166,7 @@ void idPlayerHand::NextWeapon()
 	{
 		idealWeapon = w;
 		weaponSwitchTime = gameLocal.time + WEAPON_SWITCH_DELAY;
-		owner->UpdateHudWeapon();
+		owner->UpdateHudWeapon( whichHand );
 	}
 }
 
@@ -2229,7 +2229,7 @@ void idPlayerHand::PrevWeapon()
 	{
 		idealWeapon = w;
 		weaponSwitchTime = gameLocal.time + WEAPON_SWITCH_DELAY;
-		owner->UpdateHudWeapon();
+		owner->UpdateHudWeapon( whichHand );
 	}
 }
 
@@ -2272,7 +2272,7 @@ void idPlayerHand::NextBestWeapon()
 	}
 	idealWeapon = w;
 	weaponSwitchTime = gameLocal.time + WEAPON_SWITCH_DELAY;
-	owner->UpdateHudWeapon();
+	owner->UpdateHudWeapon( whichHand );
 }
 
 void idPlayer::SelectWeapon( int num, bool force, bool specific )
@@ -3412,7 +3412,7 @@ void idPlayer::Spawn()
 		hiddenWeapon = false;
 	}
 	
-	UpdateHudWeapon();
+	UpdateHudWeapon( vr_weaponHand.GetInteger() );
 	
 	tipUp = false;
 	objectiveUp = false;
@@ -5101,7 +5101,7 @@ void idPlayer::UpdateHudStats( idMenuHandler_HUD* _hudManager )
 		
 		if( inventory.weaponPulse )
 		{
-			UpdateHudWeapon();
+			UpdateHudWeapon( vr_weaponHand.GetInteger() );
 			inventory.weaponPulse = false;
 		}
 		
@@ -5122,9 +5122,10 @@ void idPlayer::UpdateHudStats( idMenuHandler_HUD* _hudManager )
 /*
 ===============
 idPlayer::UpdateHudWeapon
+Carl: -1 = don't flash the weapon, 0 = flash right hand weapon, 1 = flash left hand weapon
 ===============
 */
-void idPlayer::UpdateHudWeapon( bool flashlightWeapon )
+void idPlayer::UpdateHudWeapon( int flashWeaponHand )
 {
 
 	idMenuScreen_HUD* curDisplay = hud;
@@ -5144,12 +5145,12 @@ void idPlayer::UpdateHudWeapon( bool flashlightWeapon )
 		return;
 	}
 	
-	curDisplay->UpdateWeaponStates( p, flashlightWeapon );
+	curDisplay->UpdateWeaponStates( p, flashWeaponHand );
 }
 
 /*
 ===============
-idPlayer::UpdateHudWeapon
+idPlayer::UpdateChattingHud
 ===============
 */
 void idPlayer::UpdateChattingHud()
@@ -6033,7 +6034,7 @@ bool idPlayer::GiveItem( idItem* item, unsigned int giveFlags )
 			// We need to update the weapon hud manually, but not
 			// the armor/ammo/health because they are updated every
 			// frame no matter what
-			UpdateHudWeapon( false );
+			UpdateHudWeapon( -1 );
 		}
 		
 		// display the pickup feedback on the hud
@@ -7501,7 +7502,7 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 		{
 			idealWeapon = num;
 		}
-		owner->UpdateHudWeapon();
+		owner->UpdateHudWeapon( whichHand );
 	}
 }
 
@@ -18331,7 +18332,7 @@ void idPlayer::Event_SelectWeapon( const char* weaponName )
 	hiddenWeapon = false;
 	hands[ vr_weaponHand.GetInteger() ].idealWeapon = weaponNum;
 	
-	UpdateHudWeapon();
+	UpdateHudWeapon( vr_weaponHand.GetInteger() );
 }
 
 /*
@@ -19283,7 +19284,7 @@ void idPlayer::ReadFromSnapshot( const idBitMsg& msg )
 		{
 			weaponCatchup = true;
 		}
-		UpdateHudWeapon();
+		UpdateHudWeapon( vr_weaponHand.GetInteger() );
 	}
 	
 	if( lastHitToggle != newHitToggle )

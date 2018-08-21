@@ -423,7 +423,7 @@ void idMenuScreen_HUD::UpdateStamina( idPlayer* player )
 
 /*
 ========================
-idMenuScreen_HUD::UpdateLocation
+idMenuScreen_HUD::UpdateWeaponInfo
 ========================
 */
 void idMenuScreen_HUD::UpdateWeaponInfo( idPlayer* player )
@@ -1149,7 +1149,7 @@ void idMenuScreen_HUD::ShowRespawnMessage( bool show )
 idMenuScreen_HUD::UpdateWeaponStates
 ========================
 */
-void idMenuScreen_HUD::UpdateWeaponStates( idPlayer* player, bool weaponChanged )
+void idMenuScreen_HUD::UpdateWeaponStates( idPlayer* player, int handWeaponChanged )
 {
 
 	if( !weaponPills )
@@ -1174,7 +1174,7 @@ void idMenuScreen_HUD::UpdateWeaponStates( idPlayer* player, bool weaponChanged 
 		
 		weaponPills->GetSprite()->SetVisible( false );
 		
-		if( weaponChanged )
+		if( handWeaponChanged >= 0 )
 		{
 			mpWeapons->GetSprite()->SetVisible( true );
 			mpWeapons->GetSprite()->PlayFrame( "rollOn" );
@@ -1186,7 +1186,7 @@ void idMenuScreen_HUD::UpdateWeaponStates( idPlayer* player, bool weaponChanged 
 			{
 				if( player->inventory.weapons & ( 1 << i ) )
 				{
-					if( i == player->GetIdealWeapon() )
+					if( i == player->hands[ handWeaponChanged ].idealWeapon.Get() )
 					{
 						weaponDefIndex = weaponDefNames.Num();
 					}
@@ -1339,16 +1339,18 @@ void idMenuScreen_HUD::UpdateWeaponStates( idPlayer* player, bool weaponChanged 
 				{
 					weapstate++;
 				}
-				if( player->GetIdealWeapon() == i )
+				if( handWeaponChanged >=0 && player->hands[handWeaponChanged].idealWeapon.Get() == i )
 				{
-				
 					const idDeclEntityDef* weaponDef = gameLocal.FindEntityDef( weap, false );
 					if( weaponDef != NULL )
 					{
 						hudIcon = declManager->FindMaterial( weaponDef->dict.GetString( "hudIcon" ), false );
 						displayName = weaponDef->dict.GetString( "display_name" );
 					}
-					
+				}
+				// if we're holding the weapon in either hand, highlight it on the HUD
+				if( player->hands[ 0 ].idealWeapon.Get() == i || player->hands[ 1 ].idealWeapon.Get() == i )
+				{
 					weapstate++;
 				}
 			}
@@ -1371,7 +1373,7 @@ void idMenuScreen_HUD::UpdateWeaponStates( idPlayer* player, bool weaponChanged 
 		
 		if( weaponImg )
 		{
-			if( weaponChanged && hudIcon != NULL )
+			if( handWeaponChanged >= 0 && hudIcon != NULL )
 			{
 				weaponImg->SetVisible( true );
 				weaponImg->PlayFrame( 2 );

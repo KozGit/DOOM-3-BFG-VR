@@ -1657,7 +1657,7 @@ public:
 	void					UpdateStamina( idPlayer* player );
 	void					UpdateLocation( idPlayer* player );
 	void					UpdateWeaponInfo( idPlayer* player );
-	void					UpdateWeaponStates( idPlayer* player, bool weaponChanged );
+	void					UpdateWeaponStates( idPlayer* player, int handWeaponChanged );
 	void					ShowTip( const char* title, const char* tip );
 	void					HideTip();
 	void					DownloadVideo();
