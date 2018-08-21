@@ -460,9 +460,16 @@ void idMenuScreen_HUD::UpdateWeaponInfo( idPlayer* player )
 	// Koz end
 	
 	idWeapon* weapon = player->GetMainWeapon(); // Carl: TODO show dual wielding on HUD
-	
-	int inClip = weapon->AmmoInClip();
-	int ammoAmount = weapon->AmmoAvailable();
+
+	int inClip[ 2 ];
+	int ammoAmount[ 2 ];
+	bool harvester[ 2 ];
+	for( int h = 0; h < 2; h++ )
+	{
+		inClip[h] = player->hands[ h ].weapon->AmmoInClip();
+		ammoAmount[h] = player->hands[ h ].weapon->AmmoAvailable();
+		harvester[h] = player->hands[ h ].weapon->IdentifyWeapon() == WEAPON_ARTIFACT || player->hands[ h ].weapon->IdentifyWeapon() == WEAPON_SOULCUBE;
+	}
 	
 	//Make sure the hud always knows how many bloodstone charges there are
 	int ammoRequired;
@@ -484,12 +491,10 @@ void idMenuScreen_HUD::UpdateWeaponInfo( idPlayer* player )
 			bsInfo->SetVisible( false );
 		}
 	}
-	
-	if( ammoAmount == -1 || player->GetCurrentWeaponSlot() == player->weapon_bloodstone || player->GetCurrentWeaponSlot() == player->weapon_soulcube )
+
+	if( ( ammoAmount[1] == -1 || harvester[1] ) && ( ammoAmount[0] == -1 || harvester[0] ) )
 	{
-	
 		ammoInfo->SetVisible( false );
-		
 	}
 	else
 	{
@@ -497,6 +502,7 @@ void idMenuScreen_HUD::UpdateWeaponInfo( idPlayer* player )
 		idStr totalAmmo;
 		idStr playerAmmo;
 		idStr playerClip;
+		bool doublePlayer = false, doubleTotal = false;
 		
 		bool showClip = true;
 		
@@ -510,27 +516,62 @@ void idMenuScreen_HUD::UpdateWeaponInfo( idPlayer* player )
 		else
 		{
 			// show remaining ammo
-			totalAmmo = va( "%i", ammoAmount );
-			playerAmmo = weapon->ClipSize() ? va( "%i", inClip ) : "--";		// how much in the current clip
-			playerClip = weapon->ClipSize() ? va( "%i", ammoAmount / weapon->ClipSize() ) : "--";
+			if( ammoAmount[ 1 ] >= 0 && ammoAmount[ 0 ] >= 0 && ammoAmount[ 1 ] != ammoAmount[ 0 ] )
+			{
+				totalAmmo = va( "%i %i", ammoAmount[ 1 ], ammoAmount[ 0 ] );
+				// Using a string longer than "99 99" will fail badly, so max display at 99 in that case.
+				// This doesn't affect single weapons, and eg. "8 250" is still allowed.
+				if (totalAmmo.Length() > 5 )
+					totalAmmo = va( "%i %i", ammoAmount[ 1 ] <= 99 ? ammoAmount[ 1 ] : 99, ammoAmount[ 0 ] <= 99 ? ammoAmount[ 0 ] : 99 );
+				doubleTotal = true;
+			}
+			else if ( ammoAmount[1] >= 0 )
+				totalAmmo = va( "%i", ammoAmount[1] );
+			else if( ammoAmount[0] >= 0 )
+				totalAmmo = va( "%i", ammoAmount[0] );
+			else
+				totalAmmo = va( "%i", ammoAmount[ vr_weaponHand.GetInteger() ] );
+
+			if( player->hands[ 1 ].weapon->ClipSize() && player->hands[ 0 ].weapon->ClipSize() ) // how much in the current clips
+			{
+				playerAmmo = va( "%i %i", inClip[ 1 ], inClip[ 0 ] );
+				// Using a string longer than "19 99" will fail badly, so...
+				if( playerAmmo.Length() > 5 || ( playerAmmo.Length() == 5 && playerAmmo.Find( '1' ) < 0 ) )
+				{
+					if ( inClip[1] <= inClip[0] )
+						playerAmmo = va( "%i %i", inClip[ 1 ] <= 19 ? inClip[ 1 ] : 19, inClip[ 0 ] <= 99 ? inClip[ 0 ] : 99 );
+					else
+						playerAmmo = va( "%i %i", inClip[ 1 ] <= 99 ? inClip[ 1 ] : 99, inClip[ 0 ] <= 19 ? inClip[ 0 ] : 19 );
+				}
+				doublePlayer = true;
+			}
+			else if ( player->hands[ 1 ].weapon->ClipSize() )
+				playerAmmo = va( "%i", inClip[ 1 ] );
+			else if( player->hands[ 0 ].weapon->ClipSize() )
+				playerAmmo = va( "%i", inClip[ 0 ] );
+			else
+				playerAmmo = va( "--" );
+
+			//playerClip = weapon->ClipSize() ? va( "%i", ammoAmount / weapon->ClipSize() ) : "--";
 			//allAmmo = va( "%i/%i", inClip, ammoAmount );
 		}
 		
-		if( !weapon->ClipSize() )
+		if( !player->hands[ 1 ].weapon->ClipSize() && !player->hands[ 0 ].weapon->ClipSize() )
 		{
 			showClip = false;
 		}
 		
-		bool ammoEmpty = ( ammoAmount == 0 );
-		bool clipEmpty = ( weapon->ClipSize() ? inClip == 0 : false );
-		bool clipLow = ( weapon->ClipSize() ? inClip <= weapon->LowAmmo() : false );
+		bool ammoEmpty = ( ammoAmount[1] == 0 || ammoAmount[0] == 0 );
+		bool clipEmpty = ( ( player->hands[ 1 ].weapon->ClipSize() && inClip[ 1 ] == 0 ) || ( player->hands[ 0 ].weapon->ClipSize() && inClip[ 0 ] == 0 ) );
+		bool clipLow = ( ( player->hands[ 1 ].weapon->ClipSize() && player->hands[ 1 ].weapon->LowAmmo() ) || ( player->hands[ 0 ].weapon->ClipSize() && player->hands[ 0 ].weapon->LowAmmo() ) );
 		
 		//Hack to stop the bloodstone ammo to display when it is being activated
+		//Carl: TODO dual wielding
 		if( player->GetCurrentWeaponSlot() == player->weapon_bloodstone )
 		{
-			ammoEmpty = false;
-			clipEmpty = false;
-			clipLow = false;
+			//ammoEmpty = false;
+			//clipEmpty = false;
+			//clipLow = false;
 		}
 		
 		if( showClip )
