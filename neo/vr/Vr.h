@@ -87,11 +87,11 @@ typedef enum
 
 typedef enum
 {
-	FLASH_BODY,
-	FLASH_HEAD,
-	FLASH_GUN,
-	FLASH_HAND,
-	FLASH_MAX,
+	FLASHLIGHT_BODY,
+	FLASHLIGHT_HEAD,
+	FLASHLIGHT_GUN,
+	FLASHLIGHT_HAND,
+	FLASHLIGHT_MAX,
 } vr_flashlight_mode_t;
 
 void SwapWeaponHand();
@@ -138,15 +138,15 @@ public:
 
 	void				CalcAimMove( float &yawDelta, float &pitchDelta );
 
-	int					GetCurrentFlashMode();
-	void				NextFlashMode();
+	int					GetCurrentFlashlightMode();
+	void				NextFlashlightMode();
 
 	bool				ShouldQuit();
 	void				ForceChaperone(int which, bool force);
 
 	//------------------
 
-	int					currentFlashMode;
+	int					currentFlashlightMode;
 
 	bool				VR_GAME_PAUSED;
 	
@@ -413,8 +413,6 @@ private:
 	
 };
 
-#endif
-
 extern idCVar	vr_scale;
 extern idCVar	vr_normalViewHeight;
 extern idCVar	vr_useOculusProfile;
@@ -509,7 +507,7 @@ extern idCVar	vr_headingBeamMode;
 extern idCVar	vr_weaponSight;
 extern idCVar	vr_weaponSightToSurface;
 
-extern idCVar   vr_motionFlashPitchAdj;
+extern idCVar	vr_motionFlashPitchAdj; // flashlight pitch adjust
 extern idCVar	vr_motionWeaponPitchAdj;
 
 extern idCVar	vr_3dgui;
@@ -589,6 +587,32 @@ extern idCVar vr_shotgunChoke;
 
 extern idCVar vr_headshotMultiplier;
 
+extern idCVar vr_weaponCycleMode;
+extern idCVar vr_gripMode;
+extern idCVar vr_doubleClickGrip;
+extern idCVar vr_pickUpMode;
+extern idCVar vr_reloadMode;
+extern idCVar vr_mustEmptyHands;
+extern idCVar vr_contextSensitive;
+extern idCVar vr_dualWield;
+extern idCVar vr_voiceMicLocation;
+
 extern iVr* commonVr;
 extern iVoice* commonVoice;
+
+typedef enum
+{
+	VR_GRIP_CONTEXT_TOGGLE = 0,
+	VR_GRIP_CONTEXT_TOGGLE_NO_SURFACE = 1,
+	VR_GRIP_TOGGLE_WEAPONS_HOLD_PHYSICS = 2,
+	VR_GRIP_TOGGLE_WEAPONS_HOLD_ITEMS = 3,
+	VR_GRIP_TOGGLE_WITH_DROP = 4,
+	VR_GRIP_DEAD_AND_BURIED = 5,
+	VR_GRIP_HOLD = 6,
+	VR_GRIP_HOLD_AND_SQUEEZE = 7,
+} vr_gripMode_t;
+
+#endif
+
+
 

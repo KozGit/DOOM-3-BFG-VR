@@ -2826,7 +2826,8 @@ void idActor::Damage( idEntity* inflictor, idEntity* attacker, const idVec3& dir
 					{
 						player->GetAchievementManager().EventCompletesAchievement( ACHIEVEMENT_ARTIFACT_WITH_BERSERK_PUNCH_20 );
 					}
-					if( player->GetCurrentWeaponSlot() == player->weapon_chainsaw )
+					// Carl: TODO fix for dual wielding
+					if( player->GetCurrentWeaponSlot() == player->weapon_chainsaw && damageNotByFists )
 					{
 						player->GetAchievementManager().EventCompletesAchievement( ACHIEVEMENT_KILL_20_ENEMY_WITH_CHAINSAW );
 					}
@@ -2865,6 +2866,7 @@ void idActor::Damage( idEntity* inflictor, idEntity* attacker, const idVec3& dir
 						// AND it has an attacker (set when the grabber picks up a moveable )
 						// AND the moveable's attacker is the attacker here (the player)
 						// then the player has killed an enemy with a launched moveable from the Grabber
+						// Carl: TODO fix. It will be possible we picked the moveable up and threw it with our hands.
 						if( moveable != NULL && moveable->GetAttacker() != NULL && moveable->GetAttacker()->IsType( idPlayer::Type ) && moveable->GetAttacker() == attacker && player->GetExpansionType() == GAME_D3XP && team != player->team )
 						{
 							player->GetAchievementManager().EventCompletesAchievement( ACHIEVEMENT_GRABBER_KILL_20_ENEMY );

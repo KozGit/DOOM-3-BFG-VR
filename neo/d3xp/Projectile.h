@@ -53,7 +53,7 @@ public :
 	void					Restore( idRestoreGame* savefile );
 	
 	void					Create( idEntity* owner, const idVec3& start, const idVec3& dir );
-	virtual void			Launch( const idVec3& start, const idVec3& dir, const idVec3& pushVelocity, const float timeSinceFire = 0.0f, const float launchPower = 1.0f, const float dmgPower = 1.0f );
+	virtual void			Launch( const idVec3& start, const idVec3& dir, const idVec3& pushVelocity, const float timeSinceFire = 0.0f, const float launchPower = 1.0f, const float dmgPower = 1.0f, const float motionThrowSpeed = 0.0f );
 	virtual void			FreeLightDef();
 	
 	idEntity* 				GetOwner() const;

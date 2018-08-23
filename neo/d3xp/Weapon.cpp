@@ -42,6 +42,8 @@ idClipModel* PDAclipModel; // Koz fixme pda more crappy globals.
 idCVar vr_guiH( "vr_guiH", "100", CVAR_INTEGER, "" );
 idCVar vr_guiA( "vr_guiA", "100", CVAR_INTEGER, "" );
 
+idCVar vr_throwPower( "vr_throwPower", "4.0", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Throw power" );
+
 // Koz end
 
 
@@ -201,6 +203,9 @@ idWeapon::idWeapon()
 	isPlayerFlashlight = false;
 	isPlayerLeftHand = false; // Koz
 
+	lastIdentifiedFrame = 0;
+	currentIdentifiedWeapon = WEAPON_NONE;
+	lastIdentifiedWeapon = WEAPON_NONE; // lastweapon holds the last actual weapon value, so the weapon enum will never return a value of 'weapon_flaslight'. nothing to do with the players previous weapon
 	// Koz end
 	
 	fraccos = 0.0f;
@@ -254,15 +259,24 @@ idWeapon::SetOwner
 Only called at player spawn time, not each weapon switch
 ================
 */
-void idWeapon::SetOwner( idPlayer* _owner )
+void idWeapon::SetOwner( idPlayer* _owner, int ownerHand )
 {
 	assert( !owner );
 	owner = _owner;
-	SetName( va( "%s_weapon", owner->name.c_str() ) );
+	hand = ownerHand;
+	const char* handNames[ 2 ] = { "right", "left" };
+	if( hand < 0 || hand >= 2 || hand == vr_weaponHand.GetInteger() )
+	{
+		SetName( va( "%s_weapon", owner->name.c_str() ) );
+	}
+	else
+	{
+		SetName( va( "%s_weapon_%s", owner->name.c_str(), handNames[ hand ] ) );
+	}
 	
 	if( worldModel.GetEntity() )
 	{
-		worldModel.GetEntity()->SetName( va( "%s_weapon_worldmodel", owner->name.c_str() ) );
+		worldModel.GetEntity()->SetName( va( "%s_worldmodel", name.c_str() ) );
 	}
 }
 
@@ -283,6 +297,19 @@ void idWeapon::SetFlashlightOwner( idPlayer* _owner )
 	{
 		worldModel.GetEntity()->SetName( va( "%s_weapon_flashlight_worldmodel", owner->name.c_str() ) );
 	}
+}
+
+// Carl: dual wielding, check which hand, if any, the weapon is in
+int idWeapon::GetHand()
+{
+	if ( !owner )
+		return -1;
+	for( int h = 0; h < 2; h++ )
+	{
+		if( owner->hands[ h ].weapon.GetEntity() == this )
+			return h;
+	}
+	return -1;
 }
 
 /*
@@ -981,7 +1008,7 @@ void idWeapon::Clear()
 	silent_fire		= false;
 	
 	grabberState	= -1;
-	grabber.Update( owner, true );
+	grabber.Update( owner, this, true );
 	
 	ammoType		= 0;
 	ammoRequired	= 0;
@@ -2261,7 +2288,7 @@ void idWeapon::OwnerDied()
 		// Update the grabber effects
 		if( /*!common->IsMultiplayer() &&*/ grabberState != -1 )
 		{
-			grabber.Update( owner, hide );
+			grabber.Update( owner, this, hide );
 		}
 	}
 	
@@ -2974,21 +3001,14 @@ Koz return weapon enumeration
 
 weapon_t idWeapon::IdentifyWeapon()
 {
-	
-
-	
-	static int lastFrame = 0;
-	static weapon_t currentWeapon = WEAPON_NONE;
-	static weapon_t lastWeapon = WEAPON_NONE; // lastweapon holds the last actual weapon value, so the weapon enum will never return a value of 'weapon_flaslight'. nothing to do with the players previous weapon
-
-	if ( lastFrame == idLib::frameNumber ) // only check once per game frame.
+	if ( lastIdentifiedFrame == idLib::frameNumber ) // only check once per game frame.
 	{
-		return currentWeapon;
+		return currentIdentifiedWeapon;
 	}
 
-	lastFrame = idLib::frameNumber;
+	lastIdentifiedFrame = idLib::frameNumber;
 
-	currentWeapon = WEAPON_NONE;
+	currentIdentifiedWeapon = WEAPON_NONE;
 
 	if ( this )
 	{
@@ -2996,36 +3016,36 @@ weapon_t idWeapon::IdentifyWeapon()
 		{
 			idStr weaponName = weaponDef->GetName();
 			
-			if ( idStr::Icmp( "weapon_fists", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_FISTS;
-			else if ( idStr::Icmp( "weapon_chainsaw", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_CHAINSAW;
-			else if ( idStr::Icmp( "weapon_pistol", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_PISTOL;
-			else if ( idStr::Icmp( "weapon_shotgun", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SHOTGUN;
-			else if ( idStr::Icmp( "weapon_machinegun", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_MACHINEGUN;
-			else if ( idStr::Icmp( "weapon_chaingun", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_CHAINGUN;
-			else if ( idStr::Icmp( "weapon_handgrenade", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_HANDGRENADE;
-			else if ( idStr::Icmp( "weapon_plasmagun", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_PLASMAGUN;
-			else if ( idStr::Icmp( "weapon_rocketlauncher", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_ROCKETLAUNCHER;
-			else if ( idStr::Icmp( "weapon_bfg", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_BFG;
-			else if ( idStr::Icmp( "weapon_soulcube", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SOULCUBE;
-			else if ( idStr::Icmp( "weapon_shotgun_double_mp", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SHOTGUN_DOUBLE_MP;
-			else if ( idStr::Icmp( "weapon_grabber", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_GRABBER;
-			else if ( idStr::Icmp( "weapon_shotgun_double", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_SHOTGUN_DOUBLE;
-			else if ( idStr::Icmp( "weapon_artifact", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_ARTIFACT;
-			else if ( idStr::Icmp( "weapon_bloodstone_passive", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_ARTIFACT;
-			else if ( idStr::Icmp( "weapon_bloodstone_active1", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_ARTIFACT;
-			else if ( idStr::Icmp( "weapon_bloodstone_active2", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_ARTIFACT;
-			else if ( idStr::Icmp( "weapon_bloodstone_active3", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_ARTIFACT;
-			else if ( idStr::Icmp( "weapon_pda", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_PDA;
-			else if ( idStr::Icmp( "weapon_flashlight_new", weaponDef->GetName() ) == 0 ) currentWeapon = lastWeapon;
+			if ( idStr::Icmp( "weapon_fists", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_FISTS;
+			else if ( idStr::Icmp( "weapon_chainsaw", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_CHAINSAW;
+			else if ( idStr::Icmp( "weapon_pistol", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_PISTOL;
+			else if ( idStr::Icmp( "weapon_shotgun", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_SHOTGUN;
+			else if ( idStr::Icmp( "weapon_machinegun", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_MACHINEGUN;
+			else if ( idStr::Icmp( "weapon_chaingun", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_CHAINGUN;
+			else if ( idStr::Icmp( "weapon_handgrenade", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_HANDGRENADE;
+			else if ( idStr::Icmp( "weapon_plasmagun", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_PLASMAGUN;
+			else if ( idStr::Icmp( "weapon_rocketlauncher", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_ROCKETLAUNCHER;
+			else if ( idStr::Icmp( "weapon_bfg", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_BFG;
+			else if ( idStr::Icmp( "weapon_soulcube", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_SOULCUBE;
+			else if ( idStr::Icmp( "weapon_shotgun_double_mp", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_SHOTGUN_DOUBLE_MP;
+			else if ( idStr::Icmp( "weapon_grabber", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_GRABBER;
+			else if ( idStr::Icmp( "weapon_shotgun_double", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_SHOTGUN_DOUBLE;
+			else if ( idStr::Icmp( "weapon_artifact", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_ARTIFACT;
+			else if ( idStr::Icmp( "weapon_bloodstone_passive", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_ARTIFACT;
+			else if ( idStr::Icmp( "weapon_bloodstone_active1", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_ARTIFACT;
+			else if ( idStr::Icmp( "weapon_bloodstone_active2", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_ARTIFACT;
+			else if ( idStr::Icmp( "weapon_bloodstone_active3", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_ARTIFACT;
+			else if ( idStr::Icmp( "weapon_pda", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = WEAPON_PDA;
+			else if ( idStr::Icmp( "weapon_flashlight_new", weaponDef->GetName() ) == 0 ) currentIdentifiedWeapon = lastIdentifiedWeapon;
 			//else if ( idStr::Icmp( "weapon_flashlight_new", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_FLASHLIGHT;
 			//else if ( idStr::Icmp( "weapon_flashlight", weaponDef->GetName() ) == 0 ) currentWeapon = WEAPON_FLASHLIGHT;
-			else currentWeapon = WEAPON_NONE;
-			lastWeapon = currentWeapon;
+			else currentIdentifiedWeapon = WEAPON_NONE;
+			lastIdentifiedWeapon = currentIdentifiedWeapon;
 		}
 	}
-	if ( currentWeapon == WEAPON_FLASHLIGHT ) common->Printf( "Identify weapon returned %s\n", weaponDef->GetName() );
+	if ( currentIdentifiedWeapon == WEAPON_FLASHLIGHT ) common->Printf( "Identify weapon returned %s\n", weaponDef->GetName() );
 
-	return currentWeapon;
+	return currentIdentifiedWeapon;
 }
 
 
@@ -3066,7 +3086,7 @@ void idWeapon::PresentWeaponOriginal( bool showViewModel )
 	else
 	{
 		// calculate weapon position based on player movement bobbing
-		owner->CalculateViewWeaponPos( viewWeaponOrigin, viewWeaponAxis );
+		owner->CalculateViewWeaponPos( GetHand(), viewWeaponOrigin, viewWeaponAxis );
 		
 		// hide offset is for dropping the gun when approaching a GUI or NPC
 		// This is simpler to manage than doing the weapon put-away animation
@@ -3263,7 +3283,7 @@ void idWeapon::PresentWeaponOriginal( bool showViewModel )
 	// Update the grabber effects
 	if( grabberState != -1 )
 	{
-		grabberState = grabber.Update( owner, hide );
+		grabberState = grabber.Update( owner, this, hide );
 	}
 	
 	// remove the muzzle flash light when it's done
@@ -3406,7 +3426,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	{
 		viewWeaponOrigin = playerViewOrigin;
 		viewWeaponAxis = playerViewAxis;
-		owner->CalculateViewFlashPos( viewWeaponOrigin, viewWeaponAxis, flashOffsets[int( currentWeapon )] );
+		owner->CalculateViewFlashlightPos( viewWeaponOrigin, viewWeaponAxis, flashlightOffsets[int( currentWeapon )] );
 
 	}
 	else if ( isPlayerLeftHand ) // Koz left hand
@@ -3416,7 +3436,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	else
 	{
 		// calculate weapon position based on player movement bobbing
-		owner->CalculateViewWeaponPos( viewWeaponOrigin, viewWeaponAxis );
+		owner->CalculateViewWeaponPos( GetHand(), viewWeaponOrigin, viewWeaponAxis );
 		// Koz hide weapon and muzzlerise was here, now called as weapon::CalculateHideRise in player->CalculateViewWeaponPosition to allow hand animations
 
 
@@ -3614,7 +3634,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	// Update the grabber effects
 	if ( grabberState != -1 )
 	{
-		grabberState = grabber.Update( owner, hide );
+		grabberState = grabber.Update( owner, this, hide );
 	}
 
 	// remove the muzzle flash light when it's done
@@ -3701,7 +3721,7 @@ void idWeapon::EnterCinematic()
 		WEAPON_RAISEWEAPON	= false;
 		WEAPON_LOWERWEAPON	= false;
 		
-		grabber.Update( this->GetOwner(), true );
+		grabber.Update( this->GetOwner(), this, true );
 	}
 	
 	disabled = true;
@@ -4772,7 +4792,7 @@ void idWeapon::GetProjectileLaunchOriginAndAxis( idVec3& origin, idMat3& axis )
 				// hand movement, not the barrel axis. (unless the controller is mounted on something like a topshot, then you have a grenade launcher.)
 				if ( commonVr->VR_USE_MOTION_CONTROLS && !vr_mountedWeaponController.GetBool() )
 				{
-					axis = owner->throwDirection.ToMat3();
+					axis = owner->hands[0].throwDirection.ToMat3();
 					break;
 				}
 			}
@@ -5054,8 +5074,19 @@ void idWeapon::Event_LaunchProjectiles( int num_projectiles, float spread, float
 			}
 			else
 			{
+				// Koz if throwing a grenade use the tracked hand velocity when using motion controls if the controller is not mounted
+				// Carl: Dual Wielding
+				float speed = 0;
+				if( IdentifyWeapon() == WEAPON_HANDGRENADE && game->isVR && commonVr->VR_USE_MOTION_CONTROLS && !vr_mountedWeaponController.GetBool() )
+				{
+					int h = GetHand();
+					if( h >= 0 )
+						speed = owner->hands[ h ].throwVelocity * vr_throwPower.GetFloat();
+				}
+				// Koz end
+
 				// Normal launch
-				proj->Launch( muzzle_pos, dir, pushVelocity, fuseOffset, launchPower, dmgPower );
+				proj->Launch( muzzle_pos, dir, pushVelocity, fuseOffset, launchPower, dmgPower, speed );
 			}
 		}
 		
@@ -5300,7 +5331,7 @@ void idWeapon::Event_LaunchPowerup( const char* powerup, float duration, int use
 		MuzzleFlashLight();
 	}
 	
-	owner->Give( powerup, va( "%f", duration ), ITEM_GIVE_FEEDBACK | ITEM_GIVE_UPDATE_STATE | ITEM_GIVE_FROM_WEAPON );
+	owner->Give( powerup, va( "%f", duration ), ITEM_GIVE_FEEDBACK | ITEM_GIVE_UPDATE_STATE | ITEM_GIVE_FROM_WEAPON, -1 ); // Carl: TODO dual wielding
 	
 	
 }
@@ -5677,7 +5708,7 @@ void idWeapon::Event_GetWeaponSkin()
 
 	if ( isPlayerFlashlight )
 	{
-		vrSkinName = commonVr->GetCurrentFlashMode() == 2 ? "minivr/flashhands/0h" : "vr/flashhands/0h"; // mini flashlight skin for gun mount : normal flashlight skin
+		vrSkinName = commonVr->GetCurrentFlashlightMode() == 2 ? "minivr/flashhands/0h" : "vr/flashhands/0h"; // mini flashlight skin for gun mount : normal flashlight skin
 	}
 	else
 	{

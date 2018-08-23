@@ -50,7 +50,7 @@ public:
 	
 	void					Initialize();
 	void					SetDragDistance( float dist );
-	int						Update( idPlayer* player, bool hide );
+	int						Update( idPlayer* player, idWeapon* weap, bool hide );
 	
 private:
 	idEntityPtr<idEntity>	dragEnt;			// entity being dragged
@@ -60,6 +60,7 @@ private:
 	int						id;					// id of body being dragged
 	idVec3					localPlayerPoint;	// dragged point in player space
 	idEntityPtr<idPlayer>	owner;
+	idEntityPtr<idWeapon>	weapon;
 	int						oldImpulseSequence;
 	bool					holdingAF;
 	bool					shakeForceFlip;
