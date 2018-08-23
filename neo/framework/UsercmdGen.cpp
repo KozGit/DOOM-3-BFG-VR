@@ -1767,8 +1767,8 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 	}
 	
 	// Koz make sure the torso faces some form of forward.
-
-	CalcTorsoYawDelta();
+	if( !ik_debug.GetBool() )
+		CalcTorsoYawDelta();
 
 	bool okToMove = false;
 	bool moveRequested = ( abs( cmd.forwardmove ) >= 0.05 || abs( cmd.rightmove ) >= 0.05 );

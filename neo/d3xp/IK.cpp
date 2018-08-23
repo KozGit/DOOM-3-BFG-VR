@@ -36,6 +36,10 @@ idCVar rfx("rfx", "0", CVAR_FLOAT, "");
 idCVar rfy("rfy", "0", CVAR_FLOAT, "");
 idCVar rfz("rfz", "0", CVAR_FLOAT, "");
 
+// idCVar rhx( "rhx", "-1", CVAR_FLOAT, "" );
+// idCVar rhy( "rhy", "0", CVAR_FLOAT, "" );
+// idCVar rhz( "rhz", "0", CVAR_FLOAT, "" );
+
 /*
 ===============================================================================
 
@@ -1333,7 +1337,7 @@ void idIK_Reach::Evaluate()
 {
 		
 	int i;
-	idVec3 modelOrigin, shoulderOrigin, elbowOrigin, handOrigin, shoulderDir, elbowDir;
+	idVec3 modelOrigin, shoulderOrigin, elbowOrigin, handOrigin, shoulderDir, elbowDir, handDir;
 	idMat3 modelAxis, axis;
 	idMat3 shoulderAxis[MAX_ARMS], elbowAxis[MAX_ARMS];
 	idVec3 elbowPos[MAX_ARMS], handPos[MAX_ARMS], shoulderPos[MAX_ARMS]; // Koz
@@ -1356,10 +1360,35 @@ void idIK_Reach::Evaluate()
 		// get the position of the hand in world space
 		animator->GetJointTransform( handJoints[i], gameLocal.time, handOrigin, axis );
 		handOrigin = modelOrigin + handOrigin * modelAxis;
+		idVec3 localHandDir;
+		if( i == 1 )
+			localHandDir = shoulderForward[1] * axis;
+		else
+			localHandDir = idVec3( 1.0f, 1.0f, -0.4f ) * axis; // Carl HACK! Todo! Why is it like this???
+//			localHandDir = idVec3( rhx.GetFloat(), rhy.GetFloat(), rhz.GetFloat() ) * axis;
+		localHandDir.Normalize();
+		handDir = localHandDir * modelAxis;
+
+		shoulderPos[i] = shoulderOrigin - modelOrigin;
+		shoulderPos[i] = shoulderPos[i] * modelAxis.Transpose();
+		handPos[i] = handOrigin - modelOrigin;
+		handPos[i] = handPos[i] * modelAxis.Transpose();
+
+		// if the hand is pointing across the body, the elbow can bend that way, otherwise it can't.
+		// (x = forward, y = left, z = up)
+		bool elbowCanMatchHand = ( i == 1 ) ? localHandDir.y < 0 : localHandDir.y > 0 ;
+		// We also need to match our hand if our hand is reaching over our shoulder
+		elbowCanMatchHand = elbowCanMatchHand || ( handPos[i].z >= shoulderPos[i].z && localHandDir.x < -0.4f );
 		
 		// get the IK bend direction
 		animator->GetJointTransform( elbowJoints[i], gameLocal.time, elbowOrigin, axis );
 		elbowDir = elbowForward[i] * axis * modelAxis;
+
+		if( elbowCanMatchHand )
+		{
+			// Use 80% hand dir, 20% original elbow dir
+			elbowDir.SLerp( elbowDir, -handDir, 0.8f );
+		}
 
 		// solve IK and calculate elbow position
 		SolveTwoArmBones( shoulderOrigin, handOrigin, elbowDir, upperArmLength[i] , lowerArmLength[i] , elbowOrigin );
@@ -1367,20 +1396,28 @@ void idIK_Reach::Evaluate()
 		elbowPos[i] = elbowOrigin - modelOrigin; // Koz actually move the elbow joint
 		elbowPos[i] = elbowPos[i] * modelAxis.Transpose();
 		
-		handPos[i] = handOrigin - modelOrigin; 
-		handPos[i] = handPos[i] * modelAxis.Transpose();
+		// uncomment these if SolveTwoArmBones changes shoulderOrigin or handOrigin
+		// handPos[i] = handOrigin - modelOrigin; 
+		// handPos[i] = handPos[i] * modelAxis.Transpose();
 
-		shoulderPos[i] = shoulderOrigin - modelOrigin;
-		shoulderPos[i] = shoulderPos[i] * modelAxis.Transpose();
+		// shoulderPos[i] = shoulderOrigin - modelOrigin;
+		// shoulderPos[i] = shoulderPos[i] * modelAxis.Transpose();
 
 		// get the axis for the shoulder joint
 		GetBoneAxis( shoulderOrigin, elbowOrigin, shoulderDir, axis );
 
-		if ( ik_debug.GetBool() )
+		if( ik_debug.GetBool() )
 		{
+			if( elbowCanMatchHand )
+				gameRenderWorld->DebugArrow( colorMagenta, handOrigin, handOrigin + handDir * 8.0f, 1 );
+			else
+				gameRenderWorld->DebugArrow( colorRed, handOrigin, handOrigin + handDir * 8.0f, 1 );
+			gameRenderWorld->DrawTextA( va( "%.2f, %.2f, %.2f", localHandDir.x, localHandDir.y, localHandDir.z ), handOrigin + handDir * 11.0f, 0.06f, colorWhite, modelAxis );
+			gameRenderWorld->DrawTextA( va( "%.2f, %.2f, %.2f", handPos[i].x, handPos[i].y, handPos[i].z ), handOrigin + handDir * 9.0f, 0.04f, colorWhite, modelAxis );
+			gameRenderWorld->DrawTextA( va( "%.2f, %.2f, %.2f", shoulderPos[i].x, shoulderPos[i].y, shoulderPos[i].z ), shoulderOrigin + handDir * 11.0f, 0.04f, colorWhite, modelAxis );
 			gameRenderWorld->DebugLine( colorCyan, shoulderOrigin, elbowOrigin );
 			gameRenderWorld->DebugLine( colorRed, elbowOrigin, handOrigin );
-			gameRenderWorld->DebugLine( colorYellow, elbowOrigin, elbowOrigin + elbowDir * 2.0f );
+			gameRenderWorld->DebugArrow( colorYellow, elbowOrigin, elbowOrigin + elbowDir * 8.0f, 1 );
 			gameRenderWorld->DebugLine( colorGreen, elbowOrigin, elbowOrigin + shoulderDir * 2.0f );
 			
 		}
