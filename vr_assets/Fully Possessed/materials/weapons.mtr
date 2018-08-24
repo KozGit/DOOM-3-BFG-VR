@@ -4233,7 +4233,9 @@ vr/lefthand
         specularmap	models/weapons/hands/hand_sp.tga
 }
 
-vr/statwatch
+
+
+vr/rstatwatchbody
 {
         noselfShadow
 	unsmoothedTangents
@@ -4249,15 +4251,15 @@ vr/statwatch
            specularmap	 models/items/pda/pda_s.tga
 }
 
-vr/statwatchgui
+vr/rstatwatchguibody
 {
 	qer_editorimage	guisurfaces/guisurface.tga
-	guiSurf guis/weapons/vrstatgui.gui
+	guiSurf guis/weapons/rvrstatgui.gui
 	discrete
 	description "VR stats watch gui"
 }
 
-vr/statwatchbody
+vr/rstatwatchhands
 {
         noselfShadow
 	unsmoothedTangents
@@ -4273,15 +4275,16 @@ vr/statwatchbody
            specularmap	 models/items/pda/pda_s.tga
 }
 
-vr/statwatchguibody
+vr/rstatwatchguihands
 {
 	qer_editorimage	guisurfaces/guisurface.tga
-	guiSurf guis/weapons/vrstatgui.gui
+	guiSurf guis/weapons/rvrstatgui.gui
 	discrete
 	description "VR stats watch gui"
 }
 
-vr/statwatchhands
+
+vr/lstatwatchbody
 {
         noselfShadow
 	unsmoothedTangents
@@ -4297,10 +4300,34 @@ vr/statwatchhands
            specularmap	 models/items/pda/pda_s.tga
 }
 
-vr/statwatchguihands
+vr/lstatwatchguibody
 {
 	qer_editorimage	guisurfaces/guisurface.tga
-	guiSurf guis/weapons/vrstatgui.gui
+	guiSurf guis/weapons/lvrstatgui.gui
+	discrete
+	description "VR stats watch gui"
+}
+
+vr/lstatwatchhands
+{
+        noselfShadow
+	unsmoothedTangents
+	renderbump  -size 1024 1024 -trace 0.1 -colorMap -aa 2  models/items/pda/pda_local.tga models/items/pda/pda_hi.lwo
+
+        	diffusemap	models/items/pda/pda.tga
+		{
+ 		  blend bumpmap
+          map  addnormals(models/items/pda/pda_local.tga, heightmap(models/items/pda/pda_h.tga, 7 ) )
+ 		  
+     	}
+	
+           specularmap	 models/items/pda/pda_s.tga
+}
+
+vr/lstatwatchguihands
+{
+	qer_editorimage	guisurfaces/guisurface.tga
+	guiSurf guis/weapons/lvrstatgui.gui
 	discrete
 	description "VR stats watch gui"
 }
@@ -4323,29 +4350,8 @@ vr/flashhand
                   specularmap	models/characters/player/arm2_s.tga
 }
 
-vr/leftstatwatch
-{
-        noselfShadow
-	unsmoothedTangents
-	renderbump  -size 1024 1024 -trace 0.1 -colorMap -aa 2  models/items/pda/pda_local.tga models/items/pda/pda_hi.lwo
 
-        	diffusemap	models/items/pda/pda.tga
-		{
- 		  blend bumpmap
-          map  addnormals(models/items/pda/pda_local.tga, heightmap(models/items/pda/pda_h.tga, 7 ) )
- 		  
-     	}
-	
-           specularmap	 models/items/pda/pda_s.tga
-}
 
-vr/leftstatwatchgui
-{
-	qer_editorimage	guisurfaces/guisurface.tga
-	guiSurf guis/weapons/vrstatgui.gui
-	discrete
-	description "VR stats watch gui"
-}
 
 vr/leftfist
 {

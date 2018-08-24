@@ -355,7 +355,8 @@ private:
 	
 	// Koz begin
 	// VR Stat Gui - this is the 'watch' the player wears in VR to display stats.
-	class idUserInterface*	vrStatGui;
+	class idUserInterface*	rvrStatGui;
+	class idUserInterface*	lvrStatGui;
 	// Koz end
 
 	// muzzle flash

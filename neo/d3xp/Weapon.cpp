@@ -866,7 +866,8 @@ void idWeapon::Restore( idRestoreGame* savefile )
 	}
 
 	// gui for stats device on player wrist in VR. 
-	vrStatGui = uiManager->FindGui( "guis/weapons/vrstatgui.gui", true, false, true );
+	rvrStatGui = uiManager->FindGui( "guis/weapons/rvrstatgui.gui", true, false, true );
+	lvrStatGui = uiManager->FindGui( "guis/weapons/lvrstatgui.gui", true, false, true );
 	
 	scale = 1.0f; // koz code to scale weapon models in the world borks the viewmodel when loading quick or autosaves, so make sure scale is correct here.
 	
@@ -1471,7 +1472,8 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 	
 
 	// Koz begin - gui for stats device on player wrist in VR. 
-	vrStatGui = uiManager->FindGui( "guis/weapons/vrstatgui.gui", true, false, true );
+	rvrStatGui = uiManager->FindGui("guis/weapons/rvrstatgui.gui", true, false, true);
+	lvrStatGui = uiManager->FindGui("guis/weapons/lvrstatgui.gui", true, false, true);
 	// Koz end
 
 
@@ -1670,7 +1672,12 @@ void idWeapon::UpdateVRGUI()
 	float armorb = 0.0f;
 	float healthb = 0.0f;
 
-	if ( vrStatGui == NULL )
+	idPlayer* player;
+	player = gameLocal.GetLocalPlayer();
+
+	if ( !player ) return;
+
+	if ( rvrStatGui == NULL )
 	{
 		return;
 	}
@@ -1704,36 +1711,65 @@ void idWeapon::UpdateVRGUI()
 			return;
 		}
 	}
-
-	int inclip = AmmoInClip();
-	int ammoamount = AmmoAvailable();
 		
-	if ( ammoamount < 0 )
+	int inclip[2];
+	int ammoamount[2];
+	int clipsize[2];
+	bool harvester[2];
+	bool ammoEmpty[2];
+	bool clipEmpty[2];
+	bool clipLow[2];
+
+	for ( int h = 0; h < 2; h++ )
+	{
+		inclip[h] = player->hands[h].weapon->AmmoInClip();
+		ammoamount[h] = player->hands[h].weapon->AmmoAvailable();
+		harvester[h] = player->hands[h].weapon->IdentifyWeapon() == WEAPON_ARTIFACT || player->hands[h].weapon->IdentifyWeapon() == WEAPON_SOULCUBE;
+		clipsize[h] = player->hands[h].weapon->ClipSize();
+
+
+		ammoEmpty[h] = ( ammoamount[h] == 0 ) ;
+		clipEmpty[h] = ( player->hands[h].weapon->ClipSize() && inclip[h] == 0);
+		clipLow[h] = ( player->hands[h].weapon->ClipSize() && player->hands[h].weapon->LowAmmo());
+	}
+
+	//int inclip = AmmoInClip();
+	//int ammoamount = AmmoAvailable();
+	
+	// update the right hand statwatch
+
+	if ( ammoamount[HAND_RIGHT] < 0 )
 	{
 		// show infinite ammo
-		vrStatGui->SetStateString( "player_ammo", "" );
+		rvrStatGui->SetStateString( "player_ammo", "" );
 	}
 	else
 	{
 		// show remaining ammo
-		vrStatGui->SetStateString( "player_totalammo", va( "%i", ammoamount ) );
-		vrStatGui->SetStateString( "player_ammo", ClipSize() ? va( "%i", inclip ) : "--" );
-		vrStatGui->SetStateString( "player_clips", ClipSize() ? va( "%i", ammoamount / ClipSize() ) : "--" );
-		vrStatGui->SetStateString( "player_allammo", va( "%i/%i", inclip, ammoamount ) );
+		rvrStatGui->SetStateString("player_totalammo", va("%i", ammoamount[HAND_RIGHT]));
+		rvrStatGui->SetStateString("player_ammo", clipsize[HAND_RIGHT] ? va("%i", inclip[HAND_RIGHT]) : "--");
+		rvrStatGui->SetStateString("player_clips", clipsize[HAND_RIGHT] ? va("%i", ammoamount[HAND_RIGHT] / clipsize[HAND_RIGHT]) : "--");
+		rvrStatGui->SetStateString("player_allammo", va("%i/%i", inclip[HAND_RIGHT], ammoamount[HAND_RIGHT]));
 	}
-	vrStatGui->SetStateBool( "player_ammo_empty", (ammoamount == 0) );
-	vrStatGui->SetStateBool( "player_clip_empty", (inclip == 0) );
-	vrStatGui->SetStateBool( "player_clip_low", (inclip <= lowAmmo) );
+	rvrStatGui->SetStateBool("player_ammo_empty", ( ammoEmpty[HAND_RIGHT] ));
+	rvrStatGui->SetStateBool("player_clip_empty", ( clipEmpty[HAND_RIGHT] ));
+	rvrStatGui->SetStateBool("player_clip_low", ( clipLow[HAND_RIGHT] ));
 
+	// koz todo
+	// need to get the ammocount from the hand structures, not sure right now, in the interim just use the ammo amount.
+	
 	//Let the GUI know the total amount of ammo regardless of the ammo required value
-	vrStatGui->SetStateString( "player_ammo_count", va( "%i", AmmoCount() ) );
+	//rvrStatGui->SetStateString( "player_ammo_count", va( "%i", AmmoCount() ) );
 
+	rvrStatGui->SetStateString("player_ammo_count", va("%i", ammoamount[HAND_RIGHT]));
+	// koz end
+
+	// koz todo also need to figure this out for dual guis
 	//Grabber Gui Info
-	vrStatGui->SetStateString( "grabber_state", va( "%i", grabberState ) );
+	rvrStatGui->SetStateString( "grabber_state", va( "%i", grabberState ) );
 
 	//health and armor
-	idPlayer* player;
-	player = gameLocal.GetLocalPlayer();
+	
 	if ( player )
 	{
 		healthv = (float)player->health;
@@ -1756,12 +1792,58 @@ void idWeapon::UpdateVRGUI()
 		
 	}
 	
-	vrStatGui->SetStateString( "player_health", va( "%f", healthv ) );
+	rvrStatGui->SetStateString( "player_health", va( "%f", healthv ) );
 	//vrStatGui->SetStateString( "player_armor", va( "%i%%", armorv ) );
-	vrStatGui->SetStateString( "player_armor", va( "%f", armorv ) );
-	vrStatGui->SetStateString( "player_healthb", va( "%f", healthb ) );
-	vrStatGui->SetStateString( "player_armorb", va( "%f", armorb ) );
+	rvrStatGui->SetStateString( "player_armor", va( "%f", armorv ) );
+	rvrStatGui->SetStateString( "player_healthb", va( "%f", healthb ) );
+	rvrStatGui->SetStateString( "player_armorb", va( "%f", armorb ) );
 	
+	
+	// update the left hand stat watch gui.
+		
+	if (lvrStatGui == NULL)
+	{
+		common->Printf("Left Hand stat gui not found.\n");
+		return;
+	}
+
+	lvrStatGui->SetStateString("player_health", va("%f", healthv));
+	//vrStatGui->SetStateString( "player_armor", va( "%i%%", armorv ) );
+	lvrStatGui->SetStateString("player_armor", va("%f", armorv));
+	lvrStatGui->SetStateString("player_healthb", va("%f", healthb));
+	lvrStatGui->SetStateString("player_armorb", va("%f", armorb));
+
+	if (ammoamount[HAND_LEFT] < 0)
+	{
+		// show infinite ammo
+		lvrStatGui->SetStateString("player_ammo", "");
+	}
+	else
+	{
+		// show remaining ammo
+		lvrStatGui->SetStateString("player_totalammo", va("%i", ammoamount[HAND_LEFT]));
+		lvrStatGui->SetStateString("player_ammo", clipsize[HAND_LEFT] ? va("%i", inclip[HAND_LEFT]) : "--");
+		lvrStatGui->SetStateString("player_clips", clipsize[HAND_LEFT] ? va("%i", ammoamount[HAND_LEFT] / clipsize[HAND_LEFT]) : "--");
+		lvrStatGui->SetStateString("player_allammo", va("%i/%i", inclip[HAND_LEFT], ammoamount[HAND_LEFT]));
+	}
+	lvrStatGui->SetStateBool("player_ammo_empty", (ammoEmpty[HAND_LEFT]));
+	lvrStatGui->SetStateBool("player_clip_empty", (clipEmpty[HAND_LEFT]));
+	lvrStatGui->SetStateBool("player_clip_low", (clipLow[HAND_LEFT]));
+
+	// koz todo 
+	
+	// need to get the ammocount from the hand structures, not sure right now, in the interim just use the ammo amount.
+	//Let the GUI know the total amount of ammo regardless of the ammo required value
+	//rvrStatGui->SetStateString( "player_ammo_count", va( "%i", AmmoCount() ) );
+
+	lvrStatGui->SetStateString("player_ammo_count", va("%i", ammoamount[HAND_LEFT]));
+	// koz end
+
+	// koz todo also need to figure this out for dual guis
+	//Grabber Gui Info
+	lvrStatGui->SetStateString("grabber_state", va("%i", grabberState));
+
+
 }
 
 /*
