@@ -217,15 +217,15 @@ public:
 	bool					UseAmmo( ammo_t type, int amount );
 	int						HasAmmo( const char* weapon_classname, bool includeClip = false, idPlayer* owner = NULL );			// _D3XP
 	
-	bool					HasEmptyClipCannotRefill( const char* weapon_classname, idPlayer* owner );
+	bool					HasEmptyClipCannotRefill( const char* weapon_classname, idPlayer* owner, const bool duplicate );
 	
 	void					UpdateArmor();
 	
 	void					SetInventoryAmmoForType( const int ammoType, const int amount );
-	void					SetClipAmmoForWeapon( const int weapon, const int amount );
+	void					SetClipAmmoForWeapon( const int weapon, const bool duplicate, const int amount );
 	
 	int						GetInventoryAmmoForType( const int ammoType ) const;
-	int						GetClipAmmoForWeapon( const int weapon ) const;
+	int						GetClipAmmoForWeapon( const int weapon, const bool duplicate ) const;
 	
 	void					WriteAmmoToSnapshot( idBitMsg& msg ) const;
 	void					ReadAmmoFromSnapshot( const idBitMsg& msg, int ownerEntityNumber );
@@ -245,6 +245,7 @@ public:
 private:
 	idArray< idPredictedValue< int >, AMMO_NUMTYPES >		ammo;
 	idArray< idPredictedValue< int >, MAX_WEAPONS >			clip;
+	idArray< idPredictedValue< int >, MAX_WEAPONS >			clipDuplicate;
 };
 
 typedef struct
@@ -281,7 +282,8 @@ class idWeaponHolder
 {
 public:
 	idPlayer* owner;
-	int heldWeapon;
+	int currentWeapon;
+	bool isTheDuplicate; // Carl: Dual wielding, is weapon the duplicate copy or the original? (ie. Which ammo clip does it use?)
 public:
 	idWeaponHolder();
 	virtual	~idWeaponHolder();
@@ -350,7 +352,7 @@ public:
 	idEntityPtr<idWeapon>	weapon;
 	bool weaponGone;			// force stop firing
 
-	int						currentWeapon;
+	// currentWeapon is inherited from the idWeaponHolder superclass
 	idPredictedValue< int >	idealWeapon;
 	int						previousWeapon;
 	int						weaponSwitchTime;
