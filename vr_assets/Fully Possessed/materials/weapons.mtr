@@ -4235,7 +4235,7 @@ vr/lefthand
 
 
 
-vr/rstatwatchbody
+vr/statwatch
 {
         noselfShadow
 	unsmoothedTangents
@@ -4251,7 +4251,7 @@ vr/rstatwatchbody
            specularmap	 models/items/pda/pda_s.tga
 }
 
-vr/rstatwatchguibody
+vr/statwatchgui
 {
 	qer_editorimage	guisurfaces/guisurface.tga
 	guiSurf guis/weapons/rvrstatgui.gui
@@ -4259,7 +4259,7 @@ vr/rstatwatchguibody
 	description "VR stats watch gui"
 }
 
-vr/rstatwatchhands
+vr/statwatchbody
 {
         noselfShadow
 	unsmoothedTangents
@@ -4275,7 +4275,31 @@ vr/rstatwatchhands
            specularmap	 models/items/pda/pda_s.tga
 }
 
-vr/rstatwatchguihands
+vr/statwatchguibody
+{
+	qer_editorimage	guisurfaces/guisurface.tga
+	guiSurf guis/weapons/rvrstatgui.gui
+	discrete
+	description "VR stats watch gui"
+}
+
+vr/statwatchhands
+{
+        noselfShadow
+	unsmoothedTangents
+	renderbump  -size 1024 1024 -trace 0.1 -colorMap -aa 2  models/items/pda/pda_local.tga models/items/pda/pda_hi.lwo
+
+        	diffusemap	models/items/pda/pda.tga
+		{
+ 		  blend bumpmap
+          map  addnormals(models/items/pda/pda_local.tga, heightmap(models/items/pda/pda_h.tga, 7 ) )
+ 		  
+     	}
+	
+           specularmap	 models/items/pda/pda_s.tga
+}
+
+vr/statwatchguihands
 {
 	qer_editorimage	guisurfaces/guisurface.tga
 	guiSurf guis/weapons/rvrstatgui.gui
@@ -4350,8 +4374,29 @@ vr/flashhand
                   specularmap	models/characters/player/arm2_s.tga
 }
 
+vr/leftstatwatch
+{
+        noselfShadow
+	unsmoothedTangents
+	renderbump  -size 1024 1024 -trace 0.1 -colorMap -aa 2  models/items/pda/pda_local.tga models/items/pda/pda_hi.lwo
 
+        	diffusemap	models/items/pda/pda.tga
+		{
+ 		  blend bumpmap
+          map  addnormals(models/items/pda/pda_local.tga, heightmap(models/items/pda/pda_h.tga, 7 ) )
+ 		  
+     	}
+	
+           specularmap	 models/items/pda/pda_s.tga
+}
 
+vr/leftstatwatchgui
+{
+	qer_editorimage	guisurfaces/guisurface.tga
+	guiSurf guis/weapons/lvrstatgui.gui
+	discrete
+	description "VR stats watch gui"
+}
 
 vr/leftfist
 {

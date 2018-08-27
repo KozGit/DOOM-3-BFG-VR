@@ -40622,7 +40622,7 @@ mesh {
 }
 
 mesh {
-	shader "vr/rstatwatchbody"
+	shader "vr/statwatchbody"
 
 	numverts 550
 	vert 0 ( 0.597221 0.135096 ) 0 1
@@ -41990,7 +41990,7 @@ mesh {
 }
 
 mesh {
-	shader "vr/rstatwatchguibody"
+	shader "vr/statwatchguibody"
 
 	numverts 4
 	vert 0 ( 1.000000 1.000000 ) 0 1
@@ -42010,7 +42010,7 @@ mesh {
 }
 
 mesh {
-	shader "vr/rstatwatchguihands"
+	shader "vr/statwatchguihands"
 
 	numverts 4
 	vert 0 ( 1.000000 1.000000 ) 0 1
@@ -42030,7 +42030,7 @@ mesh {
 }
 
 mesh {
-	shader "vr/rstatwatchhands"
+	shader "vr/statwatchhands"
 
 	numverts 550
 	vert 0 ( 0.597221 0.135096 ) 0 1

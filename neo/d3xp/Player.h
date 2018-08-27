@@ -392,6 +392,8 @@ public:
 	void					NextBestWeapon();
 	void					SelectWeapon( int num, bool force, bool specific );
 	void					DropWeapon( bool died );
+
+	void					debugPrint();
 };
 
 class idPlayer : public idActor

@@ -596,6 +596,7 @@ extern idCVar vr_mustEmptyHands;
 extern idCVar vr_contextSensitive;
 extern idCVar vr_dualWield;
 extern idCVar vr_voiceMicLocation;
+extern idCVar vr_debugHands;
 
 extern iVr* commonVr;
 extern iVoice* commonVoice;

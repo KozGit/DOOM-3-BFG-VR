@@ -1156,7 +1156,7 @@ bool idInventory::Give( idPlayer* owner, const idDict& spawnArgs, const char* st
 		}
 		return tookWeapon;
 	}
-	else if( !idStr::Icmp( statname, "item" ) || !idStr::Icmp( statname, "icon" ) || !idStr::Icmp( statname, "name" ) )
+	else if( !idStr::Icmp( statname, "item" ) || !idStr::Icmp( statname, "icon" ) || !idStr::Icmp( statname, "name" ) || !idStr::Icmp( statname, "desc" ) )
 	{
 		// ignore these as they're handled elsewhere
 		return false;
@@ -1600,6 +1600,9 @@ bool idWeaponHolder::isEmpty()
 	return currentWeapon == owner->weapon_fists;
 }
 
+// Carl: This new holster code isn't implemented or used yet
+#if 0
+
 idHolster::idHolster()
 {
 	owner = NULL;
@@ -1730,7 +1733,7 @@ void idHolster::HolsterFlashlight()
 	}
 
 	// we will holster the flashlight if carrying it
-	if( vr_flashlightMode.GetInteger() == 3 && owner->flashlight.GetEntity()->IsLinked() && !owner->spectating && owner->weaponEnabled && !owner->hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
+	if( commonVr->currentFlashlightMode == FLASHLIGHT_HAND && owner->flashlight.GetEntity()->IsLinked() && !owner->spectating && owner->weaponEnabled && !owner->hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
 		modelname = owner->flashlight->weaponDef->dict.GetString( "model" );
 	}
@@ -1902,6 +1905,8 @@ void idHolster::UpdateSlot()
 	}
 }
 
+#endif
+
 /*
 ==============
 idPlayerHand::idPlayerHand
@@ -1969,6 +1974,11 @@ idPlayerHand::Init()
 */
 void idPlayerHand::Init( idPlayer* player, int hand )
 {
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "\nBefore Init():\n" );
+		debugPrint();
+	}
 	owner = player;
 	whichHand = hand;
 
@@ -2013,12 +2023,17 @@ void idPlayerHand::Init( idPlayer* player, int hand )
 	//	laserSightActive = vr_weaponSight.GetInteger() == 0;
 	// Koz end
 
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "\nAfter Init():\n" );
+		debugPrint();
+	}
 }
 
 bool idPlayerHand::holdingFlashlight()
 {
 	// Carl: weapon must be set to fist or empty hand when we're using the flashlight
-	if( whichHand == vr_weaponHand.GetInteger() || vr_flashlightMode.GetInteger() != FLASHLIGHT_HAND || !owner || !owner->flashlight || !owner->flashlight.GetEntity()->IsLinked()
+	if( whichHand == vr_weaponHand.GetInteger() || commonVr->currentFlashlightPosition != FLASHLIGHT_HAND || !owner || !owner->flashlight || !owner->flashlight.GetEntity()->IsLinked()
 		|| ( currentWeapon != owner->weapon_fists && currentWeapon != -1 )
 		|| owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 		return false;
@@ -2044,7 +2059,7 @@ bool idPlayerHand::floatingWeapon()
 
 bool idPlayerHand::controllingWeapon()
 {
-	if( !owner || !weapon || weapon->IdentifyWeapon() == WEAPON_PDA || holdingFlashlight()
+	if( currentWeapon < 0 || !owner || !weapon || weapon->IdentifyWeapon() == WEAPON_PDA || holdingFlashlight()
 		|| owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 		return false;
 	return true;
@@ -2077,9 +2092,9 @@ bool idPlayerHand::isOverMountedFlashlight()
 	if( !owner || !owner->flashlight.IsValid() || owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 		return false;
 	else if( handSlot == SLOT_FLASHLIGHT_HEAD )
-		return vr_flashlightMode.GetInteger() == FLASHLIGHT_HEAD;
+		return commonVr->currentFlashlightPosition == FLASHLIGHT_HEAD;
 	else if( handSlot == SLOT_FLASHLIGHT_SHOULDER )
-		return vr_flashlightMode.GetInteger() == FLASHLIGHT_BODY;
+		return commonVr->currentFlashlightPosition == FLASHLIGHT_BODY;
 	else
 		return false;
 }
@@ -2119,6 +2134,7 @@ bool idPlayerHand::releaseVirtualGrab()
 	{
 		// for now, dropping the flashlight will move it to your armour
 		vr_flashlightMode.SetInteger( FLASHLIGHT_BODY );
+		vr_flashlightMode.SetModified();
 		return true;
 	}
 	else if( holdingPDA() )
@@ -2148,6 +2164,12 @@ idPlayerHand::NextWeapon
 */
 void idPlayerHand::NextWeapon()
 {
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "\nBefore NextWeapon():\n" );
+		debugPrint();
+	}
+
 	// Koz dont change weapon if in gui
 	if( !owner || commonVr->handInGui || !owner->weaponEnabled || owner->spectating || owner->hiddenWeapon || gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || owner->health < 0 )
 	{
@@ -2158,6 +2180,13 @@ void idPlayerHand::NextWeapon()
 	if( !owner->inventory.weapons )
 	{
 		return;
+	}
+
+	// Carl: Dual wielding, handle switching from flashlight properly
+	if( holdingFlashlight() )
+	{
+		commonVr->currentFlashlightMode = FLASHLIGHT_HEAD;
+		commonVr->currentFlashlightPosition = FLASHLIGHT_HEAD;
 	}
 
 	int w = idealWeapon.Get();
@@ -2219,6 +2248,13 @@ void idPlayerHand::NextWeapon()
 		idealWeapon = w;
 		weaponSwitchTime = gameLocal.time + WEAPON_SWITCH_DELAY;
 		owner->UpdateHudWeapon( whichHand );
+		if( vr_debugHands.GetBool() )
+			common->Printf( "Changing weapon\n" );
+	}
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "After NextWeapon():\n" );
+		debugPrint();
 	}
 }
 
@@ -2229,6 +2265,11 @@ idPlayerHand::PrevWeapon
 */
 void idPlayerHand::PrevWeapon()
 {
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "\nBefore NextWeapon():\n" );
+		debugPrint();
+	}
 	// Koz dont change weapon if in gui
 	if( commonVr->handInGui || !owner->weaponEnabled || owner->spectating || owner->hiddenWeapon || gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || owner->health < 0 )
 	{
@@ -2239,6 +2280,13 @@ void idPlayerHand::PrevWeapon()
 	if( !owner->inventory.weapons )
 	{
 		return;
+	}
+
+	// Carl: Dual wielding, handle switching from flashlight properly
+	if( holdingFlashlight() )
+	{
+		commonVr->currentFlashlightMode = FLASHLIGHT_HEAD;
+		commonVr->currentFlashlightPosition = FLASHLIGHT_HEAD;
 	}
 
 	int w = idealWeapon.Get();
@@ -2299,17 +2347,36 @@ void idPlayerHand::PrevWeapon()
 		idealWeapon = w;
 		weaponSwitchTime = gameLocal.time + WEAPON_SWITCH_DELAY;
 		owner->UpdateHudWeapon( whichHand );
+		if( vr_debugHands.GetBool() )
+			common->Printf( "Changing weapon\n" );
+	}
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "After PrevWeapon():\n" );
+		debugPrint();
 	}
 }
 
 void idPlayerHand::NextBestWeapon()
 {
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "\nBefore NextBestWeapon():\n" );
+		debugPrint();
+	}
 	const char* weap;
 	int w = MAX_WEAPONS;
 
 	if( !owner->weaponEnabled )
 	{
 		return;
+	}
+
+	// Carl: Dual wielding, handle switching from flashlight properly
+	if( holdingFlashlight() )
+	{
+		commonVr->currentFlashlightMode = FLASHLIGHT_HEAD;
+		commonVr->currentFlashlightPosition = FLASHLIGHT_HEAD;
 	}
 
 	while( w > 0 )
@@ -2364,6 +2431,11 @@ void idPlayerHand::NextBestWeapon()
 	idealWeapon = w;
 	weaponSwitchTime = gameLocal.time + WEAPON_SWITCH_DELAY;
 	owner->UpdateHudWeapon( whichHand );
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "After NextBestWeapon():\n" );
+		debugPrint();
+	}
 }
 
 void idPlayer::SelectWeapon( int num, bool force, bool specific )
@@ -2373,6 +2445,11 @@ void idPlayer::SelectWeapon( int num, bool force, bool specific )
 
 void idPlayerHand::DropWeapon( bool died )
 {
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "Before DropWeapon():\n" );
+		debugPrint();
+	}
 	idVec3 forward, up;
 
 	assert( !common->IsClient() );
@@ -2455,6 +2532,108 @@ void idPlayerHand::DropWeapon( bool died )
 			// just remove from our hand
 		}
 	}
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "After DropWeapon():\n" );
+		debugPrint();
+	}
+}
+
+void idPlayerHand::debugPrint()
+{
+	if( !vr_debugHands.GetBool() )
+		return;
+	idStr s = "";
+	if( vr_weaponHand.GetInteger() == whichHand )
+	{
+		s = "(Weapon hand) ";
+	}
+	else if( vr_weaponHand.GetInteger() < 0 || vr_weaponHand.GetInteger() >= 2 )
+	{
+		s = "(INVALID vr_weaponHand) ";
+		common->Printf( "vr_weaponHand = %d\n", vr_weaponHand.GetInteger() );
+	}
+	else if( commonVr->currentFlashlightPosition == FLASHLIGHT_HAND )
+	{
+		s = "(Flashlight in hand) ";
+	}
+	else if( commonVr->currentFlashlightMode == FLASHLIGHT_HAND )
+	{
+		s = "(Flashlight hand) ";
+	}
+	if (whichHand == HAND_RIGHT)
+		common->Printf( "*** Right Hand %s***\n", s.c_str() );
+	else if( whichHand == HAND_LEFT )
+		common->Printf( "*** Left Hand %s***\n", s.c_str() );
+	else
+		common->Printf( "*** Hand %d %s***\n", whichHand, s.c_str() );
+	if( !this->owner )
+		common->Printf( "  ERROR: No owner!\n" );
+	else
+		common->Printf( "  owner = '%s'\n", owner->name.c_str() );
+	// gestures
+	common->Printf( "  in holster slot %d\n", handSlot );
+	s = "";
+	if( grabbingWorld )
+		s += "grip ";
+	if( virtualGrabDown )
+		s += "vGrab ";
+	if( triggerDown )
+		s += "trigger ";
+	if( thumbDown )
+		s += "thumb ";
+	common->Printf( "  buttons = %s", s.c_str() );
+	s = "";
+	if( oldGrabbingWorld )
+		s += "grip ";
+	if( oldVirtualGrabDown )
+		s += "vGrab ";
+	if( oldTriggerDown )
+		s += "trigger ";
+	if( oldFlashlightTriggerDown )
+		s += "flashlight ";
+	if( oldThumbDown )
+		s += "thumb ";
+	common->Printf( ", old = %s\n", s.c_str() );
+
+	// weapon
+	s = "";
+	if( isTheDuplicate )
+		s += " (duplicate copy)";
+	if( weaponGone )
+		s += ", gone";
+	if( currentWeapon == idealWeapon.Get() )
+		common->Printf( "  current/ideal weapon = %s = %d%s\n", GetCurrentWeaponString().c_str(), currentWeapon, s.c_str() );
+	else
+	{
+		common->Printf( "  currentWeapon = %s = %d%s\n", GetCurrentWeaponString().c_str(), currentWeapon, s.c_str() );
+		common->Printf( "  idealWeapon = %d, weaponSwitchTime (unused?) = %dms\n", idealWeapon, weaponSwitchTime - gameLocal.time );
+	}
+	common->Printf( "  previousWeapon = %d\n", previousWeapon );
+	idWeapon* weap = weapon.GetEntity();
+	if( weap )
+	{
+		if( weap->weaponDef )
+		{
+			common->Printf( "  weapon (%s) = %s = %d\n", weap->GetName(), weap->weaponDef->GetName(), weap->IdentifyWeapon() );
+		}
+		else
+		{
+			common->Printf( "  weapon (%s): weaponDef = NULL, IdentifyWeapon = %d\n", weap->GetName(), weap->IdentifyWeapon() );
+		}
+	}
+	else
+	{
+		common->Printf( "  weapon = NULL\n" );
+	}
+	// sight
+	common->Printf( "  laser sight: active=%d, handle=%d\n", laserSightActive, laserSightHandle );
+	common->Printf( "  crosshair: lastMode=%d, handle=%d\n", lastCrosshairMode, crosshairHandle );
+	// PDA
+	common->Printf( "  PDA (was %d): fixed=%d (last=%d), ", PDAfixed, lastPdaFixed, wasPDA );
+	// Functions
+	common->Printf( "  holdingWeapon=%d, floatingWeapon=%d, controllingWeapon=%d, tooFullToInteract=%d\n", holdingWeapon(), floatingWeapon(), controllingWeapon(), tooFullToInteract() );
+	common->Printf( "  holdingFlashlight=%d, isOverMountedFlashlight=%d, holdingPDA=%d, holdingPhysics=%d, holdingItem=%d, holdingSomethingDroppable=%d\n", holdingFlashlight(), isOverMountedFlashlight(), holdingPDA(), holdingPhysics(), holdingItem(), holdingSomethingDroppable() );
 }
 
 
@@ -4049,13 +4228,25 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	
 	// Re-link idBoolFields to the scriptObject, values will be restored in scriptObject's restore
 	LinkScriptVariables();
-	
+
+	// re-init the hand's laser model (and other things)
+	for( int hand = 0; hand < 2; hand++ )
+		hands[hand].Init( this, hand );
+
 	savefile->ReadObject( reinterpret_cast<idClass*&>( primaryObjective ) );
 	inventory.Restore( savefile );
-	hands[ vr_weaponHand.GetInteger() ].weapon.Restore( savefile ); // Carl: Dual wielding, don't change save file format
+	idEntityPtr<idWeapon> weapon;
+	weapon.Restore( savefile ); // Carl: Dual wielding, don't change save file format
+	// Carl: if it's the PDA, then we saved the PDA hand, otherwise we saved the weapon hand.
+	int savedWeaponHand;
+	if( weapon.GetEntity() && weapon.GetEntity()->IdentifyWeapon() == WEAPON_PDA )
+		savedWeaponHand = 1 - vr_weaponHand.GetInteger();
+	else
+		savedWeaponHand = vr_weaponHand.GetInteger();
+	hands[savedWeaponHand].weapon = weapon;
 	// Carl: other hand's weapon isn't saved yet, so recreate it
-	hands[ 1 - vr_weaponHand.GetInteger() ].weapon = static_cast< idWeapon* >( gameLocal.SpawnEntityType( idWeapon::Type, NULL ) );
-	hands[ 1 - vr_weaponHand.GetInteger() ].weapon.GetEntity()->SetOwner( this, 1 - vr_weaponHand.GetInteger() );
+	hands[ 1 - savedWeaponHand ].weapon = static_cast< idWeapon* >( gameLocal.SpawnEntityType( idWeapon::Type, NULL ) );
+	hands[ 1 - savedWeaponHand ].weapon.GetEntity()->SetOwner( this, 1 - savedWeaponHand );
 
 	if( hudManager != NULL )
 	{
@@ -4419,10 +4610,6 @@ void idPlayer::Restore( idRestoreGame* savefile )
 	
 	aimAssist.Init( this );
 	
-	// re-init the hand's laser model
-	for( int hand = 0; hand < 2; hand++ )
-		hands[hand].Init( this, hand );
-
 	SetupPDASlot( true );
 	holsteredWeapon = weapon_fists;
 	extraHolsteredWeapon = weapon_fists;
@@ -4659,6 +4846,13 @@ void idPlayer::Restore( idRestoreGame* savefile )
 
 
 	armIK.Init( this, IK_ANIM, modelOffset );
+
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "\nRestored Hands:\n" );
+		hands[HAND_LEFT].debugPrint();
+		hands[HAND_RIGHT].debugPrint();
+	}
 
 	if (savefile->version < BUILD_NUMBER_FULLY_POSSESSED)
 		NextWeapon();
@@ -5784,6 +5978,12 @@ But it is also called when our hand is in a GUI, in which case maybe stop only t
 */
 void idPlayer::StopFiring()
 {
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "Before StopFiring():\n");
+		hands[HAND_LEFT].debugPrint();
+		hands[HAND_RIGHT].debugPrint();
+	}
 	AI_ATTACK_HELD	= false;
 	AI_WEAPON_FIRED = false;
 	AI_RELOAD		= false;
@@ -5793,6 +5993,12 @@ void idPlayer::StopFiring()
 		{
 			hands[h].weapon.GetEntity()->EndAttack();
 		}
+	}
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "After StopFiring():\n" );
+		hands[HAND_LEFT].debugPrint();
+		hands[HAND_RIGHT].debugPrint();
 	}
 }
 
@@ -5805,6 +6011,11 @@ idCVar g_infiniteAmmo( "g_infiniteAmmo", "0", CVAR_GAME | CVAR_BOOL, "infinite a
 extern idCVar ui_autoSwitch;
 void idPlayer::FireWeapon( int hand, idWeapon *weap )
 {
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "Before FireWeapon(%d):\n", hand );
+		hands[hand].debugPrint();
+	}
 	idMat3 axis;
 	idVec3 muzzle;
 	
@@ -7058,7 +7269,7 @@ bool idPlayer::OtherHandImpulseSlot()
 			else if( objectiveSystemOpen ) // if we're holding our PDA and we try to grab the PDA slot
 			{
 				// our hand is always full in this case, but that's only an issue we care and the holster contains the flashlight
-				if( vr_mustEmptyHands.GetBool() && vr_flashlightMode.GetInteger() == FLASHLIGHT_HAND )
+				if( vr_mustEmptyHands.GetBool() && commonVr->currentFlashlightMode == FLASHLIGHT_HAND )
 					return false;
 				TogglePDA( hand );
 			}
@@ -7077,13 +7288,18 @@ bool idPlayer::OtherHandImpulseSlot()
 		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons") )
 	{
 		// swap flashlight between head and hand
-		if (vr_flashlightMode.GetInteger() == FLASHLIGHT_HEAD)
+		if ( commonVr->currentFlashlightPosition == FLASHLIGHT_HEAD )
 		{
+			// Carl: move weapon from hand to inventory
+			hands[hand].idealWeapon = weapon_fists;
+			// move flashlight from head to hand
 			vr_flashlightMode.SetInteger(FLASHLIGHT_HAND);
+			vr_flashlightMode.SetModified();
 		}
-		else if (vr_flashlightMode.GetInteger() == FLASHLIGHT_HAND)
+		else if ( commonVr->currentFlashlightPosition == FLASHLIGHT_HAND )
 		{
 			vr_flashlightMode.SetInteger(FLASHLIGHT_HEAD);
+			vr_flashlightMode.SetModified();
 		}
 		return true;
 	}
@@ -7091,13 +7307,18 @@ bool idPlayer::OtherHandImpulseSlot()
 		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool("no_Weapons") )
 	{
 		// swap flashlight between body and hand
-		if (vr_flashlightMode.GetInteger() == FLASHLIGHT_BODY)
+		if ( commonVr->currentFlashlightPosition == FLASHLIGHT_BODY )
 		{
+			// Carl: move weapon from hand to inventory
+			hands[hand].idealWeapon = weapon_fists;
+			// move flashlight from shoulder to hand
 			vr_flashlightMode.SetInteger(FLASHLIGHT_HAND);
+			vr_flashlightMode.SetModified();
 		}
-		else if (vr_flashlightMode.GetInteger() == FLASHLIGHT_HAND)
+		else if ( commonVr->currentFlashlightPosition == FLASHLIGHT_HAND )
 		{
 			vr_flashlightMode.SetInteger(FLASHLIGHT_BODY);
+			vr_flashlightMode.SetModified();
 		}
 		return true;
 	}
@@ -7250,11 +7471,14 @@ bool idPlayer::WeaponHandImpulseSlot()
 		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
 		// if the flashlight is mounted on our head, and we're unambiguously trying to grab it with our weapon hand
-		if( vr_flashlightMode.GetInteger() == FLASHLIGHT_HEAD && (hands[ hand ].currentWeapon == weapon_fists || vr_gripMode.GetInteger() == VR_GRIP_TOGGLE_WITH_DROP ) )
+		if( commonVr->currentFlashlightPosition == FLASHLIGHT_HEAD && (hands[ hand ].currentWeapon == weapon_fists || vr_gripMode.GetInteger() == VR_GRIP_TOGGLE_WITH_DROP ) )
 		{
+			// move weapon from hand to inventory
+			hands[hand].idealWeapon = weapon_fists;
 			SwapWeaponHand();
 			// swap flashlight between head and hand
 			vr_flashlightMode.SetInteger( FLASHLIGHT_HAND );
+			vr_flashlightMode.SetModified();
 			return true;
 		}
 		// if we're unambiguously trying to grab it, but there's nothing there, process and ignore the grip
@@ -7267,11 +7491,14 @@ bool idPlayer::WeaponHandImpulseSlot()
 		&& flashlight.IsValid() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
 		// if the flashlight is mounted on our shoulder, and we're unambiguously trying to grab it with our weapon hand
-		if( vr_flashlightMode.GetInteger() == FLASHLIGHT_BODY && ( hands[ hand ].currentWeapon == weapon_fists || vr_gripMode.GetInteger() == VR_GRIP_TOGGLE_WITH_DROP ) )
+		if( commonVr->currentFlashlightPosition == FLASHLIGHT_BODY && ( hands[ hand ].currentWeapon == weapon_fists || vr_gripMode.GetInteger() == VR_GRIP_TOGGLE_WITH_DROP ) )
 		{
+			// move weapon from hand to inventory
+			hands[hand].idealWeapon = weapon_fists;
+			// swap flashlight from shoulder to hand
 			SwapWeaponHand();
-			// swap flashlight between shoulder and hand
 			vr_flashlightMode.SetInteger( FLASHLIGHT_HAND );
+			vr_flashlightMode.SetModified();
 			return true;
 		}
 		// if we're unambiguously trying to grab it, but there's nothing there, process and ignore the grip
@@ -7471,6 +7698,11 @@ idPlayerHand::SelectWeapon
 */
 void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 {
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "Before SelectWeapon(%d, %d, %d):\n", num, force, specific );
+		debugPrint();
+	}
 	const char* weap;
 	
 	if( !owner->weaponEnabled || owner->spectating || gameLocal.inCinematic || Flicksync_InCutscene || owner->health < 0 || commonVr->handInGui ) // Koz don't let the player change weapons if hand is currently in a gui
@@ -7479,11 +7711,6 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 	}
 	
 	if( ( num < 0 ) || ( num >= MAX_WEAPONS ) )
-	{
-		return;
-	}
-	
-	if( num == owner->weapon_flashlight )
 	{
 		return;
 	}
@@ -7503,7 +7730,22 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 				weapon.GetEntity()->RaiseWeapon();
 		}
 	}
-	
+
+	// Carl: Dual wielding, handle switching to and from flashlight properly
+	if( num == owner->weapon_flashlight || num == owner->weapon_flashlight_new )
+	{
+		idealWeapon = owner->weapon_fists;
+		commonVr->currentFlashlightMode = FLASHLIGHT_HAND;
+		commonVr->currentFlashlightPosition = FLASHLIGHT_HAND;
+		vr_weaponHand.SetInteger( 1 - whichHand );
+		return;
+	}
+	else if( holdingFlashlight() )
+	{
+		commonVr->currentFlashlightMode = FLASHLIGHT_HEAD;
+		commonVr->currentFlashlightPosition = FLASHLIGHT_HEAD;
+	}
+
 	//Is the weapon a toggle weapon
 	WeaponToggle_t* weaponToggle;
 	if( !specific && owner->weaponToggles.Get( va( "weapontoggle%d", num ), &weaponToggle ) )
@@ -7643,6 +7885,11 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 			idealWeapon = num;
 		}
 		owner->UpdateHudWeapon( whichHand );
+	}
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "After SelectWeapon():\n" );
+		debugPrint();
 	}
 }
 
@@ -10405,7 +10652,13 @@ idPlayer::TogglePDA
 void idPlayer::TogglePDA( int hand )
 {
 	// Koz debug common->Printf( "Toggle PDA\n" );
-	
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "Before TogglePDA(%d):\n", hand );
+		hands[hand].debugPrint();
+		hands[1-hand].debugPrint();
+	}
+
 	// Koz begin : reset PDA controls
 	commonVr->forceLeftStick = true;
 	// Koz end
@@ -10438,6 +10691,12 @@ void idPlayer::TogglePDA( int hand )
 				hud->ClearNewPDAInfo();
 			}
 		}
+	}
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "After TogglePDA(%d):\n", hand );
+		hands[hand].debugPrint();
+		hands[1 - hand].debugPrint();
 	}
 }
 
@@ -12734,7 +12993,7 @@ void idPlayer::SetupPDASlot( bool holsterPDA )
 	else
 	{
 		// we will holster the flashlight if carrying it
-		if ( vr_flashlightMode.GetInteger() == 3 && flashlight.GetEntity()->IsLinked() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
+		if ( commonVr->currentFlashlightMode == FLASHLIGHT_HAND && flashlight.GetEntity()->IsLinked() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 		{
 			modelname = flashlight->weaponDef->dict.GetString("model");
 			pdaHolsterAxis = idAngles(0, 90, 90).ToMat3();
@@ -18462,6 +18721,12 @@ idPlayer::Event_SelectWeapon
 */
 void idPlayer::Event_SelectWeapon( const char* weaponName )
 {
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "Before Event_SelectWeapon(\"%s\"):\n", weaponName );
+		hands[HAND_LEFT].debugPrint();
+		hands[HAND_RIGHT].debugPrint();
+	}
 	int i;
 	int weaponNum;
 	
@@ -18536,6 +18801,12 @@ void idPlayer::Event_SelectWeapon( const char* weaponName )
 	else
 	{
 		UpdateHudWeapon( 1 - vr_weaponHand.GetInteger() );
+	}
+	if( vr_debugHands.GetBool() )
+	{
+		common->Printf( "After Event_SelectWeapon(\"%s\") (not BFG or artifact):\n", weaponName );
+		hands[HAND_LEFT].debugPrint();
+		hands[HAND_RIGHT].debugPrint();
 	}
 }
 
@@ -18707,6 +18978,8 @@ idPlayer::Event_OpenPDA
 */
 void idPlayer::Event_OpenPDA()
 {
+	if( vr_debugHands.GetBool() )
+		common->Printf( "Event_OpenPDA():\n" );
 	if( !common->IsMultiplayer() )
 	{
 		// Koz debug common->Printf( "idPlayer::Event_OpenPDA() calling TogglePDA\n" );
