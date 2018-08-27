@@ -35,6 +35,7 @@ Invisible entities that affect other entities or the world when activated.
 #pragma hdrstop
 
 #include "Game_local.h"
+#include "../vr/Bonus.h"
 
 /*
 ===============================================================================
@@ -282,16 +283,19 @@ void idTarget_EndLevel::Event_Activate( idEntity* activator )
 				case GAME_D3XP:
 				{
 					cvarSystem->SetCVarBool( "g_roeNightmare", true );
+					cvarSystem->SetCVarBool( "bonus_char_roe", true );
 					break;
 				}
 				case GAME_D3LE:
 				{
 					cvarSystem->SetCVarBool( "g_leNightmare", true );
+					cvarSystem->SetCVarBool( "bonus_char_le", true );
 					break;
 				}
 				case GAME_BASE:
 				{
 					cvarSystem->SetCVarBool( "g_nightmare", true );
+					cvarSystem->SetCVarBool( "bonus_char_marine", true );
 					break;
 				}
 			}
