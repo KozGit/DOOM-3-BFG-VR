@@ -432,6 +432,8 @@ void idAchievementManager::CheckDoomClassicsAchievements( int killcount, int ite
 					localUser->SetStatInt( STAT_DOOM_COMPLETED_EPISODE_1_MEDIUM + ( episode - 1 ), 1 );
 				}
 				
+				cvarSystem->SetCVarBool( "bonus_char_doomguy", true ); // Carl: Unlock bonus character
+
 				// Save the Settings.
 				localUser->SaveProfileSettings();
 			}
@@ -489,6 +491,7 @@ void idAchievementManager::CheckDoomClassicsAchievements( int killcount, int ite
 					{
 						LocalUser_CompleteAchievement( ACHIEVEMENT_DOOM2_SUPERIOR_FIREPOWER_COMPLETE_ALL_HARD );
 					}
+					cvarSystem->SetCVarBool( "bonus_char_doomguy", true ); // Carl: Unlock bonus character
 				}
 			}
 		}
@@ -500,6 +503,7 @@ void idAchievementManager::CheckDoomClassicsAchievements( int killcount, int ite
 				if( currentGame == DOOM2_CLASSIC )
 				{
 					LocalUser_CompleteAchievement( ACHIEVEMENT_DOOM2_AND_BACK_AGAIN_COMPLETE_NO_REST );
+					cvarSystem->SetCVarBool( "bonus_char_doomguy", true ); // Carl: Unlock bonus character
 				}
 			}
 		}

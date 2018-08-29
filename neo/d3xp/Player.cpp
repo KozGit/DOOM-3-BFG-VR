@@ -1135,6 +1135,41 @@ bool idInventory::Give( idPlayer* owner, const idDict& spawnArgs, const char* st
 			
 			idStr weaponName( pos, 0, len );
 			
+			if( weaponName == "weapon_chainsaw" )
+			{
+				if( owner && owner->GetExpansionType() == GAME_BASE )
+				{
+					cvarSystem->SetCVarBool( "bonus_char_marine", true );
+					cvarSystem->SetCVarBool( "bonus_chainsaw", true );
+					if ( bonus_boomstick.GetBool() )
+						cvarSystem->SetCVarBool( "bonus_char_ash", true );
+				}
+			}
+			else if( weaponName == "weapon_shotgun_double" )
+			{
+					cvarSystem->SetCVarBool( "bonus_boomstick", true );
+					if( bonus_chainsaw.GetBool() )
+						cvarSystem->SetCVarBool( "bonus_char_ash", true );
+			}
+			else if( weaponName == "weapon_soulcube" )
+			{
+				if( owner && owner->GetExpansionType() == GAME_BASE )
+					cvarSystem->SetCVarBool( "bonus_char_marine", true );
+			}
+			else if( weaponName == "weapon_grabber" && owner )
+			{
+				gameExpansionType_t expansion = owner->GetExpansionType();
+				if( expansion == GAME_D3XP )
+					cvarSystem->SetCVarBool( "bonus_char_roe", true );
+				else if( expansion == GAME_D3LE )
+					cvarSystem->SetCVarBool( "bonus_char_le", true );
+			}
+			else if( weaponName == "weapon_bloodstone_active1" || weaponName == "weapon_bloodstone_active2" || weaponName == "weapon_bloodstone_active3" )
+			{
+				if( owner && owner->GetExpansionType() == GAME_D3XP )
+					cvarSystem->SetCVarBool( "bonus_char_roe", true );
+			}
+
 			// find the number of the matching weapon name
 			for( i = 0; i < MAX_WEAPONS; i++ )
 			{
@@ -1496,7 +1531,7 @@ bool idInventory::CanGive( idPlayer* owner, const idDict& spawnArgs, const char*
 			return true;
 		}
 	}
-	else if( !idStr::Icmp( statname, "item" ) || !idStr::Icmp( statname, "icon" ) || !idStr::Icmp( statname, "name" ) )
+	else if( !idStr::Icmp( statname, "item" ) || !idStr::Icmp( statname, "icon" ) || !idStr::Icmp( statname, "name" ) || !idStr::Icmp( statname, "desc" ) ) // Carl
 	{
 		// ignore these as they're handled elsewhere
 		//These items should not be considered as succesful gives because it messes up the max ammo items
@@ -5517,11 +5552,11 @@ void idPlayer::UpdateSkinSetup()
 			}
 		}
 
-		if ( commonVr->thirdPersonMovement )
+		if ( commonVr->thirdPersonMovement && bonusChar != BONUS_CHAR_VFR )
 		{
 			skinN += body;
 		}
-		else if ( vr_playerBodyMode.GetInteger() == 1 || ( vr_playerBodyMode.GetInteger() == 2 && (hands[ 0 ].currentWeapon == weapon_fists || hands[ 1 ].currentWeapon == weapon_fists || commonVr->handInGui) ) )
+		else if ( vr_playerBodyMode.GetInteger() == 1 || ( vr_playerBodyMode.GetInteger() == 2 && (hands[ 0 ].currentWeapon == weapon_fists || hands[ 1 ].currentWeapon == weapon_fists || commonVr->handInGui) ) || commonVr->thirdPersonMovement )
 		{
 			skinN += handsOnly;
 		}
@@ -5538,7 +5573,10 @@ void idPlayer::UpdateSkinSetup()
 			}
 			else
 			{
-				skinN += body;
+				if ( bonusChar == BONUS_CHAR_VFR )
+					skinN += handsOnly;
+				else
+					skinN += body;
 			}
 		}
 		
@@ -11127,7 +11165,7 @@ void idPlayer::PerformImpulse( int impulse )
 		else if (impulse == 4)
 			SelectWeapon( weapon_shotgun_double, false, true ); // double barreled (this was already the super shotgun)
 		else if (impulse == 11)
-			SelectWeapon( weapon_shotgun, false, true ); // single barreled (this was empty before)
+			SelectWeapon( weapon_shotgun, false, true ); // single barreled (this was empty before but I made it the chainsaw, it's a different impulse though)
 		else
 			SelectWeapon( impulse, false );
 		return;

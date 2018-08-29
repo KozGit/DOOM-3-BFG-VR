@@ -900,6 +900,49 @@ private:
 class idMenuScreen_Shell_NewGame : public idMenuScreen
 {
 public:
+
+	/*
+	================================================
+	idMenuDataSource_Shell_NewGame
+	Carl: Support Bonus Character option
+	================================================
+	*/
+	class idMenuDataSource_Shell_NewGame : public idMenuDataSource
+	{
+	public:
+		enum vrFlicksync_t
+		{
+			NEWGAME_FIELD_DOOM3,
+			NEWGAME_FIELD_ROE,
+			NEWGAME_FIELD_LE,
+			NEWGAME_FIELD_CHARACTER,
+			MAX_NEWGAME_FIELDS
+		};
+
+		idMenuDataSource_Shell_NewGame();
+
+		// loads data
+		virtual void				LoadData();
+
+		// submits data
+		virtual void				CommitData();
+
+		// says whether something changed with the data
+		virtual bool				IsDataChanged() const;
+
+		// retrieves a particular field for reading
+		virtual idSWFScriptVar		GetField( const int fieldIndex ) const;
+
+		// updates a particular field value
+		virtual void				AdjustField( const int fieldIndex, const int adjustAmount );
+
+		bool						IsRestartRequired() const;
+
+	private:
+		int	originalBonusCharacter;
+	};
+
+public:
 	idMenuScreen_Shell_NewGame() :
 		options( NULL ),
 		btnBack( NULL )
@@ -912,6 +955,7 @@ public:
 	virtual bool				HandleAction( idWidgetAction& action, const idWidgetEvent& event, idMenuWidget* widget, bool forceHandled = false );
 private:
 	idMenuWidget_DynamicList* 	options;
+	idMenuDataSource_Shell_NewGame	systemData; // Carl
 	idMenuWidget_Button*			btnBack;
 };
 
@@ -2753,7 +2797,7 @@ public:
 
 	/*
 	================================================
-	idMenuDataSource_Shell_VR_Safety_Protocols
+	idMenuDataSource_Shell_VR_Flicksync
 	================================================
 	*/
 	class idMenuDataSource_Shell_VR_Flicksync : public idMenuDataSource
