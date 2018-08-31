@@ -84,6 +84,15 @@ model model_d3le_sp_head {
 	anim blink						models/md5/characters/player/head/d3xp_head_blink.md5anim
 }
 
+// Carl: In the cutscenes and promotional art, we're wearing this helmet, not the same head as in RoE!
+model model_d3le_sp_helmet {
+	mesh							models/md5/characters/npcs/heads/mhelmet.md5mesh
+
+	anim idle						models/md5/characters/npcs/heads/mhelmetidle.md5anim
+	anim stand						models/md5/characters/npcs/heads/mhelmetidle.md5anim
+	anim blink						models/md5/characters/npcs/heads/mhelmetidle.md5anim
+}
+
 model model_d3le_sp_marine {
 	inherit model_sp_marine
 	skin								skins/characters/player/d3xp_sp_vrik.skin

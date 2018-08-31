@@ -5526,7 +5526,7 @@ void idPlayer::UpdateSkinSetup()
 		
 		idStr skinN = skin->GetName();
 		
-		if ( strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) )
+		if( bonusChar == BONUS_CHAR_ASH || ( strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) && ( bonusChar == BONUS_CHAR_NONE || bonusChar == BONUS_CHAR_MARINE ) ) )
 		{
 			skinN = "skins/characters/player/tshirt_mp";
 		}
@@ -5542,7 +5542,7 @@ void idPlayer::UpdateSkinSetup()
 		{
 			gameType = GetExpansionType();
 
-			if ( gameType == GAME_D3XP || gameType == GAME_D3LE )
+			if( gameType == GAME_D3XP || gameType == GAME_D3LE || bonusChar == BONUS_CHAR_ROE || bonusChar == BONUS_CHAR_LE )
 			{
 				skinN = "skins/characters/player/d3xp_sp_vrik";
 			}

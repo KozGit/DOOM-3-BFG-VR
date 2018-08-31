@@ -1091,7 +1091,21 @@ void idMD5Anim::CheckModelHierarchy( const idRenderModel* model ) const
 	{
 		if( !fileSystem->InProductionMode() )
 		{
-			gameLocal.Warning( "Model '%s' has different # of joints than anim '%s'", model->Name(), name.c_str() );
+			gameLocal.Warning( "Model '%s' has different # of joints (%d) than anim '%s' (%d)", model->Name(), jointInfo.Num(), name.c_str(), model->NumJoints() );
+			const idMD5Joint* modelJoints = model->GetJoints();
+			idStr s = "";
+			for( int i = 0; i < model->NumJoints(); i++ )
+			{
+				s += idStr::FormatNumber( i ) + "=" + modelJoints[i].name + " ";
+			}
+			gameLocal.Warning( "Model %s: %s", model->Name(), s.c_str() );
+			s = "";
+			for( int i = 0; i < jointInfo.Num(); i++ )
+			{
+				int jointNum = jointInfo[i].nameIndex;
+				s += idStr::FormatNumber( i ) + "=" + animationLib.JointName( jointNum ) + " ";
+			}
+			gameLocal.Warning( "Anim %s: %s", name.c_str(), s.c_str() );
 		}
 		else
 		{

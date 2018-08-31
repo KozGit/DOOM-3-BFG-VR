@@ -957,6 +957,7 @@ private:
 	idMenuWidget_DynamicList* 	options;
 	idMenuDataSource_Shell_NewGame	systemData; // Carl
 	idMenuWidget_Button*			btnBack;
+	idMenuWidget_Help*				helpWidget; // Carl
 };
 
 //*

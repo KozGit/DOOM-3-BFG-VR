@@ -1691,6 +1691,11 @@ void idAFEntity_WithAttachedHead::SetupHead()
 	idMat3				axis;
 	
 	headModel = spawnArgs.GetString( "def_head", "" );
+	// Carl: Bonus characters for cutscenes
+	if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
+	{
+		headModel = BonusCharModel( headModel, ( bonus_char_t )bonus_char.GetInteger() );
+	}
 	if( headModel[ 0 ] )
 	{
 		jointName = spawnArgs.GetString( "head_joint" );

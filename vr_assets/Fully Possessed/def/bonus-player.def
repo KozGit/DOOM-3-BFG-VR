@@ -34,6 +34,14 @@ model model_d3_sp_marine {
 	anim grabber_lower					models/md5/characters/npcs/playermoves/ik_grabber_idle_vrik.md5anim
 }
 
+model model_d3_sp_helmet {
+	mesh							models/md5/characters/npcs/heads/shelmet.md5mesh
+
+	anim idle						models/md5/characters/npcs/heads/shelmetidle.md5anim
+	anim stand						models/md5/characters/npcs/heads/shelmetidle.md5anim
+	anim blink						models/md5/characters/npcs/heads/shelmetidle.md5anim
+}
+
 
 
 entityDef player_bonus_base {
@@ -471,12 +479,14 @@ entityDef bonus_player_roe_hell  {
 }
 
 entityDef bonus_player_le  {
-	"inherit"							"player_base_d3le_sp"
+	"inherit"							"bonus_player_sp"
 	"model"								"model_d3le_sp_marine"
-	"def_head"							"model_d3le_sp_head"
-	"weapon"							"weapon_fists,weapon_grabber,weapon_pistol,weapon_shotgun_double,weapon_flashlight,weapon_pda"
-	"weapon_nightmare"					"weapon_fists,weapon_grabber,weapon_pistol,weapon_shotgun_double,weapon_flashlight,weapon_pda,weapon_soulcube"
-	"current_weapon"					"2"
+	"def_head"							"model_d3le_sp_helmet"
+	"health"							"50"
+	"weapon"							"weapon_fists,weapon_grabber,weapon_shotgun_double,weapon_flashlight,weapon_pda"
+	"weapon_nightmare"					"weapon_fists,weapon_grabber,weapon_shotgun_double,weapon_flashlight,weapon_pda,weapon_soulcube"
+	"current_weapon"					"0"
+	"ammo_bullets"						"0"
 }
 
 entityDef bonus_player_le_hell  {
@@ -514,7 +524,7 @@ entityDef bonus_player_campbell_hell  {
 entityDef bonus_player_doomguy  {
 	"inherit"							"bonus_player_sp"
 	"model"								"model_d3_sp_marine"
-	"def_head"							"head_marine_helmet"
+	"def_head"							"model_d3_sp_helmet"
 	"maxarmor"							"100"
 
 	"weapon"							"weapon_fists,weapon_pistol,weapon_shotgun_double,weapon_flashlight,weapon_pda"
@@ -544,7 +554,7 @@ entityDef bonus_player_doomguy_hell  {
 entityDef bonus_player_slayer  {
 	"inherit"							"bonus_player_sp"
 	"model"								"model_d3_sp_marine"
-	"def_head"							"head_marine_helmet"
+	"def_head"							"model_d3_sp_helmet"
 	"maxarmor"							"50"
 	"current_weapon"					"2"
 }
@@ -563,7 +573,7 @@ entityDef bonus_player_slayer_hell  {
 entityDef bonus_player_eternal  {
 	"inherit"							"bonus_player_slayer"
 	"model"								"model_d3_sp_marine"
-	"def_head"							"head_marine_helmet"
+	"def_head"							"model_d3_sp_helmet"
 	"weapon"							"weapon_fists,weapon_pistol,weapon_shotgun_double,weapon_flashlight,weapon_pda"
 	"weapon_nightmare"					"weapon_fists,weapon_pistol,weapon_shotgun_double,weapon_flashlight,weapon_pda,weapon_soulcube"
 	"current_weapon"					"2"
@@ -583,7 +593,7 @@ entityDef bonus_player_eternal_hell  {
 entityDef bonus_player_vfr  {
 	"inherit"							"bonus_player_slayer"
 	"model"								"model_d3_sp_marine"
-	"def_head"							"head_marine_helmet"
+	"def_head"							"model_d3_sple_helmet"
 	"weapon"							"weapon_fists,weapon_handgrenade,weapon_pistol,weapon_pda"
 	"weapon_nightmare"					"weapon_fists,weapon_handgrenade,weapon_pistol,weapon_pda"
 	"ammo_grenades"						"8" // todo
@@ -635,7 +645,7 @@ entityDef bonus_player_ash_hell  {
 entityDef bonus_player_samus  {
 	"inherit"							"bonus_player_sp"
 	"model"								"model_d3_sp_marine"
-	"def_head"							"head_marine_helmet"
+	"def_head"							"model_d3_sp_helmet"
 	"armor"								"100"
 	"maxarmor"							"225"
 }

@@ -57,7 +57,7 @@ void idMenuScreen_Shell_NewGame::Initialize( idMenuHandler* data )
 	options->SetControlList( true );
 	AddChild( options );
 
-	idMenuWidget_Help* const helpWidget = new( TAG_SWF ) idMenuWidget_Help();
+	helpWidget = new( TAG_SWF ) idMenuWidget_Help();
 	helpWidget->SetSpritePath( GetSpritePath(), "info", "helpTooltip" );
 	AddChild( helpWidget );
 
@@ -311,6 +311,9 @@ bool idMenuScreen_Shell_NewGame::HandleAction( idWidgetAction& action, const idW
 				if( widget->GetDataSourceFieldIndex() == idMenuDataSource_Shell_NewGame::NEWGAME_FIELD_CHARACTER )
 				{
 					dynamic_cast< idMenuWidget_Button* >( widget )->SetDescription( BonusCharDescription( ( bonus_char_t )bonus_char.GetInteger() ) );
+					idWidgetEvent e;
+					e.type = WIDGET_EVENT_FOCUS_ON;
+					helpWidget->ObserveEvent(*widget, e);
 				}
 				widget->Update();
 			}
@@ -409,9 +412,9 @@ idSWFScriptVar idMenuScreen_Shell_NewGame::idMenuDataSource_Shell_NewGame::GetFi
 
 	case NEWGAME_FIELD_CHARACTER:
 	{
-		const char* names[] = { "Default", "Marine (D3)", "Red Team (RoE)", "Bravo Team (LE)", "Campbell (D3)", "Doomguy (D2)", 
+		const char* names[] = { "Default", "Marine (D3)", "Red Team (RoE)", "Bravo Team (LM)", "Campbell (D3)", "Doomguy (D2)", 
 			"Slayer (2016)", "Slayer (Eternal)", "M. Peters (VFR)", "Ash (Evil Dead)", "Samus (Metroid)", "Witch (Hicky)" };
-		const char* lockednames[] = { "", "Locked (D3)", "Locked (RoE)", "Locked (LE)", "Locked (D3)", "Locked (D2)",
+		const char* lockednames[] = { "", "Locked (D3)", "Locked (RoE)", "Locked (LM)", "Locked (D3)", "Locked (D2)",
 			"Locked (2016)", "Locked (Eternal)", "Locked (VFR)", "Locked (Evil Dead)", "Locked (Metroid)", "Locked (Hicky)" };
 		if( BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
 			return names[bonus_char.GetInteger()];
