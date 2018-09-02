@@ -67,9 +67,14 @@ void BonusGiveSignatureWeapons( idPlayer *player, bonus_char_t ch );
 // Carl: For replacing the NPC version of the character in cutscenes. See Anim_Blend.cpp
 idStr BonusCharSkin( idStr skinname, bonus_char_t ch );
 const char* BonusCharModel( const char* m, bonus_char_t ch );
-const char* BonusCharEntityClass( const char* e, bonus_char_t ch );
 
-const char *BonusCharMesh( bonus_char_t ch );
-const char *BonusCharMeshHead( bonus_char_t ch );
+const char* BonusCharMesh( bonus_char_t ch );
+const char* BonusCharMeshHead( bonus_char_t ch );
+
+// Carl: For replacing props/items with moveable entities
+bool BonusCharNeedsMoveables( bonus_char_t ch );
+const char* ItemToMoveableEntityClass( const char* e, bonus_char_t ch );
+const char* ModelToMoveableEntityClass( const char* model, bonus_char_t ch );
+
 
 #endif

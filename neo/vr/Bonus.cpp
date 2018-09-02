@@ -281,7 +281,7 @@ const char* BonusCharModel( const char* m, bonus_char_t ch )
 	return m;
 }
 
-const char* BonusCharEntityClass( const char* e, bonus_char_t ch )
+const char* ItemToMoveableEntityClass( const char* e, bonus_char_t ch )
 {
 	if( !e || ( bonus_char.GetInteger() != BONUS_CHAR_ROE && bonus_char.GetInteger() != BONUS_CHAR_LE ) )
 		return e;
@@ -300,15 +300,17 @@ const char* BonusCharEntityClass( const char* e, bonus_char_t ch )
 			{ "weapon_bfg", "moveable_item_bfg" },
 			{ "weapon_soulcube", "moveable_item_soulcube" },
 			{ "weapon_chainsaw", "moveable_item_chainsaw" },
-			{ "weapon_grabber", "moveable_item_grabber" },
+			{ "weapon_grabber", "moveable_item_grabber" }, // Carl: I added this item
 			{ "weapon_flashlight", "moveable_item_flashlight" },
 			{ "weapon_plasmagun", "moveable_item_plasmagun" },
+			// moveable_item_flashlight
+			// mp versions moveable_item_chainsaw_mp, pistol, shotgun, machinegun, chaingun, grenades, plasmagun, rocketlauncher, bfg
 		};
 		for( int i = 0; i < 14; i++ )
 		{
 			if( idStr::Icmp( e, weapons[i][0] ) == 0 )
 			{
-				common->Printf( "Converting %s to %s", e, weapons[i][1] );
+				common->Printf( "Converting %s to %s\n", e, weapons[i][1] );
 				return weapons[i][1];
 			}
 		}
@@ -365,6 +367,131 @@ const char* BonusCharEntityClass( const char* e, bonus_char_t ch )
 		return "moveable_powerup_adrenaline";
 	}
 	return e;
+}
+
+// Carl: model can be NULL, "", or the "model" field of a func_static
+// Returns the corresponding moveable entity class (instead of "func_static"), or "" if there isn't one.
+const char* ModelToMoveableEntityClass( const char* model, bonus_char_t ch )
+{
+	if( !model || !model[0] )
+		return "";
+	const char* lookup[77][2] = {
+		// moveable.def
+		{ "models/mapobjects/lab/filecabinet1/filecabinet1.lwo", "moveable_filecabinet1" }, // 19 in Mars City
+		{ "models/mapobjects/lab/diamondbox/diamondbox.lwo", "moveable_diamondbox" }, // 11 in Mars City (1)
+		{ "models/mapobjects/lab/plasticjar2/plasticjar2.lwo", "moveable_plasticjar2" }, // 10 in Mars City
+		{ "models/mapobjects/mcity/deskcomp/deskcomp.lwo", "moveable_computer" }, // 7 in Mars City
+		{ "models/mapobjects/filler/phone.ase", "moveable_phone" }, // 6 in Mars City 1
+		{ "models/mapobjects/lab/compcart/compcart.lwo", "moveable_compcart" }, // 5 in Mars City
+		{ "models/mapobjects/lab/plasticjar1/plasticjar1.lwo", "moveable_plasticjar1" }, // 5 in Mars City
+		{ "models/mapobjects/filler/laptop.lwo", "moveable_laptop" }, // 3 in Mars City (1)
+		{ "models/mapobjects/filler/ktable.lwo", "moveable_ktable" }, // 2 in Mars City
+		{ "models/mapobjects/lab/plasticbin/plasticbin.lwo", "moveable_plasticbin" }, // 2 in Mars City (2)
+		{ "models/mapobjects/filler/monkeywrench.lwo", "moveable_wrench" }, // 1 in Mars City
+		{ "models/mapobjects/lab/infusion/infusion.lwo", "moveable_infusion" }, // 1 in Mars City
+		{ "models/mapobjects/monitors/hangingmonitor.lwo", "moveable_hangingmonitor" }, // 1 in Mars City
+		{ "models/mapobjects/base/misc/fireext.ase", "moveable_fireext" }, // 1 in Mars City (1)
+		{ "models/mapobjects/lamps/desklamp.lwo", "moveable_desklamp" }, // 1 in Mars City (1)
+		{ "models/mapobjects/filler/monitor.ase", "moveable_monitor" }, // 1 in Mars City (1)
+		{ "models/mapobjects/filler/monitorflip.lwo", "moveable_monitorflip" }, // 1 in Mars City (1)
+
+		{ "models/mapobjects/filler/mkeyboard.lwo", "moveable_keyboard1" }, // 2 in Mars City, 3 in Erebus 1 (for cutscene?), 1 in Erebus 2 (for cutscene?)
+
+
+		{ "models/mapobjects/base/tech/chair1.ase", "moveable_tech_chair1" }, //
+		{ "models/mapobjects/base/chairs/chair1.lwo", "moveable_chair1" }, //
+		// { "models/mapobjects/chairs/d3xp_chair2.lwo", "moveable_chair2" }, // moveable in Mars City and DeltaLabs2a!!! (but it's an RoE asset?)
+		// { "models/mapobjects/chairs/d3xp_chair5.lwo", "moveable_chair5" },
+		{ "models/mapobjects/base/chairs/normchair.lwo", "moveable_normchair" }, //
+		{ "models/mapobjects/chairs/kitchenchair/kitchenchair.lwo", "moveable_kitchenchair" }, // moveable in Mars City
+		{ "models/mapobjects/cannister/cannister.ase", "moveable_cannister" }, //
+		{ "models/mapobjects/washroom/trashcan01.ase", "moveable_trashcan01" }, //
+		{ "models/mapobjects/washroom/mop.lwo", "moveable_mop" }, //
+		{ "models/mapobjects/washroom/mopbucket.lwo", "moveable_mopbucket" }, //
+		{ "models/mapobjects/lab/beaker/beaker.lwo", "moveable_beaker" }, //
+		{ "models/mapobjects/lab/Blaptop/blaptop.lwo", "moveable_blaptop" }, //
+		{ "models/mapobjects/lab/plasticbinmini/plasticbinmini.lwo", "moveable_plasticbinmini" }, //
+		{ "models/mapobjects/filler/tbox1.ase", "moveable_cartonbox1" }, //
+		{ "models/mapobjects/filler/tbox2.ase", "moveable_cartonbox2" },
+		{ "models/mapobjects/filler/tbox3.ase", "moveable_cartonbox3" },
+		{ "models/mapobjects/filler/tbox4.ase", "moveable_cartonbox4" },
+		{ "models/mapobjects/filler/tbox5.ase", "moveable_cartonbox5" },
+		{ "models/mapobjects/filler/tbox6.ase", "moveable_cartonbox6" },
+		{ "models/mapobjects/filler/tbox7.ase", "moveable_cartonbox7" },
+		{ "models/mapobjects/filler/tbox8.ase", "moveable_cartonbox8" },
+		{ "models/mapobjects/boxes/metalbox1.lwo", "moveable_metalbox1" },
+		{ "models/mapobjects/lab/diamondbox/diamondbox_sm.lwo", "moveable_diamondbox_sm" }, //
+
+		{ "models/mapobjects/filler/cone.ASE", "moveable_cone" }, //
+		{ "models/mapobjects/filler/cola1.lwo", "moveable_cokecan" }, //
+		{ "models/mapobjects/filler/cola2.lwo", "moveable_cokecan" }, // this will convert it to an unbroken coke can!
+		{ "models/items/lantern/lantern_world.lwo", "moveable_item_lantern_world" }, // light on version that doesn't bounce
+		// { "models/items/lantern/lantern_world.lwo", "moveable_item_lantern" }, // moveable_items.def, light off version that bounces, moveable in MarsCity 2
+		// { "models/items/lantern/lantern_world_broken.lwo", "moveable_item_lantern_world" }, // commented out
+
+		{ "models/mapobjects/filler/foamcup.lwo", "moveable_foamcup" }, //
+		{ "models/mapobjects/lab/bottle1/bottle1.lwo", "moveable_bottle1" }, //
+		{ "models/mapobjects/lab/microscope/microscope.lwo", "moveable_microscope" }, //
+		{ "models/mapobjects/filler/pc1.ase", "moveable_pc1" }, //
+		{ "models/mapobjects/lab/gizmo1/gizmo1.lwo", "moveable_gizmo1" }, //
+		{ "models/mapobjects/lab/gizmo2/gizmo2.lwo", "moveable_gizmo2" }, //
+		{ "models/mapobjects/lab/gizmo3/gizmo3.lwo", "moveable_gizmo3" }, //
+		{ "models/mapobjects/lab/spigotcan/spigotcan.lwo", "moveable_spigotcan" }, //
+		{ "models/mapobjects/lab/tablecart1/tablecart1.lwo", "moveable_tablecart1" }, //
+		{ "models/mapobjects/lab/tablecart2/tablecart2.lwo", "moveable_tablecart2" }, //
+		{ "models/mapobjects/lab/tray/tray.lwo", "moveable_tray" }, //
+		{ "models/mal/y_utilitylampcm.ase", "moveable_utilitylamp" }, //
+
+		{ "models/mapobjects/fuel_barrel/gbarrel.ASE", "moveable_barrel1" }, //
+		{ "models/mapobjects/fuel_barrel/p_barrel.ase", "moveable_barrel2" }, //
+		// { "models/mapobjects/fuel_barrel/exp_barrel.lwo", "moveable_base_barrel" },
+		{ "models/mapobjects/fuel_barrel/exp_barrel.lwo", "moveable_explodingbarrel" },
+		// { "models/mapobjects/fuel_barrel/exp_barrel.lwo", "moveable_burningbarrel" },
+		// { "models/mapobjects/fuel_barrel/exp_barrel.lwo", "moveable_explodingbarrel_slime" },
+
+		{ "models/mapobjects/fuel_barrel/exp_barrel2b.lwo", "debris_barrelpiece" },
+		// { "models/mapobjects/fuel_barrel/exp_barrel2b.lwo", "debris_barrelpiece_slime" },
+		{ "models/mapobjects/fuel_barrel/exp_barrel2c.lwo", "debris_barreltop" },
+		// { "models/mapobjects/fuel_barrel/exp_barrel2c.lwo", "debris_barreltop_slime" },
+		{ "models/mapobjects/fuel_barrel/exp_barrel2b.lwo", "debris_barrelpiece2" },
+		{ "models/mapobjects/fuel_barrel/exp_barrel2c.lwo", "debris_barreltop2" },
+
+		{ "models/mapobjects/washroom/airtank.lwo", "moveable_explodingtank" },
+		// { "models/mapobjects/washroom/airtank.lwo", "moveable_burningtank" },
+
+		{ "models/mapobjects/filler/binder2.ase", "moveable_binder3_vr" }, // todo
+		{ "models/mapobjects/filler/binder3.ase", "moveable_binder3_vr" }, // todo
+
+		// moveable_items.def
+		{ "models/monsters/zsecurity/zsheild.lwo", "moveable_item_shield" },
+		{ "models/items/tablet/tablet_world.lwo", "moveable_item_tabletpc" },
+		{ "models/characters/sarge2/w_helmet.lwo", "moveable_item_helmet" },
+
+		{ "models/gibs/skull_pork.lwo", "moveable_item_skull_pork" },
+		{ "models/gibs/head_pork.lwo", "moveable_item_head_pork" },
+		{ "models/gibs/torso_pork.lwo", "moveable_item_torso_pork" },
+		{ "models/gibs/rup_arm_pork.lwo", "moveable_item_rup_arm_pork"},
+		{ "models/gibs/left_waist_pork.lwo", "moveable_item_left_waist_pork" },
+		{ "models/gibs/lup_leg_pork.lwo", "moveable_item_lup_leg_pork" },
+		{ "models/gibs/rup_leg_pork.lwo", "moveable_item_rup_leg_pork" },
+		{ "models/gibs/rup2_leg_pork.lwo", "moveable_item_rup2_leg_pork" },
+		{ "models/gibs/pelvis_pork.lwo", "moveable_item_pelvis_pork" },
+
+	};
+	for( int i = 0; i < 77; i++ )
+	{
+		if( idStr::Icmp( model, lookup[i][0] ) == 0 )
+		{
+			common->Printf( "Converting %s to %s", model, lookup[i][1] );
+			return lookup[i][1];
+		}
+	}
+	return "";
+}
+
+bool BonusCharNeedsMoveables( bonus_char_t ch )
+{
+	return ( ch == BONUS_CHAR_ROE || ch == BONUS_CHAR_LE ) && BonusCharUnlocked( ch );
 }
 
 bool HasPlayedDoom2016()

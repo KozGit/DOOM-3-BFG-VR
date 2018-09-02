@@ -1,0 +1,17 @@
+// Carl: Extra or fixed moveable definitions.
+
+entityDef moveable_binder3_vr {
+	"inherit"					"moveable_base_fixed"
+	"model"						"models/mapobjects/filler/binder3.ase"
+	"clipmodel"					"models/weapons/machinegun/w_machinegun.lwo"
+	"density"					"0.05"
+	"friction"					"0.1"
+	"bouncyness"				"0.3"
+	"nonsolid"					"1"
+	"snd_bounce"				"book_impact"
+
+	"def_damage"				"damage_moveable_player"
+	"monster_damage"			"damage_moveable_small"
+	"damageWhenActive"			"1"
+}
+

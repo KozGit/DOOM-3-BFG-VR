@@ -4080,12 +4080,22 @@ bool idGameLocal::InhibitEntitySpawn( idDict& spawnArgs )
 	}
 	
 	// Carl: replace non-moveable items with moveable items for bonus characters
-	if( !result && bonus_char.GetInteger() && BonusCharUnlocked( (bonus_char_t)bonus_char.GetInteger() ) )
+	if( !result && BonusCharNeedsMoveables( (bonus_char_t)bonus_char.GetInteger() ) )
 	{
 		const char* name = spawnArgs.GetString( "classname" );
-		name = BonusCharEntityClass( name, (bonus_char_t)bonus_char.GetInteger() );
-		spawnArgs.Set( "classname", name );
-		// Carl: Todo, check for func_static props that should become moveable physics objects
+		// Carl: check for func_static props that should become moveable physics objects
+		if( idStr::Icmp( name, "func_static" ) == 0 )
+		{
+			const char* model = spawnArgs.GetString( "model" );
+			name = ModelToMoveableEntityClass( model, (bonus_char_t)bonus_char.GetInteger() );
+			if( name[0] )
+				spawnArgs.Set( "classname", name );
+		}
+		else
+		{
+			name = ItemToMoveableEntityClass( name, (bonus_char_t)bonus_char.GetInteger() );
+			spawnArgs.Set( "classname", name );
+		}
 	}
 
 	return result;

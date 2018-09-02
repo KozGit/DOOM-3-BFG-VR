@@ -122,6 +122,7 @@ entityDef moveable_item_pistol {
 	"friction"					"0.2"
 	"bouncyness"				"0"
 	"snd_bounce"				"smallbox"
+	"clipmodel" 				"models/weapons/machinegun/w_machinegun.lwo" // Carl: Pistol model can't generate clipmodel
 }
 
 model worldmodel_pistol {
