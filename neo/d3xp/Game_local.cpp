@@ -2220,6 +2220,14 @@ void idGameLocal::SpawnPlayer( int clientNum )
 				break;
 			case BONUS_CHAR_CAMPBELL: p = "bonus_player_campbell";
 				break;
+			case BONUS_CHAR_SARGE: p = "bonus_player_sarge";
+				break;
+			case BONUS_CHAR_BETRUGER: p = "bonus_player_betruger";
+				break;
+			case BONUS_CHAR_SWANN: p = "bonus_player_swann";
+				break;
+			case BONUS_CHAR_ROLAND: p = "bonus_player_roland";
+				break;
 			case BONUS_CHAR_DOOMGUY: p = "bonus_player_doomguy";
 				break;
 			case BONUS_CHAR_SLAYER: p = "bonus_player_slayer";
@@ -4148,6 +4156,8 @@ void idGameLocal::SpawnMapEntities()
 	mapEnt = mapFile->GetEntity( 0 );
 	args = mapEnt->epairs;
 	args.SetInt( "spawn_entnum", ENTITYNUM_WORLD );
+	if( BonusCharHasWeapons( (bonus_char_t)bonus_char.GetInteger() ) ) // Carl: Disable no_Weapons for some bonus characters
+		args.SetBool( "no_Weapons", false );
 	if( !SpawnEntityDef( args ) || !entities[ ENTITYNUM_WORLD ] || !entities[ ENTITYNUM_WORLD ]->IsType( idWorldspawn::Type ) )
 	{
 		Error( "Problem spawning world entity" );

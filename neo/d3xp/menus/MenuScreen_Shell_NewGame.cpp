@@ -389,9 +389,11 @@ void idMenuScreen_Shell_NewGame::idMenuDataSource_Shell_NewGame::AdjustField( co
 	switch( fieldIndex ) {
 	case NEWGAME_FIELD_CHARACTER:
 	{
-		static const int numValues = 14;
-		static const int values[numValues] = { BONUS_CHAR_NONE, BONUS_CHAR_MARINE, BONUS_CHAR_ROE, BONUS_CHAR_LE, BONUS_CHAR_CAMPBELL, BONUS_CHAR_DOOMGUY,
-			BONUS_CHAR_SLAYER, BONUS_CHAR_VFR, BONUS_CHAR_ETERNAL, BONUS_CHAR_ASH, BONUS_CHAR_SAMUS, BONUS_CHAR_WITCH };
+		static const int numValues = 15;
+		static const int values[numValues] = { BONUS_CHAR_NONE, BONUS_CHAR_MARINE, BONUS_CHAR_ROE, BONUS_CHAR_LE, 
+			BONUS_CHAR_CAMPBELL, BONUS_CHAR_SARGE, BONUS_CHAR_BETRUGER, BONUS_CHAR_SWANN,
+			BONUS_CHAR_DOOMGUY, BONUS_CHAR_SLAYER, BONUS_CHAR_VFR, BONUS_CHAR_ETERNAL,
+			BONUS_CHAR_ASH, BONUS_CHAR_SAMUS, BONUS_CHAR_WITCH };
 		bonus_char.SetInteger( AdjustOption( bonus_char.GetInteger(), values, numValues, adjustAmount ) );
 		break;
 
@@ -412,10 +414,14 @@ idSWFScriptVar idMenuScreen_Shell_NewGame::idMenuDataSource_Shell_NewGame::GetFi
 
 	case NEWGAME_FIELD_CHARACTER:
 	{
-		const char* names[] = { "Default", "Marine (D3)", "Red Team (RoE)", "Bravo Team (LM)", "Campbell (D3)", "Doomguy (D2)", 
-			"Slayer (2016)", "Slayer (Eternal)", "M. Peters (VFR)", "Ash (Evil Dead)", "Samus (Metroid)", "Witch (Hicky)" };
-		const char* lockednames[] = { "", "Locked (D3)", "Locked (RoE)", "Locked (LM)", "Locked (D3)", "Locked (D2)",
-			"Locked (2016)", "Locked (Eternal)", "Locked (VFR)", "Locked (Evil Dead)", "Locked (Metroid)", "Locked (Hicky)" };
+		const char* names[] = { "Default", "Marine (D3)", "Red Team (RoE)", "Bravo Team (LM)", 
+			"Campbell (D3)", "Sarge (D3)", "Betruger (D3)", "Swann (D3)", "Roland (D3)", 
+			"Doomguy (D2)", "Slayer (2016)", "Slayer (Eternal)", "M. Peters (VFR)",
+			"Ash (Evil Dead)", "Samus (Metroid)", "Witch (Hicky)" };
+		const char* lockednames[] = { "", "Locked (D3)", "Locked (RoE)", "Locked (LM)",
+			"Locked 2 (D3)", "Locked 3 (D3)", "Locked 4 (D3)", "Locked 5 (D3)", "Locked 6 (D3)",
+			"Locked (D2)", "Locked (2016)", "Locked (Eternal)", "Locked (VFR)",
+			"Locked (Evil Dead)", "Locked (Metroid)", "Locked (Hicky)" };
 		if( BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
 			return names[bonus_char.GetInteger()];
 		else

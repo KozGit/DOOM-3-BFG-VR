@@ -556,7 +556,7 @@ void idInventory::RestoreInventory( idPlayer* owner, const idDict& dict )
 	}
 
 	// Carl: Bonus character signature weapons
-	BonusGiveSignatureWeapons( owner, bonusChar );
+	// BonusGiveSignatureWeapons( owner, bonusChar );
 
 	foundWeapons = weapons; // Carl: if we drop any of these weapons, we magically get them back at the end of the level
 	duplicateWeapons = dict.GetInt( "weapon_duplicates", "0" ); // Carl: Dual wielding, bitmask for which weapons you have two of
@@ -1148,8 +1148,17 @@ bool idInventory::Give( idPlayer* owner, const idDict& spawnArgs, const char* st
 			else if( weaponName == "weapon_shotgun_double" )
 			{
 					cvarSystem->SetCVarBool( "bonus_boomstick", true );
+					cvarSystem->SetCVarBool( "bonus_char_sarge", true );
 					if( bonus_chainsaw.GetBool() )
 						cvarSystem->SetCVarBool( "bonus_char_ash", true );
+			}
+			else if( weaponName == "weapon_bfg" )
+			{
+				if( owner && owner->GetExpansionType() == GAME_BASE )
+				{
+					cvarSystem->SetCVarBool( "bonus_char_campbell", true );
+					cvarSystem->SetCVarBool( "bonus_char_sarge", true );
+				}
 			}
 			else if( weaponName == "weapon_soulcube" )
 			{
@@ -1825,7 +1834,7 @@ void idHolster::HolsterFlashlight()
 	}
 
 	// we will holster the flashlight if carrying it
-	if( commonVr->currentFlashlightMode == FLASHLIGHT_HAND && owner->flashlight.GetEntity()->IsLinked() && !owner->spectating && owner->weaponEnabled && !owner->hiddenWeapon && ( !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || bonusChar != BONUS_CHAR_NONE ) )
+	if( commonVr->currentFlashlightMode == FLASHLIGHT_HAND && owner->flashlight.GetEntity()->IsLinked() && !owner->spectating && owner->weaponEnabled && !owner->hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
 		modelname = owner->flashlight->weaponDef->dict.GetString( "model" );
 	}
@@ -2248,7 +2257,7 @@ bool idPlayerHand::holdingFlashlight()
 {
 	// Carl: weapon must be set to fist or empty hand when we're using the flashlight
 	if( whichHand == vr_weaponHand.GetInteger() || commonVr->currentFlashlightPosition != FLASHLIGHT_HAND || !owner || !owner->flashlight || !owner->flashlight.GetEntity()->IsLinked()
-		|| owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && owner->bonusChar == BONUS_CHAR_NONE ) )
+		|| owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 		return false;
 	return true;
 }
@@ -2273,7 +2282,7 @@ bool idPlayerHand::floatingWeapon()
 bool idPlayerHand::controllingWeapon()
 {
 	if( currentWeapon < 0 || !owner || !weapon || weapon->IdentifyWeapon() == WEAPON_PDA || holdingFlashlight()
-		|| owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && owner->bonusChar == BONUS_CHAR_NONE ) )
+		|| owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 		return false;
 	return true;
 }
@@ -2302,7 +2311,7 @@ bool idPlayerHand::holdingSomethingDroppable()
 
 bool idPlayerHand::isOverMountedFlashlight()
 {
-	if( !owner || !owner->flashlight.IsValid() || owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && owner->bonusChar == BONUS_CHAR_NONE ) )
+	if( !owner || !owner->flashlight.IsValid() || owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 		return false;
 	else if( handSlot == SLOT_FLASHLIGHT_HEAD )
 		return commonVr->currentFlashlightPosition == FLASHLIGHT_HEAD;
@@ -2393,7 +2402,7 @@ void idPlayerHand::NextWeapon( int dir )
 	}
 
 	// Koz dont change weapon if in gui
-	if( !owner || commonVr->handInGui || !owner->weaponEnabled || owner->spectating || owner->hiddenWeapon || gameLocal.inCinematic || Flicksync_InCutscene || ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && owner->bonusChar == BONUS_CHAR_NONE ) || owner->health < 0 )
+	if( !owner || commonVr->handInGui || !owner->weaponEnabled || owner->spectating || owner->hiddenWeapon || gameLocal.inCinematic || Flicksync_InCutscene || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || owner->health < 0 )
 	{
 		return;
 	}
@@ -3912,7 +3921,7 @@ void idPlayer::Spawn()
 		GetPDA()->SetSecurity( idLocalization::GetString( "#str_00066" ) );
 	}
 	
-	if( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && bonusChar == BONUS_CHAR_NONE )
+	if( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
 		hiddenWeapon = true;
 		// Carl: dual wielding
@@ -5526,7 +5535,15 @@ void idPlayer::UpdateSkinSetup()
 		
 		idStr skinN = skin->GetName();
 		
-		if( bonusChar == BONUS_CHAR_ASH || ( strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) && ( bonusChar == BONUS_CHAR_NONE || bonusChar == BONUS_CHAR_MARINE ) ) )
+		if( bonusChar == BONUS_CHAR_DOOMGUY || strstr( skinN.c_str(), "skins/characters/player/doomguy" ) )
+		{
+			// Carl: I didn't make /vrHandsOnly or /vrWeaponsOnly skins for Doomguy so use the default
+			if( !commonVr->thirdPersonMovement && vr_playerBodyMode.GetInteger() != 0 )
+				skinN = "skins/characters/player/greenmarine_arm2";
+			else
+				skinN = "skins/characters/player/doomguy";
+		}
+		else if( bonusChar == BONUS_CHAR_ASH || ( strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) && ( bonusChar == BONUS_CHAR_NONE || bonusChar == BONUS_CHAR_MARINE ) ) )
 		{
 			skinN = "skins/characters/player/tshirt_mp";
 		}
@@ -7975,7 +7992,7 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 		return;
 	}
 	
-	if( ( num != owner->weapon_pda ) && ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && owner->bonusChar == BONUS_CHAR_NONE ) )
+	if( ( num != owner->weapon_pda ) && gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
 		num = owner->weapon_fists;
 		owner->hiddenWeapon ^= 1;
@@ -8882,7 +8899,7 @@ void idPlayer::UpdateFlashlight()
 	
 	flashlight.GetEntity()->PresentWeapon( true, 1 - vr_weaponHand.GetInteger() );
 	
-	if( ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && bonusChar == BONUS_CHAR_NONE ) || gameLocal.inCinematic || spectating || fl.hidden || commonVr->currentFlashlightPosition == FLASHLIGHT_INVENTORY )
+	if( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || gameLocal.inCinematic || spectating || fl.hidden || commonVr->currentFlashlightPosition == FLASHLIGHT_INVENTORY )
 	{
 		worldModel->Hide();
 	}
@@ -11209,7 +11226,7 @@ void idPlayer::PerformImpulse( int impulse )
 				{
 					FlashlightOff();
 				}
-				else if( !spectating && weaponEnabled && !hiddenWeapon && !( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && bonusChar == BONUS_CHAR_NONE ) )
+				else if( !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 				{
 					FlashlightOn();
 				}
@@ -13257,7 +13274,7 @@ bool idPlayer::GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3&
 		}
 	}
 	// Carl: flashlight hand
-	else if ( commonVr->GetCurrentFlashlightMode() == FLASHLIGHT_HAND && weaponEnabled && !spectating && !( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && bonusChar == BONUS_CHAR_NONE ) && !game->IsPDAOpen() && !commonVr->PDAforcetoggle && hands[0].currentWeapon != weapon_pda && hands[1].currentWeapon != weapon_pda )
+	else if ( commonVr->GetCurrentFlashlightMode() == FLASHLIGHT_HAND && weaponEnabled && !spectating && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && !game->IsPDAOpen() && !commonVr->PDAforcetoggle && hands[0].currentWeapon != weapon_pda && hands[1].currentWeapon != weapon_pda )
 	{
 		weapon_t currentWeapon = flashlight->IdentifyWeapon();
 		CalculateViewFlashlightPos( origin, axis, flashlightOffsets[ int( currentWeapon ) ] );
@@ -13298,7 +13315,7 @@ void idPlayer::SetupPDASlot( bool holsterPDA )
 	else
 	{
 		// we will holster the flashlight if carrying it
-		if ( commonVr->currentFlashlightMode == FLASHLIGHT_HAND && flashlight.GetEntity()->IsLinked() && !spectating && weaponEnabled && !hiddenWeapon && !( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && bonusChar == BONUS_CHAR_NONE ) )
+		if ( commonVr->currentFlashlightMode == FLASHLIGHT_HAND && flashlight.GetEntity()->IsLinked() && !spectating && weaponEnabled && !hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 		{
 			modelname = flashlight->weaponDef->dict.GetString("model");
 			pdaHolsterAxis = idAngles(0, 90, 90).ToMat3();
@@ -17525,7 +17542,7 @@ void idPlayer::CalculateViewFlashlightPos( idVec3 &origin, idMat3 &axis, idVec3 
 	setLeftHand = false;
 	//move the flashlight to alternate location for items with no mount
 		
-	if ( spectating || !weaponEnabled || ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && bonusChar == BONUS_CHAR_NONE ) ) flashlightMode = FLASHLIGHT_BODY;
+	if ( spectating || !weaponEnabled || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) ) flashlightMode = FLASHLIGHT_BODY;
 	
 	if ( flashlightMode == FLASHLIGHT_HAND )
 	{
@@ -17698,7 +17715,7 @@ void idPlayer::CalculateViewFlashlightPos( idVec3 &origin, idMat3 &axis, idVec3 
 				axis = adjustAng.ToMat3() * axis;
 				flashlight->GetRenderEntity()->allowSurfaceInViewID = -1;
 				// Carl: This fixes the flashlight shadow in Mars City 1.
-				// I could check if ( spectating || !weaponEnabled || ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && owner->bonusChar == BONUS_CHAR_NONE ) )
+				// I could check if ( spectating || !weaponEnabled || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 				// but I don't think an armor-mounted light should ever cast a flashlight-shaped shadow
 				flashlight->GetRenderEntity()->suppressShadowInViewID = entityNumber + 1;
 				setLeftHand = true;
@@ -18873,7 +18890,7 @@ idPlayer::Event_EnableWeapon
 */
 void idPlayer::Event_EnableWeapon()
 {
-	hiddenWeapon = ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && bonusChar == BONUS_CHAR_NONE );
+	hiddenWeapon = gameLocal.world->spawnArgs.GetBool( "no_Weapons" );
 	weaponEnabled = true;
 	for( int h = 0; h < 2; h++ )
 	{
@@ -18889,7 +18906,7 @@ idPlayer::Event_DisableWeapon
 */
 void idPlayer::Event_DisableWeapon()
 {
-	hiddenWeapon = ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && bonusChar == BONUS_CHAR_NONE );
+	hiddenWeapon = gameLocal.world->spawnArgs.GetBool( "no_Weapons" );
 	weaponEnabled = false;
 	for( int h = 0; h < 2; h++ )
 	{
@@ -19060,7 +19077,7 @@ void idPlayer::Event_GetPreviousWeapon()
 
 	if( hands[ vr_weaponHand.GetInteger() ].previousWeapon >= 0 )
 	{
-		int pw = ( ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && bonusChar == BONUS_CHAR_NONE ) ) ? 0 : hands[ vr_weaponHand.GetInteger() ].previousWeapon;
+		int pw = ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) ) ? 0 : hands[ vr_weaponHand.GetInteger() ].previousWeapon;
 		weapon = spawnArgs.GetString( va( "def_weapon%d", pw ) );
 		idThread::ReturnString( weapon );
 	}
@@ -19119,7 +19136,7 @@ void idPlayer::Event_SelectWeapon( const char* weaponName )
 		}
 	}
 
-	if( hiddenWeapon && ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && bonusChar == BONUS_CHAR_NONE ) )
+	if( hiddenWeapon && gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
 		hands[ vr_weaponHand.GetInteger() ].idealWeapon = weapon_fists;
 		for( int h = 0; h < 2; h++ )
@@ -19225,7 +19242,7 @@ void idPlayer::Event_GetWeaponHandState()
 	{
 		handState = 2 ;
 	}
-	else if ( !spectating && weaponEnabled &&!hiddenWeapon && !( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && bonusChar == BONUS_CHAR_NONE ) )
+	else if ( !spectating && weaponEnabled &&!hiddenWeapon && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
 
 		handState = 1 ;
@@ -19284,7 +19301,7 @@ void idPlayer::Event_GetFlashHandState() // get flashlight hand state
 	{
 		flashlightHand = 3;
 	}
-	else if ( spectating || !weaponEnabled || hiddenWeapon || ( gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && bonusChar == BONUS_CHAR_NONE ) )
+	else if ( spectating || !weaponEnabled || hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 	{
 		flashlightHand = 0;
 	}

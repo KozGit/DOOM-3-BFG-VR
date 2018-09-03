@@ -15,6 +15,9 @@ idCVar bonus_char_marine( "bonus_char_marine", "0", CVAR_BOOL | CVAR_GAME | CVAR
 idCVar bonus_char_roe( "bonus_char_roe", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Red Team from RoE expansion" );
 idCVar bonus_char_le( "bonus_char_le", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Bravo Team from LE expansion" );
 idCVar bonus_char_campbell( "bonus_char_campbell", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Jack Campbell (Swann's bodyguard) from Doom 3" );
+idCVar bonus_char_sarge( "bonus_char_sarge", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Sergeant Kelly from Doom 3" );
+idCVar bonus_char_betruger( "bonus_char_betruger", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Dr. Malcom Betruger from Doom 3" );
+idCVar bonus_char_swann( "bonus_char_swann", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Swann from Doom 3" );
 idCVar bonus_char_doomguy( "bonus_char_doomguy", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Doomguy from Doom 1 and 2" );
 idCVar bonus_char_slayer( "bonus_char_slayer", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Doom Slayer from Doom 2016" );
 idCVar bonus_char_eternal( "bonus_char_eternal", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Doom Slayer from Doom Eternal" );
@@ -34,6 +37,9 @@ bool BonusCharUnlocked( bonus_char_t ch )
 	case BONUS_CHAR_ROE: return bonus_char_roe.GetBool();
 	case BONUS_CHAR_LE: return bonus_char_le.GetBool();
 	case BONUS_CHAR_CAMPBELL: return bonus_char_campbell.GetBool();
+	case BONUS_CHAR_SARGE: return bonus_char_sarge.GetBool();
+	case BONUS_CHAR_BETRUGER: return bonus_char_betruger.GetBool();
+	case BONUS_CHAR_SWANN: return bonus_char_swann.GetBool();
 	case BONUS_CHAR_DOOMGUY: return bonus_char_doomguy.GetBool();
 	case BONUS_CHAR_SLAYER: return bonus_char_slayer.GetBool();
 	case BONUS_CHAR_ETERNAL: return bonus_char_eternal.GetBool();
@@ -45,46 +51,51 @@ bool BonusCharUnlocked( bonus_char_t ch )
 	}
 }
 
+bool BonusCharHasWeapons( bonus_char_t ch )
+{
+	return BonusCharUnlocked( ch ) && ch != BONUS_CHAR_NONE && ch != BONUS_CHAR_SWANN && ch != BONUS_CHAR_ROLAND && ch != BONUS_CHAR_WITCH;
+}
+
 void BonusGiveSignatureWeapons( idPlayer *player, bonus_char_t ch )
 {
 	switch( ch )
 	{
 	case BONUS_CHAR_MARINE:
-		player->GiveInventoryItem( "weapon_chainsaw" );
-		player->GiveInventoryItem( "weapon_soulcube" );
+		//player->GiveInventoryItem( "weapon_chainsaw" );
+		//player->GiveInventoryItem( "weapon_soulcube" );
 		break;
 	case BONUS_CHAR_ROE:
-		player->GiveInventoryItem( "weapon_grabber" );
-		player->GiveInventoryItem( "weapon_shotgun_double" );
-		player->GiveInventoryItem( "weapon_bloodstone_passive" );
+		//player->GiveInventoryItem( "weapon_grabber" );
+		//player->GiveInventoryItem( "weapon_shotgun_double" );
+		//player->GiveInventoryItem( "weapon_bloodstone_passive" );
 		break;
 	case BONUS_CHAR_LE:
-		player->GiveInventoryItem( "weapon_grabber" );
-		player->GiveInventoryItem( "weapon_shotgun_double" );
+		//player->GiveInventoryItem( "weapon_grabber" );
+		//player->GiveInventoryItem( "weapon_shotgun_double" );
 		break;
 	case BONUS_CHAR_CAMPBELL:
-		player->GiveInventoryItem( "weapon_bfg" );
+		//player->GiveInventoryItem( "weapon_bfg" );
 		break;
 	case BONUS_CHAR_DOOMGUY:
-		player->GiveInventoryItem( "weapon_chainsaw" );
-		player->GiveInventoryItem( "weapon_shotgun_double" );
+		//player->GiveInventoryItem( "weapon_chainsaw" );
+		//player->GiveInventoryItem( "weapon_shotgun_double" );
 		break;
 	case BONUS_CHAR_SLAYER:
 		// only give double shotgun in main campaign
-		player->GiveInventoryItem( "weapon_shotgun_double" );
+		//player->GiveInventoryItem( "weapon_shotgun_double" );
 		break;
 	case BONUS_CHAR_ETERNAL:
-		player->GiveInventoryItem( "weapon_shotgun_double" );
+		//player->GiveInventoryItem( "weapon_shotgun_double" );
 		break;
 	case BONUS_CHAR_VFR:
-		player->GiveInventoryItem( "weapon_handgrenade" );
+		//player->GiveInventoryItem( "weapon_handgrenade" );
 		break;
 	case BONUS_CHAR_ASH:
-		player->GiveInventoryItem( "weapon_chainsaw" );
-		player->GiveInventoryItem( "weapon_shotgun_double" );
+		//player->GiveInventoryItem( "weapon_chainsaw" );
+		//player->GiveInventoryItem( "weapon_shotgun_double" );
 		break;
 	case BONUS_CHAR_SAMUS:
-		player->GiveInventoryItem( "weapon_pistol" );
+		//player->GiveInventoryItem( "weapon_pistol" );
 		break;
 	case BONUS_CHAR_WITCH:
 		break;
@@ -103,6 +114,9 @@ const char * BonusCharDescription( bonus_char_t ch )
 		case BONUS_CHAR_ROE: return "RoE Marine with Artifact, Grabber, and double-barrel shotgun";
 		case BONUS_CHAR_LE: return "Bravo Team Marine with Grabber and double-barrel shotgun";
 		case BONUS_CHAR_CAMPBELL: return "Jack Campbell with BFG 9000 and access codes";
+		case BONUS_CHAR_SARGE: return "Sergeant Kelly with double-barrel shotgun and access codes";
+		case BONUS_CHAR_BETRUGER: return "Dr. Malcolm Betruger with Soul Cube and access codes";
+		case BONUS_CHAR_SWANN: return "Weak character with nothing but access codes";
 		case BONUS_CHAR_DOOMGUY: return "Doomguy from Doom 2 with chainsaw and double-barrel shotgun";
 		case BONUS_CHAR_SLAYER: return "Doom Slayer with double jump boots";
 		case BONUS_CHAR_ETERNAL: return "Doom Slayer with double-barrel shotgun";
@@ -121,6 +135,9 @@ const char * BonusCharDescription( bonus_char_t ch )
 		case BONUS_CHAR_ROE: return "Unlock by getting the Grabber in (or beating) RoE";
 		case BONUS_CHAR_LE: return "Unlock by getting the Grabber in (or beating) Lost Mission";
 		case BONUS_CHAR_CAMPBELL: return "Unlock by you or Campbell getting the BFG in Doom 3";
+		case BONUS_CHAR_SARGE: return "Unlock by reuniting with Sarge or finding his office";
+		case BONUS_CHAR_BETRUGER: return "Unlock by ";
+		case BONUS_CHAR_SWANN: return "Unlock by ";
 		case BONUS_CHAR_DOOMGUY: return "Unlock by beating, or getting the chainsaw in, Doom 1 or 2";
 		case BONUS_CHAR_SLAYER: return "Unlock by playing Doom 2016";
 		case BONUS_CHAR_ETERNAL: return "Unlock by console command bonus_char_eternal";
@@ -143,6 +160,8 @@ const char *BonusCharMesh( bonus_char_t ch )
 	case BONUS_CHAR_ROE: return "models/md5/chars/marine.md5mesh"; // "models/md5/cinematics/erebus5/e5_player.md5mesh";
 	case BONUS_CHAR_LE: return "models/md5/chars/marine.md5mesh"; // "models/md5/characters/player/mocap/wepplayer.md5mesh";
 	case BONUS_CHAR_CAMPBELL: return "models/md5/chars/campbell/campbell.md5mesh";
+	case BONUS_CHAR_BETRUGER: return "models/md5/chars/suit.md5mesh";
+	case BONUS_CHAR_SARGE: return "models/md5/chars/marine.md5mesh";
 	case BONUS_CHAR_DOOMGUY: return "models/md5/characters/player/mocap/player.md5mesh";
 	case BONUS_CHAR_SLAYER: return "models/md5/characters/player/mocap/player.md5mesh";
 	case BONUS_CHAR_ETERNAL: return "models/md5/characters/player/mocap/player.md5mesh";
@@ -219,9 +238,10 @@ idStr BonusCharSkin( idStr skinname, bonus_char_t ch )
 	return skinname;
 }
 
+// Carl: only used for replacing models that are INCOMPATIBLE with the default animations (mostly heads)
 const char* BonusCharModel( const char* m, bonus_char_t ch )
 {
-	if( idStr::Icmp(m, "head_player" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_MARINE )
+	if( bonus_char.GetInteger() != BONUS_CHAR_MARINE && ( idStr::Icmp(m, "head_player" ) == 0 || idStr::Icmp( m, "hellhole_cin_npcplayerhead" ) == 0 || idStr::Icmp( m, "marscity_head_player" ) == 0 ) )
 	{
 		switch( bonus_char.GetInteger() )
 		{
@@ -230,52 +250,27 @@ const char* BonusCharModel( const char* m, bonus_char_t ch )
 			break;
 		case BONUS_CHAR_LE:
 		case BONUS_CHAR_VFR:
+		case BONUS_CHAR_DOOMGUY:
 			m = "model_d3le_sp_helmet";
 			break;
-		case BONUS_CHAR_DOOMGUY:
+		case BONUS_CHAR_CAMPBELL:
+			m = "head_campbell";
+			break;
+		case BONUS_CHAR_SARGE:
+			m = "head_sarge";
+			break;
+		case BONUS_CHAR_BETRUGER:
+			m = "head_betruger";
+			break;
+		case BONUS_CHAR_SWANN:
+			m = "head_swann";
+			break;
 		case BONUS_CHAR_SLAYER:
 		case BONUS_CHAR_ETERNAL:
 		case BONUS_CHAR_SAMUS:
-			m = "model_d3_sp_helmet";
-			break;
-		}
-	}
-	else if( idStr::Icmp( m, "hellhole_cin_npcplayerhead" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_MARINE )
-	{
-		switch( bonus_char.GetInteger() )
-		{
-		case BONUS_CHAR_ROE:
-			m = "model_d3xp_sp_head";
-			break;
-		case BONUS_CHAR_LE:
-		case BONUS_CHAR_VFR:
 			m = "model_d3le_sp_helmet";
 			break;
-		case BONUS_CHAR_DOOMGUY:
-		case BONUS_CHAR_SLAYER:
-		case BONUS_CHAR_ETERNAL:
-		case BONUS_CHAR_SAMUS:
-			m = "model_d3_sp_helmet";
-			break;
-		}
-	}
-	else if( idStr::Icmp( m, "marscity_head_player" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_MARINE )
-	{
-		switch( bonus_char.GetInteger() )
-		{
-		case BONUS_CHAR_ROE:
-			m = "model_d3xp_sp_head";
-			break;
-		case BONUS_CHAR_LE:
-		case BONUS_CHAR_VFR:
-			m = "model_d3le_sp_helmet";
-			break;
-		case BONUS_CHAR_DOOMGUY:
-		case BONUS_CHAR_SLAYER:
-		case BONUS_CHAR_ETERNAL:
-		case BONUS_CHAR_SAMUS:
-			m = "model_d3_sp_helmet";
-			break;
+		// Carl: Other heads are handled elsewhere because they're compatible with head_player
 		}
 	}
 	return m;

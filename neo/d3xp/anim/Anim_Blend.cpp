@@ -3461,10 +3461,17 @@ bool idDeclModelDef::Parse( const char* text, const int textLength, bool allowBi
 					case BONUS_CHAR_ETERNAL:
 					case BONUS_CHAR_VFR:
 					case BONUS_CHAR_SAMUS:
+					case BONUS_CHAR_SARGE:
 						filename = "models/md5/chars/marine.md5mesh"; // Sarge's body
 						break;
 					case BONUS_CHAR_CAMPBELL:
 						filename = "models/md5/chars/campbell/campbell.md5mesh"; // Campbell's body
+						break;
+					case BONUS_CHAR_BETRUGER:
+						filename = "models/md5/chars/labcoat.md5mesh";
+						break;
+					case BONUS_CHAR_SWANN:
+						filename = "models/md5/chars/suit.md5mesh"; // Swann's body
 						break;
 					/*
 					models/md5/chars/tshirt.md5mesh // Player's body, Mars City
@@ -3488,15 +3495,19 @@ bool idDeclModelDef::Parse( const char* text, const int textLength, bool allowBi
 					switch( bonus_char.GetInteger() )
 					{
 					case BONUS_CHAR_ROE:
-						//filename = "models/md5/characters/npcs/heads/hxp_helmet.md5mesh"; // ?
+						// Carl: Incompatible head handled elsewhere
 						break;
 					case BONUS_CHAR_LE:
-						filename = "models/md5/characters/npcs/heads/mhelmet.md5mesh"; // Bravo Team Soldier's helmet
+						// Carl: Incompatible helmet handled elsewhere
 						break;
 					case BONUS_CHAR_CAMPBELL:
 						filename = "models/md5/heads/campbell/campbell.md5mesh"; // Campbell's head
 						break;
+					case BONUS_CHAR_BETRUGER:
+						filename = "models/md5/heads/betruger/betruger.md5mesh"; // Betruger's head (ALSO HANDLED ELSEWHERE!)
+						break;
 					case BONUS_CHAR_DOOMGUY:
+						break;
 					case BONUS_CHAR_SLAYER:
 					case BONUS_CHAR_ETERNAL:
 					case BONUS_CHAR_VFR:

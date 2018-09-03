@@ -650,13 +650,13 @@ P_TouchSpecialThing
 			return;
 		if( bonus_boomstick.GetBool() && !bonus_char_ash.GetBool() && !bonus_char_doomguy.GetBool() )
 		{
-			player->message = GOTCHAINSAW " Ash and Doomguy unlocked in Doom 3!";
+			player->message = GOTCHAINSAW " Groovy! Ash and Doomguy unlocked in Doom 3!";
 			cvarSystem->SetCVarBool( "bonus_char_ash", true );
 			cvarSystem->SetCVarBool( "bonus_char_doomguy", true );
 		}
 		else if( bonus_boomstick.GetBool() && !bonus_char_ash.GetBool() )
 		{
-			player->message = GOTCHAINSAW " Ash unlocked in Doom 3!";
+			player->message = GOTCHAINSAW " Groovy! Ash unlocked in Doom 3!";
 			cvarSystem->SetCVarBool( "bonus_char_ash", true );
 		}
 		else if( !bonus_char_doomguy.GetBool() )
@@ -693,11 +693,31 @@ P_TouchSpecialThing
 		break;
 
 	case SPR_SGN2:
+		cvarSystem->SetCVarBool( "bonus_boomstick", true );
 		if (!P_GiveWeapon (player, wp_supershotgun, special->flags&MF_DROPPED ) )
 			return;
 
-		player->message = GOTSHOTGUN2;
-		sound = sfx_wpnup;	
+		if( bonus_chainsaw.GetBool() && !bonus_char_ash.GetBool() && !bonus_char_doomguy.GetBool() )
+		{
+			player->message = GOTSHOTGUN2 " Ash and Doomguy unlocked in Doom 3!";
+			cvarSystem->SetCVarBool( "bonus_char_ash", true );
+			cvarSystem->SetCVarBool( "bonus_char_doomguy", true );
+		}
+		else if( bonus_chainsaw.GetBool() && !bonus_char_ash.GetBool() )
+		{
+			player->message = GOTSHOTGUN2 " Ash unlocked in Doom 3!";
+			cvarSystem->SetCVarBool( "bonus_char_ash", true );
+		}
+		else if( !bonus_char_doomguy.GetBool() )
+		{
+			player->message = GOTSHOTGUN2 " Doomguy unlocked in Doom 3!";
+			cvarSystem->SetCVarBool( "bonus_char_doomguy", true );
+		}
+		else
+		{
+			player->message = GOTSHOTGUN2;
+		}
+		sound = sfx_wpnup;
 		break;
 
 	default:

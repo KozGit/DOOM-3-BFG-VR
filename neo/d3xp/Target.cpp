@@ -283,19 +283,22 @@ void idTarget_EndLevel::Event_Activate( idEntity* activator )
 				case GAME_D3XP:
 				{
 					cvarSystem->SetCVarBool( "g_roeNightmare", true );
-					cvarSystem->SetCVarBool( "bonus_char_roe", true );
+					cvarSystem->SetCVarBool( "bonus_char_roe", true ); // Carl: Unlock bonus character
 					break;
 				}
 				case GAME_D3LE:
 				{
 					cvarSystem->SetCVarBool( "g_leNightmare", true );
-					cvarSystem->SetCVarBool( "bonus_char_le", true );
+					cvarSystem->SetCVarBool( "bonus_char_le", true ); // Carl: Unlock bonus character
 					break;
 				}
 				case GAME_BASE:
 				{
 					cvarSystem->SetCVarBool( "g_nightmare", true );
-					cvarSystem->SetCVarBool( "bonus_char_marine", true );
+					cvarSystem->SetCVarBool( "bonus_char_marine", true ); // Carl: Unlock bonus character
+					cvarSystem->SetCVarBool( "bonus_char_swann", true );
+					cvarSystem->SetCVarBool( "bonus_char_betruger", true );
+					cvarSystem->SetCVarBool( "bonus_char_sarge", true );
 					break;
 				}
 			}
