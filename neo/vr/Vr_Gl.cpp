@@ -691,9 +691,9 @@ void iVr::HMDRender ( idImage *leftCurrent, idImage *rightCurrent )
 	else // openVR
 #endif
 	{
-		vr::Texture_t leftEyeTexture = { (void*)leftCurrent->GetTexNum(), vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
+		vr::Texture_t leftEyeTexture = { (void*)(size_t)leftCurrent->GetTexNum(), vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 		vr::VRCompositor()->Submit( vr::Eye_Left, &leftEyeTexture );
-		vr::Texture_t rightEyeTexture = { (void*)rightCurrent->GetTexNum(), vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
+		vr::Texture_t rightEyeTexture = { (void*)(size_t)rightCurrent->GetTexNum(), vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 		vr::VRCompositor()->Submit( vr::Eye_Right, &rightEyeTexture );
 		
 #ifdef _WIN32
