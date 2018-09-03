@@ -327,7 +327,7 @@ void RB_DrawStripWithCounters( const drawSurf_t *surf ) {
 		}
 		indexBuffer = &vertexCache.frameData[vertexCache.drawListNum].indexBuffer;
 	}
-	const int indexOffset = (int)(ibHandle >> VERTCACHE_OFFSET_SHIFT) & VERTCACHE_OFFSET_MASK;
+	const size_t indexOffset = (size_t)(ibHandle >> VERTCACHE_OFFSET_SHIFT) & VERTCACHE_OFFSET_MASK;
 
 	RENDERLOG_PRINTF( "Binding Buffers: %p:%i %p:%i\n", vertexBuffer, vertOffset, indexBuffer, indexOffset );
 
