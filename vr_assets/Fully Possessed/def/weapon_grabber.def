@@ -178,7 +178,7 @@ entityDef moveable_item_grabber {
 	"friction"					"0.2"
 	"bouncyness"				"0"
 	"snd_bounce"				"smallbox"
-	"clipmodel" 				"models/weapons/machinegun/w_machinegun.lwo" // Carl: Grabber model can't generate clipmodel
+	"clipmodel" 				"models/weapons/pistol/w_pistol_c.ase" // Carl: Grabber model can't generate clipmodel
 }
 
 // ======================================================

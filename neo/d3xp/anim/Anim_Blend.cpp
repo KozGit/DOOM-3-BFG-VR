@@ -3456,13 +3456,19 @@ bool idDeclModelDef::Parse( const char* text, const int textLength, bool allowBi
 					{
 					case BONUS_CHAR_ROE:
 					case BONUS_CHAR_LE:
-					case BONUS_CHAR_DOOMGUY:
-					case BONUS_CHAR_SLAYER:
-					case BONUS_CHAR_ETERNAL:
 					case BONUS_CHAR_VFR:
 					case BONUS_CHAR_SAMUS:
 					case BONUS_CHAR_SARGE:
+						// This looks similar to the ROE guy's armour, but it's technically not identical.
 						filename = "models/md5/chars/marine.md5mesh"; // Sarge's body
+						break;
+					case BONUS_CHAR_DOOMGUY:
+					case BONUS_CHAR_SLAYER:
+					case BONUS_CHAR_ETERNAL:
+						// Unfortunately, it's impossible to use the Doom Marine in armour during cutscenes
+						// because there is no model similar to him that is rigged the same way as the T-Shirt model.
+						// So use the Marine mesh 
+						filename = "models/md5/chars/marine.md5mesh";
 						break;
 					case BONUS_CHAR_CAMPBELL:
 						filename = "models/md5/chars/campbell/campbell.md5mesh"; // Campbell's body

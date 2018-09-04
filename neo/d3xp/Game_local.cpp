@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
+#include "../framework/Common_local.h"
 #include "Game_local.h"
 
 #ifdef GAME_DLL
@@ -4096,13 +4097,14 @@ bool idGameLocal::InhibitEntitySpawn( idDict& spawnArgs )
 		{
 			const char* model = spawnArgs.GetString( "model" );
 			name = ModelToMoveableEntityClass( model, (bonus_char_t)bonus_char.GetInteger() );
-			if( name[0] )
+			if( name[0] && !WouldMoveableEntityBeGlitchy( spawnArgs.GetString( "name" ), commonLocal.GetCurrentMapName() ) )
 				spawnArgs.Set( "classname", name );
 		}
 		else
 		{
 			name = ItemToMoveableEntityClass( name, (bonus_char_t)bonus_char.GetInteger() );
-			spawnArgs.Set( "classname", name );
+			if( !WouldMoveableEntityBeGlitchy( spawnArgs.GetString( "name" ), commonLocal.GetCurrentMapName() ) )
+				spawnArgs.Set( "classname", name );
 		}
 	}
 

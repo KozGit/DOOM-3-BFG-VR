@@ -82,6 +82,7 @@ const char* BonusCharMeshHead( bonus_char_t ch );
 bool BonusCharNeedsMoveables( bonus_char_t ch );
 const char* ItemToMoveableEntityClass( const char* e, bonus_char_t ch );
 const char* ModelToMoveableEntityClass( const char* model, bonus_char_t ch );
+bool WouldMoveableEntityBeGlitchy( const char* name, const char* mapname );
 
 
 #endif

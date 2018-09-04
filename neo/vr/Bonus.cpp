@@ -332,7 +332,7 @@ const char* ItemToMoveableEntityClass( const char* e, bonus_char_t ch )
 		{
 			if( idStr::Icmp( e, ammo[i][0] ) == 0 )
 			{
-				common->Printf( "Converting %s to %s", e, ammo[i][1] );
+				common->Printf( "Converting %s to %s\n", e, ammo[i][1] );
 				return ammo[i][1];
 			}
 		}
@@ -370,7 +370,7 @@ const char* ModelToMoveableEntityClass( const char* model, bonus_char_t ch )
 {
 	if( !model || !model[0] )
 		return "";
-	const char* lookup[77][2] = {
+	const char* lookup[78][2] = {
 		// moveable.def
 		{ "models/mapobjects/lab/filecabinet1/filecabinet1.lwo", "moveable_filecabinet1" }, // 19 in Mars City
 		{ "models/mapobjects/lab/diamondbox/diamondbox.lwo", "moveable_diamondbox" }, // 11 in Mars City (1)
@@ -454,8 +454,9 @@ const char* ModelToMoveableEntityClass( const char* model, bonus_char_t ch )
 		{ "models/mapobjects/washroom/airtank.lwo", "moveable_explodingtank" },
 		// { "models/mapobjects/washroom/airtank.lwo", "moveable_burningtank" },
 
-		{ "models/mapobjects/filler/binder2.ase", "moveable_binder3_vr" }, // todo
-		{ "models/mapobjects/filler/binder3.ase", "moveable_binder3_vr" }, // todo
+		// Carl: I added these entities and collision meshes because they were broken
+		{ "models/mapobjects/filler/binder2.ase", "moveable_binder2_vr" }, // Open binder falling off edge of desk in Admin, delta2b, delta3, deltax, le_exis2
+		{ "models/mapobjects/filler/binder3.ase", "moveable_binder3_vr" }, // Binder on the desk in Reception
 
 		// moveable_items.def
 		{ "models/monsters/zsecurity/zsheild.lwo", "moveable_item_shield" },
@@ -472,16 +473,92 @@ const char* ModelToMoveableEntityClass( const char* model, bonus_char_t ch )
 		{ "models/gibs/rup2_leg_pork.lwo", "moveable_item_rup2_leg_pork" },
 		{ "models/gibs/pelvis_pork.lwo", "moveable_item_pelvis_pork" },
 
+		// vr_moveable.def
+		{ "models/mapobjects/filler/lunchbag.lwo", "moveable_lunchbag" },
+		
+
 	};
 	for( int i = 0; i < 77; i++ )
 	{
 		if( idStr::Icmp( model, lookup[i][0] ) == 0 )
 		{
-			common->Printf( "Converting %s to %s", model, lookup[i][1] );
+			common->Printf( "Converting %s to %s\n", model, lookup[i][1] );
 			return lookup[i][1];
 		}
 	}
 	return "";
+}
+
+// Carl: Examples of glitchy entities - falling through the world, or having magazines on top that stay when the entity is moved from underneath
+bool WouldMoveableEntityBeGlitchy( const char* name, const char* mapname )
+{
+	// Note that we only need to check Doom 3 maps, not the expansions which were designed for the grabber
+	if( idStr::Cmp( mapname, "game/mars_city1" )==0 )
+	{
+		if( idStr::Cmp( name, "tim_func_static_2246" ) == 0 ) // Outside world bounds warning
+			return true;
+		if( idStr::Cmp( name, "tim_func_static_2247" ) == 0 ) // Outside world bounds warning
+			return true;
+		if( idStr::Cmp( name, "tim_func_static_2263" ) == 0 ) // Outside world bounds warning
+			return true;
+		if( idStr::Cmp( name, "func_static_5217" ) == 0 ) // Outside world bounds warning
+			return true;
+		if( idStr::Cmp( name, "func_static_5219" ) == 0 ) // Outside world bounds warning
+			return true;
+		if( idStr::Cmp( name, "func_static_5205" ) == 0 ) // Outside world bounds warning
+			return true;
+		if( idStr::Cmp( name, "tim_func_static_2675" ) == 0 ) // Reception computer monitor (because it's being used)
+			return true;
+		if( idStr::Cmp( name, "func_static_5267" ) == 0 ) // Soul Cube computer monitor (because it falls half into the table)
+			return true;
+		if( idStr::Cmp( name, "mal_func_static_1908" ) == 0 ) // Lamp in meeting room (because it falls half into the table)
+			return true;
+		if( idStr::Cmp( name, "tim_moveable_trashcan01_5" ) == 0 ) // Rubish bin in toilets that falls through the floor
+			return true;
+		if( idStr::Cmp( name, "tim_func_mover_1" ) == 0 ) // TV in kitchen that falls off the wall
+			return true;
+		if( idStr::Cmp( name, "func_static_866" ) == 0 ) // Kitchen table with magazines on top and people sitting at it
+			return true;
+		if( idStr::Cmp( name, "func_static_868" ) == 0 ) // Kitchen table with magazines on top
+			return true;
+		if( idStr::Cmp( name, "weapon_shotgun_5" ) == 0 || idStr::Cmp( name, "weapon_shotgun_7" ) == 0 ) // Shotguns that fall on floor in Combat Prep weapon room
+			return true;
+		if( idStr::Cmp( name, "func_static_5202" ) == 0 ) // Keyboard that's being used in Comms before Command HQ
+			return true;
+		if( idStr::Cmp( name, "func_static_5227" ) == 0 ) // Keyboard that's being used in Command HQ by NPC who only appears when it's moved
+			return true;
+		// player_pda, item_videocd_18, tim_func_static_1711 (binder1), func_static_5283 SHOULD be moveable (dufflebag), func_static_449 (keyboard in medlab)
+		// func_static_53015, func_static_53016 - tiles in corridor heading towards sarge
+		// tim_moveable_foamcup_6
+		// marscity_cinematic_victim has bad skin due to bonus characters (originally was tshirt guy)
+	}
+	else if( idStr::Cmp( mapname, "game/mc_underground" ) == 0 )
+	{
+		if( idStr::Cmp( name, "item_armor_security_2" ) == 0 ) // armor stops gear storage locker from opening?
+			return true;
+		if( idStr::Cmp( name, "weapon_pistol_1" ) == 0 ) // our pistol falls in storage locker
+			return true;
+		if( idStr::Cmp( name, "item_medkit_small_24" ) == 0 ) // medkit bouncing around in storage locker
+			return true;
+		if( idStr::Cmp( name, "ammo_clip_small_12" ) == 0 ) // ammo clip falls through left storage locker
+			return true;
+		if( idStr::Cmp( name, "secpanel1" ) == 0 ) // important GUI falls through table
+			return true;
+
+		if( idStr::Cmp( name, "func_static_52812" ) == 0 ) // box with magazines and lunch on top
+			return true;
+	}
+	else if( idStr::Cmp( mapname, "game/mars_city2" ) == 0 )
+	{
+		//if( idStr::Cmp( name, "" ) == 0 )
+		//	return true;
+	}
+	else if( idStr::Cmp( mapname, "game/admin" ) == 0 )
+	{
+		//if( idStr::Cmp( name, "" ) == 0 )
+		//	return true;
+	}
+	return false;
 }
 
 bool BonusCharNeedsMoveables( bonus_char_t ch )
