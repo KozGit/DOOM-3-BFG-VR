@@ -4068,6 +4068,13 @@ bool idGameLocal::InhibitEntitySpawn( idDict& spawnArgs )
 		}
 	}
 	
+	if( !result && bonus_char.GetInteger() && BonusCharUnlocked( (bonus_char_t)bonus_char.GetInteger() ) )
+	{
+		const char* name = spawnArgs.GetString( "classname" );
+		name = BonusCharReplaceIncompatibleEntityClass( name, (bonus_char_t)bonus_char.GetInteger() );
+		spawnArgs.Set( "classname", name );
+	}
+
 	// Carl: replace non-moveable items with moveable items for bonus characters
 	if( !result && BonusCharNeedsMoveables( (bonus_char_t)bonus_char.GetInteger() ) )
 	{

@@ -57,6 +57,16 @@ model model_d2_sp_marine {
 	skin								skins/characters/player/doomguy_body.skin
 }
 
+// For replacing incompatible characters in cutscenes
+entityDef player_bonus_cutscene {
+	"inherit"					"npc_base"
+	"model"						"npc_tshirt" 
+	"anim"						"idle"
+	"ik_numlegs"				"0"
+	"def_head"					"head_player"
+	"head_joint"				"Shoulders"
+	"cinematic"					"1"
+}
 
 entityDef player_bonus_base {
 	"spawnclass"						"idPlayer"
@@ -469,6 +479,13 @@ entityDef bonus_player_marine_hell  {
 	"skin_player2"						"skins/hell/player"
 }
 
+entityDef bonus_player_marine_cutscene  {
+	"inherit"					"cin_base"
+	"anim"						"overhear"
+	"model"						"admin_overhear_player" 
+	"cinematic"						"1"
+}
+
 entityDef bonus_player_roe  {
 	"inherit"							"bonus_player_sp"
 	"model"								"model_d3xp_sp_marine"
@@ -490,6 +507,15 @@ entityDef bonus_player_roe_hell  {
 	"skin_playerteleportin"				"skins/hell/playerteleportin"
 	"skin_player1"						"skins/hell/player_d3xp"
 	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_roe_cutscene  {
+	"spawnclass"					"idAI"
+	"scriptobject"					"character"
+	"model"							"erebus5_cloud_player_cinematic"
+	"anim"							"e5_player_cinematic_a"
+	"cinematic"						"1"
+	"health"						"1"
 }
 
 entityDef bonus_player_le  {
@@ -514,6 +540,12 @@ entityDef bonus_player_le_hell  {
 	"skin_player2"						"skins/hell/player"
 }
 
+entityDef bonus_player_le_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"npc_marine"
+	"def_head"							"model_d3le_sp_helmet"
+}
+
 entityDef bonus_player_campbell  {
 	"inherit"							"bonus_player_sp"
 	"model"								"model_d3xp_sp_marine"
@@ -533,6 +565,12 @@ entityDef bonus_player_campbell_hell  {
 	"skin_playerteleportin"				"skins/hell/playerteleportin"
 	"skin_player1"						"skins/hell/player_d3xp"
 	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_campbell_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"char_campbell"
+	"def_head"							"head_campbell"
 }
 
 entityDef bonus_player_sarge  {
@@ -558,6 +596,12 @@ entityDef bonus_player_sarge_hell  {
 	"skin_player2"						"skins/hell/player"
 }
 
+entityDef bonus_player_sarge_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"npc_marine"
+	"def_head"							"head_sarge"
+}
+
 entityDef bonus_player_betruger  {
 	"inherit"							"bonus_player_sp"
 	"model"								"model_d3_sp_marine"
@@ -581,6 +625,12 @@ entityDef bonus_player_betruger_hell  {
 	"skin_playerteleportin"				"skins/hell/playerteleportin"
 	"skin_player1"						"skins/hell/player_d3xp"
 	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_betruger_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"char_betruger"
+	"def_head"							"head_betruger"
 }
 
 entityDef bonus_player_swann  {
@@ -609,6 +659,12 @@ entityDef bonus_player_swann_hell  {
 	"skin_player2"						"skins/hell/player"
 }
 
+entityDef bonus_player_swann_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"char_swann"
+	"def_head"							"head_swann"
+}
+
 entityDef bonus_player_roland  {
 	"inherit"							"bonus_player_sp"
 	"model"								"model_d3_sp_marine"
@@ -633,6 +689,12 @@ entityDef bonus_player_roland_hell  {
 	"skin_playerteleportin"				"skins/hell/playerteleportin"
 	"skin_player1"						"skins/hell/player_d3xp"
 	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_roland_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"npc_jumpsuit"
+	"def_head"							"model_roland_head"
 }
 
 entityDef bonus_player_doomguy  {
@@ -666,6 +728,12 @@ entityDef bonus_player_doomguy_hell  {
 	"skin_player2"						"skins/hell/player"
 }
 
+entityDef bonus_player_doomguy_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"model_d2_sp_marine"
+	"def_head"							"model_d3le_sp_helmet"
+}
+
 entityDef bonus_player_slayer  {
 	"inherit"							"bonus_player_sp"
 	"model"								"model_d3_sp_marine"
@@ -683,6 +751,12 @@ entityDef bonus_player_slayer_hell  {
 	"skin_playerteleportin"				"skins/hell/playerteleportin"
 	"skin_player1"						"skins/hell/player_d3xp"
 	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_slayer_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"model_d3_sp_marine"
+	"def_head"							"model_d3le_sp_helmet"
 }
 
 entityDef bonus_player_eternal  {
@@ -705,6 +779,12 @@ entityDef bonus_player_eternal_hell  {
 	"skin_player2"						"skins/hell/player"
 }
 
+entityDef bonus_player_eternal_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"model_d3_sp_marine"
+	"def_head"							"model_d3le_sp_helmet"
+}
+
 entityDef bonus_player_vfr  {
 	"inherit"							"bonus_player_slayer"
 	"model"								"model_d3_sp_marine"
@@ -724,6 +804,12 @@ entityDef bonus_player_vfr_hell  {
 	"skin_playerteleportin"				"skins/hell/playerteleportin"
 	"skin_player1"						"skins/hell/player_d3xp"
 	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_vfr_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"model_d3_sp_marine"
+	"def_head"							"model_d3le_sp_helmet"
 }
 
 entityDef bonus_player_ash  {
@@ -757,6 +843,12 @@ entityDef bonus_player_ash_hell  {
 	"skin_player2"						"skins/hell/player"
 }
 
+entityDef bonus_player_ash_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"npc_tshirt"
+	"def_head"							"head_player"
+}
+
 entityDef bonus_player_samus  {
 	"inherit"							"bonus_player_sp"
 	"model"								"model_d3_sp_marine"
@@ -774,6 +866,12 @@ entityDef bonus_player_samus_hell  {
 	"skin_playerteleportin"				"skins/hell/playerteleportin"
 	"skin_player1"						"skins/hell/player_d3xp"
 	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_samus_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"model_d3_sp_marine"
+	"def_head"							"model_d3le_sp_helmet"
 }
 
 entityDef bonus_player_witch  {
@@ -800,5 +898,11 @@ entityDef bonus_player_witch_hell  {
 	"skin_playerteleportin"				"skins/hell/playerteleportin"
 	"skin_player1"						"skins/hell/player_d3xp"
 	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_witch_cutscene  {
+	"inherit"							"player_bonus_cutscene"
+	"model"								"model_d3_sp_marine"
+	"def_head"							"head_player"
 }
 

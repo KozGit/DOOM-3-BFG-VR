@@ -389,6 +389,52 @@ const char* BonusCharReplaceIncompatibleHead( const char* m, bonus_char_t ch )
 	return m;
 }
 
+const char* BonusCharReplaceIncompatibleEntityClass( const char* e, bonus_char_t ch )
+{
+	if( !e || !ch )
+		return e;
+	bool replace = false;
+	if( ch != BONUS_CHAR_MARINE && ( idStr::Icmp( e, "admin_overhear_player" ) == 0 ) )
+		replace = true;
+	if( replace )
+	{
+		switch( bonus_char.GetInteger() )
+		{
+		case BONUS_CHAR_MARINE:
+			return "bonus_player_marine_cutscene";
+		case BONUS_CHAR_ROE:
+			return "bonus_player_roe_cutscene";
+		case BONUS_CHAR_LE:
+			return "bonus_player_le_cutscene";
+		case BONUS_CHAR_CAMPBELL:
+			return "bonus_player_campbell_cutscene";
+		case BONUS_CHAR_SARGE:
+			return "bonus_player_sarge_cutscene";
+		case BONUS_CHAR_BETRUGER:
+			return "bonus_player_betruger_cutscene";
+		case BONUS_CHAR_SWANN:
+			return "bonus_player_swann_cutscene";
+		case BONUS_CHAR_ROLAND:
+			return "bonus_player_roland_cutscene";
+		case BONUS_CHAR_DOOMGUY:
+			return "bonus_player_doomguy_cutscene";
+		case BONUS_CHAR_SLAYER:
+			return "bonus_player_slayer_cutscene";
+		case BONUS_CHAR_ETERNAL:
+			return "bonus_player_eternal_cutscene";
+		case BONUS_CHAR_VFR:
+			return "bonus_player_vfr_cutscene";
+		case BONUS_CHAR_ASH:
+			return "bonus_player_ash_cutscene";
+		case BONUS_CHAR_SAMUS:
+			return "bonus_player_samus_cutscene";
+		case BONUS_CHAR_WITCH:
+			return "bonus_player_witch_cutscene";
+		}
+	}
+	return e;
+}
+
 const char* ItemToMoveableEntityClass( const char* e, bonus_char_t ch )
 {
 	if( !e || ( bonus_char.GetInteger() != BONUS_CHAR_ROE && bonus_char.GetInteger() != BONUS_CHAR_LE ) )
