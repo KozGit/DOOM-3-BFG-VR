@@ -3385,7 +3385,10 @@ bool idDeclModelDef::Parse( const char* text, const int textLength, bool allowBi
 			// This is a risky place to do this, because models can add anims after inheriting our (incompatible) model
 			if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
 			{
-				//token2 = BonusCharModel( token2.c_str(), ( bonus_char_t )bonus_char.GetInteger() );
+				if ( idStr::Icmp( GetName(), "marscity_cinematic_player" )==0 || idStr::Icmp( GetName(), "marscity_hangar_player" ) == 0 ) // these models inherit from npc_tshirt
+					token2 = BonusCharReplaceTShirtModel( (bonus_char_t)bonus_char.GetInteger() );
+				else if( idStr::Icmp( GetName(), "marscity_head_player" ) == 0 ) // inherits from head_player but adds possibly incompatible animations
+					token2 = BonusCharReplaceCompatibleHead( (bonus_char_t)bonus_char.GetInteger() );
 			}
 
 			const idDeclModelDef* copy = static_cast<const idDeclModelDef*>( declManager->FindType( DECL_MODELDEF, token2, false ) );
@@ -3448,6 +3451,7 @@ bool idDeclModelDef::Parse( const char* text, const int textLength, bool allowBi
 			// Carl: Bonus characters for cutscenes
 			if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
 			{
+#if 0
 				// Doom Marine's body wearing a T-Shirt (instead of armour) in Mars City 1 cutscenes
 				// TODO: This probably affects other characters too, hopefully they won't notice
 				if( ( filename.Icmp( "models/md5/chars/tshirt.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_MARINE ) )
@@ -3601,6 +3605,7 @@ bool idDeclModelDef::Parse( const char* text, const int textLength, bool allowBi
 				//else if( filename.Icmp( "models/md5/heads/campbell/campbell.md5mesh" ) == 0 && bonus_char.GetInteger() == BONUS_CHAR_CAMPBELL )
 				//	filename = "models/md5/heads/security_goggles/goggles.md5mesh"; // replace Campbell in cutscenes with some random security guy (except it affects us too?)
 				*/
+#endif
 			}
 			modelHandle = renderModelManager->FindModel( filename );
 			if( !modelHandle )

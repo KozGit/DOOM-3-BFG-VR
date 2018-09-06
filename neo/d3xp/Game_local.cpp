@@ -2209,44 +2209,24 @@ void idGameLocal::SpawnPlayer( int clientNum )
 	else
 	{
 		const char* p = gameLocal.world->spawnArgs.GetString( "def_player", "player_doommarine" );
+		// Carl: Detect the expansion correctly, because bonus characters can't know what expansion they're in.
+		const char* exp;
+		bool hell = idStr::Cmp( p, "d3xp_player_doommarine_hell" ) == 0;
+		bool enpro1 = idStr::Cmp( p, "d3le_player_doommarine_enpro1" ) == 0;
+		if( idStr::Cmp( p, "d3xp_player_doommarine" ) == 0 || hell )
+			exp = "d3xp";
+		else if( idStr::Cmp( p, "d3le_player_doommarine" ) == 0 || enpro1 )
+			exp = "d3le";
+		else
+			exp = "d3";
+		// Carl: Bonus characters
 		if( BonusCharUnlocked( (bonus_char_t)bonus_char.GetInteger() ) )
 		{
-			switch( ( bonus_char_t )bonus_char.GetInteger() )
-			{
-			case BONUS_CHAR_MARINE: p = "bonus_player_marine"; //"player_doommarine";
-				break;
-			case BONUS_CHAR_ROE: p = "bonus_player_roe"; //"d3xp_player_doommarine";
-				break;
-			case BONUS_CHAR_LE: p = "bonus_player_le"; //"d3le_player_doommarine";
-				break;
-			case BONUS_CHAR_CAMPBELL: p = "bonus_player_campbell";
-				break;
-			case BONUS_CHAR_SARGE: p = "bonus_player_sarge";
-				break;
-			case BONUS_CHAR_BETRUGER: p = "bonus_player_betruger";
-				break;
-			case BONUS_CHAR_SWANN: p = "bonus_player_swann";
-				break;
-			case BONUS_CHAR_ROLAND: p = "bonus_player_roland";
-				break;
-			case BONUS_CHAR_DOOMGUY: p = "bonus_player_doomguy";
-				break;
-			case BONUS_CHAR_SLAYER: p = "bonus_player_slayer";
-				break;
-			case BONUS_CHAR_ETERNAL: p = "bonus_player_eternal";
-				break;
-			case BONUS_CHAR_VFR: p = "bonus_player_vfr";
-				break;
-			case BONUS_CHAR_ASH: p = "bonus_player_ash";
-				break;
-			case BONUS_CHAR_SAMUS: p = "bonus_player_samus";
-				break;
-			case BONUS_CHAR_WITCH: p = "bonus_player_witch";
-				break;
-			}
+			p = BonusCharDefPlayer( (bonus_char_t)bonus_char.GetInteger(), p, exp, hell );
 		}
 		// precache the player
 		args.Set( "classname", p );
+		args.Set( "player_expansion", exp );
 	}
 	
 	// It's important that we increment numClients before calling SpawnEntityDef, because some

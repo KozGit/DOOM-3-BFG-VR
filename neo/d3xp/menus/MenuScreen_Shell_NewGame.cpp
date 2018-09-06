@@ -413,20 +413,7 @@ idSWFScriptVar idMenuScreen_Shell_NewGame::idMenuDataSource_Shell_NewGame::GetFi
 	{
 
 	case NEWGAME_FIELD_CHARACTER:
-	{
-		const char* names[] = { "Default", "Marine (D3)", "Red Team (RoE)", "Bravo Team (LM)", 
-			"Campbell (D3)", "Sarge (D3)", "Betruger (D3)", "Swann (D3)", "Roland (D3)", 
-			"Doomguy (D2)", "Slayer (2016)", "Slayer (Eternal)", "M. Peters (VFR)",
-			"Ash (Evil Dead)", "Samus (Metroid)", "Witch (Hicky)" };
-		const char* lockednames[] = { "", "Locked (D3)", "Locked (RoE)", "Locked (LM)",
-			"Locked 2 (D3)", "Locked 3 (D3)", "Locked 4 (D3)", "Locked 5 (D3)", "Locked 6 (D3)",
-			"Locked (D2)", "Locked (2016)", "Locked (Eternal)", "Locked (VFR)",
-			"Locked (Evil Dead)", "Locked (Metroid)", "Locked (Hicky)" };
-		if( BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
-			return names[bonus_char.GetInteger()];
-		else
-			return lockednames[bonus_char.GetInteger()];
-	}
+		return BonusCharName( (bonus_char_t)bonus_char.GetInteger(), BonusCharUnlocked( (bonus_char_t)bonus_char.GetInteger() ) );
 	}
 	return false;
 }

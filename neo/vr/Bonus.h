@@ -54,7 +54,7 @@ typedef enum
 
 extern idCVar bonus_char;
 extern idCVar bonus_char_marine, bonus_char_roe, bonus_char_le;
-extern idCVar bonus_char_campbell, bonus_char_sarge, bonus_char_betruger, bonus_char_swann;
+extern idCVar bonus_char_campbell, bonus_char_sarge, bonus_char_betruger, bonus_char_swann, bonus_char_roland;
 extern idCVar bonus_char_doomguy, bonus_char_slayer, bonus_char_eternal, bonus_char_vfr;
 extern idCVar bonus_char_ash, bonus_char_samus, bonus_char_witch;
 extern idCVar bonus_chainsaw, bonus_boomstick;
@@ -62,6 +62,7 @@ extern idCVar bonus_chainsaw, bonus_boomstick;
 bool BonusCharUnlocked( bonus_char_t ch );
 
 // Carl: For the New Game menu. See MenuScreen_Shell_NewGame.
+const char *BonusCharName( bonus_char_t ch, bool unlocked );
 const char *BonusCharDescription( bonus_char_t ch );
 // Carl: For checking if we've unlocked things in this game by playing other games.
 void BonusCheckOtherGames();
@@ -71,9 +72,15 @@ bool BonusCharHasWeapons( bonus_char_t ch );
 // Carl: Give the player their signature weapons. This is probably obsolete now.
 void BonusGiveSignatureWeapons( idPlayer *player, bonus_char_t ch );
 
+// Carl: For replacing the player
+const char* BonusCharDefPlayer( bonus_char_t ch, const char* default, const char* exp, bool hell );
+
 // Carl: For replacing the NPC version of the character in cutscenes. See Anim_Blend.cpp
+idStr BonusCharReplaceTShirtModel( bonus_char_t ch );
+idStr BonusCharReplaceCompatibleHead( bonus_char_t ch );
 idStr BonusCharSkin( idStr skinname, bonus_char_t ch );
-const char* BonusCharModel( const char* m, bonus_char_t ch );
+const char* BonusCharReplaceIncompatibleHead( const char* m, bonus_char_t ch );
+
 
 const char* BonusCharMesh( bonus_char_t ch );
 const char* BonusCharMeshHead( bonus_char_t ch );

@@ -1694,7 +1694,7 @@ void idAFEntity_WithAttachedHead::SetupHead()
 	// Carl: Bonus characters for cutscenes
 	if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
 	{
-		headModel = BonusCharModel( headModel, ( bonus_char_t )bonus_char.GetInteger() );
+		headModel = BonusCharReplaceIncompatibleHead( headModel, ( bonus_char_t )bonus_char.GetInteger() );
 	}
 	if( headModel[ 0 ] )
 	{

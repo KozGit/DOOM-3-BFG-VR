@@ -42,6 +42,15 @@ model model_d3_sp_helmet {
 	anim blink						models/md5/characters/npcs/heads/shelmetidle.md5anim
 }
 
+model model_roland_head {
+	mesh							models/md5/characters/npcs/heads/h2.md5mesh
+	channel eyelids					( Ruplid Rlolid Luplid Llolid )
+
+	anim idle						models/md5/characters/npcs/heads/h2idle.md5anim
+	anim stand						models/md5/characters/npcs/heads/h2idle.md5anim
+	anim blink						models/md5/characters/npcs/heads/h2blink.md5anim
+}
+
 // Doomguy
 model model_d2_sp_marine {
 	inherit model_d3_sp_marine
@@ -54,7 +63,7 @@ entityDef player_bonus_base {
 	"scriptobject"						"player"
 	
 	"pda_name"							"personal"
-	"player_expansion"					"d3xp"
+	"player_expansion"					"d3"
 	
 	"hud"								"guis/d3xp-hud.gui"
 	"mphud"								"guis/mphud.gui"
@@ -517,6 +526,106 @@ entityDef bonus_player_campbell  {
 
 entityDef bonus_player_campbell_hell  {
 	"inherit"							"bonus_player_campbell"
+
+	"skin_player"						"skins/hell/player_vrik"
+	"skin_player_d3xp"					"skins/hell/player_d3xp_vrik"
+	"skin_playerteleportin_d3xp"		"skins/hell/playerteleportin_vrik"
+	"skin_playerteleportin"				"skins/hell/playerteleportin"
+	"skin_player1"						"skins/hell/player_d3xp"
+	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_sarge  {
+	"inherit"							"bonus_player_sp"
+	"model"								"model_d3xp_sp_marine"
+	"def_head"							"head_sarge"
+	"pda_name"							"personal"
+	"hud"								"guis/d3xp-hud.gui"
+	"weapon"							"weapon_fists,weapon_shotgun_double,weapon_flashlight,weapon_pda"
+	"weapon_nightmare"					"weapon_fists,weapon_shotgun_double,weapon_flashlight,weapon_pda"
+	"ammo_shells"						"96"
+	"current_weapon"					"4"
+}
+
+entityDef bonus_player_sarge_hell  {
+	"inherit"							"bonus_player_sarge"
+
+	"skin_player"						"skins/hell/player_vrik"
+	"skin_player_d3xp"					"skins/hell/player_d3xp_vrik"
+	"skin_playerteleportin_d3xp"		"skins/hell/playerteleportin_vrik"
+	"skin_playerteleportin"				"skins/hell/playerteleportin"
+	"skin_player1"						"skins/hell/player_d3xp"
+	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_betruger  {
+	"inherit"							"bonus_player_sp"
+	"model"								"model_d3_sp_marine"
+	"def_head"							"head_betruger"
+	"weapon"							"weapon_fists,weapon_pistol,weapon_pda,weapon_soulcube"
+	"weapon_nightmare"					"weapon_fists,weapon_pistol,weapon_pda,weapon_soulcube"
+	"current_weapon"					"19"
+}
+
+entityDef bonus_player_betruger_d3xp  {
+	"inherit"							"bonus_player_betruger"
+	"model"								"model_d3xp_sp_marine"
+}
+
+entityDef bonus_player_betruger_hell  {
+	"inherit"							"bonus_player_betruger_d3xp"
+
+	"skin_player"						"skins/hell/player_vrik"
+	"skin_player_d3xp"					"skins/hell/player_d3xp_vrik"
+	"skin_playerteleportin_d3xp"		"skins/hell/playerteleportin_vrik"
+	"skin_playerteleportin"				"skins/hell/playerteleportin"
+	"skin_player1"						"skins/hell/player_d3xp"
+	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_swann  {
+	"inherit"							"bonus_player_sp"
+	"model"								"model_d3_sp_marine"
+	"def_head"							"head_swann"
+	"weapon"							"weapon_fists,weapon_pda"
+	"weapon_nightmare"					"weapon_fists,weapon_pda,weapon_soulcube"
+	"ammo_bullets"						"0"
+	"current_weapon"					"0"
+}
+
+entityDef bonus_player_swann_d3xp  {
+	"inherit"							"bonus_player_swann"
+	"model"								"model_d3xp_sp_marine"
+}
+
+entityDef bonus_player_swann_hell  {
+	"inherit"							"bonus_player_swann_d3xp"
+
+	"skin_player"						"skins/hell/player_vrik"
+	"skin_player_d3xp"					"skins/hell/player_d3xp_vrik"
+	"skin_playerteleportin_d3xp"		"skins/hell/playerteleportin_vrik"
+	"skin_playerteleportin"				"skins/hell/playerteleportin"
+	"skin_player1"						"skins/hell/player_d3xp"
+	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_roland  {
+	"inherit"							"bonus_player_sp"
+	"model"								"model_d3_sp_marine"
+	"def_head"							"model_roland_head"
+	"weapon"							"weapon_fists,weapon_pda"
+	"weapon_nightmare"					"weapon_fists,weapon_pda,weapon_soulcube"
+	"ammo_bullets"						"0"
+	"current_weapon"					"0"
+}
+
+entityDef bonus_player_roland_d3xp  {
+	"inherit"							"bonus_player_roland"
+	"model"								"model_d3xp_sp_marine"
+}
+
+entityDef bonus_player_roland_hell  {
+	"inherit"							"bonus_player_roland_d3xp"
 
 	"skin_player"						"skins/hell/player_vrik"
 	"skin_player_d3xp"					"skins/hell/player_d3xp_vrik"

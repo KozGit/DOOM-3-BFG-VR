@@ -18,6 +18,7 @@ idCVar bonus_char_campbell( "bonus_char_campbell", "0", CVAR_BOOL | CVAR_GAME | 
 idCVar bonus_char_sarge( "bonus_char_sarge", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Sergeant Kelly from Doom 3" );
 idCVar bonus_char_betruger( "bonus_char_betruger", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Dr. Malcom Betruger from Doom 3" );
 idCVar bonus_char_swann( "bonus_char_swann", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Swann from Doom 3" );
+idCVar bonus_char_roland( "bonus_char_roland", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character R. Roland from Doom 3" );
 idCVar bonus_char_doomguy( "bonus_char_doomguy", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Doomguy from Doom 1 and 2" );
 idCVar bonus_char_slayer( "bonus_char_slayer", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Doom Slayer from Doom 2016" );
 idCVar bonus_char_eternal( "bonus_char_eternal", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Doom Slayer from Doom Eternal" );
@@ -40,6 +41,7 @@ bool BonusCharUnlocked( bonus_char_t ch )
 	case BONUS_CHAR_SARGE: return bonus_char_sarge.GetBool();
 	case BONUS_CHAR_BETRUGER: return bonus_char_betruger.GetBool();
 	case BONUS_CHAR_SWANN: return bonus_char_swann.GetBool();
+	case BONUS_CHAR_ROLAND: return bonus_char_roland.GetBool();
 	case BONUS_CHAR_DOOMGUY: return bonus_char_doomguy.GetBool();
 	case BONUS_CHAR_SLAYER: return bonus_char_slayer.GetBool();
 	case BONUS_CHAR_ETERNAL: return bonus_char_eternal.GetBool();
@@ -55,6 +57,43 @@ bool BonusCharHasWeapons( bonus_char_t ch )
 {
 	return BonusCharUnlocked( ch ) && ch != BONUS_CHAR_NONE && ch != BONUS_CHAR_SWANN && ch != BONUS_CHAR_ROLAND && ch != BONUS_CHAR_WITCH;
 }
+
+const char* BonusCharDefPlayer( bonus_char_t ch, const char* default, const char* exp, bool hell )
+{
+	switch( ch )
+	{
+	case BONUS_CHAR_MARINE: return hell ? "bonus_player_marine_hell" : "bonus_player_marine";
+	case BONUS_CHAR_ROE: return hell ? "bonus_player_roe_hell": "bonus_player_roe"; //"d3xp_player_doommarine";
+	case BONUS_CHAR_LE: return hell ? "bonus_player_le_hell" : "bonus_player_le"; //"d3le_player_doommarine";
+	case BONUS_CHAR_CAMPBELL: return hell ? "bonus_player_campbell_hell" : "bonus_player_campbell";
+	case BONUS_CHAR_SARGE: return hell ? "bonus_player_sarge_hell" : "bonus_player_sarge";
+	case BONUS_CHAR_BETRUGER:
+		if( idStr::Cmp( exp, "d3" ) == 0 )
+			return "bonus_player_betruger";
+		else
+			return hell ? "bonus_player_betruger_hell" : "bonus_player_betruger_d3xp";
+	case BONUS_CHAR_SWANN: 
+		if( idStr::Cmp( exp, "d3" ) == 0 )
+			return "bonus_player_swann";
+		else
+			return hell ? "bonus_player_swann_hell" : "bonus_player_swann_d3xp";
+	case BONUS_CHAR_ROLAND:
+		if( idStr::Cmp( exp, "d3" ) == 0 )
+			return "bonus_player_roland";
+		else
+			return hell ? "bonus_player_roland_hell" : "bonus_player_roland_d3xp";
+	case BONUS_CHAR_DOOMGUY: return hell ? "bonus_player_doomguy_hell" : "bonus_player_doomguy";
+	case BONUS_CHAR_SLAYER: return hell ? "bonus_player_slayer_hell" : "bonus_player_slayer";
+	case BONUS_CHAR_ETERNAL: return hell ? "bonus_player_eternal_hell" : "bonus_player_eternal";
+	case BONUS_CHAR_VFR: return hell ? "bonus_player_vfr_hell" : "bonus_player_vfr";
+	case BONUS_CHAR_ASH: return hell ? "bonus_player_ash_hell" : "bonus_player_ash";
+	case BONUS_CHAR_SAMUS: return hell ? "bonus_player_samus_hell" : "bonus_player_samus";
+	case BONUS_CHAR_WITCH: return hell ? "bonus_player_witch_hell" : "bonus_player_witch";
+	default:
+		return default;
+	}
+}
+
 
 void BonusGiveSignatureWeapons( idPlayer *player, bonus_char_t ch )
 {
@@ -103,6 +142,31 @@ void BonusGiveSignatureWeapons( idPlayer *player, bonus_char_t ch )
 
 }
 
+
+const char * BonusCharName( bonus_char_t ch, bool unlocked )
+{
+	switch( ch )
+	{
+	case BONUS_CHAR_NONE: return "Default";
+	case BONUS_CHAR_MARINE: return unlocked ? "Marine (D3)" : "Locked (D3)";
+	case BONUS_CHAR_ROE: return unlocked ? "Red Team (RoE)" : "Locked (RoE)";
+	case BONUS_CHAR_LE: return unlocked ? "Bravo Team (LM)" : "Locked (LM)";
+	case BONUS_CHAR_CAMPBELL: return unlocked ? "Campbell (D3)" : "Locked 2 (D3)";
+	case BONUS_CHAR_SARGE: return unlocked ? "Sarge (D3)" : "Locked 3 (D3)";
+	case BONUS_CHAR_BETRUGER: return unlocked ? "Betruger (D3)" : "Locked 4 (D3)";
+	case BONUS_CHAR_SWANN: return unlocked ? "Swann (D3)" : "Locked 5 (D3)";
+	case BONUS_CHAR_ROLAND: return unlocked ? "R Roland (D3)" : "Locked 6 (D3)";
+	case BONUS_CHAR_DOOMGUY: return unlocked ? "Doomguy (D2)" : "Locked (D2)";
+	case BONUS_CHAR_SLAYER: return unlocked ? "Slayer (2016)" : "Locked (2016)";
+	case BONUS_CHAR_ETERNAL: return unlocked ? "Slayer (Eternal)" : "Locked (Eternal)";
+	case BONUS_CHAR_VFR: return unlocked ? "M. Peters (VFR)" : "Locked (VFR)";
+	case BONUS_CHAR_ASH: return unlocked ? "Ash (Evil Dead)" : "Locked (Evil Dead)";
+	case BONUS_CHAR_SAMUS: return unlocked ? "Samus (Metroid)" : "Locked (Metroid)";
+	case BONUS_CHAR_WITCH: return unlocked ? "Witch" : "Locked";
+	default: return "ERROR!";
+	}
+}
+
 const char * BonusCharDescription( bonus_char_t ch )
 {
 	if( BonusCharUnlocked( ch ) )
@@ -117,6 +181,7 @@ const char * BonusCharDescription( bonus_char_t ch )
 		case BONUS_CHAR_SARGE: return "Sergeant Kelly with double-barrel shotgun and access codes";
 		case BONUS_CHAR_BETRUGER: return "Dr. Malcolm Betruger with Soul Cube and access codes";
 		case BONUS_CHAR_SWANN: return "Weak character with nothing but access codes";
+		case BONUS_CHAR_ROLAND: return "Scared weak survivor hiding in the Mars City vents";
 		case BONUS_CHAR_DOOMGUY: return "Doomguy from Doom 2 with chainsaw and double-barrel shotgun";
 		case BONUS_CHAR_SLAYER: return "Doom Slayer with double jump boots";
 		case BONUS_CHAR_ETERNAL: return "Doom Slayer with double-barrel shotgun";
@@ -138,6 +203,7 @@ const char * BonusCharDescription( bonus_char_t ch )
 		case BONUS_CHAR_SARGE: return "Unlock by reuniting with Sarge or finding his office";
 		case BONUS_CHAR_BETRUGER: return "Unlock by ";
 		case BONUS_CHAR_SWANN: return "Unlock by ";
+		case BONUS_CHAR_ROLAND: return "Unlock by talking to R. Roland in the vents";
 		case BONUS_CHAR_DOOMGUY: return "Unlock by beating, or getting the chainsaw in, Doom 1 or 2";
 		case BONUS_CHAR_SLAYER: return "Unlock by playing Doom 2016";
 		case BONUS_CHAR_ETERNAL: return "Unlock by console command bonus_char_eternal";
@@ -238,8 +304,67 @@ idStr BonusCharSkin( idStr skinname, bonus_char_t ch )
 	return skinname;
 }
 
+idStr BonusCharReplaceTShirtModel( bonus_char_t ch )
+{
+	// Returns a model def. The returned model def must inherit from the MODEL npc_base (not the entity) in order to be compatible with this method.
+	// npc_tshirt, npc_labcoat, npc_suit, npc_suit2, npc_jumpsuit, npc_marine, npc_security, npc_skeleton, char_betruger, char_swann, char_campbell,
+	// char_hazmat (npc_hazmat is the same), 
+	switch( bonus_char.GetInteger() )
+	{
+	case BONUS_CHAR_BETRUGER:
+		return "char_betruger";
+	case BONUS_CHAR_SWANN:
+		return "char_swann";
+	case BONUS_CHAR_CAMPBELL:
+		return "char_campbell"; // Carl: TODO is this the best way? This uses the marine model, but he also has his own model with different anims.
+	case BONUS_CHAR_ROLAND:
+		return "npc_jumpsuit";
+	case BONUS_CHAR_SARGE:
+	case BONUS_CHAR_LE:
+		return "npc_marine";
+
+	case BONUS_CHAR_ROE:
+		return "npc_marine"; // Carl: Close, but not perfect
+	case BONUS_CHAR_DOOMGUY:
+	case BONUS_CHAR_SLAYER:
+	case BONUS_CHAR_ETERNAL:
+		return "npc_marine"; // Carl: This is not ideal! But there is no compatible player model wearing Doom 3 player's armor.
+	case BONUS_CHAR_SAMUS:
+	case BONUS_CHAR_VFR:
+		return "npc_marine"; // We don't have proper models for these
+	case BONUS_CHAR_WITCH:
+		return "npc_suit";
+	case BONUS_CHAR_ASH:
+	case BONUS_CHAR_MARINE:
+	default:
+		return "npc_tshirt";
+	}
+}
+
+idStr BonusCharReplaceCompatibleHead( bonus_char_t ch )
+{
+	// Returns a model def. The returned model def must have the right number of joints, and should ideally implement idle, stand, and blink.
+	switch( bonus_char.GetInteger() )
+	{
+	case BONUS_CHAR_BETRUGER:
+		return "head_betruger";
+	case BONUS_CHAR_SWANN:
+		return "head_swann";
+	case BONUS_CHAR_CAMPBELL:
+		return "head_campbell";
+	case BONUS_CHAR_ROLAND:
+		return "model_roland_head"; // marscity2_ceiling_head
+	case BONUS_CHAR_SARGE:
+		return "head_sarge";
+	default:
+		return "head_player";
+	}
+}
+
 // Carl: only used for replacing models that are INCOMPATIBLE with the default animations (mostly heads)
-const char* BonusCharModel( const char* m, bonus_char_t ch )
+// Returns a model def. The returned model def should implement the anims: idle, stand, and blink
+// It works by changing the def_head to a different model. The downside is, we lose any animations in the original head.
+const char* BonusCharReplaceIncompatibleHead( const char* m, bonus_char_t ch )
 {
 	if( bonus_char.GetInteger() != BONUS_CHAR_MARINE && ( idStr::Icmp(m, "head_player" ) == 0 || idStr::Icmp( m, "hellhole_cin_npcplayerhead" ) == 0 || idStr::Icmp( m, "marscity_head_player" ) == 0 ) )
 	{
@@ -249,25 +374,13 @@ const char* BonusCharModel( const char* m, bonus_char_t ch )
 			m = "model_d3xp_sp_head";
 			break;
 		case BONUS_CHAR_LE:
-		case BONUS_CHAR_VFR:
-		case BONUS_CHAR_DOOMGUY:
 			m = "model_d3le_sp_helmet";
 			break;
-		case BONUS_CHAR_CAMPBELL:
-			m = "head_campbell";
-			break;
-		case BONUS_CHAR_SARGE:
-			m = "head_sarge";
-			break;
-		case BONUS_CHAR_BETRUGER:
-			m = "head_betruger";
-			break;
-		case BONUS_CHAR_SWANN:
-			m = "head_swann";
-			break;
+		case BONUS_CHAR_DOOMGUY:
 		case BONUS_CHAR_SLAYER:
 		case BONUS_CHAR_ETERNAL:
 		case BONUS_CHAR_SAMUS:
+		case BONUS_CHAR_VFR:
 			m = "model_d3le_sp_helmet";
 			break;
 		// Carl: Other heads are handled elsewhere because they're compatible with head_player

@@ -5559,7 +5559,7 @@ void idPlayer::UpdateSkinSetup()
 		{
 			gameType = GetExpansionType();
 
-			if( gameType == GAME_D3XP || gameType == GAME_D3LE || bonusChar == BONUS_CHAR_ROE || bonusChar == BONUS_CHAR_LE )
+			if( (( gameType == GAME_D3XP || gameType == GAME_D3LE) && bonusChar == BONUS_CHAR_NONE) || bonusChar == BONUS_CHAR_ROE || bonusChar == BONUS_CHAR_LE || bonusChar == BONUS_CHAR_SARGE || bonusChar == BONUS_CHAR_CAMPBELL || bonusChar == BONUS_CHAR_VFR || bonusChar == BONUS_CHAR_VFR )
 			{
 				skinN = "skins/characters/player/d3xp_sp_vrik";
 			}
