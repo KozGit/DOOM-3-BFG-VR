@@ -91,5 +91,8 @@ const char* ItemToMoveableEntityClass( const char* e, bonus_char_t ch );
 const char* ModelToMoveableEntityClass( const char* model, bonus_char_t ch );
 bool WouldMoveableEntityBeGlitchy( const char* name, const char* mapname );
 
+bool BonusCharNeedsFullAccess( bonus_char_t ch );
+void BonusCharPreUnlockDoor( idDict& spawnArgs );
+void BonusCharPreUnlockPanel( idDict& spawnArgs );
 
 #endif

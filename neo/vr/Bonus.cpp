@@ -346,16 +346,6 @@ idStr BonusCharReplaceCompatibleHead( bonus_char_t ch )
 	// Returns a model def. The returned model def must have the right number of joints, and should ideally implement idle, stand, and blink.
 	switch( bonus_char.GetInteger() )
 	{
-	case BONUS_CHAR_BETRUGER:
-		return "head_betruger";
-	case BONUS_CHAR_SWANN:
-		return "head_swann";
-	case BONUS_CHAR_CAMPBELL:
-		return "head_campbell";
-	case BONUS_CHAR_ROLAND:
-		return "model_roland_head"; // marscity2_ceiling_head
-	case BONUS_CHAR_SARGE:
-		return "head_sarge";
 	default:
 		return "head_player";
 	}
@@ -376,6 +366,16 @@ const char* BonusCharReplaceIncompatibleHead( const char* m, bonus_char_t ch )
 		case BONUS_CHAR_LE:
 			m = "model_d3le_sp_helmet";
 			break;
+		case BONUS_CHAR_CAMPBELL:
+			return "head_campbell";
+		case BONUS_CHAR_SARGE:
+			return "model_sarge_head";
+		case BONUS_CHAR_BETRUGER:
+			return "head_betruger";
+		case BONUS_CHAR_SWANN:
+			return "head_swann";
+		case BONUS_CHAR_ROLAND:
+			return "model_roland_head"; // marscity2_ceiling_head
 		case BONUS_CHAR_DOOMGUY:
 		case BONUS_CHAR_SLAYER:
 		case BONUS_CHAR_ETERNAL:
@@ -392,7 +392,7 @@ const char* BonusCharReplaceIncompatibleHead( const char* m, bonus_char_t ch )
 const char* BonusCharReplaceIncompatibleEntityClass( const char* e, bonus_char_t ch )
 {
 	if( !e || !ch )
-		return e;
+		return NULL;
 	bool replace = false;
 	if( ch != BONUS_CHAR_MARINE && ( idStr::Icmp( e, "admin_overhear_player" ) == 0 ) )
 		replace = true;
@@ -432,7 +432,7 @@ const char* BonusCharReplaceIncompatibleEntityClass( const char* e, bonus_char_t
 			return "bonus_player_witch_cutscene";
 		}
 	}
-	return e;
+	return NULL;
 }
 
 const char* ItemToMoveableEntityClass( const char* e, bonus_char_t ch )
@@ -524,11 +524,11 @@ const char* ItemToMoveableEntityClass( const char* e, bonus_char_t ch )
 }
 
 // Carl: model can be NULL, "", or the "model" field of a func_static
-// Returns the corresponding moveable entity class (instead of "func_static"), or "" if there isn't one.
+// Returns the corresponding moveable entity class (instead of "func_static"), or NULL if there isn't one.
 const char* ModelToMoveableEntityClass( const char* model, bonus_char_t ch )
 {
 	if( !model || !model[0] )
-		return "";
+		return NULL;
 	const char* lookup[78][2] = {
 		// moveable.def
 		{ "models/mapobjects/lab/filecabinet1/filecabinet1.lwo", "moveable_filecabinet1" }, // 19 in Mars City
@@ -645,7 +645,7 @@ const char* ModelToMoveableEntityClass( const char* model, bonus_char_t ch )
 			return lookup[i][1];
 		}
 	}
-	return "";
+	return NULL;
 }
 
 // Carl: Examples of glitchy entities - falling through the world, or having magazines on top that stay when the entity is moved from underneath
@@ -722,8 +722,67 @@ bool WouldMoveableEntityBeGlitchy( const char* name, const char* mapname )
 
 bool BonusCharNeedsMoveables( bonus_char_t ch )
 {
-	return ( ch == BONUS_CHAR_ROE || ch == BONUS_CHAR_LE ) && BonusCharUnlocked( ch );
+	return ch == BONUS_CHAR_ROE || ch == BONUS_CHAR_LE;
 }
+
+bool BonusCharNeedsFullAccess( bonus_char_t ch )
+{
+	return ch == BONUS_CHAR_BETRUGER || ch == BONUS_CHAR_SARGE || ch == BONUS_CHAR_SWANN || ch == BONUS_CHAR_CAMPBELL || ch == BONUS_CHAR_ROLAND;
+}
+
+void BonusCharPreUnlockDoor( idDict& spawnArgs )
+{
+	int locked = spawnArgs.GetInt( "locked" );
+	if( locked == 2 )
+	{
+		const char* name = spawnArgs.GetString( "name" );
+		if( idStr::Cmp( name, "mal_func_door_89" ) == 0
+			|| idStr::Cmp( name, "tim_func_door_186" ) == 0 || idStr::Cmp( name, "tim_func_door_187" ) == 0
+			|| idStr::Cmp( name, "tim_func_door_72" ) == 0 || idStr::Cmp( name, "tim_func_door_73" ) == 0 // listen buddy, you don't have clearance for this area
+			|| idStr::Cmp( name, "tim_func_door_98" ) == 0 )
+			return;
+		// Roland only has access to the basement door and nothing else.
+		if( bonus_char.GetInteger() == BONUS_CHAR_ROLAND && idStr::Cmp( name, "tim_func_door_219" ) != 0 && idStr::Cmp( name, "tim_func_door_220" ) != 0 )
+			return;
+		common->Printf( "Bonus Character: Unlocking door %s\n", name );
+		spawnArgs.SetInt( "locked", 0 );
+		spawnArgs.SetInt( "shaderparm7", 1 );
+		// Carl: todo check what kind of gui it had before
+		spawnArgs.Set( "gui", "guis/doors/aco_door_open.gui" );
+		spawnArgs.Set( "gui2", "guis/doors/aco_door_open.gui" );
+	}
+	else if( locked == 0 )
+	{
+		const char* name = spawnArgs.GetString( "name" );
+		// Note caverns1, commoutside, and le_enpro1 also have "func_door_15" but their movedir is different
+		if( idStr::Cmp( name, "func_door_15" ) == 0 && spawnArgs.GetInt( "movedir", 5678 ) == 0 ) // door behind other locked door that was unlocked but opens into blackness
+		{
+			common->Printf( "Bonus Character: locking door %s\n", name );
+			spawnArgs.SetInt( "locked", 2 );
+			spawnArgs.SetInt( "shaderparm7", 0 );
+			return;
+		}
+	}
+}
+
+void BonusCharPreUnlockPanel( idDict& spawnArgs )
+{
+	if( !spawnArgs.GetInt( "shaderparm7" ) && idStr::Cmp( spawnArgs.GetString( "gui" ), "guis/doors/elevatorcall.gui" ) != 0
+		&& idStr::Cmp( spawnArgs.GetString( "gui" ), "guis/marscity/elevatorcall.gui" ) != 0
+		&& idStr::Cmp( spawnArgs.GetString( "gui" ), "guis/screens/malfunction2a.gui" ) != 0 )
+	{
+		const char* name = spawnArgs.GetString( "name" );
+		// Roland only has access to the basement door and nothing else.
+		if( bonus_char.GetInteger() == BONUS_CHAR_ROLAND && idStr::Cmp( name, "tim_func_static_2703" ) != 0 )
+			return;
+		common->Printf( "Bonus Character: Unlocking door panel %s\n", name );
+		spawnArgs.SetInt( "shaderparm7", 1 );
+		// Carl: todo check what kind of gui it had before
+		spawnArgs.Set( "gui", "guis/doors/aco_door_open.gui" );
+		spawnArgs.Set( "gui2", "guis/doors/aco_door_open.gui" );
+	}
+}
+
 
 bool HasPlayedDoom2016()
 {

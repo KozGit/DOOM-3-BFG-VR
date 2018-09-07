@@ -4071,27 +4071,44 @@ bool idGameLocal::InhibitEntitySpawn( idDict& spawnArgs )
 	if( !result && bonus_char.GetInteger() && BonusCharUnlocked( (bonus_char_t)bonus_char.GetInteger() ) )
 	{
 		const char* name = spawnArgs.GetString( "classname" );
-		name = BonusCharReplaceIncompatibleEntityClass( name, (bonus_char_t)bonus_char.GetInteger() );
-		spawnArgs.Set( "classname", name );
-	}
+		const char* newname = NULL;
+		newname = BonusCharReplaceIncompatibleEntityClass( name, (bonus_char_t)bonus_char.GetInteger() );
 
-	// Carl: replace non-moveable items with moveable items for bonus characters
-	if( !result && BonusCharNeedsMoveables( (bonus_char_t)bonus_char.GetInteger() ) )
-	{
-		const char* name = spawnArgs.GetString( "classname" );
-		// Carl: check for func_static props that should become moveable physics objects
-		if( idStr::Icmp( name, "func_static" ) == 0 )
+		// Carl: replace non-moveable items with moveable items for bonus characters
+		if( !newname && BonusCharNeedsMoveables( (bonus_char_t)bonus_char.GetInteger() ) )
 		{
-			const char* model = spawnArgs.GetString( "model" );
-			name = ModelToMoveableEntityClass( model, (bonus_char_t)bonus_char.GetInteger() );
-			if( name[0] && !WouldMoveableEntityBeGlitchy( spawnArgs.GetString( "name" ), commonLocal.GetCurrentMapName() ) )
-				spawnArgs.Set( "classname", name );
+			// Carl: check for func_static props that should become moveable physics objects
+			if( idStr::Icmp( name, "func_static" ) == 0 )
+			{
+				const char* model = spawnArgs.GetString( "model" );
+				newname = ModelToMoveableEntityClass( model, (bonus_char_t)bonus_char.GetInteger() );
+			}
+			else
+			{
+				newname = ItemToMoveableEntityClass( name, (bonus_char_t)bonus_char.GetInteger() );
+			}
+			if( newname && WouldMoveableEntityBeGlitchy( spawnArgs.GetString( "name" ), commonLocal.GetCurrentMapName() ) )
+				newname = NULL;
 		}
-		else
+		if( newname )
+			spawnArgs.Set( "classname", newname );
+		else if( BonusCharNeedsFullAccess( (bonus_char_t)bonus_char.GetInteger() ) )
 		{
-			name = ItemToMoveableEntityClass( name, (bonus_char_t)bonus_char.GetInteger() );
-			if( !WouldMoveableEntityBeGlitchy( spawnArgs.GetString( "name" ), commonLocal.GetCurrentMapName() ) )
-				spawnArgs.Set( "classname", name );
+			//const char* map = commonLocal.GetCurrentMapName();
+			if( idStr::Icmp( name, "func_door" ) == 0 )
+				BonusCharPreUnlockDoor( spawnArgs );
+			else if( idStr::Icmp( name, "func_static" ) == 0 && ( idStr::Icmp( spawnArgs.GetString( "model" ), "models/mapobjects/doors/mcitydoorframegui.lwo" ) == 0
+				|| idStr::Icmp( spawnArgs.GetString( "model" ), "models/mapobjects/guiobjects/techdrpanel1/techdrpanel1.lwo" ) == 0 ) )
+				BonusCharPreUnlockPanel( spawnArgs );
+			else if( idStr::Icmp( spawnArgs.GetString( "call" ), "map_marscity1::bioscan_noreturn" ) == 0 )
+			{
+				// Carl: Instead of calling the noreturn function to lock the inner bioscan doors,
+				// unlock the side door and the outer bioscan doors by triggering them
+				spawnArgs.Delete( "call" );
+				spawnArgs.Set( "target", "func_door_11" );
+				spawnArgs.Set( "target1", "func_door_1" );
+				spawnArgs.Set( "target2", "func_door_2" );
+			}
 		}
 	}
 

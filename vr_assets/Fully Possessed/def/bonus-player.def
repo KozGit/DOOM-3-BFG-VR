@@ -42,6 +42,15 @@ model model_d3_sp_helmet {
 	anim blink						models/md5/characters/npcs/heads/shelmetidle.md5anim
 }
 
+model model_sarge_head {
+	mesh							models/md5/heads/sarge/sarge.md5mesh
+	channel eyelids					( Ruplid Rlolid Luplid Llolid )
+	
+	anim stand						models/md5/heads/sarge/sargeidle.md5anim
+	anim idle						models/md5/heads/sarge/sargeidle.md5anim
+	anim blink						models/md5/heads/sarge/sargeidle.md5anim
+}
+
 model model_roland_head {
 	mesh							models/md5/characters/npcs/heads/h2.md5mesh
 	channel eyelids					( Ruplid Rlolid Luplid Llolid )
@@ -50,6 +59,7 @@ model model_roland_head {
 	anim stand						models/md5/characters/npcs/heads/h2idle.md5anim
 	anim blink						models/md5/characters/npcs/heads/h2blink.md5anim
 }
+
 
 // Doomguy
 model model_d2_sp_marine {
@@ -576,7 +586,7 @@ entityDef bonus_player_campbell_cutscene  {
 entityDef bonus_player_sarge  {
 	"inherit"							"bonus_player_sp"
 	"model"								"model_d3xp_sp_marine"
-	"def_head"							"head_sarge"
+	"def_head"							"model_sarge_head"
 	"pda_name"							"personal"
 	"hud"								"guis/d3xp-hud.gui"
 	"weapon"							"weapon_fists,weapon_shotgun_double,weapon_flashlight,weapon_pda"
@@ -599,7 +609,7 @@ entityDef bonus_player_sarge_hell  {
 entityDef bonus_player_sarge_cutscene  {
 	"inherit"							"player_bonus_cutscene"
 	"model"								"npc_marine"
-	"def_head"							"head_sarge"
+	"def_head"							"model_sarge_head"
 }
 
 entityDef bonus_player_betruger  {
