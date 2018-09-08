@@ -508,7 +508,10 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_SAFETY_PROTOCOLS, idMenuScreen_Shell_VR_Safety_Protocols, this ); // Carl
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this );
 		// Koz end
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this ); // Carl
+		// Carl
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_VOICE_OPTIONS, idMenuScreen_Shell_VR_Voice_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this );
+		// Carl end
 
 	}
 	else
@@ -549,7 +552,11 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_SAFETY_PROTOCOLS, idMenuScreen_Shell_VR_Safety_Protocols, this ); // Carl
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this );
 		// Koz end 
-		BIND_SHELL_SCREEN(SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this); // Carl
+		// Carl
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_VOICE_OPTIONS, idMenuScreen_Shell_VR_Voice_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_HAND_OPTIONS, idMenuScreen_Shell_VR_Hand_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this );
+		// Carl end
 		
 		doom3Intro = declManager->FindMaterial( "gui/intro/introloop" );
 		roeIntro = declManager->FindMaterial( "gui/intro/marsflyby" );
@@ -1307,7 +1314,8 @@ void idMenuHandler_Shell::UpdateBGState()
 		{
 			if( nextScreen != SHELL_AREA_RESOLUTION && nextScreen != SHELL_AREA_GAMEPAD && nextScreen != SHELL_AREA_DIFFICULTY && nextScreen != SHELL_AREA_SYSTEM_OPTIONS && nextScreen != SHELL_AREA_GAME_OPTIONS && nextScreen != SHELL_AREA_NEW_GAME && nextScreen != SHELL_AREA_STEREOSCOPICS &&
 				nextScreen != SHELL_AREA_CONTROLS && nextScreen != SHELL_AREA_VR_SETTINGS && nextScreen != SHELL_AREA_VR_CHARACTER_OPTIONS && nextScreen != SHELL_AREA_VR_CONTROL_OPTIONS && nextScreen != SHELL_AREA_VR_HUD_OPTIONS && nextScreen != SHELL_AREA_VR_HUD_POSITION_OPTIONS &&
-				nextScreen != SHELL_AREA_VR_SAFETY_PROTOCOLS && nextScreen != SHELL_AREA_VR_PDA_OPTIONS && nextScreen != SHELL_AREA_VR_PROFILE_OPTIONS && nextScreen != SHELL_AREA_VR_RENDERING_OPTIONS && nextScreen != SHELL_AREA_VR_UI_OPTIONS )
+				nextScreen != SHELL_AREA_VR_SAFETY_PROTOCOLS && nextScreen != SHELL_AREA_VR_PDA_OPTIONS && nextScreen != SHELL_AREA_VR_PROFILE_OPTIONS && nextScreen != SHELL_AREA_VR_RENDERING_OPTIONS && nextScreen != SHELL_AREA_VR_UI_OPTIONS &&
+				nextScreen != SHELL_AREA_VR_VOICE_OPTIONS && nextScreen != SHELL_AREA_VR_HAND_OPTIONS)
 			{
 				ShowSmallFrame( false );
 			}

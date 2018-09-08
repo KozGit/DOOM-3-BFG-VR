@@ -91,6 +91,7 @@ typedef enum
 	FLASHLIGHT_HEAD,
 	FLASHLIGHT_GUN,
 	FLASHLIGHT_HAND,
+	FLASHLIGHT_PISTOL,
 	FLASHLIGHT_MAX,
 } vr_flashlight_mode_t;
 

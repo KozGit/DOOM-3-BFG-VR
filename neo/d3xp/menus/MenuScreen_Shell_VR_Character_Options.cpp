@@ -373,8 +373,8 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 		
 		case CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE:
 		{
-			static const int numValues = 4;
-			static const int values[numValues] = { 0, 1, 2, 3 };
+			static const int numValues = 5;
+			static const int values[numValues] = { 0, 1, 2, 3, 4 };
 			vr_flashlightMode.SetInteger( AdjustOption( vr_flashlightMode.GetInteger(), values, numValues, adjustAmount ) );
 			break;
 		}
@@ -457,29 +457,18 @@ idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_V
 		case CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE:
 		{
 			const int fm = vr_flashlightMode.GetInteger();
-
-			if ( fm == 0 )
-			{
-				return "Body";
-			}
-
-			if ( fm == 1 )
-			{
+			if( fm == FLASHLIGHT_BODY )
+				return "Left Shoulder";
+			if( fm == FLASHLIGHT_HEAD )
 				return "Head";
-			}
-
-			if ( fm == 2 )
-			{
+			if( fm == FLASHLIGHT_GUN )
 				return "Weapon";
-			}
-
-			if ( fm == 3 )
-			{
+			if( fm == FLASHLIGHT_HAND )
 				return "Hand";
-			}
-
+			if( fm == FLASHLIGHT_PISTOL )
+				return "Pistol (XBox)";
 		}
-		
+
 		case CHARACTER_OPTIONS_FIELD_WEAPON_HAND:
 		{
 			if ( vr_weaponHand.GetInteger() == 0 ) 
