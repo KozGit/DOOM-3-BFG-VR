@@ -5543,7 +5543,7 @@ void idPlayer::UpdateSkinSetup()
 			else
 				skinN = "skins/characters/player/doomguy";
 		}
-		else if( bonusChar == BONUS_CHAR_ASH || ( strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) && ( bonusChar == BONUS_CHAR_NONE || bonusChar == BONUS_CHAR_MARINE ) ) )
+		else if( bonusChar == BONUS_CHAR_ASH || ( strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) && ( bonusChar == BONUS_CHAR_NONE || bonusChar == BONUS_CHAR_MARINE || bonusChar == BONUS_CHAR_ROLAND || bonusChar == BONUS_CHAR_BETRUGER || bonusChar == BONUS_CHAR_SWANN ) ) )
 		{
 			skinN = "skins/characters/player/tshirt_mp";
 		}
@@ -5577,7 +5577,7 @@ void idPlayer::UpdateSkinSetup()
 		{
 			skinN += handsOnly;
 		}
-		else if ( vr_playerBodyMode.GetInteger() == 2 ) 
+		else if ( vr_playerBodyMode.GetInteger() == 2 || bonusChar == BONUS_CHAR_SAMUS ) 
 		{
 			skinN += weaponOnly;
 		}
@@ -5590,7 +5590,7 @@ void idPlayer::UpdateSkinSetup()
 			}
 			else
 			{
-				if ( bonusChar == BONUS_CHAR_VFR )
+				if ( bonusChar == BONUS_CHAR_VFR || bonusChar == BONUS_CHAR_ROLAND || bonusChar == BONUS_CHAR_BETRUGER || bonusChar == BONUS_CHAR_SWANN || bonusChar == BONUS_CHAR_WITCH )
 					skinN += handsOnly;
 				else
 					skinN += body;

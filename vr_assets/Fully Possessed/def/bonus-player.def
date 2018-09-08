@@ -34,6 +34,18 @@ model model_d3_sp_marine {
 	anim grabber_lower					models/md5/characters/npcs/playermoves/ik_grabber_idle_vrik.md5anim
 }
 
+model model_d3_sp_tshirt {
+	inherit model_d3_sp_marine
+	skin								skins/characters/player/tshirt_mp
+}
+
+// Doomguy
+model model_d2_sp_marine {
+	inherit model_d3_sp_marine
+	skin								skins/characters/player/doomguy_body.skin
+}
+
+
 model model_d3_sp_helmet {
 	mesh							models/md5/characters/npcs/heads/shelmet.md5mesh
 
@@ -58,13 +70,6 @@ model model_roland_head {
 	anim idle						models/md5/characters/npcs/heads/h2idle.md5anim
 	anim stand						models/md5/characters/npcs/heads/h2idle.md5anim
 	anim blink						models/md5/characters/npcs/heads/h2blink.md5anim
-}
-
-
-// Doomguy
-model model_d2_sp_marine {
-	inherit model_d3_sp_marine
-	skin								skins/characters/player/doomguy_body.skin
 }
 
 // For replacing incompatible characters in cutscenes
