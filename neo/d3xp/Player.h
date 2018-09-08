@@ -62,6 +62,8 @@ const int	NUM_QUICK_SLOTS = 4;
 
 const int MAX_WEAPONS = 32;
 
+const int weapon_empty_hand = -2; // Carl: todo, maybe a different constant
+
 const int DEAD_HEARTRATE = 0;			// fall to as you die
 const int LOWHEALTH_HEARTRATE_ADJ = 20; //
 const int DYING_HEARTRATE = 30;			// used for volumen calc when dying/dead
@@ -382,6 +384,8 @@ public:
 	virtual bool			holdingSomethingDroppable();
 	bool					isOverMountedFlashlight();
 	bool					tooFullToInteract();
+	bool					handExists(); // false if our character is missing a hand or has something mounted on their forearm instead
+
 	bool					contextToggleVirtualGrab();
 	bool					startVirtualGrab();
 	bool					releaseVirtualGrab(); // will drop whatever you're holding
@@ -883,6 +887,7 @@ public:
 	bool					CanShowWeaponViewmodel() const;
 	
 	// Carl: Dual wielding
+	bool					CanDualWield( int num ) const;
 	idWeapon*				GetWeaponInHand( int hand ) const;
 	// Carl: when the code needs just one weapon, guess which one is the "main" one
 	idWeapon*				GetMainWeapon();

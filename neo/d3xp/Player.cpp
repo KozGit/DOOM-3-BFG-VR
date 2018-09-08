@@ -2034,7 +2034,6 @@ bool idPlayerHand::holdingFlashlight()
 {
 	// Carl: weapon must be set to fist or empty hand when we're using the flashlight
 	if( whichHand == vr_weaponHand.GetInteger() || commonVr->currentFlashlightPosition != FLASHLIGHT_HAND || !owner || !owner->flashlight || !owner->flashlight.GetEntity()->IsLinked()
-		|| ( currentWeapon != owner->weapon_fists && currentWeapon != -1 )
 		|| owner->spectating || !owner->weaponEnabled || owner->hiddenWeapon || gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) )
 		return false;
 	return true;
@@ -2101,7 +2100,12 @@ bool idPlayerHand::isOverMountedFlashlight()
 
 bool idPlayerHand::tooFullToInteract()
 {
-	return vr_mustEmptyHands.GetBool() && ( holdingWeapon() || holdingFlashlight() || holdingPDA() || holdingPhysics() || holdingItem() );
+	return (vr_mustEmptyHands.GetBool() && ( holdingWeapon() || holdingFlashlight() || holdingPDA() || holdingPhysics() || holdingItem() )) || !handExists();
+}
+
+bool idPlayerHand::handExists()
+{
+	return true;
 }
 
 bool idPlayerHand::contextToggleVirtualGrab()
@@ -2132,9 +2136,10 @@ bool idPlayerHand::releaseVirtualGrab()
 	}
 	else if( holdingFlashlight() )
 	{
-		// for now, dropping the flashlight will move it to your armour
-		vr_flashlightMode.SetInteger( FLASHLIGHT_BODY );
-		vr_flashlightMode.SetModified();
+		// now dropping the flashlight moves it to your inventory
+		commonVr->currentFlashlightMode = FLASHLIGHT_INVENTORY;
+		//vr_flashlightMode.SetInteger( FLASHLIGHT_BODY );
+		//vr_flashlightMode.SetModified();
 		return true;
 	}
 	else if( holdingPDA() )
@@ -2185,8 +2190,11 @@ void idPlayerHand::NextWeapon()
 	// Carl: Dual wielding, handle switching from flashlight properly
 	if( holdingFlashlight() )
 	{
-		commonVr->currentFlashlightMode = FLASHLIGHT_HEAD;
-		commonVr->currentFlashlightPosition = FLASHLIGHT_HEAD;
+		if( vr_flashlightStrict.GetBool() )
+			commonVr->currentFlashlightMode = FLASHLIGHT_INVENTORY;
+		else
+			commonVr->currentFlashlightMode = FLASHLIGHT_HEAD;
+		commonVr->currentFlashlightPosition = commonVr->currentFlashlightMode;
 	}
 
 	int w = idealWeapon.Get();
@@ -2202,7 +2210,9 @@ void idPlayerHand::NextWeapon()
 			w = owner->weapon_fists;
 			break;
 		}
-		if( ( owner->inventory.weapons & ( 1 << w ) ) == 0 )
+		// if we don't have the weapon in our inventory, skip it
+		if( ( ( owner->inventory.weapons & ( 1 << w ) ) == 0 && w != owner->weapon_flashlight ) || 
+			(( commonVr->currentFlashlightMode == FLASHLIGHT_NONE || ( vr_flashlightStrict.GetBool() && commonVr->currentFlashlightMode != FLASHLIGHT_HAND && commonVr->currentFlashlightMode != FLASHLIGHT_INVENTORY )) && w == owner->weapon_flashlight ) )
 		{
 			continue;
 		}
@@ -2212,27 +2222,58 @@ void idPlayerHand::NextWeapon()
 			int availableWeaponsOfThisType = 1;
 			if( owner->inventory.duplicateWeapons & ( 1 << w ) )
 				availableWeaponsOfThisType++;
-			// Carl: skip weapons in the holster unless we have a duplicate, TODO make it optional
+			// Carl: skip weapons in the other hand unless we have a duplicate (dual wielding)
+			if( w == owner->hands[1 - whichHand].idealWeapon.Get() )
+			{
+				availableWeaponsOfThisType--;
+				if( availableWeaponsOfThisType <= 0 )
+					continue;
+			}
+			// Carl: optionally skip weapons in the holster unless we have a duplicate
 			if( w == owner->holsteredWeapon )
 			{
 				availableWeaponsOfThisType--;
 				if( availableWeaponsOfThisType <= 0 )
-					continue;
-			}
-			// Carl: skip weapons in the other hand unless we have a duplicate (dual wielding)
-			if( w == owner->hands[ 1 - whichHand ].idealWeapon.Get() )
-			{
-				availableWeaponsOfThisType--;
-				if( availableWeaponsOfThisType <= 0 )
-					continue;
+				{
+					vr_weaponcycle_t c = (vr_weaponcycle_t)vr_weaponCycleMode.GetInteger();
+					if( c == VR_WEAPONCYCLE_INCLUDE_HOLSTERED || c == VR_WEAPONCYCLE_HOLSTERED_AND_FLASHLIGHT || c == VR_WEAPONCYCLE_HOLSTERED_AND_FLASHLIGHT_AND_PDA )
+					{
+						// Carl: draw weapon from holster
+						owner->FreeHolsterSlot();
+						owner->holsteredWeapon = owner->weapon_fists;
+						availableWeaponsOfThisType++;
+					}
+					else
+					{
+						// Skip holstered weapon
+						continue;
+					}
+				}
 			}
 		}
 		const char* weap = owner->spawnArgs.GetString( va( "def_weapon%d", w ) );
-		if( !owner->spawnArgs.GetBool( va( "weapon%d_cycle", w ) ) )
+		if( !weap[0] )
 		{
 			continue;
 		}
-		if( !weap[ 0 ] )
+		// Carl: skip weapons if we can't automagically empty our other hand, and we can't dual wield this weapon
+		if( vr_mustEmptyHands.GetBool() && !owner->CanDualWield( w ) && !owner->CanDualWield( owner->hands[1 - whichHand].currentWeapon ) && !owner->CanDualWield( owner->hands[1 - whichHand].idealWeapon.Get() ) )
+		{
+			continue;
+		}
+
+		if( w == owner->weapon_flashlight && ( vr_weaponCycleMode.GetInteger() == VR_WEAPONCYCLE_INCLUDE_FLASHLIGHT || vr_weaponCycleMode.GetInteger() == VR_WEAPONCYCLE_HOLSTERED_AND_FLASHLIGHT || vr_weaponCycleMode.GetInteger() == VR_WEAPONCYCLE_HOLSTERED_AND_FLASHLIGHT_AND_PDA ) )
+		{
+			break;
+		}
+		else if( w == owner->weapon_pda && vr_weaponCycleMode.GetInteger() == VR_WEAPONCYCLE_HOLSTERED_AND_FLASHLIGHT_AND_PDA )
+		{
+			// skip the pda if we haven't been given one yet
+			if( owner->weapon_pda >= 0 && owner->inventory.pdas.Num() == 0 )
+				continue;
+			break;
+		}
+		else if( !owner->spawnArgs.GetBool( va( "weapon%d_cycle", w ) ) )
 		{
 			continue;
 		}
@@ -2241,10 +2282,33 @@ void idPlayerHand::NextWeapon()
 		{
 			break;
 		}
+
 	}
 
 	if( ( w != currentWeapon ) && ( w != idealWeapon.Get() ) )
 	{
+		// Carl: If we can't dual-wield it?
+		if( !owner->CanDualWield( w ) && !owner->CanDualWield( owner->hands[1 - whichHand].currentWeapon ) && !owner->CanDualWield( owner->hands[1 - whichHand].idealWeapon.Get() ) )
+		{
+			// if we can't automagically empty our other hand, do nothing
+			if( vr_mustEmptyHands.GetBool() )
+				return;
+			// otherwise, first automagically empty our other hand
+			if( owner->CanDualWield( owner->weapon_fists ) )
+				owner->hands[1 - whichHand].SelectWeapon( owner->weapon_fists, true, true );
+			else
+				owner->hands[1 - whichHand].SelectWeapon( weapon_empty_hand, true, true );
+		}
+
+		// Carl: Dual wielding, handle switching to flashlight properly
+		if( w == owner->weapon_flashlight )
+		{
+			w = owner->weapon_fists;
+			commonVr->currentFlashlightMode = FLASHLIGHT_HAND;
+			commonVr->currentFlashlightPosition = FLASHLIGHT_HAND;
+			vr_weaponHand.SetInteger( 1 - whichHand );
+		}
+
 		idealWeapon = w;
 		weaponSwitchTime = gameLocal.time + WEAPON_SWITCH_DELAY;
 		owner->UpdateHudWeapon( whichHand );
@@ -2267,7 +2331,7 @@ void idPlayerHand::PrevWeapon()
 {
 	if( vr_debugHands.GetBool() )
 	{
-		common->Printf( "\nBefore NextWeapon():\n" );
+		common->Printf( "\nBefore PrevWeapon():\n" );
 		debugPrint();
 	}
 	// Koz dont change weapon if in gui
@@ -2285,8 +2349,11 @@ void idPlayerHand::PrevWeapon()
 	// Carl: Dual wielding, handle switching from flashlight properly
 	if( holdingFlashlight() )
 	{
-		commonVr->currentFlashlightMode = FLASHLIGHT_HEAD;
-		commonVr->currentFlashlightPosition = FLASHLIGHT_HEAD;
+		if( vr_flashlightStrict.GetBool() )
+			commonVr->currentFlashlightMode = FLASHLIGHT_INVENTORY;
+		else
+			commonVr->currentFlashlightMode = FLASHLIGHT_HEAD;
+		commonVr->currentFlashlightPosition = commonVr->currentFlashlightMode;
 	}
 
 	int w = idealWeapon.Get();
@@ -2302,7 +2369,9 @@ void idPlayerHand::PrevWeapon()
 			w = owner->weapon_fists;
 			break;
 		}
-		if( ( owner->inventory.weapons & ( 1 << w ) ) == 0 )
+		// if we don't have the weapon in our inventory, skip it
+		if( ( ( owner->inventory.weapons & ( 1 << w ) ) == 0 && w != owner->weapon_flashlight ) ||
+			( ( commonVr->currentFlashlightMode == FLASHLIGHT_NONE || ( vr_flashlightStrict.GetBool() && commonVr->currentFlashlightMode != FLASHLIGHT_HAND && commonVr->currentFlashlightMode != FLASHLIGHT_INVENTORY ) ) && w == owner->weapon_flashlight ) )
 		{
 			continue;
 		}
@@ -2312,27 +2381,59 @@ void idPlayerHand::PrevWeapon()
 			int availableWeaponsOfThisType = 1;
 			if( owner->inventory.duplicateWeapons & ( 1 << w ) )
 				availableWeaponsOfThisType++;
-			// Carl: skip weapons in the holster unless we have a duplicate, TODO make it optional
+			// Carl: skip weapons in the other hand unless we have a duplicate (dual wielding)
+			if( w == owner->hands[1 - whichHand].idealWeapon.Get() )
+			{
+				availableWeaponsOfThisType--;
+				if( availableWeaponsOfThisType <= 0 )
+					continue;
+			}
+			// Carl: optionally skip weapons in the holster unless we have a duplicate
 			if( w == owner->holsteredWeapon )
 			{
 				availableWeaponsOfThisType--;
 				if( availableWeaponsOfThisType <= 0 )
-					continue;
-			}
-			// Carl: skip weapons in the other hand unless we have a duplicate (dual wielding)
-			if( w == owner->hands[ 1 - whichHand ].idealWeapon.Get() )
-			{
-				availableWeaponsOfThisType--;
-				if( availableWeaponsOfThisType <= 0 )
-					continue;
+				{
+					vr_weaponcycle_t c = (vr_weaponcycle_t)vr_weaponCycleMode.GetInteger();
+					if( c == VR_WEAPONCYCLE_INCLUDE_HOLSTERED || c == VR_WEAPONCYCLE_HOLSTERED_AND_FLASHLIGHT || c == VR_WEAPONCYCLE_HOLSTERED_AND_FLASHLIGHT_AND_PDA )
+					{
+						// Carl: draw weapon from holster
+						owner->FreeHolsterSlot();
+						owner->holsteredWeapon = owner->weapon_fists;
+						availableWeaponsOfThisType++;
+					}
+					else
+					{
+						// Skip holstered weapon
+						continue;
+					}
+				}
 			}
 		}
-		const char* weap = owner->spawnArgs.GetString( va( "def_weapon%d", w ) );
-		if( !owner->spawnArgs.GetBool( va( "weapon%d_cycle", w ) ) )
+		// Carl: skip weapons if we can't automagically empty our other hand, and we can't dual wield this weapon
+		if( vr_mustEmptyHands.GetBool() && !owner->CanDualWield( w ) && !owner->CanDualWield( owner->hands[1 - whichHand].currentWeapon ) && !owner->CanDualWield( owner->hands[1 - whichHand].idealWeapon.Get() ) )
 		{
 			continue;
 		}
-		if( !weap[ 0 ] )
+
+		const char* weap = owner->spawnArgs.GetString( va( "def_weapon%d", w ) );
+		if( !weap[0] )
+		{
+			continue;
+		}
+
+		if( w == owner->weapon_flashlight && ( vr_weaponCycleMode.GetInteger() == VR_WEAPONCYCLE_INCLUDE_FLASHLIGHT || vr_weaponCycleMode.GetInteger() == VR_WEAPONCYCLE_HOLSTERED_AND_FLASHLIGHT || vr_weaponCycleMode.GetInteger() == VR_WEAPONCYCLE_HOLSTERED_AND_FLASHLIGHT_AND_PDA ) )
+		{
+			break;
+		}
+		else if( w == owner->weapon_pda && vr_weaponCycleMode.GetInteger() == VR_WEAPONCYCLE_HOLSTERED_AND_FLASHLIGHT_AND_PDA )
+		{
+			// skip the pda if we haven't been given one yet
+			if( owner->weapon_pda >= 0 && owner->inventory.pdas.Num() == 0 )
+				continue;
+			break;
+		}
+		else if( !owner->spawnArgs.GetBool( va( "weapon%d_cycle", w ) ) )
 		{
 			continue;
 		}
@@ -2344,6 +2445,28 @@ void idPlayerHand::PrevWeapon()
 
 	if( ( w != currentWeapon ) && ( w != idealWeapon ) )
 	{
+		// Carl: If we can't dual-wield it?
+		if( !owner->CanDualWield( w ) && !owner->CanDualWield( owner->hands[1 - whichHand].currentWeapon ) && !owner->CanDualWield( owner->hands[1 - whichHand].idealWeapon.Get() ) )
+		{
+			// if we can't automagically empty our other hand, do nothing
+			if( vr_mustEmptyHands.GetBool() )
+				return;
+			// otherwise, first automagically empty our other hand
+			if( owner->CanDualWield( owner->weapon_fists ) )
+				owner->hands[1 - whichHand].SelectWeapon( owner->weapon_fists, true, true );
+			else
+				owner->hands[1 - whichHand].SelectWeapon( weapon_empty_hand, true, true );
+		}
+
+		// Carl: Dual wielding, handle switching to flashlight properly
+		if( w == owner->weapon_flashlight )
+		{
+			w = owner->weapon_fists;
+			commonVr->currentFlashlightMode = FLASHLIGHT_HAND;
+			commonVr->currentFlashlightPosition = FLASHLIGHT_HAND;
+			vr_weaponHand.SetInteger( 1 - whichHand );
+		}
+
 		idealWeapon = w;
 		weaponSwitchTime = gameLocal.time + WEAPON_SWITCH_DELAY;
 		owner->UpdateHudWeapon( whichHand );
@@ -2375,8 +2498,11 @@ void idPlayerHand::NextBestWeapon()
 	// Carl: Dual wielding, handle switching from flashlight properly
 	if( holdingFlashlight() )
 	{
-		commonVr->currentFlashlightMode = FLASHLIGHT_HEAD;
-		commonVr->currentFlashlightPosition = FLASHLIGHT_HEAD;
+		if( vr_flashlightStrict.GetBool() )
+			commonVr->currentFlashlightMode = FLASHLIGHT_INVENTORY;
+		else
+			commonVr->currentFlashlightMode = FLASHLIGHT_HEAD;
+		commonVr->currentFlashlightPosition = commonVr->currentFlashlightMode;
 	}
 
 	while( w > 0 )
@@ -2426,6 +2552,11 @@ void idPlayerHand::NextBestWeapon()
 			}
 		}
 
+		// Carl: Because this is an automatic weapon switch, we don't want to change our other hand, so just skip weapons we can't dual wield
+		if( !owner->CanDualWield( w ) && !owner->CanDualWield( owner->hands[1 - whichHand].currentWeapon ) && !owner->CanDualWield( owner->hands[1 - whichHand].idealWeapon.Get() ) )
+		{
+			continue;
+		}
 		break;
 	}
 	idealWeapon = w;
@@ -7709,7 +7840,14 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 	{
 		return;
 	}
-	
+
+	if( num == weapon_empty_hand )
+	{
+		idealWeapon = owner->weapon_fists;
+		// Carl: TODO
+		return;
+	}
+
 	if( ( num < 0 ) || ( num >= MAX_WEAPONS ) )
 	{
 		return;
@@ -7734,6 +7872,22 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 	// Carl: Dual wielding, handle switching to and from flashlight properly
 	if( num == owner->weapon_flashlight || num == owner->weapon_flashlight_new )
 	{
+		// if we don't have a holdable flashlight, do nothing
+		if( commonVr->currentFlashlightMode == FLASHLIGHT_NONE || (vr_flashlightStrict.GetBool() && commonVr->currentFlashlightMode != FLASHLIGHT_HAND && commonVr->currentFlashlightMode != FLASHLIGHT_INVENTORY) )
+			return;
+		// if we can't dual wield a flashlight...
+		if( !owner->CanDualWield( num ) && !owner->CanDualWield( owner->hands[1 - whichHand].currentWeapon ) && !owner->CanDualWield( owner->hands[1 - whichHand].idealWeapon.Get() ) )
+		{
+			// if we can't automagically empty our other hand, do nothing
+			if( vr_mustEmptyHands.GetBool() )
+				return;
+			// otherwise, first automagically empty our other hand
+			if( owner->CanDualWield( owner->weapon_fists ) )
+				owner->hands[1 - whichHand].SelectWeapon( owner->weapon_fists, true, true );
+			else
+				owner->hands[1 - whichHand].SelectWeapon( weapon_empty_hand, true, true );
+		}
+		
 		idealWeapon = owner->weapon_fists;
 		commonVr->currentFlashlightMode = FLASHLIGHT_HAND;
 		commonVr->currentFlashlightPosition = FLASHLIGHT_HAND;
@@ -7742,11 +7896,14 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 	}
 	else if( holdingFlashlight() )
 	{
-		commonVr->currentFlashlightMode = FLASHLIGHT_HEAD;
-		commonVr->currentFlashlightPosition = FLASHLIGHT_HEAD;
+		if( vr_flashlightStrict.GetBool() )
+			commonVr->currentFlashlightMode = FLASHLIGHT_INVENTORY;
+		else
+			commonVr->currentFlashlightMode = FLASHLIGHT_HEAD;
+		commonVr->currentFlashlightPosition = commonVr->currentFlashlightMode;
 	}
 
-	//Is the weapon a toggle weapon
+	//Is the weapon a toggle weapon (eg, fists/chainsaw/grabber, or shotgun/super-shotgun, or artifact/soulcube)
 	WeaponToggle_t* weaponToggle;
 	if( !specific && owner->weaponToggles.Get( va( "weapontoggle%d", num ), &weaponToggle ) )
 	{
@@ -7823,6 +7980,7 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 		num = weaponToggle->toggleList[weaponToggleIndex];
 	}
 	
+	// Is there an actual weapon for this weapon slot?
 	weap = owner->spawnArgs.GetString( va( "def_weapon%d", num ) );
 	if( !weap[ 0 ] )
 	{
@@ -7864,7 +8022,7 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 			{
 				return;
 			}
-			idealWeapon = previousWeapon;
+			num = previousWeapon;
 		}
 		else if( ( owner->weapon_pda >= 0 ) && ( num == owner->weapon_pda ) && ( owner->inventory.pdas.Num() == 0 ) )
 		{
@@ -7872,7 +8030,7 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 			if ( game->isVR )
 			{
 				//GivePDA( NULL, NULL, false ); // hack to allow the player to change system settings in the mars city level before the PDA is given by the receptionist.
-				idealWeapon = num;
+				//idealWeapon = num;
 			}
 			else
 			{
@@ -7880,10 +8038,22 @@ void idPlayerHand::SelectWeapon( int num, bool force, bool specific )
 				return;
 			}
 		}
-		else
+		
+		// If we can't we dual-wield it?
+		if( !owner->CanDualWield( num ) && !owner->CanDualWield( owner->hands[1 - whichHand].currentWeapon ) && !owner->CanDualWield( owner->hands[1 - whichHand].idealWeapon.Get() ) )
 		{
-			idealWeapon = num;
+			// if we can't automagically empty our other hand, do nothing
+			if( vr_mustEmptyHands.GetBool() )
+				return;
+			// otherwise, first automagically empty our other hand
+			if( owner->CanDualWield( owner->weapon_fists ) )
+				owner->hands[1 - whichHand].SelectWeapon( owner->weapon_fists, true, true );
+			else
+				owner->hands[1 - whichHand].SelectWeapon( weapon_empty_hand, true, true );
 		}
+
+		// If we made it all this way, we want weapon "num" and we can switch to it
+		idealWeapon = num;
 		owner->UpdateHudWeapon( whichHand );
 	}
 	if( vr_debugHands.GetBool() )
@@ -8599,6 +8769,8 @@ idPlayer::FlashlightOn
 */
 void idPlayer::FlashlightOn()
 {
+	if( commonVr->currentFlashlightPosition == FLASHLIGHT_NONE || commonVr->currentFlashlightPosition == FLASHLIGHT_INVENTORY )
+		return;
 	if( !flashlight.IsValid() )
 	{
 		return;
@@ -17225,7 +17397,26 @@ void idPlayer::CalculateViewFlashlightPos( idVec3 &origin, idMat3 &axis, idVec3 
 
 		}
 	}
-		
+	else if( flashlightMode == FLASHLIGHT_PISTOL )
+	{
+		if( hands[0].currentWeapon == weapon_pistol && !hands[0].isTheDuplicate )
+			weaponWithFlashlightMounted = hands[0].weapon.GetEntity();
+		else if( hands[1].currentWeapon == weapon_pistol && !hands[1].isTheDuplicate )
+			weaponWithFlashlightMounted = hands[1].weapon.GetEntity();
+		else
+			weaponWithFlashlightMounted = NULL;
+
+		if( !weaponWithFlashlightMounted || !weaponWithFlashlightMounted->GetMuzzlePositionWithHacks( origin, axis ) || commonVr->handInGui )
+		{
+			idAngles flashlightAx = axis.ToAngles();
+			flashlightMode = FLASHLIGHT_INVENTORY;
+			if( game->isVR ) axis = idAngles( flashlightAx.pitch, flashlightAx.yaw - commonVr->bodyYawOffset, flashlightAx.roll ).ToMat3();
+		}
+		else
+			flashlightMode = FLASHLIGHT_GUN;
+	}
+
+	int oldFlashlightPosition = commonVr->currentFlashlightPosition;
 	commonVr->currentFlashlightPosition = flashlightMode;
 
 	switch ( flashlightMode )
@@ -17255,6 +17446,9 @@ void idPlayer::CalculateViewFlashlightPos( idVec3 &origin, idMat3 &axis, idVec3 
 			
 			flashlight->GetRenderEntity()->allowSurfaceInViewID = 0;
 			flashlight->GetRenderEntity()->suppressShadowInViewID = 0;
+			// if we just got the flashlight/weapon out, start with the flashlight turned on
+			if( oldFlashlightPosition == FLASHLIGHT_INVENTORY || oldFlashlightPosition == FLASHLIGHT_NONE )
+				FlashlightOn();
 			setLeftHand = true;
 			break;
 				
@@ -17309,6 +17503,20 @@ void idPlayer::CalculateViewFlashlightPos( idVec3 &origin, idMat3 &axis, idVec3 
 				flashlight->GetRenderEntity()->suppressShadowInViewID = 0;
 				break;
 			}
+
+		case FLASHLIGHT_INVENTORY:
+		case FLASHLIGHT_NONE:
+		{
+			// don't draw the flashlight or its shadow
+			flashlight->GetRenderEntity()->allowSurfaceInViewID = -1;
+			flashlight->GetRenderEntity()->suppressShadowInViewID = entityNumber + 1;
+			// if we just put the flashlight/weapon away, turn it off
+			if( oldFlashlightPosition != FLASHLIGHT_INVENTORY && oldFlashlightPosition != FLASHLIGHT_NONE )
+				FlashlightOff();
+			break;
+		}
+
+
 
 		case FLASHLIGHT_BODY:
 		default: // this is the original body mount code.
@@ -20104,6 +20312,24 @@ bool idPlayer::CanShowWeaponViewmodel() const
 	return ui_showGun.GetBool();
 }
 
+bool idPlayer::CanDualWield( int num ) const
+{
+	vr_dualwield_t d = (vr_dualwield_t)vr_dualWield.GetInteger();
+	if( d == VR_DUALWIELD_YES || num == -1 )
+		return true;
+	if( d == VR_DUALWIELD_NOT_EVEN_FISTS )
+		return false;
+	if( num == weapon_fists )
+		return d != VR_DUALWIELD_NOT_EVEN_FISTS;
+	if( num == weapon_flashlight || num == weapon_flashlight_new )
+		return d == VR_DUALWIELD_ONLY_FLASHLIGHT || d == VR_DUALWIELD_ONLY_GRENADES_FLASHLIGHT || d == VR_DUALWIELD_ONLY_PISTOLS_FLASHLIGHT || d == VR_DUALWIELD_ONLY_PISTOLS_GRENADES_FLASHLIGHT;
+	if( num == weapon_pistol )
+		return d == VR_DUALWIELD_ONLY_PISTOLS || d == VR_DUALWIELD_ONLY_PISTOLS_FLASHLIGHT || d == VR_DUALWIELD_ONLY_PISTOLS_GRENADES_FLASHLIGHT;
+	if( num == weapon_handgrenade )
+		return d == VR_DUALWIELD_ONLY_GRENADES || d == VR_DUALWIELD_ONLY_GRENADES_FLASHLIGHT || d == VR_DUALWIELD_ONLY_PISTOLS_GRENADES_FLASHLIGHT;
+	return false;
+}
+
 /*
 ===============
 idPlayer::GetWeaponInHand
@@ -20144,6 +20370,14 @@ idWeapon * idPlayer::GetPDAWeapon() const
 // because we haven't implemented dual wielding flashlights yet.
 idWeapon * idPlayer::GetWeaponWithMountedFlashlight()
 {
+	// The pistol we start with in RoE for XBox has a flashlight mounted, so prefer that weapon first (for now)
+	if( commonVr->currentFlashlightMode == FLASHLIGHT_PISTOL )
+	{
+		if( hands[0].currentWeapon == weapon_pistol && !hands[0].isTheDuplicate )
+			return hands[0].weapon.GetEntity();
+		if( hands[1].currentWeapon == weapon_pistol && !hands[1].isTheDuplicate )
+			return hands[1].weapon.GetEntity();
+	}
 	// Carl: todo
 	return GetMainWeapon();
 }

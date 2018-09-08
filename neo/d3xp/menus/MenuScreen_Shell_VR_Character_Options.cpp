@@ -373,9 +373,31 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 		
 		case CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE:
 		{
-			static const int numValues = 5;
-			static const int values[numValues] = { 0, 1, 2, 3, 4 };
-			vr_flashlightMode.SetInteger( AdjustOption( vr_flashlightMode.GetInteger(), values, numValues, adjustAmount ) );
+			// Carl: We're using two Cvars, but only one menu option
+			const int FLASHLIGHT_STRICT = FLASHLIGHT_NONE + 1;
+			const int FLASHLIGHT_BODY_STRICT = FLASHLIGHT_BODY + FLASHLIGHT_STRICT; // can only be moved via the menu or console
+			const int FLASHLIGHT_HEAD_STRICT = FLASHLIGHT_HEAD + FLASHLIGHT_STRICT; // can only be moved via the menu or console
+			const int FLASHLIGHT_GUN_STRICT = FLASHLIGHT_GUN + FLASHLIGHT_STRICT; // can't be automatically moved to armor or helmet
+			const int FLASHLIGHT_HAND_STRICT = FLASHLIGHT_HAND + FLASHLIGHT_STRICT; // can't be manually or automatically moved to armor or helmet
+			const int FLASHLIGHT_INVENTORY_STRICT = FLASHLIGHT_INVENTORY + FLASHLIGHT_STRICT; // can only be moved to hand and back
+
+			static const int numValues = 12;
+			static const int values[numValues] = { FLASHLIGHT_BODY, FLASHLIGHT_HEAD, FLASHLIGHT_HAND, FLASHLIGHT_GUN, FLASHLIGHT_PISTOL, FLASHLIGHT_INVENTORY,
+				FLASHLIGHT_BODY_STRICT, FLASHLIGHT_HEAD_STRICT, FLASHLIGHT_HAND_STRICT, FLASHLIGHT_GUN_STRICT, FLASHLIGHT_INVENTORY_STRICT, FLASHLIGHT_NONE };
+			int value = vr_flashlightMode.GetInteger();
+			if( vr_flashlightStrict.GetBool() )
+				value += FLASHLIGHT_STRICT;
+			value = AdjustOption( value, values, numValues, adjustAmount );
+			if( value >= FLASHLIGHT_STRICT )
+			{
+				vr_flashlightMode.SetInteger( value - FLASHLIGHT_STRICT );
+				vr_flashlightStrict.SetBool( true );
+			}
+			else
+			{
+				vr_flashlightMode.SetInteger( value );
+				vr_flashlightStrict.SetBool( false );
+			}
 			break;
 		}
 		
@@ -457,16 +479,36 @@ idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_V
 		case CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE:
 		{
 			const int fm = vr_flashlightMode.GetInteger();
-			if( fm == FLASHLIGHT_BODY )
-				return "Left Shoulder";
-			if( fm == FLASHLIGHT_HEAD )
-				return "Head";
-			if( fm == FLASHLIGHT_GUN )
-				return "Weapon";
-			if( fm == FLASHLIGHT_HAND )
-				return "Hand";
-			if( fm == FLASHLIGHT_PISTOL )
+			if( fm == FLASHLIGHT_NONE )
+				return "None";
+			else if( fm == FLASHLIGHT_PISTOL )
 				return "Pistol (XBox)";
+			else if( vr_flashlightStrict.GetBool() )
+			{
+				if( fm == FLASHLIGHT_BODY )
+					return "Shoulder (strict)";
+				if( fm == FLASHLIGHT_HEAD )
+					return "Head (strict)";
+				if( fm == FLASHLIGHT_GUN )
+					return "Weapon (strict)";
+				if( fm == FLASHLIGHT_HAND )
+					return "Hand (strict)";
+				if( fm == FLASHLIGHT_INVENTORY )
+					return "Inventory (strict)";
+			}
+			else
+			{
+				if( fm == FLASHLIGHT_BODY )
+					return "Left Shoulder";
+				if( fm == FLASHLIGHT_HEAD )
+					return "Head";
+				if( fm == FLASHLIGHT_GUN )
+					return "Weapon";
+				if( fm == FLASHLIGHT_HAND )
+					return "Hand";
+				if( fm == FLASHLIGHT_INVENTORY )
+					return "Inventory";
+			}
 		}
 
 		case CHARACTER_OPTIONS_FIELD_WEAPON_HAND:

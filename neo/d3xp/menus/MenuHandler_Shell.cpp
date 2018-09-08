@@ -510,6 +510,7 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		// Koz end
 		// Carl
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_VOICE_OPTIONS, idMenuScreen_Shell_VR_Voice_Options, this );
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_HAND_OPTIONS, idMenuScreen_Shell_VR_Hand_Options, this );
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this );
 		// Carl end
 
