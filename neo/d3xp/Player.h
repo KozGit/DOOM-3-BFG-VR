@@ -391,7 +391,7 @@ public:
 	bool					releaseVirtualGrab(); // will drop whatever you're holding
 
 	idStr					GetCurrentWeaponString();
-	void					NextWeapon();
+	void					NextWeapon( int dir = 1 );
 	void					PrevWeapon();
 	void					NextBestWeapon();
 	void					SelectWeapon( int num, bool force, bool specific );
