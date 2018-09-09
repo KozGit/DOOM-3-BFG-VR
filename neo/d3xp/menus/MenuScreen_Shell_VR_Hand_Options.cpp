@@ -29,16 +29,16 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #include "../Game_local.h"
 
-const static int NUM_MENU_OPTIONS = 8; // reload mode isn't implemented yet
+const static int NUM_MENU_OPTIONS = 6; // reload mode isn't implemented yet
 const static int NUM_DISPLAY_LINES = 8;
 
 static int currentOffset = 0;
 static int lastIndex = 0;
 
-static idStr cmdName[NUM_MENU_OPTIONS+1] = { "Weapon Hand", "Holster Slots", "Dual Wielding", "Grip Mode", "Pick-Up", "Must Empty Hands", "Context Sensitive", "Weapon Cycle", "Reload Mode" };
-static idStr cmdDescription[NUM_MENU_OPTIONS+1] = { "Weapon Hand", "Holster Slots", "Can you use two weapons at once? (slight unfair advantage)", "How the grip button works",
+static idStr cmdName[NUM_MENU_OPTIONS+1] = { "Dual Wielding", "Grip Mode", "Pick-Up", "Must Empty Hands", "Context Sensitive", "Weapon Cycle", "Reload Mode" };
+static idStr cmdDescription[NUM_MENU_OPTIONS+1] = { "Can you use two weapons at once? (slight unfair advantage)", "How the grip button works",
 	"How to pick up/collect/use items and power-ups", "Must manually empty your hands before interacting", "Buttons behave according to context (recommended) instead of always as bound.", "How to cycle through weapons", "Reload mode" };
-static menuOption_t cmdType[NUM_MENU_OPTIONS+1] = { OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT };
+static menuOption_t cmdType[NUM_MENU_OPTIONS+1] = { OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT, OPTION_SLIDER_TEXT };
 
 float LinearAdjust( const float input, const float currentMin, const float currentMax, const float desiredMin,  float desiredMax );
 int	AdjustOption( const int currentValue, const int values[], const int numValues, const int adjustment );

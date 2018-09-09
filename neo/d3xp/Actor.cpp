@@ -3389,12 +3389,17 @@ idActor::Event_PlayAnim
 */
 void idActor::Event_PlayAnim( int channel, const char* animname )
 {
+	idThread::ReturnInt( PlayAnim( channel, animname ) );
+}
+
+int idActor::PlayAnim( int channel, const char* animname )
+{
 	animFlags_t	flags;
 	idEntity* headEnt;
 	int	anim;
 	
 	// Koz debug if ( channel == ANIMCHANNEL_LEFTHAND || channel == ANIMCHANNEL_RIGHTHAND ) common->Printf( "Player Playing anim %s %d\n", animname, gameLocal.time );
-
+	// Carl: This now supports separate prefixes for the lefthand and righthand channels (on the player object)
 	anim = GetAnim( channel, animname );
 	if( !anim )
 	{
@@ -3406,8 +3411,7 @@ void idActor::Event_PlayAnim( int channel, const char* animname )
 		{
 			gameLocal.DPrintf( "missing '%s' animation on '%s' (%s)\n", animname, name.c_str(), GetEntityDefName() );
 		}
-		idThread::ReturnInt( 0 );
-		return;
+		return 0;
 	}
 	
 	switch( channel )
@@ -3518,7 +3522,7 @@ void idActor::Event_PlayAnim( int channel, const char* animname )
 			gameLocal.Error( "Event_PlayAnim Unknown anim group" );
 			break;
 	}
-	idThread::ReturnInt( 1 );
+	return 1;
 }
 
 /*

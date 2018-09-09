@@ -367,6 +367,8 @@ public:
 	idQuat					motionRotation;// = idQuat_zero;
 	bool					wasPDA;
 
+	idStr					animPrefix; // player hand anims
+
 public:
 	idPlayerHand();
 	virtual					~idPlayerHand();
@@ -697,6 +699,9 @@ public:
 	}
 	void					InitTeleportTarget();
 	// Koz end
+	// Carl begin
+	bool					HasHoldableFlashlight();
+	// Carl end
 		
 	// save games
 	void					Save( idSaveGame* savefile ) const;					// archives object for save game file
@@ -900,6 +905,7 @@ public:
 	// Returns the required one if you're holding it in a hand, or the other one, or the main weapon
 	idWeapon*				GetHarvestWeapon( idStr requiredWeapons );
 	idStr					GetCurrentHarvestWeapon( idStr requiredWeapons );
+	virtual int				GetAnim( int channel, const char* name );
 	// Carl end
 
 	void					AddAIKill();

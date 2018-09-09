@@ -209,7 +209,7 @@ public:
 	void					NetCatchup();
 	
 	// Visual presentation
-	void					PresentWeapon( bool showViewModel );
+	void					PresentWeapon( bool showViewModel, int hand );
 	void					PresentWeaponOriginal( bool showViewModel ); // Koz fixme delete this
 
 	int						GetZoomFov();

@@ -3494,7 +3494,7 @@ void idWeapon::CalculateHideRise( idVec3& origin, idMat3& axis )
 idWeapon::PresentWeapon
 ================
 */
-void idWeapon::PresentWeapon( bool showViewModel )
+void idWeapon::PresentWeapon( bool showViewModel, int hand )
 {
 	
 	worldModel.GetEntity()->GetRenderEntity()->allowSurfaceInViewID = -1;
@@ -3518,7 +3518,7 @@ void idWeapon::PresentWeapon( bool showViewModel )
 	else
 	{
 		// calculate weapon position based on player movement bobbing
-		owner->CalculateViewWeaponPos( GetHand(), viewWeaponOrigin, viewWeaponAxis );
+		owner->CalculateViewWeaponPos( hand, viewWeaponOrigin, viewWeaponAxis );
 		// Koz hide weapon and muzzlerise was here, now called as weapon::CalculateHideRise in player->CalculateViewWeaponPosition to allow hand animations
 
 
@@ -4874,7 +4874,7 @@ void idWeapon::GetProjectileLaunchOriginAndAxis( idVec3& origin, idMat3& axis )
 				// hand movement, not the barrel axis. (unless the controller is mounted on something like a topshot, then you have a grenade launcher.)
 				if ( commonVr->VR_USE_MOTION_CONTROLS && !vr_mountedWeaponController.GetBool() )
 				{
-					axis = owner->hands[0].throwDirection.ToMat3();
+					axis = owner->hands[GetHand()].throwDirection.ToMat3();
 					break;
 				}
 			}
@@ -5790,7 +5790,7 @@ void idWeapon::Event_GetWeaponSkin()
 
 	if ( isPlayerFlashlight )
 	{
-		vrSkinName = commonVr->GetCurrentFlashlightMode() == 2 ? "minivr/flashhands/0h" : "vr/flashhands/0h"; // mini flashlight skin for gun mount : normal flashlight skin
+		vrSkinName = ( commonVr->GetCurrentFlashlightMode() == FLASHLIGHT_GUN || commonVr->GetCurrentFlashlightMode() == FLASHLIGHT_PISTOL ) ? "minivr/flashhands/0h" : "vr/flashhands/0h"; // mini flashlight skin for gun mount : normal flashlight skin
 	}
 	else
 	{
