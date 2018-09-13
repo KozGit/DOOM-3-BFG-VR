@@ -4097,10 +4097,20 @@ bool idGameLocal::InhibitEntitySpawn( idDict& spawnArgs )
 			//const char* map = commonLocal.GetCurrentMapName();
 			if( idStr::Icmp( name, "func_door" ) == 0 )
 				BonusCharPreUnlockDoor( spawnArgs );
-			else if( idStr::Icmp( name, "func_static" ) == 0 && ( idStr::Icmp( spawnArgs.GetString( "model" ), "models/mapobjects/doors/mcitydoorframegui.lwo" ) == 0
-				|| idStr::Icmp( spawnArgs.GetString( "model" ), "models/mapobjects/guiobjects/techdrpanel1/techdrpanel1.lwo" ) == 0 ) )
-				BonusCharPreUnlockPanel( spawnArgs );
-			else if( idStr::Icmp( spawnArgs.GetString( "call" ), "map_marscity1::bioscan_noreturn" ) == 0 )
+			else if( idStr::Icmp( name, "func_static" ) == 0 )
+			{
+				if( ( idStr::Icmp( spawnArgs.GetString( "model" ), "models/mapobjects/doors/mcitydoorframegui.lwo" ) == 0
+					|| idStr::Icmp( spawnArgs.GetString( "model" ), "models/mapobjects/guiobjects/techdrpanel1/techdrpanel1.lwo" ) == 0 ) )
+					BonusCharPreUnlockPanel( spawnArgs );
+				// This panel covering the GUI on the bioscan airlock door doesn't move with the airlock door
+				else if( idStr::Icmp( spawnArgs.GetString( "name" ), "func_static_gui_hide" ) == 0 )
+					result = true;
+				// The chair in the Bioscan room. This is the only unmoveable version of this chair in the entire game... and it's blocking our way to the shotguns and shells. lol
+				// We only make it moveable for characters who have access to that room, not for characters with the Grabber.
+				else if( idStr::Icmp( spawnArgs.GetString( "name" ), "func_static_4479" ) == 0 && idStr::Icmp( spawnArgs.GetString( "model" ), "models/mapobjects/base/chairs/chair2.ASE" ) == 0 )
+					spawnArgs.Set( "classname", "moveable_chair2" );
+			}
+			else if( bonus_char.GetInteger() != BONUS_CHAR_ROLAND && idStr::Icmp( spawnArgs.GetString( "call" ), "map_marscity1::bioscan_noreturn" ) == 0 )
 			{
 				// Carl: Instead of calling the noreturn function to lock the inner bioscan doors,
 				// unlock the side door and the outer bioscan doors by triggering them
@@ -4109,9 +4119,73 @@ bool idGameLocal::InhibitEntitySpawn( idDict& spawnArgs )
 				spawnArgs.Set( "target1", "func_door_1" );
 				spawnArgs.Set( "target2", "func_door_2" );
 			}
+			// fredrelay1 triggers the second half of the first cutscene, where the camera switches to the hangar
+			// We want to skip that cutscene by removing the trigger entirely for characters that start inside
+			// fredteleport3 is the player's starting location if you delete fredrelay1
+			else if( (bonus_char.GetInteger() == BONUS_CHAR_BETRUGER || bonus_char.GetInteger() == BONUS_CHAR_SARGE || bonus_char.GetInteger() == BONUS_CHAR_ROLAND ) )
+			{
+				if( idStr::Icmp( name, "trigger_relay" ) == 0 && idStr::Icmp( commonLocal.GetCurrentMapName(), "game/mars_city1" ) == 0 )
+				{
+					const char* n = spawnArgs.GetString( "name" );
+					// trigger_relay_38 starts the Sarge cutscene, which we don't want if we're Sarge or Betruger
+					if( idStr::Icmp( n, "fredrelay1" ) == 0 || ( bonus_char.GetInteger() != BONUS_CHAR_ROLAND && idStr::Icmp( n, "trigger_relay_38" ) == 0 ) )
+						result = true;
+				}
+				else if( idStr::Icmp( name, "info_player_teleport" ) == 0 && idStr::Icmp( spawnArgs.GetString( "name" ), "fredteleport3" ) == 0 && idStr::Icmp( commonLocal.GetCurrentMapName(), "game/mars_city1" ) == 0 )
+				{
+					if( bonus_char.GetInteger() == BONUS_CHAR_SARGE )
+					{
+						spawnArgs.Set( "origin", "-3790 -3312 208" );
+						spawnArgs.SetInt( "angle", 0 );
+					}
+					else if( bonus_char.GetInteger() == BONUS_CHAR_ROLAND )
+					{
+						spawnArgs.Set( "origin", "-106 -1702 129" );
+						spawnArgs.SetInt( "angle", 180 );
+					}
+					else if( bonus_char.GetInteger() == BONUS_CHAR_BETRUGER )
+					{
+						spawnArgs.Set( "origin", "-3637 -3586 192" );
+						spawnArgs.SetInt( "angle", 0 );
+					}
+				}
+				else if( idStr::Icmp( name, "trigger_once" ) == 0 && idStr::Icmp( commonLocal.GetCurrentMapName(), "game/mars_city1" ) == 0 )
+				{
+					const char* n = spawnArgs.GetString( "name" );
+					// Don't bioscan if we came from inside
+					// Listen buddy, you DO have clearance for this area.
+					// Sarge and Betruger don't go through reception. R. Roland can if he wants.
+					if( idStr::Icmp( n, "trigger_once_15" ) == 0 || ( bonus_char.GetInteger() != BONUS_CHAR_ROLAND && (idStr::Icmp( n, "trigger_once_7" ) == 0 || idStr::Icmp( n, "reception_trigger" ) == 0 ) ) )
+						result = true;
+				}
+				// Remove all cinematic Sarge's if we're Sarge
+				else if( bonus_char.GetInteger() == BONUS_CHAR_SARGE && idStr::Icmp( name, "marscity_cinematic_sarge2" ) == 0 )
+				{
+					result = true;
+				}
+				// Make S. L. Medley appear
+				else if( bonus_char.GetInteger() != BONUS_CHAR_ROLAND && idStr::Icmp( name, "marscity_cinematic_cam" ) == 0 && idStr::Icmp( spawnArgs.GetString( "target" ), "fredrelay1" ) == 0 )
+				{
+					spawnArgs.Set( "target", "marscity_sec_window2_1" );
+				}
+					
+				
+			}
 		}
 	}
 
+	const char* n = spawnArgs.GetString( "name" );
+	// coffee cup stuck in the desk in HQ
+	if( !result && idStr::Icmp( n, "tim_moveable_foamcup_6" ) == 0 && idStr::Cmp( spawnArgs.GetString( "origin" ), "-3835 -3357 240" ) == 0 )
+	{
+		spawnArgs.Set( "origin", "-3835 -3357 244" );
+	}
+	// rubbish bin stuck in the floor in the toilets
+	else if( !result && idStr::Icmp( n, "tim_moveable_trashcan01_5" ) == 0 && idStr::Cmp( spawnArgs.GetString( "origin" ), "-2626 -972 152" ) == 0 )
+	{
+		spawnArgs.Set( "origin", "-2626 -972 156" );
+	}
+	
 	return result;
 }
 

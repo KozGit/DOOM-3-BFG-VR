@@ -587,7 +587,18 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 		}
 		RB end
 		*/
-		
+
+		const idMaterial *blank = NULL;
+
+		bool cataract = ( player->bonusChar == BONUS_CHAR_BETRUGER && ( bonus_cataract_eye.GetBool() ? view->viewEyeBuffer < 0 : view->viewEyeBuffer > 0 ) && bonus_cataract.GetFloat() > 0
+			&& !gameLocal.inCinematic && !Flicksync_InCutscene && !gameLocal.GetCamera() && !commonVr->thirdPersonMovement );
+		if( cataract )
+		{
+			blank = declManager->FindMaterial( "_white" );
+			renderSystem->SetColor4( 0.5f, 0.5f, 0.5f, bonus_cataract.GetFloat() );
+			renderSystem->DrawStretchPic( 0.0f, 0.0f, renderSystem->GetVirtualWidth(), renderSystem->GetVirtualHeight(), 0.0f, 0.0f, 1.0f, 1.0f, blank );
+		}
+
 		if( bfgVision )
 		{
 			float extend = -0.5f * commonVr->VRScreenSeparation * renderSystem->GetVirtualWidth();
@@ -618,26 +629,28 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 			int start, barWidth;
 			
 			blockWidth /= commonVr->hmdAspect;
+			if( !blank )
+				blank = declManager->FindMaterial( "_white" );
 					
 			// top and bottom blackout bars should be the same regardless of screen separation
 			
 			// top blackout bar
-			renderSystem->DrawStretchPic( 0, 0, width, blockHeight, 0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial( "_white" ) );
+			renderSystem->DrawStretchPic( 0, 0, width, blockHeight, 0.0f, 0.0f, 1.0f, 1.0f, blank );
 			
 			// bottom blackout bar
-			renderSystem->DrawStretchPic( 0, height - blockHeight, width, blockHeight, 0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial( "_white" ) );
+			renderSystem->DrawStretchPic( 0, height - blockHeight, width, blockHeight, 0.0f, 0.0f, 1.0f, 1.0f, blank );
 							
 			//left eye
 			if ( view->viewEyeBuffer < 0 )
 			{
 				//left bar
 				barWidth = idMath::ClampFloat( 0.0f, width, blockWidth + offset);
-				renderSystem->DrawStretchPic( 0, 0, barWidth, height, 0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial( "_white" ) );
+				renderSystem->DrawStretchPic( 0, 0, barWidth, height, 0.0f, 0.0f, 1.0f, 1.0f, blank );
 
 				//rightbar
 				start = (width - blockWidth) + offset;
 				barWidth = idMath::ClampFloat( 0.0f, width, width - start);
-				renderSystem->DrawStretchPic( start, 0, barWidth, height, 0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial( "_white" ) );
+				renderSystem->DrawStretchPic( start, 0, barWidth, height, 0.0f, 0.0f, 1.0f, 1.0f, blank );
 			}
 			else if ( view->viewEyeBuffer > 0 ) // right eye
 			{
@@ -646,12 +659,12 @@ void idPlayerView::SingleView( const renderView_t* view, idMenuHandler_HUD* hudM
 				barWidth = blockWidth - offset;
 				start = idMath::ClampFloat( 0.0f, width, start );
 				barWidth = idMath::ClampFloat( 0.0f, width - start, barWidth );
-				renderSystem->DrawStretchPic( start, 0, barWidth, height, 0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial( "_white" ) );
+				renderSystem->DrawStretchPic( start, 0, barWidth, height, 0.0f, 0.0f, 1.0f, 1.0f, blank );
 
 				//right bar
 				start = (width - blockWidth) - offset;
 				barWidth = width - start;
-				renderSystem->DrawStretchPic( start, 0, barWidth, height, 0.0f, 0.0f, 1.0f, 1.0f, declManager->FindMaterial( "_white" ) );
+				renderSystem->DrawStretchPic( start, 0, barWidth, height, 0.0f, 0.0f, 1.0f, 1.0f, blank );
 
 			}
 			

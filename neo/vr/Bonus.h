@@ -58,6 +58,7 @@ extern idCVar bonus_char_campbell, bonus_char_sarge, bonus_char_betruger, bonus_
 extern idCVar bonus_char_doomguy, bonus_char_slayer, bonus_char_eternal, bonus_char_vfr;
 extern idCVar bonus_char_ash, bonus_char_samus, bonus_char_witch;
 extern idCVar bonus_chainsaw, bonus_boomstick;
+extern idCVar bonus_cataract, bonus_cataract_eye;
 
 bool BonusCharUnlocked( bonus_char_t ch );
 

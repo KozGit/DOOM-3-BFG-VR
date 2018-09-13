@@ -621,8 +621,9 @@ entityDef bonus_player_betruger  {
 	"inherit"							"bonus_player_sp"
 	"model"								"model_d3_sp_marine"
 	"def_head"							"head_betruger"
-	"weapon"							"weapon_fists,weapon_pistol,weapon_pda,weapon_soulcube"
-	"weapon_nightmare"					"weapon_fists,weapon_pistol,weapon_pda,weapon_soulcube"
+	"weapon"							"weapon_fists,weapon_pda,weapon_soulcube"
+	"weapon_nightmare"					"weapon_fists,weapon_pda,weapon_soulcube"
+	"ammo_bullets"						"0"
 	"current_weapon"					"19"
 }
 

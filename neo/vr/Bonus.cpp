@@ -28,6 +28,8 @@ idCVar bonus_char_samus( "bonus_char_samus", "0", CVAR_BOOL | CVAR_GAME | CVAR_A
 idCVar bonus_char_witch( "bonus_char_witch", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Witch from Hicky" );
 idCVar bonus_chainsaw( "bonus_chainsaw", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Has collected the chainsaw" );
 idCVar bonus_boomstick( "bonus_boomstick", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Has collected the double-barrel shotgun" );
+idCVar bonus_cataract( "bonus_cataract", "0.7", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Opacity of Betruger's cataract. 0 = no cataract, 1 = vision completely blocked" );
+idCVar bonus_cataract_eye( "bonus_cataract_eye", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Which of Betruger's eyes should have the cataract. 0 = right, 1 = left. In RoE they changed which eye it was (from Right to Left). Let player match their own good eye." );
 
 bool BonusCharUnlocked( bonus_char_t ch )
 {
@@ -356,6 +358,9 @@ idStr BonusCharReplaceCompatibleHead( bonus_char_t ch )
 // It works by changing the def_head to a different model. The downside is, we lose any animations in the original head.
 const char* BonusCharReplaceIncompatibleHead( const char* m, bonus_char_t ch )
 {
+	// Don't replace the player with Betruger in any Mars City cutscenes, because Betruge is already in those cutscenes.
+	if( bonus_char.GetInteger() == BONUS_CHAR_BETRUGER && idStr::Icmp( m, "marscity_head_player" ) == 0 )
+		return m;
 	if( bonus_char.GetInteger() != BONUS_CHAR_MARINE && ( idStr::Icmp(m, "head_player" ) == 0 || idStr::Icmp( m, "hellhole_cin_npcplayerhead" ) == 0 || idStr::Icmp( m, "marscity_head_player" ) == 0 ) )
 	{
 		switch( bonus_char.GetInteger() )
@@ -554,7 +559,7 @@ const char* ModelToMoveableEntityClass( const char* model, bonus_char_t ch )
 
 		{ "models/mapobjects/base/tech/chair1.ase", "moveable_tech_chair1" }, //
 		{ "models/mapobjects/base/chairs/chair1.lwo", "moveable_chair1" }, //
-		// { "models/mapobjects/chairs/d3xp_chair2.lwo", "moveable_chair2" }, // moveable in Mars City and DeltaLabs2a!!! (but it's an RoE asset?)
+		// { "models/mapobjects/chairs/d3xp_chair2.lwo", "moveable_chair2" }, // All the chairs in Doom 3 were already moveable
 		// { "models/mapobjects/chairs/d3xp_chair5.lwo", "moveable_chair5" },
 		{ "models/mapobjects/base/chairs/normchair.lwo", "moveable_normchair" }, //
 		{ "models/mapobjects/chairs/kitchenchair/kitchenchair.lwo", "moveable_kitchenchair" }, // moveable in Mars City
@@ -688,7 +693,6 @@ bool WouldMoveableEntityBeGlitchy( const char* name, const char* mapname )
 			return true;
 		// player_pda, item_videocd_18, tim_func_static_1711 (binder1), func_static_5283 SHOULD be moveable (dufflebag), func_static_449 (keyboard in medlab)
 		// func_static_53015, func_static_53016 - tiles in corridor heading towards sarge
-		// tim_moveable_foamcup_6
 		// marscity_cinematic_victim has bad skin due to bonus characters (originally was tshirt guy)
 	}
 	else if( idStr::Cmp( mapname, "game/mc_underground" ) == 0 )
@@ -739,7 +743,8 @@ void BonusCharPreUnlockDoor( idDict& spawnArgs )
 		if( idStr::Cmp( name, "mal_func_door_89" ) == 0
 			|| idStr::Cmp( name, "tim_func_door_186" ) == 0 || idStr::Cmp( name, "tim_func_door_187" ) == 0
 			|| idStr::Cmp( name, "tim_func_door_72" ) == 0 || idStr::Cmp( name, "tim_func_door_73" ) == 0 // listen buddy, you don't have clearance for this area
-			|| idStr::Cmp( name, "tim_func_door_98" ) == 0 )
+			|| idStr::Cmp( name, "tim_func_door_98" ) == 0
+			|| idStr::Cmp( name, "func_door_12" ) == 0 ) // Combat Prep, which is fun to unlock, but the doorway is glitchy and it makes the game too easy
 			return;
 		// Roland only has access to the basement door and nothing else.
 		if( bonus_char.GetInteger() == BONUS_CHAR_ROLAND && idStr::Cmp( name, "tim_func_door_219" ) != 0 && idStr::Cmp( name, "tim_func_door_220" ) != 0 )
@@ -769,7 +774,8 @@ void BonusCharPreUnlockPanel( idDict& spawnArgs )
 {
 	if( !spawnArgs.GetInt( "shaderparm7" ) && idStr::Cmp( spawnArgs.GetString( "gui" ), "guis/doors/elevatorcall.gui" ) != 0
 		&& idStr::Cmp( spawnArgs.GetString( "gui" ), "guis/marscity/elevatorcall.gui" ) != 0
-		&& idStr::Cmp( spawnArgs.GetString( "gui" ), "guis/screens/malfunction2a.gui" ) != 0 )
+		&& idStr::Cmp( spawnArgs.GetString( "gui" ), "guis/screens/malfunction2a.gui" ) != 0
+		&& idStr::Cmp( spawnArgs.GetString( "gui2" ), "guis/doors/areakeypad.gui" ) != 0 ) // Combat Prep room is fun, but glitchy and makes it too easy
 	{
 		const char* name = spawnArgs.GetString( "name" );
 		// Roland only has access to the basement door and nothing else.

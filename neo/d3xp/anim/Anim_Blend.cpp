@@ -3383,7 +3383,7 @@ bool idDeclModelDef::Parse( const char* text, const int textLength, bool allowBi
 			}
 			// Carl: Bonus characters for cutscenes
 			// This is a risky place to do this, because models can add anims after inheriting our (incompatible) model
-			if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
+			if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) && bonus_char.GetInteger() != BONUS_CHAR_BETRUGER )
 			{
 				if ( idStr::Icmp( GetName(), "marscity_cinematic_player" )==0 || idStr::Icmp( GetName(), "marscity_hangar_player" ) == 0 ) // these models inherit from npc_tshirt
 					token2 = BonusCharReplaceTShirtModel( (bonus_char_t)bonus_char.GetInteger() );

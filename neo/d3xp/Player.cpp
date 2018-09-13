@@ -2328,7 +2328,7 @@ bool idPlayerHand::tooFullToInteract()
 
 bool idPlayerHand::handExists()
 {
-	return true;
+	return owner && ( whichHand == HAND_LEFT || ( owner->bonusChar != BONUS_CHAR_ASH && owner->bonusChar != BONUS_CHAR_SAMUS ) );
 }
 
 bool idPlayerHand::contextToggleVirtualGrab()
@@ -18118,6 +18118,11 @@ void idPlayer::CalculateWaist()
 
 void idPlayer::CalculateLeftHand()
 {
+	if( !hands[HAND_LEFT].handExists() )
+	{
+		hands[HAND_LEFT].handSlot = SLOT_NONE;
+		return;
+	}
 	slotIndex_t oldSlot = hands[HAND_LEFT].handSlot;
 	slotIndex_t slot = SLOT_NONE;
 	if ( commonVr->hasHMD )
@@ -18160,6 +18165,11 @@ void idPlayer::CalculateLeftHand()
 
 void idPlayer::CalculateRightHand()
 {
+	if( !hands[HAND_RIGHT].handExists() )
+	{
+		hands[HAND_RIGHT].handSlot = SLOT_NONE;
+		return;
+	}
 	slotIndex_t oldSlot = hands[HAND_RIGHT].handSlot;
 	slotIndex_t slot = SLOT_NONE;
 	if ( commonVr->hasHMD )
