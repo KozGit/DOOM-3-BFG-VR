@@ -601,6 +601,7 @@ extern idCVar vr_contextSensitive;
 extern idCVar vr_dualWield;
 extern idCVar vr_voiceMicLocation;
 extern idCVar vr_debugHands;
+extern idCVar vr_rumbleChainsaw;
 
 extern iVr* commonVr;
 extern iVoice* commonVoice;

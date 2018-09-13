@@ -3778,7 +3778,8 @@ void idWeapon::PresentWeapon( bool showViewModel, int hand )
 
 	if ( owner->IsLocallyControlled() )
 	{
-		owner->hands[hand].SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
+		if ( vr_rumbleChainsaw.GetBool() || !commonVr->VR_USE_MOTION_CONTROLS )
+			owner->hands[hand].SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
 	}
 }
 /*

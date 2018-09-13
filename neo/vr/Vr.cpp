@@ -223,7 +223,8 @@ idCVar vr_mustEmptyHands( "vr_mustEmptyHands", "0", CVAR_BOOL | CVAR_GAME | CVAR
 idCVar vr_contextSensitive( "vr_contextSensitive", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Are buttons context sensitive?\n0 = no just map the buttons in the binding window, 1 = yes, context sensitive buttons (default)" );
 idCVar vr_dualWield( "vr_dualWield", "8", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Can you use two weapons at once?\n0 = not even fists, 1 = nothing, 2 = only flashlight, 3 = only grenades (VFR), 4 = only grenades/flashlight, 5 = only pistols, 6 = only pistols/flashlight, 7 = only pistols/grenades/flashlight, 8 = yes" );
 idCVar vr_voiceMicLocation( "vr_voiceMicLocation", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Where is the virtual VR microphone you need to hold up to your mouth to speak into for voice commands to work?\n0 = helmet (always works), 1 = StatWatch, 2 = left hand, 3 = right hand, 4 = either hand, 5 = push-to-talk hand, 6 = weapon, 7 = flashlight, 8 = PDA" );
-idCVar vr_debugHands( "vr_debugHands", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Enable hand/weapon/dual wielding debugging" );
+idCVar vr_debugHands( "vr_debugHands", "0", CVAR_BOOL | CVAR_GAME, "Enable hand/weapon/dual wielding debugging" );
+idCVar vr_rumbleChainsaw( "vr_rumbleChainsaw", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Enable weapon (currently chainsaw only) constant haptic feedback in VR. Not recommended for wireless VR controllers." );
 
 //===================================================================
 
