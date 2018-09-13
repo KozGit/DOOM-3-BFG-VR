@@ -369,6 +369,17 @@ public:
 
 	idStr					animPrefix; // player hand anims
 
+	//-----------------------------------------------------------------
+	// controller shake parms
+	//-----------------------------------------------------------------
+	
+	const static int		MAX_SHAKE_BUFFER = 3;
+	float					controllerShakeHighMag[ MAX_SHAKE_BUFFER ];		// magnitude of the high frequency controller shake
+	float					controllerShakeLowMag[ MAX_SHAKE_BUFFER ];		// magnitude of the low frequency controller shake
+	int						controllerShakeHighTime[ MAX_SHAKE_BUFFER ];	// time the controller shake ends for high frequency.
+	int						controllerShakeLowTime[ MAX_SHAKE_BUFFER ];		// time the controller shake ends for low frequency.
+	int						controllerShakeTimeGroup;
+
 public:
 	idPlayerHand();
 	virtual					~idPlayerHand();
@@ -398,6 +409,11 @@ public:
 	void					NextBestWeapon();
 	void					SelectWeapon( int num, bool force, bool specific );
 	void					DropWeapon( bool died );
+
+	// Controller Shake
+	void					SetControllerShake( float highMagnitude, int highDuration, float lowMagnitude, int lowDuration );
+	void					ResetControllerShake();
+	void					GetControllerShake( int& highMagnitude, int& lowMagnitude ) const;
 
 	void					debugPrint();
 };
@@ -594,17 +610,6 @@ public:
 	bool					healthTake;
 	int						nextHealthTake;
 	
-	//-----------------------------------------------------------------
-	// controller shake parms
-	//-----------------------------------------------------------------
-	
-	const static int		MAX_SHAKE_BUFFER = 3;
-	float					controllerShakeHighMag[ MAX_SHAKE_BUFFER ];		// magnitude of the high frequency controller shake
-	float					controllerShakeLowMag[ MAX_SHAKE_BUFFER ];		// magnitude of the low frequency controller shake
-	int						controllerShakeHighTime[ MAX_SHAKE_BUFFER ];	// time the controller shake ends for high frequency.
-	int						controllerShakeLowTime[ MAX_SHAKE_BUFFER ];		// time the controller shake ends for low frequency.
-	int						controllerShakeTimeGroup;
-	
 	bool					hiddenWeapon;		// if the weapon is hidden ( in noWeapons maps )
 	idEntityPtr<idProjectile> soulCubeProjectile;
 	
@@ -737,9 +742,7 @@ public:
 	void					ControllerShakeFromDamage( int damage );
 	void					ControllerShakeFromDamage( int damage, const idVec3 &direction );
 	void					SetControllerShake( float magnitude, int duration, const idVec3 &direction );
-	void					SetControllerShake( float highMagnitude, int highDuration, float lowMagnitude, int lowDuration );
 	void					ResetControllerShake();
-	void					GetControllerShake( int& highMagnitude, int& lowMagnitude ) const;
 	
 	idAimAssist* 			GetAimAssist()
 	{
@@ -796,7 +799,7 @@ public:
 	void					DrawHUD( idMenuHandler_HUD* hudManager );
 	void					DrawHUDVR( idMenuHandler_HUD* hudManager );
 
-	void					WeaponFireFeedback( const idDict* weaponDef );
+	void					WeaponFireFeedback( int hand, const idDict* weaponDef );
 	
 	float					DefaultFov() const;
 	float					CalcFov( bool honorZoom );

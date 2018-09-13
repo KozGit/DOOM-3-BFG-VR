@@ -739,13 +739,13 @@ int Sys_PollMouseInputEvents( int mouseEvents[MAX_MOUSE_EVENTS][2] )
 //	Joystick Input Handling
 //=====================================================================================
 
-void Sys_SetRumble( int device, int low, int hi )
+void Sys_SetRumble( int device, int low_left, int hi_left, int low_right, int hi_right )
 {
 	if ( commonVr->hasOculusRift ) {
 		// Koz begin
 		if ( commonVr->VR_USE_MOTION_CONTROLS && vr_rumbleEnable.GetBool() )
 		{
-			commonVr->MotionControllerSetHapticOculus( low, hi );
+			commonVr->MotionControllerSetHapticOculus( Max( low_left, hi_left ), Max( low_right, hi_right ) );
 			return;
 		}
 		// Koz end
@@ -767,28 +767,31 @@ void Sys_SetRumble( int device, int low, int hi )
 		int skipFrames = vr_rumbleSkip.GetInteger();
 
 		//if ( low + hi > 0 ) common->Printf( "Rumble low %d hi %d\n", low, hi );
-
-		if ( currentFrame == 0 || hi > 16384 )
+		for( int h = 0; h < 2; h++ )
 		{
-			if ( hi > 65535 ) hi = 16384;
+			int low = h ? low_left : low_right;
+			int hi = h ? hi_left : hi_right;
+			if( currentFrame == 0 || hi > 16384 )
+			{
+				if( hi > 65535 ) hi = 16384;
 
-			val = currentFrame == 0 ? low : ( (hi *2 ) / skipFrames );
+				val = currentFrame == 0 ? low : ( ( hi * 2 ) / skipFrames );
 
-			if ( val > 65535 ) val = 65535;
+				if( val > 65535 ) val = 65535;
 
-			val = (( 3500 / vr_rumbleDiv.GetFloat()) * val ) / 65535;
-				
-			// dont send the controller zero values - no need to turn off pulse as already time based.
-			if ( val >= 10 ) commonVr->MotionControllerSetHapticOpenVR( vr_weaponHand.GetInteger(), val );
+				val = ( ( 3500 / vr_rumbleDiv.GetFloat() ) * val ) / 65535;
+
+				// dont send the controller zero values - no need to turn off pulse as already time based.
+				if( val >= 10 ) commonVr->MotionControllerSetHapticOpenVR( h, val );
+			}
 		}
-
 		currentFrame++;
 		if ( currentFrame >= skipFrames ) currentFrame = 0;
 		return;
 	}
 	else
 	{
-		return win32.g_Joystick.SetRumble( device, low, hi );
+		return win32.g_Joystick.SetRumble( device, (int)( low_left * 0.8f + low_right * 0.2f ), (int)( hi_right * 0.8f + hi_left * 0.2f ) );
 	}
 }
 

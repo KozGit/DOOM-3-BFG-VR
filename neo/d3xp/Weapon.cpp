@@ -3427,7 +3427,7 @@ void idWeapon::PresentWeaponOriginal( bool showViewModel )
 	
 	if( owner->IsLocallyControlled() )
 	{
-		owner->SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
+		owner->hands[GetHand()].SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
 	}
 }
 
@@ -3778,7 +3778,7 @@ void idWeapon::PresentWeapon( bool showViewModel, int hand )
 
 	if ( owner->IsLocallyControlled() )
 	{
-		owner->SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
+		owner->hands[hand].SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
 	}
 }
 /*
@@ -5185,7 +5185,7 @@ void idWeapon::Event_LaunchProjectiles( int num_projectiles, float spread, float
 		MuzzleFlashLight();
 	}
 	
-	owner->WeaponFireFeedback( &weaponDef->dict );
+	owner->WeaponFireFeedback( GetHand(), &weaponDef->dict );
 	
 	// reset muzzle smoke
 	weaponSmokeStartTime = gameLocal.realClientTime;
@@ -5366,7 +5366,7 @@ void idWeapon::Event_LaunchProjectilesEllipse( int num_projectiles, float spread
 		MuzzleFlashLight();
 	}
 	
-	owner->WeaponFireFeedback( &weaponDef->dict );
+	owner->WeaponFireFeedback( GetHand(), &weaponDef->dict );
 	
 	// reset muzzle smoke
 	weaponSmokeStartTime = gameLocal.time;
@@ -5664,12 +5664,12 @@ void idWeapon::Event_Melee()
 		}
 		
 		idThread::ReturnInt( hit );
-		owner->WeaponFireFeedback( &weaponDef->dict );
+		owner->WeaponFireFeedback( GetHand(), &weaponDef->dict );
 		return;
 	}
 	
 	idThread::ReturnInt( 0 );
-	owner->WeaponFireFeedback( &weaponDef->dict );
+	owner->WeaponFireFeedback( GetHand(), &weaponDef->dict );
 }
 
 /*

@@ -1056,7 +1056,9 @@ void idProjectile::Explode( const trace_t& collision, idEntity* ignore )
 		float lowMag = distScale * 0.75f;
 		int lowDuration = idMath::Ftoi( 500.0f * distScale );
 		
-		player->SetControllerShake( highMag, highDuration, lowMag, lowDuration );
+		// Carl: TODO calculate direction
+		player->hands[HAND_RIGHT].SetControllerShake( highMag, highDuration, lowMag, lowDuration );
+		player->hands[HAND_LEFT].SetControllerShake( highMag, highDuration, lowMag, lowDuration );
 	}
 	
 	// stop sound

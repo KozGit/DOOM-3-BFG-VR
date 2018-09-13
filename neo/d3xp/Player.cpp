@@ -1908,6 +1908,128 @@ void idHolster::UpdateSlot()
 #endif
 
 /*
+========================
+idPlayerHand::SetControllerShake
+========================
+*/
+void idPlayerHand::SetControllerShake( float highMagnitude, int highDuration, float lowMagnitude, int lowDuration )
+{
+	// the main purpose of having these buffer is so multiple, individual shake events can co-exist with each other,
+	// for instance, a constant low rumble from the chainsaw when it's idle and a harsh rumble when it's being used.
+
+	// find active buffer with similar magnitude values
+	int activeBufferWithSimilarMags = -1;
+	int inactiveBuffer = -1;
+	for( int i = 0; i < MAX_SHAKE_BUFFER; i++ )
+	{
+		if( gameLocal.GetTime() <= controllerShakeHighTime[i] || gameLocal.GetTime() <= controllerShakeLowTime[i] )
+		{
+			if( idMath::Fabs( highMagnitude - controllerShakeHighMag[i] ) <= 0.1f && idMath::Fabs( lowMagnitude - controllerShakeLowMag[i] ) <= 0.1f )
+			{
+				activeBufferWithSimilarMags = i;
+				break;
+			}
+		}
+		else
+		{
+			if( inactiveBuffer == -1 )
+			{
+				inactiveBuffer = i;		// first, inactive buffer..
+			}
+		}
+	}
+
+	if( activeBufferWithSimilarMags > -1 )
+	{
+		// average the magnitudes and adjust the time
+		controllerShakeHighMag[activeBufferWithSimilarMags] += highMagnitude;
+		controllerShakeHighMag[activeBufferWithSimilarMags] *= 0.5f;
+
+		controllerShakeLowMag[activeBufferWithSimilarMags] += lowMagnitude;
+		controllerShakeLowMag[activeBufferWithSimilarMags] *= 0.5f;
+
+		controllerShakeHighTime[activeBufferWithSimilarMags] = gameLocal.GetTime() + highDuration;
+		controllerShakeLowTime[activeBufferWithSimilarMags] = gameLocal.GetTime() + lowDuration;
+		controllerShakeTimeGroup = gameLocal.selectedGroup;
+		return;
+	}
+
+	if( inactiveBuffer == -1 )
+	{
+		inactiveBuffer = 0;			// FIXME: probably want to use the oldest buffer..
+	}
+
+	controllerShakeHighMag[inactiveBuffer] = highMagnitude;
+	controllerShakeLowMag[inactiveBuffer] = lowMagnitude;
+	controllerShakeHighTime[inactiveBuffer] = gameLocal.GetTime() + highDuration;
+	controllerShakeLowTime[inactiveBuffer] = gameLocal.GetTime() + lowDuration;
+	controllerShakeTimeGroup = gameLocal.selectedGroup;
+}
+
+void idPlayerHand::ResetControllerShake()
+{
+	for( int i = 0; i < MAX_SHAKE_BUFFER; i++ )
+	{
+		controllerShakeHighTime[i] = 0;
+	}
+
+	for( int i = 0; i < MAX_SHAKE_BUFFER; i++ )
+	{
+		controllerShakeHighMag[i] = 0.0f;
+	}
+
+	for( int i = 0; i < MAX_SHAKE_BUFFER; i++ )
+	{
+		controllerShakeLowTime[i] = 0;
+	}
+
+	for( int i = 0; i < MAX_SHAKE_BUFFER; i++ )
+	{
+		controllerShakeLowMag[i] = 0.0f;
+	}
+}
+
+void idPlayerHand::GetControllerShake( int & highMagnitude, int & lowMagnitude ) const
+{
+
+	if( Flicksync_InCutscene || gameLocal.inCinematic )
+	{
+		// no controller shake during cinematics
+		highMagnitude = 0;
+		lowMagnitude = 0;
+		return;
+	}
+
+	float lowMag = 0.0f;
+	float highMag = 0.0f;
+
+	lowMagnitude = 0;
+	highMagnitude = 0;
+
+	// use highest values from active buffers
+	for( int i = 0; i < MAX_SHAKE_BUFFER; i++ )
+	{
+		if( gameLocal.GetTimeGroupTime( controllerShakeTimeGroup ) < controllerShakeLowTime[i] )
+		{
+			if( controllerShakeLowMag[i] > lowMag )
+			{
+				lowMag = controllerShakeLowMag[i];
+			}
+		}
+		if( gameLocal.GetTimeGroupTime( controllerShakeTimeGroup ) < controllerShakeHighTime[i] )
+		{
+			if( controllerShakeHighMag[i] > highMag )
+			{
+				highMag = controllerShakeHighMag[i];
+			}
+		}
+	}
+
+	lowMagnitude = idMath::Ftoi( lowMag * 65535.0f );
+	highMagnitude = idMath::Ftoi( highMag * 65535.0f );
+}
+
+/*
 ==============
 idPlayerHand::idPlayerHand
 ==============
@@ -5968,7 +6090,7 @@ WeaponFireFeedback
 Called when a weapon fires, generates head twitches, etc
 ==================
 */
-void idPlayer::WeaponFireFeedback( const idDict* weaponDef )
+void idPlayer::WeaponFireFeedback( int hand, const idDict* weaponDef )
 {
 	// force a blink
 	blink_time = 0;
@@ -5988,7 +6110,7 @@ void idPlayer::WeaponFireFeedback( const idDict* weaponDef )
 	
 	if( IsLocallyControlled() )
 	{
-		SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
+		hands[hand].SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
 	}
 }
 
@@ -9277,7 +9399,10 @@ bool idPlayer::UpdateFocusPDA()
 						
 						//Rumble the controller to let player know they scored a touch.
 						//SetControllerShake( 0.5f, 100, 0.3f, 60 ); // these are the values from the machine gun
-						SetControllerShake( 0.1f, 12, 0.8f, 12 );
+
+						// Carl: Should the PDA vibrate/haptic feedback too?
+						hands[fingerHand].SetControllerShake( 0.1f, 12, 0.8f, 12 );
+						hands[pdahand].SetControllerShake( 0.1f, 12, 0.8f, 12 );
 					}
 					commonVr->scanningPDA = false;
 					return true;
@@ -9881,7 +10006,7 @@ void idPlayer::UpdateFocus()
 
 								//Rumble the controller to let player know they scored a touch.
 								//SetControllerShake( 0.5f, 100, 0.3f, 60 ); // these are the values from the machine gun
-								SetControllerShake( 0.1f, 12, 0.8f, 12 );
+								hands[fingerHand].SetControllerShake( 0.1f, 12, 0.8f, 12 );
 								
 								focusTime = gameLocal.time + FOCUS_GUI_TIME;
 								break;
@@ -15504,7 +15629,9 @@ void idPlayer::ControllerShakeFromDamage( int damage )
 		float lowMag = highMag * 0.75f;
 		int lowDuration = idMath::Ftoi( highDuration );
 		
-		SetControllerShake( highMag, highDuration, lowMag, lowDuration );
+		// Multiplayer damage from an unknown source to an unknown location. So shake both hands.
+		for( int h = 0; h < 2; h++ )
+			hands[h].SetControllerShake( highMag, highDuration, lowMag, lowDuration );
 	}
 	
 }
@@ -15537,7 +15664,8 @@ void idPlayer::ControllerShakeFromDamage( int damage, const idVec3 &dir )
 		{
 			float lowMag = highMag * 0.75f;
 			int lowDuration = idMath::Ftoi( highDuration );
-			SetControllerShake( highMag, highDuration, lowMag, lowDuration );
+			hands[HAND_LEFT].SetControllerShake( highMag, highDuration, lowMag, lowDuration );
+			hands[HAND_RIGHT].SetControllerShake( highMag, highDuration, lowMag, lowDuration );
 		}
 	}
 	
@@ -15832,7 +15960,7 @@ void idPlayer::Damage( idEntity* inflictor, idEntity* attacker, const idVec3& di
 	
 	if( common->IsMultiplayer() && IsLocallyControlled() )
 	{
-		ControllerShakeFromDamage( damage );
+		ControllerShakeFromDamage( damage, dir );
 	}
 	
 	// The client needs to know the final damage amount for predictive pain animations.
@@ -17848,7 +17976,7 @@ void idPlayer::CalculateWaist()
 
 void idPlayer::CalculateLeftHand()
 {
-	slotIndex_t oldSlot = hands[1].handSlot;
+	slotIndex_t oldSlot = hands[HAND_LEFT].handSlot;
 	slotIndex_t slot = SLOT_NONE;
 	if ( commonVr->hasHMD )
 	{
@@ -17868,7 +17996,7 @@ void idPlayer::CalculateLeftHand()
 				if ( vr_weaponHand.GetInteger() && i != SLOT_FLASHLIGHT_SHOULDER )
 					slotOrigin.y *= -1;
 				idVec3 origin = waistOrigin + slotOrigin * waistAxis;
-				if( ( hands[1].handOrigin - origin ).LengthSqr() < slots[i].radiusSq )
+				if( ( hands[HAND_LEFT].handOrigin - origin ).LengthSqr() < slots[i].radiusSq )
 				{
 					slot = (slotIndex_t)i;
 					break;
@@ -17878,19 +18006,19 @@ void idPlayer::CalculateLeftHand()
 	}
 	else
 	{
-		//hands[1].handOrigin = hmdOrigin + hmdAxis[2] * -5;
-		//hands[1].handAxis = hmdAxis;
+		//hands[HAND_LEFT].handOrigin = hmdOrigin + hmdAxis[2] * -5;
+		//hands[HAND_LEFT].handAxis = hmdAxis;
 	}
 	if( oldSlot != slot )
 	{
-		SetControllerShake(0, 0, vr_slotMag.GetFloat(), vr_slotDur.GetInteger());
+		hands[HAND_LEFT].SetControllerShake( vr_slotMag.GetFloat(), vr_slotDur.GetInteger(), vr_slotMag.GetFloat(), vr_slotDur.GetInteger() );
 	}
-	hands[1].handSlot = slot;
+	hands[HAND_LEFT].handSlot = slot;
 }
 
 void idPlayer::CalculateRightHand()
 {
-	slotIndex_t oldSlot = hands[0].handSlot;
+	slotIndex_t oldSlot = hands[HAND_RIGHT].handSlot;
 	slotIndex_t slot = SLOT_NONE;
 	if ( commonVr->hasHMD )
 	{
@@ -17910,7 +18038,7 @@ void idPlayer::CalculateRightHand()
 				if ( vr_weaponHand.GetInteger() && i != SLOT_FLASHLIGHT_SHOULDER )
 					slotOrigin.y *= -1;
 				idVec3 origin = waistOrigin + slotOrigin * waistAxis;
-				if( (hands[0].handOrigin - origin).LengthSqr() < slots[i].radiusSq )
+				if( (hands[HAND_RIGHT].handOrigin - origin).LengthSqr() < slots[i].radiusSq )
 				{
 					slot = (slotIndex_t)i;
 					break;
@@ -17925,9 +18053,9 @@ void idPlayer::CalculateRightHand()
 	}
 	if( oldSlot != slot )
 	{
-		SetControllerShake(vr_slotMag.GetFloat(), vr_slotDur.GetInteger(), 0, 0);
+		hands[HAND_RIGHT].SetControllerShake(vr_slotMag.GetFloat(), vr_slotDur.GetInteger(), vr_slotMag.GetFloat(), vr_slotDur.GetInteger() );
 	}
-	hands[0].handSlot = slot;
+	hands[HAND_RIGHT].handSlot = slot;
 }
 
 /*
@@ -20649,7 +20777,7 @@ void idPlayer::SetControllerShake( float magnitude, int duration, const idVec3 &
 {
 	idVec3 dir = direction;
 	dir.Normalize();
-	idVec3 left = hands[1].handOrigin - hands[0].handOrigin;
+	idVec3 left = hands[HAND_LEFT].handOrigin - hands[HAND_RIGHT].handOrigin;
 	float side = left * dir * 0.5 + 0.5;
 
 	// push magnitude up so the middle doesn't feel as weak
@@ -20660,140 +20788,19 @@ void idPlayer::SetControllerShake( float magnitude, int duration, const idVec3 &
 	float leftMag = magnitude * leftSide;
 	float rightMag = magnitude * rightSide;
 
-	SetControllerShake( rightMag, duration, leftMag, duration );
+	hands[HAND_LEFT].SetControllerShake( leftMag, duration, leftMag, duration );
+	hands[HAND_RIGHT].SetControllerShake( rightMag, duration, rightMag, duration );
 }
 
 /*
 ========================
-idView::SetControllerShake
-========================
-*/
-void idPlayer::SetControllerShake( float highMagnitude, int highDuration, float lowMagnitude, int lowDuration )
-{
-
-	// the main purpose of having these buffer is so multiple, individual shake events can co-exist with each other,
-	// for instance, a constant low rumble from the chainsaw when it's idle and a harsh rumble when it's being used.
-	
-	// find active buffer with similar magnitude values
-	int activeBufferWithSimilarMags = -1;
-	int inactiveBuffer = -1;
-	for( int i = 0; i < MAX_SHAKE_BUFFER; i++ )
-	{
-		if( gameLocal.GetTime() <= controllerShakeHighTime[i] || gameLocal.GetTime() <= controllerShakeLowTime[i] )
-		{
-			if( idMath::Fabs( highMagnitude - controllerShakeHighMag[i] ) <= 0.1f && idMath::Fabs( lowMagnitude - controllerShakeLowMag[i] ) <= 0.1f )
-			{
-				activeBufferWithSimilarMags = i;
-				break;
-			}
-		}
-		else
-		{
-			if( inactiveBuffer == -1 )
-			{
-				inactiveBuffer = i;		// first, inactive buffer..
-			}
-		}
-	}
-	
-	if( activeBufferWithSimilarMags > -1 )
-	{
-		// average the magnitudes and adjust the time
-		controllerShakeHighMag[ activeBufferWithSimilarMags ] += highMagnitude;
-		controllerShakeHighMag[ activeBufferWithSimilarMags ] *= 0.5f;
-		
-		controllerShakeLowMag[ activeBufferWithSimilarMags ] += lowMagnitude;
-		controllerShakeLowMag[ activeBufferWithSimilarMags ] *= 0.5f;
-		
-		controllerShakeHighTime[ activeBufferWithSimilarMags ] = gameLocal.GetTime() + highDuration;
-		controllerShakeLowTime[ activeBufferWithSimilarMags ] = gameLocal.GetTime() + lowDuration;
-		controllerShakeTimeGroup = gameLocal.selectedGroup;
-		return;
-	}
-	
-	if( inactiveBuffer == -1 )
-	{
-		inactiveBuffer = 0;			// FIXME: probably want to use the oldest buffer..
-	}
-	
-	controllerShakeHighMag[ inactiveBuffer ] = highMagnitude;
-	controllerShakeLowMag[ inactiveBuffer ] = lowMagnitude;
-	controllerShakeHighTime[ inactiveBuffer ] = gameLocal.GetTime() + highDuration;
-	controllerShakeLowTime[ inactiveBuffer ] = gameLocal.GetTime() + lowDuration;
-	controllerShakeTimeGroup = gameLocal.selectedGroup;
-}
-
-/*
-========================
-idView::ResetControllerShake
+idPlayer::ResetControllerShake
 ========================
 */
 void idPlayer::ResetControllerShake()
 {
-	for( int i = 0; i < MAX_SHAKE_BUFFER; i++ )
-	{
-		controllerShakeHighTime[i] = 0;
-	}
-	
-	for( int i = 0; i < MAX_SHAKE_BUFFER; i++ )
-	{
-		controllerShakeHighMag[i] = 0.0f;
-	}
-	
-	for( int i = 0; i < MAX_SHAKE_BUFFER; i++ )
-	{
-		controllerShakeLowTime[i] = 0;
-	}
-	
-	for( int i = 0; i < MAX_SHAKE_BUFFER; i++ )
-	{
-		controllerShakeLowMag[i] = 0.0f;
-	}
-}
-
-/*
-========================
-idPlayer::GetControllerShake
-========================
-*/
-void idPlayer::GetControllerShake( int& highMagnitude, int& lowMagnitude ) const
-{
-
-	if( Flicksync_InCutscene || gameLocal.inCinematic )
-	{
-		// no controller shake during cinematics
-		highMagnitude = 0;
-		lowMagnitude = 0;
-		return;
-	}
-	
-	float lowMag = 0.0f;
-	float highMag = 0.0f;
-	
-	lowMagnitude = 0;
-	highMagnitude = 0;
-	
-	// use highest values from active buffers
-	for( int i = 0; i < MAX_SHAKE_BUFFER; i++ )
-	{
-		if( gameLocal.GetTimeGroupTime( controllerShakeTimeGroup ) < controllerShakeLowTime[i] )
-		{
-			if( controllerShakeLowMag[i] > lowMag )
-			{
-				lowMag = controllerShakeLowMag[i];
-			}
-		}
-		if( gameLocal.GetTimeGroupTime( controllerShakeTimeGroup ) < controllerShakeHighTime[i] )
-		{
-			if( controllerShakeHighMag[i] > highMag )
-			{
-				highMag = controllerShakeHighMag[i];
-			}
-		}
-	}
-	
-	lowMagnitude = idMath::Ftoi( lowMag * 65535.0f );
-	highMagnitude = idMath::Ftoi( highMag * 65535.0f );
+	for( int h = 0; h < 2; h++ )
+		hands[h].ResetControllerShake();
 }
 
 /*

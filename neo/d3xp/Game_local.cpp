@@ -2928,13 +2928,17 @@ void idGameLocal::BuildReturnValue( gameReturn_t& ret )
 	
 	if( GetLocalPlayer() != NULL )
 	{
-		GetLocalPlayer()->GetControllerShake( ret.vibrationLow, ret.vibrationHigh );
+		for( int h = 0; h < 2; h++ )
+			GetLocalPlayer()->hands[h].GetControllerShake( ret.vibrationLow[h], ret.vibrationHigh[h] );
 	}
 	else
 	{
 		// Dedicated server?
-		ret.vibrationLow = 0;
-		ret.vibrationHigh = 0;
+		for( int h = 0; h < 2; h++ )
+		{
+			ret.vibrationLow[h] = 0;
+			ret.vibrationHigh[h] = 0;
+		}
 	}
 	
 	// see if a target_sessionCommand has forced a changelevel
@@ -4635,7 +4639,7 @@ void idGameLocal::RadiusDamage( const idVec3& origin, idEntity* inflictor, idEnt
 					idPlayer* player = static_cast< idPlayer* >( ent );
 					if( player )
 					{
-						player->ControllerShakeFromDamage( damage );
+						player->ControllerShakeFromDamage( damage, dir );
 					}
 				}
 			}

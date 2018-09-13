@@ -46,18 +46,20 @@ struct gameReturn_t
 {
 
 	gameReturn_t() :
-		syncNextGameFrame( false ),
-		vibrationLow( 0 ),
-		vibrationHigh( 0 )
+		syncNextGameFrame( false )
 	{
-	
+		for( int h = 0; h < 2; h++ )
+		{
+			vibrationLow[h] = 0;
+			vibrationHigh[h] = 0;
+		}
 	}
 	
 	char		sessionCommand[MAX_STRING_CHARS];	// "map", "disconnect", "victory", etc
 	bool		syncNextGameFrame;					// used when cinematics are skipped to prevent session from simulating several game frames to
 	// keep the game time in sync with real time
-	int			vibrationLow;
-	int			vibrationHigh;
+	int			vibrationLow[2];
+	int			vibrationHigh[2];
 };
 
 #define TIME_GROUP1		0
