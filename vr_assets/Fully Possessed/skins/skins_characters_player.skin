@@ -1062,5 +1062,102 @@ skin skins/characters/player/doomguy/vrBody {
 	vr/lstatwatchguihands textures/common/nodraw
 }
 
+skin skins/characters/player/phobos {
+	models/characters/male_npc/soldier/soldier textures/common/nodraw
+	models/characters/player/body models/characters/player/phobos_body
+	//models/characters/male_npc/marine/marine2 textures/common/nodraw
+	models/characters/player/arm2 models/characters/player/arm2_b
 
+	vr/leftarm	textures/common/nodraw
+	vr/rightarm textures/common/nodraw
+	vr/statwatchbody textures/common/nodraw
+	vr/statwatchguibody textures/common/nodraw
+	vr/statwatchhands textures/common/nodraw
+	vr/statwatchguihands textures/common/nodraw
+	vr/lstatwatchbody textures/common/nodraw
+	vr/lstatwatchguibody textures/common/nodraw
+	vr/lstatwatchhands textures/common/nodraw
+	vr/lstatwatchguihands textures/common/nodraw
+}
 
+skin skins/characters/player/phobos_tshirt {
+	models/characters/male_npc/soldier/soldier models/characters/male_npc/soldier/soldier_b
+	models/characters/player/body textures/common/nodraw
+	models/characters/male_npc/marine/marine2 textures/common/nodraw
+	models/characters/player/arm2 models/characters/player/arm2_b
+	
+	vr/leftarm textures/common/nodraw
+	vr/rightarm textures/common/nodraw
+	//vr/statwatchbody textures/common/nodraw
+	//vr/statwatchguibody textures/common/nodraw
+	vr/statwatchhands textures/common/nodraw
+	vr/statwatchguihands textures/common/nodraw
+	vr/lstatwatchhands textures/common/nodraw
+	vr/lstatwatchguihands textures/common/nodraw
+}
+
+skin skins/characters/player/phobos_tshirt/vrBody {
+	models/characters/male_npc/soldier/soldier models/characters/male_npc/soldier/soldier_b
+	models/characters/player/body textures/common/nodraw
+	models/characters/male_npc/marine/marine2 textures/common/nodraw
+	models/characters/player/arm2 models/characters/player/arm2_b
+	
+	vr/leftarm textures/common/nodraw
+	vr/rightarm textures/common/nodraw
+	//vr/statwatchbody textures/common/nodraw
+	//vr/statwatchguibody textures/common/nodraw
+	vr/statwatchhands textures/common/nodraw
+	vr/statwatchguihands textures/common/nodraw
+	vr/lstatwatchhands textures/common/nodraw
+	vr/lstatwatchguihands textures/common/nodraw
+}
+
+skin skins/characters/player/phobos/vrBody {
+	models/characters/male_npc/soldier/soldier textures/common/nodraw
+	models/characters/player/body models/characters/player/phobos_body
+	//models/characters/male_npc/marine/marine2 textures/common/nodraw
+	models/characters/player/arm2 models/characters/player/arm2_b
+	
+	vr/leftarm textures/common/nodraw
+	vr/rightarm textures/common/nodraw
+	//vr/statwatchbody textures/common/nodraw
+	//vr/statwatchguibody textures/common/nodraw
+	vr/statwatchhands textures/common/nodraw
+	vr/statwatchguihands textures/common/nodraw
+	vr/lstatwatchhands textures/common/nodraw
+	vr/lstatwatchguihands textures/common/nodraw
+}
+
+skin skins/characters/player/phobos/vrWeaponsOnly {
+	models/characters/male_npc/soldier/soldier textures/common/nodraw
+	models/characters/player/body textures/common/nodraw
+	models/characters/male_npc/marine/marine2 textures/common/nodraw
+	models/characters/player/arm2 textures/common/nodraw
+	
+	vr/leftarm textures/common/nodraw
+	vr/rightarm textures/common/nodraw
+	vr/statwatchbody textures/common/nodraw
+	vr/statwatchguibody textures/common/nodraw
+	vr/statwatchhands textures/common/nodraw
+	vr/statwatchguihands textures/common/nodraw
+	vr/lstatwatchbody textures/common/nodraw
+	vr/lstatwatchguibody textures/common/nodraw
+	vr/lstatwatchhands textures/common/nodraw
+	vr/lstatwatchguihands textures/common/nodraw
+}
+
+skin skins/characters/player/phobos/vrHandsOnly {
+	models/characters/male_npc/soldier/soldier textures/common/nodraw
+	models/characters/player/body textures/common/nodraw
+	models/characters/male_npc/marine/marine2 textures/common/nodraw
+	models/characters/player/arm2 textures/common/nodraw
+
+	vr/leftarm	models/characters/player/arm2_b
+	vr/rightarm models/characters/player/arm2_b
+	vr/statwatchbody textures/common/nodraw
+	vr/statwatchguibody textures/common/nodraw
+	vr/lstatwatchbody textures/common/nodraw
+	vr/lstatwatchguibody textures/common/nodraw
+	//vr/statwatchhands textures/common/nodraw
+	//vr/statwatchguihands textures/common/nodraw
+}

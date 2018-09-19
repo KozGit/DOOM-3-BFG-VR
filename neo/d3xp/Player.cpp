@@ -5543,6 +5543,13 @@ void idPlayer::UpdateSkinSetup()
 			else
 				skinN = "skins/characters/player/doomguy";
 		}
+		else if( bonusChar == BONUS_CHAR_PHOBOS || strstr( skinN.c_str(), "skins/characters/player/phobos" ) )
+		{
+			if( ( strstr( skinN.c_str(), "skins/characters/player/phobos_tshirt" ) || strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) ) && (commonVr->thirdPersonMovement || vr_playerBodyMode.GetInteger() == 0 ) )
+				skinN = "skins/characters/player/phobos_tshirt";
+			else
+				skinN = "skins/characters/player/phobos";
+		}
 		else if( bonusChar == BONUS_CHAR_ASH || ( strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) && ( bonusChar == BONUS_CHAR_NONE || bonusChar == BONUS_CHAR_MARINE || bonusChar == BONUS_CHAR_ROLAND || bonusChar == BONUS_CHAR_BETRUGER || bonusChar == BONUS_CHAR_SWANN ) ) )
 		{
 			skinN = "skins/characters/player/tshirt_mp";

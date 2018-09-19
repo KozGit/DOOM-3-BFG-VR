@@ -39,6 +39,24 @@ models/characters/male_npc/marine/marine2_arm2_vrik
 	   specularmap	models/characters/player_character/body/body_arm2_s.tga
 }
 
+models/characters/player/arm2_b
+{
+        noselfShadow
+		//noShadows
+		clamp
+	renderbump  -size 1024 2048 -trace 0.1 -colorMap   models/characters/player/arm2_local.tga models/characters/player/arm1_hi.lwo
+
+
+
+        	diffusemap	models/characters/player/arm2_b.tga
+		{
+ 		  blend bumpmap
+          map  addnormals(models/characters/player/arm2_local.tga, heightmap(models/characters/player/arm2_h.tga, 3 ) )
+ 		  
+     	}
+                  specularmap	models/characters/player/arm2_s.tga
+}
+
 models/characters/player/doomguy_body
 {
         noselfShadow
@@ -48,6 +66,25 @@ models/characters/player/doomguy_body
 
 
  				diffusemap	  models/characters/player_character/body/doomguy_body.tga
+
+		{
+ 		  blend bumpmap
+          map  addnormals(models/characters/player/body_local.tga, heightmap(models/characters/player/body_h.tga, 5 ) )
+ 		  
+     	}
+		
+                  specularmap	models/characters/player/body_s.tga
+}
+
+models/characters/player/phobos_body
+{
+        noselfShadow
+		clamp
+		collision	
+	renderbump  -size 1024 2048 -trace 0.03 -colorMap -aa 2  models/characters/player/body_local.tga models/characters/player/body_hi.lwo
+
+
+ 				diffusemap	  models/characters/player_character/body/phobos_body.tga
 
 		{
  		  blend bumpmap

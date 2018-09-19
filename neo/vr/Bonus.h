@@ -44,6 +44,7 @@ typedef enum
 	BONUS_CHAR_SWANN, // 
 	BONUS_CHAR_ROLAND, // Guy you meet in the vent shaft
 	BONUS_CHAR_DOOMGUY, // Doom 1 and Doom 2's Doomguy (with Chainsaw, double barrel?)
+	BONUS_CHAR_PHOBOS, // Quake 3's Phobos (a black version of Doomguy in orange armour with no special weapons)
 	BONUS_CHAR_SLAYER, // Doom 2016's Doom Slayer (with praetorian armor, double jump boots)
 	BONUS_CHAR_ETERNAL, // Doom Eternal's Doom Slayer (with meathook, bayonet left arm, and shoulder mounted weapon?)
 	BONUS_CHAR_VFR, // Doom VFR's Combat Chasis
@@ -55,7 +56,7 @@ typedef enum
 extern idCVar bonus_char;
 extern idCVar bonus_char_marine, bonus_char_roe, bonus_char_le;
 extern idCVar bonus_char_campbell, bonus_char_sarge, bonus_char_betruger, bonus_char_swann, bonus_char_roland;
-extern idCVar bonus_char_doomguy, bonus_char_slayer, bonus_char_eternal, bonus_char_vfr;
+extern idCVar bonus_char_doomguy, bonus_char_phobos, bonus_char_slayer, bonus_char_eternal, bonus_char_vfr;
 extern idCVar bonus_char_ash, bonus_char_samus, bonus_char_witch;
 extern idCVar bonus_chainsaw, bonus_boomstick;
 extern idCVar bonus_cataract, bonus_cataract_eye;

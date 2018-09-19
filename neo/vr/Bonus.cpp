@@ -20,6 +20,7 @@ idCVar bonus_char_betruger( "bonus_char_betruger", "0", CVAR_BOOL | CVAR_GAME | 
 idCVar bonus_char_swann( "bonus_char_swann", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Swann from Doom 3" );
 idCVar bonus_char_roland( "bonus_char_roland", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character R. Roland from Doom 3" );
 idCVar bonus_char_doomguy( "bonus_char_doomguy", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Doomguy from Doom 1 and 2" );
+idCVar bonus_char_phobos( "bonus_char_phobos", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Phobos from Quake 3" );
 idCVar bonus_char_slayer( "bonus_char_slayer", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Doom Slayer from Doom 2016" );
 idCVar bonus_char_eternal( "bonus_char_eternal", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Doom Slayer from Doom Eternal" );
 idCVar bonus_char_vfr( "bonus_char_vfr", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Dr. M. Peters (via Combat Chasis) from Doom VFR" );
@@ -45,6 +46,7 @@ bool BonusCharUnlocked( bonus_char_t ch )
 	case BONUS_CHAR_SWANN: return bonus_char_swann.GetBool();
 	case BONUS_CHAR_ROLAND: return bonus_char_roland.GetBool();
 	case BONUS_CHAR_DOOMGUY: return bonus_char_doomguy.GetBool();
+	case BONUS_CHAR_PHOBOS: return bonus_char_phobos.GetBool();
 	case BONUS_CHAR_SLAYER: return bonus_char_slayer.GetBool();
 	case BONUS_CHAR_ETERNAL: return bonus_char_eternal.GetBool();
 	case BONUS_CHAR_VFR: return bonus_char_vfr.GetBool();
@@ -85,6 +87,7 @@ const char* BonusCharDefPlayer( bonus_char_t ch, const char* default, const char
 		else
 			return hell ? "bonus_player_roland_hell" : "bonus_player_roland_d3xp";
 	case BONUS_CHAR_DOOMGUY: return hell ? "bonus_player_doomguy_hell" : "bonus_player_doomguy";
+	case BONUS_CHAR_PHOBOS: return hell ? "bonus_player_phobos_hell" : "bonus_player_phobos";
 	case BONUS_CHAR_SLAYER: return hell ? "bonus_player_slayer_hell" : "bonus_player_slayer";
 	case BONUS_CHAR_ETERNAL: return hell ? "bonus_player_eternal_hell" : "bonus_player_eternal";
 	case BONUS_CHAR_VFR: return hell ? "bonus_player_vfr_hell" : "bonus_player_vfr";
@@ -159,6 +162,7 @@ const char * BonusCharName( bonus_char_t ch, bool unlocked )
 	case BONUS_CHAR_SWANN: return unlocked ? "Swann (D3)" : "Locked 5 (D3)";
 	case BONUS_CHAR_ROLAND: return unlocked ? "R Roland (D3)" : "Locked 6 (D3)";
 	case BONUS_CHAR_DOOMGUY: return unlocked ? "Doomguy (D2)" : "Locked (D2)";
+	case BONUS_CHAR_PHOBOS: return unlocked ? "Phobos (Q3)" : "Locked (Q3)";
 	case BONUS_CHAR_SLAYER: return unlocked ? "Slayer (2016)" : "Locked (2016)";
 	case BONUS_CHAR_ETERNAL: return unlocked ? "Slayer (Eternal)" : "Locked (Eternal)";
 	case BONUS_CHAR_VFR: return unlocked ? "M. Peters (VFR)" : "Locked (VFR)";
@@ -185,6 +189,7 @@ const char * BonusCharDescription( bonus_char_t ch )
 		case BONUS_CHAR_SWANN: return "Weak character with nothing but access codes";
 		case BONUS_CHAR_ROLAND: return "Scared weak survivor hiding in the Mars City vents";
 		case BONUS_CHAR_DOOMGUY: return "Doomguy from Doom 2 with chainsaw and double-barrel shotgun";
+		case BONUS_CHAR_PHOBOS: return "Phobos from Quake 3 with no special weapons";
 		case BONUS_CHAR_SLAYER: return "Doom Slayer with double jump boots";
 		case BONUS_CHAR_ETERNAL: return "Doom Slayer with double-barrel shotgun";
 		case BONUS_CHAR_VFR: return "Combat chasis with grenades, shield burst, and teleporter";
@@ -207,6 +212,7 @@ const char * BonusCharDescription( bonus_char_t ch )
 		case BONUS_CHAR_SWANN: return "Unlock by ";
 		case BONUS_CHAR_ROLAND: return "Unlock by talking to R. Roland in the vents";
 		case BONUS_CHAR_DOOMGUY: return "Unlock by beating, or getting the chainsaw in, Doom 1 or 2";
+		case BONUS_CHAR_PHOBOS: return "Unlock by ";
 		case BONUS_CHAR_SLAYER: return "Unlock by playing Doom 2016";
 		case BONUS_CHAR_ETERNAL: return "Unlock by console command bonus_char_eternal";
 		case BONUS_CHAR_VFR: return "Unlock by playing Doom VFR";
@@ -285,6 +291,9 @@ idStr BonusCharSkin( idStr skinname, bonus_char_t ch )
 	{
 		switch( bonus_char.GetInteger() )
 		{
+		case BONUS_CHAR_PHOBOS:
+			skinname = "skins/characters/player/phobos_tshirt/vrBody";
+			break;
 		case BONUS_CHAR_ASH:
 			// same skin
 			break;
@@ -296,6 +305,9 @@ idStr BonusCharSkin( idStr skinname, bonus_char_t ch )
 	{
 		switch( bonus_char.GetInteger() )
 		{
+		case BONUS_CHAR_PHOBOS:
+			skinname = "skins/characters/player/phobos_tshirt";
+			break;
 		case BONUS_CHAR_ASH:
 			// same skin
 			break;
@@ -324,6 +336,8 @@ idStr BonusCharReplaceTShirtModel( bonus_char_t ch )
 	case BONUS_CHAR_SARGE:
 	case BONUS_CHAR_LE:
 		return "npc_marine";
+	case BONUS_CHAR_PHOBOS:
+		return "black_soldier_tshirt";
 
 	case BONUS_CHAR_ROE:
 		return "npc_marine"; // Carl: Close, but not perfect
@@ -381,6 +395,8 @@ const char* BonusCharReplaceIncompatibleHead( const char* m, bonus_char_t ch )
 			return "head_swann";
 		case BONUS_CHAR_ROLAND:
 			return "model_roland_head"; // marscity2_ceiling_head
+		case BONUS_CHAR_PHOBOS:
+			return "head_black";
 		case BONUS_CHAR_DOOMGUY:
 		case BONUS_CHAR_SLAYER:
 		case BONUS_CHAR_ETERNAL:
@@ -393,6 +409,8 @@ const char* BonusCharReplaceIncompatibleHead( const char* m, bonus_char_t ch )
 	}
 	return m;
 }
+
+#define eq(s1, s2) ( idStr::Icmp(s1, s2) == 0 )
 
 const char* BonusCharReplaceIncompatibleEntityClass( const char* e, bonus_char_t ch )
 {

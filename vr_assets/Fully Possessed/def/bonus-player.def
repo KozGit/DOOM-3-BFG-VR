@@ -42,9 +42,20 @@ model model_d3_sp_tshirt {
 // Doomguy
 model model_d2_sp_marine {
 	inherit model_d3_sp_marine
-	skin								skins/characters/player/doomguy_body.skin
+	skin								skins/characters/player/doomguy.skin
 }
 
+// Doomguy
+model model_q3_sp_phobos {
+	inherit model_d3_sp_marine
+	skin								skins/characters/player/phobos.skin
+}
+
+// Phobos
+model black_soldier_tshirt {
+	inherit marscity_soldier_black
+	skin								skins/characters/npcs/soldier_black
+}
 
 model model_d3_sp_helmet {
 	mesh							models/md5/characters/npcs/heads/shelmet.md5mesh
@@ -735,6 +746,30 @@ entityDef bonus_player_doomguy  {
 
 entityDef bonus_player_doomguy_hell  {
 	"inherit"							"bonus_player_doomguy"
+
+	"skin_player"						"skins/hell/player_vrik"
+	"skin_player_d3xp"					"skins/hell/player_d3xp_vrik"
+	"skin_playerteleportin_d3xp"		"skins/hell/playerteleportin_vrik"
+	"skin_playerteleportin"				"skins/hell/playerteleportin"
+	"skin_player1"						"skins/hell/player_d3xp"
+	"skin_player2"						"skins/hell/player"
+}
+
+entityDef bonus_player_phobos  {
+	"inherit"							"bonus_player_sp"
+	"model"								"model_q3_sp_phobos"
+	"def_head"							"head_black"
+
+	"copy_joint_world eyecontrol"		""	
+
+	"skin_body" 						"skins/characters/player/phobos/vrBody"
+	"skin_weapons" 						"skins/characters/player/phobos/vrWeaponsOnly"
+	"skin_hands" 						"skins/characters/player/phobos/vrHandsOnly"
+	"skin_tshirt"						"skins/characters/player/phobos_tshirt/vrBody"
+}
+
+entityDef bonus_player_phobos_hell  {
+	"inherit"							"bonus_player_phobos"
 
 	"skin_player"						"skins/hell/player_vrik"
 	"skin_player_d3xp"					"skins/hell/player_d3xp_vrik"
