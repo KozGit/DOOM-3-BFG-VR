@@ -20,7 +20,7 @@ idCVar bonus_char_betruger( "bonus_char_betruger", "0", CVAR_BOOL | CVAR_GAME | 
 idCVar bonus_char_swann( "bonus_char_swann", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Swann from Doom 3" );
 idCVar bonus_char_roland( "bonus_char_roland", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character R. Roland from Doom 3" );
 idCVar bonus_char_doomguy( "bonus_char_doomguy", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Doomguy from Doom 1 and 2" );
-idCVar bonus_char_phobos( "bonus_char_phobos", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Phobos from Quake 3" );
+idCVar bonus_char_phobos( "bonus_char_phobos", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Phobos from Quake 3" );
 idCVar bonus_char_slayer( "bonus_char_slayer", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Doom Slayer from Doom 2016" );
 idCVar bonus_char_eternal( "bonus_char_eternal", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Doom Slayer from Doom Eternal" );
 idCVar bonus_char_vfr( "bonus_char_vfr", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Unlocked bonus character Dr. M. Peters (via Combat Chasis) from Doom VFR" );
@@ -212,7 +212,7 @@ const char * BonusCharDescription( bonus_char_t ch )
 		case BONUS_CHAR_SWANN: return "Unlock by ";
 		case BONUS_CHAR_ROLAND: return "Unlock by talking to R. Roland in the vents";
 		case BONUS_CHAR_DOOMGUY: return "Unlock by beating, or getting the chainsaw in, Doom 1 or 2";
-		case BONUS_CHAR_PHOBOS: return "Unlock by ";
+		case BONUS_CHAR_PHOBOS: return "Unlock by console command bonus_char_phobos"; // starts unlocked
 		case BONUS_CHAR_SLAYER: return "Unlock by playing Doom 2016";
 		case BONUS_CHAR_ETERNAL: return "Unlock by console command bonus_char_eternal";
 		case BONUS_CHAR_VFR: return "Unlock by playing Doom VFR";
@@ -287,7 +287,7 @@ const char *BonusCharMeshHead( bonus_char_t ch )
 
 idStr BonusCharSkin( idStr skinname, bonus_char_t ch )
 {
-	if( ( skinname.Icmp( "skins/characters/npcs/marine_player.skin" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_MARINE ) )
+	if( ( skinname.Icmp( "skins/characters/npcs/marine_player.skin" ) == 0 ) )
 	{
 		switch( bonus_char.GetInteger() )
 		{
@@ -301,7 +301,7 @@ idStr BonusCharSkin( idStr skinname, bonus_char_t ch )
 			skinname = "";
 		}
 	}
-	else if( ( skinname.Icmp( "skins/characters/npcs/marine_player_bag.skin" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_MARINE ) )
+	else if( ( skinname.Icmp( "skins/characters/npcs/marine_player_bag.skin" ) == 0 ) )
 	{
 		switch( bonus_char.GetInteger() )
 		{
@@ -325,6 +325,8 @@ idStr BonusCharReplaceTShirtModel( bonus_char_t ch )
 	// char_hazmat (npc_hazmat is the same), 
 	switch( bonus_char.GetInteger() )
 	{
+	case BONUS_CHAR_MARINE:
+		return "npc_player_armour";
 	case BONUS_CHAR_BETRUGER:
 		return "char_betruger";
 	case BONUS_CHAR_SWANN:
@@ -344,14 +346,13 @@ idStr BonusCharReplaceTShirtModel( bonus_char_t ch )
 	case BONUS_CHAR_DOOMGUY:
 	case BONUS_CHAR_SLAYER:
 	case BONUS_CHAR_ETERNAL:
-		return "npc_marine"; // Carl: This is not ideal! But there is no compatible player model wearing Doom 3 player's armor.
+		return "npc_player_armour"; // Carl: Added this compatible player model wearing Doom 3 player's armor.
 	case BONUS_CHAR_SAMUS:
 	case BONUS_CHAR_VFR:
 		return "npc_marine"; // We don't have proper models for these
 	case BONUS_CHAR_WITCH:
 		return "npc_suit";
 	case BONUS_CHAR_ASH:
-	case BONUS_CHAR_MARINE:
 	default:
 		return "npc_tshirt";
 	}

@@ -5550,7 +5550,7 @@ void idPlayer::UpdateSkinSetup()
 			else
 				skinN = "skins/characters/player/phobos";
 		}
-		else if( bonusChar == BONUS_CHAR_ASH || ( strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) && ( bonusChar == BONUS_CHAR_NONE || bonusChar == BONUS_CHAR_MARINE || bonusChar == BONUS_CHAR_ROLAND || bonusChar == BONUS_CHAR_BETRUGER || bonusChar == BONUS_CHAR_SWANN ) ) )
+		else if( bonusChar == BONUS_CHAR_ASH || ( strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) && ( bonusChar == BONUS_CHAR_NONE || bonusChar == BONUS_CHAR_ROLAND || bonusChar == BONUS_CHAR_BETRUGER || bonusChar == BONUS_CHAR_SWANN ) ) )
 		{
 			skinN = "skins/characters/player/tshirt_mp";
 		}

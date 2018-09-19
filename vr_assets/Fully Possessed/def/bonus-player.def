@@ -39,19 +39,27 @@ model model_d3_sp_tshirt {
 	skin								skins/characters/player/tshirt_mp
 }
 
+// Doom 3's Doom Marine in his armour, rigged to match other NPCs
+model npc_player_armour {
+	inherit							npc_base
+	mesh							models/md5/chars/player_armour.md5mesh
+	channel torso					( *Waist )
+	channel legs					( origin Body Body2 *Hips -*Waist SPINNER eyecontrol chair)
+}
+
 // Doomguy
 model model_d2_sp_marine {
 	inherit model_d3_sp_marine
 	skin								skins/characters/player/doomguy.skin
 }
 
-// Doomguy
+// Phobos
 model model_q3_sp_phobos {
 	inherit model_d3_sp_marine
 	skin								skins/characters/player/phobos.skin
 }
 
-// Phobos
+// Phobos in his T-Shirt
 model black_soldier_tshirt {
 	inherit marscity_soldier_black
 	skin								skins/characters/npcs/soldier_black

@@ -389,8 +389,8 @@ void idMenuScreen_Shell_NewGame::idMenuDataSource_Shell_NewGame::AdjustField( co
 	switch( fieldIndex ) {
 	case NEWGAME_FIELD_CHARACTER:
 	{
-		static const int numValues = 15;
-		static const int values[numValues] = { BONUS_CHAR_NONE, BONUS_CHAR_MARINE, BONUS_CHAR_ROE, BONUS_CHAR_LE, 
+		static const int numValues = 16;
+		static const int values[numValues] = { BONUS_CHAR_NONE, BONUS_CHAR_PHOBOS, BONUS_CHAR_MARINE, BONUS_CHAR_ROE, BONUS_CHAR_LE,
 			BONUS_CHAR_CAMPBELL, BONUS_CHAR_SARGE, BONUS_CHAR_BETRUGER, BONUS_CHAR_SWANN,
 			BONUS_CHAR_DOOMGUY, BONUS_CHAR_SLAYER, BONUS_CHAR_VFR, BONUS_CHAR_ETERNAL,
 			BONUS_CHAR_ASH, BONUS_CHAR_SAMUS, BONUS_CHAR_WITCH };
