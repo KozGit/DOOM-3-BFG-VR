@@ -340,12 +340,13 @@ idStr BonusCharReplaceTShirtModel( bonus_char_t ch )
 		return "npc_marine";
 	case BONUS_CHAR_PHOBOS:
 		return "black_soldier_tshirt";
+	case BONUS_CHAR_SLAYER:
+	case BONUS_CHAR_ETERNAL:
+		return "npc_doom_slayer"; // Carl: Added this 
 
 	case BONUS_CHAR_ROE:
 		return "npc_marine"; // Carl: Close, but not perfect
 	case BONUS_CHAR_DOOMGUY:
-	case BONUS_CHAR_SLAYER:
-	case BONUS_CHAR_ETERNAL:
 		return "npc_player_armour"; // Carl: Added this compatible player model wearing Doom 3 player's armor.
 	case BONUS_CHAR_SAMUS:
 	case BONUS_CHAR_VFR:
@@ -403,7 +404,7 @@ const char* BonusCharReplaceIncompatibleHead( const char* m, bonus_char_t ch )
 		case BONUS_CHAR_ETERNAL:
 		case BONUS_CHAR_SAMUS:
 		case BONUS_CHAR_VFR:
-			m = "model_d3le_sp_helmet";
+			m = "head_slayer";
 			break;
 		// Carl: Other heads are handled elsewhere because they're compatible with head_player
 		}

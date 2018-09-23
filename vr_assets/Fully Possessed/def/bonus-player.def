@@ -47,6 +47,23 @@ model npc_player_armour {
 	channel legs					( origin Body Body2 *Hips -*Waist SPINNER eyecontrol chair)
 }
 
+// Doom 2016's Doom Slayer in his armour, rigged to match other NPCs
+model npc_doom_slayer {
+	inherit							npc_base
+	mesh							models/md5/chars/doom_slayer.md5mesh
+	channel torso					( *Waist )
+	channel legs					( origin Body Body2 *Hips -*Waist SPINNER eyecontrol chair)
+}
+
+// Doom 2016's Doom Slayer in his armour, rigged to match other NPCs
+model head_slayer {
+	mesh							models/md5/heads/doom_slayer_helmet.md5mesh
+
+	anim idle						models/md5/characters/npcs/heads/mhelmetidle.md5anim
+	anim stand						models/md5/characters/npcs/heads/mhelmetidle.md5anim
+	anim blink						models/md5/characters/npcs/heads/mhelmetidle.md5anim
+}
+
 // Doomguy
 model model_d2_sp_marine {
 	inherit model_d3_sp_marine
@@ -796,7 +813,7 @@ entityDef bonus_player_doomguy_cutscene  {
 entityDef bonus_player_slayer  {
 	"inherit"							"bonus_player_sp"
 	"model"								"model_d3_sp_marine"
-	"def_head"							"model_d3le_sp_helmet"
+	"def_head"							"head_slayer"
 	"maxarmor"							"50"
 	"current_weapon"					"2"
 }
