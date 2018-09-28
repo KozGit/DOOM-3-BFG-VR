@@ -1412,9 +1412,9 @@ void idIK_Reach::Evaluate()
 				gameRenderWorld->DebugArrow( colorMagenta, handOrigin, handOrigin + handDir * 8.0f, 1 );
 			else
 				gameRenderWorld->DebugArrow( colorRed, handOrigin, handOrigin + handDir * 8.0f, 1 );
-			gameRenderWorld->DrawTextA( va( "%.2f, %.2f, %.2f", localHandDir.x, localHandDir.y, localHandDir.z ), handOrigin + handDir * 11.0f, 0.06f, colorWhite, modelAxis );
-			gameRenderWorld->DrawTextA( va( "%.2f, %.2f, %.2f", handPos[i].x, handPos[i].y, handPos[i].z ), handOrigin + handDir * 9.0f, 0.04f, colorWhite, modelAxis );
-			gameRenderWorld->DrawTextA( va( "%.2f, %.2f, %.2f", shoulderPos[i].x, shoulderPos[i].y, shoulderPos[i].z ), shoulderOrigin + handDir * 11.0f, 0.04f, colorWhite, modelAxis );
+			gameRenderWorld->DrawText( va( "%.2f, %.2f, %.2f", localHandDir.x, localHandDir.y, localHandDir.z ), handOrigin + handDir * 11.0f, 0.06f, colorWhite, modelAxis );
+			gameRenderWorld->DrawText( va( "%.2f, %.2f, %.2f", handPos[i].x, handPos[i].y, handPos[i].z ), handOrigin + handDir * 9.0f, 0.04f, colorWhite, modelAxis );
+			gameRenderWorld->DrawText( va( "%.2f, %.2f, %.2f", shoulderPos[i].x, shoulderPos[i].y, shoulderPos[i].z ), shoulderOrigin + handDir * 11.0f, 0.04f, colorWhite, modelAxis );
 			gameRenderWorld->DebugLine( colorCyan, shoulderOrigin, elbowOrigin );
 			gameRenderWorld->DebugLine( colorRed, elbowOrigin, handOrigin );
 			gameRenderWorld->DebugArrow( colorYellow, elbowOrigin, elbowOrigin + elbowDir * 8.0f, 1 );

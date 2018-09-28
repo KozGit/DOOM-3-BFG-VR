@@ -41,7 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 #ifdef USE_OVR
 #include "..\LibOVR\Include\OVR_CAPI_Audio.h"
 #endif
-#include "../libs/OpenVR/headers/openvr.h"
+#include "../libs/openvr/headers/openvr.h"
 
 
 #ifndef __VR_H__
@@ -643,6 +643,3 @@ typedef enum
 } vr_weaponcycle_t;
 
 #endif
-
-
-

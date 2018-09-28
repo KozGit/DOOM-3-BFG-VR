@@ -1,3 +1,3 @@
-[submodule "neo/libs/OpenVR"]
-	path = neo/libs/OpenVR
+[submodule "neo/libs/openvr"]
+	path = neo/libs/openvr
 	url = https://github.com/ValveSoftware/openvr.git

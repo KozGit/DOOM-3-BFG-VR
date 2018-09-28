@@ -2734,7 +2734,7 @@ void idPlayerHand::debugPrint()
 	else
 	{
 		common->Printf( "  currentWeapon = %s = %d%s\n", GetCurrentWeaponString().c_str(), currentWeapon, s.c_str() );
-		common->Printf( "  idealWeapon = %d, weaponSwitchTime (unused?) = %dms\n", idealWeapon, weaponSwitchTime - gameLocal.time );
+		common->Printf( "  idealWeapon = %d, weaponSwitchTime (unused?) = %dms\n", idealWeapon.Get(), weaponSwitchTime - gameLocal.time );
 	}
 	common->Printf( "  previousWeapon = %d\n", previousWeapon );
 	idWeapon* weap = weapon.GetEntity();
