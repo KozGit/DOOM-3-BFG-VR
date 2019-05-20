@@ -203,7 +203,8 @@ public:
 	
 public:
 	idDict				descriptors;						// [in] Descriptors available to be shown on the save/load screen.  Each game can define their own, e.g. Difficulty, level, map, score, time.
-	bool				damaged, isRBDoom;			// [out]
+	bool				damaged;							// [out]
+	uint8				isRBDoom;							// [out]
 	time_t				date;								// [out] read from the filesystem, not set by client
 	idStrStatic< MAX_FOLDER_NAME_LENGTH >	slotName;		// [out] folder/slot name, e.g. AUTOSAVE
 };

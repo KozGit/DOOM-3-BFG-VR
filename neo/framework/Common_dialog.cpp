@@ -1365,7 +1365,7 @@ idStr idCommonDialog::GetDialogMsg( gameDialogMessages_t msg, idStr& message, id
 		}
 		case GDM_ERROR_LOADING_SAVEGAME:
 		{
-			message = "#str_dlg_error_loading_savegame";
+			message = "#str_dlg_error_loading_savegame"; // There was an error loading your game.
 			break;
 		}
 		case GDM_ERROR_SAVING_SAVEGAME:

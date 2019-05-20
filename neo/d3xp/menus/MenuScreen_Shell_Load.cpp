@@ -388,7 +388,7 @@ void idMenuScreen_Shell_Load::LoadGame( int index )
 		class idSWFScriptFunction_LoadDialog : public idSWFScriptFunction_RefCounted
 		{
 		public:
-			idSWFScriptFunction_LoadDialog( gameDialogMessages_t _msg, bool _accept, const char* _name, bool isRBDoom3 )
+			idSWFScriptFunction_LoadDialog( gameDialogMessages_t _msg, bool _accept, const char* _name, uint8 isRBDoom3 )
 			{
 				msg = _msg;
 				accept = _accept;
@@ -407,7 +407,8 @@ void idMenuScreen_Shell_Load::LoadGame( int index )
 			}
 		private:
 			gameDialogMessages_t msg;
-			bool accept, isRBDoom;
+			bool accept;
+			uint8 isRBDoom;
 			const char* name;
 		};
 		

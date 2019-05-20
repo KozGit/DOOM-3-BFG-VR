@@ -247,7 +247,7 @@ void idSaveGameDetails::Clear()
 {
 	descriptors.Clear();
 	damaged = false;
-	isRBDoom = false; // Carl
+	isRBDoom = 0; // Carl: Fully Possessed
 	date = 0;
 	slotName[0] = '\0';
 }
