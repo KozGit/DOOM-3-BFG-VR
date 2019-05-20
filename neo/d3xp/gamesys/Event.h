@@ -64,8 +64,11 @@ private:
 	unsigned int				formatspecIndex;
 	int							returnType;
 	int							numargs;
-	size_t						argsize;
+public:
+	size_t						argsize, argsize_32, argsize_64;
 	int							argOffset[ D_EVENT_MAXARGS ];
+	int							argOffset2[ D_EVENT_MAXARGS ];
+private:
 	int							eventnum;
 	const idEventDef* 			next;
 	
@@ -83,7 +86,8 @@ public:
 	int							GetNumArgs() const;
 	size_t						GetArgSize() const;
 	int							GetArgOffset( int arg ) const;
-	
+	int							GetArgOffset2( int arg ) const;
+
 	static int					NumEventCommands();
 	static const idEventDef*		GetEventCommand( int eventnum );
 	static const idEventDef*		FindEvent( const char* name );
@@ -214,6 +218,17 @@ ID_INLINE int idEventDef::GetArgOffset( int arg ) const
 {
 	assert( ( arg >= 0 ) && ( arg < D_EVENT_MAXARGS ) );
 	return argOffset[ arg ];
+}
+
+/*
+================
+idEventDef::GetArgOffset2
+================
+*/
+ID_INLINE int idEventDef::GetArgOffset2(int arg) const
+{
+	assert((arg >= 0) && (arg < D_EVENT_MAXARGS));
+	return argOffset2[arg];
 }
 
 /*
