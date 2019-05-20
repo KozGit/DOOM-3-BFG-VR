@@ -91,49 +91,62 @@ idEventDef::idEventDef( const char* command, const char* formatspec, char return
 	// make sure the format for the args is valid, calculate the formatspecindex, and the offsets for each arg
 	bits = 0;
 	argsize = 0;
+	argsize_32 = 0;
+	argsize_64 = 0;
 	memset( argOffset, 0, sizeof( argOffset ) );
 	for( i = 0; i < numargs; i++ )
 	{
 		argOffset[ i ] = argsize;
-		switch( formatspec[ i ] )
+#if defined(__x86_64__) || defined(_WIN64)
+		argOffset2[ i ] = argsize_32;
+#else
+		argOffset2[ i ] = argsize_64;
+#endif
+		switch (formatspec[i])
 		{
 			case D_EVENT_FLOAT :
 				bits |= 1 << i;
 				// RB: 64 bit fix, changed sizeof( float ) to sizeof( intptr_t )
 				argsize += sizeof( intptr_t );
 				// RB end
+				argsize_32 += 4;
+				argsize_64 += 8;
 				break;
 				
 			case D_EVENT_INTEGER :
 				// RB: 64 bit fix, changed sizeof( int ) to sizeof( intptr_t )
 				argsize += sizeof( intptr_t );
 				// RB end
+				argsize_32 += 4;
+				argsize_64 += 8;
 				break;
 				
 			case D_EVENT_VECTOR :
 				// RB: 64 bit fix, changed sizeof( idVec3 ) to E_EVENT_SIZEOF_VEC
 				argsize += E_EVENT_SIZEOF_VEC;
 				// RB end
+				argsize_32 += 12;
+				argsize_64 += 16;
 				break;
 				
 			case D_EVENT_STRING :
 				argsize += MAX_STRING_LEN;
+				argsize_32 += MAX_STRING_LEN;
+				argsize_64 += MAX_STRING_LEN;
 				break;
 				
 			case D_EVENT_ENTITY :
+			case D_EVENT_ENTITY_NULL:
 				// RB: 64 bit fix, sizeof( idEntityPtr<idEntity> ) to sizeof( intptr_t )
 				argsize += sizeof( intptr_t );
 				// RB end
-				break;
-				
-			case D_EVENT_ENTITY_NULL :
-				// RB: 64 bit fix, sizeof( idEntityPtr<idEntity> ) to sizeof( intptr_t )
-				argsize += sizeof( intptr_t );
-				// RB end
+				argsize_32 += 4;
+				argsize_64 += 8;
 				break;
 				
 			case D_EVENT_TRACE :
 				argsize += sizeof( trace_t ) + MAX_STRING_LEN + sizeof( bool );
+				argsize_64 += 249;
 				break;
 				
 			default :
@@ -973,7 +986,9 @@ void idEvent::Restore( idRestoreGame* savefile )
 	// RB: for missing D_EVENT_STRING
 	idStr s;
 	// RB end
-	
+	bool convertFrom32Bit = false;
+	bool convertFrom64Bit = false;
+
 	savefile->ReadInt( num );
 	
 	for( i = 0; i < num; i++ )
@@ -1011,15 +1026,26 @@ void idEvent::Restore( idRestoreGame* savefile )
 		
 		// read the args
 		savefile->ReadInt( argsize );
-		if( argsize != ( int )event->eventdef->GetArgSize() )
+		if( argsize != (int)event->eventdef->GetArgSize() )
 		{
+#if defined(__x86_64__) || defined(_WIN64)
+			// Carl: loading 32 bit file on 64 bit
+			if( argsize == event->eventdef->argsize_32 )
+				convertFrom32Bit = true;
+			else
+#else
+			// Carl: loading 64 bit file on 32 bit
+			if( argsize == event->eventdef->argsize_64 )
+				convertFrom64Bit = true;
+			else
+#endif
 			// RB: fixed wrong formatting // Carl: fixed RB's wrong formatting
-			savefile->Error( "idEvent::Restore: arg size (%d) doesn't match saved arg size(%d) on event '%s'", (int)event->eventdef->GetArgSize(), (int)argsize, event->eventdef->GetName() );
+				savefile->Error( "idEvent::Restore: arg size (%d) doesn't match saved arg size(%d) on event '%s'", (int)event->eventdef->GetArgSize(), (int)argsize, event->eventdef->GetName() );
 			// RB end
 		}
 		if( argsize )
 		{
-			event->data = eventDataAllocator.Alloc( argsize );
+			event->data = eventDataAllocator.Alloc( (int)event->eventdef->GetArgSize() );
 			format = event->eventdef->GetArgFormat();
 			assert( format );
 			for( j = 0, size = 0; j < event->eventdef->GetNumArgs(); ++j )
@@ -1083,7 +1109,7 @@ void idEvent::Restore( idRestoreGame* savefile )
 						break;
 				}
 			}
-			assert( size == ( int )event->eventdef->GetArgSize() );
+			//assert( size == ( int )event->eventdef->GetArgSize() );
 		}
 		else
 		{
@@ -1129,14 +1155,96 @@ void idEvent::Restore( idRestoreGame* savefile )
 		
 		// read the args
 		savefile->ReadInt( argsize );
-		if( argsize != ( int )event->eventdef->GetArgSize() )
+#if defined(__x86_64__) || defined(_WIN64)
+		// Carl: loading 32 bit file on 64 bit
+		if( argsize == event->eventdef->argsize_32 )
+			convertFrom32Bit = true;
+		else
+#else
+		// Carl: loading 64 bit file on 32 bit
+		if( argsize == event->eventdef->argsize_64 )
+			convertFrom64Bit = true;
+		else
+#endif
+		if( argsize != (int)event->eventdef->GetArgSize() )
 		{
-			savefile->Error( "idEvent::Restore: arg size (%d) doesn't match saved arg size(%d) on event '%s'", event->eventdef->GetArgSize(), argsize, event->eventdef->GetName() );
+			savefile->Error( "idEvent::Restore(2): arg size (%d) doesn't match saved arg size(%d) on event '%s'", (int)event->eventdef->GetArgSize(), (int)argsize, event->eventdef->GetName() );
 		}
 		if( argsize )
 		{
-			event->data = eventDataAllocator.Alloc( argsize );
-			savefile->Read( event->data, argsize );
+			event->data = eventDataAllocator.Alloc( (int)event->eventdef->GetArgSize() );
+			if( convertFrom32Bit )
+			{
+				// Normally, we just read the entire parameter list straight into memory, which means everything is little-endian,
+				// which is why we use raw Read(ptr, size) methods.
+				format = event->eventdef->GetArgFormat();
+				for( j = 0, size = 0; j < event->eventdef->GetNumArgs(); ++j )
+				{
+					dataPtr = &event->data[event->eventdef->GetArgOffset( j )];
+					switch( format[j] )
+					{
+					case D_EVENT_FLOAT:
+					case D_EVENT_INTEGER:
+					case D_EVENT_ENTITY:
+					case D_EVENT_ENTITY_NULL:
+						savefile->Read( reinterpret_cast<void*>(dataPtr), 4 );
+						break;
+					case D_EVENT_VECTOR:
+						savefile->Read( reinterpret_cast<void*>(dataPtr), 12 );
+						break;
+					case D_EVENT_STRING:
+						savefile->Read( reinterpret_cast<void*>(dataPtr), 128 );
+						break;
+					case D_EVENT_TRACE:
+						savefile->ReadBool( *reinterpret_cast<bool*>(dataPtr) );
+						//trace_t& t = *reinterpret_cast<trace_t*>(dataPtr + sizeof( bool )); // todo: make sure the size matches
+						savefile->Read( reinterpret_cast<void*>(dataPtr + 1), 120 );
+						savefile->Read( reinterpret_cast<void*>(dataPtr + 1 + 120 ), 128 );
+						break;
+					default:
+						break;
+					}
+				}
+
+			}
+			else if( convertFrom64Bit )
+			{
+				int32 temp;
+				format = event->eventdef->GetArgFormat();
+				for( j = 0, size = 0; j < event->eventdef->GetNumArgs(); ++j )
+				{
+					dataPtr = &event->data[event->eventdef->GetArgOffset( j )];
+					switch( format[j] )
+					{
+					case D_EVENT_FLOAT:
+					case D_EVENT_INTEGER:
+					case D_EVENT_ENTITY:
+					case D_EVENT_ENTITY_NULL:
+						savefile->Read( reinterpret_cast<void*>(dataPtr), 4 );
+						savefile->ReadInt( temp );
+						break;
+					case D_EVENT_VECTOR:
+						savefile->Read( reinterpret_cast<void*>(dataPtr), 12 );
+						savefile->ReadInt( temp );
+						break;
+					case D_EVENT_STRING:
+						savefile->Read( reinterpret_cast<void*>(dataPtr), 128 );
+						break;
+					case D_EVENT_TRACE:
+						savefile->ReadBool( *reinterpret_cast<bool*>(dataPtr) );
+						//trace_t& t = *reinterpret_cast<trace_t*>(dataPtr + sizeof( bool )); // todo: make sure the size matches
+						savefile->Read( reinterpret_cast<void*>(dataPtr + 1), 120 );
+						savefile->Read( reinterpret_cast<void*>(dataPtr + 1 + 120), 128 );
+						break;
+					default:
+						break;
+					}
+				}
+			}
+			else
+			{
+				savefile->Read( event->data, argsize );
+			}
 		}
 		else
 		{
