@@ -1661,6 +1661,17 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	{
 		idPlayer *player = GetLocalPlayer();
 		player->InitTeleportTarget();
+		idEntity *duplicate;
+		char* duplicate_names[4] = { "player1_weapon_left2", "player1_weapon_right2", "player1_weapon_left_worldmodel2", "player1_weapon_right_worldmodel2" };
+		for( int i = 0; i < 4; i++ )
+		{
+			if ( duplicate = gameLocal.FindEntity( duplicate_names[i] ) )
+			{
+				common->Warning( "Loading game which had a duplicate player1_weapon_left/right (this is normal)." );
+				duplicate->PostEventMS( &EV_Remove, 0 );
+			}
+		}
+
 		// if we autosaved while teleporting QuakeCon style, stop the QuakeCon style effect
 		if (player->noclip)// && player->playerView.bfgVision)
 		{
