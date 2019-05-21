@@ -4153,9 +4153,26 @@ void idGameLocal::AddEntityToHash( const char* name, idEntity* ent )
 {
 	if( FindEntity( name ) )
 	{
-		Error( "Multiple entities named '%s'", name );
+		// Carl: When loading saved games from other mods, we sometimes need to reset scripts.
+		// The reset scripts for some monsters end up creating a _light entity that was already created.
+		// For now, handle that by renaming the duplicate then deleting it.
+		// This mostly happens with Erebus levels.
+		idStr n( name );
+		if( n.Right( 6 ) == "_light" )
+		{
+			n = n + '2';
+			entityHash.Add( entityHash.GenerateKey( n.c_str(), true ), ent->entityNumber );
+			ent->PostEventMS( &EV_Remove, 0 );
+		}
+		else
+		{
+			Error( "Multiple entities named '%s'", name );
+		}
 	}
-	entityHash.Add( entityHash.GenerateKey( name, true ), ent->entityNumber );
+	else
+	{
+		entityHash.Add( entityHash.GenerateKey( name, true ), ent->entityNumber );
+	}
 }
 
 /*
