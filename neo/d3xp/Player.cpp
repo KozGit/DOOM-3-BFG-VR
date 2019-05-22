@@ -18299,7 +18299,7 @@ void idPlayer::CalculateRenderView()
 			cineYawOffset = 0.0f;
 		}
 
-
+		// if we're not in a projected cutscene
 		if (!(gameLocal.inCinematic && vr_cinematics.GetInteger() == 2 && vr_flicksyncCharacter.GetInteger() == 0))
 		{
 
@@ -18459,6 +18459,17 @@ void idPlayer::CalculateRenderView()
 				commonVr->PDAforced = false;
 			}
 
+		}
+	}
+	else // Carl: not VR
+	{
+		idVec3 origin = renderView->vieworg;
+		// if we're not in a cutscene
+		if( !gameLocal.inCinematic )
+		{
+			// Used to force the user's head down when there's a low ceiling  
+			commonVr->uncrouchedHMDViewOrigin = origin;
+			commonVr->uncrouchedHMDViewOrigin.z -= commonVr->headHeightDiff;
 		}
 	}
 }
