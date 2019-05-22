@@ -603,7 +603,7 @@ void idUsercmdGenLocal::MouseMove()
 	pitchdelta = m_pitch.GetFloat() * in_mouseSpeed.GetFloat() * (in_mouseInvertLook.GetBool() ? -my : my);
 
 	// Koz begin add mouse control here
-	if ( vr_enable.GetBool() )
+	if( commonVr->hasHMD && vr_enable.GetBool() )
 	{
 		// update the independent weapon angles and return any view changes based on current aim mode
 		commonVr->CalcAimMove( yawdelta, pitchdelta );
