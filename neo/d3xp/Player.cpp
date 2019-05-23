@@ -110,6 +110,7 @@ idAngles pdaAngle2( 0, 0, 76.5);
 idAngles pdaAngle3( 0, 0, 0);
 
 extern idCVar g_useWeaponDepthHack;
+extern idCVar in_independentAim;
 
 
 /*
@@ -16954,7 +16955,17 @@ void idPlayer::CalculateViewWeaponPosVR( int hand, idVec3 &origin, idMat3 &axis 
 			angQuat = idAngles( commonVr->independentWeaponPitch, commonVr->independentWeaponYaw, 0 ).ToQuat();
 				
 			idQuat gunAxis = angQuat;
-			gunAxis *= bodyAxis.ToQuat();
+			if( game->isVR || in_independentAim.GetInteger() )
+			{
+				gunAxis *= bodyAxis.ToQuat();
+			}
+			else
+			{
+				idMat3 headAxis = idAngles( viewAngles.pitch, viewAngles.yaw, 0.0f ).ToMat3();
+				gunAxis *= headAxis.ToQuat();
+				commonVr->independentWeaponPitch = 0;
+				commonVr->independentWeaponYaw = 0;
+			}
 			newAx = gunAxis.ToMat3();
 			
 			int flip = vr_weaponHand.GetInteger() == 0 ? 1 : -1;

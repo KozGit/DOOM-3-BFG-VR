@@ -163,6 +163,7 @@ idCVar g_useWeaponDepthHack( "g_useWeaponDepthHack", "0", CVAR_BOOL | CVAR_GAME 
 idCVar g_weaponShadows( "g_weaponShadows", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Cast shadows from weapons" ); // Koz
 
 extern idCVar cg_predictedSpawn_debug;
+extern idCVar in_independentAim;
 
 /***********************************************************************
 
@@ -4848,7 +4849,8 @@ idWeapon::GetProjectileLaunchOriginAndAxis
 void idWeapon::GetProjectileLaunchOriginAndAxis( idVec3& origin, idMat3& axis )
 {
 	assert( owner != NULL );
-	if ( game->isVR )
+	// Carl: in VR, or when using independent aim, we fire from the weapon model itself
+	if( game->isVR || in_independentAim.GetInteger() )
 	{
 		static weapon_t curWeap = WEAPON_NONE;
 
@@ -4886,6 +4888,7 @@ void idWeapon::GetProjectileLaunchOriginAndAxis( idVec3& origin, idMat3& axis )
 		return;
 	}
 	
+	// Carl: When not in VR, we usually fire from our eyes (the centre of the screen)
 	// calculate the muzzle position
 	if( barrelJointView != INVALID_JOINT && projectileDict.GetBool( "launchFromBarrel" ) )
 	{

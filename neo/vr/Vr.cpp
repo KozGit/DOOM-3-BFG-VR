@@ -56,9 +56,9 @@ idCVar vr_forward_keyhole( "vr_forward_keyhole", "11.25", CVAR_FLOAT | CVAR_ARCH
 
 idCVar vr_PDAfixLocation( "vr_PDAfixLocation", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Fix PDA position in space in front of player\n instead of holding in hand." );
 
-idCVar vr_weaponPivotOffsetForward( "vr_weaponPivotOffsetForward", "3", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_weaponPivotOffsetHorizontal( "vr_weaponPivotOffsetHorizontal", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_weaponPivotOffsetVertical( "vr_weaponPivotOffsetVertical", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_weaponPivotOffsetForward( "vr_weaponPivotOffsetForward", "4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_weaponPivotOffsetHorizontal( "vr_weaponPivotOffsetHorizontal", "-4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_weaponPivotOffsetVertical( "vr_weaponPivotOffsetVertical", "-12", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 idCVar vr_weaponPivotForearmLength( "vr_weaponPivotForearmLength", "16", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
 
 idCVar vr_guiScale( "vr_guiScale", "1", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "scale reduction factor for full screen menu/pda scale in VR", 0.0001f, 1.0f ); // Koz allow scaling of full screen guis/pda

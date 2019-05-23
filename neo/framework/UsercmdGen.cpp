@@ -63,6 +63,8 @@ idCVar vr_joyCurves( "vr_joyCurves", "0", CVAR_ARCHIVE | CVAR_INTEGER, "Joy powe
 idCVar vr_joyCurveSensitivity( "vr_joyCurveSensitivity", "9", CVAR_ARCHIVE | CVAR_FLOAT, "Sensitivity val 0 - 9\n" );
 idCVar vr_joyCurveLin( "vr_joyCurveLin", "4", CVAR_ARCHIVE | CVAR_FLOAT, "Linear point for joyCurves\n sens < lin = power curve\n, sens = lin = linear\n, sens > lin = frac power curve.\n" );
 
+// Carl: Non-VR-mode independent weapon control
+idCVar in_independentAim( "in_independentAim", "0", CVAR_ARCHIVE | CVAR_INTEGER, "Independent weapon aim. 0 = normal look/aim, 1 = mouse aims weapon, 2 = keys aim weapon, 3 = both aim weapon", 0, 3 );
 
 
 /*
@@ -477,11 +479,23 @@ void idUsercmdGenLocal::AdjustAngles()
 	
 	if ( !game->isVR )
 	{
-		viewangles[YAW] -= speed * in_yawSpeed.GetFloat() * ButtonState( UB_LOOKRIGHT );
-		viewangles[YAW] += speed * in_yawSpeed.GetFloat() * ButtonState( UB_LOOKLEFT );
+		if( in_independentAim.GetInteger() & 2 )
+		{
+			float yawdelta, pitchdelta;
+			yawdelta = speed * in_yawSpeed.GetFloat() * ( ButtonState( UB_LOOKLEFT ) - ButtonState( UB_LOOKRIGHT ) );
+			pitchdelta = speed * in_pitchSpeed.GetFloat() * ( ButtonState( UB_LOOKDOWN ) - ButtonState( UB_LOOKUP ) );
+			commonVr->CalcAimMove( yawdelta, pitchdelta ); // update the independent weapon angles and return any movement changes.
+			viewangles[YAW] += yawdelta;
+			viewangles[PITCH] += pitchdelta;
+		}
+		else
+		{
+			viewangles[YAW] -= speed * in_yawSpeed.GetFloat() * ButtonState( UB_LOOKRIGHT );
+			viewangles[YAW] += speed * in_yawSpeed.GetFloat() * ButtonState( UB_LOOKLEFT );
 
-		viewangles[PITCH] -= speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKUP );
-		viewangles[PITCH] += speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKDOWN );
+			viewangles[PITCH] -= speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKUP );
+			viewangles[PITCH] += speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKDOWN );
+		}
 	}
 	else // Koz add independent weapon aiming 
 	{
@@ -603,7 +617,7 @@ void idUsercmdGenLocal::MouseMove()
 	pitchdelta = m_pitch.GetFloat() * in_mouseSpeed.GetFloat() * (in_mouseInvertLook.GetBool() ? -my : my);
 
 	// Koz begin add mouse control here
-	if( commonVr->hasHMD && vr_enable.GetBool() )
+	if( ( commonVr->hasHMD && vr_enable.GetBool() ) || in_independentAim.GetInteger() & 1 )
 	{
 		// update the independent weapon angles and return any view changes based on current aim mode
 		commonVr->CalcAimMove( yawdelta, pitchdelta );
