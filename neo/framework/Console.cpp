@@ -267,11 +267,12 @@ float idConsoleLocal::DrawFPS( float y )
 #if 0
 		if( gameLocal.GetLocalPlayer() && gameLocal.GetLocalPlayer()->GetPhysics() )
 		{
+			idStr s;
+			int w;
 			idPlayer* player = gameLocal.GetLocalPlayer();
 			y += SMALLCHAR_HEIGHT + 4;
-			idStr s;
 			s.Format( "%d %d %d", (int)player->GetPhysics()->GetOrigin().x, (int)player->GetPhysics()->GetOrigin().y, (int)player->GetPhysics()->GetOrigin().z );
-			int w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
 			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorYellow, false );
 			y += SMALLCHAR_HEIGHT + 4;
 			s.Format( "%d %d %d", (int)player->firstPersonViewOrigin.x, (int)player->firstPersonViewOrigin.y, (int)player->firstPersonViewOrigin.z );
@@ -290,6 +291,44 @@ float idConsoleLocal::DrawFPS( float y )
 			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
 			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorCyan, false );
 			y += SMALLCHAR_HEIGHT + 4;
+		}
+#endif
+#if 0
+		if( gameLocal.GetLocalPlayer() && gameLocal.GetLocalPlayer()->GetPhysics() && gameLocal.GetLocalPlayer()->hands[0].weapon )
+		{
+			idStr s;
+			int w;
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			idPlayerHand* hand = &player->hands[0];
+			idWeapon* weapon = hand->weapon;
+			y += SMALLCHAR_HEIGHT + 4;
+			// Red: Head View
+			s.Format( "eye: %d %d %d", (int)player->firstPersonViewOrigin.x, (int)player->firstPersonViewOrigin.y, (int)player->firstPersonViewOrigin.z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorGreen, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "eye: %d %d %d", (int)player->GetEyePosition().x, (int)player->GetEyePosition().y, (int)player->GetEyePosition().z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorBlue, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "weap: %d %d %d", (int)weapon->GetPhysics()->GetOrigin().x, (int)weapon->GetPhysics()->GetOrigin().y, (int)weapon->GetPhysics()->GetOrigin().z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorYellow, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "hand: %d %d %d", (int)hand->handOrigin.x, (int)hand->handOrigin.y, (int)hand->handOrigin.z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorRed, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			/*
+			s.Format( "%d %d %d", (int)player->eyeOffset.x, (int)player->eyeOffset.y, (int)player->eyeOffset.z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorBlue, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "%d", (int)commonVr->headHeightDiff );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorCyan, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			*/
 		}
 #endif
 		return y;

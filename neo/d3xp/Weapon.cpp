@@ -806,7 +806,7 @@ void idWeapon::Restore( idRestoreGame* savefile )
 	else
 	{
 		// Koz get jointhandles for hand attachers
-		if (game->isVR)
+		if (game->isVR || true)
 		{
 			weaponHandAttacher[0] = animator.GetJointHandle("RhandAttacher");
 			if (weaponHandAttacher[0] != INVALID_JOINT)
@@ -1287,7 +1287,7 @@ void idWeapon::GetWeaponDef( const char* objectname, int ammoinclip )
 	// Koz get jointhandles for hand attachers
 		
 	
-	if ( game->isVR )
+	if ( game->isVR || true )
 	{
 		weaponHandAttacher[0] = animator.GetJointHandle( "RhandAttacher" );
 		if ( weaponHandAttacher[0] != INVALID_JOINT )
@@ -3543,7 +3543,7 @@ void idWeapon::PresentWeapon( bool showViewModel, int hand )
 	
 	// in VR don't suppress drawing the player's body 
 	// also show the viewmodel
-	if ( game->isVR ) 
+	if ( game->isVR || true ) 
 	{
 		if ( (hide && disabled) ) // hide the weapon if in a cinematic
 		{
