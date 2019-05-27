@@ -308,12 +308,17 @@ idSessionLocal::LoadGame
 int idSaveGameThread::Load()
 {
 	idSaveLoadParms* callback = data.saveLoadParms;
-	idStr saveFolder = "savegame";
+	idStr saveFolder = "savegame"; // Fully Possessed
 	
-	if( callback->description.isRBDoom )
+	if( callback->description.isRBDoom == 1 ) // RB Doom
 	{
 		saveFolder = Sys_DefaultSavePath();
 		saveFolder = saveFolder.Left(saveFolder.Length() - strlen(SAVE_PATH)) + "\\id Software\\RBDOOM 3 BFG\\base\\savegame";
+	}
+	else if( callback->description.isRBDoom == 2 ) // vanilla Doom 3 BFG Edition (Official Steam or GOG version)
+	{
+		saveFolder = Sys_DefaultSavePath();
+		saveFolder = saveFolder.Left(saveFolder.Length() - strlen(SAVE_PATH)) + "\\id Software\\DOOM 3 BFG\\base\\savegame";
 	}
 
 	saveFolder.AppendPath(callback->directory);
@@ -476,170 +481,104 @@ int idSaveGameThread::Enumerate()
 	callback->detailList.Clear();
 	
 	int ret = ERROR_SUCCESS;
-	if( fileSystem->IsFolder( saveFolder, "fs_savePath" ) == FOLDER_YES )
+	bool saveGameFolderFound = false;
+	for( uint8 loadFromRBDoomType = 0; loadFromRBDoomType <= 2; loadFromRBDoomType++ )
 	{
-		idFileList* files = fileSystem->ListFilesTree( saveFolder, SAVEGAME_DETAILS_FILENAME );
-		const idStrList& fileList = files->GetList();
-		
-		for( int i = 0; i < fileList.Num() && !callback->cancelled; i++ )
+		idStr RBDoomFolder = Sys_DefaultSavePath();
+		if( loadFromRBDoomType == 0 )
+			RBDoomFolder = fileSystem->RelativePathToOSPath( "savegame", "fs_savePath" );
+		else if( loadFromRBDoomType == 1 )
+			RBDoomFolder = RBDoomFolder.Left(RBDoomFolder.Length() - strlen(SAVE_PATH)) + "\\id Software\\RBDOOM 3 BFG\\base\\savegame";
+		else
+			RBDoomFolder = RBDoomFolder.Left(RBDoomFolder.Length() - strlen(SAVE_PATH)) + "\\id Software\\DOOM 3 BFG\\base\\savegame";
+		if (!callback->cancelled && Sys_IsFolder(RBDoomFolder) == FOLDER_YES)
 		{
-			idSaveGameDetails* details = callback->detailList.Alloc();
-			// We have more folders on disk than we have room in our save detail list, stop trying to read them in and continue with what we have
-			if( details == NULL )
-			{
-				break;
-			}
-			details->isRBDoom = false;
+			saveGameFolderFound = true;
+			idStrList fileList;
+			Sys_ListFiles(RBDoomFolder, "/", fileList);
+			// append "/" + SAVEGAME_DETAILS_FILENAME
 
-			idStr directory = fileList[i];
-			
-			idFile* file = fileSystem->OpenFileRead( directory.c_str() );
-			
-			if( file != NULL )
+			for( int i = 0; i < fileList.Num() && !callback->cancelled; i++ )
 			{
-				// Read the DETAIL file for the enumerated data
-				if( callback->mode & SAVEGAME_MBF_READ_DETAILS )
+				if (fileList[i] == "." || fileList[i] == "..")
 				{
-					if( !SavegameReadDetailsFromFile( file, *details ) )
-					{
-						details->damaged = true;
-						ret = -1;
-					}
+					continue;
 				}
+
+				idSaveGameDetails* details = callback->detailList.Alloc();
+				// We have more folders on disk than we have room in our save detail list, stop trying to read them in and continue with what we have
+				if (details == NULL)
+				{
+					break;
+				}
+				details->isRBDoom = loadFromRBDoomType;
+
+				idStr directory = fileList[i] + "/" + SAVEGAME_DETAILS_FILENAME;
+
+				idFile* file = fileSystem->OpenExplicitFileRead( ( RBDoomFolder + "/" + directory ).c_str() );
+
+				if( file != NULL )
+				{
+					// Read the DETAIL file for the enumerated data
+					if( callback->mode & SAVEGAME_MBF_READ_DETAILS )
+					{
+						if( !SavegameReadDetailsFromFile( file, *details ) )
+						{
+							details->damaged = true;
+							ret = -1;
+						}
+					}
 #ifdef _WIN32 // DG: unification of win32 and posix savagame code
-				// Use the date from the directory
-				WIN32_FILE_ATTRIBUTE_DATA attrData;
-				BOOL attrRet = GetFileAttributesEx( file->GetFullPath(), GetFileExInfoStandard, &attrData );
-				delete file;
-				if( attrRet == TRUE )
-				{
-					FILETIME		lastWriteTime = attrData.ftLastWriteTime;
-					const ULONGLONG second = 10000000L; // One second = 10,000,000 * 100 nsec
-					SYSTEMTIME		base_st = { 1970, 1, 0, 1, 0, 0, 0, 0 };
-					ULARGE_INTEGER	itime;
-					FILETIME		base_ft;
-					BOOL			success = SystemTimeToFileTime( &base_st, &base_ft );
-					
-					itime.QuadPart = ( ( ULARGE_INTEGER* )&lastWriteTime )->QuadPart;
-					if( success )
+					// Use the date from the directory
+					WIN32_FILE_ATTRIBUTE_DATA attrData;
+					BOOL attrRet = GetFileAttributesEx( file->GetFullPath(), GetFileExInfoStandard, &attrData );
+					delete file;
+					if( attrRet == TRUE )
 					{
-						itime.QuadPart -= ( ( ULARGE_INTEGER* )&base_ft )->QuadPart;
+						FILETIME		lastWriteTime = attrData.ftLastWriteTime;
+						const ULONGLONG second = 10000000L; // One second = 10,000,000 * 100 nsec
+						SYSTEMTIME		base_st = { 1970, 1, 0, 1, 0, 0, 0, 0 };
+						ULARGE_INTEGER	itime;
+						FILETIME		base_ft;
+						BOOL			success = SystemTimeToFileTime( &base_st, &base_ft );
+
+						itime.QuadPart = ( ( ULARGE_INTEGER* )&lastWriteTime )->QuadPart;
+						if( success )
+						{
+							itime.QuadPart -= ( ( ULARGE_INTEGER* )&base_ft )->QuadPart;
+						}
+						else
+						{
+							// Hard coded number of 100-nanosecond units from 1/1/1601 to 1/1/1970
+							itime.QuadPart -= 116444736000000000LL;
+						}
+						itime.QuadPart /= second;
+						details->date = itime.QuadPart;
 					}
-					else
-					{
-						// Hard coded number of 100-nanosecond units from 1/1/1601 to 1/1/1970
-						itime.QuadPart -= 116444736000000000LL;
-					}
-					itime.QuadPart /= second;
-					details->date = itime.QuadPart;
-				}
 #else
-				// DG: just use the idFile object's timestamp - the windows code gets file attributes and
-				//  other complicated stuff like that.. I'm wonderin what that was good for.. this seems to work.
-				details->date = file->Timestamp();
+					// DG: just use the idFile object's timestamp - the windows code gets file attributes and
+					//  other complicated stuff like that.. I'm wonderin what that was good for.. this seems to work.
+					details->date = file->Timestamp();
 #endif // DG end
-			}
-			else
-			{
-				details->damaged = true;
-			}
-			
-			// populate the game details struct
-			directory = directory.StripFilename();
-			details->slotName = directory.c_str() + saveFolder.Length() + 1; // Strip off the prefix too
+				}
+				else
+				{
+					details->damaged = true;
+				}
+
+				// populate the game details struct
+				directory = directory.StripFilename();
+				details->slotName = directory.c_str(); // Strip off the prefix too
 // JDC: I hit this all the time			assert( fileSystem->IsFolder( directory.c_str(), "fs_savePath" ) == FOLDER_YES );
+			}
 		}
-		fileSystem->FreeFileList( files );
 	}
-	else
+
+	if( !saveGameFolderFound )
 	{
 		callback->errorCode = SAVEGAME_E_FOLDER_NOT_FOUND;
 		ret = -3;
 	}
-
-	idStr RBDoomFolder = Sys_DefaultSavePath();
-	RBDoomFolder = RBDoomFolder.Left(RBDoomFolder.Length() - strlen(SAVE_PATH)) + "\\id Software\\RBDOOM 3 BFG\\base\\savegame";
-	if (!callback->cancelled && Sys_IsFolder(RBDoomFolder) == FOLDER_YES)
-	{
-		idStrList fileList;
-		Sys_ListFiles(RBDoomFolder, "/", fileList);
-		// append "/" + SAVEGAME_DETAILS_FILENAME
-
-		for (int i = 0; i < fileList.Num() && !callback->cancelled; i++)
-		{
-			if (fileList[i] == "." || fileList[i] == "..")
-			{
-				continue;
-			}
-
-			idSaveGameDetails* details = callback->detailList.Alloc();
-			// We have more folders on disk than we have room in our save detail list, stop trying to read them in and continue with what we have
-			if (details == NULL)
-			{
-				break;
-			}
-			details->isRBDoom = true;
-
-			idStr directory = fileList[i] + "/" + SAVEGAME_DETAILS_FILENAME;
-
-			idFile* file = fileSystem->OpenExplicitFileRead((RBDoomFolder+ "/" + directory).c_str());
-
-			if (file != NULL)
-			{
-				// Read the DETAIL file for the enumerated data
-				if (callback->mode & SAVEGAME_MBF_READ_DETAILS)
-				{
-					if (!SavegameReadDetailsFromFile(file, *details))
-					{
-						details->damaged = true;
-						ret = -1;
-					}
-				}
-#ifdef _WIN32 // DG: unification of win32 and posix savagame code
-				// Use the date from the directory
-				WIN32_FILE_ATTRIBUTE_DATA attrData;
-				BOOL attrRet = GetFileAttributesEx(file->GetFullPath(), GetFileExInfoStandard, &attrData);
-				delete file;
-				if (attrRet == TRUE)
-				{
-					FILETIME		lastWriteTime = attrData.ftLastWriteTime;
-					const ULONGLONG second = 10000000L; // One second = 10,000,000 * 100 nsec
-					SYSTEMTIME		base_st = { 1970, 1, 0, 1, 0, 0, 0, 0 };
-					ULARGE_INTEGER	itime;
-					FILETIME		base_ft;
-					BOOL			success = SystemTimeToFileTime(&base_st, &base_ft);
-
-					itime.QuadPart = ((ULARGE_INTEGER*)&lastWriteTime)->QuadPart;
-					if (success)
-					{
-						itime.QuadPart -= ((ULARGE_INTEGER*)&base_ft)->QuadPart;
-					}
-					else
-					{
-						// Hard coded number of 100-nanosecond units from 1/1/1601 to 1/1/1970
-						itime.QuadPart -= 116444736000000000LL;
-					}
-					itime.QuadPart /= second;
-					details->date = itime.QuadPart;
-				}
-#else
-				// DG: just use the idFile object's timestamp - the windows code gets file attributes and
-				//  other complicated stuff like that.. I'm wonderin what that was good for.. this seems to work.
-				details->date = file->Timestamp();
-#endif // DG end
-			}
-			else
-			{
-				details->damaged = true;
-			}
-
-			// populate the game details struct
-			directory = directory.StripFilename();
-			details->slotName = directory.c_str(); // Strip off the prefix too
-			// JDC: I hit this all the time			assert( fileSystem->IsFolder( directory.c_str(), "fs_savePath" ) == FOLDER_YES );
-		}
-	}
-
 	if( data.saveLoadParms->cancelled )
 	{
 		data.saveLoadParms->errorCode = SAVEGAME_E_CANCELLED;

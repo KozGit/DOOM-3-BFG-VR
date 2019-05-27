@@ -1661,6 +1661,17 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	{
 		idPlayer *player = GetLocalPlayer();
 		player->InitTeleportTarget();
+		idEntity *duplicate;
+		char* duplicate_names[4] = { "player1_weapon_left2", "player1_weapon_right2", "player1_weapon_left_worldmodel2", "player1_weapon_right_worldmodel2" };
+		for( int i = 0; i < 4; i++ )
+		{
+			if ( duplicate = gameLocal.FindEntity( duplicate_names[i] ) )
+			{
+				common->Warning( "Loading game which had a duplicate player1_weapon_left/right (this is normal)." );
+				duplicate->PostEventMS( &EV_Remove, 0 );
+			}
+		}
+
 		// if we autosaved while teleporting QuakeCon style, stop the QuakeCon style effect
 		if (player->noclip)// && player->playerView.bfgVision)
 		{
@@ -4142,9 +4153,26 @@ void idGameLocal::AddEntityToHash( const char* name, idEntity* ent )
 {
 	if( FindEntity( name ) )
 	{
-		Error( "Multiple entities named '%s'", name );
+		// Carl: When loading saved games from other mods, we sometimes need to reset scripts.
+		// The reset scripts for some monsters end up creating a _light entity that was already created.
+		// For now, handle that by renaming the duplicate then deleting it.
+		// This mostly happens with Erebus levels.
+		idStr n( name );
+		if( n.Right( 6 ) == "_light" )
+		{
+			n = n + '2';
+			entityHash.Add( entityHash.GenerateKey( n.c_str(), true ), ent->entityNumber );
+			ent->PostEventMS( &EV_Remove, 0 );
+		}
+		else
+		{
+			Error( "Multiple entities named '%s'", name );
+		}
 	}
-	entityHash.Add( entityHash.GenerateKey( name, true ), ent->entityNumber );
+	else
+	{
+		entityHash.Add( entityHash.GenerateKey( name, true ), ent->entityNumber );
+	}
 }
 
 /*

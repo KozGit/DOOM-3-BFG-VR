@@ -79,7 +79,7 @@ idEventDef::idEventDef( const char* command, const char* formatspec, char return
 	this->formatspec = formatspec;
 	this->returnType = returnType;
 	
-	numargs = strlen( formatspec );
+	numargs = (int)strlen( formatspec );
 	assert( numargs <= D_EVENT_MAXARGS );
 	if( numargs > D_EVENT_MAXARGS )
 	{
@@ -91,50 +91,99 @@ idEventDef::idEventDef( const char* command, const char* formatspec, char return
 	// make sure the format for the args is valid, calculate the formatspecindex, and the offsets for each arg
 	bits = 0;
 	argsize = 0;
+#ifdef IS64BIT
+	argsize_32 = 0;
+#else
+	argsize_64 = 0;
+#endif
 	memset( argOffset, 0, sizeof( argOffset ) );
 	for( i = 0; i < numargs; i++ )
 	{
-		argOffset[ i ] = argsize;
-		switch( formatspec[ i ] )
+		argOffset[ i ] = (int)argsize;
+		switch (formatspec[i])
 		{
 			case D_EVENT_FLOAT :
 				bits |= 1 << i;
 				// RB: 64 bit fix, changed sizeof( float ) to sizeof( intptr_t )
 				argsize += sizeof( intptr_t );
 				// RB end
+#ifdef IS64BIT
+				argsize_32 += 4;
+#else
+				argsize_64 += 8;
+#endif
 				break;
 				
 			case D_EVENT_INTEGER :
 				// RB: 64 bit fix, changed sizeof( int ) to sizeof( intptr_t )
 				argsize += sizeof( intptr_t );
 				// RB end
+#ifdef IS64BIT
+				argsize_32 += 4;
+#else
+				argsize_64 += 8;
+#endif
 				break;
 				
 			case D_EVENT_VECTOR :
 				// RB: 64 bit fix, changed sizeof( idVec3 ) to E_EVENT_SIZEOF_VEC
 				argsize += E_EVENT_SIZEOF_VEC;
 				// RB end
+#ifdef IS64BIT
+				argsize_32 += 12;
+#else
+				argsize_64 += 16;
+#endif
 				break;
 				
 			case D_EVENT_STRING :
 				argsize += MAX_STRING_LEN;
+#ifdef IS64BIT
+				argsize_32 += MAX_STRING_LEN;
+#else
+				argsize_64 += MAX_STRING_LEN;
+#endif
 				break;
 				
 			case D_EVENT_ENTITY :
+			case D_EVENT_ENTITY_NULL:
 				// RB: 64 bit fix, sizeof( idEntityPtr<idEntity> ) to sizeof( intptr_t )
 				argsize += sizeof( intptr_t );
 				// RB end
-				break;
-				
-			case D_EVENT_ENTITY_NULL :
-				// RB: 64 bit fix, sizeof( idEntityPtr<idEntity> ) to sizeof( intptr_t )
-				argsize += sizeof( intptr_t );
-				// RB end
+#ifdef IS64BIT
+				argsize_32 += 4;
+#else
+				argsize_64 += 8;
+#endif
 				break;
 				
 			case D_EVENT_TRACE :
+			{
+				// Carl Debug
+#if 0
+				trace_t t;
+				size_t a = (char*)&t.endpos - (char*)&t; // 4 // 4
+				size_t b = (char*)&t.endAxis - (char*)&t; // 16 // 16
+				size_t c = (char*)&t.c - (char*)&t; // 52 // 56
+				size_t d = (char*)&t.c.point - (char*)&t; // 56 // 60
+				size_t e = (char*)&t.c.normal - (char*)&t; // 68 // 72
+				size_t f = (char*)&t.c.dist - (char*)&t; // 80 // 84
+				size_t g = (char*)&t.c.contents - (char*)&t; // 84 // 88
+				size_t h = (char*)&t.c.material - (char*)&t; // 88 // 96
+				size_t i = (char*)&t.c.modelFeature - (char*)&t; // 92 // 104
+				size_t j = (char*)&t.c.id - (char*)&t; // 104 // 116
+				size_t s = sizeof( t.c ); // 56 // 64
+				size_t s2 = sizeof( t.c.material ); // 4 // 8
+#endif
+
 				argsize += sizeof( trace_t ) + MAX_STRING_LEN + sizeof( bool );
+#ifdef IS64BIT
+				argsize_32 += 1 + 108 + 128;
+#else
+				argsize_64 += 1 + 120 + 128;
+#endif
 				break;
+			}
 				
 			default :
 				eventError = true;
@@ -292,7 +341,7 @@ idEvent* idEvent::Alloc( const idEventDef* evdef, int numargs, va_list args )
 	size = evdef->GetArgSize();
 	if( size )
 	{
-		ev->data = eventDataAllocator.Alloc( size );
+		ev->data = eventDataAllocator.Alloc( (int)size );
 		memset( ev->data, 0, size );
 	}
 	else
@@ -872,7 +921,7 @@ void idEvent::Save( idSaveGame* savefile )
 		savefile->WriteString( event->eventdef->GetName() );
 		savefile->WriteString( event->typeinfo->classname );
 		savefile->WriteObject( event->object );
-		savefile->WriteInt( event->eventdef->GetArgSize() );
+		savefile->WriteInt( (int)event->eventdef->GetArgSize() );
 		format = event->eventdef->GetArgFormat();
 		for( i = 0, size = 0; i < event->eventdef->GetNumArgs(); ++i )
 		{
@@ -950,8 +999,8 @@ void idEvent::Save( idSaveGame* savefile )
 		savefile->WriteString( event->eventdef->GetName() );
 		savefile->WriteString( event->typeinfo->classname );
 		savefile->WriteObject( event->object );
-		savefile->WriteInt( event->eventdef->GetArgSize() );
-		savefile->Write( event->data, event->eventdef->GetArgSize() );
+		savefile->WriteInt( (int)event->eventdef->GetArgSize() );
+		savefile->Write( event->data, (int)event->eventdef->GetArgSize() );
 		
 		event = event->eventNode.Next();
 	}
@@ -973,7 +1022,9 @@ void idEvent::Restore( idRestoreGame* savefile )
 	// RB: for missing D_EVENT_STRING
 	idStr s;
 	// RB end
-	
+	bool convertFrom32Bit = false;
+	bool convertFrom64Bit = false;
+
 	savefile->ReadInt( num );
 	
 	for( i = 0; i < num; i++ )
@@ -1011,15 +1062,26 @@ void idEvent::Restore( idRestoreGame* savefile )
 		
 		// read the args
 		savefile->ReadInt( argsize );
-		if( argsize != ( int )event->eventdef->GetArgSize() )
+		if( argsize != (int)event->eventdef->GetArgSize() )
 		{
-			// RB: fixed wrong formatting
-			savefile->Error( "idEvent::Restore: arg size (%zd) doesn't match saved arg size(%zd) on event '%s'", event->eventdef->GetArgSize(), argsize, event->eventdef->GetName() );
+#ifdef IS64BIT
+			// Carl: loading 32 bit file on 64 bit
+			if( argsize == event->eventdef->argsize_32 )
+				convertFrom32Bit = true;
+			else
+#else
+			// Carl: loading 64 bit file on 32 bit
+			if( argsize == event->eventdef->argsize_64 )
+				convertFrom64Bit = true;
+			else
+#endif
+			// RB: fixed wrong formatting // Carl: fixed RB's wrong formatting
+				savefile->Error( "idEvent::Restore: arg size (%d) doesn't match saved arg size(%d) on event '%s'", (int)event->eventdef->GetArgSize(), (int)argsize, event->eventdef->GetName() );
 			// RB end
 		}
 		if( argsize )
 		{
-			event->data = eventDataAllocator.Alloc( argsize );
+			event->data = eventDataAllocator.Alloc( (int)event->eventdef->GetArgSize() );
 			format = event->eventdef->GetArgFormat();
 			assert( format );
 			for( j = 0, size = 0; j < event->eventdef->GetNumArgs(); ++j )
@@ -1083,7 +1145,7 @@ void idEvent::Restore( idRestoreGame* savefile )
 						break;
 				}
 			}
-			assert( size == ( int )event->eventdef->GetArgSize() );
+			//assert( size == ( int )event->eventdef->GetArgSize() );
 		}
 		else
 		{
@@ -1129,14 +1191,136 @@ void idEvent::Restore( idRestoreGame* savefile )
 		
 		// read the args
 		savefile->ReadInt( argsize );
-		if( argsize != ( int )event->eventdef->GetArgSize() )
+#ifdef IS64BIT
+		// Carl: loading 32 bit file on 64 bit
+		if( argsize == event->eventdef->argsize_32 )
+			convertFrom32Bit = true;
+		else
+#else
+		// Carl: loading 64 bit file on 32 bit
+		if( argsize == event->eventdef->argsize_64 )
+			convertFrom64Bit = true;
+		else
+#endif
+		if( argsize != (int)event->eventdef->GetArgSize() )
 		{
-			savefile->Error( "idEvent::Restore: arg size (%d) doesn't match saved arg size(%d) on event '%s'", event->eventdef->GetArgSize(), argsize, event->eventdef->GetName() );
+			savefile->Error( "idEvent::Restore(2): arg size (%d) doesn't match saved arg size(%d) on event '%s'", (int)event->eventdef->GetArgSize(), (int)argsize, event->eventdef->GetName() );
 		}
 		if( argsize )
 		{
-			event->data = eventDataAllocator.Alloc( argsize );
-			savefile->Read( event->data, argsize );
+			event->data = eventDataAllocator.Alloc( (int)event->eventdef->GetArgSize() );
+#ifdef IS64BIT
+			if( convertFrom32Bit )
+			{
+				// Normally, we just read the entire parameter list straight into memory, which means everything is little-endian,
+				// which is why we use raw Read(ptr, size) methods.
+				format = event->eventdef->GetArgFormat();
+				for( j = 0, size = 0; j < event->eventdef->GetNumArgs(); ++j )
+				{
+					dataPtr = &event->data[event->eventdef->GetArgOffset( j )];
+					switch( format[j] )
+					{
+					case D_EVENT_FLOAT:
+					case D_EVENT_INTEGER:
+					case D_EVENT_ENTITY:
+					case D_EVENT_ENTITY_NULL:
+						savefile->Read( reinterpret_cast<void*>(dataPtr), 4 );
+						break;
+					case D_EVENT_VECTOR:
+						savefile->Read( reinterpret_cast<void*>(dataPtr), 12 );
+						break;
+					case D_EVENT_STRING:
+						savefile->Read( reinterpret_cast<void*>(dataPtr), 128 );
+						break;
+					case D_EVENT_TRACE:
+					{
+						savefile->ReadBool( *reinterpret_cast<bool*>(dataPtr) );
+						trace_t& t = *reinterpret_cast<trace_t*>(dataPtr + sizeof( bool ));
+						memset( &t, 0, sizeof( t ) );
+						savefile->Read( reinterpret_cast<void*>(&t), 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.endpos), 3 * 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.endAxis), 9 * 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.c), 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.c.point), 3 * 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.c.normal), 3 * 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.c.dist), 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.c.contents), 4 );
+						// Carl: We are loading a 4-byte pointer into an 8-byte slot, but we only care if it's NULL or not.
+						// The fast event queue never uses the material pointer directly, it just checks if it's NULL.
+						savefile->Read( reinterpret_cast<void*>(&t.c.material), 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.c.modelFeature), 4 * 4 );
+						savefile->Read( reinterpret_cast<void*>(dataPtr + 1 + 120), 128 );
+						break;
+					}
+					default:
+						break;
+					}
+				}
+
+			}
+#else
+			if( convertFrom64Bit )
+			{
+				int32 temp;
+				format = event->eventdef->GetArgFormat();
+				for( j = 0, size = 0; j < event->eventdef->GetNumArgs(); ++j )
+				{
+					dataPtr = &event->data[event->eventdef->GetArgOffset( j )];
+					switch( format[j] )
+					{
+					case D_EVENT_FLOAT:
+					case D_EVENT_INTEGER:
+					case D_EVENT_ENTITY:
+					case D_EVENT_ENTITY_NULL:
+						savefile->Read( reinterpret_cast<void*>(dataPtr), 4 );
+						savefile->ReadInt( temp );
+						break;
+					case D_EVENT_VECTOR:
+						savefile->Read( reinterpret_cast<void*>(dataPtr), 12 );
+						savefile->ReadInt( temp );
+						break;
+					case D_EVENT_STRING:
+						savefile->Read( reinterpret_cast<void*>(dataPtr), 128 );
+						break;
+					case D_EVENT_TRACE:
+					{
+						savefile->ReadBool( *reinterpret_cast<bool*>(dataPtr) );
+						trace_t& t = *reinterpret_cast<trace_t*>(dataPtr + sizeof( bool ));
+						memset( &t, 0, sizeof( t ) );
+						savefile->Read( reinterpret_cast<void*>(&t), 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.endpos), 3 * 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.endAxis), 9 * 4 );
+						int32 padding;
+						savefile->ReadInt( padding ); // There were 4 bytes of padding here on 64 bit
+						savefile->Read( reinterpret_cast<void*>(&t.c), 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.c.point), 3 * 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.c.normal), 3 * 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.c.dist), 4 );
+						savefile->Read( reinterpret_cast<void*>(&t.c.contents), 4 );
+						savefile->ReadInt( padding ); // t.c.contents was 8 bytes long on 64 bit
+						// Carl: In the fast event queue, material is NOT a real pointer.
+						// We only care whether the whole 8 saved bytes of material are NULL, which means our 4-byte pointer must be NULL,
+						// or if either part of the 8 bytes is not null, then our 4-byte pointer must be not NULL.
+						savefile->Read( reinterpret_cast<void*>(&t.c.material), 4 );
+						if( t.c.material == NULL )
+							savefile->Read( reinterpret_cast<void*>(&t.c.material), 4 ); // overwrite our NULL in case the other half isn't NULL
+						else
+							savefile->ReadInt( padding ); // Don't overwrite our non-null 4-bytes with something that might be NULL
+						savefile->Read( reinterpret_cast<void*>(&t.c.modelFeature), 4 * 4 );
+						savefile->Read( reinterpret_cast<void*>(dataPtr + 1 + 108), 128 );
+						break;
+					}
+						break;
+					default:
+						break;
+					}
+				}
+			}
+#endif
+			else
+			{
+				savefile->Read( event->data, argsize );
+			}
 		}
 		else
 		{

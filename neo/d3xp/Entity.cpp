@@ -805,8 +805,15 @@ void idEntity::Restore( idRestoreGame* savefile )
 	// spawnNode and activeNode are restored by gameLocal
 	savefile->ReadDict( &spawnArgs );
 	savefile->ReadString( name );
-	if ( name == "vrTeleportTarget" && gameLocal.FindEntity("vrTeleportTarget") )
-		SetName( "vrTeleportTarget2" );
+	char* duplicate_names[5] = { "vrTeleportTarget", "player1_weapon_left", "player1_weapon_right", "player1_weapon_left_worldmodel", "player1_weapon_right_worldmodel" };
+	bool isDuplicate = false;
+	for( int i = 0; i < 5; i++ )
+	{
+		if( name == duplicate_names[i] && gameLocal.FindEntity( name.c_str() ) )
+			isDuplicate = true;
+	}
+	if( isDuplicate )
+		SetName( name + "2" );
 	else
 		SetName( name );
 	
@@ -3607,7 +3614,11 @@ idEntity::RemoveContactEntity
 */
 void idEntity::RemoveContactEntity( idEntity* ent )
 {
-	GetPhysics()->RemoveContactEntity( ent );
+	idPhysics* physicsPtr = GetPhysics();
+	if( physicsPtr ) // prevent crash when physics is NULL
+	{
+		physicsPtr->RemoveContactEntity( ent );
+	}
 }
 
 

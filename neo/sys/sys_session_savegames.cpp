@@ -53,7 +53,7 @@ idSaveGameProcessorLoadFiles
 idSaveGameProcessorLoadFiles::InitLoadFiles
 ========================
 */
-bool idSaveGameProcessorLoadFiles::InitLoadFiles( const char* folder_, bool isRBDoom, const saveFileEntryList_t& files, idSaveGameManager::packageType_t type )
+bool idSaveGameProcessorLoadFiles::InitLoadFiles( const char* folder_, uint8 isRBDoom, const saveFileEntryList_t& files, idSaveGameManager::packageType_t type )
 {
 	if( !idSaveGameProcessor::Init() )
 	{
@@ -353,7 +353,7 @@ idSessionLocal::LoadGameSync
 We still want to use the savegame manager because we could have file system operations in flight and need to
 ========================
 */
-saveGameHandle_t idSessionLocal::LoadGameSync( const char* name, saveFileEntryList_t& files, bool isRBDoom )
+saveGameHandle_t idSessionLocal::LoadGameSync( const char* name, saveFileEntryList_t& files, uint8 isRBDoom )
 {
 	idSaveLoadParms& parms = processorLoadFiles->GetParmsNonConst();
 	saveGameHandle_t handle = 0;

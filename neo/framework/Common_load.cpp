@@ -1060,7 +1060,7 @@ bool idCommonLocal::SaveGame( const char* saveName )
 	gameDetails.descriptors.Set( SAVEGAME_DETAIL_FIELD_LANGUAGE, sys_lang.GetString() );
 	gameDetails.descriptors.SetInt( SAVEGAME_DETAIL_FIELD_CHECKSUM, ( int )gameDetails.descriptors.Checksum() );
 	
-	gameDetails.isRBDoom = false; // Carl
+	gameDetails.isRBDoom = 0; // Carl: Fully Possessed
 	gameDetails.slotName = saveName;
 	ScrubSaveGameFileName( gameDetails.slotName );
 	
@@ -1113,7 +1113,7 @@ bool idCommonLocal::SaveGame( const char* saveName )
 idCommonLocal::LoadGame
 ===============
 */
-bool idCommonLocal::LoadGame( const char* saveName, bool isRBDoom )
+bool idCommonLocal::LoadGame( const char* saveName, uint8 isRBDoom )
 {
 	// Koz begin
 	// Koz fixme do this right.
@@ -1320,6 +1320,7 @@ void idCommonLocal::OnLoadCompleted( idSaveLoadParms& parms )
 {
 	if( !HandleCommonErrors( parms ) )
 	{
+		// There was an error loading your game.
 		common->Dialog().AddDialog( GDM_ERROR_LOADING_SAVEGAME, DIALOG_CONTINUE, NULL, NULL, false );
 	}
 }
@@ -1440,7 +1441,10 @@ LoadGame_f
 CONSOLE_COMMAND_SHIP( loadGame, "loads a game", idCmdSystem::ArgCompletion_SaveGame )
 {
 	console->Close();
-	commonLocal.LoadGame( ( args.Argc() > 1 ) ? args.Argv( 1 ) : "quick", ( args.Argc() > 2 ) && idStr::Cmp( args.Argv( 2 ), "0" )!=0 );
+	uint8 isRBDoom = 0; // Default to loading game from Fully Possessed
+	if( args.Argc() > 2 )
+		isRBDoom = (uint8)atoi( args.Argv( 2 ) );
+	commonLocal.LoadGame( ( args.Argc() > 1 ) ? args.Argv( 1 ) : "quick", isRBDoom );
 	
 	// Koz
 	vr_headingBeamMode.SetModified();
