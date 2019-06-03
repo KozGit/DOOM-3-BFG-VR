@@ -149,11 +149,12 @@ menu_t  temp_MainDef = {
 
 
 memcpy( &::g->MainDef, &temp_MainDef, sizeof(temp_MainDef) );
-menuitem_t temp_EpisodeMenu[4] = {
+menuitem_t temp_EpisodeMenu[5] = {
 	{1,"M_EPI1", M_Episode,'k'},
 	{1,"M_EPI2", M_Episode,'t'},
 	{1,"M_EPI3", M_Episode,'i'},
-	{1,"M_EPI4", M_Episode,'t'}
+	{1,"M_EPI4", M_Episode,'t'},
+	{1,"M_EPI5", M_Episode,'s'}
 };
 memcpy( ::g->EpisodeMenu, temp_EpisodeMenu, sizeof(temp_EpisodeMenu) );
 menu_t  temp_EpiDef = {
@@ -416,7 +417,7 @@ memcpy( ::g->fuzzoffset, temp_fuzzoffset, sizeof(temp_fuzzoffset) );
 	::g->validcount = 1;		
 // r_main.constructs end // 
 //  sounds.constructs begin // 
-musicinfo_t temp_S_music[80] = {
+musicinfo_t temp_S_music[90] = {
     { 0 },
     { "e1m1", 0 },
     { "e1m2", 0 },
@@ -484,7 +485,18 @@ musicinfo_t temp_S_music[80] = {
     { "ultima", 0 },
     { "read_m", 0 },
     { "dm2ttl", 0 },
-    { "dm2int", 0 } 
+    { "dm2int", 0 },
+    { "e5m1", 0 },
+    { "e5m2", 0 },
+    { "e5m3", 0 },
+    { "e5m4", 0 },
+    { "e5m5", 0 },
+    { "e5m6", 0 },
+    { "e5m7", 0 },
+    { "e5m8", 0 },
+    { "e5m9", 0 },
+    { "intro5", 0 },
+    { "inter5", 0 }
 };
 memcpy( ::g->S_music, temp_S_music, sizeof(temp_S_music) );
 // sounds.constructs end // 

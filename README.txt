@@ -2477,15 +2477,17 @@ __________________________________________________________
 
 9. Extract the FFmpeg DLLs to your current build directory (eg. Release) under DOOM-3-BFG-VR/build/
 
-10. Copy the Fully Possessed folder from Doom3-BFG-VR\vr_assets\ to your DOOM 3 BFG Edition folder.
+10. (NEW) Download SIGIL from https://www.romerogames.ie/si6il and extract SIGIL.WAD to Doom3-BFG-VR\vr_assets\wads
 
-11. (OPTIONAL) If Doom 3 BFG wasn't installed from Steam or GOG, set the path in Visual Studio.
+11. Copy the Fully Possessed folder from Doom3-BFG-VR\vr_assets\ to your DOOM 3 BFG Edition folder.
+
+12. (OPTIONAL) If Doom 3 BFG wasn't installed from Steam or GOG, set the path in Visual Studio.
     Right click project Doom3BFGVR, click Properties. Set Configuration to All Configurations.
     Choose Debugging, set Command Arguments to:
     +set fs_basepath "C:\Program Files (x86)\Steam\steamapps\common\DOOM 3 BFG Edition"
     or wherever you installed Doom 3 BFG edition
 
-12. To create the installer, download and install NSIS. Build the release version in visual
+13. To create the installer, download and install NSIS. Build the release version in visual
     studio. Right click on the installer.nsi file and choose Compile NSIS Script.
 
 __________________________________

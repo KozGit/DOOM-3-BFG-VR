@@ -358,7 +358,7 @@ menuitem_t MainMenu[5];
 menu_t  QuitDef;
 menuitem_t QuitMenu[3];
 menu_t  MainDef;
-menuitem_t EpisodeMenu[4];
+menuitem_t EpisodeMenu[5];
 menu_t  EpiDef;
 menuitem_t ExpansionMenu[2];
 menu_t  ExpDef;

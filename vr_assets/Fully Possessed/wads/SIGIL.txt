@@ -1,0 +1,140 @@
+===========================================================================
+Primary purpose         : Single play, Co-op play, Deathmatch
+Advanced engine needed  : Limit-removing; playing E5 ingame requires
+                          either ZDoom or Eternity, though E5 is available
+                          as a separate add-on (SIGIL_COMPAT.wad) for vanilla.
+                          SIGIL.wad contains some maps, which may not be 100%
+                          vanilla compatible.
+===========================================================================
+Title                   : SIGIL
+Filename                : SIGIL.wad, SIGIL_COMPAT.wad
+                          (and SIGIL_SHREDS.wad/SIGIL_SHREDS_COMPAT.wad if purchased)
+Release date            : v1.0: May 1, 2019
+                        : v1.1: May 31,2019
+Version                 : 1.1
+Author                  : John Romero
+Email Address           : john@romero.com
+Other WADs by Author    : DOOM.WAD, DOOM1.WAD, DOOM2.WAD, E1M8B.wad, E1M4B.wad
+
+Description             : Baphomet was only doing Satan's bidding by placing
+                          a powerful sigil in the teleporter out of E4M8 to
+                          bring you back to Hell. Somehow they didn't
+                          understand that you're the reason they failed in the
+                          first place.
+
+                          It's time to trash the place with your arsenal, get out
+                          of Hell, and back to Earth to face the more advanced 
+                          demons that were sent ahead.
+
+                          Lock and load. Rip and tear.
+
+Additional Credits to   : Technical Diligence and Testing:
+                               Boris Klimes
+                               Xaser
+                               Kurt Baumgardner
+                               Flambeau
+                               keyboard_doomer
+                          
+                          Artist:
+                               Christopher Lovell
+                          
+                          MIDI Music:
+                               James Paddock
+                          
+                          MP3 Music:
+                               Buckethead
+
+===========================================================================
+* What is included *
+
+New levels              : 18 (Single-player and Deathmatch areas in each level WAD)
+Sounds                  : No
+Music                   : No
+Graphics                : Yes
+Dehacked/BEX Patch      : Yes
+Demos                   : Yes
+Other                   : No
+Other files required    : None
+
+
+* Play Information *
+
+Game                    : Doom
+Map #                   : E5M1-E5M9 (SIGIL.wad)
+                        : E3M1-E3M9 (SIGIL_COMPAT.wad)
+Single Player           : Yes
+Cooperative 2-4 Player  : Yes
+Deathmatch 2-4 Player   : Yes
+Other game styles       : None
+Difficulty Settings     : Yes
+
+While in deathmatch maps, two players can agree to open the single-player area by flipping
+one switch each at the same time to open a teleporter. Going through the teleporter will
+take each player into the single-player area and permanently keep the teleporter open to
+allow players to go between deathmatch and single-player maps.
+
+
+* Construction *
+
+Base                    : Hell
+Build Time              : One year, part-time
+Editor(s) used          : Doom Builder 2, Slade
+May Not Run With...     : Versions of Doom prior to 1.9
+
+
+* Map Names *
+
+E5M1: "Baphomet's Demesne"
+E5M2: "Sheol"
+E5M3: "Cages of the Damned"
+E5M4: "Paths of Wretchedness"
+E5M5: "Abaddon's Void"
+E5M6: "Unspeakable Persecution"
+E5M7: "Nightmare Underworld"
+E5M8: "Halls of Perdition"
+E5M9: "Realm of Iblis"
+
+* Buckethead Music Names *
+
+E5M1: Romero One Mind Any Weapon
+E5M2: 13th Floor
+E5M3: Buildor 2
+E5M4: The Patrolman
+E5M5: Cold Frost part 6
+E5M6: Melting Man part 2
+E5M7: Far 5
+E5M8: Poseidon 4-6
+E5M9: Fastpass
+
+* MIDI Music Names *
+
+E5M1: Hate Machine
+E5M2: You Ain't the Boss O' Me
+E5M3: Quell the Beast
+E5M4: Riot Squadron
+E5M5: Alice
+E5M6: Besieged City
+E5M7: Watching You
+E5M8: Easel
+E5M9: Adrenaline in the Blood
+
+
+* Copyright / Permissions *
+
+Authors may NOT use the contents of this file as a base for modification or
+reuse without explicit permission of the original mappers.  Permissions
+have been obtained from original authors for any of their resources modified
+or included in this file.
+
+You MAY distribute this file, provided you include this text file, with no
+modifications.  You may distribute this file in any electronic format (BBS,
+Diskette, CD, etc) as long as you include this file intact.  I have
+received permission from the original authors of any modified or included
+content in this file to allow further distribution.
+
+
+* Where to get the file that this text file describes *
+
+The Usual: ftp://archives.3dgamers.com/pub/idgames/ and mirror mazes
+Web sites: http://rome.ro/
+

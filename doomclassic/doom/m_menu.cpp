@@ -726,6 +726,12 @@ void M_Episode(int choice)
 	{
 		I_PrintfE("M_Episode: 4th episode requires UltimateDOOM\n");
 		choice = 0;
+	} else if ( (::g->gamemode == retail)
+		&& (choice == 4))
+	{
+		// Play the SIGIL opening music if we're starting Episode 5,
+		// otherwise we'll never have a chance to hear it
+		S_ChangeMusic(mus_intro5, true);
 	}
 
 	::g->epi = choice;

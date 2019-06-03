@@ -63,6 +63,7 @@ const char*	e1text = E1TEXT;
 const char*	e2text = E2TEXT;
 const char*	e3text = E3TEXT;
 const char*	e4text = E4TEXT;
+const char* e5text = E5TEXT;
 
 const char*	c1text = C1TEXT;
 const char*	c2text = C2TEXT;
@@ -150,6 +151,10 @@ void F_StartFinale (void)
 			  case 4:
 				finaleflat = "MFLR8_3";
 				finaletext = e4text;
+				break;
+			  case 5:
+				finaleflat = "FLOOR7_2";
+				finaletext = e5text;
 				break;
 			  default:
 				// Ouch.
@@ -806,6 +811,10 @@ void F_Drawer (void)
 	  case 4:
 	    V_DrawPatch (0,0,0,
 			 (patch_t*)W_CacheLumpName("ENDPIC",PU_CACHE_SHARED));
+	    break;
+	  case 5:
+	    V_DrawPatch (0,0,0,
+			 (patch_t*)W_CacheLumpName("SIGILEND",PU_CACHE_SHARED));
 	    break;
 	}
     }

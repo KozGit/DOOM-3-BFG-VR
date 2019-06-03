@@ -49,7 +49,7 @@ typedef enum
   registered,	// DOOM 1 registered, E3, M27
   commercial,	// DOOM 2 retail, E1 M34
   // DOOM 2 german edition not handled
-  retail,	// DOOM 1 retail, E4, M36
+  retail,	// DOOM 1 retail with SIGIL, E5, M45
   indetermined	// Well, no IWAD found.
   
 } GameMode_t;
@@ -64,7 +64,7 @@ typedef enum
   pack_plut,	// Plutonia pack
   pack_master,	// Master levels
   pack_nerve,	// Nerve levels
- 
+  pack_sigil,	// SIGIL (John Romero) levels
   none
 
 } GameMission_t;
