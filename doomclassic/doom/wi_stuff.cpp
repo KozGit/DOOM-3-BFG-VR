@@ -1474,6 +1474,8 @@ void WI_Ticker(void)
 	// intermission music
   	if ( ::g->gamemode == commercial )
 	  S_ChangeMusic(mus_dm2int, true);
+	else if ( ::g->gameepisode == 5 )
+	  S_ChangeMusic(mus_inter5, true);
 	else
 	  S_ChangeMusic(mus_inter, true); 
     }
@@ -1517,6 +1519,8 @@ void WI_loadData(void)
 	{
 		if (::g->wbs->epsd == 3)
 			strcpy(name,"INTERPIC");
+		else if (::g->wbs->epsd == 4)
+			strcpy(name,"SIGILINT");
 	}
 
 	// background

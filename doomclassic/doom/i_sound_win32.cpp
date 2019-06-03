@@ -908,7 +908,15 @@ DWORD WINAPI I_LoadSong( LPVOID songname ) {
 	unsigned char * musFile = static_cast< unsigned char * >( W_CacheLumpName( lumpName.c_str(), PU_STATIC_SHARED ) );
 
 	int length = 0;
-	Mus2Midi( musFile, midiConversionBuffer, &length );
+
+	MidiHeaderChunk_t* midi = (MidiHeaderChunk_t*)musFile;
+	if ( midi->name[0] == 'M' && midi->name[1] == 'T' && midi->name[2] == 'h' &&
+		midi->name[3] == 'd' ) {
+		length = W_LumpLength( W_GetNumForName( lumpName.c_str() ) );
+		memcpy( &midiConversionBuffer, musFile, length );
+	} else {
+		Mus2Midi( musFile, midiConversionBuffer, &length );
+	}
 
 	doomMusic = Timidity_LoadSongMem( midiConversionBuffer, length );
 

@@ -74,7 +74,8 @@ namespace DoomLib
 		"E1M1: Hangar", "E1M2: Nuclear Plant", "E1M3: Toxin Refinery", "E1M4: Command Control", "E1M5: Phobos Lab", "E1M6: Central Processing", "E1M7: Computer Station", "E1M8: Phobos Anomaly", "E1M9: Military Base",
 		"E2M1: Deimos Anomaly", "E2M2: Containment Area", "E2M3: Refinery", "E2M4: Deimos Lab", "E2M5: Command Center", "E2M6: Halls of the Damned", "E2M7: Spawning Vats", "E2M8: Tower of Babel",  "E2M9: Fortress of Mystery",
 		"E3M1: Hell Keep", "E3M2: Slough of Despair", "E3M3: Pandemonium", "E3M4: House of Pain", "E3M5: Unholy Cathedral", "E3M6: MT. Erebus", "E3M7: Gate to Limbo", "E3M8: DIS", "E3M9: Warrens", 
-		"E4M1: Hell Beneath", "E4M2: Perfect Hatred", "E4M3: Sever The Wicked", "E4M4: Unruly Evil", "E4M5: They Will Repent", "E4M6: Against Thee Wickedly", "E4M7: And Hell Followed", "E4M8: Unto The Cruel", "E4M9: Fear"
+		"E4M1: Hell Beneath", "E4M2: Perfect Hatred", "E4M3: Sever The Wicked", "E4M4: Unruly Evil", "E4M5: They Will Repent", "E4M6: Against Thee Wickedly", "E4M7: And Hell Followed", "E4M8: Unto The Cruel", "E4M9: Fear",
+		"E5M1: Baphomet's Demesne", "E5M2: Sheol", "E5M3: Cages of the Damned", "E5M4: Paths of Wretchedness", "E5M5: Abaddon's Void", "E5M6: Unspeakable Persecution", "E5M7: Nightmare Underworld", "E5M8: Halls of Perdition", "E5M9: Realm of Iblis"
 	};
 
 	static const char * Doom2_MapNames[] = {
@@ -106,7 +107,7 @@ namespace DoomLib
 	};
 
 	const ExpansionData App_Expansion_Data_Local[] = {
-		{	ExpansionData::IWAD, retail,		doom,			"DOOM",								DOOMWADDIR"DOOM.WAD",		NULL,							"base/textures/DOOMICON.PNG"	, Doom_MapNames },
+		{	ExpansionData::PWAD, retail,		doom,			"DOOM",								DOOMWADDIR"DOOM.WAD",		DOOMWADDIR"SIGIL.WAD",			"base/textures/DOOMICON.PNG"	, Doom_MapNames },
 		{	ExpansionData::IWAD, commercial,	doom2,			"DOOM 2",							DOOMWADDIR"DOOM2.WAD",		NULL,							"base/textures/DOOM2ICON.PNG"	, Doom2_MapNames },
 		{	ExpansionData::IWAD, commercial,	pack_tnt,		"FINAL DOOM: TNT EVILUTION",		DOOMWADDIR"TNT.WAD",		NULL,							"base/textures/TNTICON.PNG"		, TNT_MapNames },
 		{	ExpansionData::IWAD, commercial,	pack_plut,		"FINAL DOOM: PLUTONIA EXPERIMENT",	DOOMWADDIR"PLUTONIA.WAD",	NULL,							"base/textures/PLUTICON.PNG"	, Plut_MapNames },

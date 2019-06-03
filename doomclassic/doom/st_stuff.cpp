@@ -544,7 +544,7 @@ ST_Responder (event_t* ev)
 
 			// Ohmygod - this is not going to work.
 			if ((::g->gamemode == retail)
-				&& ((epsd > 4) || (map > 9)))
+				&& ((epsd > 5) || (map > 9)))
 				return false;
 
 			if ((::g->gamemode == registered)
@@ -1451,7 +1451,7 @@ CONSOLE_COMMAND_SHIP( idclev, "warp to next level", 0 ) {
 
 	// Ohmygod - this is not going to work.
 	if ((::g->gamemode == retail)
-		&& ((epsd > 4) || (map > 9)))
+		&& ((epsd > 5) || (map > 9)))
 		return;
 
 	if ((::g->gamemode == registered)

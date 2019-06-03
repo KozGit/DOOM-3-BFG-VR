@@ -143,6 +143,7 @@ void W_AddFile ( const char *filename)
     int			length;
     int			startlump;
     std::vector<filelump_t>	fileinfo( 1 );
+	bool		isSigil = false;
     
     // open the file and add to directory
     if ( (handle = fileSystem->OpenFileRead(filename)) == 0)
@@ -165,6 +166,8 @@ void W_AddFile ( const char *filename)
     else 
     {
 		// WAD file
+		if (strstr(filename, "SIGIL"))
+			isSigil = true;
 		handle->Read( &header, sizeof( header ) );
 		if ( idStr::Cmpn( header.identification,"IWAD",4 ) )
 		{
@@ -207,7 +210,33 @@ void W_AddFile ( const char *filename)
 		lump_p->handle = handle;
 		lump_p->position = LONG(filelumpPointer->filepos);
 		lump_p->size = LONG(filelumpPointer->size);
-		strncpy (lump_p->name, filelumpPointer->name, 8);
+		if (isSigil)
+		{
+			if (strcmp(filelumpPointer->name, "DEMO1") == 0)
+				strncpy(lump_p->name, "DEMO5", 8);
+			else if (strcmp(filelumpPointer->name, "DEMO2") == 0)
+				strncpy(lump_p->name, "DEMO6", 8);
+			else if (strcmp(filelumpPointer->name, "DEMO3") == 0)
+				strncpy(lump_p->name, "DEMO7", 8);
+			else if (strcmp(filelumpPointer->name, "DEMO4") == 0)
+				strncpy(lump_p->name, "DEMO8", 8);
+			else if (strcmp(filelumpPointer->name, "TITLEPIC") == 0)
+				strncpy(lump_p->name, "SIGILPIC", 8);
+			else if (strcmp(filelumpPointer->name, "CREDIT") == 0)
+				strncpy(lump_p->name, "SIGILCRD", 8);
+			else if (strcmp(filelumpPointer->name, "HELP1") == 0)
+				strncpy(lump_p->name, "SIGILHLP", 8);
+			else if (strcmp(filelumpPointer->name, "D_INTER") == 0)
+				strncpy(lump_p->name, "D_INTER5", 8);
+			else if (strcmp(filelumpPointer->name, "D_INTRO") == 0)
+				strncpy(lump_p->name, "D_INTRO5", 8);
+			else
+				strncpy(lump_p->name, filelumpPointer->name, 8);
+		}
+		else
+		{
+			strncpy (lump_p->name, filelumpPointer->name, 8);
+		}
 	}
 }
 

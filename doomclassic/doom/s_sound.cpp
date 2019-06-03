@@ -209,13 +209,24 @@ void S_Start(void)
 			mus_e2m4,	// Romero		e4m6
 			mus_e2m6,	// J.Anderson	e4m7 CHIRON.WAD
 			mus_e2m5,	// Shawn		e4m8
-			mus_e1m9	// Tim			e4m9
+			mus_e1m9,	// Tim			e4m9
+			mus_e5m1,	// E5M1: Hate Machine by James Paddock
+			mus_e5m2,	// E5M2: You Ain't the Boss O' Me by James Paddock
+			mus_e5m3,	// E5M3: Quell the Beast by James Paddock
+			mus_e5m4,	// E5M4: Riot Squadron by James Paddock
+			mus_e5m5,	// E5M5: Alice by James Paddock
+			mus_e5m6,	// E5M6: Besieged City by James Paddock
+			mus_e5m7,	// E5M7: Watching You by James Paddock
+			mus_e5m8,	// E5M8: Easel by James Paddock
+			mus_e5m9,	// E5M9: Adrenaline in the Blood by James Paddock
+			mus_intro5,	// E5 Intro: Lands of Ire
+			mus_inter5	// E5 Intermission screen: Big Guns
 		};
 
 		if (::g->gameepisode < 4)
 			mnum = mus_e1m1 + (::g->gameepisode-1)*9 + ::g->gamemap-1;
 		else
-			mnum = spmus[::g->gamemap-1];
+			mnum = spmus[::g->gamemap-1 + (::g->gameepisode-4)*9];
 	}	
 
 	S_StopMusic();

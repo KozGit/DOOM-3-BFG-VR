@@ -151,6 +151,7 @@ typedef enum
 	ep2,
 	ep3,
 	ep4,
+	ep5,
 	ep_end
 } episodes_e;
 typedef enum

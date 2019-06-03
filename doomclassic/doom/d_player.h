@@ -199,7 +199,7 @@ typedef struct
 
 typedef struct
 {
-    int		epsd;	// episode # (0-2)
+    int		epsd;	// episode # (0-4)
 
     // if true, splash the secret level
     qboolean	didsecret;

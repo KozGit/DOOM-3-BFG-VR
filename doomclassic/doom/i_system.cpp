@@ -181,7 +181,7 @@ void I_Error(const char *error, ...)
 	// CRASH DUMP - enable this to get extra info on error from crash dumps
 	//*(int*)0x0 = 21;
 	DoomLib::Interface.QuitCurrentGame();
-	idLib::Printf( "DOOM Classic error: %s", error_msg );
+	idLib::Printf( "DOOM Classic error: %s\n", error_msg );
 	common->SwitchToGame( DOOM3_BFG );
 }
 
