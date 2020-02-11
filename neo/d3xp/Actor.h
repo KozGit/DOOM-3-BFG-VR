@@ -120,7 +120,8 @@ public:
 	
 	idLinkList<idActor>		enemyNode;			// node linked into an entity's enemy list for quick lookups of who is attacking him
 	idLinkList<idActor>		enemyList;			// list of characters that have targeted the player as their enemy
-	
+	friend class idConsoleLocal;
+
 public:
 	idActor();
 	virtual					~idActor();
@@ -302,7 +303,6 @@ private:
 	void					SetupHead();
 public:
 	void					PlayFootStepSound();
-	
 private:
 	void					Event_EnableEyeFocus();
 	void					Event_DisableEyeFocus();

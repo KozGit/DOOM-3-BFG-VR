@@ -111,6 +111,7 @@ idAngles pdaAngle2( 0, 0, 76.5);
 idAngles pdaAngle3( 0, 0, 0);
 
 extern idCVar g_useWeaponDepthHack;
+extern idCVar in_independentAim;
 
 
 /*
@@ -1130,7 +1131,7 @@ bool idInventory::Give( idPlayer* owner, const idDict& spawnArgs, const char* st
 			}
 			else
 			{
-				len = strlen( pos );
+				len = (int)strlen( pos );
 			}
 			
 			idStr weaponName( pos, 0, len );
@@ -1465,7 +1466,7 @@ void idInventory::InitRechargeAmmo( idPlayer* owner )
 	while( kv )
 	{
 		idStr key = kv->GetKey();
-		idStr ammoname = key.Right( key.Length() - strlen( "ammorecharge_" ) );
+		idStr ammoname = key.Right( key.Length() - (int)strlen( "ammorecharge_" ) );
 		int ammoType = AmmoIndexForAmmoClass( ammoname );
 		rechargeAmmo[ammoType].ammo = ( atof( kv->GetValue().c_str() ) * 1000 );
 		strcpy( rechargeAmmo[ammoType].ammoName, ammoname );
@@ -13636,7 +13637,7 @@ void idPlayer::UpdateLaserSight( int hand )
 	showTeleport = showTeleport && !AI_DEAD && !gameLocal.inCinematic && !Flicksync_InCutscene && !game->IsPDAOpen();
 
 	// check if lasersight should be hidden
-	if ( !IsGameStereoRendered() ||
+	if ( //!IsGameStereoRendered() ||
 		!hands[hand].laserSightActive ||							// Koz allow user to toggle lasersight.
 		sightMode == -1 ||
 		!weapon->ShowCrosshair() ||		
@@ -13719,7 +13720,7 @@ void idPlayer::UpdateLaserSight( int hand )
 
 		hands[hand].laserSightRenderEntity.shaderParms[SHADERPARM_BEAM_WIDTH] = g_laserSightWidth.GetFloat();
 
-		if ( IsGameStereoRendered() && hands[hand].laserSightHandle == -1 )
+		if ( /*IsGameStereoRendered() &&*/ hands[hand].laserSightHandle == -1 )
 		{
 			hands[hand].laserSightHandle = gameRenderWorld->AddEntityDef( &hands[hand].laserSightRenderEntity );
 		}
@@ -13873,7 +13874,7 @@ void idPlayer::UpdateLaserSight( int hand )
 	}
 	oldTeleport = showTeleport;
 
-	if ( IsGameStereoRendered() && hands[hand].crosshairHandle == -1 )
+	if ( /*IsGameStereoRendered() &&*/ hands[hand].crosshairHandle == -1 )
 	{
 		hands[hand].crosshairHandle = gameRenderWorld->AddEntityDef( &hands[hand].crosshairEntity );
 	}
@@ -16897,7 +16898,7 @@ Calculate the bobbing position of the view weapon
 void idPlayer::CalculateViewWeaponPos( int hand, idVec3& origin, idMat3& axis )
 {
 	
-	if ( game->isVR )
+	if ( game->isVR || true )
 	{
 		CalculateViewWeaponPosVR( hand, origin, axis );
 		return;
@@ -16971,9 +16972,7 @@ void idPlayer::CalculateViewWeaponPos( int hand, idVec3& origin, idMat3& axis )
 	
 	axis = scaledMat * viewAxis;
 
-	for( int h = 0; h < 2; h++ )
-		hands[ h ].weapon->CalculateHideRise( origin, axis ); // Koz
-
+	hands[ hand ].weapon->CalculateHideRise( origin, axis ); // Koz
 }
 
 void DebugCross( idVec3 origin, idMat3 axis, idVec4 color )
@@ -17105,7 +17104,17 @@ void idPlayer::CalculateViewWeaponPosVR( int hand, idVec3 &origin, idMat3 &axis 
 			angQuat = idAngles( commonVr->independentWeaponPitch, commonVr->independentWeaponYaw, 0 ).ToQuat();
 				
 			idQuat gunAxis = angQuat;
-			gunAxis *= bodyAxis.ToQuat();
+			if( game->isVR || in_independentAim.GetInteger() )
+			{
+				gunAxis *= bodyAxis.ToQuat();
+			}
+			else
+			{
+				idMat3 headAxis = idAngles( viewAngles.pitch, viewAngles.yaw, 0.0f ).ToMat3();
+				gunAxis *= headAxis.ToQuat();
+				commonVr->independentWeaponPitch = 0;
+				commonVr->independentWeaponYaw = 0;
+			}
 			newAx = gunAxis.ToMat3();
 			
 			int flip = vr_weaponHand.GetInteger() == 0 ? 1 : -1;
@@ -18458,7 +18467,7 @@ void idPlayer::CalculateRenderView()
 			cineYawOffset = 0.0f;
 		}
 
-
+		// if we're not in a projected cutscene
 		if (!(gameLocal.inCinematic && vr_cinematics.GetInteger() == 2 && vr_flicksyncCharacter.GetInteger() == 0))
 		{
 
@@ -18618,6 +18627,17 @@ void idPlayer::CalculateRenderView()
 				commonVr->PDAforced = false;
 			}
 
+		}
+	}
+	else // Carl: not VR
+	{
+		idVec3 origin = renderView->vieworg;
+		// if we're not in a cutscene
+		if( !gameLocal.inCinematic )
+		{
+			// Used to force the user's head down when there's a low ceiling  
+			commonVr->uncrouchedHMDViewOrigin = origin;
+			commonVr->uncrouchedHMDViewOrigin.z -= commonVr->headHeightDiff;
 		}
 	}
 }
