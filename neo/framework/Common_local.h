@@ -192,7 +192,7 @@ public:
 	
 	virtual bool				ProcessEvent( const sysEvent_t* event );
 	
-	virtual bool				LoadGame( const char* saveName, bool RBDoom );
+	virtual bool				LoadGame( const char* saveName, uint8 RBDoom );
 	virtual bool				SaveGame( const char* saveName );
 	
 	virtual int					ButtonState( int key );
