@@ -34,6 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "PredictedValue_impl.h"
 
 #include "vr/Vr.h" // Koz
+#include "vr/Bonus.h" // Carl
 
 #define	ANGLE2SHORT(x)			( idMath::Ftoi( (x) * 65536.0f / 360.0f ) & 65535 )
 
@@ -243,6 +244,8 @@ void idInventory::Clear()
 	deplete_rate	= 0.0f;
 	deplete_ammount	= 0;
 	nextArmorDepleteTime = 0;
+
+	bonusChar = BONUS_CHAR_NONE;
 	
 	for( int i = 0; i < ammo.Num(); ++i )
 	{
@@ -326,6 +329,8 @@ void idInventory::GetPersistantData( idDict& dict )
 	const idKeyValue* kv;
 	const char* name;
 	
+	dict.SetInt( "bonusChar", bonusChar );
+
 	// armor
 	dict.SetInt( "armor", armor );
 	
@@ -436,10 +441,26 @@ void idInventory::RestoreInventory( idPlayer* owner, const idDict& dict )
 	
 	Clear();
 	
+	bonusChar = ( bonus_char_t )dict.GetInt( "bonusChar", (int)owner->bonusChar );
+
 	// health/armor
 	maxHealth		= dict.GetInt( "maxhealth", "100" );
-	armor			= dict.GetInt( "armor", "50" );
-	maxarmor		= dict.GetInt( "maxarmor", "100" );
+	// Carl: Bonus characters
+	if( bonusChar == BONUS_CHAR_DOOMGUY )
+	{
+		armor = dict.GetInt( "armor", "0" );
+		maxarmor = 100;
+	}
+	else if( bonusChar == BONUS_CHAR_SLAYER || bonusChar == BONUS_CHAR_ETERNAL )
+	{
+		armor = dict.GetInt( "armor", "0" );
+		maxarmor = 50; // without upgrades
+	}
+	else
+	{
+		armor = dict.GetInt( "armor", "50" );
+		maxarmor = dict.GetInt( "maxarmor", "100" );
+	}
 	deplete_armor	= dict.GetInt( "deplete_armor", "0" );
 	deplete_rate	= dict.GetFloat( "deplete_rate", "2.0" );
 	deplete_ammount	= dict.GetInt( "deplete_ammount", "1" );
@@ -523,7 +544,7 @@ void idInventory::RestoreInventory( idPlayer* owner, const idDict& dict )
 	// weapons are stored as a number for persistant data, but as strings in the entityDef
 	weapons	= dict.GetInt( "weapon_bits", "0" );
 	foundWeapons = weapons; // Carl: if we drop any of these weapons, we magically get them back at the end of the level
-	duplicateWeapons = dict.GetInt( "weapon_duplicates", "0" ); // Carl: Dual wielding, bitmask for which weapons you have two of
+	duplicateWeapons = 0;
 	
 	if( g_skill.GetInteger() >= 3 || cvarSystem->GetCVarBool( "fs_buildresources" ) )
 	{
@@ -533,7 +554,13 @@ void idInventory::RestoreInventory( idPlayer* owner, const idDict& dict )
 	{
 		Give( owner, dict, "weapon", dict.GetString( "weapon" ), NULL, false, ITEM_GIVE_FEEDBACK | ITEM_GIVE_UPDATE_STATE );
 	}
-	
+
+	// Carl: Bonus character signature weapons
+	// BonusGiveSignatureWeapons( owner, bonusChar );
+
+	foundWeapons = weapons; // Carl: if we drop any of these weapons, we magically get them back at the end of the level
+	duplicateWeapons = dict.GetInt( "weapon_duplicates", "0" ); // Carl: Dual wielding, bitmask for which weapons you have two of
+
 	num = dict.GetInt( "levelTriggers" );
 	for( i = 0; i < num; i++ )
 	{
@@ -994,19 +1021,49 @@ bool idInventory::Give( idPlayer* owner, const idDict& spawnArgs, const char* st
 	}
 	else if( !idStr::Icmp( statname, "armor" ) )
 	{
-		if( armor >= maxarmor )
+		amount = atoi( value );
+		// Carl: Doomguy bonus character treats armor shards like armor bonuses that can go over 100%
+		bool isArmorBonus = (bonusChar == BONUS_CHAR_DOOMGUY) && (amount <= 10);
+		if( armor >= maxarmor && !isArmorBonus )
 		{
 			return false;	// can't hold any more, so leave the item
 		}
+		int hits = 0; // Carl: if we set armor to a fixed amount like in Doom 1 and 2
+		if( bonusChar == BONUS_CHAR_DOOMGUY && !isArmorBonus )
+		{
+			if( amount == 50 ) // Carl: Standard Doom 3 security armor becomes Doom 1's 100% Armor.
+				hits = 100;
+			else if( amount > 50 )
+				hits = amount;
+			if( hits && armor >= hits )
+				return false;	// don't pick up
+		}
+
 		if( giveFlags & ITEM_GIVE_UPDATE_STATE )
 		{
-			amount = atoi( value );
-			if( amount )
+			if( hits ) // Carl: Like in Doom 1 and 2
+			{
+				armortype = (hits >= 150) ? 2 : 1;
+				armor = hits;
+				if( armor > 200 )
+					armor = 200;
+			}
+			else if( amount )
 			{
 				armor += amount;
-				if( armor > maxarmor )
+				if( isArmorBonus ) // Carl: can go over 100%
 				{
-					armor = maxarmor;
+					if( armor > 200 )
+						armor = 200;
+					if( !armortype )
+						armortype = 1;
+				}
+				else
+				{
+					if( armor > maxarmor )
+					{
+						armor = maxarmor;
+					}
 				}
 				nextArmorDepleteTime = 0;
 				armorPulse = true;
@@ -1078,6 +1135,50 @@ bool idInventory::Give( idPlayer* owner, const idDict& spawnArgs, const char* st
 			
 			idStr weaponName( pos, 0, len );
 			
+			if( weaponName == "weapon_chainsaw" )
+			{
+				if( owner && owner->GetExpansionType() == GAME_BASE )
+				{
+					cvarSystem->SetCVarBool( "bonus_char_marine", true );
+					cvarSystem->SetCVarBool( "bonus_chainsaw", true );
+					if ( bonus_boomstick.GetBool() )
+						cvarSystem->SetCVarBool( "bonus_char_ash", true );
+				}
+			}
+			else if( weaponName == "weapon_shotgun_double" )
+			{
+					cvarSystem->SetCVarBool( "bonus_boomstick", true );
+					cvarSystem->SetCVarBool( "bonus_char_sarge", true );
+					if( bonus_chainsaw.GetBool() )
+						cvarSystem->SetCVarBool( "bonus_char_ash", true );
+			}
+			else if( weaponName == "weapon_bfg" )
+			{
+				if( owner && owner->GetExpansionType() == GAME_BASE )
+				{
+					cvarSystem->SetCVarBool( "bonus_char_campbell", true );
+					cvarSystem->SetCVarBool( "bonus_char_sarge", true );
+				}
+			}
+			else if( weaponName == "weapon_soulcube" )
+			{
+				if( owner && owner->GetExpansionType() == GAME_BASE )
+					cvarSystem->SetCVarBool( "bonus_char_marine", true );
+			}
+			else if( weaponName == "weapon_grabber" && owner )
+			{
+				gameExpansionType_t expansion = owner->GetExpansionType();
+				if( expansion == GAME_D3XP )
+					cvarSystem->SetCVarBool( "bonus_char_roe", true );
+				else if( expansion == GAME_D3LE )
+					cvarSystem->SetCVarBool( "bonus_char_le", true );
+			}
+			else if( weaponName == "weapon_bloodstone_active1" || weaponName == "weapon_bloodstone_active2" || weaponName == "weapon_bloodstone_active3" )
+			{
+				if( owner && owner->GetExpansionType() == GAME_D3XP )
+					cvarSystem->SetCVarBool( "bonus_char_roe", true );
+			}
+
 			// find the number of the matching weapon name
 			for( i = 0; i < MAX_WEAPONS; i++ )
 			{
@@ -1104,7 +1205,7 @@ bool idInventory::Give( idPlayer* owner, const idDict& spawnArgs, const char* st
 				continue;
 			}
 			
-			if( !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || ( weaponName == "weapon_fists" ) || ( weaponName == "weapon_soulcube" ) )
+			if( !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) || bonusChar != BONUS_CHAR_NONE || ( weaponName == "weapon_fists" ) || ( weaponName == "weapon_soulcube" ) )
 			{
 				if( ( weapons & ( 1 << i ) ) == 0 || ( duplicateWeapons & ( 1 << i ) ) == 0 || common->IsMultiplayer() )
 				{
@@ -1439,7 +1540,7 @@ bool idInventory::CanGive( idPlayer* owner, const idDict& spawnArgs, const char*
 			return true;
 		}
 	}
-	else if( !idStr::Icmp( statname, "item" ) || !idStr::Icmp( statname, "icon" ) || !idStr::Icmp( statname, "name" ) )
+	else if( !idStr::Icmp( statname, "item" ) || !idStr::Icmp( statname, "icon" ) || !idStr::Icmp( statname, "name" ) || !idStr::Icmp( statname, "desc" ) ) // Carl
 	{
 		// ignore these as they're handled elsewhere
 		//These items should not be considered as succesful gives because it messes up the max ammo items
@@ -2227,7 +2328,7 @@ bool idPlayerHand::tooFullToInteract()
 
 bool idPlayerHand::handExists()
 {
-	return true;
+	return owner && ( whichHand == HAND_LEFT || ( owner->bonusChar != BONUS_CHAR_ASH && owner->bonusChar != BONUS_CHAR_SAMUS ) );
 }
 
 bool idPlayerHand::contextToggleVirtualGrab()
@@ -2581,7 +2682,7 @@ void idPlayerHand::DropWeapon( bool died )
 	if( !owner || owner->spectating || weaponGone || weapon.GetEntity() == NULL )
 		return;
 
-	if( handExists() )
+	if( !handExists() )
 		return;
 
 	idWeapon* weap = weapon.GetEntity();
@@ -2779,7 +2880,10 @@ idPlayer::idPlayer():
 	travelFlags = TFL_WALK | TFL_AIR | TFL_CROUCH | TFL_WALKOFFLEDGE | TFL_BARRIERJUMP | TFL_JUMP | TFL_LADDER | TFL_WATERJUMP | TFL_ELEVATOR | TFL_SPECIAL;
 	aimValidForTeleport = false;
 
-	
+	bonusChar = (bonus_char_t)bonus_char.GetInteger();
+	if( !BonusCharUnlocked( bonusChar ) )
+		bonusChar = BONUS_CHAR_NONE;
+
 	teleportAimPoint = vec3_zero;
 	teleportPoint = vec3_zero;
 	teleportAimPointPitch = 0.0f;
@@ -3104,7 +3208,11 @@ void idPlayer::Init()
 	
 	noclip					= false;
 	godmode					= false;
-	
+
+	bonusChar = ( bonus_char_t )bonus_char.GetInteger();
+	if( !BonusCharUnlocked( bonusChar ) )
+		bonusChar = BONUS_CHAR_NONE;
+
 	oldButtons				= 0;
 	oldImpulseSequence		= 0;
 	
@@ -3261,6 +3369,7 @@ void idPlayer::Init()
 	viewBobAngles.Zero();
 	viewBob.Zero();
 	
+	// Carl: Bonus characters todo
 	value = spawnArgs.GetString( "model" );
 	if( value != NULL && ( *value != 0 ) )
 	{
@@ -3277,6 +3386,7 @@ void idPlayer::Init()
 		hud->UpdateCursorState();
 	}
 	
+	// Carl: Bonus characters todo
 	if( ( common->IsMultiplayer() || g_testDeath.GetBool() ) && skin )
 	{
 		SetSkin( skin );
@@ -5327,6 +5437,7 @@ void idPlayer::SavePersistantInfo()
 	idDict& playerInfo = gameLocal.persistentPlayerInfo[entityNumber];
 	
 	playerInfo.Clear();
+	inventory.bonusChar = bonusChar;
 	inventory.GetPersistantData( playerInfo );
 	playerInfo.SetInt( "health", health );
 	playerInfo.SetInt( "current_weapon", hands[ GetBestWeaponHand() ].currentWeapon );
@@ -5424,7 +5535,22 @@ void idPlayer::UpdateSkinSetup()
 		
 		idStr skinN = skin->GetName();
 		
-		if ( strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) )
+		if( bonusChar == BONUS_CHAR_DOOMGUY || strstr( skinN.c_str(), "skins/characters/player/doomguy" ) )
+		{
+			// Carl: I didn't make /vrHandsOnly or /vrWeaponsOnly skins for Doomguy so use the default
+			if( !commonVr->thirdPersonMovement && vr_playerBodyMode.GetInteger() != 0 )
+				skinN = "skins/characters/player/greenmarine_arm2";
+			else
+				skinN = "skins/characters/player/doomguy";
+		}
+		else if( bonusChar == BONUS_CHAR_PHOBOS || strstr( skinN.c_str(), "skins/characters/player/phobos" ) )
+		{
+			if( ( strstr( skinN.c_str(), "skins/characters/player/phobos_tshirt" ) || strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) ) && (commonVr->thirdPersonMovement || vr_playerBodyMode.GetInteger() == 0 ) )
+				skinN = "skins/characters/player/phobos_tshirt";
+			else
+				skinN = "skins/characters/player/phobos";
+		}
+		else if( bonusChar == BONUS_CHAR_ASH || ( strstr( skinN.c_str(), "skins/characters/player/tshirt_mp" ) && ( bonusChar == BONUS_CHAR_NONE || bonusChar == BONUS_CHAR_ROLAND || bonusChar == BONUS_CHAR_BETRUGER || bonusChar == BONUS_CHAR_SWANN ) ) )
 		{
 			skinN = "skins/characters/player/tshirt_mp";
 		}
@@ -5440,7 +5566,7 @@ void idPlayer::UpdateSkinSetup()
 		{
 			gameType = GetExpansionType();
 
-			if ( gameType == GAME_D3XP || gameType == GAME_D3LE )
+			if( (( gameType == GAME_D3XP || gameType == GAME_D3LE) && bonusChar == BONUS_CHAR_NONE) || bonusChar == BONUS_CHAR_ROE || bonusChar == BONUS_CHAR_LE || bonusChar == BONUS_CHAR_SARGE || bonusChar == BONUS_CHAR_CAMPBELL || bonusChar == BONUS_CHAR_VFR || bonusChar == BONUS_CHAR_VFR )
 			{
 				skinN = "skins/characters/player/d3xp_sp_vrik";
 			}
@@ -5450,15 +5576,15 @@ void idPlayer::UpdateSkinSetup()
 			}
 		}
 
-		if ( commonVr->thirdPersonMovement )
+		if ( commonVr->thirdPersonMovement && bonusChar != BONUS_CHAR_VFR )
 		{
 			skinN += body;
 		}
-		else if ( vr_playerBodyMode.GetInteger() == 1 || ( vr_playerBodyMode.GetInteger() == 2 && (hands[ 0 ].currentWeapon == weapon_fists || hands[ 1 ].currentWeapon == weapon_fists || commonVr->handInGui) ) )
+		else if ( vr_playerBodyMode.GetInteger() == 1 || ( vr_playerBodyMode.GetInteger() == 2 && (hands[ 0 ].currentWeapon == weapon_fists || hands[ 1 ].currentWeapon == weapon_fists || commonVr->handInGui) ) || commonVr->thirdPersonMovement )
 		{
 			skinN += handsOnly;
 		}
-		else if ( vr_playerBodyMode.GetInteger() == 2 ) 
+		else if ( vr_playerBodyMode.GetInteger() == 2 || bonusChar == BONUS_CHAR_SAMUS ) 
 		{
 			skinN += weaponOnly;
 		}
@@ -5471,7 +5597,10 @@ void idPlayer::UpdateSkinSetup()
 			}
 			else
 			{
-				skinN += body;
+				if ( bonusChar == BONUS_CHAR_VFR || bonusChar == BONUS_CHAR_ROLAND || bonusChar == BONUS_CHAR_BETRUGER || bonusChar == BONUS_CHAR_SWANN || bonusChar == BONUS_CHAR_WITCH )
+					skinN += handsOnly;
+				else
+					skinN += body;
 			}
 		}
 		
@@ -11060,7 +11189,7 @@ void idPlayer::PerformImpulse( int impulse )
 		else if (impulse == 4)
 			SelectWeapon( weapon_shotgun_double, false, true ); // double barreled (this was already the super shotgun)
 		else if (impulse == 11)
-			SelectWeapon( weapon_shotgun, false, true ); // single barreled (this was empty before)
+			SelectWeapon( weapon_shotgun, false, true ); // single barreled (this was empty before but I made it the chainsaw, it's a different impulse though)
 		else
 			SelectWeapon( impulse, false );
 		return;
@@ -13152,7 +13281,7 @@ bool idPlayer::GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3&
 		}
 	}
 	// Carl: flashlight hand
-	else if ( commonVr->GetCurrentFlashlightMode() == FLASHLIGHT_HAND && weaponEnabled && !spectating && !gameLocal.world->spawnArgs.GetBool("no_Weapons") && !game->IsPDAOpen() && !commonVr->PDAforcetoggle && hands[0].currentWeapon != weapon_pda && hands[1].currentWeapon != weapon_pda )
+	else if ( commonVr->GetCurrentFlashlightMode() == FLASHLIGHT_HAND && weaponEnabled && !spectating && !gameLocal.world->spawnArgs.GetBool( "no_Weapons" ) && !game->IsPDAOpen() && !commonVr->PDAforcetoggle && hands[0].currentWeapon != weapon_pda && hands[1].currentWeapon != weapon_pda )
 	{
 		weapon_t currentWeapon = flashlight->IdentifyWeapon();
 		CalculateViewFlashlightPos( origin, axis, flashlightOffsets[ int( currentWeapon ) ] );
@@ -15543,7 +15672,7 @@ void idPlayer::CalcDamagePoints( idEntity* inflictor, idEntity* attacker, const 
 	}
 	
 	// check for completely getting out of the damage
-	if( !damageDef->GetBool( "noGod" ) )
+	if( !damageDef->GetBool( "noGod" ) && ( bonusChar != BONUS_CHAR_DOOMGUY || damage < 1000 ) ) // Carl: Doom 1 and 2's Doomguy gets killed by 1000 damage even in God mode
 	{
 		// check for godmode
 		if( godmode )
@@ -15566,6 +15695,12 @@ void idPlayer::CalcDamagePoints( idEntity* inflictor, idEntity* attacker, const 
 		float armor_protection;
 		
 		armor_protection = ( common->IsMultiplayer() ) ? g_armorProtectionMP.GetFloat() : g_armorProtection.GetFloat();
+		if( inventory.armortype == 1 || ( bonusChar == BONUS_CHAR_DOOMGUY && inventory.armortype == 0 ) )
+			armor_protection = 1.0f / 3;
+		else if( inventory.armortype == 2 )
+			armor_protection = 1.0f / 2;
+		else if( inventory.armortype == 3 )
+			armor_protection = 1.0f;
 		
 		armorSave = ceil( damage * armor_protection );
 		if( armorSave >= inventory.armor )
@@ -15579,8 +15714,16 @@ void idPlayer::CalcDamagePoints( idEntity* inflictor, idEntity* attacker, const 
 		}
 		else if( armorSave >= damage )
 		{
-			armorSave = damage - 1;
-			damage = 1;
+			if( bonusChar == BONUS_CHAR_DOOMGUY || bonusChar == BONUS_CHAR_SLAYER || bonusChar == BONUS_CHAR_ETERNAL )
+			{
+				armorSave = damage;
+				damage = 0;
+			}
+			else
+			{
+				armorSave = damage - 1;
+				damage = 1;
+			}
 		}
 		else
 		{
@@ -15933,7 +16076,13 @@ void idPlayer::Damage( idEntity* inflictor, idEntity* attacker, const idVec3& di
 	if( armorSave )
 	{
 		inventory.armor -= armorSave;
-		
+		// Carl: Bonus character from Doom 1 and 2
+		if( inventory.armor <= 0 && inventory.armortype <= 2 )
+		{
+			// armor is used up
+			inventory.armortype = 0;
+		}
+
 		if( gameLocal.time > lastArmorPulse + 200 )
 		{
 			StartSound( "snd_hitArmor", SND_CHANNEL_ITEM, 0, false, NULL );
@@ -17976,6 +18125,11 @@ void idPlayer::CalculateWaist()
 
 void idPlayer::CalculateLeftHand()
 {
+	if( !hands[HAND_LEFT].handExists() )
+	{
+		hands[HAND_LEFT].handSlot = SLOT_NONE;
+		return;
+	}
 	slotIndex_t oldSlot = hands[HAND_LEFT].handSlot;
 	slotIndex_t slot = SLOT_NONE;
 	if ( commonVr->hasHMD )
@@ -18018,6 +18172,11 @@ void idPlayer::CalculateLeftHand()
 
 void idPlayer::CalculateRightHand()
 {
+	if( !hands[HAND_RIGHT].handExists() )
+	{
+		hands[HAND_RIGHT].handSlot = SLOT_NONE;
+		return;
+	}
 	slotIndex_t oldSlot = hands[HAND_RIGHT].handSlot;
 	slotIndex_t slot = SLOT_NONE;
 	if ( commonVr->hasHMD )

@@ -39,4 +39,113 @@ models/characters/male_npc/marine/marine2_arm2_vrik
 	   specularmap	models/characters/player_character/body/body_arm2_s.tga
 }
 
+models/characters/player/arm2_b
+{
+        noselfShadow
+		//noShadows
+		clamp
+	renderbump  -size 1024 2048 -trace 0.1 -colorMap   models/characters/player/arm2_local.tga models/characters/player/arm1_hi.lwo
+
+
+
+        	diffusemap	models/characters/player/arm2_b.tga
+		{
+ 		  blend bumpmap
+          map  addnormals(models/characters/player/arm2_local.tga, heightmap(models/characters/player/arm2_h.tga, 3 ) )
+ 		  
+     	}
+                  specularmap	models/characters/player/arm2_s.tga
+}
+
+models/characters/player/doomguy_body
+{
+        noselfShadow
+		clamp
+		collision	
+	renderbump  -size 1024 2048 -trace 0.03 -colorMap -aa 2  models/characters/player/body_local.tga models/characters/player/body_hi.lwo
+
+
+ 				diffusemap	  models/characters/player_character/body/doomguy_body.tga
+
+		{
+ 		  blend bumpmap
+          map  addnormals(models/characters/player/body_local.tga, heightmap(models/characters/player/body_h.tga, 5 ) )
+ 		  
+     	}
+		
+                  specularmap	models/characters/player/body_s.tga
+}
+
+models/characters/player/phobos_body
+{
+        noselfShadow
+		clamp
+		collision	
+	renderbump  -size 1024 2048 -trace 0.03 -colorMap -aa 2  models/characters/player/body_local.tga models/characters/player/body_hi.lwo
+
+
+ 				diffusemap	  models/characters/player_character/body/phobos_body.tga
+
+		{
+ 		  blend bumpmap
+          map  addnormals(models/characters/player/body_local.tga, heightmap(models/characters/player/body_h.tga, 5 ) )
+ 		  
+     	}
+		
+                  specularmap	models/characters/player/body_s.tga
+}
+
+models/characters/doommarine/doommarine_torso
+{
+        noselfShadow
+		clamp
+ 		diffusemap models/characters/doommarine/doommarine_torso.png
+		bumpmap models/characters/doommarine/doommarine_torso_local.png
+		specularmap models/characters/doommarine/doommarine_torso_s.png
+}
+
+models/characters/doommarine/doommarine_arms
+{
+        noselfShadow
+		clamp
+ 		diffusemap models/characters/doommarine/doommarine_arms.png
+		bumpmap models/characters/doommarine/doommarine_arms_local.png
+		specularmap models/characters/doommarine/doommarine_arms_s.png
+}
+
+models/characters/doommarine/doommarine_legs
+{
+        noselfShadow
+		clamp
+ 		diffusemap models/characters/doommarine/doommarine_legs.png
+		bumpmap models/characters/doommarine/doommarine_legs_local.png
+		specularmap models/characters/doommarine/doommarine_legs_s.png
+}
+
+models/characters/doommarine/doommarine_cowl
+{
+        noselfShadow
+		clamp
+ 		diffusemap models/characters/doommarine/doommarine_cowl_low.png
+		bumpmap models/characters/doommarine/doommarine_cowl_low_local.png
+		specularmap models/characters/doommarine/doommarine_cowl_low_rough_s.png
+}
+
+models/characters/doommarine/doommarine_helmet
+{
+        noselfShadow
+		clamp
+ 		diffusemap models/characters/doommarine/doommarine_helmet.png
+		bumpmap models/characters/doommarine/doommarine_helmet_local.png
+		specularmap models/characters/doommarine/doommarine_helmet_s.png
+}
+
+models/characters/doommarine/doommarine_visor
+{
+        noselfShadow
+		clamp
+ 		diffusemap models/characters/doommarine/doommarine_visor.png
+		bumpmap models/characters/doommarine/doommarine_visor_local.png
+		specularmap models/characters/doommarine/doommarine_visor_s.png
+}
 

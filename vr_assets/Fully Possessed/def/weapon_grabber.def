@@ -171,6 +171,15 @@ entityDef weapon_grabber {
 	"skin_invisible"			"skins/grabber_invis"
 }
 
+entityDef moveable_item_grabber {
+	"inherit"					"weapon_grabber"
+	"spawnclass"				"idMoveableItem"
+	"density"					"0.05"
+	"friction"					"0.2"
+	"bouncyness"				"0"
+	"snd_bounce"				"smallbox"
+	"clipmodel" 				"models/weapons/pistol/w_pistol_c.ase" // Carl: Grabber model can't generate clipmodel
+}
 
 // ======================================================
 //

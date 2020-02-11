@@ -1483,7 +1483,11 @@ void idMenuHandler_Shell::ShowDoomIntro()
 {
 
 	StopSound();
-	
+	if( bonus_char.GetInteger() && BonusCharUnlocked( (bonus_char_t)bonus_char.GetInteger() ) )
+	{
+		StartGame( 0 );
+		return;
+	}
 	showingIntro = true;
 	commonVr->showingIntroVideo = showingIntro;
 
@@ -1676,7 +1680,12 @@ void idMenuHandler_Shell::ShowROEIntro()
 {
 
 	StopSound();
-	
+	if( bonus_char.GetInteger() && BonusCharUnlocked( (bonus_char_t)bonus_char.GetInteger() ) )
+	{
+		StartGame( 1 );
+		return;
+	}
+
 	showingIntro = true;
 	commonVr->showingIntroVideo = showingIntro;
 
@@ -1864,7 +1873,12 @@ void idMenuHandler_Shell::ShowLEIntro()
 {
 
 	StopSound();
-	
+	if( bonus_char.GetInteger() && BonusCharUnlocked( (bonus_char_t)bonus_char.GetInteger() ) )
+	{
+		StartGame( 2 );
+		return;
+	}
+
 	showingIntro = true;
 	commonVr->showingIntroVideo = showingIntro;
 

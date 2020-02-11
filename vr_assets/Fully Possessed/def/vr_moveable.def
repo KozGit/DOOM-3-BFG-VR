@@ -1,0 +1,76 @@
+// Carl: Extra or fixed moveable definitions.
+
+entityDef moveable_binder1_vr {
+	"inherit"					"moveable_base_fixed"
+	"model"						"models/mapobjects/filler/binder1.ase"
+	"clipmodel"					"models/mapobjects/filler/binder1_c.ase"
+	"density"					"0.05"
+	"friction"					"0.1"
+	"bouncyness"				"0.3"
+	"nonsolid"					"1"
+	"snd_bounce"				"book_impact"
+
+	"def_damage"				"damage_moveable_player"
+	"monster_damage"			"damage_moveable_small"
+	"damageWhenActive"			"1"
+}
+
+entityDef moveable_binder2_vr {
+	"inherit"					"moveable_base_fixed"
+	"model"						"models/mapobjects/filler/binder2.ase"
+	"clipmodel"					"models/mapobjects/filler/binder2_c.ase"
+	"density"					"0.05"
+	"friction"					"0.1"
+	"bouncyness"				"0.3"
+	"nonsolid"					"1"
+	"snd_bounce"				"book_impact"
+
+	"def_damage"				"damage_moveable_player"
+	"monster_damage"			"damage_moveable_small"
+	"damageWhenActive"			"1"
+}
+
+entityDef moveable_binder3_vr {
+	"inherit"					"moveable_base_fixed"
+	"model"						"models/mapobjects/filler/binder3.ase"
+	"clipmodel"					"models/mapobjects/filler/binder3_c.ase"
+	"density"					"0.05"
+	"friction"					"0.1"
+	"bouncyness"				"0.3"
+	"nonsolid"					"1"
+	"snd_bounce"				"book_impact"
+
+	"def_damage"				"damage_moveable_player"
+	"monster_damage"			"damage_moveable_small"
+	"damageWhenActive"			"1"
+}
+
+entityDef moveable_binder4_vr {
+	"inherit"					"moveable_base_fixed"
+	"model"						"models/mapobjects/filler/binder4.ase"
+	"clipmodel"					"models/mapobjects/filler/binder4_c.ase"
+	"density"					"0.05"
+	"friction"					"0.1"
+	"bouncyness"				"0.3"
+	"nonsolid"					"1"
+	"snd_bounce"				"book_impact"
+
+	"def_damage"				"damage_moveable_player"
+	"monster_damage"			"damage_moveable_small"
+	"damageWhenActive"			"1"
+}
+
+entityDef moveable_lunchbag {
+	"inherit"					"moveable_base_fixed"
+	"model"						"models/mapobjects/filler/lunchbag.lwo"
+	"density"					"0.5"
+	"friction"					"0.1"
+	"bouncyness"				"0.3"
+
+	"snd_bounce"				"paper_impact"
+
+	"def_damage"				"damage_moveable_player"
+	"monster_damage"			"damage_moveable_tiny"
+	"damageWhenActive"			"1"
+}
+
