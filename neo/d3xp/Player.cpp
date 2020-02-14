@@ -8151,37 +8151,17 @@ void idPlayer::UpdateFocus()
 
 			if ( vr_guiMode.GetInteger() == 2 )
 			{
-				
-				weaponAxis = viewPitchAdj * weaponAxis; // add a little down pitch to help my neck.
-
-				scanRange = 36.0f; // get pretty close for touchscreens
-				// if the hand is already in the gui, or has completed the lower cycle after hitting a gui,
-				// scan from the same point in space until the player exceeds movement threshold
-				// this prevents getting kicked from a gui when just looking around
-				if ( commonVr->handInGui || raised ) 
-				{
-					static idMat3 yawAdj;
-					static idVec3 distMoved;
-					scanRange += 4;
-					yawAdj = idAngles( 0.0f, viewAngles.yaw - lastBodyYaw, 0.0f ).Normalize180().ToMat3(); 
-					weaponAxis = yawAdj * lastScanAxis;
-					distMoved = physicsObj.GetOrigin() - lastBodyPosition;
-					if ( distMoved.Length() < 12.0f ) distMoved = vec3_zero;
-					start = lastScanStart + distMoved;
-									
-				}
-				else
-				{
-					lastScanStart = start;
-					lastScanAxis = weaponAxis;
-					lastBodyYaw = viewAngles.yaw;
-					lastBodyPosition = physicsObj.GetOrigin();
-				}
+				//NPI We use the true hand to scan, no eye depends, no need to check handInGui || raised 
+				CalculateViewMainHandPosVR(start, weaponAxis);
+				scanRange = 20.0f; // NPI when using touch screen, 36 is too much, 3 is the hand lenght 6 should be fine but set it to 20 to avoid to put weapon into the gui before the finger raised				
 			}
-			hmdAbsPitch = abs( commonVr->lastHMDViewAxis.ToAngles().Normalize180().pitch + vr_guiFocusPitchAdj.GetFloat() );
-			if ( hmdAbsPitch > 60.0f ) hmdAbsPitch = 60.0f;
-			scanRangeCorrected = scanRange / cos( DEG2RAD( hmdAbsPitch ) );
-			scanRange = scanRangeCorrected;
+			else //not use hmdaxis when guis as touch screen
+			{
+				hmdAbsPitch = abs(commonVr->lastHMDViewAxis.ToAngles().Normalize180().pitch + vr_guiFocusPitchAdj.GetFloat());
+				if (hmdAbsPitch > 60.0f) hmdAbsPitch = 60.0f;
+				scanRangeCorrected = scanRange / cos(DEG2RAD(hmdAbsPitch));
+				scanRange = scanRangeCorrected;
+			}
 		}
 		else
 		{
@@ -15337,6 +15317,80 @@ void DebugCross( idVec3 origin, idMat3 axis, idVec4 color )
 	gameRenderWorld->DebugLine( color, origin - 3 * axis[0], origin + 3 * axis[0], 20 );
 	gameRenderWorld->DebugLine( color, origin - 3 * axis[1], origin + 3 * axis[1], 20 );
 	gameRenderWorld->DebugLine( color, origin - 3 * axis[2], origin + 3 * axis[2], 20 );
+}
+
+void idPlayer::CalculateViewMainHandPosVR(idVec3& origin, idMat3& axis)
+{
+	static idAngles angles;
+	static int delta;
+	static idQuat gunRot;
+	static idQuat gunAxis;
+	static idVec3 gunOrigin;
+	static idVec3 motionPosition = vec3_zero;
+	static idQuat motionRotation; // = idQuat_zero;
+	static int currentHand;
+	static idVec3 originOffset = vec3_zero;
+	static idAngles hmdAngles;
+	static idVec3 headPositionDelta;
+	static idVec3 bodyPositionDelta;
+	static idVec3 absolutePosition;
+	static idQuat weaponPitch;
+	static idVec3 playerPdaPos = vec3_zero; // position player was at when pda fixed in space
+	
+	currentHand = vr_weaponHand.GetInteger();
+
+	gunOrigin = GetEyePosition();
+
+	if (game->isVR && commonVr->VR_USE_MOTION_CONTROLS)
+		gunOrigin += commonVr->leanOffset;
+
+	// direction the player body is facing.
+	idMat3 bodyAxis = idAngles(0.0, viewAngles.yaw, 0.0f).ToMat3();
+	idVec3 gravity = physicsObj.GetGravityNormal();
+
+	if (commonVr->VR_USE_MOTION_CONTROLS)
+	{
+		// motion control weapon positioning.
+		//-----------------------------------
+
+		static idVec3 weapOrigin = vec3_zero;
+		static idMat3 weapAxis = mat3_identity;
+
+		static idVec3 fixPosVec = idVec3(-17.0f, 6.0f, 0.0f);
+		static idVec3 fixPos = fixPosVec;
+		static idQuat fixRot = idAngles(40.0f, -40.0f, 20.0f).ToQuat();
+		static idVec3 attacherToDefault = vec3_zero;
+		static idMat3 rot180 = idAngles(0.0f, 180.0f, 0.0f).ToMat3();
+		static bool wasPDA = false;
+
+		attacherToDefault = handWeaponAttacherToDefaultOffset[currentHand][currentWeapon];
+		originOffset = weapon->weaponHandDefaultPos[currentHand];
+
+		commonVr->MotionControlGetHand(currentHand, motionPosition, motionRotation);
+
+		weaponPitch = idAngles(vr_motionWeaponPitchAdj.GetFloat(), 0.0f, 0.0f).ToQuat();
+		motionRotation = weaponPitch * motionRotation;
+
+		GetViewPos(weapOrigin, weapAxis);
+
+		weapOrigin += commonVr->leanOffset;
+
+		hmdAngles = commonVr->poseHmdAngles;
+		headPositionDelta = commonVr->poseHmdHeadPositionDelta;
+		bodyPositionDelta = commonVr->poseHmdBodyPositionDelta;
+		absolutePosition = commonVr->poseHmdAbsolutePosition;
+
+		weapAxis = idAngles(0.0f, weapAxis.ToAngles().yaw - commonVr->bodyYawOffset, 0.0f).ToMat3();
+		weapOrigin += weapAxis[0] * headPositionDelta.x + weapAxis[1] * headPositionDelta.y + weapAxis[2] * headPositionDelta.z;
+
+		weapOrigin += motionPosition * weapAxis;
+		weapAxis = motionRotation.ToMat3() * weapAxis;
+
+		//DebugCross(weapOrigin, weapAxis, colorYellow);
+
+		axis = weapAxis;
+		origin = weapOrigin;
+	}
 }
 
 void idPlayer::CalculateViewWeaponPosVR( idVec3 &origin, idMat3 &axis )
