@@ -63,7 +63,7 @@ idCVar pm_clientAuthoritative_minSpeedSquared( "pm_clientAuthoritative_minSpeedS
 idCVar vr_wipScale( "vr_wipScale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "" );
 
 idCVar vr_debugGui( "vr_debugGui", "0", CVAR_BOOL, "" );
-idCVar vr_guiFocusPitchAdj( "vr_guiFocusPitchAdj", "7", CVAR_FLOAT | CVAR_ARCHIVE, "View pitch adjust to help activate in game touch screens" );
+idCVar vr_guiFocusPitchAdj( "vr_guiFocusPitchAdj", "7", CVAR_FLOAT | CVAR_ARCHIVE, "View pitch adjust to help activate in game Talk to NPC" );
 
 idCVar vr_bx1( "vr_bx1", "5", CVAR_FLOAT, "");
 idCVar vr_bx2( "vr_bx2", "5", CVAR_FLOAT, "" );
@@ -8034,6 +8034,99 @@ bool idPlayer::UpdateFocusPDA()
 
 /*
 ================
+idPlayer::LookForFocusIdAI
+
+NPI 
+Searches nearby entities for interactive NPC
+Almost the same than in UpdateFocus scan, but always use eye position and axis (not guiMode : weapon or hand)
+================
+*/
+idClipModel* idPlayer::LookForFocusIdAI()
+{
+	idClipModel* clipModelList[MAX_GENTITIES];
+	idClipModel* clip;
+	int			listedClipModels;
+	idEntity*	ent;
+	int			i, j;
+	idVec3		start, end;
+	idMat3		scanAxis;
+	trace_t		trace;
+
+	idMat3 viewPitchAdj = idAngles(vr_guiFocusPitchAdj.GetFloat(), 0.0f, 0.0f).ToMat3();
+
+	start = commonVr->lastViewOrigin;
+	scanAxis = commonVr->lastViewAxis;
+	scanAxis = viewPitchAdj * scanAxis; // NPI from Koz "add a little down pitch to help my neck."
+	end = start + scanAxis[0] * 80.0f;
+	
+	idBounds bounds(start);
+	bounds.AddPoint(end);
+
+	listedClipModels = gameLocal.clip.ClipModelsTouchingBounds(bounds, -1, clipModelList, MAX_GENTITIES);
+	// no pretense at sorting here, just assume that there will only be one active
+	// gui within range along the trace
+	
+	for (i = 0; i < listedClipModels; i++)
+	{
+		clip = clipModelList[i];
+		ent = clip->GetEntity();
+
+		if (ent->IsHidden())
+		{
+			continue;
+		}
+		if (ent->IsType(idAFAttachment::Type))
+		{
+			idEntity* body = static_cast<idAFAttachment*>(ent)->GetBody();
+			if (body != NULL && body->IsType(idAI::Type) && (static_cast<idAI*>(body)->GetTalkState() >= TALK_OK))
+			{
+				gameLocal.clip.TracePoint(trace, start, end, MASK_SHOT_RENDERMODEL, this);
+				if ((trace.fraction < 1.0f) && (trace.c.entityNum == ent->entityNumber))
+				{
+					ClearFocus();
+					focusCharacter = static_cast<idAI*>(body);
+					talkCursor = 1;
+					focusTime = gameLocal.time + FOCUS_TIME;
+					if (vr_debugGui.GetBool())
+					{
+						gameRenderWorld->DebugLine(colorGreen, start, end, 20, true);
+					}
+					break;
+				}
+			}
+			continue;
+		}
+
+		if (ent->IsType(idAI::Type))
+		{
+			if (static_cast<idAI*>(ent)->GetTalkState() >= TALK_OK)
+			{
+				gameLocal.clip.TracePoint(trace, start, end, MASK_SHOT_RENDERMODEL, this);
+				if ((trace.fraction < 1.0f) && (trace.c.entityNum == ent->entityNumber))
+				{
+					ClearFocus();
+					focusCharacter = static_cast<idAI*>(ent);
+					talkCursor = 1;
+					focusTime = gameLocal.time + FOCUS_TIME;
+					if (vr_debugGui.GetBool())
+					{
+						gameRenderWorld->DebugLine(colorGreen, start, end, 20, true);
+					}
+					break;
+				}
+			}
+			continue;
+		}
+	}
+	if (vr_debugGui.GetBool())
+	{
+		gameRenderWorld->DebugLine(colorRed, start, end, 20, true);
+	}
+	return NULL; // view didn't hit NPC
+}
+
+/*
+================
 idPlayer::UpdateFocus
 
 Searches nearby entities for interactive guis, possibly making one of them
@@ -8084,8 +8177,6 @@ void idPlayer::UpdateFocus()
 	static float scanRangeCorrected;
 	static float hmdAbsPitch;
 
-	idMat3 viewPitchAdj = idAngles( vr_guiFocusPitchAdj.GetFloat(), 0.0f, 0.0f ).ToMat3();
-	
 	scanRange = 50.0f;
 	
 	if ( Flicksync_InCutscene || gameLocal.inCinematic || commonVr->thirdPersonMovement ) 
@@ -8100,7 +8191,7 @@ void idPlayer::UpdateFocus()
 	{
 		return;
 	}
-	
+
 	// only update the focus character when attack button isn't pressed so players
 	// can still chainsaw NPC's
 	if ( common->IsMultiplayer() || ( !focusCharacter && (usercmd.buttons & BUTTON_ATTACK )) )
@@ -8133,7 +8224,7 @@ void idPlayer::UpdateFocus()
 	}
 
 	start = GetEyePosition();
-
+	
 	// Koz begin
 	if ( game->isVR ) // Koz fixme only when vr actually active.
 	{
@@ -8203,6 +8294,12 @@ void idPlayer::UpdateFocus()
 			lastMPAimTime = gameLocal.realClientTime;
 		}
 	}
+
+	if (vr_debugGui.GetBool())
+	{
+		gameRenderWorld->DebugLine(colorYellow, start, end, 20, true);
+		common->Printf("Handin gui %d raised %d lowered %d hideoffset %f\n", commonVr->handInGui, raised, lowered, weapon->hideOffset);
+	}
 	
 	idBounds bounds( start );
 	bounds.AddPoint( end );
@@ -8211,11 +8308,17 @@ void idPlayer::UpdateFocus()
 	// no pretense at sorting here, just assume that there will only be one active
 	// gui within range along the trace
 
-	if ( vr_debugGui.GetBool() )
+	//NPI begin
+	//check NPC in is own updateFocus method
+	//talk scan always use vanilla scan : eye position and eye axis over dist 80.0
+	if (allowFocus)
 	{
-		gameRenderWorld->DebugLine( colorYellow, start, end, 20, true );
-		common->Printf( "Handin gui %d raised %d lowered %d hideoffset %f\n", commonVr->handInGui, raised, lowered, weapon->hideOffset );
+		clip = LookForFocusIdAI();
+		if (clip) {
+			listedClipModels = 0; //we stop scanning
+		}
 	}
+	///NPI end
 
 	for ( i = 0; i < listedClipModels; i++ )
 	{

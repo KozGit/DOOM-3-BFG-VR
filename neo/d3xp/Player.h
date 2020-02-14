@@ -1172,6 +1172,7 @@ private:
 	void					UpdateFocus();
 	void					SendPDAEvent( const sysEvent_t* sev );
 	bool					UpdateFocusPDA();
+	idClipModel*			LookForFocusIdAI();
 	void					UpdateLocation();
 	idUserInterface* 		ActiveGui();
 	
