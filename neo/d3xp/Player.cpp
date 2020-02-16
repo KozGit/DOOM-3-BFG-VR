@@ -9855,7 +9855,7 @@ void idPlayer::UpdateFocus()
 	if (vr_debugGui.GetBool())
 	{
 		gameRenderWorld->DebugLine(colorYellow, start, end, 20, true);
-		common->Printf("Handin gui %d raised %d lowered %d hideoffset %f\n", commonVr->handInGui, raised, lowered, hands[vr_weaponHand.GetInteger()]->hideOffset);
+		common->Printf("Handin gui %d raised %d lowered %d hideoffset %f\n", commonVr->handInGui, raised, lowered, hands[vr_weaponHand.GetInteger()].weapon->hideOffset);
 	}
 	
 	idBounds bounds( start );
