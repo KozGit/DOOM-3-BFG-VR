@@ -64,7 +64,7 @@ idCVar pm_clientAuthoritative_minSpeedSquared( "pm_clientAuthoritative_minSpeedS
 idCVar vr_wipScale( "vr_wipScale", "1.0", CVAR_FLOAT | CVAR_ARCHIVE, "" );
 
 idCVar vr_debugGui( "vr_debugGui", "0", CVAR_BOOL, "" );
-idCVar vr_guiFocusPitchAdj( "vr_guiFocusPitchAdj", "7", CVAR_FLOAT | CVAR_ARCHIVE, "View pitch adjust to help activate in game touch screens" );
+idCVar vr_guiFocusPitchAdj( "vr_guiFocusPitchAdj", "7", CVAR_FLOAT | CVAR_ARCHIVE, "View pitch adjust to help activate in game Talk to NPC" );
 
 idCVar vr_bx1( "vr_bx1", "5", CVAR_FLOAT, "");
 idCVar vr_bx2( "vr_bx2", "5", CVAR_FLOAT, "" );
@@ -9591,6 +9591,99 @@ bool idPlayer::UpdateFocusPDA()
 
 /*
 ================
+idPlayer::LookForFocusIdAI
+
+NPI 
+Searches nearby entities for interactive NPC
+Almost the same than in UpdateFocus scan, but always use eye position and axis (not guiMode : weapon or hand)
+================
+*/
+idClipModel* idPlayer::LookForFocusIdAI()
+{
+	idClipModel* clipModelList[MAX_GENTITIES];
+	idClipModel* clip;
+	int			listedClipModels;
+	idEntity*	ent;
+	int			i, j;
+	idVec3		start, end;
+	idMat3		scanAxis;
+	trace_t		trace;
+
+	idMat3 viewPitchAdj = idAngles(vr_guiFocusPitchAdj.GetFloat(), 0.0f, 0.0f).ToMat3();
+
+	start = commonVr->lastViewOrigin;
+	scanAxis = commonVr->lastViewAxis;
+	scanAxis = viewPitchAdj * scanAxis; // NPI from Koz "add a little down pitch to help my neck."
+	end = start + scanAxis[0] * 80.0f;
+	
+	idBounds bounds(start);
+	bounds.AddPoint(end);
+
+	listedClipModels = gameLocal.clip.ClipModelsTouchingBounds(bounds, -1, clipModelList, MAX_GENTITIES);
+	// no pretense at sorting here, just assume that there will only be one active
+	// gui within range along the trace
+	
+	for (i = 0; i < listedClipModels; i++)
+	{
+		clip = clipModelList[i];
+		ent = clip->GetEntity();
+
+		if (ent->IsHidden())
+		{
+			continue;
+		}
+		if (ent->IsType(idAFAttachment::Type))
+		{
+			idEntity* body = static_cast<idAFAttachment*>(ent)->GetBody();
+			if (body != NULL && body->IsType(idAI::Type) && (static_cast<idAI*>(body)->GetTalkState() >= TALK_OK))
+			{
+				gameLocal.clip.TracePoint(trace, start, end, MASK_SHOT_RENDERMODEL, this);
+				if ((trace.fraction < 1.0f) && (trace.c.entityNum == ent->entityNumber))
+				{
+					ClearFocus();
+					focusCharacter = static_cast<idAI*>(body);
+					talkCursor = 1;
+					focusTime = gameLocal.time + FOCUS_TIME;
+					if (vr_debugGui.GetBool())
+					{
+						gameRenderWorld->DebugLine(colorGreen, start, end, 20, true);
+					}
+					break;
+				}
+			}
+			continue;
+		}
+
+		if (ent->IsType(idAI::Type))
+		{
+			if (static_cast<idAI*>(ent)->GetTalkState() >= TALK_OK)
+			{
+				gameLocal.clip.TracePoint(trace, start, end, MASK_SHOT_RENDERMODEL, this);
+				if ((trace.fraction < 1.0f) && (trace.c.entityNum == ent->entityNumber))
+				{
+					ClearFocus();
+					focusCharacter = static_cast<idAI*>(ent);
+					talkCursor = 1;
+					focusTime = gameLocal.time + FOCUS_TIME;
+					if (vr_debugGui.GetBool())
+					{
+						gameRenderWorld->DebugLine(colorGreen, start, end, 20, true);
+					}
+					break;
+				}
+			}
+			continue;
+		}
+	}
+	if (vr_debugGui.GetBool())
+	{
+		gameRenderWorld->DebugLine(colorRed, start, end, 20, true);
+	}
+	return NULL; // view didn't hit NPC
+}
+
+/*
+================
 idPlayer::UpdateFocus
 
 Searches nearby entities for interactive guis, possibly making one of them
@@ -9641,8 +9734,6 @@ void idPlayer::UpdateFocus()
 	static float scanRangeCorrected;
 	static float hmdAbsPitch;
 
-	idMat3 viewPitchAdj = idAngles( vr_guiFocusPitchAdj.GetFloat(), 0.0f, 0.0f ).ToMat3();
-	
 	scanRange = 50.0f;
 	
 	if ( Flicksync_InCutscene || gameLocal.inCinematic || commonVr->thirdPersonMovement ) 
@@ -9657,7 +9748,7 @@ void idPlayer::UpdateFocus()
 	{
 		return;
 	}
-	
+
 	// only update the focus character when attack button isn't pressed so players
 	// can still chainsaw NPC's
 	if ( common->IsMultiplayer() || ( !focusCharacter && (usercmd.buttons & BUTTON_ATTACK )) )
@@ -9690,7 +9781,7 @@ void idPlayer::UpdateFocus()
 	}
 
 	start = GetEyePosition();
-
+	
 	// Koz begin
 	if ( game->isVR ) // Koz fixme only when vr actually active.
 	{
@@ -9708,37 +9799,17 @@ void idPlayer::UpdateFocus()
 
 			if ( vr_guiMode.GetInteger() == 2 )
 			{
-				
-				weaponAxis = viewPitchAdj * weaponAxis; // add a little down pitch to help my neck.
-
-				scanRange = 36.0f; // get pretty close for touchscreens
-				// if the hand is already in the gui, or has completed the lower cycle after hitting a gui,
-				// scan from the same point in space until the player exceeds movement threshold
-				// this prevents getting kicked from a gui when just looking around
-				if ( commonVr->handInGui || raised ) 
-				{
-					static idMat3 yawAdj;
-					static idVec3 distMoved;
-					scanRange += 4;
-					yawAdj = idAngles( 0.0f, viewAngles.yaw - lastBodyYaw, 0.0f ).Normalize180().ToMat3(); 
-					weaponAxis = yawAdj * lastScanAxis;
-					distMoved = physicsObj.GetOrigin() - lastBodyPosition;
-					if ( distMoved.Length() < 12.0f ) distMoved = vec3_zero;
-					start = lastScanStart + distMoved;
-									
-				}
-				else
-				{
-					lastScanStart = start;
-					lastScanAxis = weaponAxis;
-					lastBodyYaw = viewAngles.yaw;
-					lastBodyPosition = physicsObj.GetOrigin();
-				}
+				//NPI We use the true hand to scan, no eye depends, no need to check handInGui || raised 
+				CalculateViewMainHandPosVR(vr_weaponHand.GetInteger(), start, weaponAxis);
+				scanRange = 20.0f; // NPI when using touch screen, 36 is too much, 3 is the hand lenght 6 should be fine but set it to 20 to avoid to put weapon into the gui before the finger raised				
 			}
-			hmdAbsPitch = abs( commonVr->lastHMDViewAxis.ToAngles().Normalize180().pitch + vr_guiFocusPitchAdj.GetFloat() );
-			if ( hmdAbsPitch > 60.0f ) hmdAbsPitch = 60.0f;
-			scanRangeCorrected = scanRange / cos( DEG2RAD( hmdAbsPitch ) );
-			scanRange = scanRangeCorrected;
+			else //not use hmdaxis when guis as touch screen
+			{
+				hmdAbsPitch = abs(commonVr->lastHMDViewAxis.ToAngles().Normalize180().pitch + vr_guiFocusPitchAdj.GetFloat());
+				if (hmdAbsPitch > 60.0f) hmdAbsPitch = 60.0f;
+				scanRangeCorrected = scanRange / cos(DEG2RAD(hmdAbsPitch));
+				scanRange = scanRangeCorrected;
+			}
 		}
 		else
 		{
@@ -9780,6 +9851,12 @@ void idPlayer::UpdateFocus()
 			lastMPAimTime = gameLocal.realClientTime;
 		}
 	}
+
+	if (vr_debugGui.GetBool())
+	{
+		gameRenderWorld->DebugLine(colorYellow, start, end, 20, true);
+		common->Printf("Handin gui %d raised %d lowered %d hideoffset %f\n", commonVr->handInGui, raised, lowered, hands[vr_weaponHand.GetInteger()]->hideOffset);
+	}
 	
 	idBounds bounds( start );
 	bounds.AddPoint( end );
@@ -9788,11 +9865,17 @@ void idPlayer::UpdateFocus()
 	// no pretense at sorting here, just assume that there will only be one active
 	// gui within range along the trace
 
-	if ( vr_debugGui.GetBool() )
+	//NPI begin
+	//check NPC in is own updateFocus method
+	//talk scan always use vanilla scan : eye position and eye axis over dist 80.0
+	if (allowFocus)
 	{
-		gameRenderWorld->DebugLine( colorYellow, start, end, 20, true );
-		common->Printf( "Handin gui %d raised %d lowered %d hideoffset %f\n", commonVr->handInGui, raised, lowered, hands[ vr_weaponHand.GetInteger() ].weapon->hideOffset );
+		clip = LookForFocusIdAI();
+		if (clip) {
+			listedClipModels = 0; //we stop scanning
+		}
 	}
+	///NPI end
 
 	for ( i = 0; i < listedClipModels; i++ )
 	{
@@ -16984,8 +17067,83 @@ void DebugCross( idVec3 origin, idMat3 axis, idVec4 color )
 	gameRenderWorld->DebugLine( color, origin - 3 * axis[2], origin + 3 * axis[2], 20 );
 }
 
+
+void idPlayer::CalculateViewMainHandPosVR(int hand, idVec3& origin, idMat3& axis)
+{
+	static idAngles angles;
+	static int delta;
+	static idQuat gunRot;
+	static idQuat gunAxis;
+	static idVec3 gunOrigin;
+	static idVec3 motionPosition = vec3_zero;
+	static idQuat motionRotation; // = idQuat_zero;
+	static int currentHand;
+	static idVec3 originOffset = vec3_zero;
+	static idAngles hmdAngles;
+	static idVec3 headPositionDelta;
+	static idVec3 bodyPositionDelta;
+	static idVec3 absolutePosition;
+	static idQuat weaponPitch;
+	static idVec3 playerPdaPos = vec3_zero; // position player was at when pda fixed in space
+	
+	currentHand = vr_weaponHand.GetInteger();
+
+	gunOrigin = GetEyePosition();
+
+	if (game->isVR && commonVr->VR_USE_MOTION_CONTROLS)
+		gunOrigin += commonVr->leanOffset;
+
+	// direction the player body is facing.
+	idMat3 bodyAxis = idAngles(0.0, viewAngles.yaw, 0.0f).ToMat3();
+	idVec3 gravity = physicsObj.GetGravityNormal();
+
+	if (commonVr->VR_USE_MOTION_CONTROLS)
+	{
+		// motion control weapon positioning.
+		//-----------------------------------
+
+		static idVec3 weapOrigin = vec3_zero;
+		static idMat3 weapAxis = mat3_identity;
+
+		static idVec3 fixPosVec = idVec3(-17.0f, 6.0f, 0.0f);
+		static idVec3 fixPos = fixPosVec;
+		static idQuat fixRot = idAngles(40.0f, -40.0f, 20.0f).ToQuat();
+		static idVec3 attacherToDefault = vec3_zero;
+		static idMat3 rot180 = idAngles(0.0f, 180.0f, 0.0f).ToMat3();
+		static bool wasPDA = false;
+
+		attacherToDefault = handWeaponAttacherToDefaultOffset[currentHand][hands[hand].currentWeapon];
+		originOffset = hands[hand].weapon->weaponHandDefaultPos[currentHand];
+
+		commonVr->MotionControlGetHand(currentHand, motionPosition, motionRotation);
+
+		weaponPitch = idAngles(vr_motionWeaponPitchAdj.GetFloat(), 0.0f, 0.0f).ToQuat();
+		motionRotation = weaponPitch * motionRotation;
+
+		GetViewPos(weapOrigin, weapAxis);
+
+		weapOrigin += commonVr->leanOffset;
+
+		hmdAngles = commonVr->poseHmdAngles;
+		headPositionDelta = commonVr->poseHmdHeadPositionDelta;
+		bodyPositionDelta = commonVr->poseHmdBodyPositionDelta;
+		absolutePosition = commonVr->poseHmdAbsolutePosition;
+
+		weapAxis = idAngles(0.0f, weapAxis.ToAngles().yaw - commonVr->bodyYawOffset, 0.0f).ToMat3();
+		weapOrigin += weapAxis[0] * headPositionDelta.x + weapAxis[1] * headPositionDelta.y + weapAxis[2] * headPositionDelta.z;
+
+		weapOrigin += motionPosition * weapAxis;
+		weapAxis = motionRotation.ToMat3() * weapAxis;
+
+		//DebugCross(weapOrigin, weapAxis, colorYellow);
+
+		axis = weapAxis;
+		origin = weapOrigin;
+	}
+}
+
 // Carl: TODO Dual wielding
-void idPlayer::CalculateViewWeaponPosVR( int hand, idVec3 &origin, idMat3 &axis )
+void idPlayer::CalculateViewWeaponPosVR(int hand, idVec3 &origin, idMat3 &axis)
 {
 	
 	weapon_t currentWeaponEnum = WEAPON_NONE;

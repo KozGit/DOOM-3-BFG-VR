@@ -810,8 +810,11 @@ public:
 	
 	float					DefaultFov() const;
 	float					CalcFov( bool honorZoom );
-	void					CalculateViewWeaponPos( int hand, idVec3& origin, idMat3& axis );
-	void					CalculateViewWeaponPosVR( int hand, idVec3& origin, idMat3& axis );
+
+	void					CalculateViewWeaponPos(int hand, idVec3& origin, idMat3& axis );
+	void					CalculateViewWeaponPosVR(int hand, idVec3& origin, idMat3& axis );
+	void 					CalculateViewMainHandPosVR(int hand, idVec3& origin, idMat3& axis );
+
 	void					SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQuat rotation, bool isFlashlight = false );
 
 	// Koz begin
@@ -1301,6 +1304,7 @@ private:
 	void					UpdateFocus();
 	void					SendPDAEvent( const sysEvent_t* sev );
 	bool					UpdateFocusPDA();
+	idClipModel*			LookForFocusIdAI();
 	void					UpdateLocation();
 	idUserInterface* 		ActiveGui();
 	
