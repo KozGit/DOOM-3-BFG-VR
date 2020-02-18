@@ -449,11 +449,7 @@ public:
 	void					ClearWaitForBinding()
 	{
 		waitForBinding = false;
-	}
-	void					PreviousBinding( int mode)
-	{
-		previousBinding = mode;
-		lastBindingEvent = Sys_Milliseconds();
+		lastBindingEventTime = Sys_Milliseconds();
 	}	
 	void					UpdateLeaderboard( const idLeaderboardCallback* callback );
 	void					UpdateLobby( idMenuWidget_LobbyList* lobbyList );
@@ -483,8 +479,7 @@ private:
 	bool					largeFrameShowing;
 	bool					bgShowing;
 	bool					waitForBinding;
-	int						previousBinding = 0;
-	int						lastBindingEvent = 0;
+	int						lastBindingEventTime = 0;
 	const char* 			waitBind;
 	//idSysSignal				deviceRequestedSignal;
 	
