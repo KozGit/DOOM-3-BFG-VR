@@ -326,9 +326,14 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 		return true;
 	}
 	
-	if( waitForBinding )
+	//common->Printf("HandleGuiEvent received:%i wait:%i for %i \n", sev->evValue, waitForBinding, lastBindingEvent); // Koz debug
+	bool followedEvent = Sys_Milliseconds() - lastBindingEvent < BIND_CONTROL_DEBOUNCE_MS;
+	if( waitForBinding || followedEvent)
 	{
-	
+		if (!followedEvent) {
+			previousBinding = -1;
+		}
+
 		if( sev->evType == SE_KEY && sev->evValue2 == 1 )
 		{
 		
@@ -339,16 +344,18 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 				return true;
 			}
 			*/
-			if ( sev->evValue >= K_TOUCH_LEFT_STICK_UP && sev->evValue <= K_STEAMVR_RIGHT_PAD_RIGHT )
+			/*if ( sev->evValue >= K_TOUCH_LEFT_STICK_UP && sev->evValue <= K_STEAMVR_RIGHT_PAD_RIGHT )
 			{
 				// Koz check why did I disable remapping this?
-				//return true;
+				return true;
 			}
+			*/
 			if( sev->evValue == K_ESCAPE )
 			{
 				
 				//common->Printf( "idMenuHandlerShell handlegui event k_escape\n" ); // Koz debug
 				waitForBinding = false;
+				lastBindingEvent = 0;
 				
 				idMenuScreen_Shell_Bindings* bindScreen = dynamic_cast< idMenuScreen_Shell_Bindings* >( menuScreens[ SHELL_AREA_KEYBOARD ] );
 				if( bindScreen != NULL )
@@ -361,10 +368,14 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 			else
 			{
 			
-				if( idStr::Icmp( idKeyInput::GetBinding( sev->evValue ), "" ) == 0 )  	// no existing binding found
+				if( idStr::Icmp( idKeyInput::GetBinding( sev->evValue ), "" ) == 0 || previousBinding == 1)  	// no existing binding found
 				{
 				
 					idKeyInput::SetBinding( sev->evValue, waitBind );
+					previousBinding = 1;
+					lastBindingEvent = Sys_Milliseconds();
+					//common->Printf("HandleGuiEvent SetBinding received:%i wait:%i for %i \n", sev->evValue, waitForBinding, lastBindingEvent); // Koz debug
+
 					
 					idMenuScreen_Shell_Bindings* bindScreen = dynamic_cast< idMenuScreen_Shell_Bindings* >( menuScreens[ SHELL_AREA_KEYBOARD ] );
 					if( bindScreen != NULL )
@@ -374,18 +385,19 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 						bindScreen->ToggleWait( false );
 						bindScreen->Update();
 					}
-					
 					waitForBinding = false;
 					
 				}
 				else  	// binding found prompt to change
 				{
 				
-					const char* curBind = idKeyInput::GetBinding( sev->evValue );
-					
-					if( idStr::Icmp( waitBind, curBind ) == 0 )
+					if( idStr::Icmp( waitBind, idKeyInput::GetBinding(sev->evValue)) == 0 || previousBinding == 0)
 					{
 						idKeyInput::SetBinding( sev->evValue, "" );
+						previousBinding = 0;
+						lastBindingEvent = Sys_Milliseconds();
+						//common->Printf("HandleGuiEvent removeBinding received:%i wait:%i for %i \n", sev->evValue, waitForBinding, lastBindingEvent); // Koz debug
+
 						idMenuScreen_Shell_Bindings* bindScreen = dynamic_cast< idMenuScreen_Shell_Bindings* >( menuScreens[ SHELL_AREA_KEYBOARD ] );
 						if( bindScreen != NULL )
 						{
@@ -422,6 +434,8 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 									if( accept )
 									{
 										idKeyInput::SetBinding( key, bind );
+										//common->Printf("HandleGuiEvent overrideBinding received:%i \n", key); // Koz debug
+										mgr->PreviousBinding(1);
 										menu->SetBindingChanged( true );
 										menu->UpdateBindingDisplay();
 										menu->Update();
