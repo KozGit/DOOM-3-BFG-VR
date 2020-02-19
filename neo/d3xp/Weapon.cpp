@@ -4997,7 +4997,8 @@ void idWeapon::Event_LaunchProjectiles( int num_projectiles, float spread, float
 			
 			// make sure the projectile starts inside the bounding box of the owner
 			// Carl: unless it's a grenade, in which case we want to be able to drop it over a railing without inexplicably killing ourselves
-			if( IdentifyWeapon() == WEAPON_HANDGRENADE && game->isVR && commonVr->VR_USE_MOTION_CONTROLS && i == 0 )
+			// Npi for other weapons too, game compute if there is a mask_shot between player center and the gun muzzle : then shots was blocks, but in Vr player's center is too low and strange : Carl's start compute is much clever
+			if (game->isVR && commonVr->VR_USE_MOTION_CONTROLS && i == 0)
 			{
 				muzzle_pos = muzzleOrigin + muzzleAxis[ 0 ] * 2.0f;
 				// Carl: check that there's a grenade-sized gap at hand height from the center of our chest to our grenade,
