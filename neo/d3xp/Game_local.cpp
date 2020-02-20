@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "precompiled.h"
 #pragma hdrstop
 
+#include "../framework/Common_local.h"
 #include "Game_local.h"
 
 #ifdef GAME_DLL
@@ -2218,8 +2219,25 @@ void idGameLocal::SpawnPlayer( int clientNum )
 	}
 	else
 	{
+		const char* p = gameLocal.world->spawnArgs.GetString( "def_player", "player_doommarine" );
+		// Carl: Detect the expansion correctly, because bonus characters can't know what expansion they're in.
+		const char* exp;
+		bool hell = idStr::Cmp( p, "d3xp_player_doommarine_hell" ) == 0;
+		bool enpro1 = idStr::Cmp( p, "d3le_player_doommarine_enpro1" ) == 0;
+		if( idStr::Cmp( p, "d3xp_player_doommarine" ) == 0 || hell )
+			exp = "d3xp";
+		else if( idStr::Cmp( p, "d3le_player_doommarine" ) == 0 || enpro1 )
+			exp = "d3le";
+		else
+			exp = "d3";
+		// Carl: Bonus characters
+		if( BonusCharUnlocked( (bonus_char_t)bonus_char.GetInteger() ) )
+		{
+			p = BonusCharDefPlayer( (bonus_char_t)bonus_char.GetInteger(), p, exp, hell );
+		}
 		// precache the player
-		args.Set( "classname", gameLocal.world->spawnArgs.GetString( "def_player", "player_doommarine" ) );
+		args.Set( "classname", p );
+		args.Set( "player_expansion", exp );
 	}
 	
 	// It's important that we increment numClients before calling SpawnEntityDef, because some
@@ -2939,13 +2957,17 @@ void idGameLocal::BuildReturnValue( gameReturn_t& ret )
 	
 	if( GetLocalPlayer() != NULL )
 	{
-		GetLocalPlayer()->GetControllerShake( ret.vibrationLow, ret.vibrationHigh );
+		for( int h = 0; h < 2; h++ )
+			GetLocalPlayer()->hands[h].GetControllerShake( ret.vibrationLow[h], ret.vibrationHigh[h] );
 	}
 	else
 	{
 		// Dedicated server?
-		ret.vibrationLow = 0;
-		ret.vibrationHigh = 0;
+		for( int h = 0; h < 2; h++ )
+		{
+			ret.vibrationLow[h] = 0;
+			ret.vibrationHigh[h] = 0;
+		}
 	}
 	
 	// see if a target_sessionCommand has forced a changelevel
@@ -4057,6 +4079,124 @@ bool idGameLocal::InhibitEntitySpawn( idDict& spawnArgs )
 		}
 	}
 	
+	if( !result && bonus_char.GetInteger() && BonusCharUnlocked( (bonus_char_t)bonus_char.GetInteger() ) )
+	{
+		const char* name = spawnArgs.GetString( "classname" );
+		const char* newname = NULL;
+		newname = BonusCharReplaceIncompatibleEntityClass( name, (bonus_char_t)bonus_char.GetInteger() );
+
+		// Carl: replace non-moveable items with moveable items for bonus characters
+		if( !newname && BonusCharNeedsMoveables( (bonus_char_t)bonus_char.GetInteger() ) )
+		{
+			// Carl: check for func_static props that should become moveable physics objects
+			if( idStr::Icmp( name, "func_static" ) == 0 )
+			{
+				const char* model = spawnArgs.GetString( "model" );
+				newname = ModelToMoveableEntityClass( model, (bonus_char_t)bonus_char.GetInteger() );
+			}
+			else
+			{
+				newname = ItemToMoveableEntityClass( name, (bonus_char_t)bonus_char.GetInteger() );
+			}
+			if( newname && WouldMoveableEntityBeGlitchy( spawnArgs.GetString( "name" ), commonLocal.GetCurrentMapName() ) )
+				newname = NULL;
+		}
+		if( newname )
+			spawnArgs.Set( "classname", newname );
+		else if( BonusCharNeedsFullAccess( (bonus_char_t)bonus_char.GetInteger() ) )
+		{
+			//const char* map = commonLocal.GetCurrentMapName();
+			if( idStr::Icmp( name, "func_door" ) == 0 )
+				BonusCharPreUnlockDoor( spawnArgs );
+			else if( idStr::Icmp( name, "func_static" ) == 0 )
+			{
+				if( ( idStr::Icmp( spawnArgs.GetString( "model" ), "models/mapobjects/doors/mcitydoorframegui.lwo" ) == 0
+					|| idStr::Icmp( spawnArgs.GetString( "model" ), "models/mapobjects/guiobjects/techdrpanel1/techdrpanel1.lwo" ) == 0 ) )
+					BonusCharPreUnlockPanel( spawnArgs );
+				// This panel covering the GUI on the bioscan airlock door doesn't move with the airlock door
+				else if( idStr::Icmp( spawnArgs.GetString( "name" ), "func_static_gui_hide" ) == 0 )
+					result = true;
+				// The chair in the Bioscan room. This is the only unmoveable version of this chair in the entire game... and it's blocking our way to the shotguns and shells. lol
+				// We only make it moveable for characters who have access to that room, not for characters with the Grabber.
+				else if( idStr::Icmp( spawnArgs.GetString( "name" ), "func_static_4479" ) == 0 && idStr::Icmp( spawnArgs.GetString( "model" ), "models/mapobjects/base/chairs/chair2.ASE" ) == 0 )
+					spawnArgs.Set( "classname", "moveable_chair2" );
+			}
+			else if( bonus_char.GetInteger() != BONUS_CHAR_ROLAND && idStr::Icmp( spawnArgs.GetString( "call" ), "map_marscity1::bioscan_noreturn" ) == 0 )
+			{
+				// Carl: Instead of calling the noreturn function to lock the inner bioscan doors,
+				// unlock the side door and the outer bioscan doors by triggering them
+				spawnArgs.Delete( "call" );
+				spawnArgs.Set( "target", "func_door_11" );
+				spawnArgs.Set( "target1", "func_door_1" );
+				spawnArgs.Set( "target2", "func_door_2" );
+			}
+			// fredrelay1 triggers the second half of the first cutscene, where the camera switches to the hangar
+			// We want to skip that cutscene by removing the trigger entirely for characters that start inside
+			// fredteleport3 is the player's starting location if you delete fredrelay1
+			else if( (bonus_char.GetInteger() == BONUS_CHAR_BETRUGER || bonus_char.GetInteger() == BONUS_CHAR_SARGE || bonus_char.GetInteger() == BONUS_CHAR_ROLAND ) )
+			{
+				if( idStr::Icmp( name, "trigger_relay" ) == 0 && idStr::Icmp( commonLocal.GetCurrentMapName(), "game/mars_city1" ) == 0 )
+				{
+					const char* n = spawnArgs.GetString( "name" );
+					// trigger_relay_38 starts the Sarge cutscene, which we don't want if we're Sarge or Betruger
+					if( idStr::Icmp( n, "fredrelay1" ) == 0 || ( bonus_char.GetInteger() != BONUS_CHAR_ROLAND && idStr::Icmp( n, "trigger_relay_38" ) == 0 ) )
+						result = true;
+				}
+				else if( idStr::Icmp( name, "info_player_teleport" ) == 0 && idStr::Icmp( spawnArgs.GetString( "name" ), "fredteleport3" ) == 0 && idStr::Icmp( commonLocal.GetCurrentMapName(), "game/mars_city1" ) == 0 )
+				{
+					if( bonus_char.GetInteger() == BONUS_CHAR_SARGE )
+					{
+						spawnArgs.Set( "origin", "-3790 -3312 208" );
+						spawnArgs.SetInt( "angle", 0 );
+					}
+					else if( bonus_char.GetInteger() == BONUS_CHAR_ROLAND )
+					{
+						spawnArgs.Set( "origin", "-106 -1702 129" );
+						spawnArgs.SetInt( "angle", 180 );
+					}
+					else if( bonus_char.GetInteger() == BONUS_CHAR_BETRUGER )
+					{
+						spawnArgs.Set( "origin", "-3637 -3586 192" );
+						spawnArgs.SetInt( "angle", 0 );
+					}
+				}
+				else if( idStr::Icmp( name, "trigger_once" ) == 0 && idStr::Icmp( commonLocal.GetCurrentMapName(), "game/mars_city1" ) == 0 )
+				{
+					const char* n = spawnArgs.GetString( "name" );
+					// Don't bioscan if we came from inside
+					// Listen buddy, you DO have clearance for this area.
+					// Sarge and Betruger don't go through reception. R. Roland can if he wants.
+					if( idStr::Icmp( n, "trigger_once_15" ) == 0 || ( bonus_char.GetInteger() != BONUS_CHAR_ROLAND && (idStr::Icmp( n, "trigger_once_7" ) == 0 || idStr::Icmp( n, "reception_trigger" ) == 0 ) ) )
+						result = true;
+				}
+				// Remove all cinematic Sarge's if we're Sarge
+				else if( bonus_char.GetInteger() == BONUS_CHAR_SARGE && idStr::Icmp( name, "marscity_cinematic_sarge2" ) == 0 )
+				{
+					result = true;
+				}
+				// Make S. L. Medley appear
+				else if( bonus_char.GetInteger() != BONUS_CHAR_ROLAND && idStr::Icmp( name, "marscity_cinematic_cam" ) == 0 && idStr::Icmp( spawnArgs.GetString( "target" ), "fredrelay1" ) == 0 )
+				{
+					spawnArgs.Set( "target", "marscity_sec_window2_1" );
+				}
+					
+				
+			}
+		}
+	}
+
+	const char* n = spawnArgs.GetString( "name" );
+	// coffee cup stuck in the desk in HQ
+	if( !result && idStr::Icmp( n, "tim_moveable_foamcup_6" ) == 0 && idStr::Cmp( spawnArgs.GetString( "origin" ), "-3835 -3357 240" ) == 0 )
+	{
+		spawnArgs.Set( "origin", "-3835 -3357 244" );
+	}
+	// rubbish bin stuck in the floor in the toilets
+	else if( !result && idStr::Icmp( n, "tim_moveable_trashcan01_5" ) == 0 && idStr::Cmp( spawnArgs.GetString( "origin" ), "-2626 -972 152" ) == 0 )
+	{
+		spawnArgs.Set( "origin", "-2626 -972 156" );
+	}
+	
 	return result;
 }
 
@@ -4107,6 +4247,8 @@ void idGameLocal::SpawnMapEntities()
 	mapEnt = mapFile->GetEntity( 0 );
 	args = mapEnt->epairs;
 	args.SetInt( "spawn_entnum", ENTITYNUM_WORLD );
+	if( BonusCharHasWeapons( (bonus_char_t)bonus_char.GetInteger() ) ) // Carl: Disable no_Weapons for some bonus characters
+		args.SetBool( "no_Weapons", false );
 	if( !SpawnEntityDef( args ) || !entities[ ENTITYNUM_WORLD ] || !entities[ ENTITYNUM_WORLD ]->IsType( idWorldspawn::Type ) )
 	{
 		Error( "Problem spawning world entity" );
@@ -4149,9 +4291,26 @@ void idGameLocal::AddEntityToHash( const char* name, idEntity* ent )
 {
 	if( FindEntity( name ) )
 	{
-		Error( "Multiple entities named '%s'", name );
+		// Carl: When loading saved games from other mods, we sometimes need to reset scripts.
+		// The reset scripts for some monsters end up creating a _light entity that was already created.
+		// For now, handle that by renaming the duplicate then deleting it.
+		// This mostly happens with Erebus levels.
+		idStr n( name );
+		if( n.Right( 6 ) == "_light" )
+		{
+			n = n + '2';
+			entityHash.Add( entityHash.GenerateKey( n.c_str(), true ), ent->entityNumber );
+			ent->PostEventMS( &EV_Remove, 0 );
+		}
+		else
+		{
+			Error( "Multiple entities named '%s'", name );
+		}
 	}
-	entityHash.Add( entityHash.GenerateKey( name, true ), ent->entityNumber );
+	else
+	{
+		entityHash.Add( entityHash.GenerateKey( name, true ), ent->entityNumber );
+	}
 }
 
 /*
@@ -4646,7 +4805,7 @@ void idGameLocal::RadiusDamage( const idVec3& origin, idEntity* inflictor, idEnt
 					idPlayer* player = static_cast< idPlayer* >( ent );
 					if( player )
 					{
-						player->ControllerShakeFromDamage( damage );
+						player->ControllerShakeFromDamage( damage, dir );
 					}
 				}
 			}

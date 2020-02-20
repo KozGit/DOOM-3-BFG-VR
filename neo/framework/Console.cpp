@@ -254,7 +254,7 @@ float idConsoleLocal::DrawFPS( float y )
 		fps = ( fps + 500 ) / 1000;
 		
 		const char* s = va( "%ifps", fps );
-		int w = strlen( s ) * BIGCHAR_WIDTH;
+		int w = (int)strlen( s ) * BIGCHAR_WIDTH;
 		
 		renderSystem->DrawBigStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s, colorWhite, true );
 	}
@@ -263,7 +263,74 @@ float idConsoleLocal::DrawFPS( float y )
 	
 	// DG: "com_showFPS 2" means: show FPS only, like in classic doom3
 	if( com_showFPS.GetInteger() == 2 )
-	{		
+	{
+#if 0
+		if( gameLocal.GetLocalPlayer() && gameLocal.GetLocalPlayer()->GetPhysics() )
+		{
+			idStr s;
+			int w;
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "%d %d %d", (int)player->GetPhysics()->GetOrigin().x, (int)player->GetPhysics()->GetOrigin().y, (int)player->GetPhysics()->GetOrigin().z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorYellow, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "%d %d %d", (int)player->firstPersonViewOrigin.x, (int)player->firstPersonViewOrigin.y, (int)player->firstPersonViewOrigin.z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorGreen, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "%d", (int)(player->firstPersonViewOrigin.z - player->GetPhysics()->GetOrigin().z ) );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorRed, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "%d %d %d", (int)player->eyeOffset.x, (int)player->eyeOffset.y, (int)player->eyeOffset.z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorBlue, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "%d", (int)commonVr->headHeightDiff );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorCyan, false );
+			y += SMALLCHAR_HEIGHT + 4;
+		}
+#endif
+#if 0
+		if( gameLocal.GetLocalPlayer() && gameLocal.GetLocalPlayer()->GetPhysics() && gameLocal.GetLocalPlayer()->hands[0].weapon )
+		{
+			idStr s;
+			int w;
+			idPlayer* player = gameLocal.GetLocalPlayer();
+			idPlayerHand* hand = &player->hands[0];
+			idWeapon* weapon = hand->weapon;
+			y += SMALLCHAR_HEIGHT + 4;
+			// Red: Head View
+			s.Format( "eye: %d %d %d", (int)player->firstPersonViewOrigin.x, (int)player->firstPersonViewOrigin.y, (int)player->firstPersonViewOrigin.z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorGreen, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "eye: %d %d %d", (int)player->GetEyePosition().x, (int)player->GetEyePosition().y, (int)player->GetEyePosition().z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorBlue, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "weap: %d %d %d", (int)weapon->GetPhysics()->GetOrigin().x, (int)weapon->GetPhysics()->GetOrigin().y, (int)weapon->GetPhysics()->GetOrigin().z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorYellow, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "hand: %d %d %d", (int)hand->handOrigin.x, (int)hand->handOrigin.y, (int)hand->handOrigin.z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorRed, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			/*
+			s.Format( "%d %d %d", (int)player->eyeOffset.x, (int)player->eyeOffset.y, (int)player->eyeOffset.z );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorBlue, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			s.Format( "%d", (int)commonVr->headHeightDiff );
+			w = s.LengthWithoutColors() * SMALLCHAR_WIDTH;
+			renderSystem->DrawSmallStringExt( LOCALSAFE_RIGHT - w, idMath::Ftoi( y ) + 2, s.c_str(), colorCyan, false );
+			y += SMALLCHAR_HEIGHT + 4;
+			*/
+		}
+#endif
 		return y;
 	}
 	// DG end
@@ -349,7 +416,7 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 	if ( inFlicksync )
 	{
 		const char* s = va("SCORE: %i", Flicksync_Score);
-		int w = strlen(s) * BIGCHAR_WIDTH;
+		int w = (int)strlen(s) * BIGCHAR_WIDTH;
 		renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, colorWhite, true);
 		centerY += BIGCHAR_HEIGHT + 4;
 	}
@@ -358,7 +425,7 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 		// Make score less intrusive during normal play between cutscenes
 		idVec4 color = idVec4( 0.5f, 0.5f, 0.5f, 0.5f );
 		const char* s = va("%i", Flicksync_Score);
-		int w = strlen(s) * SMALLCHAR_WIDTH;
+		int w = (int)strlen(s) * SMALLCHAR_WIDTH;
 		renderSystem->DrawSmallStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, colorWhite, true);
 		centerY += SMALLCHAR_HEIGHT + 4;
 	}
@@ -372,14 +439,14 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 	if (Flicksync_complete)
 	{
 		const char* s = "FLICKSYNC COMPLETE";
-		int w = strlen(s) * BIGCHAR_WIDTH;
+		int w = (int)strlen(s) * BIGCHAR_WIDTH;
 		renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, colorGreen, true);
 		centerY += BIGCHAR_HEIGHT + 4;
 	}
 	else if (Flicksync_GameOver)
 	{
 		const char* s = "GAME OVER";
-		int w = strlen(s) * BIGCHAR_WIDTH;
+		int w = (int)strlen(s) * BIGCHAR_WIDTH;
 		renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, colorRed, true);
 		centerY += BIGCHAR_HEIGHT + 4;
 	}
@@ -402,7 +469,7 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 		if (Flicksync_FailsInARow == 2)
 		{
 			const char* s = "FINAL WARNING";
-			int w = strlen(s) * BIGCHAR_WIDTH;
+			int w = (int)strlen(s) * BIGCHAR_WIDTH;
 			renderSystem->DrawBigStringExt(LOCALSAFE_LEFT + (LOCALSAFE_WIDTH - w + 4) * 0.5f, idMath::Ftoi(centerY) + 2, s, color, true);
 			centerY += BIGCHAR_HEIGHT + 4;
 		}
@@ -472,7 +539,7 @@ void idConsoleLocal::DrawFlicksync( float& leftY, float& centerY )
 		}
 		{
 			const char* s = "FINAL DIALOGUE WARNING!";
-			int w = strlen(s) * SMALLCHAR_WIDTH;
+			int w = (int)strlen(s) * SMALLCHAR_WIDTH;
 			static int flash = 0;
 			flash++;
 			if (flash > 20)
@@ -853,7 +920,7 @@ void idConsoleLocal::Dump( const char* fileName )
 		buffer[x + 1] = '\r';
 		buffer[x + 2] = '\n';
 		buffer[x + 3] = 0;
-		f->Write( buffer, strlen( buffer ) );
+		f->Write( buffer, (int)strlen( buffer ) );
 	}
 	
 	fileSystem->CloseFile( f );
@@ -1385,7 +1452,7 @@ void idConsoleLocal::DrawInput()
 	
 	if( consoleField.GetAutoCompleteLength() != 0 )
 	{
-		autoCompleteLength = strlen( consoleField.GetBuffer() ) - consoleField.GetAutoCompleteLength();
+		autoCompleteLength = (int)strlen( consoleField.GetBuffer() ) - consoleField.GetAutoCompleteLength();
 		
 		if( autoCompleteLength > 0 )
 		{

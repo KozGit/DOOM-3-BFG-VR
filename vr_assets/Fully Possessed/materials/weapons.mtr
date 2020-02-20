@@ -4233,6 +4233,8 @@ vr/lefthand
         specularmap	models/weapons/hands/hand_sp.tga
 }
 
+
+
 vr/statwatch
 {
         noselfShadow
@@ -4252,7 +4254,7 @@ vr/statwatch
 vr/statwatchgui
 {
 	qer_editorimage	guisurfaces/guisurface.tga
-	guiSurf guis/weapons/vrstatgui.gui
+	guiSurf guis/weapons/rvrstatgui.gui
 	discrete
 	description "VR stats watch gui"
 }
@@ -4276,7 +4278,7 @@ vr/statwatchbody
 vr/statwatchguibody
 {
 	qer_editorimage	guisurfaces/guisurface.tga
-	guiSurf guis/weapons/vrstatgui.gui
+	guiSurf guis/weapons/rvrstatgui.gui
 	discrete
 	description "VR stats watch gui"
 }
@@ -4300,7 +4302,56 @@ vr/statwatchhands
 vr/statwatchguihands
 {
 	qer_editorimage	guisurfaces/guisurface.tga
-	guiSurf guis/weapons/vrstatgui.gui
+	guiSurf guis/weapons/rvrstatgui.gui
+	discrete
+	description "VR stats watch gui"
+}
+
+
+vr/lstatwatchbody
+{
+        noselfShadow
+	unsmoothedTangents
+	renderbump  -size 1024 1024 -trace 0.1 -colorMap -aa 2  models/items/pda/pda_local.tga models/items/pda/pda_hi.lwo
+
+        	diffusemap	models/items/pda/pda.tga
+		{
+ 		  blend bumpmap
+          map  addnormals(models/items/pda/pda_local.tga, heightmap(models/items/pda/pda_h.tga, 7 ) )
+ 		  
+     	}
+	
+           specularmap	 models/items/pda/pda_s.tga
+}
+
+vr/lstatwatchguibody
+{
+	qer_editorimage	guisurfaces/guisurface.tga
+	guiSurf guis/weapons/lvrstatgui.gui
+	discrete
+	description "VR stats watch gui"
+}
+
+vr/lstatwatchhands
+{
+        noselfShadow
+	unsmoothedTangents
+	renderbump  -size 1024 1024 -trace 0.1 -colorMap -aa 2  models/items/pda/pda_local.tga models/items/pda/pda_hi.lwo
+
+        	diffusemap	models/items/pda/pda.tga
+		{
+ 		  blend bumpmap
+          map  addnormals(models/items/pda/pda_local.tga, heightmap(models/items/pda/pda_h.tga, 7 ) )
+ 		  
+     	}
+	
+           specularmap	 models/items/pda/pda_s.tga
+}
+
+vr/lstatwatchguihands
+{
+	qer_editorimage	guisurfaces/guisurface.tga
+	guiSurf guis/weapons/lvrstatgui.gui
 	discrete
 	description "VR stats watch gui"
 }
@@ -4342,7 +4393,7 @@ vr/leftstatwatch
 vr/leftstatwatchgui
 {
 	qer_editorimage	guisurfaces/guisurface.tga
-	guiSurf guis/weapons/vrstatgui.gui
+	guiSurf guis/weapons/lvrstatgui.gui
 	discrete
 	description "VR stats watch gui"
 }

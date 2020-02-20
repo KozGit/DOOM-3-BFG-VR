@@ -660,34 +660,35 @@ void idGameLocal::ServerProcessReliableMessage( int clientNum, int type, const i
 				break;
 			}
 			
-			if( attacker.weapon.GetEntity() == NULL )
-			{
-				break;
-			}
+			//if( attacker.weapon.GetEntity() == NULL )
+			//{
+			//	break;
+			//}
 			
 			if( location == INVALID_JOINT )
 			{
 				break;
 			}
 			
+			// Carl: TODO Dual wielding, maybe check both weapons?
 			// Line of sight check. As a basic precaution against cheating,
 			// the server performs a ray intersection from the client's position
 			// to the joint he hit on the target.
-			idVec3 muzzleOrigin;
-			idMat3 muzzleAxis;
+			//idVec3 muzzleOrigin;
+			//idMat3 muzzleAxis;
 			
-			attacker.weapon.GetEntity()->GetProjectileLaunchOriginAndAxis( muzzleOrigin, muzzleAxis );
+			//attacker.weapon.GetEntity()->GetProjectileLaunchOriginAndAxis( muzzleOrigin, muzzleAxis );
 			
-			idVec3 targetLocation = victim.GetRenderEntity()->origin + victim.GetRenderEntity()->joints[location].ToVec3() * victim.GetRenderEntity()->axis;
+			//idVec3 targetLocation = victim.GetRenderEntity()->origin + victim.GetRenderEntity()->joints[location].ToVec3() * victim.GetRenderEntity()->axis;
 			
-			trace_t tr;
-			gameLocal.clip.Translation( tr, muzzleOrigin, targetLocation, NULL, mat3_identity, MASK_SHOT_RENDERMODEL, &attacker );
+			//trace_t tr;
+			//gameLocal.clip.Translation( tr, muzzleOrigin, targetLocation, NULL, mat3_identity, MASK_SHOT_RENDERMODEL, &attacker );
 			
-			idEntity* hitEnt = gameLocal.entities[ tr.c.entityNum ];
-			if( hitEnt != &victim )
-			{
-				break;
-			}
+			//idEntity* hitEnt = gameLocal.entities[ tr.c.entityNum ];
+			//if( hitEnt != &victim )
+			//{
+			//	break;
+			//}
 			const idDeclEntityDef* damageDef = static_cast<const idDeclEntityDef*>( declManager->DeclByIndex( DECL_ENTITYDEF, damageDefIndex, false ) );
 			
 			if( damageDef != NULL )
@@ -784,12 +785,16 @@ void idGameLocal::ClientReadSnapshot( const idSnapShot& ss )
 				otherPlayer->ReadPlayerStateFromSnapshot( msg );
 				if( otherPlayer != entities[ GetLocalClientNum() ] )    // This happens when we spectate another player
 				{
-					idWeapon* weap = otherPlayer->weapon.GetEntity();
-					if( weap && ( weap->GetRenderEntity()->bounds[0] == weap->GetRenderEntity()->bounds[1] ) )
+					// Carl when otherPlayer is dual wielding, fix both weapons' viewmodel bounds
+					for( int hand = 0; hand < 2; hand++ )
 					{
-						// update the weapon's viewmodel bounds so that the model doesn't flicker in the spectator's view
-						weap->GetAnimator()->GetBounds( gameLocal.time, weap->GetRenderEntity()->bounds );
-						weap->UpdateVisuals();
+						idWeapon* weap = otherPlayer->GetWeaponInHand( hand );
+						if( weap && ( weap->GetRenderEntity()->bounds[ 0 ] == weap->GetRenderEntity()->bounds[ 1 ] ) )
+						{
+							// update the weapon's viewmodel bounds so that the model doesn't flicker in the spectator's view
+							weap->GetAnimator()->GetBounds( gameLocal.time, weap->GetRenderEntity()->bounds );
+							weap->UpdateVisuals();
+						}
 					}
 				}
 			}

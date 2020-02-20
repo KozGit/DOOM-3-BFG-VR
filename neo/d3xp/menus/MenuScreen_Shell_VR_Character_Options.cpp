@@ -78,9 +78,9 @@ void idMenuScreen_Shell_VR_Character_Options::Initialize( idMenuHandler * data )
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "Flashlight Mount" );
-	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_FLASH_MODE );
+	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE );
 	control->SetupEvents( DEFAULT_REPEAT_TIME, options->GetChildren().Num() );
-	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_FLASH_MODE );
+	control->AddEventAction( WIDGET_EVENT_PRESS ).Set( WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Character_Options::CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE );
 	options->AddChild( control );
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
@@ -329,7 +329,7 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	
 
 	originalBodyMode = vr_playerBodyMode.GetInteger();
-	originalFlashMode = vr_flashlightMode.GetInteger();
+	originalFlashlightMode = vr_flashlightMode.GetInteger();
 	originalWeaponHand = vr_weaponHand.GetInteger();
 	originalSlotDisable = vr_slotDisable.GetInteger();
 	originalViewHeight = vr_normalViewHeight.GetFloat();
@@ -371,11 +371,33 @@ void idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 			break;
 		}
 		
-		case CHARACTER_OPTIONS_FIELD_FLASH_MODE:
+		case CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE:
 		{
-			static const int numValues = 4;
-			static const int values[numValues] = { 0, 1, 2, 3 };
-			vr_flashlightMode.SetInteger( AdjustOption( vr_flashlightMode.GetInteger(), values, numValues, adjustAmount ) );
+			// Carl: We're using two Cvars, but only one menu option
+			const int FLASHLIGHT_STRICT = FLASHLIGHT_NONE + 1;
+			const int FLASHLIGHT_BODY_STRICT = FLASHLIGHT_BODY + FLASHLIGHT_STRICT; // can only be moved via the menu or console
+			const int FLASHLIGHT_HEAD_STRICT = FLASHLIGHT_HEAD + FLASHLIGHT_STRICT; // can only be moved via the menu or console
+			const int FLASHLIGHT_GUN_STRICT = FLASHLIGHT_GUN + FLASHLIGHT_STRICT; // can't be automatically moved to armor or helmet
+			const int FLASHLIGHT_HAND_STRICT = FLASHLIGHT_HAND + FLASHLIGHT_STRICT; // can't be manually or automatically moved to armor or helmet
+			const int FLASHLIGHT_INVENTORY_STRICT = FLASHLIGHT_INVENTORY + FLASHLIGHT_STRICT; // can only be moved to hand and back
+
+			static const int numValues = 12;
+			static const int values[numValues] = { FLASHLIGHT_BODY, FLASHLIGHT_HEAD, FLASHLIGHT_HAND, FLASHLIGHT_GUN, FLASHLIGHT_PISTOL, FLASHLIGHT_INVENTORY,
+				FLASHLIGHT_BODY_STRICT, FLASHLIGHT_HEAD_STRICT, FLASHLIGHT_HAND_STRICT, FLASHLIGHT_GUN_STRICT, FLASHLIGHT_INVENTORY_STRICT, FLASHLIGHT_NONE };
+			int value = vr_flashlightMode.GetInteger();
+			if( vr_flashlightStrict.GetBool() )
+				value += FLASHLIGHT_STRICT;
+			value = AdjustOption( value, values, numValues, adjustAmount );
+			if( value >= FLASHLIGHT_STRICT )
+			{
+				vr_flashlightMode.SetInteger( value - FLASHLIGHT_STRICT );
+				vr_flashlightStrict.SetBool( true );
+			}
+			else
+			{
+				vr_flashlightMode.SetInteger( value );
+				vr_flashlightStrict.SetBool( false );
+			}
 			break;
 		}
 		
@@ -454,32 +476,41 @@ idSWFScriptVar idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_V
 		}
 			
 		
-		case CHARACTER_OPTIONS_FIELD_FLASH_MODE:
+		case CHARACTER_OPTIONS_FIELD_FLASHLIGHT_MODE:
 		{
 			const int fm = vr_flashlightMode.GetInteger();
-
-			if ( fm == 0 )
+			if( fm == FLASHLIGHT_NONE )
+				return "None";
+			else if( fm == FLASHLIGHT_PISTOL )
+				return "Pistol (XBox)";
+			else if( vr_flashlightStrict.GetBool() )
 			{
-				return "Body";
+				if( fm == FLASHLIGHT_BODY )
+					return "Shoulder (strict)";
+				if( fm == FLASHLIGHT_HEAD )
+					return "Head (strict)";
+				if( fm == FLASHLIGHT_GUN )
+					return "Weapon (strict)";
+				if( fm == FLASHLIGHT_HAND )
+					return "Hand (strict)";
+				if( fm == FLASHLIGHT_INVENTORY )
+					return "Inventory (strict)";
 			}
-
-			if ( fm == 1 )
+			else
 			{
-				return "Head";
+				if( fm == FLASHLIGHT_BODY )
+					return "Left Shoulder";
+				if( fm == FLASHLIGHT_HEAD )
+					return "Head";
+				if( fm == FLASHLIGHT_GUN )
+					return "Weapon";
+				if( fm == FLASHLIGHT_HAND )
+					return "Hand";
+				if( fm == FLASHLIGHT_INVENTORY )
+					return "Inventory";
 			}
-
-			if ( fm == 2 )
-			{
-				return "Weapon";
-			}
-
-			if ( fm == 3 )
-			{
-				return "Hand";
-			}
-
 		}
-		
+
 		case CHARACTER_OPTIONS_FIELD_WEAPON_HAND:
 		{
 			if ( vr_weaponHand.GetInteger() == 0 ) 
@@ -550,7 +581,7 @@ bool idMenuScreen_Shell_VR_Character_Options::idMenuDataSource_Shell_VR_Characte
 	{
 		return true;
 	}
-	if ( originalFlashMode != vr_flashlightMode.GetInteger() )
+	if ( originalFlashlightMode != vr_flashlightMode.GetInteger() )
 	{
 		return true;
 	}

@@ -120,7 +120,8 @@ public:
 	
 	idLinkList<idActor>		enemyNode;			// node linked into an entity's enemy list for quick lookups of who is attacking him
 	idLinkList<idActor>		enemyList;			// list of characters that have targeted the player as their enemy
-	
+	friend class idConsoleLocal;
+
 public:
 	idActor();
 	virtual					~idActor();
@@ -201,7 +202,8 @@ public:
 	virtual	renderView_t* 	GetRenderView();
 	
 	// animation state control
-	int						GetAnim( int channel, const char* name );
+	int						PlayAnim( int channel, const char* name );
+	virtual int				GetAnim( int channel, const char* name );
 	void					UpdateAnimState();
 	void					SetAnimState( int channel, const char* name, int blendFrames );
 	const char* 			GetAnimState( int channel ) const;
@@ -301,7 +303,6 @@ private:
 	void					SetupHead();
 public:
 	void					PlayFootStepSound();
-	
 private:
 	void					Event_EnableEyeFocus();
 	void					Event_DisableEyeFocus();

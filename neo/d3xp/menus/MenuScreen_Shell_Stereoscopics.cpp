@@ -42,7 +42,11 @@ static const char* stereoRender_enable_text[] =
 	"#str_swf_stereo_top_and_bottom",
 	"#str_swf_stereo_side_by_side_full",
 	"#str_swf_stereo_interlaced",
-	"#str_swf_stereo_quad"
+	"#str_swf_stereo_quad",
+	"STEREO3D_HDMI_720",
+	"STEREO3D_HMD",
+	"8",
+	"9"
 };
 static const int NUM_STEREO_ENABLE = sizeof( stereoRender_enable_text ) / sizeof( stereoRender_enable_text[0] );
 

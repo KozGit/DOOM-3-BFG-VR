@@ -35,6 +35,8 @@ enum settingMenuCmds_t {
 	SETTING_CMD_VR_CHARACTER_OPTIONS,
 	SETTING_CMD_VR_SAFETY_PROTOCOLS,
 	SETTING_CMD_VR_CONTROL_OPTIONS,
+	SETTING_CMD_VR_HAND_OPTIONS,
+	SETTING_CMD_VR_VOICE_OPTIONS,
 	SETTING_CMD_VR_UI_OPTIONS,
 	SETTING_CMD_VR_RENDERING_OPTIONS,
 	SETTING_CMD_VR_PROFILE_OPTIONS,
@@ -67,6 +69,12 @@ void idMenuScreen_Shell_VR_Settings::Initialize( idMenuHandler * data ) {
 	option.Append( "Control Options" );
 	menuOptions.Append( option );
 	option.Clear();
+	option.Append( "Hand Options" );
+	menuOptions.Append( option );
+	option.Clear();
+	option.Append( "Voice Options" );
+	menuOptions.Append( option );
+	option.Clear();
 	option.Append( "UI Options" );
 	menuOptions.Append( option );
 	option.Clear();
@@ -87,7 +95,7 @@ void idMenuScreen_Shell_VR_Settings::Initialize( idMenuHandler * data ) {
 	helpWidget->SetSpritePath( GetSpritePath(), "info", "helpTooltip" );
 	AddChild( helpWidget );
 
-	const char * tips[] = { "Character Options.", "Comfort & Safety Options.", "Control Options.", "UI Options.", "Rendering Options.", "Profile Options" };
+	const char * tips[] = { "Character Options.", "Comfort & Safety Options.", "Control Options.", "Hand interaction options.", "Control the game by speaking.", "UI Options.", "Rendering Options.", "Profile Options" };
 
 	while ( options->GetChildren().Num() < NUM_SETTING_OPTIONS ) {
 		idMenuWidget_Button * const buttonWidget = new (TAG_SWF) idMenuWidget_Button();
@@ -237,6 +245,14 @@ bool idMenuScreen_Shell_VR_Settings::HandleAction( idWidgetAction & action, cons
 					break;
 				}
 
+				case SETTING_CMD_VR_HAND_OPTIONS: {
+					menuData->SetNextScreen( SHELL_AREA_VR_HAND_OPTIONS, MENU_TRANSITION_SIMPLE );
+					break;
+				}
+				case SETTING_CMD_VR_VOICE_OPTIONS: {
+					menuData->SetNextScreen( SHELL_AREA_VR_VOICE_OPTIONS, MENU_TRANSITION_SIMPLE );
+					break;
+				}
 				case SETTING_CMD_VR_UI_OPTIONS: {
 					menuData->SetNextScreen( SHELL_AREA_VR_UI_OPTIONS, MENU_TRANSITION_SIMPLE );
 					break;

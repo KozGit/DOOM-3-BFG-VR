@@ -1691,6 +1691,11 @@ void idAFEntity_WithAttachedHead::SetupHead()
 	idMat3				axis;
 	
 	headModel = spawnArgs.GetString( "def_head", "" );
+	// Carl: Bonus characters for cutscenes
+	if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
+	{
+		headModel = BonusCharReplaceIncompatibleHead( headModel, ( bonus_char_t )bonus_char.GetInteger() );
+	}
 	if( headModel[ 0 ] )
 	{
 		jointName = spawnArgs.GetString( "head_joint" );
@@ -3770,7 +3775,7 @@ void idHarvestable::Think()
 	{
 		idPlayer* thePlayer = player.GetEntity();
 		
-		thePlayer->Give( spawnArgs.GetString( "give_item" ), spawnArgs.GetString( "give_value" ), ITEM_GIVE_FEEDBACK | ITEM_GIVE_UPDATE_STATE );
+		thePlayer->Give( spawnArgs.GetString( "give_item" ), spawnArgs.GetString( "give_value" ), ITEM_GIVE_FEEDBACK | ITEM_GIVE_UPDATE_STATE, thePlayer->GetHarvestWeapon("")->GetHand() );
 		thePlayer->harvest_lock = false;
 		given = true;
 	}
@@ -3946,11 +3951,13 @@ bool idHarvestable::GetFxOrientationAxis( idMat3& mat )
 		jointHandle_t	joint;
 		idVec3	joint_origin;
 		idMat3	joint_axis;
-		
-		joint = thePlayer->weapon.GetEntity()->GetAnimator()->GetJointHandle( spawnArgs.GetString( "fx_weapon_joint" ) );
+
+		// Carl: use correct weapon when dual wielding
+		idWeapon *weapon = thePlayer->GetHarvestWeapon( spawnArgs.GetString( "required_weapons" ) );
+		joint = weapon->GetAnimator()->GetJointHandle( spawnArgs.GetString( "fx_weapon_joint" ) );
 		if( joint != INVALID_JOINT )
 		{
-			thePlayer->weapon.GetEntity()->GetJointWorldTransform( joint, gameLocal.slow.time, joint_origin, joint_axis );
+			weapon->GetJointWorldTransform( joint, gameLocal.slow.time, joint_origin, joint_axis );
 		}
 		else
 		{
@@ -4058,7 +4065,7 @@ void idHarvestable::Event_Touch( idEntity* other, trace_t* trace )
 		
 		if( requiredWeapons.Length() > 0 )
 		{
-			idStr playerWeap = thePlayer->GetCurrentWeapon();
+			idStr playerWeap = thePlayer->GetCurrentHarvestWeapon( requiredWeapons );
 			if( playerWeap.Length() == 0 || requiredWeapons.Find( playerWeap, false ) == -1 )
 			{
 				okToGive = false;
@@ -4075,7 +4082,8 @@ void idHarvestable::Event_Touch( idEntity* other, trace_t* trace )
 				//Lock the player from harvesting to prevent multiple harvests when only one is needed
 				thePlayer->harvest_lock = true;
 				
-				idWeapon* weap = ( idWeapon* )thePlayer->weapon.GetEntity();
+				// Carl: Dual wielding
+				idWeapon* weap = thePlayer->GetHarvestWeapon( requiredWeapons );
 				if( weap )
 				{
 					//weap->PostEventMS(&EV_Weapon_State, 0, "Charge", 8);

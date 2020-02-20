@@ -58,7 +58,7 @@ void idMenuScreen_Shell_VR_Flicksync::Initialize( idMenuHandler* data )
 
 	btnBack = new (TAG_SWF)idMenuWidget_Button();
 	btnBack->Initialize(data);
-	btnBack->SetLabel("Campaign");
+	btnBack->SetLabel( "#str_swf_campaign" );
 	btnBack->SetSpritePath(GetSpritePath(), "info", "btnBack");
 	btnBack->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_GO_BACK);
 

@@ -74,8 +74,8 @@ typedef enum { // Koz weapon enumerations
 	WEAPON_NUM_WEAPONS
 } weapon_t;
 
-// Koz flashOffsets - values are used to move flashlight model to 'mount' to the active weapon.  Hacky McCrappyHack was here.
-const idVec3 flashOffsets[int( WEAPON_NUM_WEAPONS )] = {	idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_NONE
+// Koz flashlightOffsets - values are used to move flashlight model to 'mount' to the active weapon.  Hacky McCrappyHack was here.
+const idVec3 flashlightOffsets[int(WEAPON_NUM_WEAPONS)] = {	idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_NONE
 															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_FISTS
 															idVec3( 0.0f, 0.0f, 0.0f ),			// WEAPON_CHAINSAW
 															idVec3( -1.25f, -6.5f, 0.9f ),		// WEAPON_PISTOL
@@ -137,10 +137,11 @@ public:
 	
 	// Init
 	void					Spawn();
-	void					SetOwner( idPlayer* owner );
+	void					SetOwner( idPlayer* owner, int ownerHand );
 	idPlayer*				GetOwner();
 	virtual bool			ShouldConstructScriptObjectAtSpawn() const;
 	void					SetFlashlightOwner( idPlayer* owner );
+	int						GetHand();
 	
 	static void				CacheWeapon( const char* weaponName );
 	
@@ -208,7 +209,7 @@ public:
 	void					NetCatchup();
 	
 	// Visual presentation
-	void					PresentWeapon( bool showViewModel );
+	void					PresentWeapon( bool showViewModel, int hand );
 	void					PresentWeaponOriginal( bool showViewModel ); // Koz fixme delete this
 
 	int						GetZoomFov();
@@ -272,6 +273,10 @@ public:
 	}
 	
 	friend class idPlayer;
+	friend class idWeaponHolder;
+	friend class idHolster;
+	friend class idPlayerHand;
+	friend class idGrabber;
 private:
 	// script control
 	idScriptBool			WEAPON_ATTACK;
@@ -290,12 +295,17 @@ private:
 	bool					isLinked;
 	bool					isPlayerFlashlight;
 	bool					isPlayerLeftHand;
-	
+
+	int lastIdentifiedFrame = 0;
+	weapon_t currentIdentifiedWeapon = WEAPON_NONE;
+	weapon_t lastIdentifiedWeapon = WEAPON_NONE; // lastweapon holds the last actual weapon value, so the weapon enum will never return a value of 'weapon_flaslight'. nothing to do with the players previous weapon
+
 	// precreated projectile
 	idEntity*				projectileEnt;
 	
 	idPlayer* 				owner;
 	idEntityPtr<idAnimatedEntity>	worldModel;
+	int						hand;
 	
 	// hiding (for GUIs and NPCs)
 	int						hideTime;
@@ -345,7 +355,8 @@ private:
 	
 	// Koz begin
 	// VR Stat Gui - this is the 'watch' the player wears in VR to display stats.
-	class idUserInterface*	vrStatGui;
+	class idUserInterface*	rvrStatGui;
+	class idUserInterface*	lvrStatGui;
 	// Koz end
 
 	// muzzle flash

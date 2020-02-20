@@ -454,7 +454,7 @@ void idCommonLocal::ExecuteMapChange()
 	
 	for( int i = 0; i < MAX_INPUT_DEVICES; i++ )
 	{
-		Sys_SetRumble( i, 0, 0 );
+		Sys_SetRumble( i, 0, 0, 0, 0 );
 	}
 	
 	// close console and remove any prints from the notify lines
