@@ -162,7 +162,7 @@ void idCommonLocal::StartMenu( bool playIntro )
 			idPlayer* player = gameLocal.GetLocalPlayer();
 			if ( player != NULL )
 			{
-				player->TogglePDA( 1 - vr_weaponHand.GetInteger() );
+				player->TogglePDA();
 				return;
 			}
 		}

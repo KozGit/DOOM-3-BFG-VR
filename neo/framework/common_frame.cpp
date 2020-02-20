@@ -459,13 +459,13 @@ void idCommonLocal::ProcessGameReturn( const gameReturn_t& ret )
 	// set joystick rumble
 	if( in_useJoystick.GetBool() && in_joystickRumble.GetBool() && !game->Shell_IsActive() && session->GetSignInManager().GetMasterInputDevice() >= 0 )
 	{
-		Sys_SetRumble( session->GetSignInManager().GetMasterInputDevice(), ret.vibrationLow[1], ret.vibrationHigh[1], ret.vibrationLow[0], ret.vibrationHigh[0] );		// Only set the rumble on the active controller
+		Sys_SetRumble( session->GetSignInManager().GetMasterInputDevice(), ret.vibrationLow, ret.vibrationHigh );		// Only set the rumble on the active controller
 	}
 	else
 	{
 		for( int i = 0; i < MAX_INPUT_DEVICES; i++ )
 		{
-			Sys_SetRumble( i, 0, 0, 0, 0 );
+			Sys_SetRumble( i, 0, 0 );
 		}
 	}
 	

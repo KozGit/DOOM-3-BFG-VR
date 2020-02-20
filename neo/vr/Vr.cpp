@@ -38,7 +38,6 @@ idCVar vr_weaponHand( "vr_weaponHand", "0", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_G
 //flashlight cvars
 
 idCVar vr_flashlightMode( "vr_flashlightMode", "3", CVAR_INTEGER | CVAR_ARCHIVE | CVAR_GAME, "Flashlight mount.\n0 = Body\n1 = Head\n2 = Gun\n3= Hand ( if motion controls available.)" );
-idCVar vr_flashlightStrict( "vr_flashlightStrict", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Flashlight location should be strictly enforced." ); // Carl
 
 idCVar vr_flashlightBodyPosX( "vr_flashlightBodyPosX", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight vertical offset for body mount." );
 idCVar vr_flashlightBodyPosY( "vr_flashlightBodyPosY", "0", CVAR_FLOAT | CVAR_ARCHIVE | CVAR_GAME, "Flashlight horizontal offset for body mount." );
@@ -56,10 +55,10 @@ idCVar vr_forward_keyhole( "vr_forward_keyhole", "11.25", CVAR_FLOAT | CVAR_ARCH
 
 idCVar vr_PDAfixLocation( "vr_PDAfixLocation", "0", CVAR_BOOL | CVAR_ARCHIVE | CVAR_GAME, "Fix PDA position in space in front of player\n instead of holding in hand." );
 
-idCVar vr_weaponPivotOffsetForward( "vr_weaponPivotOffsetForward", "4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_weaponPivotOffsetHorizontal( "vr_weaponPivotOffsetHorizontal", "-4", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_weaponPivotOffsetVertical( "vr_weaponPivotOffsetVertical", "-12", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
-idCVar vr_weaponPivotForearmLength( "vr_weaponPivotForearmLength", "16", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_weaponPivotOffsetForward( "vr_weaponPivotOffsetForward", "3", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_weaponPivotOffsetHorizontal( "vr_weaponPivotOffsetHorizontal", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_weaponPivotOffsetVertical( "vr_weaponPivotOffsetVertical", "0", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );
+idCVar vr_weaponPivotForearmLength( "vr_weaponPivotForearmLength", "16", CVAR_GAME | CVAR_ARCHIVE | CVAR_FLOAT, "" );;
 
 idCVar vr_guiScale( "vr_guiScale", "1", CVAR_FLOAT | CVAR_RENDERER | CVAR_ARCHIVE, "scale reduction factor for full screen menu/pda scale in VR", 0.0001f, 1.0f ); // Koz allow scaling of full screen guis/pda
 idCVar vr_guiSeparation( "vr_guiSeparation", ".01", CVAR_FLOAT | CVAR_ARCHIVE, " Screen separation value for fullscreen guis." );
@@ -213,19 +212,6 @@ idCVar vr_instantAccel( "vr_instantAccel", "1", CVAR_BOOL | CVAR_ARCHIVE, "Insta
 idCVar vr_shotgunChoke( "vr_shotgunChoke", "0", CVAR_FLOAT | CVAR_ARCHIVE, "% To choke shotgun. 0 = None, 100 = Full Choke\n" );
 idCVar vr_headshotMultiplier( "vr_headshotMultiplier", "2.5", CVAR_FLOAT | CVAR_ARCHIVE, "Damage multiplier for headshots when using Fists,Pistol,Shotgun,Chaingun or Plasmagun.", 1, 5 );
 
-// Carl
-idCVar vr_weaponCycleMode( "vr_weaponCycleMode", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "When cycling through weapons\n0 = skip holstered weapons, 1 = include holstered weapons, 2 = flashlight but not holstered, 3 = holstered+flashlight, 4 = holstered+flashlight+pda" );
-idCVar vr_gripMode( "vr_gripMode", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "How the grip button works\n0 = context sensitive toggle, 1 = context sensitive toggle no surface, 2 = toggle for weapons/items hold for physics objects, 3 = toggle for weapons hold for physics/items, 4 = always toggle (can drop), 5 = Dead and Burried, 6 = hold to hold, 7 = hold to hold squeeze for action" );
-idCVar vr_doubleClickGrip( "vr_doubleClickGrip", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Double-clicking grip 0 = does nothing, 1 = drops or does action (depending on grip mode). Not implemented!" );
-idCVar vr_pickUpMode( "vr_pickUpMode", "1", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "How to pick up/collect/use items and powerups 0 = walk over, 1 = walk/touch, 2 = touch, 3 = manual grip, 4 = put in body, 5 = put in properly, 6 = hold and press trigger" );
-idCVar vr_reloadMode( "vr_reloadMode", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "How to reload your weapon\n0 = button, 1 = with other hand, 2 = with other empty hand, 3 = Dead and Burried" );
-idCVar vr_mustEmptyHands( "vr_mustEmptyHands", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Do you need to have an empty hand to interact with things?\n0 = no, it works automatically; 1 = yes, your hand must be empty" );
-idCVar vr_contextSensitive( "vr_contextSensitive", "1", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Are buttons context sensitive?\n0 = no just map the buttons in the binding window, 1 = yes, context sensitive buttons (default)" );
-idCVar vr_dualWield( "vr_dualWield", "8", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Can you use two weapons at once?\n0 = not even fists, 1 = nothing, 2 = only flashlight, 3 = only grenades (VFR), 4 = only grenades/flashlight, 5 = only pistols, 6 = only pistols/flashlight, 7 = only pistols/grenades/flashlight, 8 = yes" );
-idCVar vr_voiceMicLocation( "vr_voiceMicLocation", "0", CVAR_INTEGER | CVAR_GAME | CVAR_ARCHIVE, "Where is the virtual VR microphone you need to hold up to your mouth to speak into for voice commands to work?\n0 = helmet (always works), 1 = StatWatch, 2 = left hand, 3 = right hand, 4 = either hand, 5 = push-to-talk hand, 6 = weapon, 7 = flashlight, 8 = PDA" );
-idCVar vr_debugHands( "vr_debugHands", "0", CVAR_BOOL | CVAR_GAME, "Enable hand/weapon/dual wielding debugging" );
-idCVar vr_rumbleChainsaw( "vr_rumbleChainsaw", "0", CVAR_BOOL | CVAR_GAME | CVAR_ARCHIVE, "Enable weapon (currently chainsaw only) constant haptic feedback in VR. Not recommended for wireless VR controllers." );
-
 //===================================================================
 
 int fboWidth;
@@ -362,7 +348,7 @@ iVr::iVr()
 	
 	chestDefaultDefined = false;
 
-	currentFlashlightPosition = FLASHLIGHT_BODY;
+	currentFlashlightPosition = FLASH_BODY;
 
 	handInGui = false;
 
@@ -448,7 +434,7 @@ iVr::iVr()
 	teleportButtonCount = 0;
 
 
-	currentFlashlightMode = vr_flashlightMode.GetInteger();
+	currentFlashMode = vr_flashlightMode.GetInteger();
 	renderingSplash = true;
 
 	currentBindingDisplay = "";
@@ -1262,13 +1248,13 @@ void iVr::HMDInitializeDistortion()
 		static vr::Texture_t * textures = new vr::Texture_t[6];
 		for ( int i = 0; i < 6; i++ )
 		{
-			textures[i].handle = (unsigned int*)(size_t)globalImages->skyBoxSides->texnum;
+			textures[i].handle = (unsigned int*)globalImages->skyBoxSides->texnum;
 			textures[i].eType = vr::TextureType_OpenGL;
 			textures[i].eColorSpace = vr::ColorSpace_Auto;
 		}
 
-		//textures[0].handle = (unsigned int*)(size_t)globalImages->skyBoxFront->texnum;
-		textures[0].handle = (unsigned int*)(size_t)globalImages->pdaImage->texnum;
+		//textures[0].handle = (unsigned int*)globalImages->skyBoxFront->texnum;
+		textures[0].handle = (unsigned int*)globalImages->pdaImage->texnum;
 
 		static vr::EVRCompositorError error = vr::VRCompositor()->SetSkyboxOverride(textures, 1);
 
@@ -2082,25 +2068,25 @@ void iVr::FrameStart( void )
 
 /*
 ==============
-iVr::GetCurrentFlashlightMode();
+iVr::GetCurrentFlashMode();
 ==============
 */
 
-int iVr::GetCurrentFlashlightMode()
+int iVr::GetCurrentFlashMode()
 {
-	//common->Printf( "Returning flashlightmode %d\n", currentFlashlightMode );
-	return currentFlashlightMode;
+	//common->Printf( "Returning flashmode %d\n", currentFlashMode );
+	return currentFlashMode;
 }
 
 /*
 ==============
-iVr::GetCurrentFlashlightMode();
+iVr::GetCurrentFlashMode();
 ==============
 */
-void iVr::NextFlashlightMode()
+void iVr::NextFlashMode()
 {
-	currentFlashlightMode++;
-	if ( currentFlashlightMode >= FLASHLIGHT_MAX ) currentFlashlightMode = 0;
+	currentFlashMode++;
+	if ( currentFlashMode >= FLASH_MAX ) currentFlashMode = 0;
 }
 
 bool iVr::ShouldQuit()

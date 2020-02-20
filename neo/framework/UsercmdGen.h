@@ -126,7 +126,7 @@ public:
 	short		angles[3];						// view angles
 	signed char	forwardmove;					// forward/backward movement
 	signed char	rightmove;						// left/right movement
-	uint16		buttons;						// buttons
+	byte		buttons;						// buttons
 	int			clientGameMilliseconds;			// time this usercmd was sent from the client
 	int			serverGameMilliseconds;			// interpolated server time this was applied on
 	uint16		fireCount;						// number of times we've fired

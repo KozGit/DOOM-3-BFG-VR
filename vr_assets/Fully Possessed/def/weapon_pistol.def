@@ -122,7 +122,6 @@ entityDef moveable_item_pistol {
 	"friction"					"0.2"
 	"bouncyness"				"0"
 	"snd_bounce"				"smallbox"
-	"clipmodel" 				"models/weapons/pistol/w_pistol_c.ase" // Carl: Added new mesh because old pistol model couldn't generate clipmodel
 }
 
 model worldmodel_pistol {

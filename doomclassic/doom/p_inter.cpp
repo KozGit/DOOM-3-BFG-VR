@@ -381,17 +381,17 @@ P_TouchSpecialThing
 		return;
 
 	// Identify by sprite.
-	switch( special->sprite )
+	switch (special->sprite)
 	{
 		// armor
 	case SPR_ARM1:
-		if( !P_GiveArmor( player, 1 ) )
+		if (!P_GiveArmor (player, 1))
 			return;
 		player->message = GOTARMOR;
 		break;
 
 	case SPR_ARM2:
-		if( !P_GiveArmor( player, 2 ) )
+		if (!P_GiveArmor (player, 2))
 			return;
 		player->message = GOTMEGA;
 		break;
@@ -399,7 +399,7 @@ P_TouchSpecialThing
 		// bonus items
 	case SPR_BON1:
 		player->health++;		// can go over 100%
-		if( player->health > 200 )
+		if (player->health > 200)
 			player->health = 200;
 		player->mo->health = player->health;
 		player->message = GOTHTHBONUS;
@@ -407,16 +407,16 @@ P_TouchSpecialThing
 
 	case SPR_BON2:
 		player->armorpoints++;		// can go over 100%
-		if( player->armorpoints > 200 )
+		if (player->armorpoints > 200)
 			player->armorpoints = 200;
-		if( !player->armortype )
+		if (!player->armortype)
 			player->armortype = 1;
 		player->message = GOTARMBONUS;
 		break;
 
 	case SPR_SOUL:
 		player->health += 100;
-		if( player->health > 200 )
+		if (player->health > 200)
 			player->health = 200;
 		player->mo->health = player->health;
 		player->message = GOTSUPER;
@@ -424,11 +424,11 @@ P_TouchSpecialThing
 		break;
 
 	case SPR_MEGA:
-		if( ::g->gamemode != commercial )
+		if (::g->gamemode != commercial)
 			return;
 		player->health = 200;
 		player->mo->health = player->health;
-		P_GiveArmor( player, 2 );
+		P_GiveArmor (player,2);
 		player->message = GOTMSPHERE;
 		sound = sfx_getpow;
 		break;
@@ -438,63 +438,63 @@ P_TouchSpecialThing
 	case SPR_BKEY:
 		//if (!player->cards[it_bluecard])
 			//player->message = GOTBLUECARD;
-		P_GiveCard( player, it_bluecard, GOTBLUECARD );
-		if( !::g->netgame )
+		P_GiveCard (player, it_bluecard, GOTBLUECARD);
+		if (!::g->netgame)
 			break;
 		return;
 
 	case SPR_YKEY:
 		//if (!player->cards[it_yellowcard])
 			//player->message = GOTYELWCARD;
-		P_GiveCard( player, it_yellowcard, GOTYELWCARD );
-		if( !::g->netgame )
+		P_GiveCard (player, it_yellowcard, GOTYELWCARD);
+		if (!::g->netgame)
 			break;
 		return;
 
 	case SPR_RKEY:
 		//if (!player->cards[it_redcard])
 			//player->message = GOTREDCARD;
-		P_GiveCard( player, it_redcard, GOTREDCARD );
-		if( !::g->netgame )
+		P_GiveCard (player, it_redcard, GOTREDCARD);
+		if (!::g->netgame)
 			break;
 		return;
 
 	case SPR_BSKU:
 		//if (!player->cards[it_blueskull])
 			//player->message = GOTBLUESKUL;
-		P_GiveCard( player, it_blueskull, GOTBLUESKUL );
-		if( !::g->netgame )
+		P_GiveCard (player, it_blueskull, GOTBLUESKUL);
+		if (!::g->netgame)
 			break;
 		return;
 
 	case SPR_YSKU:
 		//if (!player->cards[it_yellowskull])
 			//player->message = GOTYELWSKUL;
-		P_GiveCard( player, it_yellowskull, GOTYELWSKUL );
-		if( !::g->netgame )
+		P_GiveCard (player, it_yellowskull, GOTYELWSKUL);
+		if (!::g->netgame)
 			break;
 		return;
 
 	case SPR_RSKU:
 		//if (!player->cards[it_redskull])
 			//player->message = GOTREDSKULL;
-		P_GiveCard( player, it_redskull, GOTREDSKULL );
-		if( !::g->netgame )
+		P_GiveCard (player, it_redskull, GOTREDSKULL);
+		if (!::g->netgame)
 			break;
 		return;
 
 		// medikits, heals
 	case SPR_STIM:
-		if( !P_GiveBody( player, 10 ) )
+		if (!P_GiveBody (player, 10))
 			return;
 		player->message = GOTSTIM;
 		break;
 
 	case SPR_MEDI:
-		if( !P_GiveBody( player, 25 ) )
+		if (!P_GiveBody (player, 25))
 			return;
 
-		if( player->health < 25 )
+		if (player->health < 25)
 			player->message = GOTMEDINEED;
 		else
 			player->message = GOTMEDIKIT;
@@ -503,44 +503,44 @@ P_TouchSpecialThing
 
 		// power ups
 	case SPR_PINV:
-		if( !P_GivePower( player, pw_invulnerability ) )
+		if (!P_GivePower (player, pw_invulnerability))
 			return;
 		player->message = GOTINVUL;
 		sound = sfx_getpow;
 		break;
 
 	case SPR_PSTR:
-		if( !P_GivePower( player, pw_strength ) )
+		if (!P_GivePower (player, pw_strength))
 			return;
 		player->message = GOTBERSERK;
-		if( player->readyweapon != wp_fist )
+		if (player->readyweapon != wp_fist)
 			player->pendingweapon = wp_fist;
 		sound = sfx_getpow;
 		break;
 
 	case SPR_PINS:
-		if( !P_GivePower( player, pw_invisibility ) )
+		if (!P_GivePower (player, pw_invisibility))
 			return;
 		player->message = GOTINVIS;
 		sound = sfx_getpow;
 		break;
 
 	case SPR_SUIT:
-		if( !P_GivePower( player, pw_ironfeet ) )
+		if (!P_GivePower (player, pw_ironfeet))
 			return;
 		player->message = GOTSUIT;
 		sound = sfx_getpow;
 		break;
 
 	case SPR_PMAP:
-		if( !P_GivePower( player, pw_allmap ) )
+		if (!P_GivePower (player, pw_allmap))
 			return;
 		player->message = GOTMAP;
 		sound = sfx_getpow;
 		break;
 
 	case SPR_PVIS:
-		if( !P_GivePower( player, pw_infrared ) )
+		if (!P_GivePower (player, pw_infrared))
 			return;
 		player->message = GOTVISOR;
 		sound = sfx_getpow;
@@ -548,127 +548,107 @@ P_TouchSpecialThing
 
 		// ammo
 	case SPR_CLIP:
-		if( special->flags & MF_DROPPED )
+		if (special->flags & MF_DROPPED)
 		{
-			if( !P_GiveAmmo( player, am_clip, 0 ) )
+			if (!P_GiveAmmo (player,am_clip,0))
 				return;
 		}
 		else
 		{
-			if( !P_GiveAmmo( player, am_clip, 1 ) )
+			if (!P_GiveAmmo (player,am_clip,1))
 				return;
 		}
 		player->message = GOTCLIP;
 		break;
 
 	case SPR_AMMO:
-		if( !P_GiveAmmo( player, am_clip, 5 ) )
+		if (!P_GiveAmmo (player, am_clip,5))
 			return;
 		player->message = GOTCLIPBOX;
 		break;
 
 	case SPR_ROCK:
-		if( !P_GiveAmmo( player, am_misl, 1 ) )
+		if (!P_GiveAmmo (player, am_misl,1))
 			return;
 		player->message = GOTROCKET;
 		break;
 
 	case SPR_BROK:
-		if( !P_GiveAmmo( player, am_misl, 5 ) )
+		if (!P_GiveAmmo (player, am_misl,5))
 			return;
 		player->message = GOTROCKBOX;
 		break;
 
 	case SPR_CELL:
-		if( !P_GiveAmmo( player, am_cell, 1 ) )
+		if (!P_GiveAmmo (player, am_cell,1))
 			return;
 		player->message = GOTCELL;
 		break;
 
 	case SPR_CELP:
-		if( !P_GiveAmmo( player, am_cell, 5 ) )
+		if (!P_GiveAmmo (player, am_cell,5))
 			return;
 		player->message = GOTCELLBOX;
 		break;
 
 	case SPR_SHEL:
-		if( !P_GiveAmmo( player, am_shell, 1 ) )
+		if (!P_GiveAmmo (player, am_shell,1))
 			return;
 		player->message = GOTSHELLS;
 		break;
 
 	case SPR_SBOX:
-		if( !P_GiveAmmo( player, am_shell, 5 ) )
+		if (!P_GiveAmmo (player, am_shell,5))
 			return;
 		player->message = GOTSHELLBOX;
 		break;
 
 	case SPR_BPAK:
-		if( !player->backpack )
+		if (!player->backpack)
 		{
-			for( i = 0; i < NUMAMMO; i++ )
+			for (i=0 ; i<NUMAMMO ; i++)
 				player->maxammo[i] *= 2;
 			player->backpack = true;
 		}
-		for( i = 0; i < NUMAMMO; i++ )
-			P_GiveAmmo( player, ( ammotype_t )i, 1 );
+		for (i=0 ; i<NUMAMMO ; i++)
+			P_GiveAmmo (player, (ammotype_t)i, 1);
 		player->message = GOTBACKPACK;
 		break;
 
 		// weapons
 	case SPR_BFUG:
-		if( !P_GiveWeapon( player, wp_bfg, false ) )
+		if (!P_GiveWeapon (player, wp_bfg, false) )
 			return;
 
 		// DHM - Nerve :: Give achievement
-		if( !common->IsMultiplayer() ) {
+		if ( !common->IsMultiplayer() ) {
 			switch( DoomLib::GetGameSKU() ) {
-			case GAME_SKU_DOOM2_BFG: {
-				idAchievementManager::LocalUser_CompleteAchievement( ACHIEVEMENT_DOOM2_REALLY_BIG_GUN_FIND_BFG_SINGLEPLAYER );
-			}
-			default: {
-				// No unlocks for other SKUs.
-				break;
-			}
+				case GAME_SKU_DOOM2_BFG: {
+					idAchievementManager::LocalUser_CompleteAchievement( ACHIEVEMENT_DOOM2_REALLY_BIG_GUN_FIND_BFG_SINGLEPLAYER );
+				}
+				default: {
+					// No unlocks for other SKUs.
+					break;
+				}
 			}
 		}
 
 		player->message = GOTBFG9000;
-		sound = sfx_wpnup;
+		sound = sfx_wpnup;	
 		break;
 
 	case SPR_MGUN:
-		if( !P_GiveWeapon( player, wp_chaingun, special->flags&MF_DROPPED ) )
+		if (!P_GiveWeapon (player, wp_chaingun, special->flags&MF_DROPPED) )
 			return;
 		player->message = GOTCHAINGUN;
-		sound = sfx_wpnup;
+		sound = sfx_wpnup;	
 		break;
 
 	case SPR_CSAW:
-		cvarSystem->SetCVarBool( "bonus_chainsaw", true );
-		if( !P_GiveWeapon( player, wp_chainsaw, false ) )
+		if (!P_GiveWeapon (player, wp_chainsaw, false) )
 			return;
-		if( bonus_boomstick.GetBool() && !bonus_char_ash.GetBool() && !bonus_char_doomguy.GetBool() )
-		{
-			player->message = GOTCHAINSAW " Groovy! Ash and Doomguy unlocked in Doom 3!";
-			cvarSystem->SetCVarBool( "bonus_char_ash", true );
-			cvarSystem->SetCVarBool( "bonus_char_doomguy", true );
-		}
-		else if( bonus_boomstick.GetBool() && !bonus_char_ash.GetBool() )
-		{
-			player->message = GOTCHAINSAW " Groovy! Ash unlocked in Doom 3!";
-			cvarSystem->SetCVarBool( "bonus_char_ash", true );
-		}
-		else if( !bonus_char_doomguy.GetBool() )
-		{
-			player->message = GOTCHAINSAW " Doomguy unlocked in Doom 3!";
-			cvarSystem->SetCVarBool( "bonus_char_doomguy", true );
-		}
-		else
-		{
-			player->message = GOTCHAINSAW;
-		}
-		sound = sfx_wpnup;
+		player->message = GOTCHAINSAW;
+		sound = sfx_wpnup;	
 		break;
 
 	case SPR_LAUN:
@@ -693,31 +673,11 @@ P_TouchSpecialThing
 		break;
 
 	case SPR_SGN2:
-		cvarSystem->SetCVarBool( "bonus_boomstick", true );
 		if (!P_GiveWeapon (player, wp_supershotgun, special->flags&MF_DROPPED ) )
 			return;
 
-		if( bonus_chainsaw.GetBool() && !bonus_char_ash.GetBool() && !bonus_char_doomguy.GetBool() )
-		{
-			player->message = GOTSHOTGUN2 " Ash and Doomguy unlocked in Doom 3!";
-			cvarSystem->SetCVarBool( "bonus_char_ash", true );
-			cvarSystem->SetCVarBool( "bonus_char_doomguy", true );
-		}
-		else if( bonus_chainsaw.GetBool() && !bonus_char_ash.GetBool() )
-		{
-			player->message = GOTSHOTGUN2 " Ash unlocked in Doom 3!";
-			cvarSystem->SetCVarBool( "bonus_char_ash", true );
-		}
-		else if( !bonus_char_doomguy.GetBool() )
-		{
-			player->message = GOTSHOTGUN2 " Doomguy unlocked in Doom 3!";
-			cvarSystem->SetCVarBool( "bonus_char_doomguy", true );
-		}
-		else
-		{
-			player->message = GOTSHOTGUN2;
-		}
-		sound = sfx_wpnup;
+		player->message = GOTSHOTGUN2;
+		sound = sfx_wpnup;	
 		break;
 
 	default:

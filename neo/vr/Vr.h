@@ -87,14 +87,11 @@ typedef enum
 
 typedef enum
 {
-	FLASHLIGHT_BODY,
-	FLASHLIGHT_HEAD,
-	FLASHLIGHT_GUN,
-	FLASHLIGHT_HAND,
-	FLASHLIGHT_PISTOL, // like in RoE for XBox, except you can turn the light on and off
-	FLASHLIGHT_INVENTORY, // flashlight is put away (or holstered)
-	FLASHLIGHT_NONE, // not carrying a flashlight
-	FLASHLIGHT_MAX,
+	FLASH_BODY,
+	FLASH_HEAD,
+	FLASH_GUN,
+	FLASH_HAND,
+	FLASH_MAX,
 } vr_flashlight_mode_t;
 
 void SwapWeaponHand();
@@ -141,15 +138,15 @@ public:
 
 	void				CalcAimMove( float &yawDelta, float &pitchDelta );
 
-	int					GetCurrentFlashlightMode();
-	void				NextFlashlightMode();
+	int					GetCurrentFlashMode();
+	void				NextFlashMode();
 
 	bool				ShouldQuit();
 	void				ForceChaperone(int which, bool force);
 
 	//------------------
 
-	int					currentFlashlightMode;
+	int					currentFlashMode;
 
 	bool				VR_GAME_PAUSED;
 	
@@ -416,6 +413,8 @@ private:
 	
 };
 
+#endif
+
 extern idCVar	vr_scale;
 extern idCVar	vr_normalViewHeight;
 extern idCVar	vr_useOculusProfile;
@@ -432,7 +431,6 @@ extern idCVar	vr_headKick;
 extern idCVar	vr_weaponHand;
 
 extern idCVar	vr_flashlightMode;
-extern idCVar	vr_flashlightStrict; // Carl
 
 extern idCVar	vr_flashlightBodyPosX;
 extern idCVar	vr_flashlightBodyPosY;
@@ -511,7 +509,7 @@ extern idCVar	vr_headingBeamMode;
 extern idCVar	vr_weaponSight;
 extern idCVar	vr_weaponSightToSurface;
 
-extern idCVar	vr_motionFlashPitchAdj; // flashlight pitch adjust
+extern idCVar   vr_motionFlashPitchAdj;
 extern idCVar	vr_motionWeaponPitchAdj;
 
 extern idCVar	vr_3dgui;
@@ -591,55 +589,6 @@ extern idCVar vr_shotgunChoke;
 
 extern idCVar vr_headshotMultiplier;
 
-extern idCVar vr_weaponCycleMode;
-extern idCVar vr_gripMode;
-extern idCVar vr_doubleClickGrip;
-extern idCVar vr_pickUpMode;
-extern idCVar vr_reloadMode;
-extern idCVar vr_mustEmptyHands;
-extern idCVar vr_contextSensitive;
-extern idCVar vr_dualWield;
-extern idCVar vr_voiceMicLocation;
-extern idCVar vr_debugHands;
-extern idCVar vr_rumbleChainsaw;
-
 extern iVr* commonVr;
 extern iVoice* commonVoice;
 
-typedef enum
-{
-	VR_GRIP_CONTEXT_TOGGLE = 0,
-	VR_GRIP_CONTEXT_TOGGLE_NO_SURFACE = 1,
-	VR_GRIP_TOGGLE_WEAPONS_HOLD_PHYSICS = 2,
-	VR_GRIP_TOGGLE_WEAPONS_HOLD_ITEMS = 3,
-	VR_GRIP_TOGGLE_WITH_DROP = 4,
-	VR_GRIP_DEAD_AND_BURIED = 5,
-	VR_GRIP_HOLD = 6,
-	VR_GRIP_HOLD_AND_SQUEEZE = 7,
-} vr_gripMode_t;
-
-//Carl: Can you use two weapons at once?
-typedef enum
-{
-	VR_DUALWIELD_NOT_EVEN_FISTS = 0,
-	VR_DUALWIELD_NOTHING = 1,
-	VR_DUALWIELD_ONLY_FLASHLIGHT = 2,
-	VR_DUALWIELD_ONLY_GRENADES = 3,
-	VR_DUALWIELD_ONLY_GRENADES_FLASHLIGHT = 4,
-	VR_DUALWIELD_ONLY_PISTOLS = 5,
-	VR_DUALWIELD_ONLY_PISTOLS_FLASHLIGHT = 6,
-	VR_DUALWIELD_ONLY_PISTOLS_GRENADES_FLASHLIGHT = 7,
-	VR_DUALWIELD_YES = 8
-} vr_dualwield_t;
-
-//Carl: Can you use two weapons at once?
-typedef enum
-{
-	VR_WEAPONCYCLE_SKIP_HOLSTERED = 0,
-	VR_WEAPONCYCLE_INCLUDE_HOLSTERED = 1,
-	VR_WEAPONCYCLE_INCLUDE_FLASHLIGHT = 2,
-	VR_WEAPONCYCLE_HOLSTERED_AND_FLASHLIGHT = 3,
-	VR_WEAPONCYCLE_HOLSTERED_AND_FLASHLIGHT_AND_PDA = 4
-} vr_weaponcycle_t;
-
-#endif

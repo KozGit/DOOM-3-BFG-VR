@@ -711,10 +711,6 @@ skin skins/characters/player/tshirt_mp {
 	vr/statwatchguibody textures/common/nodraw
 	vr/statwatchhands textures/common/nodraw
 	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
 	
 }
 
@@ -794,7 +790,7 @@ skin skins/characters/player/ss_machinegun {
 	//models/weapons/machinegun/m_gui textures/common/nodraw
 }
 
-skin skins/characters/player/d3xp_sp_vrik.skin
+skins/characters/player/d3xp_sp_vrik.skin
 {
 	models/characters/player_character/body/belt2		models/characters/body/belt
 	models/characters/player_character/helmet/helmet3	models/characters/helmet1/helmet
@@ -804,14 +800,10 @@ skin skins/characters/player/d3xp_sp_vrik.skin
 	vr/statwatchguibody textures/common/nodraw
 	vr/statwatchhands textures/common/nodraw
 	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
 	
 }
 
-skin skins/characters/player/d3xp_sp_vrik/vrHandsOnly
+skins/characters/player/d3xp_sp_vrik/vrHandsOnly
 {
 	models/characters/male_npc/marine/marine2		textures/common/nodraw
 	models/characters/player_character/body/belt2		textures/common/nodraw
@@ -821,13 +813,11 @@ skin skins/characters/player/d3xp_sp_vrik/vrHandsOnly
 //	vr/rightarm textures/common/nodraw
 	vr/statwatchbody textures/common/nodraw
 	vr/statwatchguibody textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
 //	vr/statwatchhands textures/common/nodraw
 //	vr/statwatchguihands textures/common/nodraw
 }
 
-skin skins/characters/player/d3xp_sp_vrik/vrWeaponsOnly
+skins/characters/player/d3xp_sp_vrik/vrWeaponsOnly
 {
 	models/characters/male_npc/marine/marine2		textures/common/nodraw
 	models/characters/player_character/body/belt2		textures/common/nodraw
@@ -839,13 +829,9 @@ skin skins/characters/player/d3xp_sp_vrik/vrWeaponsOnly
 	vr/statwatchguibody textures/common/nodraw
 	vr/statwatchhands textures/common/nodraw
 	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
 }
 
-skin skins/characters/player/d3xp_sp_vrik/vrBody
+skins/characters/player/d3xp_sp_vrik/vrBody
 {
 	models/characters/player_character/body/belt2		models/characters/body/belt
 	models/characters/player_character/helmet/helmet3	models/characters/helmet1/helmet
@@ -855,8 +841,6 @@ skin skins/characters/player/d3xp_sp_vrik/vrBody
 //	vr/statwatchguibody textures/common/nodraw
 	vr/statwatchhands textures/common/nodraw
 	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
 }
 
 skin skins/characters/player/tshirt_mp/vrHandsOnly {
@@ -886,10 +870,6 @@ skin skins/characters/player/tshirt_mp/vrHandsOnly {
 	vr/statwatchguibody textures/common/nodraw
 	vr/statwatchhands textures/common/nodraw
 	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
 }
 
 skin skins/characters/player/tshirt_mp/vrBody {
@@ -919,10 +899,6 @@ skin skins/characters/player/tshirt_mp/vrBody {
 	vr/statwatchguibody textures/common/nodraw
 	vr/statwatchhands textures/common/nodraw
 	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
 }
 
 skin skins/characters/player/tshirt_mp/vrWeaponsOnly {
@@ -953,10 +929,6 @@ skin skins/characters/player/tshirt_mp/vrWeaponsOnly {
 	vr/statwatchguibody textures/common/nodraw
 	vr/statwatchhands textures/common/nodraw
 	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
 }
 
 
@@ -972,10 +944,6 @@ skin skins/characters/player/greenmarine_arm2 {
 	vr/statwatchguibody textures/common/nodraw
 	vr/statwatchhands textures/common/nodraw
 	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
 }
 
 skin skins/characters/player/greenmarine_arm2/vrBody {
@@ -990,8 +958,6 @@ skin skins/characters/player/greenmarine_arm2/vrBody {
 	//vr/statwatchguibody textures/common/nodraw
 	vr/statwatchhands textures/common/nodraw
 	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
 }
 
 skin skins/characters/player/greenmarine_arm2/vrWeaponsOnly {
@@ -1006,10 +972,6 @@ skin skins/characters/player/greenmarine_arm2/vrWeaponsOnly {
 	vr/statwatchguibody textures/common/nodraw
 	vr/statwatchhands textures/common/nodraw
 	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
 }
 
 skin skins/characters/player/greenmarine_arm2/vrHandsOnly {
@@ -1022,142 +984,9 @@ skin skins/characters/player/greenmarine_arm2/vrHandsOnly {
 	//vr/rightarm textures/common/nodraw
 	vr/statwatchbody textures/common/nodraw
 	vr/statwatchguibody textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
 	//vr/statwatchhands textures/common/nodraw
 	//vr/statwatchguihands textures/common/nodraw
 }
 
-skin skins/characters/player/doomguy {
-	models/characters/male_npc/soldier/soldier textures/common/nodraw
-	models/characters/player/body models/characters/player/doomguy_body
-	//models/characters/male_npc/marine/marine2 textures/common/nodraw
-	//models/characters/player/arm2 textures/common/nodraw
 
-	vr/leftarm	textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/statwatchbody textures/common/nodraw
-	vr/statwatchguibody textures/common/nodraw
-	vr/statwatchhands textures/common/nodraw
-	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
-}
 
-skin skins/characters/player/doomguy/vrBody {
-	models/characters/male_npc/soldier/soldier textures/common/nodraw
-	models/characters/player/body models/characters/player/doomguy_body
-	//models/characters/male_npc/marine/marine2 textures/common/nodraw
-	//models/characters/player/arm2 textures/common/nodraw
-	
-	vr/leftarm textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	//vr/statwatchbody textures/common/nodraw
-	//vr/statwatchguibody textures/common/nodraw
-	vr/statwatchhands textures/common/nodraw
-	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
-}
-
-skin skins/characters/player/phobos {
-	models/characters/male_npc/soldier/soldier textures/common/nodraw
-	models/characters/player/body models/characters/player/phobos_body
-	//models/characters/male_npc/marine/marine2 textures/common/nodraw
-	models/characters/player/arm2 models/characters/player/arm2_b
-
-	vr/leftarm	textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/statwatchbody textures/common/nodraw
-	vr/statwatchguibody textures/common/nodraw
-	vr/statwatchhands textures/common/nodraw
-	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
-}
-
-skin skins/characters/player/phobos_tshirt {
-	models/characters/male_npc/soldier/soldier models/characters/male_npc/soldier/soldier_b
-	models/characters/player/body textures/common/nodraw
-	models/characters/male_npc/marine/marine2 textures/common/nodraw
-	models/characters/player/arm2 models/characters/player/arm2_b
-	
-	vr/leftarm textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	//vr/statwatchbody textures/common/nodraw
-	//vr/statwatchguibody textures/common/nodraw
-	vr/statwatchhands textures/common/nodraw
-	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
-}
-
-skin skins/characters/player/phobos_tshirt/vrBody {
-	models/characters/male_npc/soldier/soldier models/characters/male_npc/soldier/soldier_b
-	models/characters/player/body textures/common/nodraw
-	models/characters/male_npc/marine/marine2 textures/common/nodraw
-	models/characters/player/arm2 models/characters/player/arm2_b
-	
-	vr/leftarm textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	//vr/statwatchbody textures/common/nodraw
-	//vr/statwatchguibody textures/common/nodraw
-	vr/statwatchhands textures/common/nodraw
-	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
-}
-
-skin skins/characters/player/phobos/vrBody {
-	models/characters/male_npc/soldier/soldier textures/common/nodraw
-	models/characters/player/body models/characters/player/phobos_body
-	//models/characters/male_npc/marine/marine2 textures/common/nodraw
-	models/characters/player/arm2 models/characters/player/arm2_b
-	
-	vr/leftarm textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	//vr/statwatchbody textures/common/nodraw
-	//vr/statwatchguibody textures/common/nodraw
-	vr/statwatchhands textures/common/nodraw
-	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
-}
-
-skin skins/characters/player/phobos/vrWeaponsOnly {
-	models/characters/male_npc/soldier/soldier textures/common/nodraw
-	models/characters/player/body textures/common/nodraw
-	models/characters/male_npc/marine/marine2 textures/common/nodraw
-	models/characters/player/arm2 textures/common/nodraw
-	
-	vr/leftarm textures/common/nodraw
-	vr/rightarm textures/common/nodraw
-	vr/statwatchbody textures/common/nodraw
-	vr/statwatchguibody textures/common/nodraw
-	vr/statwatchhands textures/common/nodraw
-	vr/statwatchguihands textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
-	vr/lstatwatchhands textures/common/nodraw
-	vr/lstatwatchguihands textures/common/nodraw
-}
-
-skin skins/characters/player/phobos/vrHandsOnly {
-	models/characters/male_npc/soldier/soldier textures/common/nodraw
-	models/characters/player/body textures/common/nodraw
-	models/characters/male_npc/marine/marine2 textures/common/nodraw
-	models/characters/player/arm2 textures/common/nodraw
-
-	vr/leftarm	models/characters/player/arm2_b
-	vr/rightarm models/characters/player/arm2_b
-	vr/statwatchbody textures/common/nodraw
-	vr/statwatchguibody textures/common/nodraw
-	vr/lstatwatchbody textures/common/nodraw
-	vr/lstatwatchguibody textures/common/nodraw
-	//vr/statwatchhands textures/common/nodraw
-	//vr/statwatchguihands textures/common/nodraw
-}

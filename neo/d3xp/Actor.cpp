@@ -775,12 +775,6 @@ void idActor::SetupHead()
 	}
 	
 	headModel = spawnArgs.GetString( "def_head", "" );
-	// Carl: Bonus characters for cutscenes
-	if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
-	{
-		headModel = BonusCharReplaceIncompatibleHead( headModel, ( bonus_char_t )bonus_char.GetInteger() );
-	}
-
 	if( headModel[ 0 ] )
 	{
 		jointName = spawnArgs.GetString( "head_joint" );
@@ -2832,8 +2826,7 @@ void idActor::Damage( idEntity* inflictor, idEntity* attacker, const idVec3& dir
 					{
 						player->GetAchievementManager().EventCompletesAchievement( ACHIEVEMENT_ARTIFACT_WITH_BERSERK_PUNCH_20 );
 					}
-					// Carl: TODO fix for dual wielding
-					if( player->GetCurrentWeaponSlot() == player->weapon_chainsaw && damageNotByFists )
+					if( player->GetCurrentWeaponSlot() == player->weapon_chainsaw )
 					{
 						player->GetAchievementManager().EventCompletesAchievement( ACHIEVEMENT_KILL_20_ENEMY_WITH_CHAINSAW );
 					}
@@ -2872,7 +2865,6 @@ void idActor::Damage( idEntity* inflictor, idEntity* attacker, const idVec3& dir
 						// AND it has an attacker (set when the grabber picks up a moveable )
 						// AND the moveable's attacker is the attacker here (the player)
 						// then the player has killed an enemy with a launched moveable from the Grabber
-						// Carl: TODO fix. It will be possible we picked the moveable up and threw it with our hands.
 						if( moveable != NULL && moveable->GetAttacker() != NULL && moveable->GetAttacker()->IsType( idPlayer::Type ) && moveable->GetAttacker() == attacker && player->GetExpansionType() == GAME_D3XP && team != player->team )
 						{
 							player->GetAchievementManager().EventCompletesAchievement( ACHIEVEMENT_GRABBER_KILL_20_ENEMY );
@@ -3395,17 +3387,12 @@ idActor::Event_PlayAnim
 */
 void idActor::Event_PlayAnim( int channel, const char* animname )
 {
-	idThread::ReturnInt( PlayAnim( channel, animname ) );
-}
-
-int idActor::PlayAnim( int channel, const char* animname )
-{
 	animFlags_t	flags;
 	idEntity* headEnt;
 	int	anim;
 	
 	// Koz debug if ( channel == ANIMCHANNEL_LEFTHAND || channel == ANIMCHANNEL_RIGHTHAND ) common->Printf( "Player Playing anim %s %d\n", animname, gameLocal.time );
-	// Carl: This now supports separate prefixes for the lefthand and righthand channels (on the player object)
+
 	anim = GetAnim( channel, animname );
 	if( !anim )
 	{
@@ -3417,7 +3404,8 @@ int idActor::PlayAnim( int channel, const char* animname )
 		{
 			gameLocal.DPrintf( "missing '%s' animation on '%s' (%s)\n", animname, name.c_str(), GetEntityDefName() );
 		}
-		return 0;
+		idThread::ReturnInt( 0 );
+		return;
 	}
 	
 	switch( channel )
@@ -3528,7 +3516,7 @@ int idActor::PlayAnim( int channel, const char* animname )
 			gameLocal.Error( "Event_PlayAnim Unknown anim group" );
 			break;
 	}
-	return 1;
+	idThread::ReturnInt( 1 );
 }
 
 /*

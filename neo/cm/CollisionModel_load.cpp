@@ -3810,10 +3810,6 @@ cm_model_t* idCollisionModelManagerLocal::LoadRenderModel( const char* fileName 
 	{
 		return model;
 	}
-	else
-	{
-		common->Warning( "idCollisionModelManagerLocal::LoadRenderModel(\"%s\"): %s not found", fileName, generatedFileName.c_str() );
-	}
 	idLib::Printf( "Writing %s\n", generatedFileName.c_str() );
 	
 	model = AllocModel();
@@ -4575,7 +4571,7 @@ bool idCollisionModelManagerLocal::TrmFromModel( const cm_model_t* model, idTrac
 	// if the model has too many vertices to fit in a trace model
 	if( model->numVertices > MAX_TRACEMODEL_VERTS )
 	{
-		common->Printf( "idCollisionModelManagerLocal::TrmFromModel: model %s has too many vertices (%d/%d).\n", model->name.c_str(), model->numVertices, MAX_TRACEMODEL_VERTS );
+		common->Printf( "idCollisionModelManagerLocal::TrmFromModel: model %s has too many vertices.\n", model->name.c_str() );
 		PrintModelInfo( model );
 		return false;
 	}
@@ -4583,7 +4579,7 @@ bool idCollisionModelManagerLocal::TrmFromModel( const cm_model_t* model, idTrac
 	// plus one because the collision model accounts for the first unused edge
 	if( model->numEdges > MAX_TRACEMODEL_EDGES + 1 )
 	{
-		common->Printf( "idCollisionModelManagerLocal::TrmFromModel: model %s has too many edges (%d/%d).\n", model->name.c_str(), model->numEdges, MAX_TRACEMODEL_EDGES );
+		common->Printf( "idCollisionModelManagerLocal::TrmFromModel: model %s has too many edges.\n", model->name.c_str() );
 		PrintModelInfo( model );
 		return false;
 	}
@@ -4598,7 +4594,7 @@ bool idCollisionModelManagerLocal::TrmFromModel( const cm_model_t* model, idTrac
 	checkCount++;
 	if( !TrmFromModel_r( trm, model->node ) )
 	{
-		common->Printf( "idCollisionModelManagerLocal::TrmFromModel: model %s has too many polygons (%d/%d).\n", model->name.c_str(), model->numPolygons, MAX_TRACEMODEL_POLYS );
+		common->Printf( "idCollisionModelManagerLocal::TrmFromModel: model %s has too many polygons.\n", model->name.c_str() );
 		PrintModelInfo( model );
 		return false;
 	}

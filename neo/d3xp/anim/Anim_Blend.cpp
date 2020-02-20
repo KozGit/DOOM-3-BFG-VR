@@ -582,29 +582,7 @@ const char* idAnim::AddFrameCommand( const idDeclModelDef* modelDef, int framenu
 			return "Unexpected end of line";
 		}
 		fc.type = FC_SKIN;
-		// Carl: Bonus characters for cutscenes
-		if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
-		{
-			token = BonusCharSkin( token, ( bonus_char_t )bonus_char.GetInteger() );
-		}
-		if( token == "" )
-		{
-			// Carl: don't create a new frame command, return no error
-			// check if we've initialized the frame loopup table
-			if( !frameLookup.Num() )
-			{
-				// we haven't, so allocate the table and initialize it
-				frameLookup.SetGranularity( 1 );
-				frameLookup.SetNum( anims[0]->NumFrames() );
-				for( i = 0; i < frameLookup.Num(); i++ )
-				{
-					frameLookup[i].num = 0;
-					frameLookup[i].firstCommand = 0;
-				}
-			}
-			return NULL;
-		}
-		else if( token == "none" )
+		if( token == "none" )
 		{
 			fc.skin = NULL;
 		}
@@ -3381,16 +3359,7 @@ bool idDeclModelDef::Parse( const char* text, const int textLength, bool allowBi
 				MakeDefault();
 				return false;
 			}
-			// Carl: Bonus characters for cutscenes
-			// This is a risky place to do this, because models can add anims after inheriting our (incompatible) model
-			if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) && bonus_char.GetInteger() != BONUS_CHAR_BETRUGER )
-			{
-				if ( idStr::Icmp( GetName(), "marscity_cinematic_player" )==0 || idStr::Icmp( GetName(), "marscity_hangar_player" ) == 0 ) // these models inherit from npc_tshirt
-					token2 = BonusCharReplaceTShirtModel( (bonus_char_t)bonus_char.GetInteger() );
-				else if( idStr::Icmp( GetName(), "marscity_head_player" ) == 0 ) // inherits from head_player but adds possibly incompatible animations
-					token2 = BonusCharReplaceCompatibleHead( (bonus_char_t)bonus_char.GetInteger() );
-			}
-
+			
 			const idDeclModelDef* copy = static_cast<const idDeclModelDef*>( declManager->FindType( DECL_MODELDEF, token2, false ) );
 			if( !copy )
 			{
@@ -3416,20 +3385,12 @@ bool idDeclModelDef::Parse( const char* text, const int textLength, bool allowBi
 				MakeDefault();
 				return false;
 			}
-			// Carl: Bonus characters for cutscenes
-			if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
+			skin = declManager->FindSkin( token2 );
+			if( !skin )
 			{
-				token2 = BonusCharSkin( token2, ( bonus_char_t )bonus_char.GetInteger() );
-			}
-			if( token2 != "" && token2 != "none" )
-			{
-				skin = declManager->FindSkin( token2 );
-				if( !skin )
-				{
-					src.Warning( "Skin '%s' not found", token2.c_str() );
-					MakeDefault();
-					return false;
-				}
+				src.Warning( "Skin '%s' not found", token2.c_str() );
+				MakeDefault();
+				return false;
 			}
 		}
 		else if( token == "mesh" )
@@ -3447,165 +3408,6 @@ bool idDeclModelDef::Parse( const char* text, const int textLength, bool allowBi
 				src.Warning( "Invalid model for MD5 mesh" );
 				MakeDefault();
 				return false;
-			}
-			// Carl: Bonus characters for cutscenes
-			if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
-			{
-#if 0
-				// Doom Marine's body wearing a T-Shirt (instead of armour) in Mars City 1 cutscenes
-				// TODO: This probably affects other characters too, hopefully they won't notice
-				if( ( filename.Icmp( "models/md5/chars/tshirt.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_MARINE ) )
-				{
-					switch( bonus_char.GetInteger() )
-					{
-					case BONUS_CHAR_ROE:
-					case BONUS_CHAR_LE:
-					case BONUS_CHAR_VFR:
-					case BONUS_CHAR_SAMUS:
-					case BONUS_CHAR_SARGE:
-						// This looks similar to the ROE guy's armour, but it's technically not identical.
-						filename = "models/md5/chars/marine.md5mesh"; // Sarge's body
-						break;
-					case BONUS_CHAR_DOOMGUY:
-					case BONUS_CHAR_SLAYER:
-					case BONUS_CHAR_ETERNAL:
-						// Unfortunately, it's impossible to use the Doom Marine in armour during cutscenes
-						// because there is no model similar to him that is rigged the same way as the T-Shirt model.
-						// So use the Marine mesh 
-						filename = "models/md5/chars/marine.md5mesh";
-						break;
-					case BONUS_CHAR_CAMPBELL:
-						filename = "models/md5/chars/campbell/campbell.md5mesh"; // Campbell's body
-						break;
-					case BONUS_CHAR_BETRUGER:
-						filename = "models/md5/chars/labcoat.md5mesh";
-						break;
-					case BONUS_CHAR_SWANN:
-						filename = "models/md5/chars/suit.md5mesh"; // Swann's body
-						break;
-					/*
-					models/md5/chars/tshirt.md5mesh // Player's body, Mars City
-					models/md5/chars/marine.md5mesh // Sarge's body
-					models/md5/chars/hazmat.md5mesh
-					models/md5/chars/jumpsuit.md5mesh
-					models/md5/chars/labcoat.md5mesh
-					models/md5/chars/security.md5mesh
-					models/md5/chars/skeleton.md5mesh
-					models/md5/chars/suit.md5mesh
-					models/md5/chars/campbell/campbell.md5mesh
-					models/md5/chars/erebus2/spooked.md5mesh
-					*/
-					}
-				}
-				// Doom Marine's head
-				// Unfortunately, it's not compatible with the RoE head due to different joints
-				// (The RoE/LE head is never used except for the actual player, not cutscenes)
-				else if( filename.Icmp( "models/md5/heads/player/player.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_MARINE )
-				{
-					switch( bonus_char.GetInteger() )
-					{
-					case BONUS_CHAR_ROE:
-						// Carl: Incompatible head handled elsewhere
-						break;
-					case BONUS_CHAR_LE:
-						// Carl: Incompatible helmet handled elsewhere
-						break;
-					case BONUS_CHAR_CAMPBELL:
-						filename = "models/md5/heads/campbell/campbell.md5mesh"; // Campbell's head
-						break;
-					case BONUS_CHAR_BETRUGER:
-						filename = "models/md5/heads/betruger/betruger.md5mesh"; // Betruger's head (ALSO HANDLED ELSEWHERE!)
-						break;
-					case BONUS_CHAR_DOOMGUY:
-						break;
-					case BONUS_CHAR_SLAYER:
-					case BONUS_CHAR_ETERNAL:
-					case BONUS_CHAR_VFR:
-					case BONUS_CHAR_SAMUS:
-						filename = "models/md5/characters/npcs/heads/h3.md5mesh"; // marine helmet ?
-						break;
-						/*
-						models/md5/heads/player/player.md5mesh
-						models/md5/heads/betruger/betruger.md5mesh
-						models/md5/heads/campbell/campbell.md5mesh
-						models/md5/heads/swann/swann.md5mesh
-						models/md5/heads/sarge/sarge.md5mesh
-						models/md5/heads/head02young/h2_cinematic.md5mesh
-						models/md5/heads/goggles/goggles.md5mesh
-						models/md5/characters/npcs/heads/goggles.md5mesh // Guy outside mars city stacking boxes, also underground who becomes zombie
-						models/md5/characters/npcs/heads/h1.md5mesh // old
-						models/md5/characters/npcs/heads/h2.md5mesh // young
-						models/md5/characters/npcs/heads/h3.md5mesh // bald
-						models/md5/characters/npcs/heads/h4.md5mesh // surgeon
-						models/md5/characters/npcs/heads/h5.md5mesh // asian
-						models/md5/characters/npcs/heads/h6.md5mesh // black
-						models/md5/characters/npcs/heads/hxp_helmet.md5mesh
-						? models/md5/characters/npcs/heads/hXP1.md5mesh
-						? models/md5/characters/npcs/heads/hXP2.md5mesh
-						models/md5/characters/npcs/heads/mhelmet.md5mesh
-						models/md5/characters/npcs/heads/shelmet.md5mesh // security helmet
-						models/md5/characters/npcs/zheads/z1.md5mesh
-						models/md5/characters/npcs/zheads/z2.md5mesh
-						models/md5/characters/npcs/zheads/z3.md5mesh
-						models/md5/characters/npcs/zheads/z4.md5mesh
-						models/md5/characters/npcs/zheads/z5.md5mesh // Z-Sec with goggles
-						models/md5/characters/npcs/zheads/z6.md5mesh
-						models/md5/characters/npcs/zheads/z7.md5mesh
-
-						*/
-					}
-
-				}
-				// RoE Marine's full body and head
-				// Probably only compatible with other RoE characters
-				else if( ( filename.Icmp( "models/md5/cinematics/erebus5/e5_player.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_ROE ) // erebus 1 and 5
-					|| ( filename.Icmp( "models/md5/cinematics/intro/player_helmet.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_ROE ) // erebus 1
-					|| ( filename.Icmp( "models/md5/cinematics/intro/player_heartartifact.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_ROE )
-					|| ( filename.Icmp( "models/md5/cinematics/erebus2/player_vulgarintro.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_ROE ) // erebus 2
-					|| ( filename.Icmp( "models/md5/cinematics/erebus2/player_grabber.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_ROE )
-					|| ( filename.Icmp( "models/md5/cinematics/erebus2/player_orb.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_ROE )
-					|| ( filename.Icmp( "models/md5/cinematics/erebus6/player.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_ROE ) // erebus 6
-					|| ( filename.Icmp( "models/md5/cinematics/erebus6/player_outro.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_ROE )
-					|| ( filename.Icmp( "models/md5/cinematics/maledict_death/player_heartartifact_end.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_ROE )
-					|| ( filename.Icmp( "models/md5/cinematics/maledict_death/player_turnrun_end.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_ROE )
-					|| ( filename.Icmp( "models/md5/cinematics/maledict_death/player_rocketlauncher_end.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_ROE )
-					)
-				{
-					/* Compatible characters:
-					models/md5/cinematics/intro/imp
-					models/md5/cinematics/intro/marine
-					models/md5/cinematics/intro/mcneil
-					models/md5/cinematics/intro/player_heartartifact
-					models/md5/cinematics/intro/player_helmet
-					models/md5/cinematics/intro/stock_marine
-					models/md5/cinematics/intro/stock_marine_detonator
-					models/md5/cinematics/intro/stock_marine_flashlight
-					models/md5/cinematics/intro/stock_marine_gravitygun
-					models/md5/cinematics/intro/stock_marine_pda
-					models/md5/cinematics/erebus2/player_grabber
-					models/md5/cinematics/erebus2/player_orb
-					models/md5/cinematics/erebus2/player_vulgarintro
-					models/md5/cinematics/gravgun_intro/marine_gravmesh.md5mesh
-					? models/md5/cinematics/erebus6/player.md5mesh
-					? models/md5/cinematics/erebus6/player_outro.md5mesh
-
-					*/
-				}
-
-/*
-					|| ( filename.Icmp( "models/md5/characters/player/mocap/player.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_MARINE ) // admin (weapons are skinned)
-					|| ( filename.Icmp( "models/md5/characters/player/mocap/wepplayer.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_MARINE ) // enpro/delta 2a (weapons are skinned)
-					|| ( filename.Icmp( "models/md5/characters/player/mocap/mgplayer.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_MARINE ) // delta 4 (weapons are skinned)
-					)
-					filename = BonusCharMesh( ( bonus_char_t )bonus_char.GetInteger() );
-				else if( ( filename.Icmp( "models/md5/heads/player/player.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_MARINE )
-					|| ( filename.Icmp( "models/md5/characters/player/head/d3xp_head.md5mesh" ) == 0 && bonus_char.GetInteger() != BONUS_CHAR_ROE )
-					)
-					filename = BonusCharMeshHead( ( bonus_char_t )bonus_char.GetInteger() );
-				//else if( filename.Icmp( "models/md5/heads/campbell/campbell.md5mesh" ) == 0 && bonus_char.GetInteger() == BONUS_CHAR_CAMPBELL )
-				//	filename = "models/md5/heads/security_goggles/goggles.md5mesh"; // replace Campbell in cutscenes with some random security guy (except it affects us too?)
-				*/
-#endif
 			}
 			modelHandle = renderModelManager->FindModel( filename );
 			if( !modelHandle )

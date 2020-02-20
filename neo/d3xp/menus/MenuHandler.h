@@ -72,11 +72,7 @@ enum shellAreas_t
 	SHELL_AREA_VR_SAFETY_PROTOCOLS,
 	SHELL_AREA_VR_CONTROL_OPTIONS,
 	// Koz end
-	// Carl
 	SHELL_AREA_VR_FLICKSYNC,
-	SHELL_AREA_VR_VOICE_OPTIONS,
-	SHELL_AREA_VR_HAND_OPTIONS,
-	// Carl end
 	SHELL_NUM_AREAS
 };
 
@@ -149,7 +145,7 @@ enum menuSounds_t
 };
 
 static const int BIND_CONTROL_DEBOUNCE_MS = 50; // Npi add a debounce on event binding, because some move send multiple event unorder, can't only keep the first one
-static const int MAX_SCREEN_AREAS = SHELL_NUM_AREAS; // Carl: This should stop hard to debug crashes
+static const int MAX_SCREEN_AREAS = 40; // Koz changed from 32 to support additional VR options.
 static const int DEFAULT_REPEAT_TIME = 150;
 static const int WAIT_START_TIME_LONG = 30000;
 static const int WAIT_START_TIME_SHORT = 5000;

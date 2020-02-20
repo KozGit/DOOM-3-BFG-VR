@@ -30,7 +30,6 @@ If you have questions concerning this license or the applicable additional terms
 #define __GAME_PLAYER_H__
 
 #include "PredictedValue.h"
-#include "vr/Bonus.h" // Carl
 
 /*
 ===============================================================================
@@ -62,8 +61,6 @@ const int	FOCUS_GUI_TIME = 200; // Koz fixme, only change in VR. Previously 500,
 const int	NUM_QUICK_SLOTS = 4;
 
 const int MAX_WEAPONS = 32;
-
-const int weapon_empty_hand = -2; // Carl: todo, maybe a different constant
 
 const int DEAD_HEARTRATE = 0;			// fall to as you die
 const int LOWHEALTH_HEARTRATE_ADJ = 20; //
@@ -152,12 +149,10 @@ class idInventory
 {
 public:
 	int						maxHealth;
-	int						weapons, duplicateWeapons, foundWeapons;
+	int						weapons;
 	int						powerups;
 	int						armor;
 	int						maxarmor;
-	// Armor type is 0-3.
-	int						armortype;
 	int						powerupEndTime[ MAX_POWERUPS ];
 	
 	RechargeAmmo_t			rechargeAmmo[ AMMO_NUMTYPES ];
@@ -189,8 +184,6 @@ public:
 	int						lastGiveTime;
 	
 	idList<idLevelTriggerInfo, TAG_IDLIB_LIST_PLAYER> levelTriggers;
-
-	bonus_char_t			bonusChar;
 	
 	idInventory()
 	{
@@ -224,15 +217,15 @@ public:
 	bool					UseAmmo( ammo_t type, int amount );
 	int						HasAmmo( const char* weapon_classname, bool includeClip = false, idPlayer* owner = NULL );			// _D3XP
 	
-	bool					HasEmptyClipCannotRefill( const char* weapon_classname, idPlayer* owner, const bool duplicate );
+	bool					HasEmptyClipCannotRefill( const char* weapon_classname, idPlayer* owner );
 	
 	void					UpdateArmor();
 	
 	void					SetInventoryAmmoForType( const int ammoType, const int amount );
-	void					SetClipAmmoForWeapon( const int weapon, const bool duplicate, const int amount );
+	void					SetClipAmmoForWeapon( const int weapon, const int amount );
 	
 	int						GetInventoryAmmoForType( const int ammoType ) const;
-	int						GetClipAmmoForWeapon( const int weapon, const bool duplicate ) const;
+	int						GetClipAmmoForWeapon( const int weapon ) const;
 	
 	void					WriteAmmoToSnapshot( idBitMsg& msg ) const;
 	void					ReadAmmoFromSnapshot( const idBitMsg& msg, int ownerEntityNumber );
@@ -252,7 +245,6 @@ public:
 private:
 	idArray< idPredictedValue< int >, AMMO_NUMTYPES >		ammo;
 	idArray< idPredictedValue< int >, MAX_WEAPONS >			clip;
-	idArray< idPredictedValue< int >, MAX_WEAPONS >			clipDuplicate;
 };
 
 typedef struct
@@ -285,144 +277,6 @@ struct slot_t
 	float radiusSq;
 };
 
-class idWeaponHolder
-{
-public:
-	idPlayer* owner;
-	int currentWeapon;
-	bool isTheDuplicate; // Carl: Dual wielding, is weapon the duplicate copy or the original? (ie. Which ammo clip does it use?)
-public:
-	idWeaponHolder();
-	virtual	~idWeaponHolder();
-	void Init( idPlayer* player );
-	virtual bool isEmpty();
-};
-
-class idHolster : public idWeaponHolder
-{
-public:
-	slotIndex_t slot;
-	idVec3 origin;
-	float radiusSq;
-	renderEntity_t			renderEntity;					// used to present a model to the renderer
-	qhandle_t				modelDefHandle;					// handle to static renderer model
-	idMat3					holsterAxis;
-public:
-	idHolster();
-	virtual	~idHolster();
-	void Init( idPlayer* player );
-	void FreeSlot();
-	void HolsterModelByName( const char* modelname, idRenderModel* renderModel = NULL );
-	void HolsterPDA();
-	void HolsterFlashlight();
-	void EmptyHolster();
-	void HolsterCurrentWeapon( int stashed, int hand );
-	void StashToExtraHolster();
-	void RestoreFromExtraHolster();
-	void UpdateSlot();
-};
-
-class idPlayerHand : public idWeaponHolder
-{
-public:
-	int whichHand;
-
-	// laser sight - technically every weapon instance could have its own laser sight,
-	// but laser sights are only active when in a player's hand, so make it one per hand
-	renderEntity_t			laserSightRenderEntity;	// replace crosshair for 3DTV
-	qhandle_t				laserSightHandle;
-	renderEntity_t			crosshairEntity; // Koz add a model to place the crosshair into the world
-	qhandle_t				crosshairHandle;
-	int						lastCrosshairMode;
-	bool					laserSightActive; // Koz allow lasersight toggle
-
-	// throwing is per hand
-	idVec3 throwDirection; // for motion control throwing actions e.g. grenade
-	float throwVelocity;
-	int frameTime[10];
-	idVec3 position[10];
-	int frameNum;
-	int curTime;
-	int timeDelta;
-	int startFrameNum;
-
-	// slots
-	idVec3					handOrigin;
-	idMat3					handAxis;
-	slotIndex_t				handSlot;
-
-	bool grabbingWorld, oldGrabbingWorld; // currently this corresponds more to the state of the grip trigger/button which may actually act as a toggle
-	bool virtualGrabDown, oldVirtualGrabDown; // this is the actual virtual grab state, when this goes false you should drop what you're holding
-	bool triggerDown, oldTriggerDown, oldFlashlightTriggerDown;
-	bool thumbDown, oldThumbDown;
-
-	idEntityPtr<idWeapon>	weapon;
-	bool weaponGone;			// force stop firing
-
-	// currentWeapon is inherited from the idWeaponHolder superclass
-	idPredictedValue< int >	idealWeapon;
-	int						previousWeapon;
-	int						weaponSwitchTime;
-
-	// Weapon positioning
-	bool			  		PDAfixed; // Koz has the PDA been fixed in space?
-	bool					lastPdaFixed;
-	idVec3					playerPdaPos; // position player was at when pda fixed in space
-	idVec3					motionPosition;
-	idQuat					motionRotation;// = idQuat_zero;
-	bool					wasPDA;
-
-	idStr					animPrefix; // player hand anims
-
-	//-----------------------------------------------------------------
-	// controller shake parms
-	//-----------------------------------------------------------------
-	
-	const static int		MAX_SHAKE_BUFFER = 3;
-	float					controllerShakeHighMag[ MAX_SHAKE_BUFFER ];		// magnitude of the high frequency controller shake
-	float					controllerShakeLowMag[ MAX_SHAKE_BUFFER ];		// magnitude of the low frequency controller shake
-	int						controllerShakeHighTime[ MAX_SHAKE_BUFFER ];	// time the controller shake ends for high frequency.
-	int						controllerShakeLowTime[ MAX_SHAKE_BUFFER ];		// time the controller shake ends for low frequency.
-	int						controllerShakeTimeGroup;
-
-public:
-	idPlayerHand();
-	virtual					~idPlayerHand();
-	void					Init( idPlayer* player, int hand );
-
-	void					TrackWeaponDirection( idVec3 origin );
-
-	virtual bool			holdingFlashlight();
-	virtual bool			holdingWeapon(); // physically holding it, not just levitating or using fists
-	virtual bool			floatingWeapon(); // the soul cube and the artifact float next to your hand rather than being held
-	virtual bool			controllingWeapon(); // holding or floating
-	virtual bool			holdingPDA();
-	virtual bool			holdingPhysics();
-	virtual bool			holdingItem();
-	virtual bool			holdingSomethingDroppable();
-	bool					isOverMountedFlashlight();
-	bool					tooFullToInteract();
-	bool					handExists(); // false if our character is missing a hand or has something mounted on their forearm instead
-
-	bool					contextToggleVirtualGrab();
-	bool					startVirtualGrab();
-	bool					releaseVirtualGrab(); // will drop whatever you're holding
-
-	idStr					GetCurrentWeaponString();
-	void					NextWeapon( int dir = 1 );
-	void					PrevWeapon();
-	void					NextBestWeapon();
-	void					SelectWeapon( int num, bool force, bool specific );
-	void					DropWeapon( bool died );
-
-	// Controller Shake
-	void					SetControllerShake( float highMagnitude, int highDuration, float lowMagnitude, int lowDuration );
-	void					ResetControllerShake();
-	void					GetControllerShake( int& highMagnitude, int& lowMagnitude ) const;
-
-	void					debugPrint();
-};
-
 class idPlayer : public idActor
 {
 public:
@@ -449,9 +303,12 @@ public:
 	
 	class idPlayerView		playerView;			// handles damage kicks and effects
 	
-	idPlayerHand hands[2];
+	renderEntity_t			laserSightRenderEntity;	// replace crosshair for 3DTV
+	qhandle_t				laserSightHandle;
 
 	// Koz begin
+	bool					laserSightActive; // Koz allow lasersight toggle
+
 	renderEntity_t			headingBeamEntity; // Koz add a heading indicator pointing the direction the players body is facing.
 	qhandle_t				headingBeamHandle;
 	bool					headingBeamActive;
@@ -473,6 +330,9 @@ public:
 	qhandle_t				hudHandle;
 	bool					hudActive;
 
+	renderEntity_t			crosshairEntity; // Koz add a model to place the crosshair into the world
+	qhandle_t				crosshairHandle;
+	bool					crosshairActive;
 	const idDeclSkin*		skinCrosshairDot;
 	const idDeclSkin*		skinCrosshairCircleDot;
 	const idDeclSkin*		skinCrosshairCross;
@@ -495,9 +355,13 @@ public:
 
 	bool					aimValidForTeleport;
 	
+	bool			  		PDAfixed; // Koz has the PDA been fixed in space?
 	idVec3					PDAorigin; // Koz 
 	idMat3					PDAaxis; // Koz
 
+	idVec3 throwDirection; // for motion control throwing actions e.g. grenade
+	float throwVelocity;
+	
 	idMat3					chestPivotCorrectAxis; //made these public so could be accessed by hmdgetorientation;
 	idVec3					chestPivotDefaultPos;
 	jointHandle_t			chestPivotJoint;
@@ -517,8 +381,6 @@ public:
 	idVec3					jetMoveVel;
 	int						jetMoveTime;
 	int						jetMoveCoolDownTime;
-
-	bonus_char_t			bonusChar; // Carl
 	
 	bool					spawnAnglesSet;		// on first usercmd, we must set deltaAngles
 	idAngles				spawnAngles;
@@ -568,6 +430,7 @@ public:
 	int						flashlightBattery;
 	idEntityPtr<idWeapon>	flashlight;
 			
+	idEntityPtr<idWeapon>	weapon;
 	idMenuHandler_HUD* 		hudManager;
 	idMenuScreen_HUD* 		hud;
 	idMenuHandler_PDA* 		pdaMenu;
@@ -617,6 +480,17 @@ public:
 	bool					healthTake;
 	int						nextHealthTake;
 	
+	//-----------------------------------------------------------------
+	// controller shake parms
+	//-----------------------------------------------------------------
+	
+	const static int		MAX_SHAKE_BUFFER = 3;
+	float					controllerShakeHighMag[ MAX_SHAKE_BUFFER ];		// magnitude of the high frequency controller shake
+	float					controllerShakeLowMag[ MAX_SHAKE_BUFFER ];		// magnitude of the low frequency controller shake
+	int						controllerShakeHighTime[ MAX_SHAKE_BUFFER ];	// time the controller shake ends for high frequency.
+	int						controllerShakeLowTime[ MAX_SHAKE_BUFFER ];		// time the controller shake ends for low frequency.
+	int						controllerShakeTimeGroup;
+	
 	bool					hiddenWeapon;		// if the weapon is hidden ( in noWeapons maps )
 	idEntityPtr<idProjectile> soulCubeProjectile;
 	
@@ -654,6 +528,18 @@ public:
 	idVec3					firstPersonViewOrigin;
 	idMat3					firstPersonViewAxis;
 
+	idVec3					firstPersonWeaponOrigin; // Koz fixme check if still needed - independent weapons
+	
+	idVec3					leftHandOrigin;
+	idMat3					leftHandAxis;
+	slotIndex_t				otherHandSlot;
+
+	idVec3					rightHandOrigin;
+	idMat3					rightHandAxis;
+	slotIndex_t				weaponHandSlot;
+
+	bool handGrabbingWorld[2];
+
 	idVec3					waistOrigin;
 	idMat3					waistAxis;
 
@@ -685,11 +571,11 @@ public:
 	void					FreePDASlot();
 	void					UpdatePDASlot();
 
-	void					SetupHolsterSlot( int hand, int stashed = -1 );
+	void					SetupHolsterSlot( int stashed = -1 );
 	void					FreeHolsterSlot();
 	void					UpdateHolsterSlot();
 
-	void					UpdateLaserSight( int hand );
+	void					UpdateLaserSight();
 	bool					GetHandOrHeadPositionWithHacks( int hand, idVec3& origin, idMat3& axis );
 
 	// Koz begin
@@ -697,7 +583,7 @@ public:
 	bool					GetTeleportBeamOrigin( idVec3 &beamOrigin, idMat3 &beamAxis);
 	void					UpdatePlayerSkinsPoses();
 	void					SetWeaponHandPose();
-	void					SetFlashHandPose(); // Set flashlight hand pose
+	void					SetFlashHandPose();
 	void					ToggleLaserSight(); 
 	void					UpdateHeadingBeam(); 
 	void					ToggleHeadingBeam();
@@ -705,15 +591,13 @@ public:
 	void					ToggleHud();
 	void					RecreateCopyJoints();
 	void					UpdateNeckPose();
+	void					TrackWeaponDirection( idVec3 origin );
 	bool					IsCrouching()
 	{
 		return physicsObj.IsCrouching();
 	}
 	void					InitTeleportTarget();
 	// Koz end
-	// Carl begin
-	bool					HasHoldableFlashlight();
-	// Carl end
 		
 	// save games
 	void					Save( idSaveGame* savefile ) const;					// archives object for save game file
@@ -749,7 +633,9 @@ public:
 	void					ControllerShakeFromDamage( int damage );
 	void					ControllerShakeFromDamage( int damage, const idVec3 &direction );
 	void					SetControllerShake( float magnitude, int duration, const idVec3 &direction );
+	void					SetControllerShake( float highMagnitude, int highDuration, float lowMagnitude, int lowDuration );
 	void					ResetControllerShake();
+	void					GetControllerShake( int& highMagnitude, int& lowMagnitude ) const;
 	
 	idAimAssist* 			GetAimAssist()
 	{
@@ -806,19 +692,18 @@ public:
 	void					DrawHUD( idMenuHandler_HUD* hudManager );
 	void					DrawHUDVR( idMenuHandler_HUD* hudManager );
 
-	void					WeaponFireFeedback( int hand, const idDict* weaponDef );
+	void					WeaponFireFeedback( const idDict* weaponDef );
 	
 	float					DefaultFov() const;
 	float					CalcFov( bool honorZoom );
-
-	void					CalculateViewWeaponPos(int hand, idVec3& origin, idMat3& axis );
-	void					CalculateViewWeaponPosVR(int hand, idVec3& origin, idMat3& axis );
-	void 					CalculateViewMainHandPosVR(int hand, idVec3& origin, idMat3& axis );
+	void					CalculateViewWeaponPos( idVec3& origin, idMat3& axis );
+	void					CalculateViewWeaponPosVR( idVec3& origin, idMat3& axis );
+	void 					CalculateViewMainHandPosVR( idVec3& origin, idMat3& axis );
 
 	void					SetHandIKPos( int hand, idVec3 handOrigin, idMat3 handAxis, idQuat rotation, bool isFlashlight = false );
 
 	// Koz begin
-	void					CalculateViewFlashlightPos( idVec3 &origin, idMat3 &axis, idVec3 flashlightOffset ); // Koz aim the flashlight with motion controls
+	void					CalculateViewFlashPos( idVec3 &origin, idMat3 &axis, idVec3 flashOffset ); // Koz aim the flashlight with motion controls
 	// Koz end
 
 	idVec3					GetEyePosition() const;
@@ -828,7 +713,7 @@ public:
 
 	void					OffsetThirdPersonView( float angle, float range, float height, bool clip );
 	
-	bool					Give( const char* statname, const char* value, unsigned int giveFlags, int hand );
+	bool					Give( const char* statname, const char* value, unsigned int giveFlags );
 	bool					GiveItem( idItem* item, unsigned int giveFlags );
 	void					GiveItem( const char* name );
 	void					GiveHealthPool( float amt );
@@ -880,9 +765,7 @@ public:
 	bool					OtherHandImpulseSlot();
 	bool					WeaponHandImpulseSlot();
 	bool					GrabWorld( int hand, bool pressed ); // 0 = right hand, 1 = left hand; true if pressed, false if released; returns true if handled as grab
-	bool					TriggerClickWorld( int hand, bool pressed ); // 0 = right hand, 1 = left hand; true if pressed, false if released; returns true if handled as trigger
-	bool					ThumbClickWorld( int hand, bool pressed ); // 0 = right hand, 1 = left hand; true if pressed, false if released; returns true if handled as thumb click
-
+	
 	int						SlotForWeapon( const char* weaponName );
 	void					Reload();
 	void					NextWeapon();
@@ -890,37 +773,22 @@ public:
 	void					PrevWeapon();
 	void					SetPreviousWeapon( int num )
 	{
-		hands[ vr_weaponHand.GetInteger() ].previousWeapon = num;
+		previousWeapon = num;
 	}
 	void					SelectWeapon( int num, bool force, bool specific = false );
-	void					DropWeapons( bool died ) ;
+	void					DropWeapon( bool died ) ;
 	void					StealWeapon( idPlayer* player );
 	void					AddProjectilesFired( int count );
 	void					AddProjectileHits( int count );
 	void					SetLastHitTime( int time );
+	void					LowerWeapon();
+	void					RaiseWeapon();
 	void					WeaponLoweringCallback();
 	void					WeaponRisingCallback();
 	void					RemoveWeapon( const char* weap );
 	void					RemoveAllButEssentialWeapons();
 	bool					CanShowWeaponViewmodel() const;
 	
-	// Carl: Dual wielding
-	bool					CanDualWield( int num ) const;
-	idWeapon*				GetWeaponInHand( int hand ) const;
-	// Carl: when the code needs just one weapon, guess which one is the "main" one
-	idWeapon*				GetMainWeapon();
-	idWeapon*				GetGrabberWeapon() const;
-	idWeapon*				GetPDAWeapon() const;
-	idWeapon*				GetWeaponWithMountedFlashlight();
-	int						GetBestWeaponHand();
-	int						GetBestWeaponHandToSteal( idPlayer* thief );
-	// Carl: get the specific weapon used to harvest souls (Soul Cube or Artifact)
-	// Returns the required one if you're holding it in a hand, or the other one, or the main weapon
-	idWeapon*				GetHarvestWeapon( idStr requiredWeapons );
-	idStr					GetCurrentHarvestWeapon( idStr requiredWeapons );
-	virtual int				GetAnim( int channel, const char* name );
-	// Carl end
-
 	void					AddAIKill();
 	void					SetSoulCubeProjectile( idProjectile* projectile );
 	
@@ -940,7 +808,7 @@ public:
 	bool					HandleGuiEvents( const sysEvent_t* ev );
 	void					PerformImpulse( int impulse );
 	void					Spectate( bool spectate, bool force = false );
-	void					TogglePDA( int hand );
+	void					TogglePDA();
 	void					RouteGuiMouse( idUserInterface* gui );
 	void					UpdateHud();
 	const idDeclPDA* 		GetPDA() const;
@@ -962,7 +830,7 @@ public:
 		return privateCameraView;
 	}
 	void					StartFxFov( float duration );
-	void					UpdateHudWeapon( int flashWeaponHand );
+	void					UpdateHudWeapon( bool flashWeapon = true );
 	void					UpdateChattingHud();
 	void					UpdateHudStats( idMenuHandler_HUD* hudManager );
 	void					Event_StopAudioLog();
@@ -1031,11 +899,11 @@ public:
 	idStr					GetCurrentWeapon();
 	int						GetCurrentWeaponSlot()
 	{
-		return hands[ vr_weaponHand.GetInteger() ].currentWeapon;
+		return currentWeapon;
 	}
 	int						GetIdealWeapon()
 	{
-		return hands[ vr_weaponHand.GetInteger() ].idealWeapon.Get();
+		return idealWeapon.Get();
 	}
 	idHashTable<WeaponToggle_t>	GetWeaponToggles() const
 	{
@@ -1111,9 +979,6 @@ public:
 		numProjectileKills = 0;
 	}
 
-	friend class idWeaponHolder;
-	friend class idHolster;
-	friend class idPlayerHand;
 private:
 	// Stats & achievements
 	idAchievementManager	achievementManager;
@@ -1168,9 +1033,12 @@ private:
 	int						landTime;
 	
 	
+	int						currentWeapon;
+	idPredictedValue< int >	idealWeapon;
+	int						previousWeapon;
+	int						weaponSwitchTime;
 	bool					weaponEnabled;
-	int						risingWeaponHand; // Carl: getWeaponEntity script function assumes there is only one weapon and assigns it during raise
-
+	
 	int						skinIndex;
 	const idDeclSkin* 		skin;
 	const idDeclSkin* 		powerUpSkin;
@@ -1262,7 +1130,7 @@ private:
 	void					LookAtKiller( idEntity* inflictor, idEntity* attacker );
 	
 	void					StopFiring();
-	void					FireWeapon( int hand, idWeapon* weap );
+	void					FireWeapon();
 	void					Weapon_Combat();
 	void					Weapon_NPC();
 	void					Weapon_GUI();
@@ -1348,9 +1216,9 @@ private:
 	// Koz
 	void					Event_GetWeaponHand();
 	void					Event_GetWeaponHandState();
-	void					Event_GetFlashHand(); // get flashlight hand
-	void					Event_GetFlashHandState(); // get flashlight hand state
-	void					Event_GetFlashState(); // get flashlight state
+	void					Event_GetFlashHand();
+	void					Event_GetFlashHandState();
+	void					Event_GetFlashState();
 
 
 };

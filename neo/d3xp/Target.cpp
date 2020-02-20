@@ -35,7 +35,6 @@ Invisible entities that affect other entities or the world when activated.
 #pragma hdrstop
 
 #include "Game_local.h"
-#include "../vr/Bonus.h"
 
 /*
 ===============================================================================
@@ -283,22 +282,16 @@ void idTarget_EndLevel::Event_Activate( idEntity* activator )
 				case GAME_D3XP:
 				{
 					cvarSystem->SetCVarBool( "g_roeNightmare", true );
-					cvarSystem->SetCVarBool( "bonus_char_roe", true ); // Carl: Unlock bonus character
 					break;
 				}
 				case GAME_D3LE:
 				{
 					cvarSystem->SetCVarBool( "g_leNightmare", true );
-					cvarSystem->SetCVarBool( "bonus_char_le", true ); // Carl: Unlock bonus character
 					break;
 				}
 				case GAME_BASE:
 				{
 					cvarSystem->SetCVarBool( "g_nightmare", true );
-					cvarSystem->SetCVarBool( "bonus_char_marine", true ); // Carl: Unlock bonus character
-					cvarSystem->SetCVarBool( "bonus_char_swann", true );
-					cvarSystem->SetCVarBool( "bonus_char_betruger", true );
-					cvarSystem->SetCVarBool( "bonus_char_sarge", true );
 					break;
 				}
 			}
@@ -2171,8 +2164,7 @@ void idTarget_RumbleJoystick::Event_Activate( idEntity* activator )
 		float lowMagnitude = spawnArgs.GetFloat( "low_magnitude" );
 		int lowDuration = spawnArgs.GetInt( "low_duration" );
 		
-		player->hands[0].SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
-		player->hands[1].SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
+		player->SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
 	}
 	
 }

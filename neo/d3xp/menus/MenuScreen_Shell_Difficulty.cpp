@@ -132,7 +132,7 @@ void idMenuScreen_Shell_Difficulty::Update()
 				buttonInfo->label = "#str_00395";
 			}
 			buttonInfo->action.Set( WIDGET_ACTION_GO_BACK );
-
+			
 			buttonInfo = cmdBar->GetButton( idMenuWidget_CommandBar::BUTTON_JOY1 );
 			if( menuData->GetPlatform() != 2 )
 			{
@@ -141,7 +141,7 @@ void idMenuScreen_Shell_Difficulty::Update()
 			buttonInfo->action.Set( WIDGET_ACTION_PRESS_FOCUSED );
 		}
 	}
-
+	
 	idSWFScriptObject& root = GetSWFObject()->GetRootObject();
 	if( BindSprite( root ) )
 	{
@@ -151,19 +151,19 @@ void idMenuScreen_Shell_Difficulty::Update()
 			heading->SetText( "#str_04088" );
 			heading->SetStrokeInfo( true, 0.75f, 1.75f );
 		}
-
+		
 		idSWFSpriteInstance* gradient = GetSprite()->GetScriptObject()->GetNestedSprite( "info", "gradient" );
 		if( gradient != NULL && heading != NULL )
 		{
 			gradient->SetXPos( heading->GetTextLength() );
 		}
 	}
-
+	
 	if( btnBack != NULL )
 	{
 		btnBack->BindSprite( root );
 	}
-
+	
 	idMenuScreen::Update();
 }
 
@@ -175,16 +175,16 @@ idMenuScreen_Shell_Difficulty::ShowScreen
 void idMenuScreen_Shell_Difficulty::ShowScreen( const mainMenuTransition_t transitionType )
 {
 	idMenuScreen::ShowScreen( transitionType );
-
+	
 	nightmareUnlocked = false;
-
+	
 	idMenuHandler_Shell* shell = dynamic_cast< idMenuHandler_Shell* >( menuData );
 	int type = 0;
 	if( shell != NULL )
 	{
 		type = shell->GetNewGameType();
 	}
-
+	
 	if( type == 0 )
 	{
 		nightmareUnlocked = g_nightmare.GetBool();
@@ -197,45 +197,7 @@ void idMenuScreen_Shell_Difficulty::ShowScreen( const mainMenuTransition_t trans
 	{
 		nightmareUnlocked = g_leNightmare.GetBool();
 	}
-
-	bool useDefaultNames = true;
-	if( bonus_char.GetInteger() && BonusCharUnlocked( ( bonus_char_t )bonus_char.GetInteger() ) )
-	{
-		switch((bonus_char_t)bonus_char.GetInteger() )
-		{
-		case BONUS_CHAR_DOOMGUY:
-			dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 0 ) )->SetLabel( "Hey, not too rough." );
-			dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 1 ) )->SetLabel( "Hurt me plenty." );
-			dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 2 ) )->SetLabel( "Ultra-Violence." );
-			dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 3 ) )->SetLabel( "Nightmare!" );
-			useDefaultNames = false;
-			break;
-		case BONUS_CHAR_SLAYER:
-		case BONUS_CHAR_ETERNAL:
-		case BONUS_CHAR_VFR:
-			dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 0 ) )->SetLabel( "Hey, not too rough" );
-			dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 1 ) )->SetLabel( "Hurt me plenty" );
-			dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 2 ) )->SetLabel( "Ultra-Violence" );
-			dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 3 ) )->SetLabel( "Nightmare" );
-			useDefaultNames = false;
-			break;
-		case BONUS_CHAR_SAMUS:
-			dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 0 ) )->SetLabel( "Easy" );
-			dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 1 ) )->SetLabel( "Normal" );
-			dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 2 ) )->SetLabel( "Veteran" );
-			dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 3 ) )->SetLabel( "Hypermode" );
-			useDefaultNames = false;
-			break;
-		}
-	}
-	if( useDefaultNames )
-	{
-		dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 0 ) )->SetLabel( "#str_04089" );	// Easy
-		dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 1 ) )->SetLabel( "#str_04091" );	// Medium
-		dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 2 ) )->SetLabel( "#str_04093" );	// Hard
-		dynamic_cast< idMenuWidget_Button* >( &options->GetChildByIndex( 3 ) )->SetLabel( "#str_02357" );	// Nightmare
-	}
-	Update();
+	
 	int skill = Max( 0, g_skill.GetInteger() );
 	if( !nightmareUnlocked )
 	{

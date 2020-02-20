@@ -63,8 +63,6 @@ idCVar vr_joyCurves( "vr_joyCurves", "0", CVAR_ARCHIVE | CVAR_INTEGER, "Joy powe
 idCVar vr_joyCurveSensitivity( "vr_joyCurveSensitivity", "9", CVAR_ARCHIVE | CVAR_FLOAT, "Sensitivity val 0 - 9\n" );
 idCVar vr_joyCurveLin( "vr_joyCurveLin", "4", CVAR_ARCHIVE | CVAR_FLOAT, "Linear point for joyCurves\n sens < lin = power curve\n, sens = lin = linear\n, sens > lin = frac power curve.\n" );
 
-// Carl: Non-VR-mode independent weapon control
-idCVar in_independentAim( "in_independentAim", "0", CVAR_ARCHIVE | CVAR_INTEGER, "Independent weapon aim. 0 = normal look/aim, 1 = mouse aims weapon, 2 = keys aim weapon, 3 = both aim weapon", 0, 3 );
 
 
 /*
@@ -479,23 +477,11 @@ void idUsercmdGenLocal::AdjustAngles()
 	
 	if ( !game->isVR )
 	{
-		if( in_independentAim.GetInteger() & 2 )
-		{
-			float yawdelta, pitchdelta;
-			yawdelta = speed * in_yawSpeed.GetFloat() * ( ButtonState( UB_LOOKLEFT ) - ButtonState( UB_LOOKRIGHT ) );
-			pitchdelta = speed * in_pitchSpeed.GetFloat() * ( ButtonState( UB_LOOKDOWN ) - ButtonState( UB_LOOKUP ) );
-			commonVr->CalcAimMove( yawdelta, pitchdelta ); // update the independent weapon angles and return any movement changes.
-			viewangles[YAW] += yawdelta;
-			viewangles[PITCH] += pitchdelta;
-		}
-		else
-		{
-			viewangles[YAW] -= speed * in_yawSpeed.GetFloat() * ButtonState( UB_LOOKRIGHT );
-			viewangles[YAW] += speed * in_yawSpeed.GetFloat() * ButtonState( UB_LOOKLEFT );
+		viewangles[YAW] -= speed * in_yawSpeed.GetFloat() * ButtonState( UB_LOOKRIGHT );
+		viewangles[YAW] += speed * in_yawSpeed.GetFloat() * ButtonState( UB_LOOKLEFT );
 
-			viewangles[PITCH] -= speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKUP );
-			viewangles[PITCH] += speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKDOWN );
-		}
+		viewangles[PITCH] -= speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKUP );
+		viewangles[PITCH] += speed * in_pitchSpeed.GetFloat() * ButtonState( UB_LOOKDOWN );
 	}
 	else // Koz add independent weapon aiming 
 	{
@@ -617,7 +603,7 @@ void idUsercmdGenLocal::MouseMove()
 	pitchdelta = m_pitch.GetFloat() * in_mouseSpeed.GetFloat() * (in_mouseInvertLook.GetBool() ? -my : my);
 
 	// Koz begin add mouse control here
-	if( ( commonVr->hasHMD && vr_enable.GetBool() ) || in_independentAim.GetInteger() & 1 )
+	if ( vr_enable.GetBool() )
 	{
 		// update the independent weapon angles and return any view changes based on current aim mode
 		commonVr->CalcAimMove( yawdelta, pitchdelta );
@@ -2294,18 +2280,13 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 		int value;
 		if( Sys_ReturnJoystickInputEvent( i, action, value ) )
 		{
-			// Carl: context sensitive VR controls, plus dual wielding
-			// Grips, triggers, and thumb clicks behave specially depending
-			// on what's in your hand, and where your hand is.
-			// Actions bound to grips, triggers, and thumb clicks should
-			// only be reported to the game if our hand isn't somewhere special.
 			// left grip button
 			if( action == J_LT_GRIP || action == J_LV_GRIP )
 			{
 				int joyButton = K_JOY1 + (action - J_ACTION1);
 				// vrLeftGrab = (value != 0);
 				idPlayer * player = gameLocal.GetLocalPlayer();
-				if ( !player || !vr_contextSensitive.GetBool() || !player->GrabWorld( 1, (value != 0) ) )
+				if ( !player || !player->GrabWorld( 1, (value != 0) ) )
 					Key( joyButton, ( value != 0 ) );
 			}
 			// right grip button
@@ -2314,47 +2295,9 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 				int joyButton = K_JOY1 + (action - J_ACTION1);
 				// vrRightGrab = (value != 0);
 				idPlayer * player = gameLocal.GetLocalPlayer();
-				if ( !player || !vr_contextSensitive.GetBool() || !player->GrabWorld( 0, (value != 0) ) )
+				if ( !player || !player->GrabWorld( 0, (value != 0) ) )
 					Key( joyButton, ( value != 0 ) );
 			}
-			// left trigger button
-			else if( action == J_LT_TRIGGER || action == J_LV_TRIGGER )
-			{
-				int joyButton = K_JOY1 + ( action - J_ACTION1 );
-				// vrLeftTrigger = (value != 0);
-				idPlayer * player = gameLocal.GetLocalPlayer();
-				if( !player || !vr_contextSensitive.GetBool() || !player->TriggerClickWorld( 1, ( value != 0 ) ) )
-					Key( joyButton, ( value != 0 ) );
-			}
-			// right trigger button
-			else if( action == J_RT_TRIGGER || action == J_RV_TRIGGER )
-			{
-				int joyButton = K_JOY1 + ( action - J_ACTION1 );
-				// vrRightTrigger = (value != 0);
-				idPlayer * player = gameLocal.GetLocalPlayer();
-				if( !player || !vr_contextSensitive.GetBool() || !player->TriggerClickWorld( 0, ( value != 0 ) ) )
-					Key( joyButton, ( value != 0 ) );
-			}
-			// left thumb click (TODO - vive should only do this for center of pad)
-			else if( action == J_LT_STICK || action == J_LV_PAD )
-			{
-				int joyButton = K_JOY1 + ( action - J_ACTION1 );
-				// vrLeftTrigger = (value != 0);
-				idPlayer * player = gameLocal.GetLocalPlayer();
-				if( !player || !vr_contextSensitive.GetBool() || !player->ThumbClickWorld( 1, ( value != 0 ) ) )
-					Key( joyButton, ( value != 0 ) );
-			}
-			// right thumb click (TODO - vive should only do this for center of pad)
-			else if( action == J_RT_STICK || action == J_RV_PAD )
-			{
-				int joyButton = K_JOY1 + ( action - J_ACTION1 );
-				// vrRightTrigger = (value != 0);
-				idPlayer * player = gameLocal.GetLocalPlayer();
-				if( !player || !vr_contextSensitive.GetBool() || !player->ThumbClickWorld( 0, ( value != 0 ) ) )
-					Key( joyButton, ( value != 0 ) );
-			}
-			// Carl end
-
 			else if( action >= J_ACTION1 && action <= J_ACTION_MAX )
 			{
 				int joyButton = K_JOY1 + ( action - J_ACTION1 );

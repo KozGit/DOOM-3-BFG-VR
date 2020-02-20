@@ -1819,9 +1819,7 @@ idRestoreGame::ReadUsercmd
 */
 void idRestoreGame::ReadUsercmd( usercmd_t& usercmd )
 {
-	byte b = (byte)usercmd.buttons;
-	ReadByte( b );
-	usercmd.buttons = b;
+	ReadByte( usercmd.buttons );
 	ReadSignedChar( usercmd.forwardmove );
 	ReadSignedChar( usercmd.rightmove );
 	ReadShort( usercmd.angles[0] );

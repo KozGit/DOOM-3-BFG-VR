@@ -651,15 +651,6 @@ bool idCollisionModelManagerLocal::LoadCollisionModelFile( const char* name, uns
 			loaded = true;
 		}
 	}
-	else
-	{
-		idStr extension;
-		idStr( fileName ).ExtractFileExtension( extension );
-		if( extension.Icmp( "prt" ) != 0 && idStr::Icmp(fileName, "models/md5/chars/skeleton.md5mesh") != 0 )
-		{
-			common->Warning( "LoadCollisionModelFile(\"%s\", %08x): %s not found. This should not happen much.", name, mapFileCRC, generatedFileName.c_str() );
-		}
-	}
 	
 	if( !loaded )
 	{

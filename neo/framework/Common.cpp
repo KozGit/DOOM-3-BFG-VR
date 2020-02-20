@@ -1382,7 +1382,7 @@ void idCommonLocal::Init( int argc, const char* const* argv, const char* cmdline
 		// init the user command input code
 		usercmdGen->Init();
 		
-		Sys_SetRumble( 0, 0, 0, 0, 0 );
+		Sys_SetRumble( 0, 0, 0 );
 		
 		// initialize the user interfaces
 		uiManager->Init();

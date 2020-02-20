@@ -42,6 +42,9 @@ If you have questions concerning this license or the applicable additional terms
 
 idCVar g_projectileDebug( "g_projectileDebug", "0", CVAR_BOOL, "Debug projectiles" );
 
+idCVar vr_throwPower( "vr_throwPower", "4.0", CVAR_FLOAT | CVAR_GAME | CVAR_ARCHIVE, "Throw power" );
+
+
 // This is used in MP to simulate frames to catchup a projectile's state. Similiar to how players work much lighter weight.
 
 // This is used in MP to simulate frames to catchup a projectile's state. Similiar to how players work much lighter weight.
@@ -315,7 +318,7 @@ void idProjectile::FreeLightDef()
 idProjectile::Launch
 =================
 */
-void idProjectile::Launch( const idVec3& start, const idVec3& dir, const idVec3& pushVelocity, const float timeSinceFire, const float launchPower, const float dmgPower, const float motionThrowSpeed )
+void idProjectile::Launch( const idVec3& start, const idVec3& dir, const idVec3& pushVelocity, const float timeSinceFire, const float launchPower, const float dmgPower )
 {
 	float			fuse;
 	float			startthrust;
@@ -355,8 +358,21 @@ void idProjectile::Launch( const idVec3& start, const idVec3& dir, const idVec3&
 	speed = velocity.Length() * launchPower;
 
 	// Koz if throwing a grenade use the tracked hand velocity when using motion controls if the controller is not mounted
-	if( motionThrowSpeed != 0 )
-		speed = motionThrowSpeed;
+	if ( game->isVR && commonVr->VR_USE_MOTION_CONTROLS && !vr_mountedWeaponController.GetBool() )
+	{
+
+		idPlayer* player = static_cast<idPlayer*>(owner.GetEntity());
+		if ( player )
+		{
+			if ( player->weapon )
+			{
+				if ( player->weapon->IdentifyWeapon() == WEAPON_HANDGRENADE )
+				{
+					speed = player->throwVelocity * vr_throwPower.GetFloat();
+				}
+			}
+		}
+	}
 	// Koz end
 	
 	damagePower = dmgPower;
@@ -1056,9 +1072,7 @@ void idProjectile::Explode( const trace_t& collision, idEntity* ignore )
 		float lowMag = distScale * 0.75f;
 		int lowDuration = idMath::Ftoi( 500.0f * distScale );
 		
-		// Carl: TODO calculate direction
-		player->hands[HAND_RIGHT].SetControllerShake( highMag, highDuration, lowMag, lowDuration );
-		player->hands[HAND_LEFT].SetControllerShake( highMag, highDuration, lowMag, lowDuration );
+		player->SetControllerShake( highMag, highDuration, lowMag, lowDuration );
 	}
 	
 	// stop sound
