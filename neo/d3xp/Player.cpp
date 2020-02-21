@@ -10151,45 +10151,6 @@ void idPlayer::EvaluateControls()
 							vf.Normalize();
 							jetMoveVel = (vf * (100.0f)) / 0.060f;  // 60 ms
 						}
-						/*
-						if ( commonVr->leftMapped.y < -strafeHiThresh && fabs(commonVr->leftMapped.x) < strafeLoThresh )
-						{
-							common->Printf( "Jet Strafe forward y %f\n", commonVr->leftMapped.y);
-							jetMove = true;
-							jetMoveTime = gameLocal.time + 60;
-							idVec3 vf = physicsObj.viewForward; 
-							vf.z = 0.0f;// Koz set vertical vel to 0, otherwise jetstraffing down a small incline kills you when you hit the floor due to high impact vel.
-
-							jetMoveVel = ( vf * (100.0f)) / 0.060f;  // 60 ms
-						}
-						else if ( commonVr->leftMapped.y > strafeHiThresh && fabs(commonVr->leftMapped.x) < strafeLoThresh)
-						{
-							common->Printf( "Jet Strafe Back y %f\n", commonVr->leftMapped.y);
-							jetMove = true;
-							jetMoveTime = gameLocal.time + 60;
-							idVec3 vf = physicsObj.viewForward;
-							vf.z = 0.0f;
-							jetMoveVel = ( vf  * (-100.0f)) / 0.060f;  // 60 ms
-						}
-						else if ( commonVr->leftMapped.x < -strafeHiThresh && fabs(commonVr->leftMapped.y) < strafeLoThresh)
-						{
-							common->Printf( "Jet Strafe Left x %f\n", commonVr->leftMapped.x);
-							jetMove = true;
-							jetMoveTime = gameLocal.time + 60;
-							idVec3 vf = physicsObj.viewRight;
-							vf.z = 0.0f;
-							jetMoveVel = ( vf * (-100.0f)) / 0.060f;  // 60 ms
-						}
-						else if ( commonVr->leftMapped.x > strafeHiThresh && fabs(commonVr->leftMapped.y) < strafeLoThresh)
-						{
-							common->Printf( "Jet Strafe Right x %f\n", commonVr->leftMapped.x);
-							jetMove = true;
-							jetMoveTime = gameLocal.time + 60;
-							idVec3 vf = physicsObj.viewRight;
-							vf.z = 0.0f;
-							jetMoveVel = ( vf * (100.0f)) / 0.060f;  // 60 ms
-						}
-						*/
 					}
 				}
 			}
