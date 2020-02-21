@@ -100,6 +100,9 @@ const int IMPULSE_PAUSE = IMPULSE_44;
 const int IMPULSE_45			= 45;			// Carl: computer, resume program
 const int IMPULSE_RESUME = IMPULSE_45;
 
+//Npi : global minimal dead zone
+const double MOVE_DEAD_ZONE = 0.05;
+
 class usercmd_t
 {
 public:

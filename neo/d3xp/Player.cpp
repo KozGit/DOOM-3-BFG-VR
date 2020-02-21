@@ -10049,12 +10049,11 @@ idPlayer::EvaluateControls
 */
 void idPlayer::EvaluateControls()
 {
-	
 	static float strafeHiThresh = commonVr->hasOculusRift ? 0.3f : 0.6f;
 	static float strafeLoThresh = commonVr->hasOculusRift ? 0.25f : 0.3f;
 
-	static bool lastOculusStrafe = false;
-	static bool currentOculusStrafe = false;
+	static bool lastJetStrafe = false;
+	static bool currentJetStrafe = false;
 
 	// check for respawning
 	if( health <= 0 && !g_testDeath.GetBool() )
@@ -10098,7 +10097,7 @@ void idPlayer::EvaluateControls()
 	
 	bool doTeleport = false;
 
-	currentOculusStrafe = (commonVr->hasOculusRift && (vr_teleportMode.GetInteger() == 2 ) && ((fabs( commonVr->leftMapped.x ) > strafeHiThresh) || (fabs( commonVr->leftMapped.y ) > strafeHiThresh)));
+	currentJetStrafe = (game->isVR && vr_teleportMode.GetInteger() == 2  && ((fabs( commonVr->leftMapped.x ) > strafeHiThresh) || (fabs( commonVr->leftMapped.y ) > strafeHiThresh)));
 
 	extern idCVar timescale;
 
@@ -10109,11 +10108,11 @@ void idPlayer::EvaluateControls()
 	else
 	{
 		
-		if ( (common->ButtonState( UB_TELEPORT ) && !commonVr->oldTeleportButtonState) || ( currentOculusStrafe && !lastOculusStrafe )) // on transit from no press to press.
+		if ( (common->ButtonState( UB_TELEPORT ) && !commonVr->oldTeleportButtonState) || ( currentJetStrafe && !lastJetStrafe )) // on transit from no press to press.
 		{
 			if ( vr_teleportMode.GetInteger() != 0 ) // Doom VFR style
 			{
-				if ( ((commonVr->leftMapped.x > -0.5f) && (commonVr->leftMapped.x < 0.5f) && (commonVr->leftMapped.y > -0.5f) && (commonVr->leftMapped.y < 0.5f) && !commonVr->hasOculusRift ) || commonVr->hasOculusRift && common->ButtonState( UB_TELEPORT ) )
+				if (((fabs(commonVr->leftMapped.x) < strafeLoThresh) && (fabs(commonVr->leftMapped.y) < strafeLoThresh)) || common->ButtonState( UB_TELEPORT ) )
 				{
 					warpAim = true;
 					timescale.SetFloat(0.5f);
@@ -10125,10 +10124,25 @@ void idPlayer::EvaluateControls()
 					if (!jetMove && gameLocal.time > jetMoveCoolDownTime) {
 					
 						// tie to the teleport button
-											
-						if ( commonVr->leftMapped.y < -strafeHiThresh && commonVr->leftMapped.x > -strafeLoThresh && commonVr->leftMapped.x < strafeLoThresh )
+						if (fabs(commonVr->leftMapped.x) < strafeLoThresh) {
+							commonVr->leftMapped.x = 0;
+						}
+						if (fabs(commonVr->leftMapped.y) < strafeLoThresh) {
+							commonVr->leftMapped.y = 0;
+						}
+						if (fabs(commonVr->leftMapped.x) > 0 || fabs(commonVr->leftMapped.y) > 0) {
+							// Npi jetStrafe from input axis, without snap
+							jetMove = true;
+							jetMoveTime = gameLocal.time + 60;
+							idVec3 vf = physicsObj.viewForward * commonVr->leftMapped.y * -1 + physicsObj.viewRight * commonVr->leftMapped.x;
+							vf.z = 0.0f;
+							vf.Normalize();
+							jetMoveVel = (vf * (100.0f)) / 0.060f;  // 60 ms
+						}
+						/*
+						if ( commonVr->leftMapped.y < -strafeHiThresh && fabs(commonVr->leftMapped.x) < strafeLoThresh )
 						{
-							//common->Printf( "Jet Strafe forward\n" );
+							common->Printf( "Jet Strafe forward y %f\n", commonVr->leftMapped.y);
 							jetMove = true;
 							jetMoveTime = gameLocal.time + 60;
 							idVec3 vf = physicsObj.viewForward; 
@@ -10136,33 +10150,34 @@ void idPlayer::EvaluateControls()
 
 							jetMoveVel = ( vf * (100.0f)) / 0.060f;  // 60 ms
 						}
-						else if ( commonVr->leftMapped.y > strafeHiThresh && commonVr->leftMapped.x > -strafeLoThresh && commonVr->leftMapped.x < strafeLoThresh )
+						else if ( commonVr->leftMapped.y > strafeHiThresh && fabs(commonVr->leftMapped.x) < strafeLoThresh)
 						{
-							//common->Printf( "Jet Strafe Back\n" );
+							common->Printf( "Jet Strafe Back y %f\n", commonVr->leftMapped.y);
 							jetMove = true;
 							jetMoveTime = gameLocal.time + 60;
 							idVec3 vf = physicsObj.viewForward;
 							vf.z = 0.0f;
 							jetMoveVel = ( vf  * (-100.0f)) / 0.060f;  // 60 ms
 						}
-						else if ( commonVr->leftMapped.x < -strafeHiThresh && commonVr->leftMapped.y > -strafeLoThresh && commonVr->leftMapped.y < strafeLoThresh )
+						else if ( commonVr->leftMapped.x < -strafeHiThresh && fabs(commonVr->leftMapped.y) < strafeLoThresh)
 						{
-							//common->Printf( "Jet Strafe Left\n" );
+							common->Printf( "Jet Strafe Left x %f\n", commonVr->leftMapped.x);
 							jetMove = true;
 							jetMoveTime = gameLocal.time + 60;
 							idVec3 vf = physicsObj.viewRight;
 							vf.z = 0.0f;
 							jetMoveVel = ( vf * (-100.0f)) / 0.060f;  // 60 ms
 						}
-						else if ( commonVr->leftMapped.x > strafeHiThresh && commonVr->leftMapped.y > -strafeLoThresh && commonVr->leftMapped.y < strafeLoThresh )
+						else if ( commonVr->leftMapped.x > strafeHiThresh && fabs(commonVr->leftMapped.y) < strafeLoThresh)
 						{
-							//common->Printf( "Jet Strafe Right\n" );
+							common->Printf( "Jet Strafe Right x %f\n", commonVr->leftMapped.x);
 							jetMove = true;
 							jetMoveTime = gameLocal.time + 60;
 							idVec3 vf = physicsObj.viewRight;
 							vf.z = 0.0f;
 							jetMoveVel = ( vf * (100.0f)) / 0.060f;  // 60 ms
 						}
+						*/
 					}
 				}
 			}
@@ -10178,18 +10193,17 @@ void idPlayer::EvaluateControls()
 			commonVr->teleportButtonCount = 0; // let the fire button abort teleporting.
 		}
 
-		if ( ( vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS && commonVr->teleportButtonCount != 0 ) ||
-			( commonVr->teleportButtonCount > 1 ) ||
-			( ( commonVr->oldTeleportButtonState && !common->ButtonState( UB_TELEPORT ) ) && !vr_teleportButtonMode.GetBool() )
-			|| lastOculusStrafe && currentOculusStrafe && !!vr_teleportButtonMode.GetBool() ) // on transit from press to release
-		{
-			
+		if ( ( vr_teleport.GetInteger() == 1 && commonVr->VR_USE_MOTION_CONTROLS && commonVr->teleportButtonCount > 1 )  //teleport==1 : gun sight
+			|| ( commonVr->teleportButtonCount > 1 ) 
+			|| ( commonVr->oldTeleportButtonState && !common->ButtonState( UB_TELEPORT ) && !vr_teleportButtonMode.GetBool() ) //vr_teleportButtonMode : 0 = Press aim, release teleport. 1 = 1st press aim, 2nd press teleport
+			|| (lastJetStrafe && currentJetStrafe && !vr_teleportButtonMode.GetBool())) // on transit from press to release
+		{			
 			if ( vr_teleportMode.GetInteger() == 2 )
 			{
 				warpAim = false;
-				timescale.SetFloat( 1.0f );
+				//timescale.SetFloat( 1.0f ); // Npi keep slow mo
 				// if touch within the map teleport boundary
-				if ( ( commonVr->leftMapped.x > -0.5f ) && ( commonVr->leftMapped.x < 0.5f ) && ( commonVr->leftMapped.y > -0.5f ) && ( commonVr->leftMapped.y < 0.5f ) ) {
+				if ((fabs(commonVr->leftMapped.x) < strafeLoThresh && fabs(commonVr->leftMapped.y) < strafeLoThresh)) {
 					doTeleport = true;  
 					jetMoveCoolDownTime = 0;
 				}
@@ -10201,7 +10215,7 @@ void idPlayer::EvaluateControls()
 			}
 		}
 		commonVr->oldTeleportButtonState = common->ButtonState( UB_TELEPORT );
-		lastOculusStrafe = currentOculusStrafe;
+		lastJetStrafe = currentJetStrafe;
 	}
 	
 	bool didTeleport = false;
@@ -10216,11 +10230,11 @@ void idPlayer::EvaluateControls()
 		{
 			aimValidForTeleport = false;
 			int t = vr_teleport.GetInteger();
-			if( t > 0 )
+			if( t > 0 ) //if not disabled
 			{
-				if ( vr_teleportMode.GetInteger() == 0 ) 
+				if ( vr_teleportMode.GetInteger() == 0 ) //blink
 				{
-					playerView.Flash( colorBlack, 140 );
+					playerView.Flash( colorRed, 140 );
 				}
 				
 				TeleportPath( teleportPoint );
@@ -11097,7 +11111,7 @@ void idPlayer::Move()
 
 					commonVr->leanOffset += commonVr->motionMoveDelta;
 
-					if ( commonVr->leanOffset.LengthSqr() > 36.0f * 36.0f ) // dont move head more than 36 inches // Koz fixme should me measure distance from waist?
+					if ( commonVr->leanOffset.LengthSqr() > 36.0f * 36.0f ) // dont move head more than 36 inches (~91cm that's a game :)) // Koz fixme should me measure distance from waist?
 					{
 						commonVr->leanOffset.Normalize();
 						commonVr->leanOffset *= 36.0f;

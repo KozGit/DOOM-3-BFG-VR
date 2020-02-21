@@ -599,7 +599,7 @@ idSWFScriptVar idMenuScreen_Shell_VR_Control_Options::idMenuDataSource_Shell_VR_
 				return "Right Hand = Forward";
 			}
 
-			return "Standard Stick Move";
+			return "Standard Stick Move (Body)";
 		}
 
 		case CONTROL_OPTIONS_FIELD_CROUCH_MODE:

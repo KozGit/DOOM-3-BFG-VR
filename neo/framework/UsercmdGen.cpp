@@ -1598,7 +1598,7 @@ void idUsercmdGenLocal::CalcTorsoYawDelta()
 		}
 	}
 
-	if ( influenceLevel == 0 && !gameLocal.inCinematic && commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && (abs( cmd.forwardmove ) < .1 || abs( cmd.rightmove ) < .1) )
+	if ( influenceLevel == 0 && !gameLocal.inCinematic && commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && (abs( cmd.forwardmove ) < MOVE_DEAD_ZONE || abs( cmd.rightmove ) < MOVE_DEAD_ZONE) )
 	{
 		idVec3 rightHandPos;
 		idVec3 rightHandForwardVec;
@@ -1771,7 +1771,7 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		CalcTorsoYawDelta();
 
 	bool okToMove = false;
-	bool moveRequested = ( abs( cmd.forwardmove ) >= 0.05 || abs( cmd.rightmove ) >= 0.05 );
+	bool moveRequested = ( abs( cmd.forwardmove ) >= MOVE_DEAD_ZONE || abs( cmd.rightmove ) >= MOVE_DEAD_ZONE);
 
 	if ( moveRequested )
 	{
@@ -1860,12 +1860,10 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		}
 	}
 
-	// okToMove is true for Doom VFR
-//	if (vr_teleportMode.GetInteger() == 2) {
-//		cmd.forwardmove = 0.0f;
-//		cmd.rightmove = 0.0f;
-//		okToMove = true;
-//	}
+	// okToMove is true for Doom VFR Jetstream 
+	if (vr_teleportMode.GetInteger() == 2) {
+		okToMove = true;
+	}
 
 	if ( !okToMove )
 	{
@@ -1876,8 +1874,9 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		
 	
 	
-	if (commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && (vr_movePoint.GetInteger() == 1 || vr_movePoint.GetInteger() > 2) && 
-		(abs(cmd.forwardmove) >= .1 || abs(cmd.rightmove) >= .1) || vr_teleportMode.GetInteger() == 2) // body will follow motion from move vector
+	if (commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement 
+		&& (vr_movePoint.GetInteger() == 1 || vr_movePoint.GetInteger() > 2) // move hands dependent
+		&& (abs(cmd.forwardmove) >= MOVE_DEAD_ZONE || abs(cmd.rightmove) >= MOVE_DEAD_ZONE || vr_teleportMode.GetInteger() == 2)) // body will follow motion from move vector
 	{
 		static idAngles controllerAng;
 		int hand;
@@ -1901,10 +1900,10 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		viewangles[YAW] += controllerAng.yaw - commonVr->bodyYawOffset;
 		commonVr->bodyYawOffset = controllerAng.yaw;
 	}
-	else if ( !commonVr->VR_USE_MOTION_CONTROLS || vr_movePoint.GetInteger() == 2 ) // body will follow view
+	else if (!commonVr->VR_USE_MOTION_CONTROLS || vr_movePoint.GetInteger() == 2) // body will follow view
 	{
-		viewangles[YAW] += commonVr->poseHmdAngles.yaw - commonVr->bodyMoveAng;
-		commonVr->bodyMoveAng = commonVr->poseHmdAngles.yaw;
+		viewangles[YAW] += commonVr->poseHmdAngles.yaw - commonVr->bodyYawOffset;
+		//commonVr->bodyMoveAng = commonVr->poseHmdAngles.yaw; //Npi don't change bodyAng without cmd
 		commonVr->bodyYawOffset = commonVr->poseHmdAngles.yaw;
 	}
 
@@ -1991,7 +1990,7 @@ void idUsercmdGenLocal::MakeCurrent()
 	
 	if ( vr_motionSickness.GetInteger() == 10 )
 	{
-		if ( cmd.forwardmove != 0 || cmd.rightmove != 0 )
+		if ( abs(cmd.forwardmove) >= MOVE_DEAD_ZONE || abs(cmd.rightmove) >= MOVE_DEAD_ZONE)
 		{
 			commonVr->thirdPersonMovement = true;
 			thirdPersonTime = Sys_Milliseconds();
