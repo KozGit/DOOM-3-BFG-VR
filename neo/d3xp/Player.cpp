@@ -2353,7 +2353,7 @@ void idPlayer::InitTeleportTarget()
 	
 	commonVr->teleportButtonCount = 0;
 
-	common->Printf( "Initializing teleport target\n" );
+	//common->Printf( "Initializing teleport target\n" );
 	origin = GetPhysics()->GetOrigin() + (origin + modelOffset) * GetPhysics()->GetAxis();
 
 	if ( !( teleportTarget = (idAnimatedEntity*)gameLocal.FindEntity( "vrTeleportTarget" ) ) )
@@ -10048,8 +10048,8 @@ idPlayer::EvaluateControls
 */
 void idPlayer::EvaluateControls()
 {
-	static float strafeHiThresh = commonVr->hasOculusRift ? 0.3f : 0.6f;
-	static float strafeLoThresh = commonVr->hasOculusRift ? 0.25f : 0.3f;
+	static float strafeHiThresh = commonVr->hasOculusRift ? 0.3f : 0.4f;
+	static float strafeLoThresh = commonVr->hasOculusRift ? 0.25f : 0.25f;
 
 	static bool lastJetStrafe = false;
 	static bool currentJetStrafe = false;
@@ -10207,7 +10207,7 @@ void idPlayer::EvaluateControls()
 			{
 				if ( vr_teleportMode.GetInteger() == 0 ) //blink
 				{
-					playerView.Flash( colorRed, 140 );
+					playerView.Flash( colorBlack, 140 );
 				}
 				
 				TeleportPath( teleportPoint );
