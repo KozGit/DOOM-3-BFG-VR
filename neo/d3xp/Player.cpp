@@ -79,7 +79,6 @@ idCVar vr_teleportMaxDrop( "vr_teleportMaxDrop", "360", CVAR_FLOAT, "" );
 
 idCVar vr_laserSightUseOffset( "vr_laserSightUseOffset", "1", CVAR_BOOL | CVAR_ARCHIVE, " 0 = lasersight emits straight from barrel.\n 1 = use offsets from weapon def" );
 
-
 // for testing
 idCVar ftx( "ftx", "0", CVAR_FLOAT, "" );
 idCVar fty( "fty", "0", CVAR_FLOAT, "" );
@@ -10122,7 +10121,7 @@ void idPlayer::EvaluateControls()
 				{
 					
 					if (!jetMove && gameLocal.time > jetMoveCoolDownTime) {
-					
+
 						// tie to the teleport button
 						if (fabs(commonVr->leftMapped.x) < strafeLoThresh) {
 							commonVr->leftMapped.x = 0;
@@ -10134,7 +10133,20 @@ void idPlayer::EvaluateControls()
 							// Npi jetStrafe from input axis, without snap
 							jetMove = true;
 							jetMoveTime = gameLocal.time + 60;
-							idVec3 vf = physicsObj.viewForward * commonVr->leftMapped.y * -1 + physicsObj.viewRight * commonVr->leftMapped.x;
+							idVec3 vf;
+							if (vr_comfortJetStrafeDelta.GetFloat() > 1) {
+								idVec3 cmdInput = idVec3(commonVr->leftMapped.x, commonVr->leftMapped.y * -1, 0.0f);
+								float yaw = cmdInput.ToYaw();
+								//snap to cloasest yaw => (yaw+snap/2) - (yaw+snap/2)%snap
+								yaw += vr_comfortJetStrafeDelta.GetFloat() / 2;
+								yaw -= fmod(yaw, vr_comfortJetStrafeDelta.GetFloat());
+								idVec3 strafeVector = idAngles(0.0f, yaw, 0.0f).ToForward();
+								vf = physicsObj.viewForward * strafeVector.y + physicsObj.viewRight * strafeVector.x;								
+							}
+							else
+							{
+								vf = physicsObj.viewForward * commonVr->leftMapped.y * -1 + physicsObj.viewRight * commonVr->leftMapped.x;
+							}
 							vf.z = 0.0f;
 							vf.Normalize();
 							jetMoveVel = (vf * (100.0f)) / 0.060f;  // 60 ms

@@ -2222,6 +2222,7 @@ public:
 			SAFETY_PROTOCOLS_FIELD_TELEPORTATION,
 			SAFETY_PROTOCOLS_FIELD_TELEPORTATION_MODE,
 			SAFETY_PROTOCOLS_FIELD_SNAP_TURNS,
+			SAFETY_PROTOCOLS_FIELD_JET_SNAP_TURNS,
 			SAFETY_PROTOCOLS_FIELD_WALK_SPEED_ADJUST,
 			SAFETY_PROTOCOLS_FIELD_MOTION_SICKNESS,
 			SAFETY_PROTOCOLS_FIELD_KNOCKBACK,
@@ -2255,6 +2256,7 @@ public:
 		int	originalMotionSickness;
 		float	originalWalkSpeedAdjust;
 		float originalComfortDelta;
+		float originalComfortJetStrafeDelta;
 		float	originalKnockBack;
 		float	originalHeadKick;
 		float	originalStepSmooth;

@@ -501,6 +501,7 @@ extern idCVar	vr_minLoadScreenTime;
 extern idCVar	vr_deadzonePitch;
 extern idCVar	vr_deadzoneYaw;
 extern idCVar	vr_comfortDelta;
+extern idCVar	vr_comfortJetStrafeDelta;
 
 //extern idCVar	vr_interactiveCinematic;
 
@@ -529,9 +530,6 @@ extern idCVar	vr_stepSmooth;
 
 extern idCVar	vr_mountedWeaponController;
 extern idCVar	vr_walkSpeedAdjust;
-
-
-extern idCVar	vr_movePoint;
 
 extern idCVar	vr_crouchTriggerDist;
 extern idCVar	vr_crouchMode;
