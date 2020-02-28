@@ -520,7 +520,7 @@ public:
 	
 	// save games
 	void										Save( idSaveGame* savefile ) const;
-	bool										Restore( idRestoreGame* savefile, int &skill_level, idStr &first_decl_string );
+	bool										Restore( idRestoreGame* savefile, int &skill_level, idStr &first_decl_string, idStr &second_decl_string);
 	int											CalculateChecksum() const;		// Used to insure program code has not
 	//    changed between savegames
 	
