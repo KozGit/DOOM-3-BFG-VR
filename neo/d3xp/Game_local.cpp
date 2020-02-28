@@ -1345,9 +1345,10 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 
 	int i_skill;
 	idStr first_decl_string;
+	idStr second_decl_string;
 
 	// Load the idProgram, also checking to make sure scripting hasn't changed since the savegame
-	if( program.Restore( &savegame, i_skill, first_decl_string) == false )
+	if( program.Restore( &savegame, i_skill, first_decl_string, second_decl_string) == false )
 	{
 		// Carl: Keep loading even if the scripts have changed since we saved.
 		loadScriptFailed = true;
@@ -1371,11 +1372,14 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 		return false;
 #endif
 	}
-	
+	if (i_skill < 0 || i_skill>4)
+	{
+		Error("Critical error while loading save game.", num);
+	}
 	g_skill.SetInteger( i_skill );
 	
 	// precache any media specified in the map
-	savegame.ReadDecls( first_decl_string );
+	savegame.ReadDecls( first_decl_string, second_decl_string);
 	 
 	savegame.ReadDict( &si );
 	SetServerInfo( si );

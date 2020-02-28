@@ -2329,6 +2329,7 @@ void idProgram::Save( idSaveGame* savefile ) const
 	int i;
 	int currentFileNum = top_files;
 	
+	//common->Printf("idProgram::Save() count:%d @%d\n", fileList.Num() - currentFileNum, savefile->file->Tell()); //Npi debug
 	savefile->WriteInt( ( fileList.Num() - currentFileNum ) );
 	while( currentFileNum < fileList.Num() )
 	{
@@ -2336,6 +2337,10 @@ void idProgram::Save( idSaveGame* savefile ) const
 		currentFileNum++;
 	}
 	
+	//common->Printf("idProgram::Save() overrided variables:%d  @%d\n", variableDefaults.Num(), savefile->file->Tell()); //Npi debug
+	
+	int start = savefile->file->Tell(); //Npi debug
+	int writeCount = 0;
 	for( i = 0; i < variableDefaults.Num(); i++ )
 	{
 		// Carl: We never save variableDefaults.Num(), and it depends on scripts, but it affects offsets in the file.
@@ -2344,11 +2349,15 @@ void idProgram::Save( idSaveGame* savefile ) const
 		{
 			savefile->WriteInt( i );
 			savefile->WriteByte( variables[i] );
+			writeCount++;
 		}
 	}
 	// Mark the end of the diff with default variables with -1
 	savefile->WriteInt( -1 );
-	
+	//common->Printf("idProgram::Save() overrided variables:%d/%d, %d bytes\n", writeCount, variableDefaults.Num(), savefile->file->Tell()- start); //Npi debug
+
+	//common->Printf("idProgram::Save() other variables:%d @%d\n", numVariables-variableDefaults.Num(), savefile->file->Tell()); //Npi debug
+
 	savefile->WriteInt( numVariables );
 	// Carl: See how we're using variableDefaults.Num() to determine the number of bytes to write? That's a problem.
 	for( i = variableDefaults.Num(); i < numVariables; i++ )
@@ -2357,7 +2366,9 @@ void idProgram::Save( idSaveGame* savefile ) const
 	}
 	
 	int checksum = CalculateChecksum();
+	//common->Printf("idProgram::Save() saved_checksum:%d @%d\n", checksum, savefile->file->Tell()); //Npi debug
 	savefile->WriteInt( checksum );
+	
 }
 
 /*
@@ -2365,82 +2376,108 @@ void idProgram::Save( idSaveGame* savefile ) const
 idProgram::Restore
 ================
 */
-bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first_decl_string )
+bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first_decl_string, idStr &second_decl_string)
 {
 	int i, num, index;
 	bool result = true;
 	idStr scriptname;
 	
-	int start = savefile->file->Tell(); //Carl debug
+	//int start = savefile->file->Tell(); //Carl debug
 	savefile->ReadInt( num );
-	common->Printf("idProgram::Restore() Compile scripts start num=%d, %d\n", num, start); //Carl debug
+	//common->Printf("idProgram::Restore() Compile scripts start num=%d, @%d\n", num, start); //Carl debug
 	for( i = 0; i < num; i++ )
 	{
 		savefile->ReadString( scriptname );
 		CompileFile( scriptname );
 	}
 	
-	common->Printf("idProgram::Restore() Read Variables, %d\n", savefile->file->Tell()); //Carl debug
+	//common->Printf("idProgram::Restore() Read Variables, @%d\n", savefile->file->Tell()); //Carl debug
 	savefile->ReadInt( index );
 	int minVariableDefaultsNum = 0;
-	while( index >= 0 )
+	while( index >= 0 ) //detect the Mark the end of the diff with default variables with -1
 	{
 		savefile->ReadByte( variables[index] );
 		savefile->ReadInt( index );
-		if( index + 1 > minVariableDefaultsNum )
+		if(minVariableDefaultsNum < index + 1 )
 			minVariableDefaultsNum = index + 1;
 	}
 	
-	savefile->ReadInt( num );
+	savefile->ReadInt( num ); //numVariables
 
-	common->Printf("idProgram::Restore() Read variables after defaults, num=%d, %d\n", num, savefile->file->Tell() - 4); //Carl debug
+	//common->Printf("idProgram::Restore() Read variables after defaults=%d, num=%d, %d\n", minVariableDefaultsNum, num, savefile->file->Tell() - 4); //Carl debug
 
 	// Carl: now for the hard part... we don't know how many bytes we need to read. The minimum is zero, the maximum is (num - minVariableDefaultsNum).
 	// All we know is, it's followed by a 4-byte hash, then a 4-byte integer between 0 and 3, then a 4-byte integer pointing to a valid string in the strings file.
+	// Npi : then another 4-byte integer pointing to a valid string in the strings file.
 	// And we're not allowed to seek ahead or behind in the save file to check what's next.
 	
 	// This code will fail if: this is an old save and the first table name is longer than 255 characters or only 1 character long (highly unlikely) or missing
 	// OR there just happens to be a sequence of variables with these values: 0 0 0 (0 to 3) 0 0 (two bytes that match a string offset > 12 in the string file)
 	// The second problem is more likely. Perhaps we should reduce false positives by making sure the string is not a type?
+	// Npi : And if an unlucky random offset match a acceptable string
 
 	// maxCount will be the actual exact count on all savegames produced by v022 or later.
 	// But on older saves, it will be higher than the actual count, unless scripts changed the last variable with a default from its default.
+	//
+	// Npi : May use a version number in savegame instead (v022 is the good solution), and switch between version's restore methods.
+	// With "Lost Mission"'s levels we found tese conditions by luck before the true maxCount, and all next reads are dead..
+	// To fix that quickly, just look for a second string pointer : before 1% chance to fail, now 1%*1%=0.01% chance to fail ... it's better, but... :)
+	// before that I try to look for checksum, but old saves have a different checksum
+
 	int maxCount = num - minVariableDefaultsNum;
 	// What we're actually trying to read
 	byte *temp = (byte *)Mem_Alloc16(maxCount, TAG_SAVEGAMES);
 	bool malloc_failed = !temp;
 	if (malloc_failed)
 		temp = &variables[minVariableDefaultsNum];
-	int saved_checksum, skill = -1, stringPointer, stringLength;
-	idStr actualString = "";
-	// a buffer large enough to hold the two 4-byte values after our bytes
-	byte circleBuffer[12];
+	int saved_checksum, skill = -1, string1Pointer, string1Length, string2Pointer, string2Length;
+	idStr actualString1 = "";
+	idStr actualString2 = "";
+	// a buffer large enough to hold the four 4-byte values after our bytes
+	byte circleBuffer[16];
 	int circleBufferIndex = 0;
 	// prime the buffer
-	for (i = 0; i < 12; i++)
+	for (i = 0; i < 16; i++)
 		savefile->ReadByte(circleBuffer[i]);
 	i = 0;
 	while (i < maxCount)
 	{
 		// check if we reached the end (marked by the saved checksum then skill level followed by a string)
-		saved_checksum = circleBuffer[circleBufferIndex] | (circleBuffer[(circleBufferIndex + 1) % 12] << 8) | (circleBuffer[(circleBufferIndex + 2) % 12] << 16) | (circleBuffer[(circleBufferIndex + 3) % 12] << 24);
+		saved_checksum = circleBuffer[circleBufferIndex] | (circleBuffer[(circleBufferIndex + 1) % 16] << 8) | (circleBuffer[(circleBufferIndex + 2) % 16] << 16) | (circleBuffer[(circleBufferIndex + 3) % 16] << 24);
 		saved_checksum = BigLong(saved_checksum);
-		skill = circleBuffer[(circleBufferIndex + 4) % 12] | (circleBuffer[(circleBufferIndex + 5) % 12] << 8) | (circleBuffer[(circleBufferIndex + 6) % 12] << 16) | (circleBuffer[(circleBufferIndex + 7) % 12] << 24);
+		skill = circleBuffer[(circleBufferIndex + 4) % 16] | (circleBuffer[(circleBufferIndex + 5) % 16] << 8) | (circleBuffer[(circleBufferIndex + 6) % 16] << 16) | (circleBuffer[(circleBufferIndex + 7) % 16] << 24);
 		skill = BigLong(skill);
 		if (skill >= 0 && skill <= 3) // 1 = marine, 3 = nightmare
 		{
-			stringPointer = circleBuffer[(circleBufferIndex + 8) % 12] | (circleBuffer[(circleBufferIndex + 9) % 12] << 8) | (circleBuffer[(circleBufferIndex + 10) % 12] << 16) | (circleBuffer[(circleBufferIndex + 11) % 12] << 24);
-			stringPointer = BigLong(stringPointer);
-			if (stringPointer > 12 && stringPointer <= savefile->stringFile->Length() - 4)
+			string1Pointer = circleBuffer[(circleBufferIndex + 8) % 16] | (circleBuffer[(circleBufferIndex + 9) % 16] << 8) | (circleBuffer[(circleBufferIndex + 10) % 16] << 16) | (circleBuffer[(circleBufferIndex + 11) % 16] << 24);
+			string1Pointer = BigLong(string1Pointer);
+			if (string1Pointer > 16 && string1Pointer <= savefile->stringFile->Length() - 4)
 			{
-				savefile->stringFile->Seek(stringPointer, FS_SEEK_SET);
-				savefile->stringFile->ReadInt(stringLength);
-				if (stringLength >= 2 && stringLength <= 255) //Carl: I'm ASSUMING the first table name won't be longer than 255 chars
+				string2Pointer = circleBuffer[(circleBufferIndex + 12) % 16] | (circleBuffer[(circleBufferIndex + 13) % 16] << 8) | (circleBuffer[(circleBufferIndex + 14) % 16] << 16) | (circleBuffer[(circleBufferIndex + 15) % 16] << 24);
+				string2Pointer = BigLong(string2Pointer);
+				if (string2Pointer > 16 && string2Pointer <= savefile->stringFile->Length() - 4)
 				{
-					actualString.Fill(' ', stringLength);
-					savefile->stringFile->Read(&actualString[0], stringLength);
-					// we've read everything
-					break;
+					savefile->stringFile->Seek(string1Pointer, FS_SEEK_SET);
+					savefile->stringFile->ReadInt(string1Length);
+					if (string1Length >= 2 && string1Length <= 255) //Carl: I'm ASSUMING the first table name won't be longer than 255 chars
+					{
+						savefile->stringFile->Seek(string2Pointer, FS_SEEK_SET);
+						savefile->stringFile->ReadInt(string2Length);
+						if (string2Length >= 2 && string2Length <= 255) //Npi: I'm ASSUMING the second table name won't be longer than 255 chars
+						{
+							actualString1.Fill(' ', string1Length);
+							savefile->stringFile->Seek(string1Pointer, FS_SEEK_SET);
+							savefile->stringFile->ReadInt(string1Length);
+							savefile->stringFile->Read(&actualString1[0], string1Length);
+							
+							actualString2.Fill(' ', string2Length);
+							savefile->stringFile->Seek(string2Pointer, FS_SEEK_SET);
+							savefile->stringFile->ReadInt(string2Length);
+							savefile->stringFile->Read(&actualString2[0], string2Length);
+							// we've read everything
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -2450,7 +2487,7 @@ bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first
 		// read replacement byte value into index
 		savefile->ReadByte(circleBuffer[circleBufferIndex]);
 		// increment index
-		circleBufferIndex = (circleBufferIndex + 1) % 12;
+		circleBufferIndex = (circleBufferIndex + 1) % 16;
 		i++;
 	}
 	// go through temp
@@ -2460,33 +2497,42 @@ bool idProgram::Restore( idRestoreGame* savefile, int &skill_level, idStr &first
 	if (!malloc_failed)
 		Mem_Free16(temp);
 	// set our values
-	if (skill == -1)
+	if (skill == -1) //if we just read the good num of data
 	{
-		saved_checksum = circleBuffer[circleBufferIndex] | (circleBuffer[(circleBufferIndex + 1) % 12] << 8) | (circleBuffer[(circleBufferIndex + 2) % 12] << 16) | (circleBuffer[(circleBufferIndex + 3) % 12] << 24);
+		saved_checksum = circleBuffer[circleBufferIndex] | (circleBuffer[(circleBufferIndex + 1) % 16] << 8) | (circleBuffer[(circleBufferIndex + 2) % 16] << 16) | (circleBuffer[(circleBufferIndex + 3) % 16] << 24);
 		saved_checksum = BigLong(saved_checksum);
-		skill = circleBuffer[(circleBufferIndex + 4) % 12] | (circleBuffer[(circleBufferIndex + 5) % 12] << 8) | (circleBuffer[(circleBufferIndex + 6) % 12] << 16) | (circleBuffer[(circleBufferIndex + 7) % 12] << 24);
+		skill = circleBuffer[(circleBufferIndex + 4) % 16] | (circleBuffer[(circleBufferIndex + 5) % 16] << 8) | (circleBuffer[(circleBufferIndex + 6) % 16] << 16) | (circleBuffer[(circleBufferIndex + 7) % 16] << 24);
 		skill = BigLong(skill);
-		stringPointer = circleBuffer[(circleBufferIndex + 8) % 12] | (circleBuffer[(circleBufferIndex + 9) % 12] << 8) | (circleBuffer[(circleBufferIndex + 10) % 12] << 16) | (circleBuffer[(circleBufferIndex + 11) % 12] << 24);
-		stringPointer = BigLong(stringPointer);
-		savefile->stringFile->Seek(stringPointer, FS_SEEK_SET);
-		savefile->stringFile->ReadInt(stringLength);
-		actualString.Fill(' ', stringLength);
-		savefile->stringFile->Read(&actualString[0], stringLength);
+		string1Pointer = circleBuffer[(circleBufferIndex + 8) % 16] | (circleBuffer[(circleBufferIndex + 9) % 16] << 8) | (circleBuffer[(circleBufferIndex + 10) % 16] << 16) | (circleBuffer[(circleBufferIndex + 11) % 16] << 24);
+		string1Pointer = BigLong(string1Pointer);
+		string2Pointer = circleBuffer[(circleBufferIndex + 12) % 16] | (circleBuffer[(circleBufferIndex + 13) % 16] << 8) | (circleBuffer[(circleBufferIndex + 14) % 16] << 16) | (circleBuffer[(circleBufferIndex + 15) % 16] << 24);
+		string2Pointer = BigLong(string2Pointer);
+
+		savefile->stringFile->Seek(string1Pointer, FS_SEEK_SET);
+		savefile->stringFile->ReadInt(string1Length);
+		actualString1.Fill(' ', string1Length);
+		savefile->stringFile->Read(&actualString1[0], string1Length);
+
+		savefile->stringFile->Seek(string2Pointer, FS_SEEK_SET);
+		savefile->stringFile->ReadInt(string2Length);
+		actualString2.Fill(' ', string2Length);
+		savefile->stringFile->Read(&actualString2[0], string2Length);
 	}
 	// copy them into our parameters
 	skill_level = skill;
-	first_decl_string = actualString;
+	first_decl_string = actualString1;
+	second_decl_string = actualString2;
 
-	common->Printf("idProgram::Restore(), num=%d, %d bytes, %d\n", maxCount, savefile->file->Tell() - start - 12, start); //Carl debug
+	//common->Printf("idProgram::Restore(), num=%d, %d bytes, %d\n", maxCount, savefile->file->Tell() - start - 16, start); //Carl debug
 	int checksum = CalculateChecksum();
-	
+	//common->Printf("idProgram::Restore() saved_checksum:%d computed:%d, @%d\n", saved_checksum, checksum, savefile->file->Tell()); //Npi debug
 	if( saved_checksum != checksum )
 	{
 		result = false;
 	}
 	
-	common->Printf("idProgram::Restore() g_skill=%d\n", skill_level);
-	common->Printf("idProgram::Restore() first_decl_string=\"%s\"\n", first_decl_string.c_str());
+	//common->Printf("idProgram::Restore() g_skill=%d\n", skill_level);
+	//common->Printf("idProgram::Restore() first_decl_string=\"%s\"\n", first_decl_string.c_str());
 
 	return result;
 }
