@@ -5556,20 +5556,21 @@ bool idGameLocal::IsPortalSkyAcive()
 idGameLocal::SelectTimeGroup
 ============
 */
-void idGameLocal::SelectTimeGroup( int timeGroup )
+void idGameLocal::SelectTimeGroup(int timeGroup)
 {
-	if( timeGroup )
+	// Koz: VR: We still render frames when game is paused. Make sure the 'fast' (player) timegroup is selected during pause.
+	// This prevents issues with player animation timing in pause.
+	// Nothing in the slow timegroup should change during pause.
+	if (timeGroup || (commonVr->VR_GAME_PAUSED && commonVr->PDAforced))
 	{
-		fast.Get( time, previousTime, realClientTime );
+		fast.Get(time, previousTime, realClientTime);
 	}
 	else
 	{
-		slow.Get( time, previousTime, realClientTime );
+		slow.Get(time, previousTime, realClientTime);
 	}
-	
 	selectedGroup = timeGroup;
 }
-
 /*
 ===========
 idGameLocal::GetTimeGroupTime
