@@ -30,8 +30,8 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #ifdef USE_OVR
-#include "..\LibOVR\Include\OVR_CAPI.h"
-#include "..\LibOVR\Include\OVR_CAPI_GL.h"
+#include "libs\LibOVR\Include\OVR_CAPI.h"
+#include "libs\LibOVR\Include\OVR_CAPI_GL.h"
 #endif
 
 #include "vr_hmd.h"
@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "FlickSync.h"
 #include "../renderer/Framebuffer.h"
 #ifdef USE_OVR
-#include "..\LibOVR\Include\OVR_CAPI_Audio.h"
+#include "libs\LibOVR\Include\OVR_CAPI_Audio.h"
 #endif
 #include "../libs/openvr/headers/openvr.h"
 
