@@ -45,7 +45,7 @@ If you have questions concerning this license or the applicable additional terms
 #undef strncmp // Koz fixme to prevent conflict with oculus SDK.
 #include "vr/Vr.h"
 #ifdef USE_OVR
-#include "libs\LibOVR\Include\OVR_CAPI.h"
+#include "libs/LibOVR/Include/OVR_CAPI.h"
 #endif
 // Koz end
 

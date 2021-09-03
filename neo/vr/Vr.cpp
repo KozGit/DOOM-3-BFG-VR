@@ -14,7 +14,7 @@
 #endif
 #include "d3xp/physics/Clip.h"
 #ifdef USE_OVR
-#include "libs\LibOVR\Include\OVR_CAPI_GL.h"
+#include "../libs/LibOVR/Include/OVR_CAPI_GL.h"
 #endif
 #include "../renderer/Framebuffer.h"
 
