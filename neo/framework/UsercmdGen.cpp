@@ -511,7 +511,7 @@ void idUsercmdGenLocal::AdjustAngles()
 		commonVr->CalcAimMove( yawdelta, pitchdelta ); // update the independent weapon angles and return any movement changes.
 		viewangles[YAW] += yawdelta;
 		viewangles[PITCH] += pitchdelta;
-		
+
 	}
 }
 
@@ -1717,7 +1717,8 @@ void idUsercmdGenLocal::CalcTorsoYawDelta()
 		turnDelta = -idMath::AngleDelta( bodyYaw, targetBodyYaw );
 
 		float cmdYaw = 0.0f;
-		float degPerFrame = fabs( turnDelta ) > 30 ? turnDelta : fabs( turnDelta ) / (200.0f / (1000 / commonVr->hmdHz));// 1.0f;
+		//NPI : fabs(turnDelta)
+		float degPerFrame = fabs( turnDelta ) > 30 ? fabs(turnDelta) : fabs( turnDelta ) / (200.0f / (1000 / commonVr->hmdHz));// 1.0f;
 
 		if ( fabs( turnDelta ) < degPerFrame )
 		{
@@ -1728,11 +1729,13 @@ void idUsercmdGenLocal::CalcTorsoYawDelta()
 			cmdYaw = turnDelta > 0.0f ? degPerFrame : -degPerFrame;
 		}
 
-		if ( fabs( cmdYaw ) < 0.1f ) cmdYaw = 0.0f;
+		//ceil 0.2 may fix #351
+		if ( fabs( cmdYaw ) < 0.2f ) cmdYaw = 0.0f;
 
 		viewangles[YAW] += cmdYaw;
 		commonVr->bodyYawOffset += cmdYaw;
 		commonVr->bodyYawOffset = idAngles(0.0f, commonVr->bodyYawOffset, 0.0f).Normalize180().yaw; 
+		//gameRenderWorld->DebugLine(colorMagenta, commonVr->lastCenterEyeOrigin, commonVr->lastCenterEyeOrigin + idAngles(viewangles).Normalize180().ToForward() * 12.0f, 10);
 
 	}
 }
