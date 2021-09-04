@@ -1257,13 +1257,13 @@ include_directories(
 			.
 			idlib
 			#libs/curl/include
-			#libs/openal/include
+			#libs/openal-soft/include
 			#libs/freetype/include
             )
 			
 #link_directories(
 #			${CMAKE_CURRENT_SOURCE_DIR}/libs/curl/lib
-#			${CMAKE_CURRENT_SOURCE_DIR}/libs/openal/lib)
+#			${CMAKE_CURRENT_SOURCE_DIR}/libs/openal-soft/lib)
 
 if(MSVC)
 
