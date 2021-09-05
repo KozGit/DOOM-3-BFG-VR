@@ -1729,10 +1729,11 @@ void idUsercmdGenLocal::CalcTorsoYawDelta()
 			cmdYaw = turnDelta > 0.0f ? degPerFrame : -degPerFrame;
 		}
 
-		//ceil 0.2 may fix #351
-		if ( fabs( cmdYaw ) < 0.2f ) cmdYaw = 0.0f;
+		if ( fabs( cmdYaw ) < 0.05f ) cmdYaw = 0.0f;
 
+		//NPI : need to normalized yaw too : fix #351
 		viewangles[YAW] += cmdYaw;
+		viewangles[YAW] = idAngles(0.0f, viewangles[YAW], 0.0f).Normalize180().yaw;
 		commonVr->bodyYawOffset += cmdYaw;
 		commonVr->bodyYawOffset = idAngles(0.0f, commonVr->bodyYawOffset, 0.0f).Normalize180().yaw; 
 		//gameRenderWorld->DebugLine(colorMagenta, commonVr->lastCenterEyeOrigin, commonVr->lastCenterEyeOrigin + idAngles(viewangles).Normalize180().ToForward() * 12.0f, 10);

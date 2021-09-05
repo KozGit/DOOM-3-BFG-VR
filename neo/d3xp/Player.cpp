@@ -13162,6 +13162,10 @@ void idPlayer::Think()
 	playedTimeSecs += playedTimeResidual / 1000;
 	playedTimeResidual = playedTimeResidual % 1000;
 	
+	//gameRenderWorld->DebugLine(colorRed, firstPersonViewOrigin, firstPersonViewOrigin + commonVr->poseHmdAngles.ToForward() * 10.0f);
+	//gameRenderWorld->DebugLine(colorGreen, commonVr->lastCenterEyeOrigin, commonVr->lastCenterEyeOrigin + commonVr->lastCenterEyeAxis.ToAngles().ToForward() * 10.0f);
+	//gameRenderWorld->DebugLine(colorBlue, firstPersonViewOrigin, firstPersonViewOrigin + viewAngles.ToForward() * 10.0f);
+
 	aimAssist.Update();
 	
 	UpdatePlayerIcons();
@@ -13633,6 +13637,10 @@ void idPlayer::Think()
 			gameRenderWorld->DebugSphere( colorWhite, tempSphere, 18, true );
 		}
 	}
+
+	//gameRenderWorld->DebugLine(colorMagenta, firstPersonViewOrigin, firstPersonViewOrigin + commonVr->poseHmdAngles.ToForward() * 9.0f);
+	//gameRenderWorld->DebugLine(colorYellow, commonVr->lastCenterEyeOrigin, commonVr->lastCenterEyeOrigin + commonVr->lastCenterEyeAxis.ToAngles().ToForward() * 9.0f);
+	//gameRenderWorld->DebugLine(colorCyan, firstPersonViewOrigin, firstPersonViewOrigin + viewAngles.ToForward() * 9.0f);
 }
 
 /*
