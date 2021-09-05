@@ -238,7 +238,7 @@ public:
 	int						GetEntityNum() const;
 	
 private:
-	int						spawnId;
+	int						spawnId = 0;
 };
 
 struct timeState_t

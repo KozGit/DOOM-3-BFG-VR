@@ -301,6 +301,14 @@ void idSound::DoSound( bool play )
 {
 	if( play )
 	{
+		if (refSound.shader == NULL) {
+			//Npi : fix #231 : can't found where this refSound was created, it comes from an event but shader is null, in creator of refSound it's possible to create a refsound with shader null, so avoid a crash, skip it and warn only
+			common->Printf("WARNING: DoSound(true) with a refSound.shader == NULL. (%s)\n", name.c_str()); //Npi debug
+			idSphere tempSphere(refSound.origin, 75);
+			gameRenderWorld->DebugSphere(colorRed, tempSphere, 2000, true);
+			playingUntilTime = 0;
+			return;
+		}		
 		if( Flicksync_Speaker( name.c_str(), refSound.shader->base->GetName(), refSound.shader->GetLength() * 10000 ) )
 			StartSoundShader( refSound.shader, SND_CHANNEL_ANY, refSound.parms.soundShaderFlags, true, &playingUntilTime );
 		playingUntilTime += gameLocal.time;

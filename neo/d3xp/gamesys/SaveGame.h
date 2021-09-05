@@ -29,12 +29,13 @@ If you have questions concerning this license or the applicable additional terms
 #ifndef __SAVEGAME_H__
 #define __SAVEGAME_H__
 
+const int MAX_DICT_ELEMENTS = 0x1FFFF;
+
 /*
 
 Save game related helper classes.
 
 */
-
 class idSaveGame
 {
 public:
@@ -102,10 +103,11 @@ public:
 	{
 		return file->Length();
 	}
-	
-private:
+public:
 	idFile* 				file;
 	idFile* 				stringFile;
+
+private:
 	idCompressor* 			compressor;
 	
 	idList<const idClass*>	objects;
@@ -131,7 +133,7 @@ public:
 	idRestoreGame( idFile* savefile, idFile* stringTableFile, int saveVersion );
 	~idRestoreGame();
 	
-	void					ReadDecls( idStr& first_decl_string );
+	void					ReadDecls( idStr& first_decl_string, idStr& second_decl_string);
 	
 	void					CreateObjects();
 	void					RestoreObjects();

@@ -1728,11 +1728,13 @@ void idUsercmdGenLocal::CalcTorsoYawDelta()
 			cmdYaw = turnDelta > 0.0f ? degPerFrame : -degPerFrame;
 		}
 
-		if ( fabs( cmdYaw ) < 0.1f ) cmdYaw = 0.0f;
+		if (fabs(cmdYaw) < 0.05f) cmdYaw = 0.0f;
 
+		//NPI : need to normalized yaw too : fix #351 and #341
 		viewangles[YAW] += cmdYaw;
+		viewangles[YAW] = idAngles(0.0f, viewangles[YAW], 0.0f).Normalize180().yaw;
 		commonVr->bodyYawOffset += cmdYaw;
-		commonVr->bodyYawOffset = idAngles(0.0f, commonVr->bodyYawOffset, 0.0f).Normalize180().yaw; 
+		commonVr->bodyYawOffset = idAngles(0.0f, commonVr->bodyYawOffset, 0.0f).Normalize180().yaw;
 
 	}
 }
