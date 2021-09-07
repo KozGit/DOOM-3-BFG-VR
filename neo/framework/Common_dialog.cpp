@@ -1557,7 +1557,6 @@ idCommonDialog::HandleDialogEvent
 */
 bool idCommonDialog::HandleDialogEvent( const sysEvent_t* sev )
 {
-
 	if( dialog != NULL && dialog->IsLoaded() && dialog->IsActive() )
 	{
 		if( saveIndicator->IsActive() )
@@ -1566,11 +1565,15 @@ bool idCommonDialog::HandleDialogEvent( const sysEvent_t* sev )
 		}
 		else
 		{
-			if( dialog->HandleEvent( sev ) )
-			{
-				idKeyInput::ClearStates();
-				// TODO_D3_PORT
-				//sys->ClearEvents();
+			bool followedEvent = Sys_Milliseconds() - lastDialogEventTime < DIALOG_CONTROL_DEBOUNCE_MS;
+			if (sev->evType == SE_MOUSE || !followedEvent) {
+				if (dialog->HandleEvent(sev))
+				{
+					idKeyInput::ClearStates();
+					lastDialogEventTime = Sys_Milliseconds();
+					// TODO_D3_PORT
+					//sys->ClearEvents();
+				}
 			}
 		}
 		
