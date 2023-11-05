@@ -358,8 +358,8 @@ void idProjectile::Launch( const idVec3& start, const idVec3& dir, const idVec3&
 	speed = velocity.Length() * launchPower;
 
 	// Koz if throwing a grenade use the tracked hand velocity when using motion controls if the controller is not mounted
-	if ( game->isVR && commonVr->VR_USE_MOTION_CONTROLS && !vr_mountedWeaponController.GetBool() )
-	{
+	if ( game->isVR && commonVr->VR_USE_MOTION_CONTROLS && !vr_mountedWeaponController.GetBool()
+		&& (owner.GetEntity() && owner.GetEntity()->IsType(idPlayer::Type)) ) { //Fix by dfmlege from Doom3Quest : must check if entity is really the player (not enemies)
 
 		idPlayer* player = static_cast<idPlayer*>(owner.GetEntity());
 		if ( player )
