@@ -511,7 +511,7 @@ void idUsercmdGenLocal::AdjustAngles()
 		commonVr->CalcAimMove( yawdelta, pitchdelta ); // update the independent weapon angles and return any movement changes.
 		viewangles[YAW] += yawdelta;
 		viewangles[PITCH] += pitchdelta;
-		
+
 	}
 }
 
@@ -1598,7 +1598,7 @@ void idUsercmdGenLocal::CalcTorsoYawDelta()
 		}
 	}
 
-	if ( influenceLevel == 0 && !gameLocal.inCinematic && commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && (abs( cmd.forwardmove ) < .1 || abs( cmd.rightmove ) < .1) )
+	if ( influenceLevel == 0 && !gameLocal.inCinematic && commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && (abs( cmd.forwardmove ) < MOVE_DEAD_ZONE || abs( cmd.rightmove ) < MOVE_DEAD_ZONE) )
 	{
 		idVec3 rightHandPos;
 		idVec3 rightHandForwardVec;
@@ -1717,7 +1717,8 @@ void idUsercmdGenLocal::CalcTorsoYawDelta()
 		turnDelta = -idMath::AngleDelta( bodyYaw, targetBodyYaw );
 
 		float cmdYaw = 0.0f;
-		float degPerFrame = fabs( turnDelta ) > 30 ? turnDelta : fabs( turnDelta ) / (200.0f / (1000 / commonVr->hmdHz));// 1.0f;
+		//NPI : fabs(turnDelta)
+		float degPerFrame = fabs( turnDelta ) > 30 ? fabs(turnDelta) : fabs( turnDelta ) / (200.0f / (1000 / commonVr->hmdHz));// 1.0f;
 
 		if ( fabs( turnDelta ) < degPerFrame )
 		{
@@ -1728,11 +1729,14 @@ void idUsercmdGenLocal::CalcTorsoYawDelta()
 			cmdYaw = turnDelta > 0.0f ? degPerFrame : -degPerFrame;
 		}
 
-		if ( fabs( cmdYaw ) < 0.1f ) cmdYaw = 0.0f;
+		if ( fabs( cmdYaw ) < 0.05f ) cmdYaw = 0.0f;
 
+		//NPI : need to normalized yaw too : fix #351
 		viewangles[YAW] += cmdYaw;
+		viewangles[YAW] = idAngles(0.0f, viewangles[YAW], 0.0f).Normalize180().yaw;
 		commonVr->bodyYawOffset += cmdYaw;
 		commonVr->bodyYawOffset = idAngles(0.0f, commonVr->bodyYawOffset, 0.0f).Normalize180().yaw; 
+		//gameRenderWorld->DebugLine(colorMagenta, commonVr->lastCenterEyeOrigin, commonVr->lastCenterEyeOrigin + idAngles(viewangles).Normalize180().ToForward() * 12.0f, 10);
 
 	}
 }
@@ -1771,7 +1775,7 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		CalcTorsoYawDelta();
 
 	bool okToMove = false;
-	bool moveRequested = ( abs( cmd.forwardmove ) >= 0.05 || abs( cmd.rightmove ) >= 0.05 );
+	bool moveRequested = ( abs( cmd.forwardmove ) >= MOVE_DEAD_ZONE || abs( cmd.rightmove ) >= MOVE_DEAD_ZONE);
 
 	if ( moveRequested )
 	{
@@ -1860,12 +1864,10 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		}
 	}
 
-	// okToMove is true for Doom VFR
-//	if (vr_teleportMode.GetInteger() == 2) {
-//		cmd.forwardmove = 0.0f;
-//		cmd.rightmove = 0.0f;
-//		okToMove = true;
-//	}
+	// okToMove is true for Doom VFR Jetstream 
+	if (vr_teleportMode.GetInteger() == 2) {
+		okToMove = true;
+	}
 
 	if ( !okToMove )
 	{
@@ -1876,8 +1878,9 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		
 	
 	
-	if (commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement && (vr_movePoint.GetInteger() == 1 || vr_movePoint.GetInteger() > 2) && 
-		(abs(cmd.forwardmove) >= .1 || abs(cmd.rightmove) >= .1) || vr_teleportMode.GetInteger() == 2) // body will follow motion from move vector
+	if (commonVr->VR_USE_MOTION_CONTROLS && !commonVr->thirdPersonMovement 
+		&& (vr_movePoint.GetInteger() == 1 || vr_movePoint.GetInteger() > 2) // move hands dependent
+		&& (abs(cmd.forwardmove) >= MOVE_DEAD_ZONE || abs(cmd.rightmove) >= MOVE_DEAD_ZONE || vr_teleportMode.GetInteger() == 2)) // body will follow motion from move vector
 	{
 		static idAngles controllerAng;
 		int hand;
@@ -1901,10 +1904,10 @@ void idUsercmdGenLocal::EvaluateVRMoveMode()
 		viewangles[YAW] += controllerAng.yaw - commonVr->bodyYawOffset;
 		commonVr->bodyYawOffset = controllerAng.yaw;
 	}
-	else if ( !commonVr->VR_USE_MOTION_CONTROLS || vr_movePoint.GetInteger() == 2 ) // body will follow view
+	else if (!commonVr->VR_USE_MOTION_CONTROLS || vr_movePoint.GetInteger() == 2) // body will follow view
 	{
-		viewangles[YAW] += commonVr->poseHmdAngles.yaw - commonVr->bodyMoveAng;
-		commonVr->bodyMoveAng = commonVr->poseHmdAngles.yaw;
+		viewangles[YAW] += commonVr->poseHmdAngles.yaw - commonVr->bodyYawOffset;
+		//commonVr->bodyMoveAng = commonVr->poseHmdAngles.yaw; //Npi don't change bodyAng without cmd
 		commonVr->bodyYawOffset = commonVr->poseHmdAngles.yaw;
 	}
 
@@ -1991,7 +1994,7 @@ void idUsercmdGenLocal::MakeCurrent()
 	
 	if ( vr_motionSickness.GetInteger() == 10 )
 	{
-		if ( cmd.forwardmove != 0 || cmd.rightmove != 0 )
+		if ( abs(cmd.forwardmove) >= MOVE_DEAD_ZONE || abs(cmd.rightmove) >= MOVE_DEAD_ZONE)
 		{
 			commonVr->thirdPersonMovement = true;
 			thirdPersonTime = Sys_Milliseconds();
@@ -2280,18 +2283,13 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 		int value;
 		if( Sys_ReturnJoystickInputEvent( i, action, value ) )
 		{
-			// Carl: context sensitive VR controls, plus dual wielding
-			// Grips, triggers, and thumb clicks behave specially depending
-			// on what's in your hand, and where your hand is.
-			// Actions bound to grips, triggers, and thumb clicks should
-			// only be reported to the game if our hand isn't somewhere special.
 			// left grip button
 			if( action == J_LT_GRIP || action == J_LV_GRIP )
 			{
 				int joyButton = K_JOY1 + (action - J_ACTION1);
 				// vrLeftGrab = (value != 0);
 				idPlayer * player = gameLocal.GetLocalPlayer();
-				if ( !player || !vr_contextSensitive.GetBool() || !player->GrabWorld( 1, (value != 0) ) )
+				if ( !player || !player->GrabWorld( 1, (value != 0) ) )
 					Key( joyButton, ( value != 0 ) );
 			}
 			// right grip button
@@ -2300,47 +2298,9 @@ void idUsercmdGenLocal::Joystick( int deviceNum )
 				int joyButton = K_JOY1 + (action - J_ACTION1);
 				// vrRightGrab = (value != 0);
 				idPlayer * player = gameLocal.GetLocalPlayer();
-				if ( !player || !vr_contextSensitive.GetBool() || !player->GrabWorld( 0, (value != 0) ) )
+				if ( !player || !player->GrabWorld( 0, (value != 0) ) )
 					Key( joyButton, ( value != 0 ) );
 			}
-			// left trigger button
-			else if( action == J_LT_TRIGGER || action == J_LV_TRIGGER )
-			{
-				int joyButton = K_JOY1 + ( action - J_ACTION1 );
-				// vrLeftTrigger = (value != 0);
-				idPlayer * player = gameLocal.GetLocalPlayer();
-				if( !player || !vr_contextSensitive.GetBool() || !player->TriggerClickWorld( 1, ( value != 0 ) ) )
-					Key( joyButton, ( value != 0 ) );
-			}
-			// right trigger button
-			else if( action == J_RT_TRIGGER || action == J_RV_TRIGGER )
-			{
-				int joyButton = K_JOY1 + ( action - J_ACTION1 );
-				// vrRightTrigger = (value != 0);
-				idPlayer * player = gameLocal.GetLocalPlayer();
-				if( !player || !vr_contextSensitive.GetBool() || !player->TriggerClickWorld( 0, ( value != 0 ) ) )
-					Key( joyButton, ( value != 0 ) );
-			}
-			// left thumb click (TODO - vive should only do this for center of pad)
-			else if( action == J_LT_STICK || action == J_LV_PAD )
-			{
-				int joyButton = K_JOY1 + ( action - J_ACTION1 );
-				// vrLeftTrigger = (value != 0);
-				idPlayer * player = gameLocal.GetLocalPlayer();
-				if( !player || !vr_contextSensitive.GetBool() || !player->ThumbClickWorld( 1, ( value != 0 ) ) )
-					Key( joyButton, ( value != 0 ) );
-			}
-			// right thumb click (TODO - vive should only do this for center of pad)
-			else if( action == J_RT_STICK || action == J_RV_PAD )
-			{
-				int joyButton = K_JOY1 + ( action - J_ACTION1 );
-				// vrRightTrigger = (value != 0);
-				idPlayer * player = gameLocal.GetLocalPlayer();
-				if( !player || !vr_contextSensitive.GetBool() || !player->ThumbClickWorld( 0, ( value != 0 ) ) )
-					Key( joyButton, ( value != 0 ) );
-			}
-			// Carl end
-
 			else if( action >= J_ACTION1 && action <= J_ACTION_MAX )
 			{
 				int joyButton = K_JOY1 + ( action - J_ACTION1 );

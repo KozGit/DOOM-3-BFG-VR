@@ -32,6 +32,8 @@ If you have questions concerning this license or the applicable additional terms
 static const int	MAX_DIALOGS			= 4;		// maximum dialogs that can be open at one time
 static const int	PC_KEYBOARD_WAIT	= 20000;
 
+static const int DIALOG_CONTROL_DEBOUNCE_MS = 50; // Npi add a debounce on event dialog, because some move send multiple events unorder, can't apply all events must accept only the first one
+
 /*
 ================================================
 Dialog box message types
@@ -323,6 +325,8 @@ private:
 	int		startSaveTime;		// with stopSaveTime, useful to pass 360 TCR# 047.  Need to keep the dialog on the screen for a minimum amount of time
 	int		stopSaveTime;
 	bool	dialogInUse;		// this is to prevent an active msg getting lost during a map heap reset
+
+	int		lastDialogEventTime = 0; // NPI add debounce events
 };
 
 #endif

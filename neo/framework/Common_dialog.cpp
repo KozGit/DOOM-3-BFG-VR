@@ -1365,7 +1365,7 @@ idStr idCommonDialog::GetDialogMsg( gameDialogMessages_t msg, idStr& message, id
 		}
 		case GDM_ERROR_LOADING_SAVEGAME:
 		{
-			message = "#str_dlg_error_loading_savegame";
+			message = "#str_dlg_error_loading_savegame"; // There was an error loading your game.
 			break;
 		}
 		case GDM_ERROR_SAVING_SAVEGAME:
@@ -1557,7 +1557,6 @@ idCommonDialog::HandleDialogEvent
 */
 bool idCommonDialog::HandleDialogEvent( const sysEvent_t* sev )
 {
-
 	if( dialog != NULL && dialog->IsLoaded() && dialog->IsActive() )
 	{
 		if( saveIndicator->IsActive() )
@@ -1566,11 +1565,15 @@ bool idCommonDialog::HandleDialogEvent( const sysEvent_t* sev )
 		}
 		else
 		{
-			if( dialog->HandleEvent( sev ) )
-			{
-				idKeyInput::ClearStates();
-				// TODO_D3_PORT
-				//sys->ClearEvents();
+			bool followedEvent = Sys_Milliseconds() - lastDialogEventTime < DIALOG_CONTROL_DEBOUNCE_MS;
+			if (sev->evType == SE_MOUSE || !followedEvent) {
+				if (dialog->HandleEvent(sev))
+				{
+					idKeyInput::ClearStates();
+					lastDialogEventTime = Sys_Milliseconds();
+					// TODO_D3_PORT
+					//sys->ClearEvents();
+				}
 			}
 		}
 		

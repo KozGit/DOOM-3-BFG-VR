@@ -332,7 +332,7 @@ void idMenuScreen_PDA_Inventory::EquipWeapon()
 		validIndex++;
 	}
 	
-	player->TogglePDA( 1 - vr_weaponHand.GetInteger() );
+	player->TogglePDA();
 	
 }
 

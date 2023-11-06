@@ -245,11 +245,19 @@ ___________________________________________________
 4) NEW FEATURES
 __________________________________________
 
-New in 0.23:
+New in 0.23 (unreleased):
 	Spanish voice commands (to use, replace dict/voice.dict with dict/voiceSpanish.dict)
 
 New in 0.21-Alpha-WMR (WMR Joystick support) (unofficial):
 	Windows Mixed Reality Joystick support
+
+New in 0.21b (unofficial): (2020 Feb 13)
+	Try to release in 2020 current (awesome but stalled) work combined by Koz and Carl, 
+	Almost all is functionnal but dual weilding which doesn't work well with my set (ValveIndex)
+	Released as a Patch : install official v0.020, then unzip patch into the Doom Folder, you should accept all replacements
+	Contains almost all 0.21a updates (but dual weilding)
+	Merge save/loading fix by Carl
+	Merge compiling fix merged on Carl repo
 
 New in 0.21a (unreleased):
 	Doom VFR style teleport and jet-strafe

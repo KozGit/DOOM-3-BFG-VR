@@ -326,9 +326,10 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 		return true;
 	}
 	
-	if( waitForBinding )
+	//common->Printf("HandleGuiEvent received:%i wait:%i for %i \n", sev->evValue, waitForBinding, lastBindingEventTime); // Koz debug
+	bool followedEvent = Sys_Milliseconds() - lastBindingEventTime < BIND_CONTROL_DEBOUNCE_MS;
+	if( waitForBinding || followedEvent)
 	{
-	
 		if( sev->evType == SE_KEY && sev->evValue2 == 1 )
 		{
 		
@@ -339,16 +340,18 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 				return true;
 			}
 			*/
-			if ( sev->evValue >= K_TOUCH_LEFT_STICK_UP && sev->evValue <= K_STEAMVR_RIGHT_PAD_RIGHT )
+			/*if ( sev->evValue >= K_TOUCH_LEFT_STICK_UP && sev->evValue <= K_STEAMVR_RIGHT_PAD_RIGHT )
 			{
 				// Koz check why did I disable remapping this?
-				//return true;
+				return true;
 			}
+			*/
 			if( sev->evValue == K_ESCAPE )
 			{
 				
 				//common->Printf( "idMenuHandlerShell handlegui event k_escape\n" ); // Koz debug
 				waitForBinding = false;
+				lastBindingEventTime = 0;
 				
 				idMenuScreen_Shell_Bindings* bindScreen = dynamic_cast< idMenuScreen_Shell_Bindings* >( menuScreens[ SHELL_AREA_KEYBOARD ] );
 				if( bindScreen != NULL )
@@ -358,13 +361,32 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 				}
 				
 			}
+			else if (followedEvent) 
+			{
+				idKeyInput::SetBinding(sev->evValue, "");
+				lastBindingEventTime = Sys_Milliseconds();
+				//common->Printf("HandleGuiEvent removeBinding received:%i wait:%i for %i \n", sev->evValue, waitForBinding, lastBindingEventTime); // Koz debug
+
+				idMenuScreen_Shell_Bindings* bindScreen = dynamic_cast<idMenuScreen_Shell_Bindings*>(menuScreens[SHELL_AREA_KEYBOARD]);
+				if (bindScreen != NULL)
+				{
+					bindScreen->SetBindingChanged(true);
+					bindScreen->UpdateBindingDisplay();
+					bindScreen->ToggleWait(false);
+					bindScreen->Update();
+					waitForBinding = false;
+				}
+			} 
 			else
 			{
 			
-				if( idStr::Icmp( idKeyInput::GetBinding( sev->evValue ), "" ) == 0 )  	// no existing binding found
+				if( idStr::Icmp( idKeyInput::GetBinding( sev->evValue ), "" ) == 0)  	// no existing binding found
 				{
 				
 					idKeyInput::SetBinding( sev->evValue, waitBind );
+					lastBindingEventTime = Sys_Milliseconds();
+					//common->Printf("HandleGuiEvent SetBinding received:%i wait:%i for %i \n", sev->evValue, waitForBinding, lastBindingEventTime); // Koz debug
+
 					
 					idMenuScreen_Shell_Bindings* bindScreen = dynamic_cast< idMenuScreen_Shell_Bindings* >( menuScreens[ SHELL_AREA_KEYBOARD ] );
 					if( bindScreen != NULL )
@@ -374,18 +396,18 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 						bindScreen->ToggleWait( false );
 						bindScreen->Update();
 					}
-					
 					waitForBinding = false;
 					
 				}
 				else  	// binding found prompt to change
 				{
 				
-					const char* curBind = idKeyInput::GetBinding( sev->evValue );
-					
-					if( idStr::Icmp( waitBind, curBind ) == 0 )
+					if( idStr::Icmp( waitBind, idKeyInput::GetBinding(sev->evValue)) == 0)
 					{
 						idKeyInput::SetBinding( sev->evValue, "" );
+						lastBindingEventTime = Sys_Milliseconds();
+						//common->Printf("HandleGuiEvent removeBinding received:%i wait:%i for %i \n", sev->evValue, waitForBinding, lastBindingEventTime); // Koz debug
+
 						idMenuScreen_Shell_Bindings* bindScreen = dynamic_cast< idMenuScreen_Shell_Bindings* >( menuScreens[ SHELL_AREA_KEYBOARD ] );
 						if( bindScreen != NULL )
 						{
@@ -422,6 +444,7 @@ bool idMenuHandler_Shell::HandleGuiEvent( const sysEvent_t* sev )
 									if( accept )
 									{
 										idKeyInput::SetBinding( key, bind );
+										//common->Printf("HandleGuiEvent overrideBinding received:%i \n", key); // Koz debug
 										menu->SetBindingChanged( true );
 										menu->UpdateBindingDisplay();
 										menu->Update();
@@ -508,11 +531,7 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_SAFETY_PROTOCOLS, idMenuScreen_Shell_VR_Safety_Protocols, this ); // Carl
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this );
 		// Koz end
-		// Carl
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_VOICE_OPTIONS, idMenuScreen_Shell_VR_Voice_Options, this );
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_HAND_OPTIONS, idMenuScreen_Shell_VR_Hand_Options, this );
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this );
-		// Carl end
+		BIND_SHELL_SCREEN( SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this ); // Carl
 
 	}
 	else
@@ -553,11 +572,7 @@ void idMenuHandler_Shell::Initialize( const char* swfFile, idSoundWorld* sw )
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_SAFETY_PROTOCOLS, idMenuScreen_Shell_VR_Safety_Protocols, this ); // Carl
 		BIND_SHELL_SCREEN( SHELL_AREA_VR_PROFILE_OPTIONS, idMenuScreen_Shell_VR_Profile_Options, this );
 		// Koz end 
-		// Carl
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_VOICE_OPTIONS, idMenuScreen_Shell_VR_Voice_Options, this );
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_HAND_OPTIONS, idMenuScreen_Shell_VR_Hand_Options, this );
-		BIND_SHELL_SCREEN( SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this );
-		// Carl end
+		BIND_SHELL_SCREEN(SHELL_AREA_VR_FLICKSYNC, idMenuScreen_Shell_VR_Flicksync, this); // Carl
 		
 		doom3Intro = declManager->FindMaterial( "gui/intro/introloop" );
 		roeIntro = declManager->FindMaterial( "gui/intro/marsflyby" );
@@ -1315,8 +1330,7 @@ void idMenuHandler_Shell::UpdateBGState()
 		{
 			if( nextScreen != SHELL_AREA_RESOLUTION && nextScreen != SHELL_AREA_GAMEPAD && nextScreen != SHELL_AREA_DIFFICULTY && nextScreen != SHELL_AREA_SYSTEM_OPTIONS && nextScreen != SHELL_AREA_GAME_OPTIONS && nextScreen != SHELL_AREA_NEW_GAME && nextScreen != SHELL_AREA_STEREOSCOPICS &&
 				nextScreen != SHELL_AREA_CONTROLS && nextScreen != SHELL_AREA_VR_SETTINGS && nextScreen != SHELL_AREA_VR_CHARACTER_OPTIONS && nextScreen != SHELL_AREA_VR_CONTROL_OPTIONS && nextScreen != SHELL_AREA_VR_HUD_OPTIONS && nextScreen != SHELL_AREA_VR_HUD_POSITION_OPTIONS &&
-				nextScreen != SHELL_AREA_VR_SAFETY_PROTOCOLS && nextScreen != SHELL_AREA_VR_PDA_OPTIONS && nextScreen != SHELL_AREA_VR_PROFILE_OPTIONS && nextScreen != SHELL_AREA_VR_RENDERING_OPTIONS && nextScreen != SHELL_AREA_VR_UI_OPTIONS &&
-				nextScreen != SHELL_AREA_VR_VOICE_OPTIONS && nextScreen != SHELL_AREA_VR_HAND_OPTIONS)
+				nextScreen != SHELL_AREA_VR_SAFETY_PROTOCOLS && nextScreen != SHELL_AREA_VR_PDA_OPTIONS && nextScreen != SHELL_AREA_VR_PROFILE_OPTIONS && nextScreen != SHELL_AREA_VR_RENDERING_OPTIONS && nextScreen != SHELL_AREA_VR_UI_OPTIONS )
 			{
 				ShowSmallFrame( false );
 			}

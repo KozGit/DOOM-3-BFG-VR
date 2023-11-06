@@ -386,9 +386,7 @@ void Cmd_Give_f( const idCmdArgs& args )
 	
 	if( give_all || idStr::Icmp( name, "weapons" ) == 0 )
 	{
-		player->inventory.duplicateWeapons |= player->inventory.weapons;
 		player->inventory.weapons = ( int )( BIT( MAX_WEAPONS ) - 1 );
-		player->inventory.foundWeapons |= player->inventory.weapons;
 		player->CacheWeapons();
 		
 		if( !give_all )
@@ -512,7 +510,7 @@ void Cmd_Give_f( const idCmdArgs& args )
 		return;
 	}
 	
-	if( !give_all && !player->Give( args.Argv( 1 ), args.Argv( 2 ), ITEM_GIVE_FEEDBACK | ITEM_GIVE_UPDATE_STATE, -1 ) )
+	if( !give_all && !player->Give( args.Argv( 1 ), args.Argv( 2 ), ITEM_GIVE_FEEDBACK | ITEM_GIVE_UPDATE_STATE ) )
 	{
 		gameLocal.Printf( "unknown item\n" );
 	}
@@ -1783,14 +1781,8 @@ static void Cmd_WeaponSplat_f( const idCmdArgs& args )
 	{
 		return;
 	}
-
-	// Carl dual wielding, splat blood on both weapons
-	for( int hand = 0; hand < 2; hand++ )
-	{
-		idWeapon* weapon = player->GetWeaponInHand( hand );
-		if( weapon )
-			weapon->BloodSplat( 2.0f );
-	}
+	
+	player->weapon.GetEntity()->BloodSplat( 2.0f );
 }
 
 /*

@@ -143,6 +143,7 @@ idSaveGame::WriteDecls
 */
 void idSaveGame::WriteDecls()
 {
+	//int start = file->Tell();
 	// Write out all loaded decls
 	for( int t = 0; t < declManager->GetNumDeclTypes(); t++ )
 	{
@@ -159,9 +160,11 @@ void idSaveGame::WriteDecls()
 				continue;
 			}
 			WriteString( declName );
+			//common->Printf("WriteDecls # %d name %s\n", t, declName);
 		}
 		WriteString( 0 );
 	}
+	//common->Printf("idSaveGame::WriteDecls %d bytes, @%d\n", file->Tell() - start, start); //Npi debug
 }
 
 /*
@@ -171,11 +174,14 @@ idSaveGame::WriteObjectList
 */
 void idSaveGame::WriteObjectList()
 {
+	//int start = file->Tell();
+	//common->Printf("idSaveGame::WriteObjectList() start num=%d @%d\n", objects.Num() - 1, file->Tell()); //Npi debug
 	WriteInt( objects.Num() - 1 );
 	for( int i = 1; i < objects.Num(); i++ )
 	{
 		WriteString( objects[ i ]->GetClassname() );
 	}
+	//common->Printf("idSaveGame::WriteObjectList %d bytes, @%d\n", file->Tell() - start, start); //Npi debug
 }
 
 /*
@@ -451,20 +457,25 @@ void idSaveGame::WriteDict( const idDict* dict )
 	int num;
 	int i;
 	const idKeyValue* kv;
-	
+	//int posi = file->Tell();
+
 	if( !dict )
 	{
 		WriteInt( -1 );
+		//common->Printf("idSaveGame::WriteDict num(-1) dict @%d\n", posi); //Npi debug
 	}
 	else
 	{
 		num = dict->GetNumKeyVals();
+		//common->Printf("idSaveGame::WriteDict num(%d) dict @%d\n", num, posi); //Npi debug
 		WriteInt( num );
 		for( i = 0; i < num; i++ )
 		{
+			//posi = file->Tell();
 			kv = dict->GetKeyVal( i );
 			WriteString( kv->GetKey() );
 			WriteString( kv->GetValue() );
+			//common->Printf("idSaveGame::WriteDict #%d %s=%s @%d\n", i, kv->GetKey().c_str(), kv->GetValue().c_str(), posi); //Npi debug
 		}
 	}
 }
@@ -955,12 +966,13 @@ idRestoreGame::ReadDecls
 ================
 Carl: We already read the first declName in the list while reading the script variables.
 */
-void idRestoreGame::ReadDecls( idStr& first_decl_string )
+void idRestoreGame::ReadDecls( idStr& first_decl_string, idStr& second_decl_string)
 {
 	idStr declName;
 	bool first = true;
-	int start = file->Tell() - 4;
-	common->Printf("idRestoreGame::ReadDecls() start, num=%d, %d\n", declManager->GetNumDeclTypes(), start); //Carl debug
+	bool second = false;
+	//int start = file->Tell() - 4;
+	//common->Printf("idRestoreGame::ReadDecls() start, num=%d, %d\n", declManager->GetNumDeclTypes(), start); //Carl debug
 	for( int t = 0; t < declManager->GetNumDeclTypes(); t++ )
 	{
 		while( true )
@@ -969,6 +981,12 @@ void idRestoreGame::ReadDecls( idStr& first_decl_string )
 			{
 				declName = first_decl_string;
 				first = false;
+				second = true;
+			}
+			else if (second)
+			{
+				declName = second_decl_string;
+				second = false;
 			}
 			else
 			{
@@ -976,14 +994,14 @@ void idRestoreGame::ReadDecls( idStr& first_decl_string )
 			}
 			if( declName.IsEmpty() )
 			{
-				//common->Printf("Empty, breaking.\n");
+				//common->Printf("ReadDecls Empty, breaking.\n");
 				break;
 			}
-			//common->Printf("Decln # %d name %s\n", t, declName.c_str());
+			//common->Printf("ReadDecls # %d name %s\n", t, declName.c_str());
 			declManager->FindType( ( declType_t )t, declName );
 		}
 	}
-	common->Printf("idRestoreGame::ReadDecls() %d bytes, %d\n", file->Tell() - start, start); //Carl debug
+	//common->Printf("idRestoreGame::ReadDecls() %d bytes, @%d\n", file->Tell() - start, start); //Carl debug
 }
 
 /*
@@ -1444,32 +1462,40 @@ void idRestoreGame::ReadStaticObject( idClass& obj )
 idRestoreGame::ReadDict
 ================
 */
-void idRestoreGame::ReadDict( idDict* dict )
+void idRestoreGame::ReadDict(idDict* dict)
 {
-	//int start = file->Tell(); //Carl debug
+	int start = file->Tell(); //Carl debug
 	int num;
 	int i;
 	idStr key;
 	idStr value;
-	
-	ReadInt( num );
-	
-	if( num < 0 )
+
+	ReadInt(num);
+	//common->Printf("idRestoreGame::ReadDict() num=%d @%d\n", num, start); //Npi debug
+
+	if (num < 0)
 	{
 		dict = NULL;
 	}
-	else
+	else if (num > MAX_DICT_ELEMENTS)
+	{
+		dict = NULL;
+		Error("idRestoreGame::ReadDict: Wrong number of dict read from save game (%d).", num);
+	}
+	else 
 	{
 		dict->Clear();
 		for( i = 0; i < num; i++ )
 		{
+			int posi = file->Tell(); //Carl debug
 			ReadString( key );
 			ReadString( value );
 			dict->Set( key, value );
+			//common->Printf("idRestoreGame::ReadDict() %s = %s @%d\n", key, value, posi); //Npi debug
 		}
 	}
 	//int end = file->Tell();
-	//common->Printf("  ReadDict() %d bytes, %d\n", end-start, start); //Carl debug
+	//common->Printf("idRestoreGame::ReadDict() %d bytes, @%d\n", end-start, start); //Carl debug
 	//dict->Print();
 }
 
@@ -1819,9 +1845,7 @@ idRestoreGame::ReadUsercmd
 */
 void idRestoreGame::ReadUsercmd( usercmd_t& usercmd )
 {
-	byte b = (byte)usercmd.buttons;
-	ReadByte( b );
-	usercmd.buttons = b;
+	ReadByte( usercmd.buttons );
 	ReadSignedChar( usercmd.forwardmove );
 	ReadSignedChar( usercmd.rightmove );
 	ReadShort( usercmd.angles[0] );

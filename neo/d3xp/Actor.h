@@ -201,8 +201,7 @@ public:
 	virtual	renderView_t* 	GetRenderView();
 	
 	// animation state control
-	int						PlayAnim( int channel, const char* name );
-	virtual int				GetAnim( int channel, const char* name );
+	int						GetAnim( int channel, const char* name );
 	void					UpdateAnimState();
 	void					SetAnimState( int channel, const char* name, int blendFrames );
 	const char* 			GetAnimState( int channel ) const;

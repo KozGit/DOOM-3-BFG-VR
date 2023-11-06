@@ -38,7 +38,7 @@ class idSaveGameProcessorLoadFiles : public idSaveGameProcessor
 public:
 	DEFINE_CLASS( idSaveGameProcessorLoadFiles );
 	
-	virtual bool	InitLoadFiles( const char* folder, bool isRBDoom,
+	virtual bool	InitLoadFiles( const char* folder, uint8 isRBDoom,
 								   const saveFileEntryList_t& files,
 								   idSaveGameManager::packageType_t type = idSaveGameManager::PACKAGE_GAME );
 	virtual bool	Process();

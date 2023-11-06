@@ -867,7 +867,7 @@ static const int MAX_MOUSE_EVENTS = 256;
 int				Sys_PollMouseInputEvents( int mouseEvents[MAX_MOUSE_EVENTS][2] );
 
 // joystick input polling
-void			Sys_SetRumble( int device, int low_left, int hi_left, int low_right, int hi_right );
+void			Sys_SetRumble( int device, int low, int hi );
 int				Sys_PollJoystickInputEvents( int deviceNum );
 int				Sys_ReturnJoystickInputEvent( const int n, int& action, int& value );
 void			Sys_EndJoystickInputEvents();

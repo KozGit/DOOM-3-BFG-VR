@@ -11,8 +11,8 @@
 #include "sys/sdl/sdl_local.h"
 #endif
 #ifdef USE_OVR
-#include "libs\LibOVR\Include\OVR_CAPI_GL.h"
-#include "libs\LibOVR\Include\Extras\OVR_Math.h"
+#include "../libs/LibOVR/Include/OVR_CAPI_GL.h"
+#include "../libs/LibOVR/Include/Extras/OVR_Math.h"
 #endif
 
 idCVar zdist("zdist", "-2.9", CVAR_FLOAT, "");

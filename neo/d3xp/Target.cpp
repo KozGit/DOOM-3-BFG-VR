@@ -2164,8 +2164,7 @@ void idTarget_RumbleJoystick::Event_Activate( idEntity* activator )
 		float lowMagnitude = spawnArgs.GetFloat( "low_magnitude" );
 		int lowDuration = spawnArgs.GetInt( "low_duration" );
 		
-		player->hands[0].SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
-		player->hands[1].SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
+		player->SetControllerShake( highMagnitude, highDuration, lowMagnitude, lowDuration );
 	}
 	
 }

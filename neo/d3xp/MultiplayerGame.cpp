@@ -2893,7 +2893,7 @@ void idMultiplayerGame::DropWeapon( int clientNum )
 	{
 		return;
 	}
-	static_cast< idPlayer* >( ent )->DropWeapons( false );
+	static_cast< idPlayer* >( ent )->DropWeapon( false );
 }
 
 /*

@@ -301,7 +301,7 @@ public:
 	// Processes the given event.
 	virtual	bool				ProcessEvent( const sysEvent_t* event ) = 0;
 	
-	virtual bool				LoadGame( const char* saveName, bool isRBDoom ) = 0;
+	virtual bool				LoadGame( const char* saveName, uint8 isRBDoom ) = 0;
 	virtual bool				SaveGame( const char* saveName ) = 0;
 	
 	virtual idDemoFile* 		ReadDemo() = 0;

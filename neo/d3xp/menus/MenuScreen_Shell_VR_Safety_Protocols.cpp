@@ -92,6 +92,14 @@ void idMenuScreen_Shell_VR_Safety_Protocols::Initialize( idMenuHandler * data ) 
 	options->AddChild( control );
 
 	control = new (TAG_SWF)idMenuWidget_ControlButton();
+	control->SetOptionType(OPTION_SLIDER_TEXT);
+	control->SetLabel("JetStrafe Turning");
+	control->SetDataSource(&systemData, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_JET_SNAP_TURNS);
+	control->SetupEvents(DEFAULT_REPEAT_TIME, options->GetChildren().Num());
+	control->AddEventAction(WIDGET_EVENT_PRESS).Set(WIDGET_ACTION_COMMAND, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_JET_SNAP_TURNS);
+	options->AddChild(control);
+
+	control = new (TAG_SWF)idMenuWidget_ControlButton();
 	control->SetOptionType( OPTION_SLIDER_TEXT );
 	control->SetLabel( "Walk Speed Adj" );
 	control->SetDataSource( &systemData, idMenuDataSource_Shell_VR_Safety_Protocols::SAFETY_PROTOCOLS_FIELD_WALK_SPEED_ADJUST );
@@ -338,6 +346,7 @@ idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Gameplay_Optio
 void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Protocols::LoadData() {
 	
 	originalComfortDelta = vr_comfortDelta.GetFloat();
+	originalComfortJetStrafeDelta = vr_comfortJetStrafeDelta.GetFloat();
 	originalTeleport = vr_teleport.GetInteger();
 	originalTeleportMode = vr_teleportMode.GetInteger();
 	originalMotionSickness = vr_motionSickness.GetInteger();
@@ -461,6 +470,31 @@ void idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 			break;
 		}
 
+		case SAFETY_PROTOCOLS_FIELD_JET_SNAP_TURNS:
+		{
+			static const int numValues = 6;
+			static const int values[numValues] = { 0, 1, 10, 30, 45, 90 };
+			int value = (int)(vr_comfortJetStrafeDelta.GetFloat() + 0.5f);
+			if (value < 1)
+				value = 1;
+			else if (value > 90)
+				value = 90;
+			else
+			{
+				for (int i = 0; i < numValues - 1; i++)
+				{
+					if (value > values[i] && value < values[i + 1])
+					{
+						value = values[i + 1];
+						break;
+					}
+				}
+			}
+			value = AdjustOption(value, values, numValues, adjustAmount);
+			vr_comfortJetStrafeDelta.SetFloat(value);
+			break;
+		}
+
 		case SAFETY_PROTOCOLS_FIELD_WALK_SPEED_ADJUST:
 		{
 			float ws = vr_walkSpeedAdjust.GetFloat();
@@ -560,6 +594,18 @@ idSWFScriptVar idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR
 				return va( "Snap %.0f degrees", f );
 		}	
 
+		case SAFETY_PROTOCOLS_FIELD_JET_SNAP_TURNS:
+		{
+			float f = vr_comfortJetStrafeDelta.GetFloat();
+
+			if (f < 0.5f)
+				return "Real Life";
+			if (f == 1.0f)
+				return "Analog";
+			else
+				return va("Snap %.0f degrees", f);
+		}
+
 		case SAFETY_PROTOCOLS_FIELD_WALK_SPEED_ADJUST:
 			return va("%.0f", vr_walkSpeedAdjust.GetFloat());
 
@@ -616,6 +662,10 @@ bool idMenuScreen_Shell_VR_Safety_Protocols::idMenuDataSource_Shell_VR_Safety_Pr
 		return true;
 	}
 	if ( originalComfortDelta != vr_comfortDelta.GetFloat() )
+	{
+		return true;
+	}
+	if (originalComfortJetStrafeDelta != vr_comfortJetStrafeDelta.GetFloat())
 	{
 		return true;
 	}

@@ -34,11 +34,17 @@ Event are used for scheduling tasks and for linking script commands.
 #ifndef __SYS_EVENT_H__
 #define __SYS_EVENT_H__
 
+// Carl: For loading 32bit saved games on 64bit and vice versa
+#if defined(__x86_64__) || defined(_WIN64)
+#define IS64BIT
+#endif
+
 #define D_EVENT_MAXARGS				8			// if changed, enable the CREATE_EVENT_CODE define in Event.cpp to generate switch statement for idClass::ProcessEventArgPtr.
 // running the game will then generate c:\doom\base\events.txt, the contents of which should be copied into the switch statement.
 
 // RB: from dhewm3
 // stack size of idVec3, aligned to native pointer size
+// Carl: This is 12 on 32-bit and 16 on 64-bit
 #define E_EVENT_SIZEOF_VEC			((sizeof(idVec3) + (sizeof(intptr_t) - 1)) & ~(sizeof(intptr_t) - 1))
 // RB end
 
@@ -65,6 +71,11 @@ private:
 	int							returnType;
 	int							numargs;
 	size_t						argsize;
+#ifdef IS64BIT
+	size_t						argsize_32;
+#else
+	size_t						argsize_64;
+#endif
 	int							argOffset[ D_EVENT_MAXARGS ];
 	int							eventnum;
 	const idEventDef* 			next;
@@ -83,10 +94,11 @@ public:
 	int							GetNumArgs() const;
 	size_t						GetArgSize() const;
 	int							GetArgOffset( int arg ) const;
-	
+
 	static int					NumEventCommands();
 	static const idEventDef*		GetEventCommand( int eventnum );
 	static const idEventDef*		FindEvent( const char* name );
+	friend class idEvent;
 };
 
 class idSaveGame;

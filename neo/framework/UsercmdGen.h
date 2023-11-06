@@ -100,6 +100,9 @@ const int IMPULSE_PAUSE = IMPULSE_44;
 const int IMPULSE_45			= 45;			// Carl: computer, resume program
 const int IMPULSE_RESUME = IMPULSE_45;
 
+//Npi : global minimal dead zone
+const double MOVE_DEAD_ZONE = 0.05;
+
 class usercmd_t
 {
 public:
@@ -126,7 +129,7 @@ public:
 	short		angles[3];						// view angles
 	signed char	forwardmove;					// forward/backward movement
 	signed char	rightmove;						// left/right movement
-	uint16		buttons;						// buttons
+	byte		buttons;						// buttons
 	int			clientGameMilliseconds;			// time this usercmd was sent from the client
 	int			serverGameMilliseconds;			// interpolated server time this was applied on
 	uint16		fireCount;						// number of times we've fired

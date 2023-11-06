@@ -67,8 +67,10 @@ void idMenuWidget_Shell_SaveInfo::Update()
 	if( loadIndex >= 0 && sortedSaves.Num() != 0 && loadIndex < sortedSaves.Num() )
 	{
 		const idSaveGameDetails& details = sortedSaves[ loadIndex ];
-		if (details.isRBDoom)
+		if( details.isRBDoom == 1 )
 			info.Append( "RB Doom 3 BFG - " );
+		else if( details.isRBDoom == 2 )
+			info.Append( "Doom 3 BFG - " );
 		info.Append( details.slotName );
 		info.Append( "\n" );
 		

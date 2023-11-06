@@ -1345,9 +1345,10 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 
 	int i_skill;
 	idStr first_decl_string;
+	idStr second_decl_string;
 
 	// Load the idProgram, also checking to make sure scripting hasn't changed since the savegame
-	if( program.Restore( &savegame, i_skill, first_decl_string) == false )
+	if( program.Restore( &savegame, i_skill, first_decl_string, second_decl_string) == false )
 	{
 		// Carl: Keep loading even if the scripts have changed since we saved.
 		loadScriptFailed = true;
@@ -1371,11 +1372,14 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 		return false;
 #endif
 	}
-	
+	if (i_skill < 0 || i_skill>4)
+	{
+		Error("Critical error while loading save game.", num);
+	}
 	g_skill.SetInteger( i_skill );
 	
 	// precache any media specified in the map
-	savegame.ReadDecls( first_decl_string );
+	savegame.ReadDecls( first_decl_string, second_decl_string);
 	 
 	savegame.ReadDict( &si );
 	SetServerInfo( si );
@@ -1661,6 +1665,17 @@ bool idGameLocal::InitFromSaveGame( const char* mapName, idRenderWorld* renderWo
 	{
 		idPlayer *player = GetLocalPlayer();
 		player->InitTeleportTarget();
+		idEntity *duplicate;
+		char* duplicate_names[4] = { "player1_weapon_left2", "player1_weapon_right2", "player1_weapon_left_worldmodel2", "player1_weapon_right_worldmodel2" };
+		for( int i = 0; i < 4; i++ )
+		{
+			if ( duplicate = gameLocal.FindEntity( duplicate_names[i] ) )
+			{
+				common->Warning( "Loading game which had a duplicate player1_weapon_left/right (this is normal)." );
+				duplicate->PostEventMS( &EV_Remove, 0 );
+			}
+		}
+
 		// if we autosaved while teleporting QuakeCon style, stop the QuakeCon style effect
 		if (player->noclip)// && player->playerView.bfgVision)
 		{
@@ -2928,17 +2943,13 @@ void idGameLocal::BuildReturnValue( gameReturn_t& ret )
 	
 	if( GetLocalPlayer() != NULL )
 	{
-		for( int h = 0; h < 2; h++ )
-			GetLocalPlayer()->hands[h].GetControllerShake( ret.vibrationLow[h], ret.vibrationHigh[h] );
+		GetLocalPlayer()->GetControllerShake( ret.vibrationLow, ret.vibrationHigh );
 	}
 	else
 	{
 		// Dedicated server?
-		for( int h = 0; h < 2; h++ )
-		{
-			ret.vibrationLow[h] = 0;
-			ret.vibrationHigh[h] = 0;
-		}
+		ret.vibrationLow = 0;
+		ret.vibrationHigh = 0;
 	}
 	
 	// see if a target_sessionCommand has forced a changelevel
@@ -4639,7 +4650,7 @@ void idGameLocal::RadiusDamage( const idVec3& origin, idEntity* inflictor, idEnt
 					idPlayer* player = static_cast< idPlayer* >( ent );
 					if( player )
 					{
-						player->ControllerShakeFromDamage( damage, dir );
+						player->ControllerShakeFromDamage( damage );
 					}
 				}
 			}
@@ -5552,20 +5563,21 @@ bool idGameLocal::IsPortalSkyAcive()
 idGameLocal::SelectTimeGroup
 ============
 */
-void idGameLocal::SelectTimeGroup( int timeGroup )
+void idGameLocal::SelectTimeGroup(int timeGroup)
 {
-	if( timeGroup )
+	// Koz: VR: We still render frames when game is paused. Make sure the 'fast' (player) timegroup is selected during pause.
+	// This prevents issues with player animation timing in pause.
+	// Nothing in the slow timegroup should change during pause.
+	if (timeGroup || (commonVr->VR_GAME_PAUSED && commonVr->PDAforced))
 	{
-		fast.Get( time, previousTime, realClientTime );
+		fast.Get(time, previousTime, realClientTime);
 	}
 	else
 	{
-		slow.Get( time, previousTime, realClientTime );
+		slow.Get(time, previousTime, realClientTime);
 	}
-	
 	selectedGroup = timeGroup;
 }
-
 /*
 ===========
 idGameLocal::GetTimeGroupTime
